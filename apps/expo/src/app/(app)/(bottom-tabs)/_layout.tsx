@@ -1,4 +1,5 @@
-import React, { useEffect, useState, type ElementType } from "react";
+import React, { useEffect, useState } from "react";
+import type { ElementType } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
   Easing,
@@ -6,36 +7,31 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
-import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
-import {
-  Camera,
-  Circle as CircleIcon,
-  Home,
-  Inbox,
-  Search,
-  User2,
-} from "@tamagui/lucide-icons";
+import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { MotiView } from "moti";
 import { useTheme } from "tamagui";
 
-import { Header as BaseHeader } from "~/components/Headers";
-import { BottomTabBar } from "~/components/TabBars";
+import { BottomTabs } from "~/components/Layouts/Navigation";
 import {
+  Avatar,
   Button,
   Circle,
   H3,
+  Icon,
   Paragraph,
   Text,
   useBottomSheetController,
   View,
   YStack,
 } from "~/components/ui";
-import { BottomTabs } from "~/layouts";
+import type { IconName } from "~/components/ui";
+import useProfile from "~/hooks/useProfile";
 import { api } from "~/utils/api";
 import { storage } from "~/utils/storage";
 
@@ -48,9 +44,9 @@ interface TabBarIconProps {
 }
 
 const BottomTabsLayout = () => {
-  const theme = useTheme();
   const utils = api.useUtils();
   const bottomSheet = useBottomSheetController();
+  const { profile } = useProfile();
 
   const { data: unreadNotificationsCount } =
     api.notifications.getUnreadNotificationsCount.useQuery();
@@ -78,6 +74,8 @@ const BottomTabsLayout = () => {
         });
       }, 1000);
     }
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDismissWelcome = () => {
@@ -86,10 +84,33 @@ const BottomTabsLayout = () => {
   };
 
   const getTabBarIcon =
-    (IconComponent: ElementType) =>
-    ({ focused, ...props }: TabBarIconProps) => (
-      <IconComponent strokeWidth={focused ? 3 : 1.5} {...props} />
-    );
+    (iconName: IconName) =>
+    ({ focused, color, size }: TabBarIconProps) => {
+      const animatedStyle = useAnimatedStyle(() => ({
+        transform: [
+          {
+            scale: withSpring(focused ? 1.1 : 1, {
+              mass: 0.5,
+              damping: 12,
+              stiffness: 100,
+            }),
+          },
+        ],
+      }));
+
+      return (
+        <Animated.View style={animatedStyle}>
+          <Icon
+            name={iconName}
+            color={color}
+            size={size}
+            iconStyle={{
+              opacity: focused ? 1 : 0.5,
+            }}
+          />
+        </Animated.View>
+      );
+    };
 
   const NotificationBadge = ({ count }: { count: number }) => {
     return (
@@ -145,51 +166,34 @@ const BottomTabsLayout = () => {
   };
 
   return (
-    <BottomTabs
-      tabBar={(props) => <BottomTabBar {...props} />}
-      screenOptions={{
-        header: (props) => <Header {...props} />,
-        headerStyle: {
-          backgroundColor: theme.background.val,
-        },
-      }}
-      screenListeners={{
-        tabPress: () =>
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
-      }}
-      backBehavior="history"
-    >
+    <BottomTabs screenOptions={{ headerShown: false }} backBehavior="history">
       <BottomTabs.Screen
         name="(home)"
         options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Home),
+          tabBarIcon: getTabBarIcon("home"),
         }}
       />
 
       <BottomTabs.Screen
         name="(search)"
         options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Search),
+          tabBarIcon: getTabBarIcon("search"),
         }}
       />
 
       <BottomTabs.Screen
         name="(camera)"
         options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Camera),
+          tabBarIcon: getTabBarIcon("camera"),
         }}
       />
 
       <BottomTabs.Screen
         name="(inbox)"
         options={{
-          header: () => null,
           tabBarIcon: (props) => (
             <View>
-              {getTabBarIcon(Inbox)(props)}
+              {getTabBarIcon("notifications")(props)}
               {(unreadNotificationsCount ?? 0) > 0 && (
                 <NotificationBadge count={unreadNotificationsCount ?? 0} />
               )}
@@ -201,8 +205,30 @@ const BottomTabsLayout = () => {
       <BottomTabs.Screen
         name="(profile)"
         options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(User2),
+          tabBarIcon: ({ focused, size }) => {
+            const animatedStyle = useAnimatedStyle(() => ({
+              transform: [
+                {
+                  scale: withSpring(focused ? 1.1 : 1, {
+                    mass: 0.5,
+                    damping: 12,
+                    stiffness: 100,
+                  }),
+                },
+              ],
+            }));
+
+            return (
+              <Animated.View style={animatedStyle}>
+                <Avatar
+                  source={profile?.profilePictureUrl ?? DefaultProfilePicture}
+                  size={size}
+                  bordered={focused}
+                  style={{ opacity: focused ? 1 : 0.5 }}
+                />
+              </Animated.View>
+            );
+          },
         }}
       />
     </BottomTabs>
@@ -210,68 +236,18 @@ const BottomTabsLayout = () => {
 };
 
 interface FeatureProps {
-  emoji: string;
+  icon: string;
   title: string;
   description: string;
 }
 
-type HeaderProps = BottomTabHeaderProps;
-
-const Header = ({ options }: HeaderProps) => (
-  <BaseHeader
-    HeaderLeft={
-      options.headerLeft
-        ? options.headerLeft({
-            canGoBack: false,
-            pressColor: options.headerPressColor,
-            pressOpacity: options.headerPressOpacity,
-            tintColor: options.headerTintColor,
-          })
-        : undefined
-    }
-    HeaderTitle={
-      typeof options.headerTitle === "function" ? (
-        options.headerTitle({
-          children: options.title ?? "",
-          tintColor: options.headerTintColor,
-          allowFontScaling: options.tabBarAllowFontScaling,
-        })
-      ) : options.title ? (
-        <Text fontSize="$5" fontWeight="bold">
-          {options.title}
-        </Text>
-      ) : null
-    }
-    HeaderRight={
-      options.headerRight
-        ? options.headerRight({
-            canGoBack: false,
-            pressColor: options.headerPressColor,
-            pressOpacity: options.headerPressOpacity,
-            tintColor: options.headerTintColor,
-          })
-        : undefined
-    }
-  />
-);
-
-// const SECONDARY_COLOR = "#A608EF"; // a deeper purple to blend nicely with pink
-// hot pink
 const STARTING_COLOR = "#a819b0";
 const ENDING_COLOR = "#F214FF";
 
 const AnimatedSvg = Animated.createAnimatedComponent(Svg);
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-const Feature = ({
-  icon,
-  title,
-  description,
-}: {
-  icon: string;
-  title: string;
-  description: string;
-}) => (
+const Feature = ({ icon, title, description }: FeatureProps) => (
   <YStack gap="$2" alignItems="flex-start">
     <Text fontSize={28}>{icon}</Text>
     <YStack gap="$1">
@@ -442,7 +418,7 @@ export const WelcomeBottomSheet = ({
                 right: -10,
               }}
             >
-              <CircleIcon size={15} color="white" />
+              <Icon name="ellipse" size={15} color="white" />
             </MotiView>
             <MotiView
               from={{ opacity: 0, scale: 0.5 }}
@@ -459,7 +435,7 @@ export const WelcomeBottomSheet = ({
                 left: -5,
               }}
             >
-              <CircleIcon size={12} color="white" />
+              <Icon name="ellipse" size={12} color="white" />
             </MotiView>
           </YStack>
         </MotiView>

@@ -8,12 +8,13 @@ import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import { getToken } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
+import type { MediaListItemActionProps } from "~/components/ui";
 import {
   CardContainer,
   Circle,
+  EmptyPlaceholder,
   H5,
   MediaListItem,
-  MediaListItemActionProps,
   Paragraph,
   SizableText,
   XStack,
@@ -21,9 +22,9 @@ import {
 } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
 import { TimeAgo } from "~/components/ui/TimeAgo";
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import useRouteProfile from "~/hooks/useRouteProfile";
-import { api, RouterOutputs } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
+import { api } from "~/utils/api";
 
 type NotificationItem =
   RouterOutputs["notifications"]["paginateNotifications"]["items"][0];
@@ -177,7 +178,11 @@ const Inbox = () => {
       imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
       primaryAction={renderActionButton(item)}
       onPress={() =>
-        routeProfile({ userId: item.userId, username: item.username })
+        routeProfile(item.userId, {
+          name: item.name ?? "",
+          username: item.username,
+          profilePictureUrl: item.profilePictureUrl,
+        })
       }
     />
   );
@@ -231,7 +236,7 @@ const Inbox = () => {
     if (isNotificationsLoading) {
       return (
         <YStack gap="$2.5">
-          {Array.from({ length: 10 }).map((_, index) => (
+          {Array.from({ length: 20 }).map((_, index) => (
             <MediaListItem.Skeleton key={index} />
           ))}
         </YStack>
@@ -263,9 +268,6 @@ const Inbox = () => {
       ListEmptyComponent={ListEmptyComponent}
       ListFooterComponent={GridSuggestions}
       ItemSeparatorComponent={Spacer}
-      ListHeaderComponentStyle={{
-        paddingBottom: getToken("$4", "space"),
-      }}
       ListFooterComponentStyle={{
         marginTop: getToken("$2", "space"),
       }}

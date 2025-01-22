@@ -1,14 +1,13 @@
-import type { FunctionComponent, ReactNode } from "react";
+import type { ReactNode } from "react";
 import React from "react";
 import type { ImageSourcePropType } from "react-native";
 import { TouchableOpacity } from "react-native";
-import { Image as ExpoImage } from "expo-image";
 import { Image } from "tamagui";
 import type { GetProps } from "tamagui";
 
-import { Skeleton } from "~/components/Skeletons";
 import { Avatar } from "./Avatar";
 import { Button } from "./Buttons";
+import { Skeleton } from "./Skeleton";
 import { XStack, YStack } from "./Stacks";
 import { Paragraph, SizableText } from "./Texts";
 
@@ -16,7 +15,7 @@ export type MediaListItemActionProps = {
   label: string;
 } & GetProps<typeof Button>;
 
-type MediaListItemProps = {
+interface MediaListItemProps {
   recyclingKey?: string;
   verticalText?: boolean;
   title: ReactNode;
@@ -26,7 +25,7 @@ type MediaListItemProps = {
   primaryAction?: MediaListItemActionProps;
   secondaryAction?: MediaListItemActionProps;
   onPress?: () => void;
-};
+}
 
 export const MediaListItem = ({
   recyclingKey,
@@ -42,25 +41,13 @@ export const MediaListItem = ({
   const content = (
     <XStack alignItems="center" gap="$3">
       {imageUrl && (
-        <Image
-          key={recyclingKey}
-          source={typeof imageUrl === "string" ? { uri: imageUrl } : imageUrl}
-          width={56}
-          height={56}
-          borderRadius={28}
-        />
-        // <Avatar source={imageUrl} size={56} />
-        // <ExpoImage
-        //   source={typeof imageUrl === "string" ? { uri: imageUrl } : imageUrl}
-        //   style={{ width: 56, height: 56, borderRadius: 28 }}
-        //   recyclingKey={recyclingKey}
-        // />
+        <Avatar source={imageUrl} size={56} recyclingKey={recyclingKey} />
       )}
 
       {verticalText ? (
         <Paragraph flex={1}>
           {typeof title === "string" ? (
-            <SizableText size="$4" fontWeight={"bold"} lineHeight={0}>
+            <SizableText size="$4" fontWeight="bold" lineHeight={0}>
               {title}
             </SizableText>
           ) : (
@@ -86,7 +73,7 @@ export const MediaListItem = ({
       ) : (
         <YStack flex={1} gap="$1.5">
           {typeof title === "string" ? (
-            <SizableText size="$4" fontWeight={"bold"} lineHeight={0}>
+            <SizableText size="$4" fontWeight="bold" lineHeight={0}>
               {title}
             </SizableText>
           ) : (

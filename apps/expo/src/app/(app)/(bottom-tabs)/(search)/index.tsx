@@ -1,13 +1,11 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Keyboard, RefreshControl } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
-import { getToken, H6, YStack } from "tamagui";
+import { getToken, YStack } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
-import { SearchInput } from "~/components/Inputs";
-import { HeaderTitle, MediaListItem } from "~/components/ui";
+import { HeaderTitle, MediaListItem, SearchInput } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
@@ -16,7 +14,6 @@ import type { RouterOutputs } from "~/utils/api";
 type SearchResultItem = RouterOutputs["search"]["profilesByUsername"][number];
 
 const Search = () => {
-  const insets = useSafeAreaInsets();
   const { routeProfile } = useRouteProfile();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,7 +49,11 @@ const Search = () => {
       subtitle={item.name}
       imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
       onPress={() =>
-        routeProfile({ userId: item.userId, username: item.username })
+        routeProfile(item.userId, {
+          name: item.name,
+          username: item.username,
+          profilePictureUrl: item.profilePictureUrl,
+        })
       }
     />
   );
@@ -81,7 +82,7 @@ const Search = () => {
     if (isSearching) {
       return (
         <YStack gap="$2.5">
-          {Array.from({ length: 10 }).map((_, index) => (
+          {Array.from({ length: 20 }).map((_, index) => (
             <MediaListItem.Skeleton key={index} />
           ))}
         </YStack>
@@ -105,12 +106,12 @@ const Search = () => {
       ListFooterComponent={ListFooterComponent}
       ItemSeparatorComponent={Spacer}
       ListHeaderComponentStyle={{
-        paddingTop: getToken("$2", "space"),
-        paddingBottom: getToken("$3", "space"),
+        paddingTop: getToken("$2", "space") as number,
+        paddingBottom: getToken("$3", "space") as number,
       }}
       contentContainerStyle={{
-        paddingBottom: getToken("$4", "space"),
-        paddingHorizontal: getToken("$4", "space"),
+        paddingBottom: getToken("$4", "space") as number,
+        paddingHorizontal: getToken("$4", "space") as number,
       }}
       showsVerticalScrollIndicator={false}
       onScrollBeginDrag={Keyboard.dismiss}

@@ -3,19 +3,24 @@
     "source.fixAll.eslint": "explicit"
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[typescript,typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
   "editor.formatOnSave": true,
   "eslint.rules.customizations": [{ "rule": "*", "severity": "warn" }],
-  "eslint.experimental.useFlatConfig": true,
+  "eslint.runtime": "node",
   "eslint.workingDirectories": [
     { "pattern": "apps/*/" },
-    { "pattern": "cloud/*/"},
+    { "pattern": "cloud/*/" },
     { "pattern": "packages/*/" },
     { "pattern": "tooling/*/" }
   ],
+  "prettier.ignorePath": ".gitignore",
   "tailwindCSS.experimental.classRegex": [
     ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
     ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
   ],
+  "tailwindCSS.experimental.configFile": "./tooling/tailwind/web.ts",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "typescript.preferences.autoImportFileExcludePatterns": [
     "next/router.d.ts",
@@ -23,3 +28,4 @@
   ],
   "typescript.tsdk": "node_modules/typescript/lib"
 }
+

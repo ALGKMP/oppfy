@@ -1,7 +1,9 @@
-import { StyleProp, TouchableOpacity, ViewStyle } from "react-native";
+import type { StyleProp, ViewStyle } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { MoreHorizontal } from "@tamagui/lucide-icons";
 
 import {
+  Icon,
   useActionSheetController,
   useAlertDialogController,
 } from "~/components/ui";
@@ -9,19 +11,20 @@ import { useSession } from "~/contexts/SessionContext";
 import { useSaveMedia } from "~/hooks/post/useSaveMedia";
 import { useDeletePost } from "../../hooks/post/useDeletePost";
 import { useReportPost } from "../../hooks/post/useReportPost";
+import { Author, Recipient } from "./PostCard";
 
 interface MorePostOptionsButtonProps {
   postId: string;
-  recipientUserId: string;
+  author: Author;
+  recipient: Recipient;
   mediaUrl: string;
-  style?: StyleProp<ViewStyle>;
 }
 
 const MorePostOptionsButton = ({
   mediaUrl,
-  style = { position: "absolute", bottom: 15, right: 15 },
   postId,
-  recipientUserId,
+  author,
+  recipient,
 }: MorePostOptionsButtonProps) => {
   const { handleSavePost, isSaving } = useSaveMedia();
   const { handleDeletePost, isDeleting } = useDeletePost();
@@ -33,7 +36,7 @@ const MorePostOptionsButton = ({
 
   const buttonOptionsOther = [
     {
-      text: isSaving ? "Saving..." : "Save Post",
+      text: "Save Post",
       onPress: () => void handleSavePost(mediaUrl),
       autoClose: true,
     },
@@ -96,7 +99,7 @@ const MorePostOptionsButton = ({
 
   const buttonOptionsSelf = [
     {
-      text: isSaving ? "Saving" : "Save Post",
+      text: isSaving ? "Saving..." : "Save Post",
       textProps: {
         color: isSaving ? "$gray9" : undefined,
       },
@@ -129,22 +132,16 @@ const MorePostOptionsButton = ({
   ];
 
   return (
-    <TouchableOpacity
-      hitSlop={20}
-      style={style}
+    <Icon
+      name="ellipsis-horizontal"
       onPress={() => {
         show({
           title: "More Options",
           buttonOptions:
-            user?.uid === recipientUserId
-              ? buttonOptionsSelf
-              : buttonOptionsOther,
-          onCancel: () => {},
+            user?.uid === recipient.id ? buttonOptionsSelf : buttonOptionsOther,
         });
       }}
-    >
-      <MoreHorizontal />
-    </TouchableOpacity>
+    />
   );
 };
 

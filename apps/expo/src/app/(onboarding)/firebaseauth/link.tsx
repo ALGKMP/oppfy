@@ -11,7 +11,7 @@ import { getToken, useTheme } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
-import { Header } from "~/components/Headers";
+import { Header } from "~/components/Layouts";
 import {
   H2,
   H6,
@@ -209,8 +209,11 @@ const CountryPicker = ({
 
   const { searchQuery, setSearchQuery, filteredItems } = useSearch<CountryData>(
     {
-      data: countriesWithoutSections as CountryData[],
-      keys: ["name", "dialingCode", "countryCode"],
+      data: countriesWithoutSections,
+      fuseOptions: {
+        keys: ["name", "dialingCode", "countryCode"],
+        threshold: 0.3,
+      },
     },
   );
 
@@ -221,7 +224,7 @@ const CountryPicker = ({
   }, [searchQuery, filteredItems]);
 
   const onCountrySelect = (countryData: CountryData) => {
-    setSelectedCountryData && setSelectedCountryData(countryData);
+    setSelectedCountryData?.(countryData);
     setModalVisible(false);
   };
 

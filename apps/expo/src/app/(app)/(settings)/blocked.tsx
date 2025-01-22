@@ -5,10 +5,14 @@ import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
 import { getToken, H6, YStack } from "tamagui";
 
-import { SearchInput } from "~/components/Inputs";
-import { MediaListItem, useActionSheetController } from "~/components/ui";
+import {
+  EmptyPlaceholder,
+  HeaderTitle,
+  MediaListItem,
+  SearchInput,
+  useActionSheetController,
+} from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -74,10 +78,14 @@ const Blocked = () => {
   const blockedUsersItems =
     blockedUsersData?.pages.flatMap((page) => page.items) ?? [];
 
-  const { searchQuery, setSearchQuery, filteredItems } = useSearch({
-    data: blockedUsersItems,
-    keys: ["name", "username"],
-  });
+  const { searchQuery, setSearchQuery, filteredItems } =
+    useSearch<BlockedUserItem>({
+      data: blockedUsersItems,
+      fuseOptions: {
+        keys: ["name", "username"],
+        threshold: 0.3,
+      },
+    });
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
@@ -135,7 +143,7 @@ const Blocked = () => {
     if (isLoading) {
       return (
         <YStack gap="$2.5">
-          {Array.from({ length: 10 }).map((_, index) => (
+          {Array.from({ length: 20 }).map((_, index) => (
             <MediaListItem.Skeleton key={index} />
           ))}
         </YStack>
@@ -157,7 +165,7 @@ const Blocked = () => {
     if (filteredItems.length === 0) {
       return (
         <YStack flex={1}>
-          <H6 theme="alt1">No Users Found</H6>
+          <HeaderTitle>No Users Found</HeaderTitle>
         </YStack>
       );
     }

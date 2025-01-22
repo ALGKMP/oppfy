@@ -1,19 +1,13 @@
 import React from "react";
 import { Dimensions, FlatList } from "react-native";
-import { Sparkles } from "@tamagui/lucide-icons";
 import { getToken } from "tamagui";
 
-import { YStack } from "~/components/ui";
 import { HeaderTitle } from "~/components/ui/Headings";
 import { UserCard } from "~/components/ui/UserCard";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
-import type { RouterOutputs } from "~/utils/api";
 
-const STALE_TIME = 60 * 1000;
-
-type RecommendationItem =
-  RouterOutputs["contacts"]["getRecommendationProfilesSelf"][0];
+const STALE_TIME = 60 * 5000;
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -21,10 +15,12 @@ const GridSuggestions = () => {
   const utils = api.useUtils();
   const { routeProfile } = useRouteProfile();
 
-  const { data, isLoading } =
-    api.contacts.getRecommendationProfilesSelf.useQuery(undefined, {
+  const { data } = api.contacts.getRecommendationProfilesSelf.useQuery(
+    undefined,
+    {
       staleTime: STALE_TIME,
-    });
+    },
+  );
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
@@ -45,15 +41,13 @@ const GridSuggestions = () => {
     },
   });
 
-  const handleProfilePress = (userId: string, username: string) => {
-    routeProfile({ userId, username });
-  };
-
-  if (!data?.length || isLoading) {
+  if (!data?.length) {
     return null;
   }
 
-  const TILE_WIDTH = screenWidth / 2 - getToken("$3", "space") * 2; // Two tiles with gap in between
+  const SCREEN_PADDING = getToken("$4", "space") as number;
+  const GAP = getToken("$2", "space") as number;
+  const TILE_WIDTH = (screenWidth - SCREEN_PADDING * 2 - GAP) / 2; // Account for screen padding and gap between tiles
 
   return (
     <FlatList
@@ -65,22 +59,26 @@ const GridSuggestions = () => {
           profilePictureUrl={item.profilePictureUrl}
           width={TILE_WIDTH}
           index={index}
-          onPress={() => handleProfilePress(item.userId, item.username)}
+          onPress={() =>
+            routeProfile(item.userId, {
+              name: item.name ?? "",
+              username: item.username,
+              profilePictureUrl: item.profilePictureUrl,
+            })
+          }
           actionButton={{
             label: "Follow",
-            onPress: () => followMutation.mutateAsync({ userId: item.userId }),
-            variant: "primary",
+            onPress: () =>
+              void followMutation.mutateAsync({ userId: item.userId }),
           }}
         />
       )}
       numColumns={2}
       ListHeaderComponent={
-        <HeaderTitle icon={<Sparkles />} theme="alt1">
-          Suggested for You
-        </HeaderTitle>
+        <HeaderTitle icon="sparkles">Suggested for You</HeaderTitle>
       }
-      columnWrapperStyle={{ gap: getToken("$2", "space") }}
-      contentContainerStyle={{ gap: getToken("$2", "space") }}
+      columnWrapperStyle={{ gap: getToken("$2", "space") as number }}
+      contentContainerStyle={{ gap: getToken("$2", "space") as number }}
       showsVerticalScrollIndicator={false}
       scrollEnabled={false}
     />

@@ -1,4 +1,4 @@
-import { eq, or, and, inArray, sql } from "drizzle-orm"; // Add inArray import
+import { and, eq, inArray, or, sql } from "drizzle-orm"; // Add inArray import
 
 import { db, schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
@@ -115,7 +115,7 @@ export class UserRepository {
 
   @handleDatabaseErrors
   async updateStatsOnUserDelete(userId: string) {
-    console.log("running this bitch ass hoe")
+    console.log("running this bitch ass hoe");
     return await this.db.transaction(async (tx) => {
       // Update post stats
       // Decrement likes count
@@ -128,7 +128,7 @@ export class UserRepository {
             tx
               .select({ postId: schema.like.postId })
               .from(schema.like)
-              .where(eq(schema.like.userId, userId))
+              .where(eq(schema.like.userId, userId)),
           ),
         );
 
@@ -142,7 +142,7 @@ export class UserRepository {
             tx
               .select({ postId: schema.comment.postId })
               .from(schema.comment)
-              .where(eq(schema.comment.userId, userId))
+              .where(eq(schema.comment.userId, userId)),
           ),
         );
 
@@ -174,8 +174,11 @@ export class UserRepository {
             tx
               .select({ profileId: schema.user.profileId })
               .from(schema.follower)
-              .innerJoin(schema.user, eq(schema.follower.recipientId, schema.user.id))
-              .where(eq(schema.follower.senderId, userId))
+              .innerJoin(
+                schema.user,
+                eq(schema.follower.recipientId, schema.user.id),
+              )
+              .where(eq(schema.follower.senderId, userId)),
           ),
         );
 
@@ -189,8 +192,11 @@ export class UserRepository {
             tx
               .select({ profileId: schema.user.profileId })
               .from(schema.follower)
-              .innerJoin(schema.user, eq(schema.follower.senderId, schema.user.id))
-              .where(eq(schema.follower.recipientId, userId))
+              .innerJoin(
+                schema.user,
+                eq(schema.follower.senderId, schema.user.id),
+              )
+              .where(eq(schema.follower.recipientId, userId)),
           ),
         );
 
@@ -209,14 +215,14 @@ export class UserRepository {
                 or(
                   and(
                     eq(schema.friend.userId1, userId),
-                    eq(schema.friend.userId2, schema.user.id)
+                    eq(schema.friend.userId2, schema.user.id),
                   ),
                   and(
                     eq(schema.friend.userId2, userId),
-                    eq(schema.friend.userId1, schema.user.id)
-                  )
-                )
-              )
+                    eq(schema.friend.userId1, schema.user.id),
+                  ),
+                ),
+              ),
           ),
         );
     });

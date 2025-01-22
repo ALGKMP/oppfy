@@ -6,8 +6,6 @@ import { FlashList } from "@shopify/flash-list";
 import { ChevronRight } from "@tamagui/lucide-icons";
 import { getToken, Image, Text, XStack, YStack } from "tamagui";
 
-import { ScreenView } from "~/components/ui";
-
 const EXCLUDED_ALBUMS = ["Bursts", "Raw", "Recently Deleted", "Screenshots"];
 
 type AlbumWithCover = MediaLibrary.Album & {
@@ -95,7 +93,8 @@ const AlbumPickerScreen = () => {
         <XStack
           alignItems="center"
           justifyContent="space-between"
-          paddingVertical="$3"
+          paddingTop={index === 0 ? 0 : "$3"}
+          paddingBottom={index === albums.length - 1 ? 0 : "$3"}
           borderBottomWidth={index < albums.length - 1 ? 1 : 0}
           borderBottomColor="$borderColor"
           onPress={handlePress}
@@ -140,7 +139,8 @@ const AlbumPickerScreen = () => {
       estimatedItemSize={80}
       contentContainerStyle={{
         paddingBottom: insets.bottom,
-        paddingHorizontal: getToken("$4", "space"),
+        paddingTop: getToken("$3", "space") as number,
+        paddingHorizontal: getToken("$4", "space") as number,
       }}
     />
   );

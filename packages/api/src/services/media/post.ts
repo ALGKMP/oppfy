@@ -687,7 +687,6 @@ export class PostService {
     return data;
   }
 
-
   private async _processPaginatedPostData(
     data: Post[],
     pageSize: number,

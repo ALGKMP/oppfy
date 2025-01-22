@@ -1,4 +1,4 @@
-import { Theme } from "@react-navigation/native";
+import type { Theme } from "@react-navigation/native";
 
 export const NAV_THEME = {
   background: "#151515", // background

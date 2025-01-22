@@ -26,10 +26,10 @@
   "devDependencies": {
     "@oppfy/prettier-config": "workspace:*",
     "@turbo/gen": "^2.0.4",
-    "prettier": "^3.2.5",
+    "prettier": "catalog:",
     "sort-package-json": "^2.12.0",
-    "turbo": "^2.0.6",
-    "typescript": "^5.4"
+    "turbo": "^2.3.3",
+    "typescript": "catalog:"
   },
   "packageManager": "pnpm@9.14.2",
   "engines": {

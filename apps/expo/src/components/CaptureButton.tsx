@@ -315,7 +315,7 @@ const CaptureButton = ({
   );
 };
 
-export default React.memo(CaptureButton);
+export default CaptureButton;
 
 const styles = StyleSheet.create({
   shadow: {

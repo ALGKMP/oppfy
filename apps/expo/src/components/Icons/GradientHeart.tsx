@@ -4,9 +4,9 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
+  withSequence,
   withSpring,
   withTiming,
-  withSequence,
 } from "react-native-reanimated";
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 
@@ -28,7 +28,9 @@ const GradientHeart = ({ gradient, position }: GradientHeartProps) => {
   const rotation = useSharedValue(0);
 
   useEffect(() => {
-    const twistAngle = (Math.random() * (MAX_TWIST_ANGLE - MIN_TWIST_ANGLE) + MIN_TWIST_ANGLE) * (Math.random() < 0.5 ? -1 : 1);
+    const twistAngle =
+      (Math.random() * (MAX_TWIST_ANGLE - MIN_TWIST_ANGLE) + MIN_TWIST_ANGLE) *
+      (Math.random() < 0.5 ? -1 : 1);
 
     scale.value = withSpring(
       1,
@@ -42,13 +44,16 @@ const GradientHeart = ({ gradient, position }: GradientHeartProps) => {
         reduceMotion: ReduceMotion.System,
       },
       () => {
-        scale.value = withDelay(FADE_OUT_DELAY, withTiming(0, { duration: 250 }));
+        scale.value = withDelay(
+          FADE_OUT_DELAY,
+          withTiming(0, { duration: 250 }),
+        );
       },
     );
 
     rotation.value = withSequence(
       withTiming(0, { duration: TWIST_DURATION / 2 }),
-      withTiming(twistAngle, { duration: TWIST_DURATION / 2 })
+      withTiming(twistAngle, { duration: TWIST_DURATION / 2 }),
     );
   }, [scale, rotation]);
 
@@ -68,7 +73,7 @@ const GradientHeart = ({ gradient, position }: GradientHeartProps) => {
 
   return (
     <Animated.View style={heartImageAnimatedStyle}>
-      <Svg height="120" width="120" viewBox="0 0 24 24"> 
+      <Svg height="120" width="120" viewBox="0 0 24 24">
         <Defs>
           <LinearGradient id="grad" x1={x1} y1={y1} x2={x2} y2={y2}>
             {/* TODO: Find better colors */}
@@ -128,11 +133,14 @@ export const useHeartAnimations = () => {
 
       setHearts((prevHearts) => [...prevHearts, newHeart]);
 
-      setTimeout(() => {
-        setHearts((prevHearts) =>
-          prevHearts.filter((heart) => heart.id !== newHeart.id),
-        );
-      }, ANIMATION_DURATION + FADE_OUT_DELAY + 250); // Adjusted timeout
+      setTimeout(
+        () => {
+          setHearts((prevHearts) =>
+            prevHearts.filter((heart) => heart.id !== newHeart.id),
+          );
+        },
+        ANIMATION_DURATION + FADE_OUT_DELAY + 250,
+      ); // Adjusted timeout
     },
     [getRandomGradient],
   );

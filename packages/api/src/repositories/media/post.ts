@@ -36,9 +36,10 @@ export class PostRepository {
         likesCount: schema.postStats.likes,
         mediaType: schema.post.mediaType,
         createdAt: schema.post.createdAt,
-        hasLiked: sql<boolean>`CASE WHEN ${schema.like.userId} IS NOT NULL THEN true ELSE false END`.as(
-          "has_liked",
-        ),
+        hasLiked:
+          sql<boolean>`CASE WHEN ${schema.like.userId} IS NOT NULL THEN true ELSE false END`.as(
+            "has_liked",
+          ),
       })
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
@@ -50,7 +51,7 @@ export class PostRepository {
         schema.like,
         and(
           eq(schema.like.postId, schema.post.id),
-          eq(schema.like.userId, userId!),
+          eq(schema.like.userId, userId),
         ),
       )
       .where(eq(schema.post.id, postId))
@@ -157,10 +158,12 @@ export class PostRepository {
       .selectDistinct({
         postId: schema.post.id,
         authorId: schema.post.authorId,
+        authorName: authorProfile.name,
         authorUsername: authorProfile.username,
         authorProfileId: authorProfile.id,
         authorProfilePicture: authorProfile.profilePictureKey,
         recipientId: schema.post.recipientId,
+        recipientName: recipientProfile.name,
         recipientUsername: recipientProfile.username,
         recipientProfileId: recipientProfile.id,
         recipientProfilePicture: recipientProfile.profilePictureKey,
@@ -177,20 +180,34 @@ export class PostRepository {
             "has_liked",
           ),
       })
-      .from(schema.follower)
-      .innerJoin(
-        schema.post,
-        eq(schema.post.recipientId, schema.follower.recipientId),
-      )
+      .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
-      .innerJoin(schema.like, eq(schema.like.postId, schema.post.id))
       .innerJoin(author, eq(schema.post.authorId, author.id))
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
       .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
-      .where(
+      .leftJoin(
+        schema.like,
+        and(
+          eq(schema.like.postId, schema.post.id),
+          eq(schema.like.userId, userId),
+        ),
+      )
+      .leftJoin(
+        schema.follower,
         and(
           eq(schema.follower.senderId, userId),
+          eq(schema.follower.recipientId, schema.post.recipientId),
+        ),
+      )
+      .where(
+        and(
+          or(
+            // Posts where user follows the recipient
+            eq(schema.follower.senderId, userId),
+            // Posts authored by the user
+            eq(schema.post.authorId, userId),
+          ),
           cursor
             ? or(
                 lt(schema.post.createdAt, cursor.createdAt),
@@ -308,11 +325,13 @@ export class PostRepository {
       .select({
         postId: schema.post.id,
         authorId: schema.post.authorId,
+        authorName: authorProfile.name,
         authorUsername: authorProfile.username,
         authorProfileId: authorProfile.id,
         authorProfilePicture: authorProfile.profilePictureKey,
         recipientId: schema.post.recipientId,
         recipientProfileId: recipientProfile.id,
+        recipientName: recipientProfile.name,
         recipientUsername: recipientProfile.username,
         recipientProfilePicture: recipientProfile.profilePictureKey,
         caption: schema.post.caption,

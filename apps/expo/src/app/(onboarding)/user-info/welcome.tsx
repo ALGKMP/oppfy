@@ -14,6 +14,7 @@ import { ArrowRight, Sparkles, X } from "@tamagui/lucide-icons";
 import {
   Circle,
   H1,
+  Icon,
   OnboardingButton,
   Paragraph,
   ScreenView,
@@ -153,8 +154,8 @@ const Welcome = () => {
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <TouchableOpacity
-          hitSlop={10}
+        <Icon
+          name="close"
           onPress={async () => {
             const confirmed = await alertDialog.show({
               title: "Exit Onboarding",
@@ -168,9 +169,8 @@ const Welcome = () => {
               await signOut();
             }
           }}
-        >
-          <X color="$gray11" />
-        </TouchableOpacity>
+          blurred
+        />
       ),
     });
   }, [navigation, signOut, alertDialog]);

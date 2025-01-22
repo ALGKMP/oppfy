@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { RefreshControl, TouchableOpacity } from "react-native";
+import { Keyboard, RefreshControl, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Contact } from "expo-contacts";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -7,12 +7,16 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { ChevronRight, Info, UserRoundX } from "@tamagui/lucide-icons";
+import type { IFuseOptions } from "fuse.js";
 import { parsePhoneNumberWithError } from "libphonenumber-js";
-import { getToken } from "tamagui";
+import { getToken, useTheme } from "tamagui";
 
 import {
+  EmptyPlaceholder,
   H5,
   H6,
+  HeaderTitle,
+  Icon,
   MediaListItem,
   SearchInput,
   Spacer,
@@ -20,7 +24,6 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { useContacts } from "~/hooks/contacts";
 import useSearch from "~/hooks/useSearch";
 import { api } from "~/utils/api";
@@ -29,12 +32,12 @@ import { storage } from "~/utils/storage";
 const INITIAL_PAGE_SIZE = 5;
 const ADDITIONAL_PAGE_SIZE = 10;
 
-type Friend = {
+interface Friend {
   userId: string;
   username: string;
   name: string;
   profilePictureUrl: string | null;
-};
+}
 
 type ListItem =
   | { type: "header"; title: string; isContact?: boolean }
@@ -44,6 +47,7 @@ type ListItem =
 const HAS_SEEN_SHARE_TIP_KEY = "has_seen_share_tip";
 
 const PostTo = () => {
+  const theme = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const headerHeight = useHeaderHeight();
@@ -82,7 +86,7 @@ const PostTo = () => {
       return parsedNumber.isValid()
         ? parsedNumber.formatNational()
         : phoneNumber;
-    } catch (error) {
+    } catch {
       return phoneNumber;
     }
   }, []);
@@ -123,42 +127,49 @@ const PostTo = () => {
       item.type === "friend" || item.type === "contact",
   );
 
-  const filterItems = useCallback(
-    (query: string) => {
-      return searchableItems.filter((item) => {
-        const searchTerm = query.toLowerCase();
-        if (item.type === "friend") {
-          return (
-            item.data.username.toLowerCase().includes(searchTerm) ||
-            item.data.name.toLowerCase().includes(searchTerm)
-          );
-        } else if (item.type === "contact") {
-          return (
-            item.data.name?.toLowerCase().includes(searchTerm) ||
-            item.data.phoneNumbers?.[0]?.number
-              ?.toLowerCase()
-              .includes(searchTerm)
-          );
-        }
-        return false;
-      });
-    },
-    [searchableItems],
-  );
+  const searchOptions: IFuseOptions<ListItem> = {
+    keys: [
+      {
+        name: "data.username",
+        getFn: (item: ListItem) =>
+          item.type === "friend" ? item.data.username : "",
+      },
+      {
+        name: "data.name",
+        getFn: (item: ListItem) =>
+          item.type === "friend"
+            ? item.data.name
+            : item.type === "contact"
+              ? item.data.name
+              : "",
+      },
+      {
+        name: "data.phoneNumber",
+        getFn: (item: ListItem) =>
+          item.type === "contact"
+            ? (item.data.phoneNumbers?.[0]?.number ?? "")
+            : "",
+      },
+    ],
+    threshold: 0.3,
+  };
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const filteredItems = useMemo(
-    () => (searchQuery ? filterItems(searchQuery) : searchableItems),
-    [searchQuery, filterItems, searchableItems],
-  );
+  const {
+    searchQuery,
+    setSearchQuery,
+    filteredItems: searchResults,
+  } = useSearch<ListItem>({
+    data: searchableItems,
+    fuseOptions: searchOptions,
+  });
 
   const displayItems = useMemo(() => {
     const result: ListItem[] = [];
-    const friends = filteredItems.filter(
+    const friends = searchResults.filter(
       (item): item is Extract<ListItem, { type: "friend" }> =>
         item.type === "friend",
     );
-    const contacts = filteredItems.filter(
+    const contacts = searchResults.filter(
       (item): item is Extract<ListItem, { type: "contact" }> =>
         item.type === "contact",
     );
@@ -178,7 +189,7 @@ const PostTo = () => {
     }
 
     return result;
-  }, [filteredItems]);
+  }, [searchResults]);
 
   const loadContacts = useCallback(async () => {
     const contactsNotOnApp = await getDeviceContactsNotOnApp();
@@ -201,6 +212,8 @@ const PostTo = () => {
 
   useEffect(() => {
     void loadContacts();
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -281,21 +294,21 @@ const PostTo = () => {
     ({ item }: { item: ListItem }) => {
       if (item.type === "header") {
         return (
-          <XStack alignItems="center" gap="$2">
-            <H5 theme="alt1">{item.title}</H5>
+          <XStack alignItems="center" gap="$1">
+            <HeaderTitle>{item.title}</HeaderTitle>
             {item.isContact && (
-              <TouchableOpacity
-                onPress={() => {
+              <Icon
+                name="information-circle"
+                color={theme.primary.val as string}
+                onPress={() =>
                   void infoDialog.show({
                     title: "Post for Anyone",
                     subtitle:
                       "You can share posts with friends who aren't on Oppfy yet! They'll get a text invite to join and see your post when they do. It's a great way to bring your friends into the fun.",
                     acceptText: "Got it",
-                  });
-                }}
-              >
-                <Info size="$1" color="$blue9" />
-              </TouchableOpacity>
+                  })
+                }
+              />
             )}
           </XStack>
         );
@@ -338,7 +351,7 @@ const PostTo = () => {
         />
       );
     },
-    [formatPhoneNumber, onContactSelected, onFriendSelected, infoDialog],
+    [formatPhoneNumber, onContactSelected, onFriendSelected],
   );
 
   const ListHeaderComponent = useMemo(
@@ -361,7 +374,7 @@ const PostTo = () => {
     if (isLoading) {
       return (
         <YStack gap="$2.5">
-          {Array.from({ length: 10 }).map((_, index) => (
+          {Array.from({ length: 20 }).map((_, index) => (
             <MediaListItem.Skeleton key={index} />
           ))}
         </YStack>
@@ -380,16 +393,16 @@ const PostTo = () => {
       );
     }
 
-    if (filteredItems.length === 0) {
+    if (searchResults.length === 0) {
       return (
         <YStack flex={1}>
-          <H6 theme="alt1">No Users Found</H6>
+          <HeaderTitle>No Users Found</HeaderTitle>
         </YStack>
       );
     }
 
     return null;
-  }, [isLoadingFriends, isLoadingContacts, items.length, filteredItems.length]);
+  }, [isLoadingFriends, isLoadingContacts, items.length, searchResults.length]);
 
   const getItemType = useCallback((item: ListItem) => {
     return item.type;
@@ -416,10 +429,14 @@ const PostTo = () => {
       ItemSeparatorComponent={Spacer}
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
-      ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
+      onScrollBeginDrag={Keyboard.dismiss}
+      keyboardShouldPersistTaps="handled"
+      ListHeaderComponentStyle={{
+        marginBottom: getToken("$3", "space") as number,
+      }}
       contentContainerStyle={{
-        padding: getToken("$4", "space"),
-        paddingBottom: insets.bottom + getToken("$2", "space"),
+        padding: getToken("$4", "space") as number,
+        paddingBottom: (insets.bottom + getToken("$2", "space")) as number,
       }}
       onEndReached={handleOnEndReached}
       onEndReachedThreshold={0.5}

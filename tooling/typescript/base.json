@@ -3,25 +3,26 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "target": "es2022",
-    "lib": ["es2022"],
+    "target": "ES2022",
+    "lib": ["ES2022"],
     "allowJs": true,
     "resolveJsonModule": true,
     "moduleDetection": "force",
     "isolatedModules": true,
-    "experimentalDecorators": true,
-
+    
     "incremental": true,
     "disableSourceOfProjectReferenceRedirect": true,
-
+    
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "checkJs": true,
     "disableSizeLimit": true,
-
-    "module": "ES2022",
+    
+    "module": "Preserve",
     "moduleResolution": "Bundler",
-    "noEmit": true
+    "noEmit": true,
+
+    "experimentalDecorators": true,
   },
   "exclude": ["node_modules", "build", "dist", ".next", ".expo"]
 }

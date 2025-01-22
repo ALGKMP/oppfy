@@ -17,7 +17,15 @@ const PostCaption = ({ caption }: PostCaptionProps) => {
       disabled={isExpanded || caption.length <= 110}
       onPress={() => setIsExpanded(!isExpanded)}
     >
-      <Paragraph>
+      <Paragraph
+        fontSize="$4"
+        lineHeight={22}
+        opacity={1}
+        shadowColor="black"
+        shadowOffset={{ width: 1, height: 1 }}
+        shadowOpacity={0.3}
+        shadowRadius={2}
+      >
         {isExpanded ? (
           caption
         ) : (
@@ -26,7 +34,9 @@ const PostCaption = ({ caption }: PostCaptionProps) => {
             {caption.length > 110 && (
               <>
                 ...
-                <Text color="$gray8"> more</Text>
+                <Text color="rgba(255,255,255,0.8)" fontWeight="500">
+                  more
+                </Text>
               </>
             )}
           </>

@@ -41,8 +41,12 @@ import { CameraOff } from "@tamagui/lucide-icons";
 
 import CaptureButton from "~/components/CaptureButton";
 import Focus, { useFocusAnimations } from "~/components/Icons/Focus";
-import { ScreenView, useAlertDialogController, View } from "~/components/ui";
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
+import {
+  EmptyPlaceholder,
+  ScreenView,
+  useAlertDialogController,
+  View,
+} from "~/components/ui";
 import useIsForeground from "~/hooks/useIsForeground";
 
 const MAX_RECORDING_DURATION = 60 * 1000; // 1 minute

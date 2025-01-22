@@ -6,9 +6,10 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { getToken, H5, Spacer, YStack } from "tamagui";
 
-import { MediaListItem } from "~/components/ui";
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import { api, type RouterOutputs } from "~/utils/api";
+import { EmptyPlaceholder, MediaListItem } from "~/components/ui";
+import useRouteProfile from "~/hooks/useRouteProfile";
+import { api } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
 
 type FriendRequestItem =
   RouterOutputs["friend"]["paginateFriendRequests"]["items"][0];
@@ -23,10 +24,11 @@ type ListItem =
 const PAGE_SIZE = 20;
 
 const Requests = () => {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const utils = api.useUtils();
   const [refreshing, setRefreshing] = useState(false);
+
+  const { routeProfile } = useRouteProfile();
 
   // Friend Requests Query
   const {
@@ -282,12 +284,10 @@ const Requests = () => {
               }),
           }}
           onPress={() =>
-            router.navigate({
-              pathname: "/profile/[userId]",
-              params: {
-                userId: item.data.userId,
-                username: item.data.username,
-              },
+            routeProfile(item.data.userId, {
+              name: item.data.name ?? "",
+              username: item.data.username,
+              profilePictureUrl: item.data.profilePictureUrl,
             })
           }
         />
@@ -315,12 +315,10 @@ const Requests = () => {
             }),
         }}
         onPress={() =>
-          router.navigate({
-            pathname: "/profile/[userId]",
-            params: {
-              userId: item.data.userId,
-              username: item.data.username,
-            },
+          routeProfile(item.data.userId, {
+            name: item.data.name ?? "",
+            username: item.data.username,
+            profilePictureUrl: item.data.profilePictureUrl,
           })
         }
       />
@@ -331,7 +329,7 @@ const Requests = () => {
     if (friendRequestsIsLoading || followRequestsIsLoading) {
       return (
         <YStack gap="$2.5">
-          {Array.from({ length: 10 }).map((_, index) => (
+          {Array.from({ length: 20 }).map((_, index) => (
             <MediaListItem.Skeleton key={index} />
           ))}
         </YStack>

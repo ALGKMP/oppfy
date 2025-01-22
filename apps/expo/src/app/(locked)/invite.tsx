@@ -15,8 +15,7 @@ import {
   YStack,
 } from "tamagui";
 
-import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
-import { OnboardingButton } from "~/components/ui";
+import { OnboardingButton, ScreenView } from "~/components/ui";
 import { useContacts } from "~/hooks/contacts";
 import { api } from "~/utils/api";
 
@@ -126,29 +125,27 @@ const InvitePage = () => {
   }, []);
 
   return (
-    <KeyboardSafeView>
-      <BaseScreenView
-        backgroundColor="$background"
-        paddingBottom={0}
-        safeAreaEdges={["bottom", "top"]}
-        paddingHorizontal={0}
-      >
-        <View flex={1} backgroundColor={theme.background.val}>
-          <View flex={1} paddingHorizontal="$4">
-            <FlashList
-              data={friends}
-              renderItem={({ item }) => <FriendItem item={item} />}
-              estimatedItemSize={50}
-              ListHeaderComponent={Header}
-              // ListFooterComponent={Footer}
-            />
-          </View>
-          <OnboardingButton disabled onPress={() => {}}>
-            CONTINUE
-          </OnboardingButton>
+    <ScreenView
+      paddingBottom={0}
+      paddingHorizontal={0}
+      safeAreaEdges={["bottom", "top"]}
+      keyboardAvoiding
+    >
+      <View flex={1} backgroundColor={theme.background.val}>
+        <View flex={1} paddingHorizontal="$4">
+          <FlashList
+            data={friends}
+            renderItem={({ item }) => <FriendItem item={item} />}
+            estimatedItemSize={50}
+            ListHeaderComponent={Header}
+            // ListFooterComponent={Footer}
+          />
         </View>
-      </BaseScreenView>
-    </KeyboardSafeView>
+        <OnboardingButton disabled onPress={() => {}}>
+          CONTINUE
+        </OnboardingButton>
+      </View>
+    </ScreenView>
   );
 };
 

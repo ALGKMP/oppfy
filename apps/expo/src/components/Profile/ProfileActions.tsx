@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "expo-router";
 import type { IconProps } from "@tamagui/helpers-icon";
 import { Edit3, Share2, UserPlus, Users } from "@tamagui/lucide-icons";
@@ -8,9 +8,14 @@ import { Button } from "~/components/ui";
 import { Skeleton } from "~/components/ui/Skeleton";
 import { Spinner } from "~/components/ui/Spinner";
 import { api } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
+
+type NetworkRelationships = RouterOutputs["profile"]["getNetworkRelationships"];
 
 interface ActionButtonProps {
   userId?: string;
+  isDisabled?: boolean;
+  networkRelationships?: NetworkRelationships;
 }
 
 type IconComponent = React.FC<IconProps>;
@@ -23,16 +28,13 @@ interface ButtonConfig {
   isPrimary?: boolean;
 }
 
-const ActionButton = ({ userId }: ActionButtonProps) => {
+const ActionButton = ({
+  userId,
+  isDisabled,
+  networkRelationships,
+}: ActionButtonProps) => {
   const router = useRouter();
   const { actions } = useProfileActionButtons(userId);
-
-  // Only make the network status query if userId is provided
-  const { data: networkStatus, isLoading: isNetworkStatusLoading } =
-    api.profile.getNetworkRelationships.useQuery(
-      { userId: userId! },
-      { enabled: !!userId },
-    );
 
   // Handle self-profile case
   if (!userId) {
@@ -46,6 +48,8 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
           borderWidth={1.5}
           borderRadius="$6"
           onPress={() => router.push("/edit-profile")}
+          disabled={isDisabled}
+          opacity={isDisabled ? 0.5 : 1}
         >
           Edit Profile
         </Button>
@@ -57,6 +61,8 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
           color="white"
           borderRadius="$6"
           onPress={() => router.push("/share-profile")}
+          disabled={isDisabled}
+          opacity={isDisabled ? 0.5 : 1}
         >
           Share Profile
         </Button>
@@ -64,7 +70,7 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
     );
   }
 
-  if (isNetworkStatusLoading) {
+  if (!networkRelationships) {
     return (
       <XStack gap="$3">
         <Skeleton width="48%" height={44} radius="$6" />
@@ -73,7 +79,10 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
     );
   }
 
-  if (networkStatus?.isTargetUserBlocked || networkStatus?.isOtherUserBlocked) {
+  if (
+    networkRelationships.isTargetUserBlocked ||
+    networkRelationships.isOtherUserBlocked
+  ) {
     return (
       <XStack gap="$3">
         <Button
@@ -90,7 +99,7 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
   }
 
   const { privacy, targetUserFollowState, targetUserFriendState } =
-    networkStatus ?? {};
+    networkRelationships;
 
   const buttonConfigs: Record<string, ButtonConfig> = {
     follow: {
@@ -248,7 +257,7 @@ const useProfileActionButtons = (userId?: string) => {
 
     try {
       await Promise.all([
-        utils.profile.getNetworkRelationships.invalidate({ userId: userId! }),
+        utils.profile.getNetworkRelationships.invalidate({ userId: userId }),
         utils.profile.getFullProfileOther.invalidate({ userId }),
         utils.contacts.getRecommendationProfilesSelf.invalidate(),
       ]);

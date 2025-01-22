@@ -198,7 +198,7 @@ const Start = () => {
   return (
     <ScreenView
       padding={0}
-      backgroundColor={"$primary"}
+      backgroundColor="$primary"
       safeAreaEdges={["bottom"]}
     >
       {renderedCameras}

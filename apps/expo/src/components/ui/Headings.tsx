@@ -1,4 +1,5 @@
-import { cloneElement, type ReactNode } from "react";
+import { TouchableOpacity } from "react-native";
+import { Info } from "@tamagui/lucide-icons";
 import {
   styled,
   H1 as TamaguiH1,
@@ -11,12 +12,23 @@ import {
 } from "tamagui";
 import type { XStackProps } from "tamagui";
 
-type IconProp = JSX.Element | null;
+import { useDialogController } from "./Dialog";
+import { Icon } from "./Icon";
+import type { IconName } from "./Icon";
 
-interface HeaderTitleProps extends XStackProps {
-  children: ReactNode;
-  icon?: IconProp;
-  iconAfter?: IconProp;
+interface InfoDialogProps {
+  title: string;
+  subtitle: string;
+  acceptText?: string;
+}
+
+export interface HeaderTitleProps extends XStackProps {
+  children: React.ReactNode;
+  icon?: IconName;
+  iconAfter?: IconName;
+  iconSize?: number;
+  iconColor?: string;
+  info?: InfoDialogProps;
 }
 
 export const H1 = styled(TamaguiH1, {});
@@ -30,11 +42,31 @@ export const HeaderTitle = ({
   children,
   icon,
   iconAfter,
+  iconSize = 14,
+  iconColor,
+  info,
   ...props
-}: HeaderTitleProps) => (
-  <XStack alignItems="center" gap="$2" opacity={0.7} {...props}>
-    {icon && cloneElement(icon, { size: icon.props.size ?? 14 })}
-    <H5>{children}</H5>
-    {iconAfter && cloneElement(iconAfter, { size: iconAfter.props.size ?? 14 })}
-  </XStack>
-);
+}: HeaderTitleProps) => {
+  const dialog = useDialogController();
+
+  return (
+    <XStack alignItems="center" gap="$2" opacity={0.7} {...props}>
+      {icon && <Icon name={icon} size={iconSize} color={iconColor} />}
+      <H5>{children}</H5>
+      {iconAfter && <Icon name={iconAfter} size={iconSize} color={iconColor} />}
+      {info && (
+        <TouchableOpacity
+          onPress={() => {
+            void dialog.show({
+              title: info.title,
+              subtitle: info.subtitle,
+              acceptText: info.acceptText,
+            });
+          }}
+        >
+          <Info size={iconSize} color={iconColor ?? "$blue9"} />
+        </TouchableOpacity>
+      )}
+    </XStack>
+  );
+};

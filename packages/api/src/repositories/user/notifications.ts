@@ -183,6 +183,7 @@ export class NotificationsRepository {
           id: schema.notifications.id,
           userId: schema.user.id,
           profileId: schema.profile.id,
+          name: schema.profile.name,
           username: schema.profile.username,
           profilePictureKey: schema.profile.profilePictureKey,
           eventType: schema.notifications.eventType,
@@ -246,7 +247,7 @@ export class NotificationsRepository {
       return fetchedNotifications;
     });
 
-    return notifications;
+    return notifications.filter((notification) => notification.name !== null);
   }
 
   @handleDatabaseErrors
@@ -355,5 +356,23 @@ export class NotificationsRepository {
     }
 
     await query;
+  }
+
+  @handleDatabaseErrors
+  async deleteNotificationsBetweenUsers(userId1: string, userId2: string) {
+    await this.db
+      .delete(schema.notifications)
+      .where(
+        or(
+          and(
+            eq(schema.notifications.senderId, userId1),
+            eq(schema.notifications.recipientId, userId2),
+          ),
+          and(
+            eq(schema.notifications.senderId, userId2),
+            eq(schema.notifications.recipientId, userId1),
+          ),
+        ),
+      );
   }
 }

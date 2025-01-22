@@ -11,7 +11,7 @@ type TimeUnit =
   | "month"
   | "year";
 
-interface TimeFormat {
+export interface TimeFormat {
   value: number;
   unit: TimeUnit;
 }

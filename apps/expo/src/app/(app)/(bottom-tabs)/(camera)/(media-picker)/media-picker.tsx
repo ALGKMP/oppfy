@@ -5,53 +5,25 @@ import React, {
   useState,
 } from "react";
 import { Dimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Video } from "@tamagui/lucide-icons";
-import { Stack } from "tamagui";
+import { getToken, Stack } from "tamagui";
 
-import { BaseScreenView } from "~/components/Views";
-import useMediaProcessing from "~/hooks/media/useMediaProcessing";
+const MAX_VIDEO_DURATION = 60;
 
 const NUM_COLUMNS = 3;
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const ITEM_SIZE = SCREEN_WIDTH / NUM_COLUMNS;
 
-const moveVideoToLocalStorage = async (uri: string) => {
-  // Remove file:// prefix if present
-  const cleanUri = uri.replace("file://", "");
-  const filename = cleanUri.split("/").pop() || "video.mp4";
-  const destination = `${FileSystem.documentDirectory}videos/${filename}`;
-
-  // Ensure videos directory exists
-  await FileSystem.makeDirectoryAsync(
-    `${FileSystem.documentDirectory}videos/`,
-    {
-      intermediates: true,
-    },
-  ).catch(() => {});
-
-  console.log("Moving video:", {
-    from: cleanUri,
-    to: destination,
-  });
-
-  // Copy file
-  await FileSystem.copyAsync({
-    from: uri,
-    to: destination,
-  });
-
-  return `file://${destination}`;
-};
-
 const MediaPickerScreen = () => {
   const router = useRouter();
   const navigation = useNavigation();
-  const { processVideo } = useMediaProcessing();
+  const insets = useSafeAreaInsets();
 
   const { albumId, albumTitle } = useLocalSearchParams<{
     albumId: string;
@@ -81,7 +53,24 @@ const MediaPickerScreen = () => {
       sortBy: [MediaLibrary.SortBy.creationTime],
     });
 
-    setAssets((prevAssets) => [...prevAssets, ...media.assets]);
+    // Filter out assets that are wider than tall and videos longer than 1 minute
+    const filteredAssets = await Promise.all(
+      media.assets.map(async (asset) => {
+        if (asset.mediaType === "video") {
+          const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
+          return (
+            asset.height >= asset.width &&
+            assetInfo.duration <= MAX_VIDEO_DURATION
+          );
+        }
+        return asset.height >= asset.width;
+      }),
+    );
+
+    setAssets((prevAssets) => [
+      ...prevAssets,
+      ...media.assets.filter((_, index) => filteredAssets[index]),
+    ]);
     setEndCursor(media.endCursor);
     setHasNextPage(media.hasNextPage);
     setIsLoading(false);
@@ -92,6 +81,8 @@ const MediaPickerScreen = () => {
     setEndCursor(null);
     setHasNextPage(true);
     void fetchAssets();
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const renderItem = useCallback(
@@ -118,20 +109,11 @@ const MediaPickerScreen = () => {
                 assetInfo.localUri,
               );
 
-              // Process video to 1 minute
-              const processedUri = await processVideo({
-                uri: localUri,
-                startTime: 0,
-                endTime: 60, // 1 minute
-                outputUri: `${FileSystem.documentDirectory}videos/processed_${Date.now()}.mp4`,
-              });
-
-              router.dismiss();
-              router.dismiss();
+              router.dismissTo("/(app)/(bottom-tabs)/(camera)");
               router.push({
                 pathname: "/preview",
                 params: {
-                  uri: processedUri,
+                  uri: localUri,
                   type: assetInfo.mediaType,
                   height: assetInfo.height.toString(),
                   width: assetInfo.width.toString(),
@@ -139,9 +121,8 @@ const MediaPickerScreen = () => {
               });
             } else {
               // For images, continue with the normal flow
-              router.dismiss();
-              router.dismiss();
-              router.push({
+              router.dismissTo("/(app)/(bottom-tabs)/(camera)");
+              router.navigate({
                 pathname: "/preview",
                 params: {
                   uri: assetInfo.uri,
@@ -170,7 +151,7 @@ const MediaPickerScreen = () => {
         </Stack>
       );
     },
-    [router, processVideo],
+    [router],
   );
 
   return (
@@ -185,8 +166,36 @@ const MediaPickerScreen = () => {
         void fetchAssets();
       }}
       onEndReachedThreshold={0.5}
+      contentContainerStyle={{
+        paddingBottom: insets.bottom,
+        paddingTop: getToken("$3", "space") as number,
+      }}
     />
   );
+};
+
+const moveVideoToLocalStorage = async (uri: string) => {
+  // Remove file:// prefix if present
+  const cleanUri = uri.replace("file://", "");
+  const filename = cleanUri.split("/").pop() ?? "video.mp4";
+  const destination = `${FileSystem.documentDirectory}videos/${filename}`;
+
+  // Ensure videos directory exists
+  await FileSystem.makeDirectoryAsync(
+    `${FileSystem.documentDirectory}videos/`,
+    {
+      intermediates: true,
+    },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+  ).catch(() => {});
+
+  // Copy file
+  await FileSystem.copyAsync({
+    from: uri,
+    to: destination,
+  });
+
+  return `file://${destination}`;
 };
 
 export default MediaPickerScreen;
