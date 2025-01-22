@@ -17,21 +17,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const post = await api.post.getPostForNextJs({ postId: params.id });
 
-    // Calculate dimensions using width/height ratio to properly handle portrait/landscape
+    // Calculate dimensions maintaining aspect ratio with max height of 1200px for vertical images
+    // and max width of 1200px for horizontal images
     const maxDimension = 1200;
-    const aspectRatio = post.width && post.height ? post.width / post.height : 1;
+    const aspectRatio =
+      post.height && post.width ? post.height / post.width : 1;
 
     let width: number;
     let height: number;
 
-    if (aspectRatio < 1) {
-      // Portrait image (width < height)
+    if (aspectRatio > 1) {
+      // Vertical image
       height = maxDimension;
-      width = Math.round(height * aspectRatio);
+      width = Math.round(height / aspectRatio);
     } else {
-      // Landscape or square image
+      // Horizontal or square image
       width = maxDimension;
-      height = Math.round(width / aspectRatio);
+      height = Math.round(width * aspectRatio);
     }
 
     // Ensure minimum dimensions for social media
@@ -137,7 +139,7 @@ export default async function PostPage({ params }: Props) {
     );
   }
 
-  const aspectRatio = post.width && post.height ? post.width / post.height : 1;
+  const aspectRatio = post.height && post.width ? post.height / post.width : 1;
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-black">
       <AnimatedPostPage post={post} aspectRatio={aspectRatio} />
