@@ -24,19 +24,16 @@ const ShareProfile = () => {
   const profilePictureUrl =
     utils.profile.getFullProfileSelf.getData()?.profilePictureUrl ?? "";
 
-  const qrValue = new URL(
-    // `/profile?username=${username}&userId=${userId}&name=${name}&profilePictureUrl=${profilePictureUrl}`,
-    "https://www.oppfy.app",
-  ).toString();
+  const profileUrl = `https://www.oppfy.app/profile/${username}`;
 
   const handleShare = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    void Sharing.shareAsync(qrValue);
+    void Sharing.shareAsync(profileUrl);
   };
 
   const handleCopyLink = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    void Clipboard.setStringAsync(qrValue);
+    void Clipboard.setStringAsync(profileUrl);
     toast.show("Link copied");
   };
 
@@ -51,7 +48,7 @@ const ShareProfile = () => {
       >
         <QRContainer paddingVertical="$8" width="100%">
           <YStack alignItems="center" gap="$4">
-            <MaskedQRCode value={qrValue} />
+            <MaskedQRCode value={profileUrl} />
             <GradientText>{username}</GradientText>
           </YStack>
         </QRContainer>
