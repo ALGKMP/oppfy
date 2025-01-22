@@ -170,21 +170,21 @@ export default function AnimatedPostPage({ post, aspectRatio }: PostPageProps) {
             transition={{ delay: 1 }}
           >
             <div className="text-center">
-              <span className="mb-2 block text-xl md:text-2xl">🤝</span>
-              <h3 className="mb-1 text-sm font-bold text-[#F214FF] md:text-base">
-                Friend-Powered
-              </h3>
-              <p className="text-xs text-gray-400">
-                Let your friends be your photographers
-              </p>
-            </div>
-            <div className="text-center">
               <span className="mb-2 block text-xl md:text-2xl">📸</span>
               <h3 className="mb-1 text-sm font-bold text-[#F214FF] md:text-base">
                 Real Moments
               </h3>
               <p className="text-xs text-gray-400">
                 Capture life as it happens
+              </p>
+            </div>
+            <div className="text-center">
+              <span className="mb-2 block text-xl md:text-2xl">🤝</span>
+              <h3 className="mb-1 text-sm font-bold text-[#F214FF] md:text-base">
+                Friend-Powered
+              </h3>
+              <p className="text-xs text-gray-400">
+                Let your friends be your photographers
               </p>
             </div>
             <div className="text-center">

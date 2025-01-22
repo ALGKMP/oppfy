@@ -8,45 +8,17 @@ import { api } from "~/trpc/server";
 
 interface Props {
   params: {
-    id: string;
+    username: string;
   };
 }
 
 // Generate metadata for the page
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
-    const post = await api.post.getPostForNextJs({ postId: params.id });
-
-    if (!post) {
-      return {
-        title: "Post Not Found | Oppfy",
-        description: "The requested post could not be found",
-        themeColor: "#F214FF",
-      };
-    }
-
-    // Calculate dimensions maintaining aspect ratio with max height of 1200px for vertical images
-    // and max width of 1200px for horizontal images
-    const maxDimension = 1200;
-    const aspectRatio =
-      post.height && post.width ? post.height / post.width : 1;
-
-    let width: number;
-    let height: number;
-
-    if (aspectRatio > 1) {
-      // Vertical image
-      height = maxDimension;
-      width = Math.round(height / aspectRatio);
-    } else {
-      // Horizontal or square image
-      width = maxDimension;
-      height = Math.round(width * aspectRatio);
-    }
-
-    // Ensure minimum dimensions for social media
-    width = Math.max(width, 600);
-    height = Math.max(height, 600);
+    // const post = await api.post.getPostForNextJs({ postId: params.id });
+    const profile = await api.profile.getProfileForNextJs({
+      username: params.username,
+    });
 
     return {
       title: `${post.authorUsername} opped ${post.recipientUsername} | Oppfy`,

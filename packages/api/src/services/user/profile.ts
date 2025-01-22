@@ -69,6 +69,25 @@ export class ProfileService {
     });
   }
 
+  async getProfileByUsername(username: string) {
+    const profile = await this.profileRepository.getUserFullProfile(username);
+
+    if (profile === undefined) {
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+    }
+
+    const profilePictureUrl = profile.profile.profilePictureKey
+      ? await this.cloudFrontService.getSignedUrlForProfilePicture(
+          profile.profile.profilePictureKey,
+        )
+      : null;
+
+    return {
+      ...profile,
+      profilePictureUrl,
+    };
+  }
+
   async getFullProfileSelf(userId: string) {
     const user = await this.profileRepository.getUserFullProfile(userId);
 
