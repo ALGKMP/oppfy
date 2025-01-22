@@ -19,6 +19,7 @@
     "@tamagui/themes": "1.95.3",
     "expo": "~52.0.0",
     "expo-constants": "~17.0.3",
+    "expo-font": "~13.0.3",
     "expo-image": "~2.0.3",
     "expo-linear-gradient": "~14.0.1",
     "expo-linking": "~7.0.3",
