@@ -55,6 +55,8 @@ const lambdaHandler = async (
   event: S3ObjectLambdaEvent,
   _context: Context,
 ): Promise<void> => {
+  console.log("event", event);
+
   const record = event.Records[0];
 
   if (record === undefined) {
@@ -79,25 +81,28 @@ const lambdaHandler = async (
     const metadata = sharedValidators.aws.metadataSchema.parse(Metadata);
     metadata.caption = decodeURIComponent(metadata.caption);
 
-    if (metadata.type === "onApp") {
-      try {
-        const { insertId: postId } = await db.transaction(async (tx) => {
-          const [post] = await tx
-            .insert(schema.post)
-            .values({
-              authorId: metadata.author,
-              recipientId: metadata.recipient,
-              key: key,
-              mediaType: "image" as const,
-              height: parseInt(metadata.height),
-              width: parseInt(metadata.width),
-              caption: metadata.caption,
-            })
-            .returning({ insertId: schema.post.id });
+    console.log("metadata", metadata);
+    console.log("metadata.postid", metadata.postid);
+    // if (metadata.type === "onApp") {
+    try {
+      const { insertId: postId } = await db.transaction(async (tx) => {
+        const [post] = await tx
+          .insert(schema.post)
+          .values({
+            id: metadata.postid,
+            authorId: metadata.author,
+            recipientId: metadata.recipient,
+            key: key,
+            mediaType: "image" as const,
+            height: parseInt(metadata.height),
+            width: parseInt(metadata.width),
+            caption: metadata.caption,
+          })
+          .returning({ insertId: schema.post.id });
 
-          if (post === undefined) {
-            throw new Error("Failed to insert post");
-          }
+        if (post === undefined) {
+          throw new Error("Failed to insert post");
+        }
 
           await tx.insert(schema.postStats).values({ postId: post.insertId });
 
@@ -115,52 +120,34 @@ const lambdaHandler = async (
           return post;
         });
 
-        await storeNotification(metadata.author, metadata.recipient, {
-          eventType: "post",
-          entityType: "post",
-          entityId: postId.toString(),
-        });
-
-        const { posts } = await getNotificationSettings(metadata.recipient);
-        if (posts) {
-          const pushTokens = await getPushTokens(metadata.recipient);
-          if (pushTokens.length > 0) {
-            const senderProfile = await getProfile(metadata.author);
-            await sendNotification(
-              pushTokens,
-              metadata.author,
-              metadata.recipient,
-              {
-                title: "You've been opped",
-                body: `${senderProfile.username} posted a picture of you`,
-                entityId: postId.toString(),
-                entityType: "post",
-              },
-            );
-          }
-        }
-      } catch (error) {
-        // If the transaction fails, delete the S3 object
-        await deleteS3Object(objectBucket, key);
-        throw error;
-      }
-    } else {
-      await db.transaction(async (tx) => {
-        await tx.insert(schema.postOfUserNotOnApp).values({
-          key,
-          mediaType: "image" as const,
-          authorId: metadata.author,
-          height: parseInt(metadata.height),
-          width: parseInt(metadata.width),
-          caption: metadata.caption,
-          phoneNumber: metadata.number,
-        });
-
-        // For offApp posts, we don't increment any post counts since the recipient isn't on the app
-        console.log(
-          `[PostStats] No post count increment for offApp post since recipient isn't on app`,
-        );
+      await storeNotification(metadata.author, metadata.recipient, {
+        eventType: "post",
+        entityType: "post",
+        entityId: postId.toString(),
       });
+
+      const { posts } = await getNotificationSettings(metadata.recipient);
+      if (posts) {
+        const pushTokens = await getPushTokens(metadata.recipient);
+        if (pushTokens.length > 0) {
+          const senderProfile = await getProfile(metadata.author);
+          await sendNotification(
+            pushTokens,
+            metadata.author,
+            metadata.recipient,
+            {
+              title: "You've been opped",
+              body: `${senderProfile.username} posted a picture of you`,
+              entityId: postId.toString(),
+              entityType: "post",
+            },
+          );
+        }
+      }
+    } catch (error) {
+      // If the transaction fails, delete the S3 object
+      await deleteS3Object(objectBucket, key);
+      throw error;
     }
   } catch (error) {
     console.error("Error processing post:", error);

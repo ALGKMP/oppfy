@@ -80,6 +80,7 @@ export class S3Service {
     width,
     contentLength,
     contentType,
+    postId,
   }: {
     author: string;
     recipient: string;
@@ -88,6 +89,7 @@ export class S3Service {
     width: string;
     contentLength: number;
     contentType: ContentType;
+    postId: string;
   }) {
     try {
       const currentDate = Date.now();
@@ -107,8 +109,10 @@ export class S3Service {
           height,
           width,
           type: "onApp",
+          postid: postId,
         },
       });
+
 
       return presignedUrl;
     } catch (err) {
@@ -122,24 +126,26 @@ export class S3Service {
   // post for user not on app
   async uploadPostForUserNotOnAppUrl({
     author,
-    number,
+    recipient,
     caption,
     height,
     width,
     contentLength,
     contentType,
+    postId,
   }: {
     author: string;
-    number: string;
+    recipient: string;
     caption: string;
     height: string;
     width: string;
     contentLength: number;
     contentType: ContentType;
+    postId: string;
   }) {
     try {
       const currentDate = Date.now();
-      const objectKey = `posts/${currentDate}-${number}-${author}.jpg`;
+      const objectKey = `posts/${currentDate}-${recipient}-${author}.jpg`;
 
       caption = encodeURIComponent(caption);
 
@@ -153,9 +159,12 @@ export class S3Service {
           caption,
           height,
           width,
-          number,
+          recipient,
+          postid: postId,
+          type: "notOnApp",
         },
       });
+
 
       return presignedUrl;
     } catch (err) {

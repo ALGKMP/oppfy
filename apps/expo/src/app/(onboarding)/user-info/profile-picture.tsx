@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
@@ -38,6 +38,16 @@ const ProfilePicture = () => {
     if (result.success) setHasUploadedPic(true);
   };
 
+  const onSubmit = useCallback(async () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.replace("/(app)/(bottom-tabs)/(home)");
+  }, [router]);
+
+  const onSkip = useCallback(async () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.replace("/(app)/(bottom-tabs)/(home)");
+  }, [router]);
+
   useEffect(() => {
     const fn = async () => {
       await syncContacts();
@@ -47,16 +57,6 @@ const ProfilePicture = () => {
     // eslint-disable-next-line react-compiler/react-compiler
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const onSubmit = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.replace("/(app)/(bottom-tabs)/(home)");
-  };
-
-  const onSkip = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.replace("/(app)/(bottom-tabs)/(home)");
-  };
 
   return (
     <ScreenView

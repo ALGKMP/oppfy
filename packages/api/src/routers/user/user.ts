@@ -17,7 +17,15 @@ export const userRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        await ctx.services.user.createUser(input.userId, input.phoneNumber);
+        // check if user already exists with phonenumber is is offapp, if so update the user id
+        const user = await ctx.services.user.getUserByPhoneNumberNoThrow(
+          input.phoneNumber,
+        );
+        if (user && user.accountStatus === "notOnApp") {
+          await ctx.services.user.updateUserId(user.id, input.userId);
+        } else {
+          await ctx.services.user.createUser(input.userId, input.phoneNumber);
+        }
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -63,17 +71,6 @@ export const userRouter = createTRPCRouter({
     }
   }),
 
-  isNewUser: protectedProcedure.query(async ({ ctx }) => {
-    try {
-      return await ctx.services.user.isNewUser(ctx.session.uid);
-    } catch (err) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to check if the post guide should be shown",
-        cause: err,
-      });
-    }
-  }),
 
   getPrivacySetting: protectedProcedure.query(async ({ ctx }) => {
     try {
@@ -103,6 +100,45 @@ export const userRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to update privacy settings",
+          cause: err,
+        });
+      }
+    }),
+
+  updateUserId: publicProcedure
+    .input(
+      z.object({
+        oldUserId: z.string(),
+        newUserId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.services.user.updateUserId(input.oldUserId, input.newUserId);
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update user ID",
+          cause: err,
+        });
+      }
+    }),
+
+  getUserByPhoneNumber: publicProcedure
+    .input(
+      z.object({
+        phoneNumber: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        return await ctx.services.user.getUserByPhoneNumberNoThrow(
+          input.phoneNumber,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to get user by phone number",
           cause: err,
         });
       }

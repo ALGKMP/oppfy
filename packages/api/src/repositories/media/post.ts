@@ -488,14 +488,4 @@ export class PostRepository {
     });
   }
 
-  @handleDatabaseErrors
-  async getCountOfPostsNotOnApp(userId: string) {
-    return await this.db
-      .select({
-        count: sql<number>`count(*)`.as("count"),
-      })
-      .from(schema.postOfUserNotOnApp)
-      .where(eq(schema.post.authorId, userId))
-      .limit(1);
-  }
 }

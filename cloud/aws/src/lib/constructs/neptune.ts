@@ -4,17 +4,18 @@ import { Construct } from "constructs";
 
 export class Neptune extends Construct {
   public readonly cluster: neptune.DatabaseCluster;
+  public readonly securityGroup: ec2.SecurityGroup;
 
   constructor(scope: Construct, id: string, vpc: ec2.Vpc) {
     super(scope, id);
 
-    const securityGroup = new ec2.SecurityGroup(this, "SecurityGroup", {
+    this.securityGroup = new ec2.SecurityGroup(this, "SecurityGroup", {
       vpc,
       description: "Security group for Neptune Service",
       allowAllOutbound: true,
     });
 
-    securityGroup.addIngressRule(
+    this.securityGroup.addIngressRule(
       ec2.Peer.anyIpv4(),
       ec2.Port.tcp(8182),
       "Allow Gremlin access from any IPv4 address",
@@ -25,7 +26,7 @@ export class Neptune extends Construct {
       iamAuthentication: false,
       instanceType: neptune.InstanceType.T3_MEDIUM,
       engineVersion: neptune.EngineVersion.V1_3_0_0,
-      securityGroups: [securityGroup],
+      securityGroups: [this.securityGroup],
     });
   }
 }

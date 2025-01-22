@@ -1,5 +1,8 @@
+import { z } from "zod";
+
 import { auth } from "@oppfy/firebase";
 
+import { accountStatusEnum } from "../../../../db/src/schema";
 import { DomainError, ErrorCode } from "../../errors";
 import {
   BlockRepository,
@@ -12,6 +15,10 @@ import {
 } from "../../repositories";
 import { UserRepository } from "../../repositories/user/user";
 
+//TODO: move to validators
+export type InferEnum<T extends { enumValues: string[] }> =
+  T["enumValues"][number];
+
 export class UserService {
   private searchRepository = new SearchRepository();
   private userRepository = new UserRepository();
@@ -23,7 +30,40 @@ export class UserService {
   private postStatsRepository = new PostStatsRepository();
   private auth = auth;
 
-  async createUser(userId: string, phoneNumber: string) {
+  async createUserWithUsername(
+    userId: string,
+    phoneNumber: string,
+    name: string,
+    accountStatus: InferEnum<typeof accountStatusEnum> = "onApp",
+  ) {
+    let username;
+    let usernameExists;
+
+    // make name be just name with no letters or other shit and first name with last night right after
+    const goodName = name
+      .replace(/[^a-zA-Z0-9]/g, "")
+      .replace(/\s+/g, "_")
+      .toLowerCase();
+    do {
+      const randomPart = Math.random().toString(10).substring(2, 12);
+      username = goodName.substring(0, 15) + `_` + randomPart;
+
+      usernameExists = await this.profileRepository.usernameExists(username);
+    } while (usernameExists);
+
+    await this.userRepository.createUser(
+      userId,
+      phoneNumber,
+      username,
+      accountStatus,
+    );
+  }
+
+  async createUser(
+    userId: string,
+    phoneNumber: string,
+    accountStatus: InferEnum<typeof accountStatusEnum> = "onApp",
+  ) {
     let username;
     let usernameExists;
     do {
@@ -36,7 +76,12 @@ export class UserService {
       usernameExists = await this.profileRepository.usernameExists(username);
     } while (usernameExists);
 
-    await this.userRepository.createUser(userId, phoneNumber, username);
+    await this.userRepository.createUser(
+      userId,
+      phoneNumber,
+      username,
+      accountStatus,
+    );
   }
 
   async getUser(userId: string) {
@@ -45,6 +90,18 @@ export class UserService {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
     return user;
+  }
+
+  async getUserByPhoneNumber(phoneNumber: string) {
+    const user = await this.userRepository.getUserByPhoneNumber(phoneNumber);
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+    return user;
+  }
+
+  async getUserByPhoneNumberNoThrow(phoneNumber: string) {
+    return await this.userRepository.getUserByPhoneNumber(phoneNumber);
   }
 
   async getUserByProfileId(profileId: string) {
@@ -82,12 +139,6 @@ export class UserService {
     ].every((field) => !!field);
   }
 
-  async isNewUser(uid: string) {
-    const counts = await this.postRepository.getCountOfPostsNotOnApp(uid);
-
-    return counts[0]?.count === 0;
-  }
-
   async canAccessUserData({
     currentUserId,
     targetUserId,
@@ -123,5 +174,14 @@ export class UserService {
     if (isFollowing) return true;
 
     return false;
+  }
+
+  async updateUserId(oldUserId: string, newUserId: string) {
+    const user = await this.userRepository.getUser(oldUserId);
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+
+    await this.userRepository.updateUserId(oldUserId, newUserId);
   }
 }

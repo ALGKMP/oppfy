@@ -79,12 +79,12 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
   const assetId = body.object.id;
 
   try {
-    if (metadata.type === "onApp") {
       try {
         const { insertId: postId } = await db.transaction(async (tx) => {
           const [post] = await tx
             .insert(schema.post)
             .values({
+              id: metadata.postid,
               key,
               mediaType: "video" as const,
               authorId: metadata.author,
@@ -132,17 +132,6 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
         await deleteAsset(assetId);
         throw error;
       }
-    } else {
-      await db.insert(schema.postOfUserNotOnApp).values({
-        key,
-        mediaType: "video" as const,
-        authorId: metadata.author,
-        height: parseInt(metadata.height),
-        width: parseInt(metadata.width),
-        caption: metadata.caption,
-        phoneNumber: metadata.number,
-      });
-    }
   } catch (error) {
     console.error("Error processing video:", error);
     // Ensure Mux asset is deleted in case of any error

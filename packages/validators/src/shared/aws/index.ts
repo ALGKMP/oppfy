@@ -8,6 +8,7 @@ const baseSchema = z
     caption: z.string().max(255).default(""),
     height: z.string(),
     width: z.string(),
+    postid: z.string(),
   })
   .catchall(z.string());
 
@@ -17,7 +18,7 @@ export const s3ObjectMetadataForUserOnAppSchema = baseSchema.extend({
 });
 
 export const s3ObjectMetadataForUserNotOnAppSchema = baseSchema.extend({
-  number: z.string(),
+  recipient: z.string(),
   type: z.literal("notOnApp"),
 });
 

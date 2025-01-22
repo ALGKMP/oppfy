@@ -80,6 +80,8 @@ const PhoneNumberOTP = () => {
   );
 
   const handleNewUser = async (userId: string) => {
+    console.log("handleNewUser", userId, phoneNumber);
+
     if (!phoneNumber) {
       setError(Error.UNKNOWN_ERROR);
       return;
@@ -94,6 +96,7 @@ const PhoneNumberOTP = () => {
   };
 
   const handleExistingUser = async () => {
+    console.log("handleExistingUser", phoneNumber);
     const userOnboardingCompleted =
       await userOnboardingCompletedMutation.mutateAsync();
 

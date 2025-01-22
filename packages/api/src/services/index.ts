@@ -10,12 +10,14 @@ import { FriendService } from "./network/friend";
 import { ReportService } from "./network/report";
 import { ContactService } from "./user/contacts";
 import { NotificationsService } from "./user/notifications";
+import { PendingUserService } from "./user/pendingUser";
 import { PrivacyService } from "./user/privacy";
 import { ProfileService } from "./user/profile";
 import { UserService } from "./user/user";
 
 export const services = {
   user: new UserService(),
+  pendingUser: new PendingUserService(), 
   notifications: new NotificationsService(),
   contact: new ContactService(),
   privacy: new PrivacyService(),

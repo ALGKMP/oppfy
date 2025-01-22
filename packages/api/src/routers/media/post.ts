@@ -1,8 +1,10 @@
+import { randomUUID } from "crypto";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { postContentType } from "../../../../validators/src/shared/media";
 import { DomainError, ErrorCode } from "../../errors";
+import { PendingUserService } from "../../services/user/pendingUser";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -23,10 +25,15 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        return await ctx.services.s3.uploadPostForUserOnAppUrl({
+        const postId = `${Date.now()}-${ctx.session.uid}`;
+
+        const presignedUrl = await ctx.services.s3.uploadPostForUserOnAppUrl({
           author: ctx.session.uid,
           ...input,
+          postId,
         });
+
+        return { url: presignedUrl, postId };
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -39,6 +46,7 @@ export const postRouter = createTRPCRouter({
     .input(
       z.object({
         number: z.string(),
+        name: z.string(),
         caption: z.string().max(255).default(""),
         height: z.string(),
         width: z.string(),
@@ -48,10 +56,29 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        return await ctx.services.s3.uploadPostForUserNotOnAppUrl({
-          author: ctx.session.uid,
-          ...input,
-        });
+        // make/check for account
+        const user = await ctx.services.user.getUserByPhoneNumberNoThrow(
+          input.number,
+        );
+
+        const userId = user ? user.id : randomUUID();
+
+        if (!user) {
+          await ctx.services.user.createUserWithUsername(userId, input.number, input.name, "notOnApp");
+        }
+
+        // post id is
+        const postId = randomUUID();
+        const presignedUrl = await ctx.services.s3.uploadPostForUserNotOnAppUrl(
+          {
+            author: ctx.session.uid,
+            recipient: userId,
+            ...input,
+            postId,
+          },
+        );
+
+        return { url: presignedUrl, postId };
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -71,13 +98,17 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+
+        const postId = randomUUID().toString();
+
         const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
           ...input,
           author: ctx.session.uid,
           type: "onApp",
+          postid: postId,
         });
 
-        return url;
+        return { url, postId };
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -91,6 +122,7 @@ export const postRouter = createTRPCRouter({
     .input(
       z.object({
         number: z.string(),
+        name: z.string(),
         caption: z.string().max(255).default(""),
         height: z.string(),
         width: z.string(),
@@ -98,13 +130,30 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        // do pending user stuff here
+        // make/check for account
+        const user = await ctx.services.user.getUserByPhoneNumberNoThrow(
+          input.number,
+        );
+
+
+        const userId = user ? user.id : randomUUID();
+
+        if (!user) {
+          await ctx.services.user.createUserWithUsername(userId, input.number, input.name, "notOnApp");
+        }
+
+        const postId = randomUUID().toString();
+
         const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
           ...input,
           author: ctx.session.uid,
           type: "notOnApp",
+          recipient: userId,
+          postid: postId,
         });
 
-        return url;
+        return { url, postId };
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

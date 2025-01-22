@@ -118,10 +118,21 @@ const PostTo = () => {
     return result;
   }, [friendsList, visibleContacts]);
 
-  const searchableItems = items.filter(
-    (item): item is Extract<ListItem, { type: "friend" | "contact" }> =>
-      item.type === "friend" || item.type === "contact",
-  );
+  const searchableItems = useMemo(() => {
+    const result: Extract<ListItem, { type: "friend" | "contact" }>[] = [];
+
+    // Add all friends
+    friendsList.forEach((friend) => {
+      result.push({ type: "friend", data: friend });
+    });
+
+    // Add all contacts (not just visible ones)
+    contacts.forEach((contact) => {
+      result.push({ type: "contact", data: contact });
+    });
+
+    return result;
+  }, [friendsList, contacts]);
 
   const searchOptions: IFuseOptions<ListItem> = {
     keys: [
@@ -189,6 +200,7 @@ const PostTo = () => {
 
   const loadContacts = useCallback(async () => {
     const contactsNotOnApp = await getDeviceContactsNotOnApp();
+
     setContacts(contactsNotOnApp);
     setVisibleContacts(contactsNotOnApp.slice(0, INITIAL_PAGE_SIZE));
     setIsLoadingContacts(false);
@@ -247,6 +259,10 @@ const PostTo = () => {
 
   const onContactSelected = useCallback(
     (contact: Contact) => {
+      const formattedPhoneNumber = parsePhoneNumberWithError(
+        contact.phoneNumbers?.[0]?.number ?? "",
+      ).format("E.164");
+      console.log("name", contact.name);
       router.navigate({
         pathname: "/create-post",
         params: {
@@ -254,7 +270,8 @@ const PostTo = () => {
           type,
           width,
           height,
-          number: contact.phoneNumbers?.[0]?.number ?? "",
+          name: contact.name ?? "user",
+          number: formattedPhoneNumber,
           userType: "notOnApp",
           recipientName: contact.name,
           recipientImage: contact.imageAvailable

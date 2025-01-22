@@ -18,6 +18,7 @@ export interface UploadMediaInputOnApp extends UploadMediaInputBase {
 
 export interface UploadMediaInputNotOnApp extends UploadMediaInputBase {
   number: string;
+  name: string;
   type: "notOnApp";
 }
 
@@ -50,7 +51,7 @@ const useUploadMedia = () => {
         height: height.toString(),
       };
 
-      const presignedUrl =
+      const { url, postId } =
         input.type === "onApp"
           ? await uploadVideoPostForUserOnApp.mutateAsync({
               ...baseData,
@@ -59,9 +60,10 @@ const useUploadMedia = () => {
           : await uploadVideoPostForUserNotOnApp.mutateAsync({
               ...baseData,
               number: input.number,
+              name: input.name,
             });
 
-      const response = await fetch(presignedUrl, {
+      const response = await fetch(url, {
         method: "PUT",
         headers: {
           "Content-Type": videoBlob.type,
@@ -73,6 +75,8 @@ const useUploadMedia = () => {
       if (!response.ok) {
         throw new Error("Failed to upload video");
       }
+
+      return postId;
     },
   });
 
@@ -86,8 +90,6 @@ const useUploadMedia = () => {
         photoBlob.type,
       );
 
-      console.log("Media type of the image:", photoBlob.type);
-
       if (!parsedMediaType.success) {
         throw new Error("Invalid media type");
       }
@@ -100,7 +102,7 @@ const useUploadMedia = () => {
         contentType: parsedMediaType.data,
       };
 
-      const presignedUrl =
+      const { url, postId } =
         input.type === "onApp"
           ? await uploadPicturePostForUserOnApp.mutateAsync({
               ...baseData,
@@ -109,9 +111,10 @@ const useUploadMedia = () => {
           : await uploadPicturePostForUserNotOnApp.mutateAsync({
               ...baseData,
               number: input.number,
+              name: input.name,
             });
 
-      const response = await fetch(presignedUrl, {
+      const response = await fetch(url, {
         method: "PUT",
         body: photoBlob,
       });
@@ -119,6 +122,8 @@ const useUploadMedia = () => {
       if (!response.ok) {
         throw new Error("Failed to upload photo");
       }
+
+      return postId;
     },
   });
 

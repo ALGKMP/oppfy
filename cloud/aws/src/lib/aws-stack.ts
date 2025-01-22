@@ -18,6 +18,7 @@ import { LambdaFunction } from "./constructs/lambda";
 import { Neptune } from "./constructs/neptune";
 import { OpenSearch } from "./constructs/opensearch";
 import { Queue } from "./constructs/queue";
+import { NeptuneNotebook } from "./constructs/sagemaker";
 import { SNSTopic } from "./constructs/sns";
 
 const environment = {
@@ -96,7 +97,12 @@ export class AwsStack extends cdk.Stack {
     const _database = new Database(this, "Database", vpc);
     const _openSearch = new OpenSearch(this, "OpenSearch", vpc);
     const neptune = new Neptune(this, "Neptune", vpc);
-
+/*     const neptuneNotebook = new NeptuneNotebook(this, "NeptuneNotebook", {
+      vpc,
+      neptuneCluster: neptune.cluster,
+      neptuneSecurityGroup: neptune.securityGroup,
+    });
+ */
     const postBucket = new Bucket(this, "PostBucket");
     const profileBucket = new Bucket(this, "ProfileBucket");
 

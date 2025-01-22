@@ -1,6 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { DimensionValue } from "react-native";
-import { Dimensions, Pressable, StyleSheet } from "react-native";
+import {
+  Dimensions,
+  Linking,
+  Platform,
+  Pressable,
+  Share,
+  StyleSheet,
+} from "react-native";
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -54,6 +61,7 @@ interface CreatePostWithRecipient extends CreatePostBaseParams {
 interface CreatePostWithPhoneNumber extends CreatePostBaseParams {
   number: string;
   userType: "notOnApp";
+  name: string;
 }
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -193,6 +201,9 @@ const CreatePost = () => {
       height: parseInt(height),
       caption,
     };
+
+    console.log("params", params);
+
     const input =
       params.userType === "onApp"
         ? ({
@@ -204,15 +215,46 @@ const CreatePost = () => {
             ...baseData,
             number: params.number,
             type: "notOnApp",
+            name: params.name,
           } satisfies UploadMediaInputNotOnApp);
 
-    await (type === "photo"
-      ? uploadPhotoMutation.mutateAsync(input)
-      : uploadVideoMutation.mutateAsync(input));
+    console.log("before upload", input);
 
-    await promptForReview();
 
-    router.dismissTo("/(app)/(bottom-tabs)/(camera)");
+    const postId =
+      type === "photo"
+        ? await uploadPhotoMutation.mutateAsync(input)
+        : await uploadVideoMutation.mutateAsync(input);
+
+    // await promptForReview();
+
+    console.log("after upload here is the posr id", postId);
+
+
+    //https://oppfy.app/post/postId
+
+    // Construct the SMS URL to 41207628976
+    const url = `sms:${params.number}&body=https://oppfy.app/post/${postId}`;
+    console.log("url", url);
+
+    Linking.openURL(url).catch(() => {
+      console.error("Failed to open SMS app");
+    });
+
+    /*      // Construct the SMS URL
+/*      // Construct the SMS URL
+     const url = Platform.select({
+      ios: `sms:${params.number}&body=${encodeURIComponent(caption)}`,
+      android: `sms:${params.number}?body=${encodeURIComponent(caption)}`,
+    }); */
+
+    /*     // Open the SMS app
+    Linking.openURL(url!).catch(() => {
+      console.error('Failed to open SMS app');
+    }); */
+
+    router.dismissAll();
+    router.navigate("/(app)/(bottom-tabs)/(home)");
   };
 
   const openCaptionSheet = () => {

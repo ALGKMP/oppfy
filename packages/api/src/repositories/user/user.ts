@@ -4,7 +4,9 @@ import { db, schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
 import { auth } from "@oppfy/firebase";
 
+import { accountStatusEnum } from "../../../../db/src/schema";
 import { handleDatabaseErrors } from "../../errors";
+import { InferEnum } from "../../services/user/user";
 
 export type PrivacySettings = NonNullable<
   InferInsertModel<typeof schema.user>["privacySetting"]
@@ -15,7 +17,12 @@ export class UserRepository {
   private auth = auth;
 
   @handleDatabaseErrors
-  async createUser(userId: string, phoneNumber: string, username: string) {
+  async createUser(
+    userId: string,
+    phoneNumber: string,
+    username: string,
+    accountStatus: InferEnum<typeof accountStatusEnum>,
+  ) {
     await this.db.transaction(async (tx) => {
       // Create an empty profile for the user, ready to be updated later
       const [profile] = await tx
@@ -50,6 +57,7 @@ export class UserRepository {
         profileId: profile.id,
         notificationSettingsId: notificationSetting.id,
         phoneNumber,
+        accountStatus,
       });
     });
   }
@@ -108,7 +116,12 @@ export class UserRepository {
     const existingNumbers = await this.db
       .select({ phoneNumber: schema.user.phoneNumber })
       .from(schema.user)
-      .where(inArray(schema.user.phoneNumber, phoneNumbers));
+      .where(
+        and(
+          inArray(schema.user.phoneNumber, phoneNumbers),
+          eq(schema.user.accountStatus, "onApp"),
+        ),
+      );
 
     return existingNumbers.map((user) => user.phoneNumber);
   }
@@ -225,6 +238,16 @@ export class UserRepository {
               ),
           ),
         );
+    });
+  }
+
+  @handleDatabaseErrors
+  async updateUserId(oldUserId: string, newUserId: string) {
+    await this.db.transaction(async (tx) => {
+      await tx
+        .update(schema.user)
+        .set({ id: newUserId })
+        .where(eq(schema.user.id, oldUserId));
     });
   }
 }
