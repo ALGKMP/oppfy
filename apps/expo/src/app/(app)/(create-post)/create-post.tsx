@@ -73,7 +73,6 @@ const SEND_BUTTON_MESSAGES = [
   (name: string) => `${name} CAN'T HIDE 👀`,
   (name: string) => `${name} NEEDS THIS 🫣`,
   (name: string) => `PEER PRESSURE ${name} 🎯`,
-  (name: string) => `${name} IS MISSING OUT 💅`,
   (name: string) => `GOTCHA ${name} 😏`,
   (name: string) => `SHOW ${name} WHAT'S UP 🌟`,
   (name: string) => `${name} SHOULD SEE THIS 👋`,
@@ -157,10 +156,8 @@ const CaptionSheet = ({
 const CreatePost = () => {
   const theme = useTheme();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { promptForReview } = useStoreReview();
   const { show, hide } = useBottomSheetController();
-  const inputRef = useRef<TextInput>(null);
 
   const [caption, setCaption] = useState("");
 
@@ -188,6 +185,7 @@ const CreatePost = () => {
 
   const [buttonMessage] = useState(() => {
     const messageTemplate =
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       SEND_BUTTON_MESSAGES[
         Math.floor(Math.random() * SEND_BUTTON_MESSAGES.length)
       ]!;
@@ -220,41 +218,35 @@ const CreatePost = () => {
 
     console.log("before upload", input);
 
-
     const postId =
       type === "photo"
         ? await uploadPhotoMutation.mutateAsync(input)
         : await uploadVideoMutation.mutateAsync(input);
 
-    // await promptForReview();
+    const messageTemplates = [
+      "🚨 I JUST EXPOSED YOU! Posted your first pic on Oppfy! Come see what I caught you doing:",
+      "👀 Caught you in 4K! I created your Oppfy profile & posted your first pic:",
+      "🔥 Time to expose you on Oppfy! I just put up your first post:",
+      "😱 YOU'VE BEEN OPPED! I just posted your first picture. Come see what I caught:",
+      "🫣 I'm making your Oppfy profile blow up & you don't even know it yet! First post:",
+      "📸 SURPRISE! I'm making you go viral on Oppfy & you're not even on it! Check this out:",
+    ];
 
-    console.log("after upload here is the posr id", postId);
+    const randomMessage =
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      messageTemplates[Math.floor(Math.random() * messageTemplates.length)]!;
+    const appUrl = `https://oppfy.app/post/${postId}`;
+    const message = `${randomMessage}\n\n${appUrl}\n\n💫 Oppfy - Where we post for each other. Download now & get me back 😈`;
 
-
-    //https://oppfy.app/post/postId
-
-    // Construct the SMS URL to 41207628976
-    const url = `sms:${params.number}&body=https://oppfy.app/post/${postId}`;
-    console.log("url", url);
-
-    Linking.openURL(url).catch(() => {
-      console.error("Failed to open SMS app");
+    const url = Platform.select({
+      ios: `sms:${params.number}&body=${encodeURIComponent(message)}`,
+      android: `sms:${params.number}?body=${encodeURIComponent(message)}`,
+      default: `sms:${params.number}?body=${encodeURIComponent(message)}`,
     });
 
-    /*      // Construct the SMS URL
-/*      // Construct the SMS URL
-     const url = Platform.select({
-      ios: `sms:${params.number}&body=${encodeURIComponent(caption)}`,
-      android: `sms:${params.number}?body=${encodeURIComponent(caption)}`,
-    }); */
+    await Linking.openURL(url);
 
-    /*     // Open the SMS app
-    Linking.openURL(url!).catch(() => {
-      console.error('Failed to open SMS app');
-    }); */
-
-    router.dismissAll();
-    router.navigate("/(app)/(bottom-tabs)/(home)");
+    router.dismissTo("/(app)/(bottom-tabs)/(camera)");
   };
 
   const openCaptionSheet = () => {
