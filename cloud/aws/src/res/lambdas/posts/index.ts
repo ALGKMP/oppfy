@@ -81,13 +81,15 @@ const lambdaHandler = async (
     const metadata = sharedValidators.aws.metadataSchema.parse(Metadata);
     metadata.caption = decodeURIComponent(metadata.caption);
 
+    console.log("metadata", metadata);
+    console.log("metadata.postid", metadata.postid);
     // if (metadata.type === "onApp") {
     try {
       const { insertId: postId } = await db.transaction(async (tx) => {
         const [post] = await tx
           .insert(schema.post)
           .values({
-            id: metadata.postId,
+            id: metadata.postid,
             authorId: metadata.author,
             recipientId: metadata.recipient,
             key: key,
@@ -105,6 +107,8 @@ const lambdaHandler = async (
         await tx.insert(schema.postStats).values({ postId: post.insertId });
         return post;
       });
+
+      console.log("postId", postId);
 
       await storeNotification(metadata.author, metadata.recipient, {
         eventType: "post",

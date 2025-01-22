@@ -8,6 +8,7 @@ const baseSchema = z
     caption: z.string().max(255).default(""),
     height: z.string(),
     width: z.string(),
+    postid: z.string(),
   })
   .catchall(z.string());
 

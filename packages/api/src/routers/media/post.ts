@@ -67,7 +67,7 @@ export const postRouter = createTRPCRouter({
         }
 
         // post id is
-        const postId = `${Date.now()}-${userId}`;
+        const postId = randomUUID();
         const presignedUrl = await ctx.services.s3.uploadPostForUserNotOnAppUrl(
           {
             author: ctx.session.uid,
@@ -97,7 +97,9 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const postId = `${Date.now()}-${ctx.session.uid}`;
+
+        const postId = randomUUID().toString();
+
         const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
           ...input,
           author: ctx.session.uid,
@@ -138,7 +140,7 @@ export const postRouter = createTRPCRouter({
           await ctx.services.user.createUser(userId, input.number, "notOnApp");
         }
 
-        const postId = `${Date.now()}-${userId}`;
+        const postId = randomUUID().toString();
 
         const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
           ...input,

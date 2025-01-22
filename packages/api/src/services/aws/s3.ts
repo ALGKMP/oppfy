@@ -109,7 +109,7 @@ export class S3Service {
           height,
           width,
           type: "onApp",
-          postId,
+          postid: postId,
         },
       });
 
@@ -160,7 +160,7 @@ export class S3Service {
           height,
           width,
           recipient,
-          postId,
+          postid: postId,
           type: "notOnApp",
         },
       });
