@@ -70,15 +70,15 @@ export class ProfileService {
   }
 
   async getProfileByUsername(username: string) {
-    const profile = await this.profileRepository.getUserFullProfile(username);
+    const profile = await this.profileRepository.getProfileByUsername(username);
 
     if (profile === undefined) {
       throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
     }
 
-    const profilePictureUrl = profile.profile.profilePictureKey
+    const profilePictureUrl = profile.profilePictureKey
       ? await this.cloudFrontService.getSignedUrlForProfilePicture(
-          profile.profile.profilePictureKey,
+          profile.profilePictureKey,
         )
       : null;
 

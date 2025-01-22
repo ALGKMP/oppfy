@@ -1,56 +1,60 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import { motion } from "framer-motion";
 
-import AnimatedPostErrorPage from "~/components/AnimatedPostErrorPage";
-import AnimatedPostPage from "~/components/AnimatedPostPage";
+import AnimatedProfileErrorPage from "~/components/AnimatedProfileErrorPage";
+import AnimatedProfilePage from "~/components/AnimatedProfilePage";
 import { api } from "~/trpc/server";
 
 interface Props {
   params: {
-    username: string;
+    id: string;
   };
 }
 
 // Generate metadata for the page
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
-    // const post = await api.post.getPostForNextJs({ postId: params.id });
     const profile = await api.profile.getProfileForNextJs({
-      username: params.username,
+      username: params.id,
     });
 
+    if (!profile) {
+      return {
+        title: "Profile Not Found | Oppfy",
+        description: "The requested profile could not be found",
+        themeColor: "#F214FF",
+      };
+    }
+
     return {
-      title: `${post.authorUsername} opped ${post.recipientUsername} | Oppfy`,
-      description: post.caption.length === 0 ? "No caption" : post.caption,
+      title: `${profile.name ?? profile.username} (@${profile.username}) | Oppfy`,
+      description:
+        profile.bio ??
+        `Check out ${profile.name ?? profile.username}'s profile on Oppfy`,
       themeColor: "#F214FF",
       openGraph: {
-        title: `${post.authorUsername} opped ${post.recipientUsername}`,
-        description: post.caption,
+        title: `${profile.name ?? profile.username} (@${profile.username})`,
+        description:
+          profile.bio ??
+          `Check out ${profile.name ?? profile.username}'s profile on Oppfy`,
         images: [
           {
-            url: post.imageUrl,
-            width,
-            height,
-            alt: `${post.authorUsername} opped ${post.recipientUsername}`,
+            url: profile.profilePictureUrl ?? "/default-profile-picture.jpg",
+            width: 800,
+            height: 800,
+            alt: `${profile.name ?? profile.username}'s profile picture`,
           },
         ],
-        type: "article",
-        url: `https://www.oppfy.app/post/${post.postId}`,
+        type: "profile",
+        url: `https://www.oppfy.app/profile/${profile.id}`,
         siteName: "Oppfy",
       },
       twitter: {
-        card: "summary_large_image",
-        title: `${post.authorUsername} opped ${post.recipientUsername}`,
-        description: post.caption,
-        images: [
-          {
-            url: post.imageUrl,
-            width,
-            height,
-            alt: `${post.authorUsername} opped ${post.recipientUsername}`,
-          },
-        ],
+        card: "summary",
+        title: `${profile.name ?? profile.username} (@${profile.username})`,
+        description:
+          profile.bio ??
+          `Check out ${profile.name ?? profile.username}'s profile on Oppfy`,
+        images: [profile.profilePictureUrl ?? "/default-profile-picture.jpg"],
         site: "@oppfyapp",
         creator: "@oppfyapp",
       },
@@ -94,35 +98,36 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   } catch (_) {
     return {
-      title: "Post Not Found | Oppfy",
-      description: "The requested post could not be found",
+      title: "Profile Not Found | Oppfy",
+      description: "The requested profile could not be found",
       themeColor: "#F214FF",
     };
   }
 }
 
 // Main page component
-export default async function PostPage({ params }: Props) {
-  let post;
+export default async function ProfilePage({ params }: Props) {
+  let profile;
 
   try {
-    post = await api.post.getPostForNextJs({ postId: params.id });
+    profile = await api.profile.getProfileForNextJs({
+      username: params.id,
+    });
   } catch (error) {
-    post = null;
+    profile = null;
   }
 
-  if (!post) {
+  if (!profile) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-black">
-        <AnimatedPostErrorPage />
+        <AnimatedProfileErrorPage />
       </main>
     );
   }
 
-  const aspectRatio = post.height && post.width ? post.height / post.width : 1;
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-black">
-      <AnimatedPostPage post={post} aspectRatio={aspectRatio} />
+      <AnimatedProfilePage profile={profile} />
     </main>
   );
 }
