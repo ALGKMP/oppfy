@@ -61,6 +61,7 @@ interface CreatePostWithRecipient extends CreatePostBaseParams {
 interface CreatePostWithPhoneNumber extends CreatePostBaseParams {
   number: string;
   userType: "notOnApp";
+  name: string;
 }
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -200,6 +201,9 @@ const CreatePost = () => {
       height: parseInt(height),
       caption,
     };
+
+    console.log("params", params);
+
     const input =
       params.userType === "onApp"
         ? ({
@@ -211,6 +215,7 @@ const CreatePost = () => {
             ...baseData,
             number: params.number,
             type: "notOnApp",
+            name: params.name,
           } satisfies UploadMediaInputNotOnApp);
 
     console.log("before upload", input);

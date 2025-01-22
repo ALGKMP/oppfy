@@ -30,6 +30,35 @@ export class UserService {
   private postStatsRepository = new PostStatsRepository();
   private auth = auth;
 
+  async createUserWithUsername(
+    userId: string,
+    phoneNumber: string,
+    name: string,
+    accountStatus: InferEnum<typeof accountStatusEnum> = "onApp",
+  ) {
+    let username;
+    let usernameExists;
+
+    // make name be just name with no letters or other shit and first name with last night right after
+    const goodName = name.replace(/[^a-zA-Z0-9]/g, "").replace(/\s+/g, "_");
+    do {
+      const randomPart = Math.random()
+        .toString(10)
+        .substring(2, 17)
+        .padEnd(15, "0");
+      username = goodName + `_` + randomPart;
+
+      usernameExists = await this.profileRepository.usernameExists(username);
+    } while (usernameExists);
+
+    await this.userRepository.createUser(
+      userId,
+      phoneNumber,
+      username,
+      accountStatus,
+    );
+  }
+
   async createUser(
     userId: string,
     phoneNumber: string,

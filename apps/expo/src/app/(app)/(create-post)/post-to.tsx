@@ -266,6 +266,7 @@ const PostTo = () => {
       const formattedPhoneNumber = parsePhoneNumberWithError(
         contact.phoneNumbers?.[0]?.number ?? "",
       ).format("E.164");
+      console.log("name", contact.name);
       router.navigate({
         pathname: "/create-post",
         params: {
@@ -273,6 +274,7 @@ const PostTo = () => {
           type,
           width,
           height,
+          name: contact.name ?? "user",
           number: formattedPhoneNumber,
           userType: "notOnApp",
           recipientName: contact.name ?? "",

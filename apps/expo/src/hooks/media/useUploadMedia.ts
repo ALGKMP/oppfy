@@ -18,6 +18,7 @@ export interface UploadMediaInputOnApp extends UploadMediaInputBase {
 
 export interface UploadMediaInputNotOnApp extends UploadMediaInputBase {
   number: string;
+  name: string;
   type: "notOnApp";
 }
 
@@ -109,6 +110,7 @@ const useUploadMedia = () => {
           : await uploadPicturePostForUserNotOnApp.mutateAsync({
               ...baseData,
               number: input.number,
+              name: input.name,
             });
 
       console.log("url", url);
