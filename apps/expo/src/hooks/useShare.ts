@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Alert, Platform, Share } from "react-native";
 import * as Linking from "expo-linking";
+import { useTheme } from "tamagui";
 
 interface SharePostToNewUserOptions {
   postId: string;
@@ -25,6 +26,7 @@ const SHARE_MESSAGE_TEMPLATES = [
 ];
 
 const useShare = () => {
+  const theme = useTheme();
   const [isSharing, setIsSharing] = useState(false);
 
   const sharePost = async (postId: string) => {
@@ -37,17 +39,16 @@ const useShare = () => {
         ]!;
 
       const url = `https://oppfy.app/post/${postId}`;
-      const message = `${randomMessage}\n\n${url}`;
 
       await Share.share(
         {
-          message,
+          message: randomMessage,
           url, // This enables proper URL preview on iOS
         },
         {
           dialogTitle: "Share Post",
           subject: "Check out this post on Oppfy", // Used for email sharing
-          tintColor: "#F214FF", // Matches Oppfy brand color
+          tintColor: theme.primary.val as string, // Matches Oppfy brand color
         },
       );
     } catch (error) {
