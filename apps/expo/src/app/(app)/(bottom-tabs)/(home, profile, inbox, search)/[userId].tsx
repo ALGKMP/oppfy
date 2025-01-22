@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
@@ -11,8 +12,6 @@ import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
 import { EmptyPlaceholder, HeaderTitle, Icon } from "~/components/ui";
-import useProfile from "~/hooks/useProfile";
-import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -20,16 +19,22 @@ type Post = RouterOutputs["post"]["paginatePostsOfUserOther"]["items"][number];
 
 const OtherProfile = () => {
   const router = useRouter();
-  const { routeProfile } = useRouteProfile();
-
   const insets = useSafeAreaInsets();
 
-  const { userId, username } = useLocalSearchParams<{
+  const params = useLocalSearchParams<{
     userId: string;
-    username: string;
+    username?: string;
+    name?: string;
+    profilePictureUrl?: string;
   }>();
 
-  const { data: profileData } = useProfile();
+  const { userId } = params;
+
+  const {
+    data: profileData,
+    isLoading: isLoadingProfile,
+    refetch: refetchProfile,
+  } = api.profile.getFullProfileOther.useQuery({ userId: userId });
 
   const { data: networkRelationships, refetch: refetchNetworkRelationships } =
     api.profile.getNetworkRelationships.useQuery({ userId });
@@ -45,8 +50,6 @@ const OtherProfile = () => {
     { userId, pageSize: 10 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      enabled: !!userId,
-      refetchOnMount: true,
     },
   );
 
@@ -57,7 +60,11 @@ const OtherProfile = () => {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await Promise.all([refetchPosts(), refetchNetworkRelationships()]);
+    await Promise.all([
+      refetchPosts(),
+      refetchProfile(),
+      refetchNetworkRelationships(),
+    ]);
     setIsRefreshing(false);
   };
 
@@ -86,30 +93,28 @@ const OtherProfile = () => {
   const renderPost = ({ item }: { item: Post }) => (
     <PostCard
       postId={item.postId}
+      endpoint="other-profile"
       createdAt={item.createdAt}
       caption={item.caption}
-      endpoint="other-profile"
-      self={{
-        id: profileData?.userId ?? "",
-        username: profileData?.username ?? "",
-        profilePicture: profileData?.profilePictureUrl,
-      }}
       author={{
         id: item.authorId,
+        name: item.authorName ?? "",
         username: item.authorUsername ?? "",
-        profilePicture: item.authorProfilePicture,
+        profilePictureUrl: item.authorProfilePicture,
       }}
       recipient={{
         id: item.recipientId,
+        name: item.recipientName ?? "",
         username: item.recipientUsername ?? "",
-        profilePicture: item.recipientProfilePicture,
+        profilePictureUrl: item.recipientProfilePicture,
       }}
       media={{
         id: item.postId,
         recipient: {
           id: item.recipientId,
+          name: item.recipientName ?? "",
           username: item.recipientUsername ?? "",
-          profilePicture: item.recipientProfilePicture,
+          profilePictureUrl: item.recipientProfilePicture,
         },
         type: item.mediaType,
         url: item.imageUrl,
@@ -129,16 +134,31 @@ const OtherProfile = () => {
 
   const renderHeader = () => (
     <YStack gap="$2" position="relative">
-      <Header userId={userId} />
+      <Header
+        user={{
+          id: userId,
+          name: profileData?.name ?? params.name ?? null,
+          username: profileData?.username ?? params.username ?? "",
+          profilePictureUrl:
+            profileData?.profilePictureUrl ?? params.profilePictureUrl ?? null,
+          bio: profileData?.bio ?? null,
+        }}
+        stats={{
+          postCount: profileData?.postCount ?? 0,
+          followingCount: profileData?.followingCount ?? 0,
+          followerCount: profileData?.followerCount ?? 0,
+          friendCount: profileData?.friendCount ?? 0,
+        }}
+        createdAt={profileData?.createdAt}
+        isLoading={isLoadingProfile}
+        networkRelationships={networkRelationships}
+      />
       {profileData?.friendCount &&
       profileData.friendCount > 0 &&
       !networkRelationships?.blocked ? (
-        <FriendCarousel paddingHorizontal="$2.5" onUserPress={routeProfile} />
+        <FriendCarousel userId={userId} paddingHorizontal="$2.5" />
       ) : (
-        <RecommendationCarousel
-          paddingHorizontal="$2.5"
-          onUserPress={routeProfile}
-        />
+        <RecommendationCarousel paddingHorizontal="$2.5" />
       )}
       {(isLoadingPostData || postItems.length > 0) && (
         <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
@@ -213,16 +233,21 @@ const OtherProfile = () => {
       estimatedItemSize={300}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}
-      onRefresh={handleRefresh}
       onViewableItemsChanged={onViewableItemsChanged}
       viewabilityConfig={viewabilityConfig}
       extraData={{ viewableItems, postItems }}
-      refreshing={isRefreshing}
       ItemSeparatorComponent={() => <Spacer size="$4" />}
       ListHeaderComponentStyle={{
         marginTop: insets.top,
         marginBottom: getToken("$2", "space") as number,
       }}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={handleRefresh}
+          progressViewOffset={insets.top}
+        />
+      }
     />
   );
 };

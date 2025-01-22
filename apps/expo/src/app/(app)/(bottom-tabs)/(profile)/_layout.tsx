@@ -7,7 +7,15 @@ const ProfileLayout = () => {
       screenOptions={{
         headerShown: false,
       }}
-    ></Stack>
+    >
+      <Stack.Screen
+        name="self-profile"
+        options={{
+          headerShown: false,
+        }}
+        initialParams={{ isFirstInStack: "yes" }}
+      />
+    </Stack>
   );
 };
 

@@ -24,8 +24,10 @@ import {
 import { getTokens } from "tamagui";
 
 import { Button } from "./Buttons";
+import { Circle } from "./Shapes";
 import { XStack, YStack } from "./Stacks";
 import { Text } from "./Texts";
+import { View } from "./Views";
 
 const AnimatedYStack = Animated.createAnimatedComponent(YStack);
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
@@ -378,6 +380,41 @@ UserCard.SeeAll = ({
         </Animated.View>
       </AnimatedYStack>
     </TouchableOpacity>
+  );
+};
+
+UserCard.Skeleton = ({ width }: { width: number }) => {
+  return (
+    <YStack
+      backgroundColor="$gray3"
+      padding="$4"
+      borderRadius="$4"
+      width={width}
+      opacity={0.7}
+    >
+      <YStack space="$4" alignItems="center">
+        {/* Profile picture skeleton */}
+        <Circle size={80} backgroundColor="$gray4" />
+
+        {/* Username skeleton */}
+        <XStack
+          width={100}
+          height={16}
+          backgroundColor="$gray4"
+          borderRadius="$2"
+        />
+
+        {/* Button skeleton */}
+        <Button
+          disabled
+          width="100%"
+          backgroundColor="$gray4"
+          borderColor="transparent"
+        >
+          <Text color="transparent">Follow</Text>
+        </Button>
+      </YStack>
+    </YStack>
   );
 };
 

@@ -133,7 +133,11 @@ const Friends = () => {
           }),
       }}
       onPress={() =>
-        routeProfile({ userId: item.userId, username: item.username })
+        routeProfile(item.userId, {
+          name: item.name,
+          username: item.username,
+          profilePictureUrl: item.profilePictureUrl,
+        })
       }
     />
   );

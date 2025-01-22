@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 
@@ -43,7 +43,7 @@ const Username = () => {
         username: username.toLowerCase(),
       });
 
-      router.push("/user-info/profile-picture");
+      router.push("/user-info/date-of-birth");
     } catch (error) {
       if (isTRPCClientError(error)) {
         switch (error.data?.code) {

@@ -92,7 +92,7 @@ const PhoneNumberOTP = () => {
       phoneNumber,
     });
 
-    router.replace("/user-info/welcome");
+    router.replace("/user-info/name");
   };
 
   const handleExistingUser = async () => {
@@ -100,9 +100,11 @@ const PhoneNumberOTP = () => {
     const userOnboardingCompleted =
       await userOnboardingCompletedMutation.mutateAsync();
 
-    userOnboardingCompleted
-      ? router.replace("/(app)/(bottom-tabs)/(home)")
-      : router.replace("/user-info/welcome");
+    router.replace(
+      userOnboardingCompleted
+        ? "/(app)/(bottom-tabs)/(home)"
+        : "/user-info/name",
+    );
   };
 
   const onSubmit = async () => {

@@ -3,6 +3,13 @@
   "compilerOptions": {
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
-  "include": ["*.ts", "src"],
-  "exclude": ["node_modules"]
+  "include": [
+    "*.ts",
+    "src",
+    "sync-profile-stats.ts",
+    "wipe.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

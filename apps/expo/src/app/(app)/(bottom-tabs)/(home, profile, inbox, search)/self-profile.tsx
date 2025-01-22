@@ -1,32 +1,40 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
+import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import { CameraOff, ScrollText } from "@tamagui/lucide-icons";
-import { Button, getToken, Spacer, View, YStack } from "tamagui";
+import { CameraOff } from "@tamagui/lucide-icons";
+import { getToken, Spacer, View, YStack } from "tamagui";
 
 import FriendCarousel from "~/components/FriendCarousel";
 import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
-import { EmptyPlaceholder, HeaderTitle } from "~/components/ui";
-import useProfile from "~/hooks/useProfile";
-import useRouteProfile from "~/hooks/useRouteProfile";
+import { EmptyPlaceholder, HeaderTitle, Icon } from "~/components/ui";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
 const SelfProfile = () => {
-  const insets = useSafeAreaInsets();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+
+  const { isFirstInStack } = useLocalSearchParams<{
+    isFirstInStack: "yes";
+  }>();
+  
 
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
 
-  const { data: profileData } = useProfile();
+  const {
+    data: profileData,
+    isLoading: isLoadingProfile,
+    refetch: refetchProfile,
+  } = api.profile.getFullProfileSelf.useQuery(undefined, {});
 
   const {
     data: postsData,
@@ -39,7 +47,6 @@ const SelfProfile = () => {
     { pageSize: 10 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      refetchOnMount: true,
     },
   );
 
@@ -48,18 +55,9 @@ const SelfProfile = () => {
 
   const postItems = postsData?.pages.flatMap((page) => page.items) ?? [];
 
-  const { routeProfile } = useRouteProfile();
-
-  // const handleUserPress = useCallback(
-  //   (params: { userId: string; username: string }) => {
-  //     void routeProfile(params);
-  //   },
-  //   [routeProfile],
-  // );
-
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await refetchPosts();
+    await Promise.all([refetchPosts(), refetchProfile()]);
     setIsRefreshing(false);
   };
 
@@ -91,20 +89,17 @@ const SelfProfile = () => {
       endpoint="self-profile"
       createdAt={item.createdAt}
       caption={item.caption}
-      self={{
-        id: profileData?.userId ?? "",
-        username: profileData?.username ?? "",
-        profilePicture: profileData?.profilePictureUrl,
-      }}
       author={{
         id: item.authorId,
+        name: item.authorName ?? "",
         username: item.authorUsername ?? "",
-        profilePicture: item.authorProfilePicture,
+        profilePictureUrl: item.authorProfilePicture,
       }}
       recipient={{
         id: item.recipientId,
+        name: item.recipientName ?? "",
         username: item.recipientUsername ?? "",
-        profilePicture: item.recipientProfilePicture,
+        profilePictureUrl: item.recipientProfilePicture,
       }}
       media={{
         id: item.postId,
@@ -116,8 +111,9 @@ const SelfProfile = () => {
         },
         recipient: {
           id: item.recipientId,
+          name: item.recipientName ?? "",
           username: item.recipientUsername ?? "",
-          profilePicture: item.recipientProfilePicture,
+          profilePictureUrl: item.recipientProfilePicture,
         },
       }}
       stats={{
@@ -130,23 +126,45 @@ const SelfProfile = () => {
   );
 
   const renderHeader = () => (
-    <YStack gap="$2">
-      <Header />
-      <YStack>
-        {profileData?.friendCount && profileData.friendCount > 0 ? (
-          <FriendCarousel paddingHorizontal="$2.5" onUserPress={routeProfile} />
-        ) : (
-          <RecommendationCarousel
-            paddingHorizontal="$4"
-            onUserPress={routeProfile}
-          />
-        )}
-        {/* <Button onPress={() => router.push("otherpr")}>TEST</Button> */}
-      </YStack>
+    <YStack gap="$2" position="relative">
+      <Header
+        user={{
+          name: profileData?.name ?? null,
+          username: profileData?.username ?? "",
+          profilePictureUrl: profileData?.profilePictureUrl ?? null,
+          bio: profileData?.bio ?? null,
+        }}
+        stats={{
+          postCount: profileData?.postCount ?? 0,
+          followingCount: profileData?.followingCount ?? 0,
+          followerCount: profileData?.followerCount ?? 0,
+          friendCount: profileData?.friendCount ?? 0,
+        }}
+        createdAt={profileData?.createdAt}
+        isLoading={isLoadingProfile}
+      />
+      {profileData?.friendCount && profileData.friendCount > 0 ? (
+        <FriendCarousel paddingHorizontal="$2.5" />
+      ) : (
+        <RecommendationCarousel paddingHorizontal="$2.5" />
+      )}
       {(isLoadingPostData || postItems.length > 0) && (
         <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
           Posts
         </HeaderTitle>
+      )}
+
+      {isFirstInStack !== "yes" && (
+        <Icon
+          name="chevron-back"
+          onPress={() => router.back()}
+          blurred
+          style={{
+            position: "absolute",
+            top: 12,
+            left: 12,
+          }}
+        />
       )}
     </YStack>
   );
@@ -183,16 +201,21 @@ const SelfProfile = () => {
       estimatedItemSize={664}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}
-      onRefresh={handleRefresh}
       onViewableItemsChanged={onViewableItemsChanged}
       viewabilityConfig={viewabilityConfig}
       extraData={{ viewableItems, postItems }}
-      refreshing={isRefreshing}
       ItemSeparatorComponent={() => <Spacer size="$4" />}
       ListHeaderComponentStyle={{
-        marginTop: insets.top,
+        paddingTop: insets.top,
         marginBottom: getToken("$2", "space") as number,
       }}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={handleRefresh}
+          progressViewOffset={insets.top}
+        />
+      }
     />
   );
 };

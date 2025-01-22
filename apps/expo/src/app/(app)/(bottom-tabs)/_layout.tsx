@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import type { ElementType } from "react";
-import { StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import Animated, {
   Easing,
   useAnimatedProps,
@@ -13,6 +13,7 @@ import Animated, {
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
+import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { MotiView } from "moti";
 import { useTheme } from "tamagui";
 
@@ -30,7 +31,6 @@ import {
   YStack,
 } from "~/components/ui";
 import type { IconName } from "~/components/ui";
-import useProfile from "~/hooks/useProfile";
 import { api } from "~/utils/api";
 import { storage } from "~/utils/storage";
 
@@ -45,24 +45,17 @@ interface TabBarIconProps {
 const BottomTabsLayout = () => {
   const utils = api.useUtils();
   const bottomSheet = useBottomSheetController();
-  const { profile } = useProfile();
+  const { data: profileData } = api.profile.getFullProfileSelf.useQuery();
 
   const { data: unreadNotificationsCount } =
     api.notifications.getUnreadNotificationsCount.useQuery();
-
-  useEffect(() => {
-    const prefetch = async () => {
-      await utils.profile.getFullProfileSelf.prefetch();
-    };
-    void prefetch();
-  }, [utils.profile.getFullProfileSelf]);
 
   useEffect(() => {
     const hasSeenWelcome = storage.getBoolean(HAS_SEEN_WELCOME_KEY);
     const isDev = process.env.NODE_ENV === "development";
     if (isDev || !hasSeenWelcome) {
       // 1 second delay
-      setTimeout(() => {
+      // setTimeout(() => {
         bottomSheet.show({
           snapPoints: ["100%"],
           headerShown: false,
@@ -71,10 +64,10 @@ const BottomTabsLayout = () => {
           enableContentPanningGesture: false,
           children: <WelcomeBottomSheet onComplete={handleDismissWelcome} />,
         });
-      }, 1000);
+      // }, 1000);
     }
-  // eslint-disable-next-line react-compiler/react-compiler
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDismissWelcome = () => {
@@ -96,20 +89,6 @@ const BottomTabsLayout = () => {
           },
         ],
       }));
-
-      // Special case for profile tab
-      if (iconName === "person-circle" && profile?.profilePictureUrl) {
-        return (
-          <Animated.View style={animatedStyle}>
-            <Avatar
-              source={profile.profilePictureUrl}
-              size={size}
-              bordered={focused}
-              style={{ opacity: focused ? 1 : 0.5 }}
-            />
-          </Animated.View>
-        );
-      }
 
       return (
         <Animated.View style={animatedStyle}>
@@ -143,11 +122,15 @@ const BottomTabsLayout = () => {
         style={{
           position: "absolute",
           top: -6,
-          right: -6,
+          left: 12,
           minWidth: 18,
           height: 18,
+          paddingHorizontal: 4,
           borderRadius: 9,
           overflow: "hidden",
+          alignItems: "center",
+          justifyContent: "center",
+          transform: [{ translateX: 0 }],
         }}
       >
         <BlurView
@@ -156,22 +139,13 @@ const BottomTabsLayout = () => {
           style={{ ...StyleSheet.absoluteFillObject }}
         />
         <View
-          backgroundColor="$red8"
+          backgroundColor="$red11"
           opacity={0.8}
           style={{
             ...StyleSheet.absoluteFillObject,
           }}
         />
-        <Text
-          color="white"
-          fontSize={10}
-          fontWeight="bold"
-          textAlign="center"
-          style={{
-            paddingHorizontal: 4,
-            lineHeight: 18,
-          }}
-        >
+        <Text color="white" fontSize={10} fontWeight="bold" textAlign="center">
           {count > 99 ? "99+" : count}
         </Text>
       </MotiView>
@@ -179,7 +153,11 @@ const BottomTabsLayout = () => {
   };
 
   return (
-    <BottomTabs screenOptions={{ headerShown: false }} backBehavior="history">
+    <BottomTabs
+      initialRouteName="(home)"
+      backBehavior="history"
+      screenOptions={{ headerShown: false }}
+    >
       <BottomTabs.Screen
         name="(home)"
         options={{
@@ -218,7 +196,32 @@ const BottomTabsLayout = () => {
       <BottomTabs.Screen
         name="(profile)"
         options={{
-          tabBarIcon: getTabBarIcon("person-circle"),
+          tabBarIcon: ({ focused, size }) => {
+            const animatedStyle = useAnimatedStyle(() => ({
+              transform: [
+                {
+                  scale: withSpring(focused ? 1.1 : 1, {
+                    mass: 0.5,
+                    damping: 12,
+                    stiffness: 100,
+                  }),
+                },
+              ],
+            }));
+
+            return (
+              <Animated.View style={animatedStyle}>
+                <Avatar
+                  source={
+                    profileData?.profilePictureUrl ?? DefaultProfilePicture
+                  }
+                  size={size}
+                  bordered={focused}
+                  style={{ opacity: focused ? 1 : 0.5 }}
+                />
+              </Animated.View>
+            );
+          },
         }}
       />
     </BottomTabs>

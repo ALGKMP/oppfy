@@ -327,8 +327,6 @@ const HeaderGradient = ({
                     position: "absolute",
                     left: x1,
                     top: y1,
-                    width: "1px",
-                    height: "1px",
                     transform: [
                       {
                         rotate:

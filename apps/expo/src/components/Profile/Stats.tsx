@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TouchableOpacity } from "react-native";
-import { Href, useRouter } from "expo-router";
+import type { Href } from "expo-router";
+import { useRouter } from "expo-router";
 import { Text, XStack, YStack } from "tamagui";
 
 import { Skeleton } from "~/components/ui/Skeleton";
@@ -13,16 +14,19 @@ interface StatsProps {
   followerCount: number;
   friendCount: number;
   isLoading: boolean;
+  disabled?: boolean;
 }
 
 const StatItem = ({
   label,
   value,
   isLoading,
+  disabled,
 }: {
   label: string;
   value: number;
   isLoading?: boolean;
+  disabled?: boolean;
 }) => {
   if (isLoading) {
     return (
@@ -34,7 +38,7 @@ const StatItem = ({
   }
 
   return (
-    <YStack alignItems="center" gap="$1.5">
+    <YStack alignItems="center" gap="$1.5" opacity={disabled ? 0.5 : 1}>
       <Text fontWeight="700" fontSize="$6" color="$color">
         {value}
       </Text>
@@ -53,11 +57,12 @@ const Stats = ({
   followerCount,
   friendCount,
   isLoading,
+  disabled = false,
 }: StatsProps) => {
   const router = useRouter();
 
   const navigateToSection = (section: string) => {
-    if (isLoading) return;
+    if (isLoading || disabled) return;
 
     const basePath = userId ? "/other-connections" : "/self-connections";
     router.push({
@@ -82,37 +87,46 @@ const Stats = ({
       elevation={2}
       opacity={isLoading ? 0.8 : 1}
     >
-      <TouchableOpacity
-        onPress={() => navigateToSection("posts")}
-        disabled={isLoading}
-      >
-        <StatItem label="Posts" value={postCount} isLoading={isLoading} />
+      <TouchableOpacity disabled={true}>
+        <StatItem
+          label="Posts"
+          value={postCount}
+          isLoading={isLoading}
+          disabled={disabled}
+        />
       </TouchableOpacity>
       <TouchableOpacity
         onPress={() => navigateToSection("following")}
-        disabled={isLoading}
+        disabled={isLoading || disabled}
       >
         <StatItem
           label="Following"
           value={followingCount}
           isLoading={isLoading}
+          disabled={disabled}
         />
       </TouchableOpacity>
       <TouchableOpacity
         onPress={() => navigateToSection("followers")}
-        disabled={isLoading}
+        disabled={isLoading || disabled}
       >
         <StatItem
           label="Followers"
           value={followerCount}
           isLoading={isLoading}
+          disabled={disabled}
         />
       </TouchableOpacity>
       <TouchableOpacity
         onPress={() => navigateToSection("friends")}
-        disabled={isLoading}
+        disabled={isLoading || disabled}
       >
-        <StatItem label="Friends" value={friendCount} isLoading={isLoading} />
+        <StatItem
+          label="Friends"
+          value={friendCount}
+          isLoading={isLoading}
+          disabled={disabled}
+        />
       </TouchableOpacity>
     </XStack>
   );

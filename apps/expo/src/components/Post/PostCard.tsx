@@ -14,24 +14,18 @@ import { PostImage } from "./PostImage";
 import { PostStats } from "./PostStats";
 import { PostVideo } from "./PostVideo";
 
-type ProfilePicture = ImageSourcePropType | string | undefined | null;
-
-interface Self {
-  id: string;
-  username: string;
-  profilePicture: ProfilePicture;
-}
-
 export interface Author {
   id: string;
+  name: string;
   username: string;
-  profilePicture: ProfilePicture;
+  profilePictureUrl: string | null | undefined;
 }
 
 export interface Recipient {
   id: string;
+  name: string;
   username: string;
-  profilePicture: ProfilePicture;
+  profilePictureUrl: string | null | undefined;
 }
 
 interface MediaDimensions {
@@ -59,7 +53,6 @@ export interface PostCardProps {
   postId: string;
   createdAt: Date;
   caption: string;
-  self: Self;
   author: Author;
   recipient: Recipient;
   media: Media;
@@ -133,14 +126,15 @@ const PostCard = (props: PostCardProps) => {
           <TouchableOpacity
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              routeProfile({
-                userId: props.recipient.id,
+              routeProfile(props.recipient.id, {
+                name: props.recipient.name,
                 username: props.recipient.username,
+                profilePictureUrl: props.recipient.profilePictureUrl,
               });
             }}
           >
             <Avatar
-              source={props.recipient.profilePicture}
+              source={props.recipient.profilePictureUrl}
               size={44}
               bordered
             />
@@ -150,9 +144,10 @@ const PostCard = (props: PostCardProps) => {
             <TouchableOpacity
               onPress={() => {
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                routeProfile({
-                  userId: props.recipient.id,
+                routeProfile(props.recipient.id, {
+                  name: props.recipient.name,
                   username: props.recipient.username,
+                  profilePictureUrl: props.recipient.profilePictureUrl,
                 });
               }}
             >
@@ -172,9 +167,10 @@ const PostCard = (props: PostCardProps) => {
               <TouchableOpacity
                 onPress={() => {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  routeProfile({
-                    userId: props.author.id,
+                  routeProfile(props.author.id, {
+                    name: props.author.name,
                     username: props.author.username,
+                    profilePictureUrl: props.author.profilePictureUrl,
                   });
                 }}
               >

@@ -267,7 +267,11 @@ const Friends = () => {
       imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
       primaryAction={renderActionButton(item)}
       onPress={() =>
-        routeProfile({ userId: item.userId, username: item.username })
+        routeProfile(item.userId, {
+          name: item.name,
+          username: item.username,
+          profilePictureUrl: item.profilePictureUrl,
+        })
       }
     />
   );

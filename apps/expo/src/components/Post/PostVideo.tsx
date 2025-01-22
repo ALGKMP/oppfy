@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { ResizeMode, Video } from "expo-av";
@@ -52,11 +52,16 @@ export const PostVideo = ({
     }, [isViewable]),
   );
 
+  // Cleanup loading state when component unmounts
+  useEffect(() => {
+    return () => {
+      setIsVideoLoading(false);
+    };
+  }, []);
+
   const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
-      requestAnimationFrame(() => {
-        setIsVideoLoading(false);
-      });
+      setIsVideoLoading(false);
     }
   };
 
@@ -126,11 +131,7 @@ export const PostVideo = ({
           isLooping={true}
           isMuted={isMuted}
           onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-          onLoadStart={() => {
-            requestAnimationFrame(() => {
-              setIsVideoLoading(true);
-            });
-          }}
+          onLoadStart={() => setIsVideoLoading(true)}
         />
         {isVideoLoading && (
           <View

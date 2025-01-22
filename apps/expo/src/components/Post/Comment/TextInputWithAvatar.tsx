@@ -7,9 +7,8 @@ import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { SendHorizontal } from "@tamagui/lucide-icons";
 import { useTheme } from "tamagui";
 
-import { SizableText, View, XStack, YStack } from "~/components/ui";
-import useProfile from "~/hooks/useProfile";
-import { Avatar } from "~/components/ui";
+import { Avatar, SizableText, View, XStack, YStack } from "~/components/ui";
+import { api } from "~/utils/api";
 
 interface CommentInputProps {
   onPostComment: (comment: string) => void;
@@ -18,9 +17,12 @@ interface CommentInputProps {
 const EMOJI_LIST = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
 
 const TextInputWithAvatar = ({ onPostComment }: CommentInputProps) => {
-  const { profile } = useProfile();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+
+  const utils = api.useUtils();
+  const profile = utils.profile.getFullProfileSelf.getData();
+
   const [inputValue, setInputValue] = useState("");
 
   const handleChangeText = (text: string) => {

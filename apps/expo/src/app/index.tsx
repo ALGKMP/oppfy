@@ -23,7 +23,7 @@ const Index = () => {
   }
 
   if (!onboardingComplete) {
-    return <Redirect href="/(onboarding)/user-info/welcome" />;
+    return <Redirect href="/(onboarding)/user-info/name" />;
   }
 
   return <Redirect href="/(app)/(bottom-tabs)/(home)" />;

@@ -1,6 +1,8 @@
 import React from "react";
 import { View, XStack, YStack } from "tamagui";
 
+import type { RouterOutputs } from "@oppfy/api";
+
 import Bio from "~/components/Profile/Bio";
 import HeaderGradient from "~/components/Profile/HeaderGradient";
 import JoinDatePill from "~/components/Profile/JoinDatePill";
@@ -8,43 +10,47 @@ import ProfileActions from "~/components/Profile/ProfileActions";
 import ProfileInfo from "~/components/Profile/ProfileInfo";
 import QuickActions from "~/components/Profile/QuickActions";
 import Stats from "~/components/Profile/Stats";
-import useProfile from "~/hooks/useProfile";
-import { api } from "~/utils/api";
-import type { RouterOutputs } from "~/utils/api";
-import { H3 } from "../ui";
 
-interface HeaderProps {
-  userId?: string;
+type NetworkRelationships = RouterOutputs["profile"]["getNetworkRelationships"];
+
+interface User {
+  id?: string;
+  name: string | null;
+  username: string;
+  profilePictureUrl: string | null;
+  bio: string | null;
 }
 
-const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
-  const { profile: profileData, isLoading: isLoadingProfileData } = useProfile({
-    userId,
-  });
+interface Stats {
+  postCount: number;
+  followingCount: number;
+  followerCount: number;
+  friendCount: number;
+}
 
-  const { data: networkRelationships } =
-    api.profile.getNetworkRelationships.useQuery(
-      { userId: userId ?? "" },
-      { enabled: !!userId },
-    );
+interface HeaderProps {
+  user: User;
+  stats: Stats;
+  createdAt?: Date;
+  networkRelationships?: NetworkRelationships;
+  isLoading?: boolean;
+}
 
-  const defaultProfile = {
-    name: undefined,
-    username: undefined,
-    bio: undefined,
-    profilePictureUrl: undefined,
-    followingCount: 0,
-    followerCount: 0,
-    friendCount: 0,
-    postCount: 0,
-    createdAt: undefined,
-  };
-
-  const profile = profileData ?? defaultProfile;
+const Header = ({
+  user,
+  stats,
+  createdAt,
+  networkRelationships,
+  isLoading = false,
+}: HeaderProps) => {
   const isBlocked = networkRelationships?.blocked ?? false;
+  const isPrivate = networkRelationships?.privacy === "private";
+  const isDisabled =
+    isBlocked ||
+    (isPrivate && networkRelationships.targetUserFollowState !== "Following");
 
   // Generate a unique key for HeaderGradient based on username
-  const headerKey = `header-gradient-${profile.username ?? "default"}`;
+  const headerKey = `header-gradient-${user.username ?? "default"}`;
 
   return (
     <YStack>
@@ -52,22 +58,11 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
       <YStack height={140} overflow="hidden" borderRadius="$6">
         <HeaderGradient
           key={headerKey}
-          username={profile.username}
-          profilePictureUrl={profile.profilePictureUrl}
+          username={user.username}
+          profilePictureUrl={user.profilePictureUrl}
         />
         <View position="absolute" bottom={12} right={12}>
-          <JoinDatePill createdAt={profile.createdAt} />
-        </View>
-        <View
-          position="absolute"
-          top={0}
-          bottom={0}
-          left={0}
-          right={0}
-          alignItems="center"
-          justifyContent="center"
-        >
-          {!userId && <H3></H3>}
+          <JoinDatePill createdAt={createdAt} />
         </View>
       </YStack>
 
@@ -75,39 +70,38 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
       <YStack marginTop={-60} paddingHorizontal="$4" gap="$4">
         <XStack justifyContent="space-between" alignItems="flex-end">
           <ProfileInfo
-            name={profile.name}
-            username={profile.username}
-            profilePictureUrl={profile.profilePictureUrl}
-            isLoading={isLoadingProfileData}
+            name={user.name}
+            username={user.username}
+            profilePictureUrl={user.profilePictureUrl}
+            isLoading={isLoading}
           />
           <QuickActions
-            userId={userId}
-            username={profile.username}
-            profilePictureUrl={profile.profilePictureUrl}
-            isLoading={isLoadingProfileData}
+            userId={user.id}
+            username={user.username}
+            profilePictureUrl={user.profilePictureUrl}
+            isLoading={isLoading}
             networkRelationships={networkRelationships}
           />
         </XStack>
 
-        <Bio bio={profile.bio} isLoading={isLoadingProfileData} />
+        <Bio bio={user.bio} isLoading={isLoading} />
 
         <ProfileActions
-          userId={userId}
+          userId={user.id}
           isDisabled={isBlocked}
           networkRelationships={networkRelationships}
         />
 
-        {!isBlocked && (
-          <Stats
-            userId={userId}
-            username={profile.username}
-            postCount={profile.postCount}
-            followingCount={profile.followingCount}
-            followerCount={profile.followerCount}
-            friendCount={profile.friendCount}
-            isLoading={isLoadingProfileData}
-          />
-        )}
+        <Stats
+          userId={user.id}
+          username={user.username}
+          postCount={stats.postCount}
+          followingCount={stats.followingCount}
+          followerCount={stats.followerCount}
+          friendCount={stats.friendCount}
+          isLoading={isLoading}
+          disabled={isDisabled}
+        />
       </YStack>
     </YStack>
   );

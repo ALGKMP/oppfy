@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
-import { getToken, H5, Spacer, YStack } from "tamagui";
+import { getToken } from "tamagui";
+import { Spacer, YStack } from "~/components/ui";
 
-import { EmptyPlaceholder, MediaListItem } from "~/components/ui";
+import { EmptyPlaceholder, HeaderTitle, MediaListItem } from "~/components/ui";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
@@ -259,7 +259,7 @@ const Requests = () => {
 
   const renderItem = ({ item }: { item: ListItem }) => {
     if (item.type === "header") {
-      return <H5 theme="alt1">{item.title}</H5>;
+      return <HeaderTitle>{item.title}</HeaderTitle>;
     }
 
     if (item.type === "friendRequest") {
@@ -284,9 +284,10 @@ const Requests = () => {
               }),
           }}
           onPress={() =>
-            routeProfile({
-              userId: item.data.userId,
+            routeProfile(item.data.userId, {
+              name: item.data.name ?? "",
               username: item.data.username,
+              profilePictureUrl: item.data.profilePictureUrl,
             })
           }
         />
@@ -314,9 +315,10 @@ const Requests = () => {
             }),
         }}
         onPress={() =>
-          routeProfile({
-            userId: item.data.userId,
+          routeProfile(item.data.userId, {
+            name: item.data.name ?? "",
             username: item.data.username,
+            profilePictureUrl: item.data.profilePictureUrl,
           })
         }
       />
@@ -368,8 +370,8 @@ const Requests = () => {
       ItemSeparatorComponent={Spacer}
       ListEmptyComponent={ListEmptyComponent}
       contentContainerStyle={{
-        padding: getToken("$4", "space"),
-        paddingBottom: insets.bottom + getToken("$2", "space"),
+        padding: getToken("$4", "space") as number,
+        paddingBottom: (insets.bottom + getToken("$2", "space")) as number,
       }}
       onEndReached={handleOnEndReached}
       onEndReachedThreshold={0.5}

@@ -1,20 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Keyboard, RefreshControl, TouchableOpacity } from "react-native";
+import { Keyboard, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Contact } from "expo-contacts";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
-import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
-import { ChevronRight, Info, UserRoundX } from "@tamagui/lucide-icons";
+import { ChevronRight, UserRoundX } from "@tamagui/lucide-icons";
 import type { IFuseOptions } from "fuse.js";
 import { parsePhoneNumberWithError } from "libphonenumber-js";
 import { getToken, useTheme } from "tamagui";
 
 import {
   EmptyPlaceholder,
-  H5,
-  H6,
   HeaderTitle,
   Icon,
   MediaListItem,
@@ -50,7 +47,6 @@ const PostTo = () => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const headerHeight = useHeaderHeight();
   const infoDialog = useDialogController();
 
   const { type, uri, height, width } = useLocalSearchParams<{
@@ -277,7 +273,7 @@ const PostTo = () => {
           name: contact.name ?? "user",
           number: formattedPhoneNumber,
           userType: "notOnApp",
-          recipientName: contact.name ?? "",
+          recipientName: contact.name,
           recipientImage: contact.imageAvailable
             ? contact.image?.uri
             : undefined,
@@ -365,10 +361,17 @@ const PostTo = () => {
             iconAfter: ChevronRight,
             onPress: () => onContactSelected(item.data),
           }}
+          onPress={() => onContactSelected(item.data)}
         />
       );
     },
-    [formatPhoneNumber, onContactSelected, onFriendSelected],
+    [
+      formatPhoneNumber,
+      infoDialog,
+      onContactSelected,
+      onFriendSelected,
+      theme.primary.val,
+    ],
   );
 
   const ListHeaderComponent = useMemo(

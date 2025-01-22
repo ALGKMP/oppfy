@@ -4,7 +4,11 @@ import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { useScrollToTop } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
+import {
+  UserRoundCheck,
+  UserRoundPlus,
+  UserRoundX,
+} from "@tamagui/lucide-icons";
 import { getToken } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
@@ -41,6 +45,8 @@ const Inbox = () => {
 
   const listRef = useRef<FlashList<NotificationItem>>(null);
   useScrollToTop(listRef);
+
+  utils.notifications.getUnreadNotificationsCount.setData(undefined, 0);
 
   const { data: requestsCount, refetch: refetchRequestCount } =
     api.request.countRequests.useQuery(undefined, {
@@ -178,7 +184,11 @@ const Inbox = () => {
       imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
       primaryAction={renderActionButton(item)}
       onPress={() =>
-        routeProfile({ userId: item.userId, username: item.username })
+        routeProfile(item.userId, {
+          name: item.name ?? "",
+          username: item.username,
+          profilePictureUrl: item.profilePictureUrl,
+        })
       }
     />
   );
@@ -190,7 +200,10 @@ const Inbox = () => {
 
     if (pendingRequests > 0) {
       return (
-        <TouchableOpacity onPress={() => router.navigate("/requests")}>
+        <TouchableOpacity
+          onPress={() => router.navigate("/requests")}
+          style={{ marginBottom: getToken("$4", "space") as number }}
+        >
           <CardContainer
             padding="$4"
             orientation="horizontal"
@@ -241,7 +254,7 @@ const Inbox = () => {
 
     if (notificationItems.length === 0) {
       return (
-        <YStack flex={1} justifyContent="center">
+        <YStack flex={1} justifyContent="center" padding="$4">
           <EmptyPlaceholder
             title="No notifications"
             subtitle="You don't have any notifications yet."
@@ -265,11 +278,11 @@ const Inbox = () => {
       ListFooterComponent={GridSuggestions}
       ItemSeparatorComponent={Spacer}
       ListFooterComponentStyle={{
-        marginTop: getToken("$2", "space"),
+        marginTop: getToken("$2", "space") as number,
       }}
       contentContainerStyle={{
-        paddingBottom: getToken("$4", "space"),
-        paddingHorizontal: getToken("$4", "space"),
+        paddingBottom: getToken("$4", "space") as number,
+        paddingHorizontal: getToken("$4", "space") as number,
       }}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}

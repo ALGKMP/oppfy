@@ -5,18 +5,17 @@ import { FlashList } from "@shopify/flash-list";
 import { getToken, YStack } from "tamagui";
 import type { SpaceTokens, Token } from "tamagui";
 
-import { api } from "~/utils/api";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
+import { api } from "~/utils/api";
 import { Spacer } from "./ui";
 import { HeaderTitle } from "./ui/Headings";
 import { UserCard } from "./ui/UserCard";
 
-type Friend = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][number];
-
 interface FriendCarouselProps {
-  paddingHorizontal?: SpaceTokens;
+  userId?: string;
   paddingVertical?: SpaceTokens;
-  onUserPress: (params: { userId: string; username: string }) => void;
+  paddingHorizontal?: SpaceTokens;
 }
 
 const LoadingCard = ({ width }: { width: number }) => (
@@ -30,28 +29,20 @@ const LoadingCard = ({ width }: { width: number }) => (
 );
 
 const FriendCarousel = ({
-  paddingHorizontal,
+  userId,
   paddingVertical,
-  onUserPress,
+  paddingHorizontal,
 }: FriendCarouselProps) => {
   const { width: windowWidth } = useWindowDimensions();
   const router = useRouter();
+  const { routeProfile } = useRouteProfile();
 
-  const { data: friendsData, isLoading } =
-    api.friend.paginateFriendsSelf.useInfiniteQuery(
-      { pageSize: 10 },
-      {
-        getNextPageParam: (lastPage) => lastPage.nextCursor,
-        staleTime: 60 * 5000, // 5 minutes
-      },
-    );
-
-  const friends = friendsData?.pages.flatMap((page) => page.items) ?? [];
+  const { friends, isLoading } = useFriends({ userId });
 
   const CARD_WIDTH = windowWidth * 0.25;
   const CARD_GAP = getToken("$2.5", "space") as number;
 
-  if (!isLoading && !friends.length) {
+  if (!isLoading && !friends?.length) {
     return null;
   }
 
@@ -62,7 +53,7 @@ const FriendCarousel = ({
       </HeaderTitle>
 
       <FlashList<Friend | null>
-        data={isLoading ? Array(4).fill(null) : [...friends, null]}
+        data={isLoading ? Array(4).fill(null) : [...(friends ?? []), null]}
         horizontal
         showsHorizontalScrollIndicator={false}
         estimatedItemSize={CARD_WIDTH}
@@ -82,7 +73,13 @@ const FriendCarousel = ({
             return (
               <UserCard.SeeAll
                 width={CARD_WIDTH}
-                onPress={() => router.push("/self-connections/friends")}
+                onPress={() =>
+                  router.push(
+                    userId
+                      ? `/other-connections/${userId}/friends`
+                      : "/self-connections/friends",
+                  )
+                }
                 index={index}
               />
             );
@@ -97,7 +94,11 @@ const FriendCarousel = ({
               width={CARD_WIDTH}
               index={index}
               onPress={() =>
-                onUserPress({ userId: item.userId, username: item.username })
+                routeProfile(item.userId, {
+                  name: item.name,
+                  username: item.username,
+                  profilePictureUrl: item.profilePictureUrl,
+                })
               }
             />
           );
@@ -105,6 +106,38 @@ const FriendCarousel = ({
       />
     </YStack>
   );
+};
+
+type Friend = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][number];
+
+interface UseFriendsProps {
+  userId?: string;
+  pageSize?: number;
+}
+
+const useFriends = ({ userId, pageSize = 10 }: UseFriendsProps = {}) => {
+  const query = api.friend.paginateFriendsOthers.useInfiniteQuery(
+    { userId: userId!, pageSize },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      enabled: !!userId,
+    },
+  );
+
+  const selfQuery = api.friend.paginateFriendsSelf.useInfiniteQuery(
+    { pageSize },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      enabled: !userId,
+    },
+  );
+
+  const activeQuery = userId ? query : selfQuery;
+
+  return {
+    isLoading: activeQuery.isLoading,
+    friends: activeQuery.data?.pages.flatMap((page) => page.items),
+  };
 };
 
 export default FriendCarousel;

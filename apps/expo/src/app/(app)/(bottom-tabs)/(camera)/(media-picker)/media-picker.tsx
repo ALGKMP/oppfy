@@ -1,24 +1,86 @@
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from "react";
-import { Dimensions } from "react-native";
+import React, { useCallback, useLayoutEffect } from "react";
+import { Alert, Dimensions, FlatList } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as FileSystem from "expo-file-system";
-import { Image } from "expo-image";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Video } from "@tamagui/lucide-icons";
-import { getToken, Stack } from "tamagui";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import type { InfiniteData, QueryFunctionContext } from "@tanstack/react-query";
+import { getToken, Image, ScrollView } from "tamagui";
 
-import useMediaProcessing from "~/hooks/media/useMediaProcessing";
+import { Stack } from "~/components/ui";
 
+const MAX_VIDEO_DURATION = 60;
 const NUM_COLUMNS = 3;
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const ITEM_SIZE = SCREEN_WIDTH / NUM_COLUMNS;
+const PAGE_SIZE = 500;
+const INITIAL_PAGE_SIZE = 1000;
+
+interface UseMediaAssetsProps {
+  albumId: string;
+}
+
+interface MediaAssetsPage {
+  items: MediaLibrary.Asset[];
+  nextCursor: string | null;
+  hasNextPage: boolean;
+}
+
+type MediaAssetsQueryKey = ["mediaAssets", string];
+type MediaAssetsInfiniteData = InfiniteData<MediaAssetsPage>;
+
+const useMediaAssets = ({ albumId }: UseMediaAssetsProps) => {
+  return useInfiniteQuery<
+    MediaAssetsPage,
+    Error,
+    MediaAssetsInfiniteData,
+    MediaAssetsQueryKey,
+    string | null
+  >({
+    queryKey: ["mediaAssets", albumId],
+    queryFn: async (
+      context: QueryFunctionContext<MediaAssetsQueryKey, string | null>,
+    ) => {
+      const isInitialFetch = !context.pageParam;
+      const media = await MediaLibrary.getAssetsAsync({
+        album: albumId,
+        mediaType: [MediaLibrary.MediaType.photo, MediaLibrary.MediaType.video],
+        first: isInitialFetch ? INITIAL_PAGE_SIZE : PAGE_SIZE,
+        after: context.pageParam ?? undefined,
+        sortBy: [MediaLibrary.SortBy.creationTime],
+      });
+
+      // Filter out landscape media and long videos
+      const filteredAssets = media.assets.filter((asset) => {
+        // Filter out landscape media
+        if (asset.height < asset.width) {
+          return false;
+        }
+
+        // Filter out long videos
+        if (
+          asset.mediaType === "video" &&
+          asset.duration > MAX_VIDEO_DURATION
+        ) {
+          return false;
+        }
+
+        return true;
+      });
+
+      return {
+        items: filteredAssets,
+        nextCursor: media.endCursor,
+        hasNextPage: media.hasNextPage,
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    initialPageParam: null,
+  });
+};
 
 const moveVideoToLocalStorage = async (uri: string) => {
   // Remove file:// prefix if present
@@ -32,7 +94,6 @@ const moveVideoToLocalStorage = async (uri: string) => {
     {
       intermediates: true,
     },
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
   ).catch(() => {});
 
   // Copy file
@@ -48,55 +109,22 @@ const MediaPickerScreen = () => {
   const router = useRouter();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-  const { processVideo } = useMediaProcessing();
 
   const { albumId, albumTitle } = useLocalSearchParams<{
     albumId: string;
     albumTitle: string;
   }>();
 
-  const [assets, setAssets] = useState<MediaLibrary.Asset[]>([]);
-  const [endCursor, setEndCursor] = useState<string | null>(null);
-  const [hasNextPage, setHasNextPage] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
+    useMediaAssets({ albumId });
+
+  const assets = data?.pages.flatMap((page) => page.items) ?? [];
 
   useLayoutEffect(() => {
     navigation.setOptions({
       title: albumTitle,
     });
   }, [navigation, albumTitle]);
-
-  const fetchAssets = async () => {
-    if (!hasNextPage || isLoading) return;
-    setIsLoading(true);
-
-    const media = await MediaLibrary.getAssetsAsync({
-      album: albumId,
-      mediaType: [MediaLibrary.MediaType.photo, MediaLibrary.MediaType.video],
-      first: 50,
-      after: endCursor ?? undefined,
-      sortBy: [MediaLibrary.SortBy.creationTime],
-    });
-
-    // Filter out assets that are wider than tall
-    const filteredAssets = media.assets.filter(
-      (asset) => asset.height >= asset.width,
-    );
-
-    setAssets((prevAssets) => [...prevAssets, ...filteredAssets]);
-    setEndCursor(media.endCursor);
-    setHasNextPage(media.hasNextPage);
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    setAssets([]);
-    setEndCursor(null);
-    setHasNextPage(true);
-    void fetchAssets();
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const renderItem = useCallback(
     ({ item }: { item: MediaLibrary.Asset }) => {
@@ -106,65 +134,59 @@ const MediaPickerScreen = () => {
           height={ITEM_SIZE}
           margin={0.5}
           onPress={async () => {
-            // Get full asset info with network download if needed
-            const assetInfo = await MediaLibrary.getAssetInfoAsync(item, {
-              shouldDownloadFromNetwork: true,
-            });
+            try {
+              // Get full asset info with network download if needed
+              const assetInfo = await MediaLibrary.getAssetInfoAsync(item, {
+                shouldDownloadFromNetwork: true,
+              });
 
-            // For videos, we need to move to local storage and process
-            if (item.mediaType === "video") {
-              if (!assetInfo.localUri) {
-                throw new Error("Could not get local URI for video");
+              // For videos, validate and move to local storage
+              if (item.mediaType === "video") {
+                if (!assetInfo.localUri) {
+                  throw new Error("Could not get local URI for video");
+                }
+
+                // Move to local storage
+                const localUri = await moveVideoToLocalStorage(
+                  assetInfo.localUri,
+                );
+
+                router.dismissTo("/(app)/(bottom-tabs)/(camera)");
+                router.push({
+                  pathname: "/preview",
+                  params: {
+                    uri: localUri,
+                    type: assetInfo.mediaType,
+                    height: assetInfo.height.toString(),
+                    width: assetInfo.width.toString(),
+                  },
+                });
+              } else {
+                router.dismissTo("/(app)/(bottom-tabs)/(camera)");
+                router.navigate({
+                  pathname: "/preview",
+                  params: {
+                    uri: assetInfo.uri,
+                    type: assetInfo.mediaType,
+                    height: assetInfo.height.toString(),
+                    width: assetInfo.width.toString(),
+                  },
+                });
               }
-
-              // Move to local storage
-              const localUri = await moveVideoToLocalStorage(
-                assetInfo.localUri,
+            } catch (error) {
+              console.error("Error processing media:", error);
+              Alert.alert(
+                "Error",
+                "Failed to process media. Please try again.",
               );
-
-              // Process video to 1 minute
-              const processedUri = await processVideo({
-                uri: localUri,
-                startTime: 0,
-                endTime: 60, // 1 minute
-                outputUri: `${FileSystem.documentDirectory}videos/processed_${Date.now()}.mp4`,
-              });
-
-              router.dismiss();
-              router.dismiss();
-              router.push({
-                pathname: "/preview",
-                params: {
-                  uri: processedUri,
-                  type: assetInfo.mediaType,
-                  height: assetInfo.height.toString(),
-                  width: assetInfo.width.toString(),
-                },
-              });
-            } else {
-              // For images, continue with the normal flow
-              router.dismiss();
-              router.dismiss();
-              router.push({
-                pathname: "/preview",
-                params: {
-                  uri: assetInfo.uri,
-                  type: assetInfo.mediaType,
-                  height: assetInfo.height.toString(),
-                  width: assetInfo.width.toString(),
-                },
-              });
             }
           }}
         >
           <Image
             source={{ uri: item.uri }}
-            recyclingKey={item.uri}
-            style={{
-              width: "100%",
-              height: "100%",
-            }}
-            contentFit="cover"
+            width={ITEM_SIZE}
+            height={ITEM_SIZE}
+            resizeMode="cover"
           />
           {item.mediaType === "video" && (
             <Stack position="absolute" top={5} left={5}>
@@ -174,7 +196,7 @@ const MediaPickerScreen = () => {
         </Stack>
       );
     },
-    [router, processVideo],
+    [router],
   );
 
   return (
@@ -185,8 +207,8 @@ const MediaPickerScreen = () => {
       numColumns={NUM_COLUMNS}
       estimatedItemSize={ITEM_SIZE}
       onEndReached={() => {
-        if (!hasNextPage || isLoading) return;
-        void fetchAssets();
+        if (!hasNextPage || isFetchingNextPage) return;
+        void fetchNextPage();
       }}
       onEndReachedThreshold={0.5}
       contentContainerStyle={{

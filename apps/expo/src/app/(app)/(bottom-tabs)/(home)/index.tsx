@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { Dimensions } from "react-native";
+import { Dimensions, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -25,8 +25,6 @@ import {
 import PostCard from "~/components/Post/PostCard";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
 import { Avatar, HeaderTitle, Icon, Separator } from "~/components/ui";
-import useProfile from "~/hooks/useProfile";
-import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -38,14 +36,14 @@ const HomeScreen = () => {
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
   const router = useRouter();
-  const { routeProfile } = useRouteProfile();
 
   const insets = useSafeAreaInsets();
 
   const [refreshing, setRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
-  const { profile, isLoading: isLoadingProfile } = useProfile();
+  const { data: profile, isLoading: isLoadingProfile } =
+    api.profile.getFullProfileSelf.useQuery();
 
   const {
     data: postData,
@@ -92,13 +90,6 @@ const HomeScreen = () => {
     setViewableItems(visibleItemIds);
   };
 
-  const handleUserPress = useCallback(
-    (params: { userId: string; username: string }) => {
-      void routeProfile(params);
-    },
-    [routeProfile],
-  );
-
   const renderPost = useCallback(
     ({ item }: { item: Post }) => {
       if (profile === undefined) return null;
@@ -109,27 +100,25 @@ const HomeScreen = () => {
           createdAt={item.createdAt}
           caption={item.caption}
           endpoint="home-feed"
-          self={{
-            id: profile.userId,
-            username: profile.username,
-            profilePicture: profile.profilePictureUrl,
-          }}
           author={{
             id: item.authorId,
+            name: item.authorName ?? "",
             username: item.authorUsername ?? "",
-            profilePicture: item.authorProfilePicture,
+            profilePictureUrl: item.authorProfilePicture,
           }}
           recipient={{
             id: item.recipientId,
+            name: item.recipientName ?? "",
             username: item.recipientUsername ?? "",
-            profilePicture: item.recipientProfilePicture,
+            profilePictureUrl: item.recipientProfilePicture,
           }}
           media={{
             id: item.postId,
             recipient: {
               id: item.recipientId,
+              name: item.recipientName ?? "",
               username: item.recipientUsername ?? "",
-              profilePicture: item.recipientProfilePicture,
+              profilePictureUrl: item.recipientProfilePicture,
             },
             type: item.mediaType,
             url: item.imageUrl,
@@ -238,23 +227,23 @@ const HomeScreen = () => {
       );
     }
 
+    // we should not show the footer if there are more posts to fetch
+    if (hasNextPage) {
+      return null;
+    }
+
     return (
       <YStack gap="$4">
-        <RecommendationCarousel
-          paddingHorizontal="$4"
-          onUserPress={handleUserPress}
-        />
+        <RecommendationCarousel paddingHorizontal="$4" />
         <Footer />
       </YStack>
     );
-  }, [isLoading, handleUserPress]);
+  }, [hasNextPage, isLoading]);
 
   return (
     <FlashList
       ref={scrollRef}
       data={postItems}
-      refreshing={refreshing}
-      onRefresh={onRefresh}
       onEndReached={handleOnEndReached}
       nestedScrollEnabled={false}
       showsVerticalScrollIndicator={false}
@@ -275,6 +264,13 @@ const HomeScreen = () => {
         paddingTop: getToken("$3", "space") as number,
         paddingBottom: getToken("$4", "space") as number,
       }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          progressViewOffset={insets.top}
+        />
+      }
     />
   );
 };

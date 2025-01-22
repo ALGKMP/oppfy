@@ -1,7 +1,7 @@
 import React from "react";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
-import { Send, Settings2, UserX } from "@tamagui/lucide-icons";
+import { Ban, Send, Settings2 } from "@tamagui/lucide-icons";
 import { XStack } from "tamagui";
 
 import type { RouterOutputs } from "@oppfy/api";
@@ -87,11 +87,12 @@ const QuickActions = ({
         }
       />
       <Button
-        icon={<UserX size={20} />}
+        icon={<Ban size={20} color="$red11" />}
         variant="outlined"
         size="$3.5"
         circular
         borderWidth={1.5}
+        borderColor="$red11"
         disabled={isLoading || isBlockActionLoading}
         opacity={isLoading || isBlockActionLoading ? 0.5 : 1}
         onPress={handleBlockAction}

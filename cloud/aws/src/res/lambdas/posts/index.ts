@@ -11,7 +11,7 @@ import { createEnv } from "@t3-oss/env-core";
 import type { Context } from "aws-lambda";
 import { z } from "zod";
 
-import { db, eq, schema } from "@oppfy/db";
+import { db, eq, schema, sql } from "@oppfy/db";
 import { sharedValidators } from "@oppfy/validators";
 
 type SnsNotificationData = z.infer<
@@ -104,11 +104,21 @@ const lambdaHandler = async (
           throw new Error("Failed to insert post");
         }
 
-        await tx.insert(schema.postStats).values({ postId: post.insertId });
-        return post;
-      });
+          await tx.insert(schema.postStats).values({ postId: post.insertId });
 
-      console.log("postId", postId);
+          // Only increment recipient's profile stats post count since they're the one being posted about
+          const recipientStatsResult = await tx
+            .update(schema.profileStats)
+            .set({ posts: sql`${schema.profileStats.posts} + 1` })
+            .where(
+              eq(
+                schema.profileStats.profileId,
+                sql`(SELECT profile_id FROM "user" WHERE id = ${metadata.recipient})`,
+              ),
+            );
+
+          return post;
+        });
 
       await storeNotification(metadata.author, metadata.recipient, {
         eventType: "post",

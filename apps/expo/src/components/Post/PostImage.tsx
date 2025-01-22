@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { Image } from "expo-image";
@@ -9,7 +9,12 @@ import { useLikePost } from "~/hooks/post/useLikePost";
 import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 import type { PostMediaProps } from "./types";
 
-export const PostImage = ({ endpoint, media, stats, isViewable }: PostMediaProps) => {
+export const PostImage = ({
+  endpoint,
+  media,
+  stats,
+  isViewable,
+}: PostMediaProps) => {
   const { handleLikeDoubleTapped } = useLikePost({
     postId: media.id,
     endpoint,
@@ -18,6 +23,13 @@ export const PostImage = ({ endpoint, media, stats, isViewable }: PostMediaProps
   });
   const { hearts, addHeart } = useHeartAnimations();
   const [isImageLoading, setIsImageLoading] = useState(false);
+
+  // Cleanup loading state when component unmounts
+  useEffect(() => {
+    return () => {
+      setIsImageLoading(false);
+    };
+  }, []);
 
   const handleDoubleTap = useCallback(
     (x: number, y: number) => {
@@ -47,16 +59,8 @@ export const PostImage = ({ endpoint, media, stats, isViewable }: PostMediaProps
           }}
           contentFit="cover"
           transition={0}
-          onLoadStart={() => {
-            requestAnimationFrame(() => {
-              setIsImageLoading(true);
-            });
-          }}
-          onLoad={() => {
-            requestAnimationFrame(() => {
-              setIsImageLoading(false);
-            });
-          }}
+          onLoadStart={() => setIsImageLoading(true)}
+          onLoad={() => setIsImageLoading(false)}
         />
         {isImageLoading && (
           <View

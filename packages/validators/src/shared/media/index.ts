@@ -10,10 +10,12 @@ export const post = z.object({
   postId: z.string(),
   authorId: z.string(),
   authorProfileId: z.string(),
+  authorName: z.string().nullable(),
   authorUsername: z.string().nullable(),
   authorProfilePicture: z.string().nullable(),
   recipientId: z.string(),
   recipientProfileId: z.string(),
+  recipientName: z.string().nullable(),
   recipientUsername: z.string().nullable(),
   recipientProfilePicture: z.string().nullable(), // Corrected typo
   caption: z.string().max(255).default(""),
