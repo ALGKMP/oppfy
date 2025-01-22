@@ -1,5 +1,5 @@
 import React, { useCallback, useLayoutEffect } from "react";
-import { Dimensions, FlatList } from "react-native";
+import { Alert, Dimensions, FlatList } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
@@ -16,8 +16,8 @@ const MAX_VIDEO_DURATION = 60;
 const NUM_COLUMNS = 3;
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const ITEM_SIZE = SCREEN_WIDTH / NUM_COLUMNS;
-const PAGE_SIZE = 150;
-const INITIAL_PAGE_SIZE = 300;
+const PAGE_SIZE = 500;
+const INITIAL_PAGE_SIZE = 1000;
 
 interface UseMediaAssetsProps {
   albumId: string;
@@ -53,22 +53,26 @@ const useMediaAssets = ({ albumId }: UseMediaAssetsProps) => {
         sortBy: [MediaLibrary.SortBy.creationTime],
       });
 
-      // Filter out assets that are wider than tall and videos longer than 1 minute
-      const filteredAssets = await Promise.all(
-        media.assets.map(async (asset) => {
-          if (asset.mediaType === "video") {
-            const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
-            return (
-              asset.height >= asset.width &&
-              assetInfo.duration <= MAX_VIDEO_DURATION
-            );
-          }
-          return asset.height >= asset.width;
-        }),
-      );
+      // Filter out landscape media and long videos
+      const filteredAssets = media.assets.filter((asset) => {
+        // Filter out landscape media
+        if (asset.height < asset.width) {
+          return false;
+        }
+
+        // Filter out long videos
+        if (
+          asset.mediaType === "video" &&
+          asset.duration > MAX_VIDEO_DURATION
+        ) {
+          return false;
+        }
+
+        return true;
+      });
 
       return {
-        items: media.assets.filter((_, index) => filteredAssets[index]),
+        items: filteredAssets,
         nextCursor: media.endCursor,
         hasNextPage: media.hasNextPage,
       };
@@ -130,44 +134,51 @@ const MediaPickerScreen = () => {
           height={ITEM_SIZE}
           margin={0.5}
           onPress={async () => {
-            // Get full asset info with network download if needed
-            const assetInfo = await MediaLibrary.getAssetInfoAsync(item, {
-              shouldDownloadFromNetwork: true,
-            });
+            try {
+              // Get full asset info with network download if needed
+              const assetInfo = await MediaLibrary.getAssetInfoAsync(item, {
+                shouldDownloadFromNetwork: true,
+              });
 
-            // For videos, we need to move to local storage and process
-            if (item.mediaType === "video") {
-              if (!assetInfo.localUri) {
-                throw new Error("Could not get local URI for video");
+              // For videos, validate and move to local storage
+              if (item.mediaType === "video") {
+                if (!assetInfo.localUri) {
+                  throw new Error("Could not get local URI for video");
+                }
+
+                // Move to local storage
+                const localUri = await moveVideoToLocalStorage(
+                  assetInfo.localUri,
+                );
+
+                router.dismissTo("/(app)/(bottom-tabs)/(camera)");
+                router.push({
+                  pathname: "/preview",
+                  params: {
+                    uri: localUri,
+                    type: assetInfo.mediaType,
+                    height: assetInfo.height.toString(),
+                    width: assetInfo.width.toString(),
+                  },
+                });
+              } else {
+                router.dismissTo("/(app)/(bottom-tabs)/(camera)");
+                router.navigate({
+                  pathname: "/preview",
+                  params: {
+                    uri: assetInfo.uri,
+                    type: assetInfo.mediaType,
+                    height: assetInfo.height.toString(),
+                    width: assetInfo.width.toString(),
+                  },
+                });
               }
-
-              // Move to local storage
-              const localUri = await moveVideoToLocalStorage(
-                assetInfo.localUri,
+            } catch (error) {
+              console.error("Error processing media:", error);
+              Alert.alert(
+                "Error",
+                "Failed to process media. Please try again.",
               );
-
-              router.dismissTo("/(app)/(bottom-tabs)/(camera)");
-              router.push({
-                pathname: "/preview",
-                params: {
-                  uri: localUri,
-                  type: assetInfo.mediaType,
-                  height: assetInfo.height.toString(),
-                  width: assetInfo.width.toString(),
-                },
-              });
-            } else {
-              // For images, continue with the normal flow
-              router.dismissTo("/(app)/(bottom-tabs)/(camera)");
-              router.navigate({
-                pathname: "/preview",
-                params: {
-                  uri: assetInfo.uri,
-                  type: assetInfo.mediaType,
-                  height: assetInfo.height.toString(),
-                  width: assetInfo.width.toString(),
-                },
-              });
             }
           }}
         >
