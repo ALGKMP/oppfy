@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
@@ -21,37 +21,67 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       return {
         title: "Post Not Found | Oppfy",
         description: "The requested post could not be found",
+        themeColor: "#F214FF",
       };
     }
 
+    // Calculate dimensions maintaining aspect ratio with max width of 1200px
+    const maxWidth = 1200;
+    const aspectRatio =
+      post.height && post.width ? post.height / post.width : 1;
+    const width = maxWidth;
+    const height = Math.round(maxWidth * aspectRatio);
+
     return {
       title: `${post.authorUsername} opped ${post.recipientUsername} | Oppfy`,
-      description: post.caption ?? "No caption",
+      description: post.caption.length === 0 ? "No caption" : post.caption,
+      themeColor: "#F214FF",
       openGraph: {
         title: `${post.authorUsername} opped ${post.recipientUsername}`,
-        description: post.caption ?? "No caption",
+        description: post.caption.length === 0 ? "No caption" : post.caption,
         images: [
           {
             url: post.imageUrl,
-            width: 1200,
-            height: 630,
+            width,
+            height,
             alt: `${post.authorUsername} opped ${post.recipientUsername}`,
           },
         ],
         type: "article",
         url: `https://www.oppfy.app/post/${post.postId}`,
+        siteName: "Oppfy",
       },
       twitter: {
         card: "summary_large_image",
         title: `${post.authorUsername} opped ${post.recipientUsername}`,
-        description: post.caption ?? "No caption",
-        images: [post.imageUrl],
+        description: post.caption.length === 0 ? "No caption" : post.caption,
+        images: [
+          {
+            url: post.imageUrl,
+            width,
+            height,
+            alt: `${post.authorUsername} opped ${post.recipientUsername}`,
+          },
+        ],
+        site: "@oppfyapp",
+      },
+      applicationName: "Oppfy",
+      appleWebApp: {
+        title: "Oppfy",
+        statusBarStyle: "black-translucent",
+        capable: true,
+      },
+      viewport: {
+        width: "device-width",
+        initialScale: 1,
+        maximumScale: 1,
       },
     };
-  } catch (error) {
+  } catch (_) {
     return {
       title: "Post Not Found | Oppfy",
       description: "The requested post could not be found",
+      themeColor: "#F214FF",
     };
   }
 }
