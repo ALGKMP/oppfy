@@ -114,9 +114,6 @@ const useUploadMedia = () => {
               name: input.name,
             });
 
-      console.log("url", url);
-      console.log("postId", postId);
-
       const response = await fetch(url, {
         method: "PUT",
         body: photoBlob,
