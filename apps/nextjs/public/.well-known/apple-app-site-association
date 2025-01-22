@@ -12,16 +12,22 @@
             "exclude": true
           },
           {
-            "/": "/post",
-            "?": {
-              "postId": "*"
-            }
+            "/": "/post/*",
+            "comment": "Exclude multi-segment paths after post/",
+            "exclude": true
           },
           {
-            "/": "/profile",
-            "?": {
-              "username": "*"
-            }
+            "/": "/profile/*",
+            "comment": "Exclude multi-segment paths after profile/",
+            "exclude": true
+          },
+          {
+            "/": "/post/:postId",
+            "comment": "Only match single post ID"
+          },
+          {
+            "/": "/profile/:username",
+            "comment": "Only match single username"
           }
         ]
       }
