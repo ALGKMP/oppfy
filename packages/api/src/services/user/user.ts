@@ -184,4 +184,16 @@ export class UserService {
 
     await this.userRepository.updateUserId(oldUserId, newUserId);
   }
+
+  async updateUserAccountStatus(
+    userId: string,
+    status: InferEnum<typeof accountStatusEnum>,
+  ) {
+    const user = await this.userRepository.getUser(userId);
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+
+    await this.userRepository.updateAccountStatus(userId, status);
+  }
 }

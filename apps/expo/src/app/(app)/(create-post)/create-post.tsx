@@ -218,12 +218,12 @@ const CreatePost = () => {
 
     console.log("before upload", input);
 
-    if (params.userType === "notOnApp" && params.number) {
-      const postId =
-        type === "photo"
-          ? await uploadPhotoMutation.mutateAsync(input)
-          : await uploadVideoMutation.mutateAsync(input);
+    const postId =
+      type === "photo"
+        ? await uploadPhotoMutation.mutateAsync(input)
+        : await uploadVideoMutation.mutateAsync(input);
 
+    if (params.userType === "notOnApp" && params.number) {
       await sharePostToNewUser({
         postId,
         phoneNumber: params.number,
