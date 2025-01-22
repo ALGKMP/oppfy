@@ -40,7 +40,7 @@ export class UserService {
     let usernameExists;
 
     // make name be just name with no letters or other shit and first name with last night right after
-    const goodName = name.replace(/[^a-zA-Z0-9]/g, "").replace(/\s+/g, "_");
+    const goodName = name.replace(/[^a-zA-Z0-9]/g, "").replace(/\s+/g, "_").toLowerCase();
     do {
       const randomPart = Math.random()
         .toString(10)
