@@ -86,7 +86,6 @@ const useUploadMedia = () => {
         photoBlob.type,
       );
 
-      console.log("Media type of the image:", photoBlob.type);
 
       if (!parsedMediaType.success) {
         throw new Error("Invalid media type");
@@ -100,7 +99,7 @@ const useUploadMedia = () => {
         contentType: parsedMediaType.data,
       };
 
-      const presignedUrl =
+      const { url, postId } =
         input.type === "onApp"
           ? await uploadPicturePostForUserOnApp.mutateAsync({
               ...baseData,
@@ -111,7 +110,11 @@ const useUploadMedia = () => {
               number: input.number,
             });
 
-      const response = await fetch(presignedUrl, {
+
+      console.log("url", url);
+      console.log("postId", postId);
+
+      const response = await fetch(url, {
         method: "PUT",
         body: photoBlob,
       });
@@ -119,6 +122,8 @@ const useUploadMedia = () => {
       if (!response.ok) {
         throw new Error("Failed to upload photo");
       }
+
+      return postId;
     },
   });
 

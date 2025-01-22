@@ -25,10 +25,15 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        return await ctx.services.s3.uploadPostForUserOnAppUrl({
+        const postId = `${Date.now()}-${ctx.session.uid}`;
+
+        const presignedUrl = await ctx.services.s3.uploadPostForUserOnAppUrl({
           author: ctx.session.uid,
           ...input,
+          postId,
         });
+
+        return { url: presignedUrl, postId };
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -61,11 +66,18 @@ export const postRouter = createTRPCRouter({
           await ctx.services.user.createUser(userId, input.number, "notOnApp");
         }
 
-        return await ctx.services.s3.uploadPostForUserNotOnAppUrl({
-          author: ctx.session.uid,
-          recipient: userId,
-          ...input,
-        });
+        // post id is
+        const postId = `${Date.now()}-${userId}`;
+        const presignedUrl = await ctx.services.s3.uploadPostForUserNotOnAppUrl(
+          {
+            author: ctx.session.uid,
+            recipient: userId,
+            ...input,
+            postId,
+          },
+        );
+
+        return { url: presignedUrl, postId };
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -113,11 +125,22 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         // do pending user stuff here
+        // make/check for account
+        const user = await ctx.services.user.getUserByPhoneNumberNoThrow(
+          input.number,
+        );
+
+        const userId = user ? user.id : randomUUID();
+
+        if (!user) {
+          await ctx.services.user.createUser(userId, input.number, "notOnApp");
+        }
 
         const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
           ...input,
           author: ctx.session.uid,
           type: "notOnApp",
+          recipient: userId,
         });
 
         return url;

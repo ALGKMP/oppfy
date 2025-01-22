@@ -87,6 +87,7 @@ const lambdaHandler = async (
         const [post] = await tx
           .insert(schema.post)
           .values({
+            id: metadata.postId,
             authorId: metadata.author,
             recipientId: metadata.recipient,
             key: key,

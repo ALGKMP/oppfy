@@ -80,6 +80,7 @@ export class S3Service {
     width,
     contentLength,
     contentType,
+    postId,
   }: {
     author: string;
     recipient: string;
@@ -88,6 +89,7 @@ export class S3Service {
     width: string;
     contentLength: number;
     contentType: ContentType;
+    postId: string;
   }) {
     try {
       const currentDate = Date.now();
@@ -107,6 +109,7 @@ export class S3Service {
           height,
           width,
           type: "onApp",
+          postId,
         },
       });
 
@@ -129,6 +132,7 @@ export class S3Service {
     width,
     contentLength,
     contentType,
+    postId,
   }: {
     author: string;
     recipient: string;
@@ -137,6 +141,7 @@ export class S3Service {
     width: string;
     contentLength: number;
     contentType: ContentType;
+    postId: string;
   }) {
     try {
       const currentDate = Date.now();
@@ -155,6 +160,7 @@ export class S3Service {
           height,
           width,
           recipient,
+          postId,
           type: "notOnApp",
         },
       });

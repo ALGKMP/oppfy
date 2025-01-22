@@ -71,17 +71,6 @@ export const userRouter = createTRPCRouter({
     }
   }),
 
-  isNewUser: protectedProcedure.query(async ({ ctx }) => {
-    try {
-      return await ctx.services.user.isNewUser(ctx.session.uid);
-    } catch (err) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to check if the post guide should be shown",
-        cause: err,
-      });
-    }
-  }),
 
   getPrivacySetting: protectedProcedure.query(async ({ ctx }) => {
     try {

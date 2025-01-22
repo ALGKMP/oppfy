@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { DimensionValue } from "react-native";
-import { Dimensions, Pressable, StyleSheet } from "react-native";
+import { Dimensions, Linking, Platform, Pressable, Share, StyleSheet } from "react-native";
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -206,11 +206,39 @@ const CreatePost = () => {
             type: "notOnApp",
           } satisfies UploadMediaInputNotOnApp);
 
-    type === "photo"
-      ? void uploadPhotoMutation.mutateAsync(input)
-      : void uploadVideoMutation.mutateAsync(input);
 
-    await promptForReview();
+    console.log("before upload", input);
+
+    const a = await uploadPhotoMutation.mutateAsync(input);
+    console.log("after upload", a);
+
+    const postId = type === "photo"
+      ? a
+      : await uploadVideoMutation.mutateAsync(input);
+
+    // await promptForReview();
+
+    console.log("after upload here is the posr id", postId);
+
+    // Construct the SMS URL to 41207628976
+    const url = `sms:${params.number}&body=bruh`;
+    console.log("url", url);
+
+    Linking.openURL(url).catch(() => {
+      console.error("Failed to open SMS app");
+    });
+
+    /*      // Construct the SMS URL
+/*      // Construct the SMS URL
+     const url = Platform.select({
+      ios: `sms:${params.number}&body=${encodeURIComponent(caption)}`,
+      android: `sms:${params.number}?body=${encodeURIComponent(caption)}`,
+    }); */
+
+/*     // Open the SMS app
+    Linking.openURL(url!).catch(() => {
+      console.error('Failed to open SMS app');
+    }); */
 
     router.dismissAll();
     router.navigate("/(app)/(bottom-tabs)/(home)");
