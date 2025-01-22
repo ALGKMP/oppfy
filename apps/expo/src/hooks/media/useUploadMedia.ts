@@ -50,7 +50,7 @@ const useUploadMedia = () => {
         height: height.toString(),
       };
 
-      const presignedUrl =
+      const { url, postId } =
         input.type === "onApp"
           ? await uploadVideoPostForUserOnApp.mutateAsync({
               ...baseData,
@@ -61,7 +61,7 @@ const useUploadMedia = () => {
               number: input.number,
             });
 
-      const response = await fetch(presignedUrl, {
+      const response = await fetch(url, {
         method: "PUT",
         headers: {
           "Content-Type": videoBlob.type,
@@ -73,6 +73,8 @@ const useUploadMedia = () => {
       if (!response.ok) {
         throw new Error("Failed to upload video");
       }
+
+      return postId;
     },
   });
 
@@ -85,7 +87,6 @@ const useUploadMedia = () => {
       const parsedMediaType = sharedValidators.media.postContentType.safeParse(
         photoBlob.type,
       );
-
 
       if (!parsedMediaType.success) {
         throw new Error("Invalid media type");
@@ -109,7 +110,6 @@ const useUploadMedia = () => {
               ...baseData,
               number: input.number,
             });
-
 
       console.log("url", url);
       console.log("postId", postId);

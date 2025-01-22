@@ -97,13 +97,14 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        const postId = `${Date.now()}-${ctx.session.uid}`;
         const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
           ...input,
           author: ctx.session.uid,
           type: "onApp",
         });
 
-        return url;
+        return { url, postId };
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -130,20 +131,24 @@ export const postRouter = createTRPCRouter({
           input.number,
         );
 
+
         const userId = user ? user.id : randomUUID();
 
         if (!user) {
           await ctx.services.user.createUser(userId, input.number, "notOnApp");
         }
 
+        const postId = `${Date.now()}-${userId}`;
+
         const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
           ...input,
           author: ctx.session.uid,
           type: "notOnApp",
           recipient: userId,
+          postId
         });
 
-        return url;
+        return { url, postId };
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
