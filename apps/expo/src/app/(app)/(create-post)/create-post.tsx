@@ -224,8 +224,11 @@ const CreatePost = () => {
 
     console.log("after upload here is the posr id", postId);
 
+
+    //https://oppfy.app/post/postId
+
     // Construct the SMS URL to 41207628976
-    const url = `sms:${params.number}&body=bruh`;
+    const url = `sms:${params.number}&body=https://oppfy.app/post/${postId}`;
     console.log("url", url);
 
     Linking.openURL(url).catch(() => {
