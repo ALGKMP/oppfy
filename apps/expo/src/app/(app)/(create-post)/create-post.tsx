@@ -45,6 +45,7 @@ import type {
   UploadMediaInputOnApp,
 } from "~/hooks/media/useUploadMedia";
 import useStoreReview from "~/hooks/useRating";
+import useShare from "~/hooks/useShare";
 
 interface CreatePostBaseParams extends Record<string, string> {
   uri: string;
@@ -158,6 +159,7 @@ const CreatePost = () => {
   const router = useRouter();
   const { promptForReview } = useStoreReview();
   const { show, hide } = useBottomSheetController();
+  const { sharePostToNewUser } = useShare();
 
   const [caption, setCaption] = useState("");
 
@@ -200,8 +202,6 @@ const CreatePost = () => {
       caption,
     };
 
-    console.log("params", params);
-
     const input =
       params.userType === "onApp"
         ? ({
@@ -218,32 +218,17 @@ const CreatePost = () => {
 
     console.log("before upload", input);
 
-    const postId =
-      type === "photo"
-        ? await uploadPhotoMutation.mutateAsync(input)
-        : await uploadVideoMutation.mutateAsync(input);
+    if (params.userType === "notOnApp" && params.number) {
+      const postId =
+        type === "photo"
+          ? await uploadPhotoMutation.mutateAsync(input)
+          : await uploadVideoMutation.mutateAsync(input);
 
-    const messageTemplates = [
-      "🚨 I JUST EXPOSED YOU! Posted your first pic on Oppfy! Come see what I caught you doing",
-      "👀 Caught you in 4K! I created your Oppfy profile & posted your first pic",
-      "🔥 Time to expose you on Oppfy! I just put up your first post",
-      "😱 YOU'VE BEEN OPPED! I just posted your first picture. Come see what I caught",
-      "🫣 I'm making your Oppfy profile blow up & you don't even know it yet",
-      "📸 SURPRISE! I'm making you go viral on Oppfy & you're not even on it",
-    ];
-
-    const randomMessage =
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      messageTemplates[Math.floor(Math.random() * messageTemplates.length)]!;
-    const message = `${randomMessage}\n\n💫 Oppfy - Where we post for each other. Download now & get me back 😈\n\nhttps://oppfy.app/post/${postId}`;
-
-    const url = Platform.select({
-      ios: `sms:${params.number}&body=${encodeURIComponent(message)}`,
-      android: `sms:${params.number}?body=${encodeURIComponent(message)}`,
-      default: `sms:${params.number}?body=${encodeURIComponent(message)}`,
-    });
-
-    await Linking.openURL(url);
+      await sharePostToNewUser({
+        postId,
+        phoneNumber: params.number,
+      });
+    }
 
     router.dismissTo("/(app)/(bottom-tabs)/(camera)");
   };

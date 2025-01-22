@@ -25,7 +25,7 @@ const ShareProfile = () => {
     utils.profile.getFullProfileSelf.getData()?.profilePictureUrl ?? "";
 
   const qrValue = new URL(
-    `/profile?username=${username}&userId=${userId}&name=${name}&profilePictureUrl=${profilePictureUrl}`,
+    // `/profile?username=${username}&userId=${userId}&name=${name}&profilePictureUrl=${profilePictureUrl}`,
     "https://www.oppfy.app",
   ).toString();
 

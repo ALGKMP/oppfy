@@ -12,6 +12,7 @@ import { Text, XStack, YStack } from "tamagui";
 import CommentsBottomSheet from "~/components/Post/Comment/CommentsBottomSheet";
 import { useBottomSheetController } from "~/components/ui/BottomSheet";
 import { useLikePost } from "~/hooks/post/useLikePost";
+import useShare from "~/hooks/useShare";
 import { Icon } from "../ui";
 
 interface PostStatsProps {
@@ -165,16 +166,11 @@ const CommentAction = ({
 
 const ShareAction = ({ postId }: { postId: string }) => {
   const { buttonScale, animate } = useButtonAnimation();
+  const { sharePost } = useShare();
 
   const handlePress = async () => {
     animate();
-    try {
-      await Share.share({
-        message: `Check out this post: https://yourapp.com/posts/${postId}`,
-      });
-    } catch (error) {
-      console.error("Error sharing:", error);
-    }
+    await sharePost(postId);
   };
 
   return (
