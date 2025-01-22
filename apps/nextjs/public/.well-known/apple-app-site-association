@@ -12,10 +12,16 @@
             "exclude": true
           },
           {
-            "/": "/post/:id"
+            "/": "/post",
+            "?": {
+              "postId": "*"
+            }
           },
           {
-            "/": "/profile/:username"
+            "/": "/profile",
+            "?": {
+              "username": "*"
+            }
           }
         ]
       }

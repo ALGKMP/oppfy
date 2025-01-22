@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           },
         ],
         type: "article",
-        // url: `https://www.oppfy.app/post/${post.postId}`,
+        url: `https://www.oppfy.app/post/${post.postId}`,
         siteName: "Oppfy",
       },
       twitter: {
