@@ -17,31 +17,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const post = await api.post.getPostForNextJs({ postId: params.id });
 
-    if (!post) {
-      return {
-        title: "Post Not Found | Oppfy",
-        description: "The requested post could not be found",
-        themeColor: "#F214FF",
-      };
-    }
-
-    // Calculate dimensions maintaining aspect ratio with max height of 1200px for vertical images
-    // and max width of 1200px for horizontal images
+    // Calculate dimensions using width/height ratio to properly handle portrait/landscape
     const maxDimension = 1200;
-    const aspectRatio =
-      post.height && post.width ? post.height / post.width : 1;
+    const aspectRatio = post.width && post.height ? post.width / post.height : 1;
 
     let width: number;
     let height: number;
 
-    if (aspectRatio > 1) {
-      // Vertical image
+    if (aspectRatio < 1) {
+      // Portrait image (width < height)
       height = maxDimension;
-      width = Math.round(height / aspectRatio);
+      width = Math.round(height * aspectRatio);
     } else {
-      // Horizontal or square image
+      // Landscape or square image
       width = maxDimension;
-      height = Math.round(width * aspectRatio);
+      height = Math.round(width / aspectRatio);
     }
 
     // Ensure minimum dimensions for social media
@@ -147,7 +137,7 @@ export default async function PostPage({ params }: Props) {
     );
   }
 
-  const aspectRatio = post.height && post.width ? post.height / post.width : 1;
+  const aspectRatio = post.width && post.height ? post.width / post.height : 1;
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-black">
       <AnimatedPostPage post={post} aspectRatio={aspectRatio} />

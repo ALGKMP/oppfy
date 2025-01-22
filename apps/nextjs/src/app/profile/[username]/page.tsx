@@ -6,7 +6,7 @@ import { api } from "~/trpc/server";
 
 interface Props {
   params: {
-    id: string;
+    username: string;
   };
 }
 
@@ -14,8 +14,10 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const profile = await api.profile.getProfileForNextJs({
-      username: params.id,
+      username: params.username,
     });
+
+    console.log("profile", profile);
 
     if (!profile) {
       return {
@@ -111,7 +113,7 @@ export default async function ProfilePage({ params }: Props) {
 
   try {
     profile = await api.profile.getProfileForNextJs({
-      username: params.id,
+      username: params.username,
     });
   } catch (error) {
     profile = null;

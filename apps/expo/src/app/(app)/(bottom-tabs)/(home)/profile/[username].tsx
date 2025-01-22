@@ -134,10 +134,10 @@ import { Text } from "tamagui";
 import useRouteProfile from "~/hooks/useRouteProfile";
 
 const Profile = () => {
-  const { postId } = useLocalSearchParams<{ postId: string }>();
+  const { username } = useLocalSearchParams<{ username: string }>();
   const routeProfile = useRouteProfile();
 
-  return <Text>Profile {postId}</Text>;
+  return <Text>Profile Username: {username}</Text>;
 
   // return <Redirect href={`/profile/${postId}`} />;
 };
