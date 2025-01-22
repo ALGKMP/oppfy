@@ -37,17 +37,25 @@ export default function AppClipScreen() {
 
   useEffect(() => {
     const config = {
-      duration: 500,
+      duration: 700,
       easing: Easing.bezier(0.16, 1, 0.3, 1), // Fast-out, slow-in curve
     };
 
-    translateX1.value = withTiming(0, config);
-    translateX2.value = withDelay(100, withTiming(0, config));
-    translateX3.value = withDelay(200, withTiming(0, config));
+    const INITIAL_DELAY = 500; // Half second initial delay
 
-    opacity1.value = withTiming(1, { duration: 50 });
-    opacity2.value = withDelay(100, withTiming(1, { duration: 50 }));
-    opacity3.value = withDelay(200, withTiming(1, { duration: 50 }));
+    translateX1.value = withDelay(INITIAL_DELAY, withTiming(0, config));
+    translateX2.value = withDelay(INITIAL_DELAY + 100, withTiming(0, config));
+    translateX3.value = withDelay(INITIAL_DELAY + 200, withTiming(0, config));
+
+    opacity1.value = withDelay(INITIAL_DELAY, withTiming(1, { duration: 50 }));
+    opacity2.value = withDelay(
+      INITIAL_DELAY + 100,
+      withTiming(1, { duration: 50 }),
+    );
+    opacity3.value = withDelay(
+      INITIAL_DELAY + 200,
+      withTiming(1, { duration: 50 }),
+    );
   }, []);
 
   const animatedStyle1 = useAnimatedStyle(() => ({
