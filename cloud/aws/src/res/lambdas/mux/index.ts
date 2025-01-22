@@ -84,7 +84,7 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
           const [post] = await tx
             .insert(schema.post)
             .values({
-              id: metadata.postId,
+              id: metadata.postid,
               key,
               mediaType: "video" as const,
               authorId: metadata.author,

@@ -105,6 +105,7 @@ export const postRouter = createTRPCRouter({
           ...input,
           author: ctx.session.uid,
           type: "onApp",
+          postid: postId,
         });
 
         return { url, postId };
@@ -148,7 +149,7 @@ export const postRouter = createTRPCRouter({
           author: ctx.session.uid,
           type: "notOnApp",
           recipient: userId,
-          postId
+          postid: postId,
         });
 
         return { url, postId };
