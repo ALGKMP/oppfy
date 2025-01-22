@@ -40,13 +40,13 @@ export class UserService {
     let usernameExists;
 
     // make name be just name with no letters or other shit and first name with last night right after
-    const goodName = name.replace(/[^a-zA-Z0-9]/g, "").replace(/\s+/g, "_").toLowerCase();
+    const goodName = name
+      .replace(/[^a-zA-Z0-9]/g, "")
+      .replace(/\s+/g, "_")
+      .toLowerCase();
     do {
-      const randomPart = Math.random()
-        .toString(10)
-        .substring(2, 17)
-        .padEnd(15, "0");
-      username = goodName + `_` + randomPart;
+      const randomPart = Math.random().toString(10).substring(2, 12);
+      username = goodName.substring(0, 15) + `_` + randomPart;
 
       usernameExists = await this.profileRepository.usernameExists(username);
     } while (usernameExists);
