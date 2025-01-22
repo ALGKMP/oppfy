@@ -61,16 +61,16 @@ export default function AnimatedPostErrorPage() {
         transition={{ delay: 0.8 }}
       >
         <div className="text-center">
+          <span className="mb-2 block text-3xl">📸</span>
+          <h3 className="mb-1 font-bold text-[#F214FF]">Real Moments</h3>
+          <p className="text-sm text-gray-400">Capture life as it happens</p>
+        </div>
+        <div className="text-center">
           <span className="mb-2 block text-3xl">🤝</span>
           <h3 className="mb-1 font-bold text-[#F214FF]">Friend-Powered</h3>
           <p className="text-sm text-gray-400">
             Let your friends be your photographers
           </p>
-        </div>
-        <div className="text-center">
-          <span className="mb-2 block text-3xl">📸</span>
-          <h3 className="mb-1 font-bold text-[#F214FF]">Real Moments</h3>
-          <p className="text-sm text-gray-400">Capture life as it happens</p>
         </div>
         <div className="text-center">
           <span className="mb-2 block text-3xl">✨</span>

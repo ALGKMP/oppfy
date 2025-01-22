@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { auth } from "@oppfy/firebase";
 
-import { accountStatusEnum } from "../../../../db/src/schema";
+import type { accountStatusEnum } from "../../../../db/src/schema";
 import { DomainError, ErrorCode } from "../../errors";
 import {
   BlockRepository,

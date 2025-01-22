@@ -38,6 +38,13 @@ export class ProfileRepository {
   }
 
   @handleDatabaseErrors
+  async getProfileByUsername(username: string) {
+    return await this.db.query.profile.findFirst({
+      where: eq(schema.profile.username, username),
+    });
+  }
+
+  @handleDatabaseErrors
   async updateProfile(
     profileId: string,
     update: Partial<typeof schema.profile.$inferInsert>,

@@ -5,7 +5,11 @@ import { eq, schema } from "@oppfy/db";
 import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "../../trpc";
 
 export const profileRouter = createTRPCRouter({
   getProfileId: protectedProcedure.input(z.void()).mutation(async ({ ctx }) => {
@@ -113,6 +117,23 @@ export const profileRouter = createTRPCRouter({
       });
     }
   }),
+
+  getProfileForNextJs: publicProcedure
+    .input(
+      z.object({
+        username: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        return await ctx.services.profile.getProfileByUsername(input.username);
+      } catch (err) {
+        console.error(err);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
+    }),
 
   getNetworkRelationships: protectedProcedure
     .input(

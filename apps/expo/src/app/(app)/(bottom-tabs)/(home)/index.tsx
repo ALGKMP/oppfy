@@ -258,7 +258,7 @@ const HomeScreen = () => {
       ItemSeparatorComponent={() => <Spacer size="$4" />}
       ListEmptyComponent={renderEmptyList}
       contentContainerStyle={{
-        paddingTop: (insets.top + getToken("$2", "space")) as number,
+        paddingTop: insets.top,
       }}
       ListFooterComponentStyle={{
         paddingTop: getToken("$3", "space") as number,
