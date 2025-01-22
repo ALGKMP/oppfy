@@ -12,104 +12,116 @@ import {
   YStack,
 } from "tamagui";
 
-import PostItem from "~/components/Media/PostItem";
+import { Header } from "~/components/Layouts";
+import PostCard from "~/components/Post/PostCard";
+import { EmptyPlaceholder, Icon, ScreenView } from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
 import { api } from "~/utils/api";
 
-// Define a type for your route segments
-// const Post = () => {
-//   const { user } = useSession();
-//   const router = useRouter();
-//   const insets = useSafeAreaInsets();
-
-//   const params = useLocalSearchParams<{ postId: string }>();
-
-//   const rawPostId = params.postId ?? "";
-//   const postId = parseInt(rawPostId);
-
-//   const { data: post, isLoading: isPostLoading } = api.post.getPost.useQuery(
-//     { postId: postId }, // Use nullish coalescing for fallback
-//     { enabled: !isNaN(postId) },
-//   );
-
-//   const { data: isFollowing, isLoading: isFollowingLoading } =
-//     api.follow.isFollowingSelf.useQuery(
-//       { userId: post?.recipientId ?? "" },
-//       { enabled: !!post?.recipientId }, // Enable only if recipientId is defined
-//     );
-
-//   const follow = api.follow.followUser.useMutation();
-
-//   if (isPostLoading || isFollowingLoading) {
-//     return (
-//       <View flex={1} bg="black" justifyContent="center" alignItems="center">
-//         <Spinner />
-//       </View>
-//     );
-//   }
-//   const isSelfPost = post?.authorId === user?.uid;
-
-//   if (!post) {
-//     return (
-//       <View bg="black" flex={1} justifyContent="center" alignItems="center">
-//         <Text>Post not found</Text>
-//       </View>
-//     );
-//   }
-
-//   return (
-//     <BaseScreenView padding={0} top={insets.top}>
-//       <ScrollView>
-//         <XStack
-//           paddingVertical="$2"
-//           paddingHorizontal="$4"
-//           alignItems="center"
-//           justifyContent="space-between"
-//           backgroundColor="$background"
-//         >
-//           {router.canGoBack() ? (
-//             <View minWidth="$2" alignItems="flex-start">
-//               <TouchableOpacity
-//                 onPress={() => {
-//                   void router.back();
-//                 }}
-//               >
-//                 <ChevronLeft />
-//               </TouchableOpacity>
-//             </View>
-//           ) : (
-//             <View minWidth="$2" alignItems="flex-start" />
-//           )}
-
-//           <YStack alignItems="center">
-//             <SizableText size="$3" fontWeight="bold" color="$gray10">
-//               {post.recipientUsername?.toUpperCase()}
-//             </SizableText>
-//             <Text fontSize="$5" fontWeight="bold">
-//               Post
-//             </Text>
-//           </YStack>
-
-//           {!isFollowing ? (
-//             <View minWidth="$2" alignItems="flex-end">
-//               <TouchableOpacity
-//                 onPress={() => follow.mutate({ userId: post.recipientId })}
-//               >
-//                 <Text fontWeight="bold">Follow</Text>
-//               </TouchableOpacity>
-//             </View>
-//           ) : (
-//             <View minWidth="$2" alignItems="flex-end" />
-//           )}
-//         </XStack>
-//         <PostItem post={post} isSelfPost={isSelfPost} isViewable={true} />
-//       </ScrollView>
-//     </BaseScreenView>
-//   );
-// };
-
 const Post = () => {
-  return <View></View>;
+  const router = useRouter();
+
+  const { postId } = useLocalSearchParams<{ postId: string }>();
+
+  const { data: post, isLoading: isPostLoading } = api.post.getPost.useQuery(
+    { postId },
+    { enabled: !!postId },
+  );
+
+  if (isPostLoading) {
+    return (
+      <ScreenView padding={0} scrollable>
+        <YStack gap="$2">
+          <Header
+            title="Post"
+            HeaderLeft={
+              <Icon name="chevron-back" onPress={() => router.back()} blurred />
+            }
+          />
+
+          <PostCard.Skeleton />
+        </YStack>
+      </ScreenView>
+    );
+  }
+
+  if (!post) {
+    return (
+      <ScreenView padding={0}>
+        <Header
+          title="Post"
+          HeaderLeft={
+            <Icon name="chevron-back" onPress={() => router.back()} blurred />
+          }
+        />
+
+        <View
+          flex={1}
+          justifyContent="center"
+          alignItems="center"
+          paddingBottom="$8"
+        >
+          <EmptyPlaceholder
+            title="Post not found"
+            subtitle="The post you are looking for does not exist"
+          />
+        </View>
+      </ScreenView>
+    );
+  }
+
+  return (
+    <ScreenView padding={0} scrollable>
+      <YStack gap="$2">
+        <Header
+          title="Post"
+          HeaderLeft={
+            <Icon name="chevron-back" onPress={() => router.back()} blurred />
+          }
+        />
+
+        <PostCard
+          postId={post.postId}
+          endpoint="single-post"
+          createdAt={post.createdAt}
+          caption={post.caption}
+          author={{
+            id: post.authorId,
+            name: post.authorName ?? "",
+            username: post.authorUsername ?? "",
+            profilePictureUrl: post.authorProfilePicture,
+          }}
+          recipient={{
+            id: post.recipientId,
+            name: post.recipientName ?? "",
+            username: post.recipientUsername ?? "",
+            profilePictureUrl: post.recipientProfilePicture,
+          }}
+          media={{
+            id: post.postId,
+            recipient: {
+              id: post.recipientId,
+              name: post.recipientName ?? "",
+              username: post.recipientUsername ?? "",
+              profilePictureUrl: post.recipientProfilePicture,
+            },
+            type: post.mediaType,
+            url: post.imageUrl,
+            dimensions: {
+              width: post.width,
+              height: post.height,
+            },
+          }}
+          stats={{
+            likes: post.likesCount,
+            comments: post.commentsCount,
+            hasLiked: post.hasLiked,
+          }}
+          isViewable={true}
+        />
+      </YStack>
+    </ScreenView>
+  );
 };
 
 export default Post;
