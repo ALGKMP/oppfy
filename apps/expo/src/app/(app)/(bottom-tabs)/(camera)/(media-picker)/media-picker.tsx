@@ -1,5 +1,5 @@
 import React, { useCallback, useLayoutEffect } from "react";
-import { Dimensions } from "react-native";
+import { Dimensions, FlatList } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
@@ -8,7 +8,7 @@ import { FlashList } from "@shopify/flash-list";
 import { Video } from "@tamagui/lucide-icons";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { InfiniteData, QueryFunctionContext } from "@tanstack/react-query";
-import { getToken, Image } from "tamagui";
+import { getToken, Image, ScrollView } from "tamagui";
 
 import { Stack } from "~/components/ui";
 
@@ -16,7 +16,8 @@ const MAX_VIDEO_DURATION = 60;
 const NUM_COLUMNS = 3;
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const ITEM_SIZE = SCREEN_WIDTH / NUM_COLUMNS;
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 150;
+const INITIAL_PAGE_SIZE = 300;
 
 interface UseMediaAssetsProps {
   albumId: string;
@@ -43,10 +44,11 @@ const useMediaAssets = ({ albumId }: UseMediaAssetsProps) => {
     queryFn: async (
       context: QueryFunctionContext<MediaAssetsQueryKey, string | null>,
     ) => {
+      const isInitialFetch = !context.pageParam;
       const media = await MediaLibrary.getAssetsAsync({
         album: albumId,
         mediaType: [MediaLibrary.MediaType.photo, MediaLibrary.MediaType.video],
-        first: PAGE_SIZE,
+        first: isInitialFetch ? INITIAL_PAGE_SIZE : PAGE_SIZE,
         after: context.pageParam ?? undefined,
         sortBy: [MediaLibrary.SortBy.creationTime],
       });
