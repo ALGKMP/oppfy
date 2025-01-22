@@ -12,10 +12,10 @@
             "exclude": true
           },
           {
-            "/": "/post/*"
+            "/": "/post/:id"
           },
           {
-            "/": "/profile/*"
+            "/": "/profile/:username"
           }
         ]
       }
