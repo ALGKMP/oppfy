@@ -7,12 +7,13 @@ import React, {
 import { Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as FileSystem from "expo-file-system";
-import { Image } from "expo-image";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Video } from "@tamagui/lucide-icons";
-import { getToken, Stack } from "tamagui";
+import { getToken, Image } from "tamagui";
+
+import { Stack } from "~/components/ui";
 
 const MAX_VIDEO_DURATION = 60;
 
@@ -136,12 +137,9 @@ const MediaPickerScreen = () => {
         >
           <Image
             source={{ uri: item.uri }}
-            recyclingKey={item.uri}
-            style={{
-              width: "100%",
-              height: "100%",
-            }}
-            contentFit="cover"
+            width={ITEM_SIZE}
+            height={ITEM_SIZE}
+            resizeMode="cover"
           />
           {item.mediaType === "video" && (
             <Stack position="absolute" top={5} left={5}>
