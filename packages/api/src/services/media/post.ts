@@ -686,7 +686,8 @@ export class PostService {
         );
         data.imageUrl = imageUrl;
       } else {
-        data.imageUrl = `https://stream.mux.com/${data.imageUrl}.m3u8`;
+
+        data.imageUrl = `https://image.mux.com/${data.imageUrl}/thumbnail.jpg`;
       }
     } catch (error) {
       console.error(
