@@ -51,8 +51,6 @@ const useUploadMedia = () => {
         height: height.toString(),
       };
 
-      console.log("input", input);
-
       const { url, postId } =
         input.type === "onApp"
           ? await uploadVideoPostForUserOnApp.mutateAsync({
