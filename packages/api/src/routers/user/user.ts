@@ -23,6 +23,8 @@ export const userRouter = createTRPCRouter({
         );
         if (user && user.accountStatus === "notOnApp") {
           await ctx.services.user.updateUserId(user.id, input.userId);
+          // set the user to onapp
+          await ctx.services.user.updateUserAccountStatus(user.id, "onApp");
         } else {
           await ctx.services.user.createUser(input.userId, input.phoneNumber);
         }
