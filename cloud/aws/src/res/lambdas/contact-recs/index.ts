@@ -101,7 +101,7 @@ export const handler = async (
       .dedup()
       .order()
       .by("createdAt", order.desc)
-      .limit(10)
+      .limit(30)
       .id()
       .toList();
 
@@ -116,7 +116,21 @@ export const handler = async (
       .dedup()
       .order()
       .by("createdAt", order.desc)
-      .limit(30)
+      .limit(15)
+      .id()
+      .toList();
+
+    // get me people 2 edges away from me who are not in tier1 or tier2
+    const tier3 = await g
+      .V(userId)
+      .out("contact")
+      .out("contact")
+      .where(__.not(__.inE("contact").outV().hasId(userId)))
+      .where(__.not(__.inE("contact").outV().hasId(P.within(tier1))))
+      .where(__.not(__.inE("contact").outV().hasId(P.within(tier2))))
+      .order()
+      .by("createdAt", order.desc)
+      .limit(10)
       .id()
       .toList();
 
@@ -156,7 +170,7 @@ export const handler = async (
     const recommendedIds = {
       tier1,
       tier2,
-      tier3: [],
+      tier3,
       tier4: [],
     };
 
