@@ -103,22 +103,30 @@ const lambdaHandler = async (
         if (post === undefined) {
           throw new Error("Failed to insert post");
         }
+/* 
+        // force friendship between author and recipient if recipient is not on app
+        if (metadata.type === "notOnApp") {
+          await tx.insert(schema.friend).values({
+            userId1: metadata.author,
+            userId2: metadata.recipient,
+          });
+        } */
 
-          await tx.insert(schema.postStats).values({ postId: post.insertId });
+        await tx.insert(schema.postStats).values({ postId: post.insertId });
 
-          // Only increment recipient's profile stats post count since they're the one being posted about
-          const recipientStatsResult = await tx
-            .update(schema.profileStats)
-            .set({ posts: sql`${schema.profileStats.posts} + 1` })
-            .where(
-              eq(
-                schema.profileStats.profileId,
-                sql`(SELECT profile_id FROM "user" WHERE id = ${metadata.recipient})`,
-              ),
-            );
+        // Only increment recipient's profile stats post count since they're the one being posted about
+        const recipientStatsResult = await tx
+          .update(schema.profileStats)
+          .set({ posts: sql`${schema.profileStats.posts} + 1` })
+          .where(
+            eq(
+              schema.profileStats.profileId,
+              sql`(SELECT profile_id FROM "user" WHERE id = ${metadata.recipient})`,
+            ),
+          );
 
-          return post;
-        });
+        return post;
+      });
 
       await storeNotification(metadata.author, metadata.recipient, {
         eventType: "post",
