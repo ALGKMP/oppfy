@@ -45,7 +45,6 @@ const getBaseUrl = () => {
   const localhost = debuggerHost?.split(":")[0];
 
   if (!localhost) {
-    console.log("using oppfy.app");
     return "https://www.oppfy.app";
   }
 
