@@ -12,7 +12,20 @@
           "package_name": "com.oppfy.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "314057542000-sovq3r2qgv08icf367ak8csgq0ojtbii.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.oppfy.app",
+            "certificate_hash": "939bae2c4d10da75499c19acf5cc71fce66d0b34"
+          }
+        },
+        {
+          "client_id": "314057542000-2itde1e4cnueclld1vdu68l86s6q16nn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAT0NgNbPm-1I1RDm2Udjzh3wFpfmQ1PDo"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "314057542000-2itde1e4cnueclld1vdu68l86s6q16nn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "314057542000-eelcvvc71mkook9bs7g6e9md7q117sfn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.oppfy.app"
+              }
+            }
+          ]
         }
       }
     }
