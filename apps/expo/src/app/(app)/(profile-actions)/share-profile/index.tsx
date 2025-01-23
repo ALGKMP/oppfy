@@ -11,7 +11,7 @@ import { useToastController } from "@tamagui/toast";
 import { Stack, Text, useTheme, View, YStack } from "tamagui";
 
 import BeautifulQRCode from "~/components/QRCode/BeautifulQRCode";
-import { Button, H1 } from "~/components/ui";
+import { Avatar, Button, H1 } from "~/components/ui";
 import { api } from "~/utils/api";
 
 const ShareProfile = () => {
@@ -49,7 +49,7 @@ const ShareProfile = () => {
             {/* Profile Card */}
             <View
               width={340}
-              height={420}
+              // height={420}
               br={44}
               ov="hidden"
               bg="rgba(255,255,255,0.1)"
@@ -76,37 +76,6 @@ const ShareProfile = () => {
 
               {/* Content Container */}
               <YStack ai="center" gap="$4" py="$6">
-                {/* Profile Picture */}
-                <View
-                  width={80}
-                  height={80}
-                  br={40}
-                  ov="hidden"
-                  bg="white"
-                  shadowColor="#000"
-                  shadowOffset={{ width: 0, height: 8 }}
-                  shadowOpacity={0.2}
-                  shadowRadius={16}
-                >
-                  <Image
-                    source={profilePictureUrl || ""}
-                    style={StyleSheet.absoluteFill}
-                    contentFit="cover"
-                  />
-                </View>
-
-                {/* Username */}
-                <H1
-                  color="white"
-                  size="$8"
-                  fontFamily="$mono"
-                  shadowColor="rgba(0,0,0,0.2)"
-                  shadowOffset={{ width: 0, height: 2 }}
-                  shadowRadius={4}
-                >
-                  @{username}
-                </H1>
-
                 {/* QR Code Container */}
                 <View
                   mt="$4"
@@ -121,8 +90,23 @@ const ShareProfile = () => {
                   shadowOpacity={0.1}
                   shadowRadius={24}
                 >
-                  <BeautifulQRCode value={profileUrl} size={230} />
+                  <BeautifulQRCode
+                    value={profileUrl}
+                    size={230}
+                    profilePictureUrl={profilePictureUrl}
+                  />
                 </View>
+
+                {/* Username */}
+                <H1
+                  size="$9"
+                  fontFamily="$body"
+                  shadowColor="rgba(0,0,0,0.2)"
+                  shadowOffset={{ width: 0, height: 2 }}
+                  shadowRadius={4}
+                >
+                  @{username}
+                </H1>
               </YStack>
 
               {/* Decorative Elements */}
