@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "664271432377-140nj4r21bcv1fedeio97i8e7psqqte7.apps.googleusercontent.com",
+          "client_id": "664271432377-fp8s8f933csn4q16m1jropsb428lejf9.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.oppfy.app",
-            "certificate_hash": "dc9f59b3589ebad1462b643709ae693f3c7f4055"
+            "certificate_hash": "319f76feaaeff1e4e0c7b15e15bd375af22d40aa"
           }
         },
         {
