@@ -1,51 +1,26 @@
 {
   "project_info": {
-    "project_number": "664271432377",
-    "project_id": "oppfy-93698",
-    "storage_bucket": "oppfy-93698.firebasestorage.app"
+    "project_number": "314057542000",
+    "project_id": "test-c1cf0",
+    "storage_bucket": "test-c1cf0.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:664271432377:android:129fac24b29b911ce30968",
+        "mobilesdk_app_id": "1:314057542000:android:f47f4b944ccd636e13a7b5",
         "android_client_info": {
           "package_name": "com.oppfy.app"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "664271432377-vgqkp3pqgjvdcp7lji34rie1u2prp2f5.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.oppfy.app",
-            "certificate_hash": "64cdacc9cf9c12aba8319164ffc12e8c6090bcc1"
-          }
-        },
-        {
-          "client_id": "664271432377-3jnd5o2ui3baguh6s947qdu93aam7pdt.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCuA29dN71zLzK3ipViG6Yr_eiH3_7nyrk"
+          "current_key": "AIzaSyAT0NgNbPm-1I1RDm2Udjzh3wFpfmQ1PDo"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "664271432377-3jnd5o2ui3baguh6s947qdu93aam7pdt.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "664271432377-h5n87uoihp66gnet47sdodh611pv4ltc.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.oppfy.app"
-              }
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
