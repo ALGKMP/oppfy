@@ -80,8 +80,6 @@ const PhoneNumberOTP = () => {
   );
 
   const handleNewUser = async (userId: string) => {
-    console.log("handleNewUser", userId, phoneNumber);
-
     if (!phoneNumber) {
       setError(Error.UNKNOWN_ERROR);
       return;

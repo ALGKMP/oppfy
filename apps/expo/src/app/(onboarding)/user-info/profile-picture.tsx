@@ -17,11 +17,9 @@ import {
 } from "~/components/ui";
 import { useContacts } from "~/hooks/contacts";
 import { useUploadProfilePicture } from "~/hooks/media";
-import { api } from "~/utils/api";
 
 const ProfilePicture = () => {
   const router = useRouter();
-  const utils = api.useUtils();
   const theme = useTheme();
 
   const { syncContacts } = useContacts();
@@ -31,19 +29,19 @@ const ProfilePicture = () => {
       optimisticallyUpdate: true,
     });
 
-  const [hasUploadedPic, setHasUploadedPic] = React.useState(false);
+  const [hasUploadedPic, setHasUploadedPic] = useState(false);
 
   const handleImageUpload = async () => {
     const result = await pickAndUploadImage();
     if (result.success) setHasUploadedPic(true);
   };
 
-  const onSubmit = useCallback(async () => {
+  const onSubmit = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.replace("/(app)/(bottom-tabs)/(home)");
   }, [router]);
 
-  const onSkip = useCallback(async () => {
+  const onSkip = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.replace("/(app)/(bottom-tabs)/(home)");
   }, [router]);
