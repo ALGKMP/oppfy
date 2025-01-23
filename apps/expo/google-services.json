@@ -7,18 +7,18 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:664271432377:android:a36aa34a36123b17e30968",
+        "mobilesdk_app_id": "1:664271432377:android:129fac24b29b911ce30968",
         "android_client_info": {
           "package_name": "com.oppfy.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "664271432377-140nj4r21bcv1fedeio97i8e7psqqte7.apps.googleusercontent.com",
+          "client_id": "664271432377-vgqkp3pqgjvdcp7lji34rie1u2prp2f5.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.oppfy.app",
-            "certificate_hash": "dc9f59b3589ebad1462b643709ae693f3c7f4055"
+            "certificate_hash": "64cdacc9cf9c12aba8319164ffc12e8c6090bcc1"
           }
         },
         {
