@@ -69,22 +69,13 @@ const useShare = () => {
   const shareProfile = async (username: string) => {
     setIsSharing(true);
     try {
-      const randomMessage =
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        SHARE_PROFILE_TEMPLATES[
-          Math.floor(Math.random() * SHARE_PROFILE_TEMPLATES.length)
-        ]!;
-
       const url = `https://oppfy.app/profile/${username}`;
-
       await Share.share(
         {
-          message: randomMessage,
           url,
         },
         {
           dialogTitle: "Share Profile",
-          subject: "Check out my profile on Oppfy",
           tintColor: theme.primary.val as string,
         },
       );

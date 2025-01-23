@@ -8,6 +8,7 @@ import type { RouterOutputs } from "@oppfy/api";
 
 import { Button, useActionSheetController } from "~/components/ui";
 import { useBlockUser } from "~/hooks/useBlockUser";
+import useShare from "~/hooks/useShare";
 
 type NetworkRelationships = RouterOutputs["profile"]["getNetworkRelationships"];
 
@@ -28,6 +29,7 @@ const QuickActions = ({
 }: QuickActionsProps) => {
   const router = useRouter();
   const actionSheet = useActionSheetController();
+  const { shareProfile } = useShare();
 
   const {
     handleBlockUser,
@@ -85,6 +87,7 @@ const QuickActions = ({
         opacity={
           isLoading || networkRelationships?.isTargetUserBlocked ? 0.5 : 1
         }
+        onPress={() => shareProfile(username ?? "")}
       />
       <Button
         icon={<Ban size={20} color="$red11" />}
