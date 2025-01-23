@@ -1,45 +1,45 @@
 {
   "project_info": {
-    "project_number": "314057542000",
-    "project_id": "test-c1cf0",
-    "storage_bucket": "test-c1cf0.firebasestorage.app"
+    "project_number": "664271432377",
+    "project_id": "oppfy-93698",
+    "storage_bucket": "oppfy-93698.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:314057542000:android:f47f4b944ccd636e13a7b5",
+        "mobilesdk_app_id": "1:664271432377:android:129fac24b29b911ce30968",
         "android_client_info": {
           "package_name": "com.oppfy.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "314057542000-sovq3r2qgv08icf367ak8csgq0ojtbii.apps.googleusercontent.com",
+          "client_id": "664271432377-aqh1kva54mqienh168hnikltd9pqlksp.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.oppfy.app",
-            "certificate_hash": "939bae2c4d10da75499c19acf5cc71fce66d0b34"
+            "certificate_hash": "cdf9df926f7731889929b990bb7bb92592c7fdc1"
           }
         },
         {
-          "client_id": "314057542000-2itde1e4cnueclld1vdu68l86s6q16nn.apps.googleusercontent.com",
+          "client_id": "664271432377-3jnd5o2ui3baguh6s947qdu93aam7pdt.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAT0NgNbPm-1I1RDm2Udjzh3wFpfmQ1PDo"
+          "current_key": "AIzaSyCuA29dN71zLzK3ipViG6Yr_eiH3_7nyrk"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "314057542000-2itde1e4cnueclld1vdu68l86s6q16nn.apps.googleusercontent.com",
+              "client_id": "664271432377-3jnd5o2ui3baguh6s947qdu93aam7pdt.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "314057542000-eelcvvc71mkook9bs7g6e9md7q117sfn.apps.googleusercontent.com",
+              "client_id": "664271432377-h5n87uoihp66gnet47sdodh611pv4ltc.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.oppfy.app"
