@@ -25,6 +25,14 @@ const SHARE_MESSAGE_TEMPLATES = [
   "📸 Caught in 4K on Oppfy",
 ];
 
+const SHARE_PROFILE_TEMPLATES = [
+  "👀 Check out my Oppfy profile",
+  "🔥 Follow me on Oppfy",
+  "💫 Join me on Oppfy",
+  "📸 This is my Oppfy profile",
+  "🫣 Come find me on Oppfy",
+];
+
 const useShare = () => {
   const theme = useTheme();
   const [isSharing, setIsSharing] = useState(false);
@@ -49,6 +57,35 @@ const useShare = () => {
           dialogTitle: "Share Post",
           subject: "Check out this post on Oppfy", // Used for email sharing
           tintColor: theme.primary.val as string, // Matches Oppfy brand color
+        },
+      );
+    } catch (error) {
+      console.error("Error sharing:", error);
+      Alert.alert("An error occurred while sharing");
+    }
+    setIsSharing(false);
+  };
+
+  const shareProfile = async (username: string) => {
+    setIsSharing(true);
+    try {
+      const randomMessage =
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        SHARE_PROFILE_TEMPLATES[
+          Math.floor(Math.random() * SHARE_PROFILE_TEMPLATES.length)
+        ]!;
+
+      const url = `https://oppfy.app/profile/${username}`;
+
+      await Share.share(
+        {
+          message: randomMessage,
+          url,
+        },
+        {
+          dialogTitle: "Share Profile",
+          subject: "Check out my profile on Oppfy",
+          tintColor: theme.primary.val as string,
         },
       );
     } catch (error) {
@@ -83,6 +120,7 @@ const useShare = () => {
     isSharing,
     sharePostToNewUser,
     sharePost,
+    shareProfile,
   };
 };
 

@@ -5,19 +5,20 @@ import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Sharing from "expo-sharing";
 import { Ionicons } from "@expo/vector-icons";
 import { useToastController } from "@tamagui/toast";
-import { Stack, Text, useTheme, View, YStack } from "tamagui";
+import { Stack, useTheme, View, YStack } from "tamagui";
 
 import BeautifulQRCode from "~/components/QRCode/BeautifulQRCode";
-import { Avatar, Button, H1 } from "~/components/ui";
+import { Button, H1 } from "~/components/ui";
+import useShare from "~/hooks/useShare";
 import { api } from "~/utils/api";
 
 const ShareProfile = () => {
   const theme = useTheme();
   const utils = api.useUtils();
   const toast = useToastController();
+  const { shareProfile, isSharing } = useShare();
 
   const username = utils.profile.getFullProfileSelf.getData()?.username ?? "";
   const profilePictureUrl =
@@ -26,7 +27,7 @@ const ShareProfile = () => {
 
   const handleShare = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await Sharing.shareAsync(profileUrl);
+    await shareProfile(username);
   };
 
   const handleCopyLink = async () => {
@@ -49,7 +50,6 @@ const ShareProfile = () => {
             {/* Profile Card */}
             <View
               width={340}
-              // height={420}
               br={44}
               ov="hidden"
               bg="rgba(255,255,255,0.1)"
@@ -99,7 +99,7 @@ const ShareProfile = () => {
 
                 {/* Username */}
                 <H1
-                  size="$9"
+                  size="$8"
                   fontFamily="$body"
                   shadowColor="rgba(0,0,0,0.2)"
                   shadowOffset={{ width: 0, height: 2 }}
@@ -143,6 +143,7 @@ const ShareProfile = () => {
                 />
               }
               onPress={handleShare}
+              disabled={isSharing}
             >
               Share Profile
             </Button>
