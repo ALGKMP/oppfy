@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "expo-router";
+import { jwtDecode } from "jwt-decode";
 
 import { api, queryClient } from "~/utils/api";
 import { storage } from "~/utils/storage";
@@ -45,23 +46,6 @@ interface JWTPayload {
   jti?: string;
 }
 
-function parseJwt(token: string): JWTPayload {
-  const parts = token.split(".");
-  if (parts.length !== 3) {
-    throw new Error("Invalid JWT format");
-  }
-
-  const base64 = parts[1]!.replace(/-/g, "+").replace(/_/g, "/");
-  const jsonPayload = decodeURIComponent(
-    atob(base64)
-      .split("")
-      .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-      .join(""),
-  );
-
-  return JSON.parse(jsonPayload);
-}
-
 const SessionProvider = ({ children }: SessionProviderProps) => {
   const router = useRouter();
 
@@ -89,7 +73,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
       const parsedTokens = JSON.parse(storedTokens) as AuthTokens;
       setTokens(parsedTokens);
       // parse jwt and pull uid out
-      const jwt = parseJwt(parsedTokens.accessToken);
+      const jwt = jwtDecode<JWTPayload>(parsedTokens.accessToken);
       setUser({ uid: jwt.uid });
     }
     setStatus("success");
@@ -101,7 +85,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
 
     const refreshTokens = async () => {
       try {
-        const currentPayload = parseJwt(tokens.accessToken);
+        const currentPayload = jwtDecode<JWTPayload>(tokens.accessToken);
         const now = Math.floor(Date.now() / 1000);
 
         // Only refresh if token is about to expire in the next 5 minutes
@@ -115,7 +99,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
         });
 
         // Verify the new tokens before setting them
-        const newPayload = parseJwt(newTokens.accessToken);
+        const newPayload = jwtDecode<JWTPayload>(newTokens.accessToken);
         if (!newPayload.exp || !newPayload.iat || !newPayload.uid) {
           throw new Error("Invalid new token format");
         }
@@ -164,7 +148,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
 
       // Store tokens and user
       setTokens(result.tokens);
-      const jwt = parseJwt(result.tokens.accessToken);
+      const jwt = jwtDecode<JWTPayload>(result.tokens.accessToken);
       setUser({ uid: jwt.uid });
       storage.set("auth_tokens", JSON.stringify(result.tokens));
 
@@ -236,6 +220,3 @@ const useSession = () => {
 };
 
 export { SessionProvider, useSession };
-function jwtDecode(accessToken: string) {
-  throw new Error("Function not implemented.");
-}
