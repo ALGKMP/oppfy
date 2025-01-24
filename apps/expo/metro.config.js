@@ -7,7 +7,7 @@ const path = require("path");
 const { getSentryExpoConfig } = require("@sentry/react-native/metro");
 
 module.exports = withTurborepoManagedCache(
-  withMonorepoPaths(getSentryExpoConfig(__dirname)),
+  withMonorepoPaths(withAppClipConfig(getSentryExpoConfig(__dirname))),
 );
 
 /**
@@ -47,5 +47,25 @@ function withTurborepoManagedCache(config) {
   config.cacheStores = [
     new FileStore({ root: path.join(__dirname, "node_modules/.cache/metro") }),
   ];
+  return config;
+}
+
+function withAppClipConfig(config) {
+  if (process.env.BUILDING_FOR_APP_CLIP) {
+    // Exclude modules from being processed
+    config.resolver.blockList = [
+      /.*firebase.*/,
+      /.*sentry.*/,
+      /.*ffmpeg.*/,
+      /.*vision-camera.*/,
+      // Add more patterns based on your excludedModules
+    ];
+
+    // Prefer .clip.tsx files
+    config.resolver.sourceExts = [
+      ...config.resolver.sourceExts.map((ext) => `clip.${ext}`),
+      ...config.resolver.sourceExts,
+    ];
+  }
   return config;
 }

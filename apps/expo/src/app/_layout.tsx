@@ -1,6 +1,6 @@
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Slot } from "expo-router";
+import { Slot, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { ThemeProvider } from "@react-navigation/native";
@@ -23,6 +23,7 @@ import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "../../tamagui.config";
 
 const RootLayout = () => {
+
   return (
     <SentryProvider>
       <TRPCProvider>

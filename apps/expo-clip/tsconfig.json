@@ -1,0 +1,24 @@
+{
+  "extends": ["@oppfy/tsconfig/base.json"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./src/*"],
+      "@assets/*": ["./assets/*"]
+    },
+    "jsx": "react-native",
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "types": ["nativewind/types"],
+    "checkJs": false
+  },
+  "include": [
+    "index.tsx",
+    "src",
+    "*.ts",
+    "*.js",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "./metro-require.d.ts"
+  ],
+  "exclude": ["node_modules"]
+}
