@@ -68,15 +68,9 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const authToken = opts.headers.get("Authorization") ?? null;
-  console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-  console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-  console.log("AUTH TOKEN: ", authToken);
-
-  console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-  console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+export const createTRPCContext = (opts: { headers: Headers }) => {
   const source = opts.headers.get("x-trpc-source") ?? "unknown";
+  const authToken = opts.headers.get("Authorization") ?? null;
 
   console.log(">>> tRPC Request from", source);
 
@@ -87,30 +81,27 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
   if (authToken) {
     try {
       const token = authToken.split("Bearer ")[1];
-      console.log(
-        "Attempting to verify token:",
-        token?.substring(0, 20) + "...",
-      );
+
       if (!token) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "No token provided",
         });
       }
-      
+
       // Verify and decode the token
       session = jwt.verify(token, JWT_ACCESS_SECRET) as JWTPayload;
-      
+
       // Check if token is about to expire (within 5 minutes)
       const now = Math.floor(Date.now() / 1000);
-      if (session.exp - now < 300) { // 5 minutes
+      if (session.exp - now < 300) {
+        // 5 minutes
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Token is about to expire",
         });
       }
     } catch (err) {
-      console.error("JWT verification failed:", err);
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message:
