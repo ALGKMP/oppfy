@@ -2,7 +2,6 @@ import { and, eq, inArray, or, sql } from "drizzle-orm"; // Add inArray import
 
 import { db, schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
-import { auth } from "@oppfy/firebase";
 
 import { accountStatusEnum } from "../../../../db/src/schema";
 import { handleDatabaseErrors } from "../../errors";
@@ -14,7 +13,6 @@ export type PrivacySettings = NonNullable<
 
 export class UserRepository {
   private db = db;
-  private auth = auth;
 
   @handleDatabaseErrors
   async createUser(
@@ -86,7 +84,6 @@ export class UserRepository {
   @handleDatabaseErrors
   async deleteUser(userId: string) {
     await this.db.delete(schema.user).where(eq(schema.user.id, userId));
-    await this.auth.deleteUser(userId);
   }
 
   @handleDatabaseErrors

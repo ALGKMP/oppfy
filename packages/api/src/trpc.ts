@@ -8,19 +8,23 @@
  */
 import crypto from "crypto";
 import { initTRPC, TRPCError } from "@trpc/server";
-import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import type { DecodedIdToken } from "firebase-admin/auth";
+import jwt from "jsonwebtoken";
 import superjson from "superjson";
-import type { OpenApiMeta } from "trpc-openapi";
 import { ZodError } from "zod";
 
 import { cloudfront } from "@oppfy/cloudfront";
 import { db } from "@oppfy/db";
-import { auth } from "@oppfy/firebase";
 import { mux } from "@oppfy/mux";
 import { s3 } from "@oppfy/s3";
 
 import { services } from "./services";
+
+const JWT_ACCESS_SECRET =
+  process.env.JWT_ACCESS_SECRET ?? "your-access-secret-key";
+
+interface JWTPayload {
+  userId: string;
+}
 
 /**
  * 1. CONTEXT
@@ -30,9 +34,8 @@ import { services } from "./services";
  * These allow you to access things when processing a request, like the database, the session, etc.
  */
 
-// type CreateContextOptions = Record<string, never>;
 interface CreateContextOptions {
-  session: DecodedIdToken | null;
+  session: JWTPayload | null;
 }
 
 /**
@@ -50,7 +53,6 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
     s3,
     db,
     mux,
-    auth,
     cloudfront,
     services,
     session: opts.session,
@@ -63,10 +65,6 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-// export const createTRPCContext = async ({
-//   req,
-//   res,
-// }: CreateNextContextOptions) => {
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   console.log("Headers received:", Object.fromEntries(opts.headers));
 
@@ -75,12 +73,9 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
 
   console.log(">>> tRPC Request from", source);
 
-  // const requestId = crypto.randomUUID();
   opts.headers.set("x-request-id", crypto.randomUUID());
 
-  // const token = req.headers.authorization?.split("Bearer ")[1];
-
-  let session: DecodedIdToken | null = null;
+  let session: JWTPayload | null = null;
 
   if (authToken) {
     try {
@@ -92,16 +87,14 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
       if (!token) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          cause: "Invalid Firebase Token",
           message: "No token provided",
         });
       }
-      session = await auth.verifyIdToken(token);
+      session = jwt.verify(token, JWT_ACCESS_SECRET) as JWTPayload;
     } catch (err) {
-      console.error("Firebase token verification failed:", err);
+      console.error("JWT verification failed:", err);
       throw new TRPCError({
         code: "UNAUTHORIZED",
-        cause: "Invalid Firebase Token",
         message:
           err instanceof Error
             ? err.message
@@ -123,34 +116,19 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
  * errors on the backend.
  */
 
-// const t = initTRPC
-//   .context<Context>()
-//   .meta<OpenApiMeta>()
-//   .create({
-//     errorFormatter: ({ error, shape }) => {
-//       if (error.code === 'INTERNAL_SERVER_ERROR' && process.env.NODE_ENV === 'production') {
-//         return { ...shape, message: 'Internal server error' };
-//       }
-//       return shape;
-//     },
-//   });
-
-const t = initTRPC
-  .context<typeof createTRPCContext>()
-  // .meta<OpenApiMeta>()
-  .create({
-    transformer: superjson,
-    errorFormatter({ shape, error }) {
-      return {
-        ...shape,
-        data: {
-          ...shape.data,
-          zodError:
-            error.cause instanceof ZodError ? error.cause.flatten() : null,
-        },
-      };
-    },
-  });
+const t = initTRPC.context<typeof createTRPCContext>().create({
+  transformer: superjson,
+  errorFormatter({ shape, error }) {
+    return {
+      ...shape,
+      data: {
+        ...shape.data,
+        zodError:
+          error.cause instanceof ZodError ? error.cause.flatten() : null,
+      },
+    };
+  },
+});
 
 /**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
@@ -180,10 +158,6 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
 });
 
 export const createCallerFactory = t.createCallerFactory;
-
-/**
- * S3 Verification
- */
 
 /**
  * Public (unauthenticated) procedure
