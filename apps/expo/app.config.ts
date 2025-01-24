@@ -23,7 +23,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   assetBundlePatterns: ["**/*"],
   ios: {
-    googleServicesFile: "./GoogleService-Info.plist",
     supportsTablet: false,
     bundleIdentifier: "com.oppfy.app",
     entitlements: {
@@ -32,15 +31,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     associatedDomains: [
       "applinks:oppfy.app",
       "applinks:www.oppfy.app",
-      "applinks:opp.oppfy.app",
-      "applinks:oppfy-nextjs.vercel.app",
     ],
     infoPlist: {
       UIBackgroundModes: ["fetch"],
     },
   },
   android: {
-    googleServicesFile: "./google-services.json",
     package: "com.oppfy.app",
     adaptiveIcon: {
       foregroundImage: "./assets/icon.png",
@@ -71,10 +67,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-router",
     "react-native-image-marker",
     "@config-plugins/ffmpeg-kit-react-native",
-    "@react-native-firebase/app",
-    "@react-native-firebase/auth",
-    "@react-native-firebase/perf",
-    "@react-native-firebase/crashlytics",
     [
       "expo-build-properties",
       {
