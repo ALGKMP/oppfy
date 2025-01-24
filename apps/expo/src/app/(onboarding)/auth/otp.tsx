@@ -174,12 +174,17 @@ const OTPInput = ({ value, onChange }: OTPInputProps) => {
               {...(focused &&
                 (index === value.length ||
                   (value.length === 6 && index === 5)) && {
-                  focused: true,
+                  backgroundColor: "$gray4",
                 })}
             >
-              <Text fontSize={24} fontWeight="bold">
-                {value[index]}
+              <Text fontSize="$7" fontWeight="bold" color="$color">
+                {value[index] ?? ""}
               </Text>
+              {focused &&
+                (index === value.length ||
+                  (value.length === 6 && index === 5)) && (
+                  <View style={styles.cursor} />
+                )}
             </OTPBox>
           ))}
         </XStack>
@@ -189,20 +194,15 @@ const OTPInput = ({ value, onChange }: OTPInputProps) => {
 };
 
 const OTPBox = styled(View, {
-  width: 44,
-  height: 48,
-  borderRadius: 8,
-  borderWidth: 1,
-  borderColor: "$gray7",
-  alignItems: "center",
+  width: 50,
+  height: 60,
+  borderRadius: "$6",
+  backgroundColor: "$gray3",
   justifyContent: "center",
-  variants: {
-    focused: {
-      true: {
-        borderColor: "$blue9",
-      },
-    },
-  },
+  alignItems: "center",
+  shadowColor: "$gray6",
+  shadowRadius: 5,
+  shadowOpacity: 0.2,
 });
 
 const styles = StyleSheet.create({
@@ -211,6 +211,12 @@ const styles = StyleSheet.create({
     width: 1,
     height: 1,
     opacity: 0,
+  },
+  cursor: {
+    width: 2,
+    height: 32,
+    backgroundColor: "$color",
+    position: "absolute",
   },
 });
 

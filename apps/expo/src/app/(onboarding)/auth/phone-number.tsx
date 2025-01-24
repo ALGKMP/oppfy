@@ -5,7 +5,7 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
-import { useTheme } from "tamagui";
+import { getToken, useTheme } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
@@ -202,6 +202,8 @@ const CountryPicker = ({
   selectedCountryData,
   setSelectedCountryData,
 }: CountryPickerProps) => {
+  const theme = useTheme();
+
   const [modalVisible, setModalVisible] = useState(false);
 
   const { searchQuery, setSearchQuery, filteredItems } = useSearch<CountryData>(
@@ -264,27 +266,33 @@ const CountryPicker = ({
               selectedCountryCode={selectedCountryData?.countryCode}
             />
           </YStack>
+          {/* </View> */}
         </View>
       </Modal>
 
+      {/* Do not attempt to use Styled() to clean this up, it breaks the onPress event */}
       <TouchableOpacity
+        style={{
+          height: 76,
+          borderRadius: getToken("$6", "radius") as number,
+          backgroundColor: theme.gray4.val,
+          paddingLeft: getToken("$3", "space") as number,
+          paddingRight: getToken("$3", "space") as number,
+          justifyContent: "center",
+          shadowColor: theme.gray6.val,
+          shadowOpacity: 0.1,
+          shadowRadius: 10,
+          borderTopRightRadius: 0,
+          borderBottomRightRadius: 0,
+        }}
         onPress={() => {
-          Keyboard.dismiss();
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           setModalVisible(true);
         }}
       >
-        <XStack
-          height={76}
-          borderRadius="$6"
-          backgroundColor="$gray4"
-          paddingHorizontal="$3"
-          alignItems="center"
-          gap="$2"
-          borderTopRightRadius={0}
-          borderBottomRightRadius={0}
-        >
-          <Text fontSize={24}>{selectedCountryData?.flag}</Text>
-          <Text fontSize={16} fontWeight="500">
+        <XStack alignItems="center" gap="$1.5">
+          <Text fontSize="$9">{selectedCountryData?.flag}</Text>
+          <Text fontSize="$6" fontWeight="bold">
             {selectedCountryData?.dialingCode}
           </Text>
         </XStack>
@@ -293,7 +301,7 @@ const CountryPicker = ({
   );
 };
 
-interface CountriesFlashListProps {
+interface CountriesFlastListProps {
   onSelect?: (countryData: CountryData) => void;
   selectedCountryCode?: string;
   data: (string | CountryData)[];
@@ -303,37 +311,78 @@ const CountriesFlashList = ({
   onSelect,
   selectedCountryCode,
   data,
-}: CountriesFlashListProps) => {
+}: CountriesFlastListProps) => {
   const insets = useSafeAreaInsets();
 
   return (
     <FlashList
-      data={data}
-      estimatedItemSize={56}
       contentContainerStyle={{ paddingBottom: insets.bottom }}
-      renderItem={({ item }) => {
+      data={data}
+      onScrollBeginDrag={Keyboard.dismiss}
+      estimatedItemSize={43}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      renderItem={({ item, index }) => {
         if (typeof item === "string") {
+          // Render header
           return (
-            <H6 color="$gray11" marginTop="$4" marginBottom="$2">
-              {item}
-            </H6>
+            <View paddingVertical={8}>
+              <H6 theme="alt1">{item}</H6>
+            </View>
+          );
+        } else {
+          const isSelected = item.countryCode === selectedCountryCode;
+
+          const isFirstInGroup =
+            index === 0 || typeof data[index - 1] === "string";
+
+          const isLastInGroup =
+            index === data.length - 1 || typeof data[index + 1] === "string";
+
+          const borderRadius = getToken("$6", "radius") as number;
+
+          return (
+            <ListItem
+              size="$4.5"
+              padding={12}
+              borderBottomWidth={1}
+              backgroundColor="$gray2"
+              {...(isFirstInGroup && {
+                borderTopLeftRadius: borderRadius,
+                borderTopRightRadius: borderRadius,
+              })}
+              {...(isLastInGroup && {
+                borderBottomWidth: 0,
+                borderBottomLeftRadius: borderRadius,
+                borderBottomRightRadius: borderRadius,
+              })}
+              pressStyle={{
+                backgroundColor: "$gray3",
+              }}
+              onPress={() => onSelect && onSelect(item)}
+            >
+              <XStack
+                flex={1}
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <XStack alignItems="center" gap="$2">
+                  <Text fontSize="$8">{item.flag}</Text>
+                  <Text fontSize="$5">{item.name}</Text>
+                  <Text fontSize="$5" color="$gray9">
+                    ({item.dialingCode})
+                  </Text>
+                </XStack>
+
+                {isSelected && <CheckCircle2 />}
+              </XStack>
+            </ListItem>
           );
         }
-
-        const isSelected = item.countryCode === selectedCountryCode;
-
-        return (
-          <ListItem
-            title={`${item.flag}  ${item.name}`}
-            subTitle={item.dialingCode}
-            onPress={() => onSelect?.(item)}
-            pressStyle={{
-              backgroundColor: "$gray4",
-            }}
-            iconAfter={isSelected ? <CheckCircle2 color="$blue9" /> : undefined}
-          />
-        );
       }}
+      getItemType={(item) =>
+        typeof item === "string" ? "sectionHeader" : "row"
+      }
     />
   );
 };
