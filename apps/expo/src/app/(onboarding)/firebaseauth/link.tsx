@@ -29,7 +29,6 @@ import { useSession } from "~/contexts/SessionContext";
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
 import useSearch from "~/hooks/useSearch";
-import { api } from "~/utils/api";
 
 const countriesWithoutSections = countriesData.filter(
   (item) => typeof item !== "string",
@@ -45,7 +44,7 @@ enum Error {
 
 const PhoneNumber = () => {
   const router = useRouter();
-  const sendVerificationCode = api.auth.sendVerificationCode.useMutation();
+  const { signInWithPhoneNumber } = useSession();
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [countryData, setCountryData] = useState<CountryData>({
@@ -76,14 +75,16 @@ const PhoneNumber = () => {
     const e164PhoneNumber = `${countryData.dialingCode}${phoneNumber}`;
 
     try {
-      await sendVerificationCode.mutateAsync({ phoneNumber: e164PhoneNumber });
+      const success = await signInWithPhoneNumber(e164PhoneNumber);
 
-      router.push({
-        params: {
-          phoneNumber: e164PhoneNumber,
-        },
-        pathname: "/firebaseauth/phone-number-otp",
-      });
+      if (success) {
+        router.push({
+          params: {
+            phoneNumber: e164PhoneNumber,
+          },
+          pathname: "/firebaseauth/phone-number-otp",
+        });
+      }
     } catch (err: unknown) {
       console.error("Error sending verification code:", err);
       if (err && typeof err === "object" && "message" in err) {
@@ -242,27 +243,23 @@ const CountryPicker = ({
       </Modal>
 
       <TouchableOpacity
-        style={{
-          height: 76,
-          borderRadius: getToken("$6", "radius") as number,
-          backgroundColor: theme.gray4.val,
-          paddingLeft: getToken("$3", "space") as number,
-          paddingRight: getToken("$3", "space") as number,
-          justifyContent: "center",
-          shadowColor: theme.gray6.val,
-          shadowOpacity: 0.1,
-          shadowRadius: 10,
-          borderTopRightRadius: 0,
-          borderBottomRightRadius: 0,
-        }}
         onPress={() => {
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          Keyboard.dismiss();
           setModalVisible(true);
         }}
       >
-        <XStack alignItems="center" gap="$1.5">
-          <Text fontSize="$9">{selectedCountryData?.flag}</Text>
-          <Text fontSize="$6" fontWeight="bold">
+        <XStack
+          height={76}
+          borderRadius="$6"
+          backgroundColor="$gray4"
+          paddingHorizontal="$3"
+          alignItems="center"
+          gap="$2"
+          borderTopRightRadius={0}
+          borderBottomRightRadius={0}
+        >
+          <Text fontSize={24}>{selectedCountryData?.flag}</Text>
+          <Text fontSize={16} fontWeight="500">
             {selectedCountryData?.dialingCode}
           </Text>
         </XStack>
@@ -271,7 +268,7 @@ const CountryPicker = ({
   );
 };
 
-interface CountriesFlastListProps {
+interface CountriesFlashListProps {
   onSelect?: (countryData: CountryData) => void;
   selectedCountryCode?: string;
   data: (string | CountryData)[];
@@ -281,77 +278,37 @@ const CountriesFlashList = ({
   onSelect,
   selectedCountryCode,
   data,
-}: CountriesFlastListProps) => {
+}: CountriesFlashListProps) => {
   const insets = useSafeAreaInsets();
 
   return (
     <FlashList
-      contentContainerStyle={{ paddingBottom: insets.bottom }}
       data={data}
-      onScrollBeginDrag={Keyboard.dismiss}
-      estimatedItemSize={43}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-      renderItem={({ item, index }) => {
+      estimatedItemSize={56}
+      contentContainerStyle={{ paddingBottom: insets.bottom }}
+      renderItem={({ item }) => {
         if (typeof item === "string") {
           return (
-            <View paddingVertical={8}>
-              <H6 theme="alt1">{item}</H6>
-            </View>
-          );
-        } else {
-          const isSelected = item.countryCode === selectedCountryCode;
-
-          const isFirstInGroup =
-            index === 0 || typeof data[index - 1] === "string";
-
-          const isLastInGroup =
-            index === data.length - 1 || typeof data[index + 1] === "string";
-
-          const borderRadius = getToken("$6", "radius") as number;
-
-          return (
-            <ListItem
-              size="$4.5"
-              padding={12}
-              borderBottomWidth={1}
-              backgroundColor="$gray2"
-              {...(isFirstInGroup && {
-                borderTopLeftRadius: borderRadius,
-                borderTopRightRadius: borderRadius,
-              })}
-              {...(isLastInGroup && {
-                borderBottomWidth: 0,
-                borderBottomLeftRadius: borderRadius,
-                borderBottomRightRadius: borderRadius,
-              })}
-              pressStyle={{
-                backgroundColor: "$gray3",
-              }}
-              onPress={() => onSelect && onSelect(item)}
-            >
-              <XStack
-                flex={1}
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <XStack alignItems="center" gap="$2">
-                  <Text fontSize="$8">{item.flag}</Text>
-                  <Text fontSize="$5">{item.name}</Text>
-                  <Text fontSize="$5" color="$gray9">
-                    ({item.dialingCode})
-                  </Text>
-                </XStack>
-
-                {isSelected && <CheckCircle2 />}
-              </XStack>
-            </ListItem>
+            <H6 color="$gray11" marginTop="$4" marginBottom="$2">
+              {item}
+            </H6>
           );
         }
+
+        const isSelected = item.countryCode === selectedCountryCode;
+
+        return (
+          <ListItem
+            title={`${item.flag}  ${item.name}`}
+            subTitle={item.dialingCode}
+            onPress={() => onSelect?.(item)}
+            pressStyle={{
+              backgroundColor: "$gray4",
+            }}
+            iconAfter={isSelected ? <CheckCircle2 color="$blue9" /> : undefined}
+          />
+        );
       }}
-      getItemType={(item) =>
-        typeof item === "string" ? "sectionHeader" : "row"
-      }
     />
   );
 };

@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { Paragraph, styled } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
@@ -17,7 +17,6 @@ import {
   YStack,
 } from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
-import { api } from "~/utils/api";
 
 enum Error {
   INCORRECT_CODE = "Incorrect code. Try again.",
@@ -32,17 +31,12 @@ enum Error {
 }
 
 const PhoneNumberOTP = () => {
-  const router = useRouter();
   const { phoneNumber } = useLocalSearchParams<{ phoneNumber: string }>();
-  const verifyCode = api.auth.verifyCode.useMutation();
+  const { verifyPhoneNumberOTP } = useSession();
 
   const [phoneNumberOTP, setPhoneNumberOTP] = useState("");
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  const createUser = api.user.createUser.useMutation();
-  const userOnboardingCompletedMutation =
-    api.user.checkOnboardingComplete.useMutation();
 
   const isValidPhoneNumberOTP = useMemo(
     () =>
@@ -50,52 +44,20 @@ const PhoneNumberOTP = () => {
     [phoneNumberOTP],
   );
 
-  const handleNewUser = async (userId: string) => {
-    if (!phoneNumber) {
-      setError(Error.UNKNOWN_ERROR);
-      return;
-    }
-
-    await createUser.mutateAsync({
-      userId,
-      phoneNumber,
-    });
-
-    router.replace("/user-info/name");
-  };
-
-  const handleExistingUser = async () => {
-    console.log("handleExistingUser", phoneNumber);
-    const userOnboardingCompleted =
-      await userOnboardingCompletedMutation.mutateAsync();
-
-    router.replace(
-      userOnboardingCompleted
-        ? "/(app)/(bottom-tabs)/(home)"
-        : "/user-info/name",
-    );
-  };
-
   const onSubmit = async () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    if (!phoneNumber) {
+      setError(Error.INVALID_PHONE_NUMBER);
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await verifyCode.mutateAsync({
-        phoneNumber: phoneNumber,
-        code: phoneNumberOTP,
-      });
-
-      if (!result.success) {
-        setError(Error.INCORRECT_CODE);
-        return;
-      }
-
-      // TODO: Handle user creation/session management based on result
-      // For now, just redirect to the next screen
-      router.replace("/user-info/name");
+      await verifyPhoneNumberOTP(phoneNumber, phoneNumberOTP);
+      // Navigation is now handled in the SessionContext
     } catch (error: unknown) {
       console.error("Error verifying code:", error);
       if (error && typeof error === "object" && "message" in error) {
