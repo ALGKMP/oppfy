@@ -15,7 +15,7 @@ const env = createEnv({
 const {
   driver: { DriverRemoteConnection },
   structure: { Graph },
-  process: { P, order, column, statics: __ },
+  process: { P, order, statics: __ },
 } = gremlin;
 
 export const handler = async (
@@ -32,6 +32,7 @@ export const handler = async (
 
     const g = graph.traversal().withRemote(dc);
     const userId = event.queryStringParameters?.userId;
+    console.log("userId", userId);
 
     if (!userId) {
       return {
@@ -86,12 +87,28 @@ export const handler = async (
       .where(eq(schema.block.blockedUserId, userId))
       .then((res) => res.map((r) => r.userId));
 
+    const friend1s = await db
+      .select({ userId: schema.friend.userId1 })
+      .from(schema.friend)
+      .where(eq(schema.friend.userId1, userId))
+      .then((res) => res.map((r) => r.userId));
+
+    const friend2s = await db
+      .select({ userId: schema.friend.userId2 })
+      .from(schema.friend)
+      .where(eq(schema.friend.userId2, userId))
+      .then((res) => res.map((r) => r.userId));
+
     const peopleIDontWantToRecommend = [
       ...following,
       ...blocked,
       ...blockedBy,
       ...requested,
+      ...friend1s,
+      ...friend2s,
     ];
+
+    console.log("People IDontWantToRecommend", peopleIDontWantToRecommend);
 
     const tier1 = await g
       .V(userId)
@@ -105,7 +122,11 @@ export const handler = async (
       .id()
       .toList();
 
+    console.log("Tier 1", tier1);
+
     const excludeForTier2 = [...peopleIDontWantToRecommend, ...tier1];
+
+    console.log("Exclude For Tier 2", excludeForTier2);
 
     // all incoming people who arent in tier1 and tier2
     const tier2 = await g
@@ -120,6 +141,8 @@ export const handler = async (
       .id()
       .toList();
 
+    console.log("Tier 2", tier2);
+
     // get me people 2 edges away from me who are not in tier1 or tier2
     const tier3 = await g
       .V(userId)
@@ -133,6 +156,8 @@ export const handler = async (
       .limit(10)
       .id()
       .toList();
+
+    console.log("Tier 3", tier3);
 
     // remove all tier1 from tier2
 

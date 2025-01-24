@@ -30,6 +30,10 @@ const AppLayout = () => {
     }
   }, [sessionIsLoading, permissionsIsLoading]);
 
+  if (sessionIsLoading || permissionsIsLoading) {
+    return null;
+  }
+
   if (!isSignedIn) {
     console.log("!isSignedIn");
     return <Redirect href="/(onboarding)" />;
@@ -46,6 +50,7 @@ const AppLayout = () => {
 
   return (
     <Stack
+      initialRouteName="(bottom-tabs)"
       screenOptions={{
         header: () => null,
       }}

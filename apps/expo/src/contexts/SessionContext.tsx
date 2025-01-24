@@ -79,6 +79,8 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
           const now = Math.floor(Date.now() / 1000);
 
           if (jwt.exp <= now) {
+            storage.delete("auth_tokens");
+            storage.delete("auth_user");
             // Token is expired, try to refresh
             const newTokens = await refreshTokenMutation.mutateAsync({
               refreshToken: parsedTokens.refreshToken,
