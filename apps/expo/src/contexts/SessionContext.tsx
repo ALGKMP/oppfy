@@ -30,7 +30,7 @@ interface SessionContextType {
   verifyPhoneNumber: (
     phoneNumber: string,
     code: string,
-  ) => Promise<{ user: User; tokens: AuthTokens } | null>;
+  ) => Promise<{ tokens: AuthTokens }>;
 }
 
 interface SessionProviderProps {
@@ -113,15 +113,13 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
         code,
       });
 
-      if (!result.success || !result.tokens || !result.user) {
+      if (!result.success || !result.tokens) {
         throw new Error("Failed to verify code with API");
       }
 
       // Store tokens and user
       setTokens(result.tokens);
-      setUser(result.user);
       storage.set("auth_tokens", JSON.stringify(result.tokens));
-      storage.set("auth_user", JSON.stringify(result.user));
 
       // Check if user needs onboarding
       const userOnboardingCompleted =
@@ -135,7 +133,6 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
       );
 
       return {
-        user: result.user,
         tokens: result.tokens,
       };
     } catch (error) {
