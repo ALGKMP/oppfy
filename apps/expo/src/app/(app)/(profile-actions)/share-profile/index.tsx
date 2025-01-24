@@ -112,8 +112,8 @@ const ShareProfile = () => {
               {/* Decorative Elements */}
               <View
                 position="absolute"
-                width={120}
-                height={120}
+                width={100}
+                height={100}
                 br={60}
                 top={-40}
                 right={-40}

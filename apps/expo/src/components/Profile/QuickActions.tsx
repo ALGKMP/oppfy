@@ -1,7 +1,13 @@
 import React from "react";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
-import { Ban, Send, Settings2 } from "@tamagui/lucide-icons";
+import {
+  Ban,
+  Send,
+  SendHorizontal,
+  Settings2,
+  Share,
+} from "@tamagui/lucide-icons";
 import { XStack } from "tamagui";
 
 import type { RouterOutputs } from "@oppfy/api";
@@ -78,7 +84,7 @@ const QuickActions = ({
   return (
     <XStack gap="$3" paddingBottom="$1">
       <Button
-        icon={<Send size={20} />}
+        icon={<Share size={20} />}
         variant="outlined"
         size="$3.5"
         circular
