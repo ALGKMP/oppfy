@@ -34,11 +34,17 @@ const countriesWithoutSections = countriesData.filter(
   (item) => typeof item !== "string",
 );
 
-enum Error {
-  INVALID_PHONE_NUMBER = "Invalid phone number. Please check the number and try again.",
+enum TwilioError {
+  INVALID_PHONE_NUMBER = "Invalid phone number format. Please use a valid phone number.",
+  INVALID_PARAMETER = "Invalid parameter. Please check your input and try again.",
+  RESOURCE_NOT_FOUND = "Service not found. Please try again later.",
+  CAPABILITY_NOT_ENABLED = "This capability is not enabled. Please contact support.",
+  AUTHENTICATION_FAILED = "Authentication failed. Please try again later.",
+  FORBIDDEN = "Access denied. Please try again later.",
+  RATE_LIMIT_EXCEEDED = "Too many attempts. Please try again later.",
   QUOTA_EXCEEDED = "SMS quota exceeded. Please try again later.",
-  NETWORK_REQUEST_FAILED = "Network error. Please check your connection and try again.",
-  TOO_MANY_REQUESTS = "Too many attempts. Please try again later.",
+  SERVICE_UNAVAILABLE = "Service temporarily unavailable. Please try again later.",
+  NETWORK_ERROR = "Network error. Please check your connection and try again.",
   UNKNOWN_ERROR = "An unknown error occurred. Please try again later.",
 }
 
@@ -63,7 +69,7 @@ const PhoneNumber = () => {
     [phoneNumber, countryData.countryCode],
   );
 
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<TwilioError | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async () => {
@@ -90,20 +96,41 @@ const PhoneNumber = () => {
       if (err && typeof err === "object" && "message" in err) {
         const errorMessage = (err as { message: string }).message;
         switch (errorMessage) {
-          case "QUOTA_EXCEEDED":
-            setError(Error.QUOTA_EXCEEDED);
+          case "60200": // Invalid parameter
+            setError(TwilioError.INVALID_PARAMETER);
+            break;
+          case "60203": // Invalid phone number
+            setError(TwilioError.INVALID_PHONE_NUMBER);
+            break;
+          case "60404": // Service not found
+            setError(TwilioError.RESOURCE_NOT_FOUND);
+            break;
+          case "60405": // Capability not enabled
+            setError(TwilioError.CAPABILITY_NOT_ENABLED);
+            break;
+          case "60401": // Authentication failed
+            setError(TwilioError.AUTHENTICATION_FAILED);
+            break;
+          case "60403": // Forbidden
+            setError(TwilioError.FORBIDDEN);
+            break;
+          case "60429": // Too many requests
+            setError(TwilioError.RATE_LIMIT_EXCEEDED);
+            break;
+          case "60435": // Quota exceeded
+            setError(TwilioError.QUOTA_EXCEEDED);
+            break;
+          case "60503": // Service unavailable
+            setError(TwilioError.SERVICE_UNAVAILABLE);
             break;
           case "NETWORK_REQUEST_FAILED":
-            setError(Error.NETWORK_REQUEST_FAILED);
-            break;
-          case "TOO_MANY_REQUESTS":
-            setError(Error.TOO_MANY_REQUESTS);
+            setError(TwilioError.NETWORK_ERROR);
             break;
           default:
-            setError(Error.UNKNOWN_ERROR);
+            setError(TwilioError.UNKNOWN_ERROR);
         }
       } else {
-        setError(Error.UNKNOWN_ERROR);
+        setError(TwilioError.UNKNOWN_ERROR);
       }
     }
 
