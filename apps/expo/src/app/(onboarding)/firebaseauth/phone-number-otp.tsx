@@ -32,7 +32,7 @@ enum Error {
 
 const PhoneNumberOTP = () => {
   const { phoneNumber } = useLocalSearchParams<{ phoneNumber: string }>();
-  const { verifyPhoneNumberOTP } = useSession();
+  const { verifyPhoneNumber } = useSession();
 
   const [phoneNumberOTP, setPhoneNumberOTP] = useState("");
   const [error, setError] = useState<Error | null>(null);
@@ -56,7 +56,7 @@ const PhoneNumberOTP = () => {
     setError(null);
 
     try {
-      await verifyPhoneNumberOTP(phoneNumber, phoneNumberOTP);
+      await verifyPhoneNumber(phoneNumber, phoneNumberOTP);
       // Navigation is now handled in the SessionContext
     } catch (error: unknown) {
       console.error("Error verifying code:", error);

@@ -5,7 +5,7 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
-import { getToken, useTheme } from "tamagui";
+import { useTheme } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
@@ -44,7 +44,7 @@ enum Error {
 
 const PhoneNumber = () => {
   const router = useRouter();
-  const { signInWithPhoneNumber } = useSession();
+  const { sendVerificationCode } = useSession();
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [countryData, setCountryData] = useState<CountryData>({
@@ -75,7 +75,7 @@ const PhoneNumber = () => {
     const e164PhoneNumber = `${countryData.dialingCode}${phoneNumber}`;
 
     try {
-      const success = await signInWithPhoneNumber(e164PhoneNumber);
+      const success = await sendVerificationCode(e164PhoneNumber);
 
       if (success) {
         router.push({
@@ -175,8 +175,6 @@ const CountryPicker = ({
   selectedCountryData,
   setSelectedCountryData,
 }: CountryPickerProps) => {
-  const theme = useTheme();
-
   const [modalVisible, setModalVisible] = useState(false);
 
   const { searchQuery, setSearchQuery, filteredItems } = useSearch<CountryData>(

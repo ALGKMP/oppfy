@@ -1,7 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "expo-router";
-import auth from "@react-native-firebase/auth";
-import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
 import { api, queryClient } from "~/utils/api";
 import { storage } from "~/utils/storage";
@@ -11,8 +9,15 @@ interface AuthTokens {
   refreshToken: string;
 }
 
+interface User {
+  id: string;
+  phoneNumber: string;
+  accountStatus: "onApp" | "notOnApp";
+  profileId: string;
+}
+
 interface SessionContextType {
-  user: FirebaseAuthTypes.User | null;
+  user: User | null;
   tokens: AuthTokens | null;
 
   isLoading: boolean;
@@ -21,11 +26,11 @@ interface SessionContextType {
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<void>;
 
-  signInWithPhoneNumber: (phoneNumber: string) => Promise<boolean>;
-  verifyPhoneNumberOTP: (
+  sendVerificationCode: (phoneNumber: string) => Promise<boolean>;
+  verifyPhoneNumber: (
     phoneNumber: string,
-    otp: string,
-  ) => Promise<{ user: FirebaseAuthTypes.User; tokens: AuthTokens } | null>;
+    code: string,
+  ) => Promise<{ user: User; tokens: AuthTokens } | null>;
 }
 
 interface SessionProviderProps {
@@ -39,82 +44,84 @@ const AuthContext = createContext<SessionContextType | undefined>(undefined);
 const SessionProvider = ({ children }: SessionProviderProps) => {
   const router = useRouter();
 
-  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [tokens, setTokens] = useState<AuthTokens | null>(null);
-  const [confirmation, setConfirmation] =
-    useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
   const [status, setStatus] = useState<Status>("loading");
 
   // API mutations
-  const sendVerificationCode = api.auth.sendVerificationCode.useMutation();
-  const verifyCode = api.auth.verifyCode.useMutation();
+  const sendVerificationCodeMutation =
+    api.auth.sendVerificationCode.useMutation();
+  const verifyCodeMutation = api.auth.verifyCode.useMutation();
   const refreshTokenMutation = api.auth.refreshToken.useMutation();
-  const deleteUser = api.user.deleteUser.useMutation();
+  const deleteUserMutation = api.user.deleteUser.useMutation();
   const userOnboardingCompletedMutation =
     api.user.checkOnboardingComplete.useMutation();
 
   const isSignedIn = !!user && !!tokens;
   const isLoading = status === "loading";
 
-  // Load tokens from storage on startup
+  // Load tokens and user from storage on startup
   useEffect(() => {
     const storedTokens = storage.getString("auth_tokens");
-    if (storedTokens) {
+    const storedUser = storage.getString("auth_user");
+
+    if (storedTokens && storedUser) {
       setTokens(JSON.parse(storedTokens) as AuthTokens);
+      setUser(JSON.parse(storedUser) as User);
     }
+    setStatus("success");
   }, []);
 
-  // Firebase auth state listener
+  // Refresh token setup
   useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged((authUser) => {
-      setUser(authUser);
-      setStatus("success");
-    });
+    if (!tokens?.refreshToken) return;
 
-    return unsubscribe;
-  }, []);
+    const refreshTokens = async () => {
+      try {
+        const newTokens = await refreshTokenMutation.mutateAsync({
+          refreshToken: tokens.refreshToken,
+        });
+        setTokens(newTokens);
+        storage.set("auth_tokens", JSON.stringify(newTokens));
+      } catch (error) {
+        console.error("Failed to refresh tokens:", error);
+        // If refresh fails, sign out
+        void signOut();
+      }
+    };
 
-  const signInWithPhoneNumber = async (phoneNumber: string) => {
+    // Refresh tokens 1 minute before access token expires
+    const timer = setInterval(refreshTokens, 14 * 60 * 1000); // 14 minutes
+
+    return () => clearInterval(timer);
+  }, [tokens?.refreshToken]);
+
+  const sendVerificationCode = async (phoneNumber: string) => {
     try {
-      // First send verification code through our API
-      await sendVerificationCode.mutateAsync({ phoneNumber });
-
-      // Then initiate Firebase phone auth
-      const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
-      setConfirmation(confirmation);
-      return confirmation.verificationId !== null;
+      await sendVerificationCodeMutation.mutateAsync({ phoneNumber });
+      return true;
     } catch (error) {
       console.error("Error sending verification code:", error);
       throw error;
     }
   };
 
-  const verifyPhoneNumberOTP = async (phoneNumber: string, otp: string) => {
-    if (!confirmation) {
-      throw new Error("No confirmation result available for OTP verification.");
-    }
-
+  const verifyPhoneNumber = async (phoneNumber: string, code: string) => {
     try {
-      // First verify with Firebase
-      const credential = await confirmation.confirm(otp);
-
-      if (!credential.user) {
-        throw new Error("No user returned from Firebase auth");
-      }
-
-      // Then verify with our API and get JWT tokens
-      const result = await verifyCode.mutateAsync({
+      const result = await verifyCodeMutation.mutateAsync({
         phoneNumber,
-        code: otp,
+        code,
       });
 
-      if (!result.success || !result.tokens) {
+      if (!result.success || !result.tokens || !result.user) {
         throw new Error("Failed to verify code with API");
       }
 
-      // Store tokens
+      // Store tokens and user
       setTokens(result.tokens);
+      setUser(result.user);
       storage.set("auth_tokens", JSON.stringify(result.tokens));
+      storage.set("auth_user", JSON.stringify(result.user));
 
       // Check if user needs onboarding
       const userOnboardingCompleted =
@@ -128,7 +135,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
       );
 
       return {
-        user: credential.user,
+        user: result.user,
         tokens: result.tokens,
       };
     } catch (error) {
@@ -138,8 +145,8 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   };
 
   const signOut = async () => {
-    await auth().signOut();
     storage.delete("auth_tokens");
+    storage.delete("auth_user");
     setTokens(null);
     setUser(null);
     queryClient.clear();
@@ -147,9 +154,9 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   };
 
   const deleteAccount = async () => {
-    await deleteUser.mutateAsync();
-    await auth().currentUser?.delete();
+    await deleteUserMutation.mutateAsync();
     storage.delete("auth_tokens");
+    storage.delete("auth_user");
     setTokens(null);
     setUser(null);
     queryClient.clear();
@@ -164,8 +171,8 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
         isSignedIn,
         deleteAccount,
         signOut,
-        signInWithPhoneNumber,
-        verifyPhoneNumberOTP,
+        sendVerificationCode,
+        verifyPhoneNumber,
       }}
     >
       {children}
