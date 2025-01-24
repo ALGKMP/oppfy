@@ -14,15 +14,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "664271432377-aqh1kva54mqienh168hnikltd9pqlksp.apps.googleusercontent.com",
+          "client_id": "664271432377-kuccdvg8jqg3noftvd464ld3spacg2hj.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.oppfy.app",
-            "certificate_hash": "cdf9df926f7731889929b990bb7bb92592c7fdc1"
+            "certificate_hash": "54022fa18ac5599806c252765e1768bbe4a25448"
           }
         },
         {
-          "client_id": "664271432377-3jnd5o2ui3baguh6s947qdu93aam7pdt.apps.googleusercontent.com",
+          "client_id": "664271432377-696u44neu01q6brev3tegbhmd40d995f.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
