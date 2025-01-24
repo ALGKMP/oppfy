@@ -10,10 +10,7 @@ interface AuthTokens {
 }
 
 interface User {
-  id: string;
-  phoneNumber: string;
-  accountStatus: "onApp" | "notOnApp";
-  profileId: string;
+  uid: string;
 }
 
 interface SessionContextType {
@@ -41,6 +38,24 @@ type Status = "loading" | "success" | "error";
 
 const AuthContext = createContext<SessionContextType | undefined>(undefined);
 
+
+function parseJwt(token: string): User {
+  const parts = token.split(".");
+  if (parts.length !== 3) {
+    throw new Error("Invalid JWT format");
+  }
+  
+  const base64 = parts[1]!.replace(/-/g, "+").replace(/_/g, "/");
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split("")
+      .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+      .join(""),
+  );
+
+  return JSON.parse(jsonPayload);
+}
+
 const SessionProvider = ({ children }: SessionProviderProps) => {
   const router = useRouter();
 
@@ -63,11 +78,13 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   // Load tokens and user from storage on startup
   useEffect(() => {
     const storedTokens = storage.getString("auth_tokens");
-    const storedUser = storage.getString("auth_user");
 
-    if (storedTokens && storedUser) {
-      setTokens(JSON.parse(storedTokens) as AuthTokens);
-      setUser(JSON.parse(storedUser) as User);
+    if (storedTokens) {
+      const parsedTokens = JSON.parse(storedTokens) as AuthTokens;
+      setTokens(parsedTokens);
+      // parse jwt and pull uid out
+      const jwt = parseJwt(parsedTokens.accessToken);
+      setUser({ uid: jwt.uid });
     }
     setStatus("success");
   }, []);
@@ -119,6 +136,8 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
 
       // Store tokens and user
       setTokens(result.tokens);
+      const jwt = parseJwt(result.tokens.accessToken);
+      setUser({ uid: jwt.uid });
       storage.set("auth_tokens", JSON.stringify(result.tokens));
 
       // Check if user needs onboarding
@@ -189,3 +208,6 @@ const useSession = () => {
 };
 
 export { SessionProvider, useSession };
+function jwtDecode(accessToken: string) {
+  throw new Error("Function not implemented.");
+}
