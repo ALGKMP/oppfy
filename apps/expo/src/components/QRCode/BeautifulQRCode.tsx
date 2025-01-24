@@ -1,6 +1,7 @@
 import React from "react";
 import QRCode from "react-native-qrcode-svg";
 import { LinearGradient } from "expo-linear-gradient";
+import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { View } from "tamagui";
 
 interface BeautifulQRCodeProps {
@@ -42,7 +43,11 @@ const BeautifulQRCode = ({
               enableLinearGradient
               linearGradient={["#F214FF", "#FF14D4"]}
               gradientDirection={["0", "1", "1", "0"]}
-              logo={{ uri: profilePictureUrl ?? undefined }}
+              logo={
+                profilePictureUrl
+                  ? { uri: profilePictureUrl }
+                  : DefaultProfilePicture
+              }
               logoSize={logoSize}
               logoBackgroundColor="white"
               logoBorderRadius={logoSize / 2}
