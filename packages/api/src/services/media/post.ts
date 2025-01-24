@@ -527,7 +527,7 @@ export class PostService {
       throw new DomainError(ErrorCode.COMMENT_NOT_FOUND);
     }
 
-    if (post.recipientId !== userId && comment.userId !== userId) {
+    if (post.recipientId !== userId || comment.userId !== userId) {
       throw new DomainError(ErrorCode.UNAUTHORIZED);
     }
 
@@ -686,7 +686,6 @@ export class PostService {
         );
         data.imageUrl = imageUrl;
       } else {
-
         data.imageUrl = `https://image.mux.com/${data.imageUrl}/thumbnail.jpg`;
       }
     } catch (error) {
