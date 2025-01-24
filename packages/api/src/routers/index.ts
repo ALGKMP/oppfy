@@ -10,3 +10,4 @@ export { notificationsRouter } from "./user/notifications";
 export { contactsRouter } from "./user/contacts";
 export { reportRouter } from "./network/report";
 export { pendingUserRouter } from "./user/pendingUser";
+export { authRouter } from "./auth/auth";

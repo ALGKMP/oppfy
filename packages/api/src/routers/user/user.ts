@@ -8,33 +8,33 @@ import {
 } from "../../trpc";
 
 export const userRouter = createTRPCRouter({
-  createUser: publicProcedure
-    .input(
-      z.object({
-        userId: z.string(),
-        phoneNumber: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      try {
-        // check if user already exists with phonenumber is is offapp, if so update the user id
-        const user = await ctx.services.user.getUserByPhoneNumberNoThrow(
-          input.phoneNumber,
-        );
-        if (user && user.accountStatus === "notOnApp") {
-          await ctx.services.user.updateUserId(user.id, input.userId);
-          await ctx.services.user.updateUserAccountStatus(user.id, "onApp");
-        } else {
-          await ctx.services.user.createUser(input.userId, input.phoneNumber);
-        }
-      } catch (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create a new user",
-          cause: err,
-        });
-      }
-    }),
+  // createUser: publicProcedure
+  //   .input(
+  //     z.object({
+  //       userId: z.string(),
+  //       phoneNumber: z.string(),
+  //     }),
+  //   )
+  //   .mutation(async ({ ctx, input }) => {
+  //     try {
+  //       // check if user already exists with phonenumber is is offapp, if so update the user id
+  //       const user = await ctx.services.user.getUserByPhoneNumberNoThrow(
+  //         input.phoneNumber,
+  //       );
+  //       if (user && user.accountStatus === "notOnApp") {
+  //         await ctx.services.user.updateUserId(user.id, input.userId);
+  //         await ctx.services.user.updateUserAccountStatus(user.id, "onApp");
+  //       } else {
+  //         await ctx.services.user.createUser(input.userId, input.phoneNumber);
+  //       }
+  //     } catch (err) {
+  //       throw new TRPCError({
+  //         code: "INTERNAL_SERVER_ERROR",
+  //         message: "Failed to create a new user",
+  //         cause: err,
+  //       });
+  //     }
+  //   }),
 
   deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
     try {

@@ -14,9 +14,9 @@
     "migrate": "pnpm with-env tsx ./migrate.ts",
     "push": "pnpm generate && pnpm migrate",
     "studio": "pnpm with-env drizzle-kit studio --config drizzle.config.ts",
+    "sync-profile-stats": "pnpm with-env tsx ./sync-profile-stats.ts",
     "typecheck": "tsc --noEmit",
     "wipe": "pnpm with-env tsx ./wipe.ts",
-    "sync-profile-stats": "pnpm with-env tsx ./sync-profile-stats.ts",
     "with-env": "dotenv -e ../../.env --"
   },
   "prettier": "@oppfy/prettier-config",
@@ -31,7 +31,6 @@
   },
   "devDependencies": {
     "@oppfy/eslint-config": "workspace:*",
-    "@oppfy/firebase": "workspace:*",
     "@oppfy/prettier-config": "workspace:*",
     "@oppfy/tsconfig": "workspace:*",
     "drizzle-kit": "^0.21.1",

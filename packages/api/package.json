@@ -20,7 +20,6 @@
     "@oppfy/cloudfront": "workspace:*",
     "@oppfy/db": "workspace:*",
     "@oppfy/env": "workspace:*",
-    "@oppfy/firebase": "workspace:*",
     "@oppfy/mux": "workspace:*",
     "@oppfy/opensearch": "workspace:*",
     "@oppfy/s3": "workspace:*",
@@ -34,12 +33,14 @@
     "jsonwebtoken": "^9.0.2",
     "superjson": "2.2.1",
     "trpc-openapi": "^1.2.0",
+    "twilio": "^5.4.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@oppfy/eslint-config": "workspace:*",
     "@oppfy/prettier-config": "workspace:*",
     "@oppfy/tsconfig": "workspace:*",
+    "@types/jsonwebtoken": "^9.0.7",
     "eslint": "catalog:",
     "prettier": "^3.2.5",
     "typescript": "^5.4"

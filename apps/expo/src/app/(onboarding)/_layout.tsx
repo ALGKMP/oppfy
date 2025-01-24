@@ -36,11 +36,8 @@ const OnboardingLayout = () => (
 
     <Stack.Screen name="misc/permissions" options={{ animation: "fade" }} />
 
-    <Stack.Screen name="firebaseauth/link" options={{ animation: "fade" }} />
-    <Stack.Screen
-      name="firebaseauth/phone-number-otp"
-      options={{ animation: "fade" }}
-    />
+    <Stack.Screen name="auth/phone-number" options={{ animation: "fade" }} />
+    <Stack.Screen name="auth/otp" options={{ animation: "fade" }} />
 
     <Stack.Screen
       name="user-info/name"

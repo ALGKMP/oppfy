@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import Constants from "expo-constants";
-import auth from "@react-native-firebase/auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import superjson from "superjson";
 
-// import {useReactQueryDevTools} from "@dev-plugins/react-query";
-
 import type { AppRouter } from "@oppfy/api";
+
+import { storage } from "~/utils/storage";
 
 /**
  * A set of typesafe hooks for consuming your API.
@@ -59,7 +58,6 @@ const getBaseUrl = () => {
 export const queryClient = new QueryClient();
 
 export function TRPCProvider(props: { children: React.ReactNode }) {
-  // const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() =>
     api.createClient({
       links: [
@@ -70,9 +68,12 @@ export function TRPCProvider(props: { children: React.ReactNode }) {
             const headers = new Map<string, string>();
             headers.set("x-trpc-source", "expo-react");
 
-            const authToken = await auth().currentUser?.getIdToken();
-            if (authToken) {
-              headers.set("Authorization", `Bearer ${authToken}`);
+            const storedTokens = storage.getString("auth_tokens");
+            if (storedTokens) {
+              const { accessToken } = JSON.parse(storedTokens);
+              if (accessToken) {
+                headers.set("Authorization", `Bearer ${accessToken}`);
+              }
             }
 
             return Object.fromEntries(headers);

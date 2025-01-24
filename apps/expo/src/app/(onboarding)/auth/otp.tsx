@@ -1,9 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import auth from "@react-native-firebase/auth";
+import { useLocalSearchParams } from "expo-router";
 import { Paragraph, styled } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
@@ -19,10 +17,6 @@ import {
   YStack,
 } from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
-import { api } from "~/utils/api";
-
-// ! This is for testing purposes only, do not use in production
-auth().settings.appVerificationDisabledForTesting = false;
 
 enum Error {
   INCORRECT_CODE = "Incorrect code. Try again.",
@@ -36,42 +30,13 @@ enum Error {
   UNKNOWN_ERROR = "An unknown error occurred. Please try again later.",
 }
 
-const FirebaseErrorCodes = {
-  INVALID_VERIFICATION_CODE: "auth/invalid-verification-code",
-  TOO_MANY_REQUESTS: "auth/too-many-requests",
-  INVALID_PHONE_NUMBER: "auth/invalid-phone-number",
-  QUOTA_EXCEEDED: "auth/quota-exceeded",
-  CODE_EXPIRED: "auth/code-expired",
-  MISSING_VERIFICATION_CODE: "auth/missing-verification-code",
-  NETWORK_REQUEST_FAILED: "auth/network-request-failed",
-};
-
-const isFirebaseError = (
-  err: unknown,
-): err is FirebaseAuthTypes.NativeFirebaseAuthError => {
-  return (
-    typeof err === "object" &&
-    err !== null &&
-    "code" in err &&
-    typeof (err as FirebaseAuthTypes.NativeFirebaseAuthError).code ===
-      "string" &&
-    (err as FirebaseAuthTypes.NativeFirebaseAuthError).code.startsWith("auth/")
-  );
-};
-
 const PhoneNumberOTP = () => {
-  const router = useRouter();
   const { phoneNumber } = useLocalSearchParams<{ phoneNumber: string }>();
-
-  const { verifyPhoneNumberOTP } = useSession();
+  const { verifyPhoneNumber } = useSession();
 
   const [phoneNumberOTP, setPhoneNumberOTP] = useState("");
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  const createUser = api.user.createUser.useMutation();
-  const userOnboardingCompletedMutation =
-    api.user.checkOnboardingComplete.useMutation();
 
   const isValidPhoneNumberOTP = useMemo(
     () =>
@@ -79,88 +44,49 @@ const PhoneNumberOTP = () => {
     [phoneNumberOTP],
   );
 
-  const handleNewUser = async (userId: string) => {
-    if (!phoneNumber) {
-      setError(Error.UNKNOWN_ERROR);
-      return;
-    }
-
-    await createUser.mutateAsync({
-      userId,
-      phoneNumber,
-    });
-
-    router.replace("/user-info/name");
-  };
-
-  const handleExistingUser = async () => {
-    console.log("handleExistingUser", phoneNumber);
-    const userOnboardingCompleted =
-      await userOnboardingCompletedMutation.mutateAsync();
-
-    router.replace(
-      userOnboardingCompleted
-        ? "/(app)/(bottom-tabs)/(home)"
-        : "/user-info/name",
-    );
-  };
-
   const onSubmit = async () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    if (!phoneNumber) {
+      setError(Error.INVALID_PHONE_NUMBER);
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
 
-    let userCredential: FirebaseAuthTypes.UserCredential | null = null;
-
     try {
-      userCredential = await verifyPhoneNumberOTP(phoneNumberOTP);
-    } catch (error) {
-      if (!isFirebaseError(error)) {
+      await verifyPhoneNumber(phoneNumber, phoneNumberOTP);
+      // Navigation is now handled in the SessionContext
+    } catch (error: unknown) {
+      console.error("Error verifying code:", error);
+      if (error && typeof error === "object" && "message" in error) {
+        const errorMessage = (error as { message: string }).message;
+        switch (errorMessage) {
+          case "BAD_REQUEST":
+            setError(Error.INCORRECT_CODE);
+            break;
+          case "QUOTA_EXCEEDED":
+            setError(Error.QUOTA_EXCEEDED);
+            break;
+          case "CODE_EXPIRED":
+            setError(Error.CODE_EXPIRED);
+            break;
+          case "NETWORK_REQUEST_FAILED":
+            setError(Error.NETWORK_REQUEST_FAILED);
+            break;
+          case "TOO_MANY_REQUESTS":
+            setError(Error.TOO_MANY_REQUESTS);
+            break;
+          default:
+            setError(Error.UNKNOWN_ERROR);
+        }
+      } else {
         setError(Error.UNKNOWN_ERROR);
-        return;
       }
-
-      switch (error.code) {
-        case FirebaseErrorCodes.INVALID_VERIFICATION_CODE:
-          setError(Error.INCORRECT_CODE);
-          break;
-        case FirebaseErrorCodes.TOO_MANY_REQUESTS:
-          setError(Error.TOO_MANY_REQUESTS);
-          break;
-        case FirebaseErrorCodes.INVALID_PHONE_NUMBER:
-          setError(Error.INVALID_PHONE_NUMBER);
-          break;
-        case FirebaseErrorCodes.QUOTA_EXCEEDED:
-          setError(Error.QUOTA_EXCEEDED);
-          break;
-        case FirebaseErrorCodes.CODE_EXPIRED:
-          setError(Error.CODE_EXPIRED);
-          break;
-        case FirebaseErrorCodes.MISSING_VERIFICATION_CODE:
-          setError(Error.MISSING_VERIFICATION_CODE);
-          break;
-        case FirebaseErrorCodes.NETWORK_REQUEST_FAILED:
-          setError(Error.NETWORK_REQUEST_FAILED);
-          break;
-      }
-
-      setIsLoading(false);
     }
 
-    if (!userCredential) {
-      return;
-    }
-
-    const isNewUser = userCredential.additionalUserInfo?.isNewUser;
-    const userId = userCredential.user.uid;
-
-    if (!userId) {
-      setError(Error.UNKNOWN_ERROR);
-      return;
-    }
-
-    isNewUser ? await handleNewUser(userId) : await handleExistingUser();
+    setIsLoading(false);
   };
 
   return (
@@ -248,17 +174,12 @@ const OTPInput = ({ value, onChange }: OTPInputProps) => {
               {...(focused &&
                 (index === value.length ||
                   (value.length === 6 && index === 5)) && {
-                  backgroundColor: "$gray4",
+                  focused: true,
                 })}
             >
-              <Text fontSize="$7" fontWeight="bold" color="$color">
-                {value[index] ?? ""}
+              <Text fontSize={24} fontWeight="bold">
+                {value[index]}
               </Text>
-              {focused &&
-                (index === value.length ||
-                  (value.length === 6 && index === 5)) && (
-                  <View style={styles.cursor} />
-                )}
             </OTPBox>
           ))}
         </XStack>
@@ -268,15 +189,20 @@ const OTPInput = ({ value, onChange }: OTPInputProps) => {
 };
 
 const OTPBox = styled(View, {
-  width: 50,
-  height: 60,
-  borderRadius: "$6",
-  backgroundColor: "$gray3",
-  justifyContent: "center",
+  width: 44,
+  height: 48,
+  borderRadius: 8,
+  borderWidth: 1,
+  borderColor: "$gray7",
   alignItems: "center",
-  shadowColor: "$gray6",
-  shadowRadius: 5,
-  shadowOpacity: 0.2,
+  justifyContent: "center",
+  variants: {
+    focused: {
+      true: {
+        borderColor: "$blue9",
+      },
+    },
+  },
 });
 
 const styles = StyleSheet.create({
@@ -285,12 +211,6 @@ const styles = StyleSheet.create({
     width: 1,
     height: 1,
     opacity: 0,
-  },
-  cursor: {
-    width: 2,
-    height: 32,
-    backgroundColor: "$color",
-    position: "absolute",
   },
 });
 

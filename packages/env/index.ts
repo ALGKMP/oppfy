@@ -7,6 +7,10 @@ declare global {
       AWS_ACCESS_KEY_ID: string;
       AWS_SECRET_ACCESS_KEY: string;
 
+      TWILIO_ACCOUNT_SID: string;
+      TWILIO_AUTH_TOKEN: string;
+      TWILIO_SERVICE_SID: string;
+
       SNS_PUSH_NOTIFICATION_TOPIC_ARN: string;
 
       SQS_CONTACT_QUEUE: string;
@@ -35,6 +39,9 @@ declare global {
 
       EXPO_PUBLIC_SENTRY_AUTH_TOKEN: string;
       EXPO_PUBLIC_SENTRY_DSN: string;
+
+      JWT_ACCESS_SECRET: string;
+      JWT_REFRESH_SECRET: string;
 
       CLOUDFRONT_PUBLIC_KEY: string;
       CLOUDFRONT_PUBLIC_KEY_ID: string;

@@ -3,11 +3,9 @@ import { Keyboard, Modal, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import auth from "@react-native-firebase/auth";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
-import { getToken, useTheme } from "tamagui";
+import { useTheme } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
@@ -36,41 +34,23 @@ const countriesWithoutSections = countriesData.filter(
   (item) => typeof item !== "string",
 );
 
-// ! This is for testing purposes only, do not use in production
-auth().settings.appVerificationDisabledForTesting = true;
-
-enum Error {
-  INVALID_PHONE_NUMBER = "Invalid phone number. Please check the number and try again.",
+enum TwilioError {
+  INVALID_PHONE_NUMBER = "Invalid phone number format. Please use a valid phone number.",
+  INVALID_PARAMETER = "Invalid parameter. Please check your input and try again.",
+  RESOURCE_NOT_FOUND = "Service not found. Please try again later.",
+  CAPABILITY_NOT_ENABLED = "This capability is not enabled. Please contact support.",
+  AUTHENTICATION_FAILED = "Authentication failed. Please try again later.",
+  FORBIDDEN = "Access denied. Please try again later.",
+  RATE_LIMIT_EXCEEDED = "Too many attempts. Please try again later.",
   QUOTA_EXCEEDED = "SMS quota exceeded. Please try again later.",
-  NETWORK_REQUEST_FAILED = "Network error. Please check your connection and try again.",
-  TOO_MANY_REQUESTS = "Too many attempts. Please try again later.",
+  SERVICE_UNAVAILABLE = "Service temporarily unavailable. Please try again later.",
+  NETWORK_ERROR = "Network error. Please check your connection and try again.",
   UNKNOWN_ERROR = "An unknown error occurred. Please try again later.",
 }
 
-const FirebaseErrorCodes = {
-  INVALID_PHONE_NUMBER: "auth/invalid-phone-number",
-  QUOTA_EXCEEDED: "auth/quota-exceeded",
-  NETWORK_REQUEST_FAILED: "auth/network-request-failed",
-  TOO_MANY_REQUESTS: "auth/too-many-requests",
-};
-
-const isFirebaseError = (
-  err: unknown,
-): err is FirebaseAuthTypes.NativeFirebaseAuthError => {
-  return (
-    typeof err === "object" &&
-    err !== null &&
-    "code" in err &&
-    typeof (err as FirebaseAuthTypes.NativeFirebaseAuthError).code ===
-      "string" &&
-    (err as FirebaseAuthTypes.NativeFirebaseAuthError).code.startsWith("auth/")
-  );
-};
-
 const PhoneNumber = () => {
   const router = useRouter();
-
-  const { signInWithPhoneNumber } = useSession();
+  const { sendVerificationCode } = useSession();
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [countryData, setCountryData] = useState<CountryData>({
@@ -89,8 +69,7 @@ const PhoneNumber = () => {
     [phoneNumber, countryData.countryCode],
   );
 
-  const [error, setError] = useState<Error | null>(null);
-
+  const [error, setError] = useState<TwilioError | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async () => {
@@ -102,36 +81,56 @@ const PhoneNumber = () => {
     const e164PhoneNumber = `${countryData.dialingCode}${phoneNumber}`;
 
     try {
-      await signInWithPhoneNumber(e164PhoneNumber);
+      const success = await sendVerificationCode(e164PhoneNumber);
 
-      router.push({
-        params: {
-          phoneNumber: e164PhoneNumber,
-        },
-        pathname: "/firebaseauth/phone-number-otp",
-      });
-    } catch (err) {
-      if (!isFirebaseError(err)) {
-        setError(Error.UNKNOWN_ERROR);
-        setIsLoading(false);
-        return;
+      if (success) {
+        router.push({
+          params: {
+            phoneNumber: e164PhoneNumber,
+          },
+          pathname: "/auth/otp",
+        });
       }
-
-      switch (err.code) {
-        case FirebaseErrorCodes.INVALID_PHONE_NUMBER:
-          setError(Error.INVALID_PHONE_NUMBER);
-          break;
-        case FirebaseErrorCodes.QUOTA_EXCEEDED:
-          setError(Error.QUOTA_EXCEEDED);
-          break;
-        case FirebaseErrorCodes.NETWORK_REQUEST_FAILED:
-          setError(Error.NETWORK_REQUEST_FAILED);
-          break;
-        case FirebaseErrorCodes.TOO_MANY_REQUESTS:
-          setError(Error.TOO_MANY_REQUESTS);
-          break;
-        default:
-          setError(Error.UNKNOWN_ERROR);
+    } catch (err: unknown) {
+      console.error("Error sending verification code:", err);
+      if (err && typeof err === "object" && "message" in err) {
+        const errorMessage = (err as { message: string }).message;
+        switch (errorMessage) {
+          case "60200": // Invalid parameter
+            setError(TwilioError.INVALID_PARAMETER);
+            break;
+          case "60203": // Invalid phone number
+            setError(TwilioError.INVALID_PHONE_NUMBER);
+            break;
+          case "60404": // Service not found
+            setError(TwilioError.RESOURCE_NOT_FOUND);
+            break;
+          case "60405": // Capability not enabled
+            setError(TwilioError.CAPABILITY_NOT_ENABLED);
+            break;
+          case "60401": // Authentication failed
+            setError(TwilioError.AUTHENTICATION_FAILED);
+            break;
+          case "60403": // Forbidden
+            setError(TwilioError.FORBIDDEN);
+            break;
+          case "60429": // Too many requests
+            setError(TwilioError.RATE_LIMIT_EXCEEDED);
+            break;
+          case "60435": // Quota exceeded
+            setError(TwilioError.QUOTA_EXCEEDED);
+            break;
+          case "60503": // Service unavailable
+            setError(TwilioError.SERVICE_UNAVAILABLE);
+            break;
+          case "NETWORK_REQUEST_FAILED":
+            setError(TwilioError.NETWORK_ERROR);
+            break;
+          default:
+            setError(TwilioError.UNKNOWN_ERROR);
+        }
+      } else {
+        setError(TwilioError.UNKNOWN_ERROR);
       }
     }
 
@@ -203,8 +202,6 @@ const CountryPicker = ({
   selectedCountryData,
   setSelectedCountryData,
 }: CountryPickerProps) => {
-  const theme = useTheme();
-
   const [modalVisible, setModalVisible] = useState(false);
 
   const { searchQuery, setSearchQuery, filteredItems } = useSearch<CountryData>(
@@ -267,33 +264,27 @@ const CountryPicker = ({
               selectedCountryCode={selectedCountryData?.countryCode}
             />
           </YStack>
-          {/* </View> */}
         </View>
       </Modal>
 
-      {/* Do not attempt to use Styled() to clean this up, it breaks the onPress event */}
       <TouchableOpacity
-        style={{
-          height: 76,
-          borderRadius: getToken("$6", "radius") as number,
-          backgroundColor: theme.gray4.val,
-          paddingLeft: getToken("$3", "space") as number,
-          paddingRight: getToken("$3", "space") as number,
-          justifyContent: "center",
-          shadowColor: theme.gray6.val,
-          shadowOpacity: 0.1,
-          shadowRadius: 10,
-          borderTopRightRadius: 0,
-          borderBottomRightRadius: 0,
-        }}
         onPress={() => {
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          Keyboard.dismiss();
           setModalVisible(true);
         }}
       >
-        <XStack alignItems="center" gap="$1.5">
-          <Text fontSize="$9">{selectedCountryData?.flag}</Text>
-          <Text fontSize="$6" fontWeight="bold">
+        <XStack
+          height={76}
+          borderRadius="$6"
+          backgroundColor="$gray4"
+          paddingHorizontal="$3"
+          alignItems="center"
+          gap="$2"
+          borderTopRightRadius={0}
+          borderBottomRightRadius={0}
+        >
+          <Text fontSize={24}>{selectedCountryData?.flag}</Text>
+          <Text fontSize={16} fontWeight="500">
             {selectedCountryData?.dialingCode}
           </Text>
         </XStack>
@@ -302,7 +293,7 @@ const CountryPicker = ({
   );
 };
 
-interface CountriesFlastListProps {
+interface CountriesFlashListProps {
   onSelect?: (countryData: CountryData) => void;
   selectedCountryCode?: string;
   data: (string | CountryData)[];
@@ -312,78 +303,37 @@ const CountriesFlashList = ({
   onSelect,
   selectedCountryCode,
   data,
-}: CountriesFlastListProps) => {
+}: CountriesFlashListProps) => {
   const insets = useSafeAreaInsets();
 
   return (
     <FlashList
-      contentContainerStyle={{ paddingBottom: insets.bottom }}
       data={data}
-      onScrollBeginDrag={Keyboard.dismiss}
-      estimatedItemSize={43}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-      renderItem={({ item, index }) => {
+      estimatedItemSize={56}
+      contentContainerStyle={{ paddingBottom: insets.bottom }}
+      renderItem={({ item }) => {
         if (typeof item === "string") {
-          // Render header
           return (
-            <View paddingVertical={8}>
-              <H6 theme="alt1">{item}</H6>
-            </View>
-          );
-        } else {
-          const isSelected = item.countryCode === selectedCountryCode;
-
-          const isFirstInGroup =
-            index === 0 || typeof data[index - 1] === "string";
-
-          const isLastInGroup =
-            index === data.length - 1 || typeof data[index + 1] === "string";
-
-          const borderRadius = getToken("$6", "radius") as number;
-
-          return (
-            <ListItem
-              size="$4.5"
-              padding={12}
-              borderBottomWidth={1}
-              backgroundColor="$gray2"
-              {...(isFirstInGroup && {
-                borderTopLeftRadius: borderRadius,
-                borderTopRightRadius: borderRadius,
-              })}
-              {...(isLastInGroup && {
-                borderBottomWidth: 0,
-                borderBottomLeftRadius: borderRadius,
-                borderBottomRightRadius: borderRadius,
-              })}
-              pressStyle={{
-                backgroundColor: "$gray3",
-              }}
-              onPress={() => onSelect && onSelect(item)}
-            >
-              <XStack
-                flex={1}
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <XStack alignItems="center" gap="$2">
-                  <Text fontSize="$8">{item.flag}</Text>
-                  <Text fontSize="$5">{item.name}</Text>
-                  <Text fontSize="$5" color="$gray9">
-                    ({item.dialingCode})
-                  </Text>
-                </XStack>
-
-                {isSelected && <CheckCircle2 />}
-              </XStack>
-            </ListItem>
+            <H6 color="$gray11" marginTop="$4" marginBottom="$2">
+              {item}
+            </H6>
           );
         }
+
+        const isSelected = item.countryCode === selectedCountryCode;
+
+        return (
+          <ListItem
+            title={`${item.flag}  ${item.name}`}
+            subTitle={item.dialingCode}
+            onPress={() => onSelect?.(item)}
+            pressStyle={{
+              backgroundColor: "$gray4",
+            }}
+            iconAfter={isSelected ? <CheckCircle2 color="$blue9" /> : undefined}
+          />
+        );
       }}
-      getItemType={(item) =>
-        typeof item === "string" ? "sectionHeader" : "row"
-      }
     />
   );
 };

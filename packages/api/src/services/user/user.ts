@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import { auth } from "@oppfy/firebase";
-
 import type { accountStatusEnum } from "../../../../db/src/schema";
 import { DomainError, ErrorCode } from "../../errors";
 import {
@@ -12,8 +10,8 @@ import {
   ProfileRepository,
   ProfileStatsRepository,
   SearchRepository,
+  UserRepository,
 } from "../../repositories";
-import { UserRepository } from "../../repositories/user/user";
 
 //TODO: move to validators
 export type InferEnum<T extends { enumValues: string[] }> =
@@ -28,7 +26,6 @@ export class UserService {
   private blockRepository = new BlockRepository();
   private profileStatsRepository = new ProfileStatsRepository();
   private postStatsRepository = new PostStatsRepository();
-  private auth = auth;
 
   async createUserWithUsername(
     userId: string,
@@ -122,7 +119,7 @@ export class UserService {
 
     await this.profileRepository.deleteProfile(user.profileId);
     await this.searchRepository.deleteProfile(userId);
-    await this.auth.deleteUser(userId);
+    await this.userRepository.deleteUser(userId);
   }
 
   async checkOnboardingComplete(userId: string | undefined) {

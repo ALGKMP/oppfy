@@ -45,7 +45,7 @@ const Permissions = () => {
   const onPress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     void router.push(
-      isSignedIn ? "/(app)/(bottom-tabs)/(home)" : "/firebaseauth/link",
+      isSignedIn ? "/(app)/(bottom-tabs)/(home)" : "/auth/phone-number",
     );
   };
 
