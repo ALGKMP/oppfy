@@ -48,12 +48,12 @@ export class UserService {
       usernameExists = await this.profileRepository.usernameExists(username);
     } while (usernameExists);
 
-    await this.userRepository.createUserWithName(
+    await this.userRepository.createUser(
       userId,
       phoneNumber,
       username,
-      name,
       accountStatus,
+      name,
     );
   }
 
