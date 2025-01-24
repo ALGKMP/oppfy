@@ -54,6 +54,8 @@ const Name = () => {
               cancelText: "Cancel",
             });
 
+            console.log("confirmed", confirmed);
+
             if (confirmed) {
               await signOut();
             }

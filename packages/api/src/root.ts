@@ -3,22 +3,24 @@ import { generateOpenApiDocument } from "trpc-openapi";
 import { env } from "@oppfy/env";
 
 import {
+  authRouter,
   blockRouter,
   contactsRouter,
   followRouter,
   friendRouter,
   notificationsRouter,
+  pendingUserRouter,
   postRouter,
   profileRouter,
   reportRouter,
   requestRouter,
   searchRouter,
   userRouter,
-  pendingUserRouter
 } from "./routers";
 import { createCallerFactory, createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
+  auth: authRouter,
   user: userRouter,
   profile: profileRouter,
   post: postRouter,

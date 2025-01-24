@@ -3,8 +3,6 @@ import { Keyboard, Modal, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import auth from "@react-native-firebase/auth";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
 import { getToken, useTheme } from "tamagui";
@@ -31,13 +29,11 @@ import { useSession } from "~/contexts/SessionContext";
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
 import useSearch from "~/hooks/useSearch";
+import { api } from "~/utils/api";
 
 const countriesWithoutSections = countriesData.filter(
   (item) => typeof item !== "string",
 );
-
-// ! This is for testing purposes only, do not use in production
-auth().settings.appVerificationDisabledForTesting = true;
 
 enum Error {
   INVALID_PHONE_NUMBER = "Invalid phone number. Please check the number and try again.",
@@ -47,30 +43,9 @@ enum Error {
   UNKNOWN_ERROR = "An unknown error occurred. Please try again later.",
 }
 
-const FirebaseErrorCodes = {
-  INVALID_PHONE_NUMBER: "auth/invalid-phone-number",
-  QUOTA_EXCEEDED: "auth/quota-exceeded",
-  NETWORK_REQUEST_FAILED: "auth/network-request-failed",
-  TOO_MANY_REQUESTS: "auth/too-many-requests",
-};
-
-const isFirebaseError = (
-  err: unknown,
-): err is FirebaseAuthTypes.NativeFirebaseAuthError => {
-  return (
-    typeof err === "object" &&
-    err !== null &&
-    "code" in err &&
-    typeof (err as FirebaseAuthTypes.NativeFirebaseAuthError).code ===
-      "string" &&
-    (err as FirebaseAuthTypes.NativeFirebaseAuthError).code.startsWith("auth/")
-  );
-};
-
 const PhoneNumber = () => {
   const router = useRouter();
-
-  const { signInWithPhoneNumber } = useSession();
+  const sendVerificationCode = api.auth.sendVerificationCode.useMutation();
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [countryData, setCountryData] = useState<CountryData>({
@@ -90,7 +65,6 @@ const PhoneNumber = () => {
   );
 
   const [error, setError] = useState<Error | null>(null);
-
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async () => {
@@ -102,7 +76,7 @@ const PhoneNumber = () => {
     const e164PhoneNumber = `${countryData.dialingCode}${phoneNumber}`;
 
     try {
-      await signInWithPhoneNumber(e164PhoneNumber);
+      await sendVerificationCode.mutateAsync({ phoneNumber: e164PhoneNumber });
 
       router.push({
         params: {
@@ -110,28 +84,25 @@ const PhoneNumber = () => {
         },
         pathname: "/firebaseauth/phone-number-otp",
       });
-    } catch (err) {
-      if (!isFirebaseError(err)) {
+    } catch (err: unknown) {
+      console.error("Error sending verification code:", err);
+      if (err && typeof err === "object" && "message" in err) {
+        const errorMessage = (err as { message: string }).message;
+        switch (errorMessage) {
+          case "QUOTA_EXCEEDED":
+            setError(Error.QUOTA_EXCEEDED);
+            break;
+          case "NETWORK_REQUEST_FAILED":
+            setError(Error.NETWORK_REQUEST_FAILED);
+            break;
+          case "TOO_MANY_REQUESTS":
+            setError(Error.TOO_MANY_REQUESTS);
+            break;
+          default:
+            setError(Error.UNKNOWN_ERROR);
+        }
+      } else {
         setError(Error.UNKNOWN_ERROR);
-        setIsLoading(false);
-        return;
-      }
-
-      switch (err.code) {
-        case FirebaseErrorCodes.INVALID_PHONE_NUMBER:
-          setError(Error.INVALID_PHONE_NUMBER);
-          break;
-        case FirebaseErrorCodes.QUOTA_EXCEEDED:
-          setError(Error.QUOTA_EXCEEDED);
-          break;
-        case FirebaseErrorCodes.NETWORK_REQUEST_FAILED:
-          setError(Error.NETWORK_REQUEST_FAILED);
-          break;
-        case FirebaseErrorCodes.TOO_MANY_REQUESTS:
-          setError(Error.TOO_MANY_REQUESTS);
-          break;
-        default:
-          setError(Error.UNKNOWN_ERROR);
       }
     }
 
@@ -267,11 +238,9 @@ const CountryPicker = ({
               selectedCountryCode={selectedCountryData?.countryCode}
             />
           </YStack>
-          {/* </View> */}
         </View>
       </Modal>
 
-      {/* Do not attempt to use Styled() to clean this up, it breaks the onPress event */}
       <TouchableOpacity
         style={{
           height: 76,
@@ -325,7 +294,6 @@ const CountriesFlashList = ({
       keyboardShouldPersistTaps="handled"
       renderItem={({ item, index }) => {
         if (typeof item === "string") {
-          // Render header
           return (
             <View paddingVertical={8}>
               <H6 theme="alt1">{item}</H6>

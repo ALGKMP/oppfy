@@ -8,6 +8,7 @@ import { BlockService } from "./network/block";
 import { FollowService } from "./network/follow";
 import { FriendService } from "./network/friend";
 import { ReportService } from "./network/report";
+import { TwilioService } from "./twilio";
 import { ContactService } from "./user/contacts";
 import { NotificationsService } from "./user/notifications";
 import { PendingUserService } from "./user/pendingUser";
@@ -17,7 +18,7 @@ import { UserService } from "./user/user";
 
 export const services = {
   user: new UserService(),
-  pendingUser: new PendingUserService(), 
+  pendingUser: new PendingUserService(),
   notifications: new NotificationsService(),
   contact: new ContactService(),
   privacy: new PrivacyService(),
@@ -32,4 +33,5 @@ export const services = {
   paginate: new PaginationService(),
   report: new ReportService(),
   cloudfront: new CloudFrontService(),
+  twilio: new TwilioService(),
 };
