@@ -14,12 +14,12 @@ const JWT_REFRESH_SECRET =
 const generateTokens = (uid: string) => {
   // Access token expires in 15 minutes
   const accessToken = jwt.sign({ uid }, JWT_ACCESS_SECRET, {
-    expiresIn: "15m",
+    expiresIn: "30m",
   });
 
   // Refresh token expires in 7 days
   const refreshToken = jwt.sign({ uid }, JWT_REFRESH_SECRET, {
-    expiresIn: "7d",
+    expiresIn: "30d",
   });
 
   return { accessToken, refreshToken };

@@ -66,8 +66,6 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  * @see https://trpc.io/docs/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  console.log("Headers received:", Object.fromEntries(opts.headers));
-
   const authToken = opts.headers.get("Authorization") ?? null;
   const source = opts.headers.get("x-trpc-source") ?? "unknown";
 
@@ -91,6 +89,8 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
         });
       }
       session = jwt.verify(token, JWT_ACCESS_SECRET) as JWTPayload;
+      console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+      console.log("session", session);
     } catch (err) {
       console.error("JWT verification failed:", err);
       throw new TRPCError({
