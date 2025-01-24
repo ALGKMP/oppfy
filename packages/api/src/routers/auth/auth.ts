@@ -3,23 +3,22 @@ import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 
+import { env } from "@oppfy/env";
+
 import { createTRPCRouter, publicProcedure } from "../../trpc";
 
 // Secret keys should be in environment variables in production
-const JWT_ACCESS_SECRET =
-  process.env.JWT_ACCESS_SECRET ?? "your-access-secret-key";
-const JWT_REFRESH_SECRET =
-  process.env.JWT_REFRESH_SECRET ?? "your-refresh-secret-key";
 
 const generateTokens = (uid: string) => {
   // Access token expires in 15 minutes
-  const accessToken = jwt.sign({ uid }, JWT_ACCESS_SECRET, {
-    expiresIn: "30m",
+  const accessToken = jwt.sign({ uid }, env.JWT_ACCESS_SECRET, {
+    // expiresIn: "30m",
+    expiresIn: "1m",
   });
 
   // Refresh token expires in 7 days
-  const refreshToken = jwt.sign({ uid }, JWT_REFRESH_SECRET, {
-    expiresIn: "30d",
+  const refreshToken = jwt.sign({ uid }, env.JWT_REFRESH_SECRET, {
+    expiresIn: "3m",
   });
 
   return { accessToken, refreshToken };
@@ -133,12 +132,20 @@ export const authRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       try {
         // Verify the refresh token
-        const payload = jwt.verify(input.refreshToken, JWT_REFRESH_SECRET) as {
-          userId: string;
+        const { uid } = jwt.verify(
+          input.refreshToken,
+          env.JWT_REFRESH_SECRET,
+        ) as {
+          uid: string;
         };
 
         // Generate new tokens
-        const tokens = generateTokens(payload.userId);
+        const tokens = generateTokens(uid);
+
+        console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+        console.log("Access token:", tokens.accessToken);
+        console.log("Refresh token:", tokens.refreshToken);
+        console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
 
         return tokens;
       } catch (error) {

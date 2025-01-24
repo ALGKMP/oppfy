@@ -40,6 +40,9 @@ declare global {
       EXPO_PUBLIC_SENTRY_AUTH_TOKEN: string;
       EXPO_PUBLIC_SENTRY_DSN: string;
 
+      JWT_ACCESS_SECRET: string;
+      JWT_REFRESH_SECRET: string;
+
       CLOUDFRONT_PUBLIC_KEY: string;
       CLOUDFRONT_PUBLIC_KEY_ID: string;
       CLOUDFRONT_PROFILE_DISTRIBUTION_ID: string;

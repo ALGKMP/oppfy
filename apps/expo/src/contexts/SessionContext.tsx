@@ -67,16 +67,41 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
 
   // Load tokens and user from storage on startup
   useEffect(() => {
-    const storedTokens = storage.getString("auth_tokens");
+    const loadTokens = async () => {
+      const storedTokens = storage.getString("auth_tokens");
 
-    if (storedTokens) {
-      const parsedTokens = JSON.parse(storedTokens) as AuthTokens;
-      setTokens(parsedTokens);
-      // parse jwt and pull uid out
-      const jwt = jwtDecode<JWTPayload>(parsedTokens.accessToken);
-      setUser({ uid: jwt.uid });
-    }
-    setStatus("success");
+      if (storedTokens) {
+        const parsedTokens = JSON.parse(storedTokens) as AuthTokens;
+
+        try {
+          // Check if access token is expired
+          const jwt = jwtDecode<JWTPayload>(parsedTokens.accessToken);
+          const now = Math.floor(Date.now() / 1000);
+
+          if (jwt.exp <= now) {
+            // Token is expired, try to refresh
+            const newTokens = await refreshTokenMutation.mutateAsync({
+              refreshToken: parsedTokens.refreshToken,
+            });
+
+            setTokens(newTokens);
+            storage.set("auth_tokens", JSON.stringify(newTokens));
+            setUser({ uid: jwtDecode<JWTPayload>(newTokens.accessToken).uid });
+          } else {
+            // Token is still valid
+            setTokens(parsedTokens);
+            setUser({ uid: jwt.uid });
+          }
+        } catch (error) {
+          console.error("Error loading/refreshing tokens:", error);
+          // If refresh fails or token is invalid, clear everything
+          await signOut();
+        }
+      }
+      setStatus("success");
+    };
+
+    void loadTokens();
   }, []);
 
   // Enhanced token refresh logic
@@ -97,7 +122,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
         const newTokens = await refreshTokenMutation.mutateAsync({
           refreshToken: tokens.refreshToken,
         });
-
+        console.log("New tokens:", newTokens);
         // Verify the new tokens before setting them
         const newPayload = jwtDecode<JWTPayload>(newTokens.accessToken);
         if (!newPayload.exp || !newPayload.iat || !newPayload.uid) {

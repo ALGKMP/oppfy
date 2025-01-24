@@ -16,17 +16,24 @@ const AppLayout = () => {
   useNotificationObserver();
   // useContacts(true);
 
-  const { isLoading: _sessionIsLoading, isSignedIn } = useSession();
-  const { isLoading: _permissionsIsLoading, permissions } = usePermissions();
+  const { isLoading: sessionIsLoading, isSignedIn } = useSession();
+  const { isLoading: permissionsIsLoading, permissions } = usePermissions();
 
   const requiredPermissions = permissions.camera && permissions.contacts;
 
   useEffect(() => {
-    void setTimeout(
-      () => void SplashScreen.hideAsync(),
-      DELAY_TO_HIDE_SPLASH_SCREEN,
-    );
-  }, []);
+    if (!sessionIsLoading && !permissionsIsLoading) {
+      void setTimeout(
+        () => void SplashScreen.hideAsync(),
+        DELAY_TO_HIDE_SPLASH_SCREEN,
+      );
+    }
+  }, [sessionIsLoading, permissionsIsLoading]);
+
+  // Wait for everything to load before making redirect decisions
+  if (sessionIsLoading || permissionsIsLoading) {
+    return null;
+  }
 
   if (!isSignedIn) {
     console.log("!isSignedIn");

@@ -14,13 +14,11 @@ import { ZodError } from "zod";
 
 import { cloudfront } from "@oppfy/cloudfront";
 import { db } from "@oppfy/db";
+import { env } from "@oppfy/env";
 import { mux } from "@oppfy/mux";
 import { s3 } from "@oppfy/s3";
 
 import { services } from "./services";
-
-const JWT_ACCESS_SECRET =
-  process.env.JWT_ACCESS_SECRET ?? "your-access-secret-key";
 
 interface JWTPayload {
   uid: string;
@@ -90,18 +88,9 @@ export const createTRPCContext = (opts: { headers: Headers }) => {
       }
 
       // Verify and decode the token
-      session = jwt.verify(token, JWT_ACCESS_SECRET) as JWTPayload;
-
-      // Check if token is about to expire (within 5 minutes)
-      const now = Math.floor(Date.now() / 1000);
-      if (session.exp - now < 300) {
-        // 5 minutes
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Token is about to expire",
-        });
-      }
+      session = jwt.verify(token, env.JWT_ACCESS_SECRET) as JWTPayload;
     } catch (err) {
+      console.log("Error verifying token:", err);
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message:
