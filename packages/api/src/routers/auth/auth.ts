@@ -11,14 +11,14 @@ const JWT_ACCESS_SECRET =
 const JWT_REFRESH_SECRET =
   process.env.JWT_REFRESH_SECRET ?? "your-refresh-secret-key";
 
-const generateTokens = (userId: string) => {
+const generateTokens = (uid: string) => {
   // Access token expires in 15 minutes
-  const accessToken = jwt.sign({ userId }, JWT_ACCESS_SECRET, {
+  const accessToken = jwt.sign({ uid }, JWT_ACCESS_SECRET, {
     expiresIn: "15m",
   });
 
   // Refresh token expires in 7 days
-  const refreshToken = jwt.sign({ userId }, JWT_REFRESH_SECRET, {
+  const refreshToken = jwt.sign({ uid }, JWT_REFRESH_SECRET, {
     expiresIn: "7d",
   });
 
