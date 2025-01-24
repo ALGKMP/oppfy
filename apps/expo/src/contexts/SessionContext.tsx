@@ -93,7 +93,6 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
             setUser({ uid: jwt.uid });
           }
         } catch (error) {
-          console.error("Error loading/refreshing tokens:", error);
           // If refresh fails or token is invalid, clear everything
           await signOut();
         }
@@ -135,7 +134,6 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
         // Update user data if needed
         setUser({ uid: newPayload.uid });
       } catch (error) {
-        console.error("Failed to refresh tokens:", error);
         // If refresh fails, sign out
         void signOut();
       }
@@ -151,51 +149,41 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   }, [tokens?.refreshToken]);
 
   const sendVerificationCode = async (phoneNumber: string) => {
-    try {
-      await sendVerificationCodeMutation.mutateAsync({ phoneNumber });
-      return true;
-    } catch (error) {
-      console.error("Error sending verification code:", error);
-      throw error;
-    }
+    await sendVerificationCodeMutation.mutateAsync({ phoneNumber });
+    return true;
   };
 
   const verifyPhoneNumber = async (phoneNumber: string, code: string) => {
-    try {
-      const result = await verifyCodeMutation.mutateAsync({
-        phoneNumber,
-        code,
-      });
+    const result = await verifyCodeMutation.mutateAsync({
+      phoneNumber,
+      code,
+    });
 
-      if (!result.success || !result.tokens) {
-        throw new Error("Failed to verify code with API");
-      }
-
-      // Store tokens and user
-      setTokens(result.tokens);
-      const jwt = jwtDecode<JWTPayload>(result.tokens.accessToken);
-      setUser({ uid: jwt.uid });
-      storage.set("auth_tokens", JSON.stringify(result.tokens));
-
-      // Check if user needs onboarding
-      const userOnboardingCompleted =
-        await userOnboardingCompletedMutation.mutateAsync();
-
-      // Navigate based on onboarding status
-      router.replace(
-        userOnboardingCompleted
-          ? "/(app)/(bottom-tabs)/(home)"
-          : "/user-info/name",
-      );
-
-      return {
-        tokens: result.tokens,
-        isNewUser: result.isNewUser,
-      };
-    } catch (error) {
-      console.error("Error verifying code:", error);
-      throw error;
+    if (!result.success || !result.tokens) {
+      throw new Error("Failed to verify code with API");
     }
+
+    // Store tokens and user
+    setTokens(result.tokens);
+    const jwt = jwtDecode<JWTPayload>(result.tokens.accessToken);
+    setUser({ uid: jwt.uid });
+    storage.set("auth_tokens", JSON.stringify(result.tokens));
+
+    // Check if user needs onboarding
+    const userOnboardingCompleted =
+      await userOnboardingCompletedMutation.mutateAsync();
+
+    // Navigate based on onboarding status
+    router.replace(
+      userOnboardingCompleted
+        ? "/(app)/(bottom-tabs)/(home)"
+        : "/user-info/name",
+    );
+
+    return {
+      tokens: result.tokens,
+      isNewUser: result.isNewUser,
+    };
   };
 
   const signOut = async () => {

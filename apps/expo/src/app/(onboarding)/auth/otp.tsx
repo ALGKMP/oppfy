@@ -63,10 +63,16 @@ const PhoneNumberOTP = () => {
       await verifyPhoneNumber(phoneNumber, phoneNumberOTP);
       // Navigation is now handled in the SessionContext
     } catch (err: unknown) {
-      console.error("Error verifying code:", err);
       if (err && typeof err === "object" && "message" in err) {
         const errorMessage = (err as { message: string }).message;
+        console.log("Error message:", err);
         switch (errorMessage) {
+          case "Invalid Verification Code":
+            setError(TwilioError.INVALID_CODE);
+            break;
+          case "Failed to verify code":
+            setError(TwilioError.INVALID_CODE);
+            break;
           case "60200": // Invalid parameter
             setError(TwilioError.INVALID_PARAMETER);
             break;
