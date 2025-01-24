@@ -3,9 +3,9 @@ import { and, eq, inArray, or, sql } from "drizzle-orm"; // Add inArray import
 import { db, schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
 
-import { accountStatusEnum } from "../../../../db/src/schema";
+import type { accountStatusEnum } from "../../../../db/src/schema";
 import { handleDatabaseErrors } from "../../errors";
-import { InferEnum } from "../../services/user/user";
+import type { InferEnum } from "../../services/user/user";
 
 export type PrivacySettings = NonNullable<
   InferInsertModel<typeof schema.user>["privacySetting"]
@@ -20,12 +20,13 @@ export class UserRepository {
     phoneNumber: string,
     username: string,
     accountStatus: InferEnum<typeof accountStatusEnum>,
+    name?: string,
   ) {
     await this.db.transaction(async (tx) => {
       // Create an empty profile for the user, ready to be updated later
       const [profile] = await tx
         .insert(schema.profile)
-        .values({ username })
+        .values({ username, ...(name && { name }) })
         .returning({ id: schema.profile.id });
 
       if (!profile) throw new Error("Profile was not created");
