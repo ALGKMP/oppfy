@@ -30,11 +30,6 @@ const AppLayout = () => {
     }
   }, [sessionIsLoading, permissionsIsLoading]);
 
-  // Wait for everything to load before making redirect decisions
-  if (sessionIsLoading || permissionsIsLoading) {
-    return null;
-  }
-
   if (!isSignedIn) {
     console.log("!isSignedIn");
     return <Redirect href="/(onboarding)" />;
