@@ -30,7 +30,7 @@ interface SessionContextType {
   verifyPhoneNumber: (
     phoneNumber: string,
     code: string,
-  ) => Promise<{ tokens: AuthTokens }>;
+  ) => Promise<{ tokens: AuthTokens; isNewUser: boolean }>;
 }
 
 interface SessionProviderProps {
@@ -134,6 +134,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
 
       return {
         tokens: result.tokens,
+        isNewUser: result.isNewUser,
       };
     } catch (error) {
       console.error("Error verifying code:", error);
