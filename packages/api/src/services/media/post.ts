@@ -527,7 +527,7 @@ export class PostService {
       throw new DomainError(ErrorCode.COMMENT_NOT_FOUND);
     }
 
-    if (post.recipientId !== userId || comment.userId !== userId) {
+    if (post.recipientId !== userId && comment.userId !== userId) {
       throw new DomainError(ErrorCode.UNAUTHORIZED);
     }
 
