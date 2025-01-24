@@ -25,7 +25,7 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const postId = `${Date.now()}-${ctx.session.uid}`;
+        const postId = randomUUID().toString();
 
         const presignedUrl = await ctx.services.s3.uploadPostForUserOnAppUrl({
           author: ctx.session.uid,

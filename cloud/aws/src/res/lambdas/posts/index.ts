@@ -153,6 +153,7 @@ const lambdaHandler = async (
         }
       }
     } catch (error) {
+      console.log("error", error);
       // If the transaction fails, delete the S3 object
       await deleteS3Object(objectBucket, key);
       throw error;
