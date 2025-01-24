@@ -17,7 +17,7 @@ const generateTokens = (uid: string) => {
 
   // Refresh token expires in 7 days
   const refreshToken = jwt.sign({ uid }, env.JWT_REFRESH_SECRET, {
-    expiresIn: "30d",
+    expiresIn: "60d",
   });
 
   return { accessToken, refreshToken };
