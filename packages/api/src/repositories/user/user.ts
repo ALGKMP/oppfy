@@ -61,6 +61,54 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
+  async createUserWithName(
+    userId: string,
+    phoneNumber: string,
+    username: string,
+    name: string,
+    accountStatus: InferEnum<typeof accountStatusEnum>,
+  ) {
+    await this.db.transaction(async (tx) => {
+      // Create an empty profile for the user, ready to be updated later
+      const [profile] = await tx
+        .insert(schema.profile)
+        .values({ username, name })
+        .returning({ id: schema.profile.id });
+
+      if (!profile) throw new Error("Profile was not created");
+
+      const [profileStats] = await tx
+        .insert(schema.profileStats)
+        .values({ profileId: profile.id })
+        .returning({ id: schema.profileStats.id });
+
+      // Create default notification settings for the user
+      const [notificationSetting] = await tx
+        .insert(schema.notificationSettings)
+        .values({})
+        .returning({ id: schema.notificationSettings.id });
+
+      if (profileStats === undefined) {
+        throw new Error("Profile stats was not created");
+      }
+
+      if (notificationSetting === undefined) {
+        throw new Error("Notification setting was not created");
+      }
+
+      // Create the user with the profileId and notificationSettingsId
+      await tx.insert(schema.user).values({
+        id: userId,
+        profileId: profile.id,
+        notificationSettingsId: notificationSetting.id,
+        phoneNumber,
+        accountStatus,
+      });
+    });
+  }
+
+
+  @handleDatabaseErrors
   async getUser(userId: string) {
     return await this.db.query.user.findFirst({
       where: eq(schema.user.id, userId),
