@@ -104,7 +104,7 @@ const Start = () => {
   const onSubmit = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     requiredPermissions
-      ? router.push("/firebaseauth/link")
+      ? router.push("/auth/phone-number")
       : router.push("/misc/permissions");
   };
 
