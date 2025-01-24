@@ -72,10 +72,13 @@ export const authRouter = createTRPCRouter({
         // Generate a new user ID
         const userId = crypto.randomUUID();
 
+        let isNewUser = false;
+
         if (user && user.accountStatus === "notOnApp") {
           // Update existing user's ID and status
           await ctx.services.user.updateUserId(user.id, userId);
           await ctx.services.user.updateUserAccountStatus(userId, "onApp");
+          isNewUser = true;
 
           // Fetch the updated user
           user = await ctx.services.user.getUserByPhoneNumber(
@@ -88,6 +91,7 @@ export const authRouter = createTRPCRouter({
             input.phoneNumber,
             "onApp",
           );
+          isNewUser = true;
 
           // Fetch the newly created user
           user = await ctx.services.user.getUserByPhoneNumber(
@@ -105,7 +109,7 @@ export const authRouter = createTRPCRouter({
 
         return {
           success: true,
-          user,
+          isNewUser,
           tokens: {
             accessToken,
             refreshToken,
