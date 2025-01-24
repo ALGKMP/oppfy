@@ -516,22 +516,28 @@ export class PostService {
   }) {
     // get post data from commentId
     const post = await this.postRepository.getPostFromCommentId(commentId);
+    console.log("post", post);
 
     if (post === undefined) {
       throw new DomainError(ErrorCode.POST_NOT_FOUND);
     }
+    console.log("post", post);
 
     const comment = await this.commentRepository.getComment(commentId);
+    console.log("comment", comment);
 
     if (comment === undefined) {
       throw new DomainError(ErrorCode.COMMENT_NOT_FOUND);
     }
+    console.log("comment", comment);
 
     if (post.recipientId !== userId && comment.userId !== userId) {
       throw new DomainError(ErrorCode.UNAUTHORIZED);
     }
+    console.log("comment", comment);
 
     await this.commentRepository.removeComment(commentId);
+    console.log("comment", comment);
     await this.postStatsRepository.decrementCommentsCount(postId);
   }
 

@@ -113,11 +113,13 @@ export class PostRepository {
       .selectDistinct({
         postId: schema.post.id,
         authorId: schema.post.authorId,
+        authorName: authorProfile.name,
         authorUsername: authorProfile.username,
         authorProfileId: authorProfile.id,
         authorProfilePicture: authorProfile.profilePictureKey,
         recipientId: schema.post.recipientId,
         recipientProfileId: recipientProfile.id,
+        recipientName: recipientProfile.name,
         recipientUsername: recipientProfile.username,
         recipientProfilePicture: recipientProfile.profilePictureKey,
         caption: schema.post.caption,
@@ -128,15 +130,10 @@ export class PostRepository {
         likesCount: schema.postStats.likes,
         mediaType: schema.post.mediaType,
         createdAt: schema.post.createdAt,
-        hasLiked:
-          sql<boolean>`CASE WHEN ${schema.like.userId} IS NOT NULL THEN true ELSE false END`.as(
-            "has_liked",
-          ),
       })
       .from(schema.comment)
       .innerJoin(schema.post, eq(schema.comment.postId, schema.post.id))
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
-      .innerJoin(schema.like, eq(schema.like.postId, schema.post.id))
       .innerJoin(author, eq(schema.post.authorId, author.id))
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
