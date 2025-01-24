@@ -38,13 +38,19 @@ type Status = "loading" | "success" | "error";
 
 const AuthContext = createContext<SessionContextType | undefined>(undefined);
 
+interface JWTPayload {
+  uid: string;
+  iat: number;
+  exp: number;
+  jti?: string;
+}
 
-function parseJwt(token: string): User {
+function parseJwt(token: string): JWTPayload {
   const parts = token.split(".");
   if (parts.length !== 3) {
     throw new Error("Invalid JWT format");
   }
-  
+
   const base64 = parts[1]!.replace(/-/g, "+").replace(/_/g, "/");
   const jsonPayload = decodeURIComponent(
     atob(base64)
@@ -89,17 +95,36 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
     setStatus("success");
   }, []);
 
-  // Refresh token setup
+  // Enhanced token refresh logic
   useEffect(() => {
     if (!tokens?.refreshToken) return;
 
     const refreshTokens = async () => {
       try {
+        const currentPayload = parseJwt(tokens.accessToken);
+        const now = Math.floor(Date.now() / 1000);
+
+        // Only refresh if token is about to expire in the next 5 minutes
+        if (currentPayload.exp - now > 300) {
+          return;
+        }
+
+        console.log("Refreshing tokens...");
         const newTokens = await refreshTokenMutation.mutateAsync({
           refreshToken: tokens.refreshToken,
         });
+
+        // Verify the new tokens before setting them
+        const newPayload = parseJwt(newTokens.accessToken);
+        if (!newPayload.exp || !newPayload.iat || !newPayload.uid) {
+          throw new Error("Invalid new token format");
+        }
+
         setTokens(newTokens);
         storage.set("auth_tokens", JSON.stringify(newTokens));
+
+        // Update user data if needed
+        setUser({ uid: newPayload.uid });
       } catch (error) {
         console.error("Failed to refresh tokens:", error);
         // If refresh fails, sign out
@@ -107,8 +132,11 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
       }
     };
 
-    // Refresh tokens 1 minute before access token expires
-    const timer = setInterval(refreshTokens, 14 * 60 * 1000); // 14 minutes
+    // Check tokens every minute
+    const timer = setInterval(refreshTokens, 60 * 1000);
+
+    // Initial check
+    void refreshTokens();
 
     return () => clearInterval(timer);
   }, [tokens?.refreshToken]);
