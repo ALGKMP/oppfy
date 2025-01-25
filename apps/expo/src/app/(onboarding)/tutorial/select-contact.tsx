@@ -6,12 +6,12 @@ import { FlashList } from "@shopify/flash-list";
 import { Phone } from "@tamagui/lucide-icons";
 import type { IFuseOptions } from "fuse.js";
 import { parsePhoneNumberWithError } from "libphonenumber-js";
-import { getToken, Text } from "tamagui";
+import { getToken } from "tamagui";
 
 import {
   EmptyPlaceholder,
+  H1,
   HeaderTitle,
-  ScreenView,
   SearchInput,
   Spacer,
   UserCard,
@@ -108,69 +108,73 @@ const SelectContact = () => {
   const TILE_WIDTH = (screenWidth - SCREEN_PADDING * 2 - GAP) / 2; // Account for screen padding and gap between tiles
 
   return (
-    <ScreenView
-      backgroundColor="$background"
-      padding="$0"
-      justifyContent="space-between"
-    >
-      <YStack flex={1} paddingHorizontal="$4" gap="$4" paddingTop="$8">
-        <YStack gap="$2">
-          <HeaderTitle>Select a Contact</HeaderTitle>
-          <SearchInput
-            placeholder="Search contacts..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onClear={() => setSearchQuery("")}
+    <FlashList
+      data={displayContacts}
+      estimatedItemSize={80}
+      numColumns={2}
+      contentContainerStyle={{
+        paddingHorizontal: getToken("$4", "space"),
+        paddingTop: getToken("$6", "space"),
+      }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+      onEndReached={loadMoreContacts}
+      onEndReachedThreshold={0.5}
+      ItemSeparatorComponent={Spacer}
+      ListEmptyComponent={() => {
+        return isLoadingContacts ? (
+          <YStack flex={1} gap="$4" paddingTop="$4">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <UserCard.Skeleton key={index} width={cardWidth} />
+            ))}
+          </YStack>
+        ) : (
+          <EmptyPlaceholder
+            icon={PhoneIcon}
+            title="No Contacts Found"
+            subtitle="We couldn't find any contacts that aren't already on the app. Try inviting some friends!"
           />
-        </YStack>
-        <FlashList
-          data={displayContacts}
-          estimatedItemSize={80}
-          numColumns={2}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-          }
-          onEndReached={loadMoreContacts}
-          onEndReachedThreshold={0.5}
-          ItemSeparatorComponent={Spacer}
-          ListEmptyComponent={() => {
-            return isLoadingContacts ? (
-              <YStack flex={1} gap="$4" paddingTop="$4">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <UserCard.Skeleton key={index} width={cardWidth} />
-                ))}
-              </YStack>
-            ) : (
-              <EmptyPlaceholder
-                icon={PhoneIcon}
-                title="No Contacts Found"
-                subtitle="We couldn't find any contacts that aren't already on the app. Try inviting some friends!"
+        );
+      }}
+      ListHeaderComponent={() => {
+        return (
+          <YStack gap="$2" paddingBottom="$4">
+            <H1 textAlign="center" color="$color">
+              Choose a Contact Not On The App!
+            </H1>
+            <YStack gap="$2">
+              <SearchInput
+                placeholder="Search contacts..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                onClear={() => setSearchQuery("")}
               />
-            );
+            </YStack>
+          </YStack>
+        );
+      }}
+      renderItem={({ item: contact, index }) => (
+        <UserCard
+          userId={contact.id ?? Math.random().toString()}
+          username={contact.name}
+          profilePictureUrl={
+            contact.imageAvailable && contact.image?.uri
+              ? contact.image.uri
+              : null
+          }
+          bio={contact.phoneNumbers?.[0]?.number ?? undefined}
+          width={TILE_WIDTH}
+          index={index}
+          onPress={() => onContactSelected(contact)}
+          actionButton={{
+            label: "Select",
+            onPress: () => onContactSelected(contact),
+            icon: "add",
           }}
-          renderItem={({ item: contact, index }) => (
-            <UserCard
-              userId={contact.id ?? Math.random().toString()}
-              username={contact.name}
-              profilePictureUrl={
-                contact.imageAvailable && contact.image?.uri
-                  ? contact.image.uri
-                  : null
-              }
-              bio={contact.phoneNumbers?.[0]?.number ?? undefined}
-              width={TILE_WIDTH}
-              index={index}
-              onPress={() => onContactSelected(contact)}
-              actionButton={{
-                label: "Select",
-                onPress: () => onContactSelected(contact),
-                icon: "add",
-              }}
-            />
-          )}
         />
-      </YStack>
-    </ScreenView>
+      )}
+    />
   );
 };
 
