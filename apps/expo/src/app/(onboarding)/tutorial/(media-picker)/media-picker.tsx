@@ -135,7 +135,6 @@ const MediaPickerScreen = () => {
           margin={0.5}
           onPress={async () => {
             try {
-              // Get full asset info with network download if needed
               const assetInfo = await MediaLibrary.getAssetInfoAsync(item, {
                 shouldDownloadFromNetwork: true,
               });
@@ -151,9 +150,8 @@ const MediaPickerScreen = () => {
                   assetInfo.localUri,
                 );
 
-                router.dismissTo("/(app)/(bottom-tabs)/(camera)");
                 router.push({
-                  pathname: "/preview",
+                  pathname: "/tutorial/preview",
                   params: {
                     uri: localUri,
                     type: assetInfo.mediaType,
@@ -162,9 +160,8 @@ const MediaPickerScreen = () => {
                   },
                 });
               } else {
-                router.dismissTo("/(app)/(bottom-tabs)/(camera)");
-                router.navigate({
-                  pathname: "/preview",
+                router.push({
+                  pathname: "/tutorial/preview",
                   params: {
                     uri: assetInfo.uri,
                     type: assetInfo.mediaType,

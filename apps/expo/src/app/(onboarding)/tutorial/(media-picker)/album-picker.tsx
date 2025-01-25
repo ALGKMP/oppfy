@@ -81,7 +81,7 @@ const AlbumPickerScreen = () => {
 
       const handlePress = () => {
         router.push({
-          pathname: "/(app)/(bottom-tabs)/(camera)/(media-picker)/media-picker",
+          pathname: "/tutorial/media-picker",
           params: {
             albumId: id,
             albumTitle: title,
