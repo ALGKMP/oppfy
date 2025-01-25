@@ -46,15 +46,19 @@ const OnboardingLayout = () => (
         gestureEnabled: false,
       }}
     />
+    <Stack.Screen name="user-info/username" options={{ animation: "fade" }} />
     <Stack.Screen
       name="user-info/date-of-birth"
       options={{ animation: "fade" }}
     />
-
-    <Stack.Screen name="user-info/username" options={{ animation: "fade" }} />
     <Stack.Screen
       name="user-info/profile-picture"
       options={{ animation: "fade" }}
+    />
+
+    <Stack.Screen
+      name="tutorial/explanation"
+      options={{ animation: "fade", gestureEnabled: false }}
     />
   </Stack>
 );

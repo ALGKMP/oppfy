@@ -72,6 +72,44 @@ export const userRouter = createTRPCRouter({
     }
   }),
 
+  tutorialComplete: publicProcedure.query(async ({ ctx }) => {
+    try {
+      if (!ctx.session?.uid) return false;
+      const user = await ctx.services.user.getUserStatus(ctx.session.uid);
+      return user.hasCompletedTutorial;
+    } catch (err) {
+      if (err instanceof DomainError) {
+        if (err.code === ErrorCode.USER_NOT_FOUND) {
+          return false;
+        }
+      }
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to check if user has completed the onboarding process",
+        cause: err,
+      });
+    }
+  }),
+
+  checkTutorialComplete: publicProcedure.mutation(async ({ ctx }) => {
+    try {
+      if (!ctx.session?.uid) return false;
+      const user = await ctx.services.user.getUserStatus(ctx.session.uid);
+      return user.hasCompletedTutorial;
+    } catch (err) {
+      if (err instanceof DomainError) {
+        if (err.code === ErrorCode.USER_NOT_FOUND) {
+          return false;
+        }
+      }
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to check if user has completed the onboarding process",
+        cause: err,
+      });
+    }
+  }),
+
   completedTutorial: publicProcedure.mutation(async ({ ctx }) => {
     try {
       if (!ctx.session?.uid) return false;
@@ -80,19 +118,6 @@ export const userRouter = createTRPCRouter({
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to complete tutorial",
-        cause: err,
-      });
-    }
-  }),
-
-  tutorialComplete: publicProcedure.mutation(async ({ ctx }) => {
-    try {
-      if (!ctx.session?.uid) return false;
-      return await ctx.services.user.getUserStatus(ctx.session.uid);
-    } catch (err) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to check if user has completed the onboarding process",
         cause: err,
       });
     }

@@ -1,9 +1,7 @@
 import React from "react";
-import { View } from "react-native";
 import { Redirect } from "expo-router";
 
 import { usePermissions } from "~/contexts/PermissionsContext";
-import { useContacts } from "~/hooks/contacts";
 import { useAuth } from "~/hooks/useAuth";
 import { api } from "~/utils/api";
 
@@ -12,12 +10,14 @@ const Index = () => {
   const { isLoading: sessionIsLoading, isSignedIn } = useAuth();
   const { isLoading: onboardingCompleteIsLoading, data: onboardingComplete } =
     api.user.onboardingComplete.useQuery();
-  const { syncContacts } = useContacts();
+  const { isLoading: tutorialCompleteIsLoading, data: tutorialComplete } =
+    api.user.tutorialComplete.useQuery();
 
   const isLoading =
-    sessionIsLoading || permissionsIsLoading || onboardingCompleteIsLoading;
-
-  console.log("isLoadingIndex", isLoading);
+    sessionIsLoading ||
+    permissionsIsLoading ||
+    onboardingCompleteIsLoading ||
+    tutorialCompleteIsLoading;
 
   if (isLoading) {
     return null;
@@ -31,7 +31,9 @@ const Index = () => {
     return <Redirect href="/(onboarding)/user-info/name" />;
   }
 
-  void syncContacts();
+  if (!tutorialComplete) {
+    return <Redirect href="/(onboarding)/tutorial/explanation" />;
+  }
 
   return <Redirect href="/(app)/(bottom-tabs)/(home)" />;
 };
