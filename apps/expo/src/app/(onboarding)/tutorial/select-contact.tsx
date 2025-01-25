@@ -88,9 +88,8 @@ const SelectContact = () => {
       ).format("E.164");
 
       router.push({
-        pathname: "/tutorial/caption",
+        pathname: "/tutorial/media-picker",
         params: {
-          ...params,
           name: contact.name,
           number: formattedPhoneNumber,
           recipientName: contact.name,
@@ -100,7 +99,7 @@ const SelectContact = () => {
         },
       });
     },
-    [router, params],
+    [router],
   );
 
   const SCREEN_PADDING = getToken("$4", "space") as number;
