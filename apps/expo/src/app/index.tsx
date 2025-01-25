@@ -32,7 +32,7 @@ const Index = () => {
   }
 
   if (!tutorialComplete) {
-    return <Redirect href="/(onboarding)/tutorial/explanation" />;
+    return <Redirect href="/(onboarding)/tutorial/intro" />;
   }
 
   return <Redirect href="/(app)/(bottom-tabs)/(home)" />;

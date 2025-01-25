@@ -1,11 +1,14 @@
 import React from "react";
 import { Linking, TouchableOpacity } from "react-native";
+import { SplashScreen } from "expo-router";
 import Splash from "@assets/splash.png";
 import { Info } from "@tamagui/lucide-icons";
 import { Image } from "tamagui";
 
 import { Stack } from "~/components/Layouts/Navigation";
 import { Icon } from "~/components/ui";
+
+void SplashScreen.hideAsync();
 
 const HeaderTitle = () => (
   <Image source={Splash} resizeMode="contain" width={100} height={100} />
@@ -57,7 +60,15 @@ const OnboardingLayout = () => (
     />
 
     <Stack.Screen
-      name="tutorial/explanation"
+      name="tutorial/intro"
+      options={{ animation: "fade", gestureEnabled: false }}
+    />
+    <Stack.Screen
+      name="tutorial/select"
+      options={{ animation: "fade", gestureEnabled: false }}
+    />
+    <Stack.Screen
+      name="tutorial/caption"
       options={{ animation: "fade", gestureEnabled: false }}
     />
   </Stack>

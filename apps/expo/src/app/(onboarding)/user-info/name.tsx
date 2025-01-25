@@ -66,8 +66,6 @@ const Name = () => {
     });
   }, [navigation, signOut, alertDialog]);
 
-  useEffect(() => void SplashScreen.hideAsync(), []);
-
   return (
     <ScreenView
       paddingBottom={0}

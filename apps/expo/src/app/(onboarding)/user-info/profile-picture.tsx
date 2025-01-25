@@ -42,13 +42,13 @@ const ProfilePicture = () => {
   const onSubmit = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     void completedOnboarding.mutateAsync();
-    router.replace("/tutorial/explanation");
+    router.replace("/tutorial/intro");
   };
 
   const onSkip = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     void completedOnboarding.mutateAsync();
-    router.replace("/tutorial/explanation");
+    router.replace("/tutorial/intro");
   };
 
   useEffect(() => {
