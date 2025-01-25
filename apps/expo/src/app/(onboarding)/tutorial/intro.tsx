@@ -91,7 +91,7 @@ const Intro = () => {
     if (currentStep < STEPS.length) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      router.push("/tutorial/(media-picker)/select-contact");
+      router.push("/tutorial/select-contact");
     }
   };
 
