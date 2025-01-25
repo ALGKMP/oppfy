@@ -16,7 +16,6 @@ import { Header } from "~/components/Layouts";
 import PostCard from "~/components/Post/PostCard";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
 import { EmptyPlaceholder, Icon, ScreenView } from "~/components/ui";
-import { useSession } from "~/contexts/SessionContext";
 import { api } from "~/utils/api";
 
 const Post = () => {

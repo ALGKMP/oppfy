@@ -15,7 +15,7 @@ import {
   useAlertDialogController,
   YStack,
 } from "~/components/ui";
-import { useSession } from "~/contexts/SessionContext";
+import { useAuth } from "~/hooks/useAuth";
 import { api } from "~/utils/api";
 
 const Name = () => {
@@ -23,7 +23,7 @@ const Name = () => {
   const navigation = useNavigation();
   const alertDialog = useAlertDialogController();
 
-  const { signOut } = useSession();
+  const { signOut } = useAuth();
 
   const [name, setName] = useState("");
   const updateProfile = api.profile.updateProfile.useMutation();

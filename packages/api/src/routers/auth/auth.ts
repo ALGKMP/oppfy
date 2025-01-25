@@ -12,7 +12,7 @@ import { createTRPCRouter, publicProcedure } from "../../trpc";
 const generateTokens = (uid: string) => {
   // Access token expires in 15 minutes
   const accessToken = jwt.sign({ uid }, env.JWT_ACCESS_SECRET, {
-    expiresIn: "60m",
+    expiresIn: "1m",
   });
 
   // Refresh token expires in 7 days

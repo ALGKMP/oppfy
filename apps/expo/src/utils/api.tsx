@@ -8,6 +8,7 @@ import superjson from "superjson";
 import type { AppRouter } from "@oppfy/api";
 
 import { storage } from "~/utils/storage";
+import type { AuthTokens } from "./auth";
 
 /**
  * A set of typesafe hooks for consuming your API.
@@ -30,7 +31,7 @@ export function isTRPCClientError(
  * Extend this function when going to production by
  * setting the baseUrl to your production API URL.
  */
-const getBaseUrl = () => {
+export const getBaseUrl = () => {
   /**
    * Gets the IP address of your host-machine. If it cannot automatically find it,
    * you'll have to manually set it. NOTE: Port 3000 should work for most but confirm
@@ -64,16 +65,15 @@ export function TRPCProvider(props: { children: React.ReactNode }) {
         httpBatchLink({
           transformer: superjson,
           url: `${getBaseUrl()}/api/trpc`,
-          async headers() {
+          headers() {
             const headers = new Map<string, string>();
             headers.set("x-trpc-source", "expo-react");
 
             const storedTokens = storage.getString("auth_tokens");
             if (storedTokens) {
-              const { accessToken } = JSON.parse(storedTokens);
-              if (accessToken) {
+              const { accessToken } = JSON.parse(storedTokens) as AuthTokens;
+              if (accessToken)
                 headers.set("Authorization", `Bearer ${accessToken}`);
-              }
             }
 
             return Object.fromEntries(headers);

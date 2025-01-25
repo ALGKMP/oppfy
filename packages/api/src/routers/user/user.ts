@@ -72,7 +72,6 @@ export const userRouter = createTRPCRouter({
     }
   }),
 
-
   getPrivacySetting: protectedProcedure.query(async ({ ctx }) => {
     try {
       return await ctx.services.privacy.getPrivacySettings(ctx.session.uid);

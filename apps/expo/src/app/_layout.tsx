@@ -15,7 +15,6 @@ import {
 import { BottomSheetProvider } from "~/components/ui/BottomSheet";
 import { AudioProvider } from "~/contexts/AudioContext";
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
-import { SessionProvider } from "~/contexts/SessionContext";
 import { FontProvider } from "~/providers/FontProvider";
 import { SentryProvider } from "~/providers/SentryProvider";
 import { DARK_THEME } from "~/theme";
@@ -29,33 +28,31 @@ const RootLayout = () => {
         <ThemeProvider value={DARK_THEME}>
           <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
             <FontProvider>
-              <SessionProvider>
-                <PermissionsProvider>
-                  <AudioProvider>
-                    <SafeAreaProvider>
-                      <GestureHandlerRootView style={{ flex: 1 }}>
-                        <PortalProvider>
-                          <BottomSheetModalProvider>
-                            <ActionSheetProvider>
-                              <AlertDialogProvider>
-                                <DialogProvider>
-                                  <ToastProvider native={true}>
-                                    <BottomSheetProvider>
-                                      <StatusBar style="auto" />
-                                      <Slot />
-                                      <ToastViewport />
-                                    </BottomSheetProvider>
-                                  </ToastProvider>
-                                </DialogProvider>
-                              </AlertDialogProvider>
-                            </ActionSheetProvider>
-                          </BottomSheetModalProvider>
-                        </PortalProvider>
-                      </GestureHandlerRootView>
-                    </SafeAreaProvider>
-                  </AudioProvider>
-                </PermissionsProvider>
-              </SessionProvider>
+              <PermissionsProvider>
+                <AudioProvider>
+                  <SafeAreaProvider>
+                    <GestureHandlerRootView style={{ flex: 1 }}>
+                      <PortalProvider>
+                        <BottomSheetModalProvider>
+                          <ActionSheetProvider>
+                            <AlertDialogProvider>
+                              <DialogProvider>
+                                <ToastProvider native={true}>
+                                  <BottomSheetProvider>
+                                    <StatusBar style="auto" />
+                                    <Slot />
+                                    <ToastViewport />
+                                  </BottomSheetProvider>
+                                </ToastProvider>
+                              </DialogProvider>
+                            </AlertDialogProvider>
+                          </ActionSheetProvider>
+                        </BottomSheetModalProvider>
+                      </PortalProvider>
+                    </GestureHandlerRootView>
+                  </SafeAreaProvider>
+                </AudioProvider>
+              </PermissionsProvider>
             </FontProvider>
           </TamaguiProvider>
         </ThemeProvider>

@@ -5,8 +5,8 @@ import { FlashList } from "@shopify/flash-list";
 import { MessageCircleOff } from "@tamagui/lucide-icons";
 
 import { EmptyPlaceholder, View } from "~/components/ui";
-import { useSession } from "~/contexts/SessionContext";
 import { useComments } from "~/hooks/post/useComments";
+import { useAuth } from "~/hooks/useAuth";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import Comment from "./Comment";
 import type { CommentItem } from "./Comment";
@@ -33,7 +33,7 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
   });
 
   const listRef = useRef<FlashList<CommentItem> | null>(null);
-  const { user } = useSession();
+  const { user } = useAuth();
   const selfUserId = user?.uid;
   const { routeProfile } = useRouteProfile();
 
