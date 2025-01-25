@@ -35,16 +35,17 @@ export function useAuth() {
       await userOnboardingCompletedMutation.mutateAsync();
     const tutorialComplete = await tutorialCompleteMutation.mutateAsync();
 
-    // Navigate based on onboarding status
-    router.replace(
-      userOnboardingCompleted
-        ? "/(app)/(bottom-tabs)/(home)"
-        : "/user-info/name",
-    );
+    if (!userOnboardingCompleted) {
+      router.replace("/user-info/name");
+      return;
+    }
 
-    return {
-      isNewUser: !userOnboardingCompleted,
-    };
+    if (!tutorialComplete) {
+      router.replace("/tutorial/intro");
+      return;
+    }
+
+    router.replace("/(app)/(bottom-tabs)/(home)");
   };
 
   const signOut = () => {
