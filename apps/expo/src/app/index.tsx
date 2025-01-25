@@ -1,20 +1,23 @@
 import React from "react";
+import { View } from "react-native";
 import { Redirect } from "expo-router";
 
 import { usePermissions } from "~/contexts/PermissionsContext";
-import { useSession } from "~/contexts/SessionContext";
-import { api } from "~/utils/api";
 import { useContacts } from "~/hooks/contacts";
+import { useAuth } from "~/hooks/useAuth";
+import { api } from "~/utils/api";
 
 const Index = () => {
   const { isLoading: permissionsIsLoading } = usePermissions();
-  const { isLoading: sessionIsLoading, isSignedIn } = useSession();
+  const { isLoading: sessionIsLoading, isSignedIn } = useAuth();
   const { isLoading: onboardingCompleteIsLoading, data: onboardingComplete } =
     api.user.onboardingComplete.useQuery();
   const { syncContacts } = useContacts();
 
   const isLoading =
     sessionIsLoading || permissionsIsLoading || onboardingCompleteIsLoading;
+
+  console.log("isLoadingIndex", isLoading);
 
   if (isLoading) {
     return null;

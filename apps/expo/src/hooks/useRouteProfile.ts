@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 
-import { useSession } from "~/contexts/SessionContext";
+import { useAuth } from "~/hooks/useAuth";
 
 interface ProfileInfo {
   username: string;
@@ -14,7 +14,7 @@ export interface ProfileRouteParams {
 }
 
 const useRouteProfile = () => {
-  const { user } = useSession();
+  const { user } = useAuth();
   const router = useRouter();
 
   const routeProfile = (userId: string, profileInfo?: ProfileInfo) => {

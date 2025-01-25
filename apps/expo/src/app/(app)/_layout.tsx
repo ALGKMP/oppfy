@@ -3,11 +3,11 @@ import { Redirect, SplashScreen } from "expo-router";
 
 import { Stack } from "~/components/Layouts/Navigation";
 import { usePermissions } from "~/contexts/PermissionsContext";
-import { useSession } from "~/contexts/SessionContext";
 import {
   useNotificationObserver,
   usePushNotifications,
 } from "~/hooks/notifications";
+import { useAuth } from "~/hooks/useAuth";
 
 const DELAY_TO_HIDE_SPLASH_SCREEN = 250;
 
@@ -16,7 +16,7 @@ const AppLayout = () => {
   useNotificationObserver();
   // useContacts(true);
 
-  const { isLoading: sessionIsLoading, isSignedIn } = useSession();
+  const { isLoading: sessionIsLoading, isSignedIn } = useAuth();
   const { isLoading: permissionsIsLoading, permissions } = usePermissions();
 
   const requiredPermissions = permissions.camera && permissions.contacts;

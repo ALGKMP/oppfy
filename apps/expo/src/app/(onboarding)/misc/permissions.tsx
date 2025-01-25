@@ -24,13 +24,13 @@ import {
   YStack,
 } from "~/components/ui";
 import { usePermissions } from "~/contexts/PermissionsContext";
-import { useSession } from "~/contexts/SessionContext";
+import { useAuth } from "~/hooks/useAuth";
 
 type PermissionType = "Camera" | "Contacts" | "Notifications";
 
 const Permissions = () => {
   const router = useRouter();
-  const { isSignedIn } = useSession();
+  const { isSignedIn } = useAuth();
   const { permissions, checkPermissions } = usePermissions();
 
   const alertDialog = useAlertDialogController();
