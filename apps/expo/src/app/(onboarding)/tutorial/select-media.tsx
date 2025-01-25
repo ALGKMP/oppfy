@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import * as MediaLibrary from "expo-media-library";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowRight, Image as ImageIcon } from "@tamagui/lucide-icons";
 
 import {
@@ -20,8 +20,14 @@ import {
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const ITEM_WIDTH = (SCREEN_WIDTH - 48) / 3;
 
-const Select = () => {
+const SelectMedia = () => {
   const router = useRouter();
+  const params = useLocalSearchParams<{
+    name: string;
+    number: string;
+    recipientName: string;
+    recipientImage?: string;
+  }>();
 
   const [recentPhotos, setRecentPhotos] = useState<MediaLibrary.Asset[]>([]);
   const [selectedAsset, setSelectedAsset] = useState<MediaLibrary.Asset | null>(
@@ -55,6 +61,10 @@ const Select = () => {
         width: selectedAsset.width,
         height: selectedAsset.height,
         type: selectedAsset.mediaType,
+        name: params.name,
+        number: params.number,
+        recipientName: params.recipientName,
+        recipientImage: params.recipientImage,
       },
     });
   };
@@ -69,7 +79,7 @@ const Select = () => {
         <YStack gap="$2">
           <H2 textAlign="center">Pick Your First Share</H2>
           <Paragraph textAlign="center" color="$gray11">
-            Choose a photo or video to share with your friends
+            Choose a photo or video to share with {params.name}
           </Paragraph>
         </YStack>
 
@@ -179,4 +189,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Select;
+export default SelectMedia;
