@@ -11,6 +11,7 @@ import {
   EmptyPlaceholder,
   HeaderTitle,
   ScreenView,
+  Spacer,
   UserCard,
   YStack,
 } from "~/components/ui";
@@ -77,6 +78,10 @@ const SelectContact = () => {
     [router, params],
   );
 
+  const SCREEN_PADDING = getToken("$4", "space") as number;
+  const GAP = getToken("$2", "space") as number;
+  const TILE_WIDTH = (screenWidth - SCREEN_PADDING * 2 - GAP) / 2; // Account for screen padding and gap between tiles
+
   return (
     <ScreenView
       backgroundColor="$background"
@@ -90,11 +95,13 @@ const SelectContact = () => {
         <FlashList
           data={contacts}
           estimatedItemSize={80}
+          numColumns={2}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
           onEndReached={loadMoreContacts}
           onEndReachedThreshold={0.5}
+          ItemSeparatorComponent={Spacer}
           ListEmptyComponent={() => {
             return isLoadingContacts ? (
               <YStack flex={1} gap="$4" paddingTop="$4">
@@ -120,9 +127,7 @@ const SelectContact = () => {
                   : null
               }
               bio={contact.phoneNumbers?.[0]?.number ?? undefined}
-              size="large"
-              style="minimal"
-              width={cardWidth}
+              width={TILE_WIDTH}
               index={index}
               onPress={() => onContactSelected(contact)}
               actionButton={{
