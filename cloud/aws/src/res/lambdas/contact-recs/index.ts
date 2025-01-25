@@ -15,7 +15,7 @@ const env = createEnv({
 const {
   driver: { DriverRemoteConnection },
   structure: { Graph },
-  process: { P, order, statics: __ },
+  process: { P, order, column, statics: __ },
 } = gremlin;
 
 export const handler = async (
@@ -143,17 +143,25 @@ export const handler = async (
 
     console.log("Tier 2", tier2);
 
-    // get me people 2 edges away from me who are not in tier1 or tier2
+    // get people 2 edges away, ranked by number of mutual connections
+    const excludeForTier3 = [...peopleIDontWantToRecommend, ...tier1, ...tier2, userId];
+
+    // get people 2 edges away, ranked by number of mutual connections
     const tier3 = await g
       .V(userId)
       .out("contact")
       .out("contact")
-      .where(__.not(__.inE("contact").outV().hasId(userId)))
-      .where(__.not(__.inE("contact").outV().hasId(P.within(tier1))))
-      .where(__.not(__.inE("contact").outV().hasId(P.within(tier2))))
+      .where(__.not(__.hasId(P.within(excludeForTier3))))
+      .group()
+      .by(__.identity())
+      .by(__.in_("contact")
+        .where(__.out("contact").hasId(userId))
+        .count())
+      .unfold()
       .order()
-      .by("createdAt", order.desc)
+      .by(__.select(column.values), order.desc)
       .limit(10)
+      .select(column.keys)
       .id()
       .toList();
 
