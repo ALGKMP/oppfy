@@ -125,9 +125,9 @@ const SelectContact = () => {
       ItemSeparatorComponent={Spacer}
       ListEmptyComponent={() => {
         return isLoadingContacts ? (
-          <YStack flex={1} gap="$4" paddingTop="$4">
+          <YStack flex={1} flexDirection="row" flexWrap="wrap" gap={GAP}>
             {Array.from({ length: 6 }).map((_, index) => (
-              <UserCard.Skeleton key={index} width={cardWidth} />
+              <UserCard.Skeleton key={index} width={TILE_WIDTH} />
             ))}
           </YStack>
         ) : (
@@ -143,7 +143,7 @@ const SelectContact = () => {
       }}
       ListHeaderComponent={() => {
         return (
-          <YStack gap="$4" >
+          <YStack gap="$4">
             <H1 textAlign="center" color="$color">
               Choose a Contact Not On The App!
             </H1>
