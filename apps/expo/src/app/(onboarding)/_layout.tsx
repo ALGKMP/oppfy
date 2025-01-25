@@ -63,8 +63,16 @@ const OnboardingLayout = () => (
       name="tutorial/intro"
       options={{ animation: "fade", gestureEnabled: false }}
     />
-    <Stack.Screen name="tutorial/select" options={{ animation: "fade" }} />
+    <Stack.Screen name="tutorial/select-media" options={{ animation: "fade" }} />
     <Stack.Screen name="tutorial/caption" options={{ animation: "fade" }} />
+    <Stack.Screen name="tutorial/select-contact" options={{ animation: "fade" }} />
+    <Stack.Screen
+      name="tutorial/(media-picker)"
+      options={{
+        presentation: "modal",
+        animation: "fade",
+      }}
+    />
   </Stack>
 );
 
