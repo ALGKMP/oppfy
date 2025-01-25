@@ -141,7 +141,7 @@ const SelectContact = () => {
       ListHeaderComponentStyle={{
         marginBottom: getToken("$4", "space") as number,
       }}
-      ListHeaderComponent={() => {
+      ListHeaderComponent={useMemo(() => {
         return (
           <YStack gap="$4">
             <H1 textAlign="center" color="$color">
@@ -157,7 +157,7 @@ const SelectContact = () => {
             </YStack>
           </YStack>
         );
-      }}
+      }, [searchQuery, setSearchQuery])}
       renderItem={({ item: contact, index }) => (
         <UserCard
           userId={contact.id ?? Math.random().toString()}
