@@ -1,19 +1,16 @@
-import React, { useState } from "react";
+import React from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Send, UserPlus2 } from "@tamagui/lucide-icons";
+import { Send } from "@tamagui/lucide-icons";
 
 import {
-  Button,
   H2,
   OnboardingButton,
-  OnboardingInput,
   Paragraph,
   ScreenView,
   Text,
   View,
-  XStack,
   YStack,
 } from "~/components/ui";
 import { api } from "~/utils/api";
@@ -30,24 +27,41 @@ const Preview = () => {
     height: string;
     type: string;
     caption: string;
+    name: string;
+    number: string;
+    recipientName: string;
+    recipientImage?: string;
   }>();
 
-  const [recipientName, setRecipientName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-
-  const uploadMedia = api.media.uploadMedia.useMutation();
+  const uploadPicturePostForUserNotOnApp =
+    api.post.uploadPicturePostForUserNotOnApp.useMutation();
+  const uploadVideoPostForUserNotOnApp =
+    api.post.uploadVideoPostForUserNotOnApp.useMutation();
 
   const handleShare = async () => {
     try {
-      await uploadMedia.mutateAsync({
-        uri: params.uri,
-        width: parseInt(params.width),
-        height: parseInt(params.height),
-        type: params.type as "photo" | "video",
-        caption: params.caption,
-        recipientName,
-        phoneNumber,
-      });
+      if (params.type === "video") {
+        await uploadVideoPostForUserNotOnApp.mutateAsync({
+          number: params.number,
+          name: params.name,
+          caption: params.caption,
+          width: params.width,
+          height: params.height,
+        });
+      } else {
+        const response = await fetch(params.uri);
+        const blob = await response.blob();
+
+        await uploadPicturePostForUserNotOnApp.mutateAsync({
+          number: params.number,
+          name: params.name,
+          caption: params.caption,
+          width: params.width,
+          height: params.height,
+          contentLength: blob.size,
+          contentType: blob.type as "image/jpeg" | "image/png",
+        });
+      }
 
       // Navigate to success screen or home
       router.replace("/(app)/(bottom-tabs)/(camera)");
@@ -55,6 +69,10 @@ const Preview = () => {
       console.error("Failed to share:", error);
     }
   };
+
+  const isLoading =
+    uploadPicturePostForUserNotOnApp.status === "pending" ||
+    uploadVideoPostForUserNotOnApp.status === "pending";
 
   return (
     <ScreenView
@@ -65,9 +83,9 @@ const Preview = () => {
     >
       <YStack flex={1} paddingHorizontal="$4" gap="$6" paddingTop="$8">
         <YStack gap="$2">
-          <H2 textAlign="center">Almost Ready!</H2>
+          <H2 textAlign="center">Ready to Share!</H2>
           <Paragraph textAlign="center" color="$gray11">
-            Preview your share and add your friend's details
+            Preview your share for {params.name}
           </Paragraph>
         </YStack>
 
@@ -98,57 +116,27 @@ const Preview = () => {
         </View>
 
         {/* Recipient Info */}
-        <YStack gap="$4">
-          <XStack
-            backgroundColor="$gray3"
-            padding="$4"
-            borderRadius="$4"
-            gap="$4"
-            alignItems="center"
-            animation="quick"
-            enterStyle={{
-              opacity: 0,
-              scale: 0.9,
-            }}
-          >
-            <UserPlus2 size={24} color="$primary" />
-            <YStack flex={1}>
-              <Text color="$gray11" fontSize="$3">
-                Enter your friend's details to share this with them
-              </Text>
-            </YStack>
-          </XStack>
-
-          <YStack gap="$4">
-            <OnboardingInput
-              label="Friend's Name"
-              value={recipientName}
-              onChangeText={setRecipientName}
-              placeholder="Enter their name"
-              autoComplete="name"
-              animation="quick"
-              enterStyle={{
-                opacity: 0,
-                x: 20,
-              }}
-            />
-
-            <OnboardingInput
-              label="Phone Number"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              placeholder="Enter their phone number"
-              keyboardType="phone-pad"
-              autoComplete="tel"
-              animation="quick"
-              enterStyle={{
-                opacity: 0,
-                x: 20,
-              }}
-              animation-delay="100ms"
-            />
-          </YStack>
-        </YStack>
+        <View
+          backgroundColor="$gray3"
+          borderRadius="$6"
+          padding="$4"
+          gap="$4"
+          animation="quick"
+          enterStyle={{
+            opacity: 0,
+            scale: 0.9,
+          }}
+        >
+          <Text fontSize="$4" fontWeight="500">
+            Sharing with:
+          </Text>
+          <Text fontSize="$5" color="$gray11">
+            {params.name}
+          </Text>
+          <Text fontSize="$4" color="$gray11">
+            {params.number}
+          </Text>
+        </View>
       </YStack>
 
       {/* Bottom Button */}
@@ -162,8 +150,7 @@ const Preview = () => {
         <OnboardingButton
           icon={Send}
           onPress={handleShare}
-          disabled={!recipientName.trim() || !phoneNumber.trim()}
-          loading={uploadMedia.isLoading}
+          disabled={isLoading}
         >
           Share Now
         </OnboardingButton>

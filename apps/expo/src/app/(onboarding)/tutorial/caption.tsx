@@ -34,6 +34,10 @@ const Caption = () => {
     width: string;
     height: string;
     type: string;
+    name: string;
+    number: string;
+    recipientName: string;
+    recipientImage?: string;
   }>();
 
   const [caption, setCaption] = useState("");
@@ -59,7 +63,7 @@ const Caption = () => {
         <YStack gap="$2">
           <H2 textAlign="center">Add a Message</H2>
           <Paragraph textAlign="center" color="$gray11">
-            Write something to grab their attention
+            Write something to share with {params.name}
           </Paragraph>
         </YStack>
 

@@ -24,19 +24,19 @@ const GIF_WIDTH = PREVIEW_WIDTH * 0.8; // Make GIF smaller than full width
 
 const STEPS = [
   {
+    icon: "👥",
+    title: "Choose a Friend",
+    description: "Select someone to share your first moment with",
+  },
+  {
     icon: "📸",
-    title: "Take a Photo",
+    title: "Pick a Photo",
     description: "Capture a moment or choose from your gallery",
   },
   {
     icon: "💭",
     title: "Add a Caption",
     description: "Write something fun to share with your friend",
-  },
-  {
-    icon: "✨",
-    title: "Share Instantly",
-    description: "Send it to your friend, even if they're not on Oppfy yet",
   },
 ];
 
@@ -91,7 +91,7 @@ const Intro = () => {
     if (currentStep < STEPS.length) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      router.push("/tutorial/select");
+      router.push("/tutorial/(media-picker)/select-contact");
     }
   };
 
@@ -151,11 +151,7 @@ const Intro = () => {
                     y: 10,
                   }}
                 >
-                  <View
-                    padding="$3"
-                    borderRadius="$4"
-                    opacity={0.9}
-                  >
+                  <View padding="$3" borderRadius="$4" opacity={0.9}>
                     <Text fontSize={50}>{step.icon}</Text>
                   </View>
                   <YStack flex={1}>
