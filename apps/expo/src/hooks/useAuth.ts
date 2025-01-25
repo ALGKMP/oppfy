@@ -9,6 +9,7 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(true);
 
   const deleteUserMutation = api.user.deleteUser.useMutation();
+  const tutorialCompleteMutation = api.user.checkTutorialComplete.useMutation();
   const userOnboardingCompletedMutation =
     api.user.checkOnboardingComplete.useMutation();
 
@@ -32,6 +33,7 @@ export function useAuth() {
     // Check if user needs onboarding
     const userOnboardingCompleted =
       await userOnboardingCompletedMutation.mutateAsync();
+    const tutorialComplete = await tutorialCompleteMutation.mutateAsync();
 
     // Navigate based on onboarding status
     router.replace(
