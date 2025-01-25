@@ -148,7 +148,6 @@ const Intro = () => {
 
       {/* Bottom Button */}
       <YStack
-        padding="$4"
         paddingBottom="$6"
         backgroundColor="$background"
         borderTopWidth={1}
