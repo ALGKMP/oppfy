@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshControl, useWindowDimensions } from "react-native";
 import type { Contact } from "expo-contacts";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Phone } from "@tamagui/lucide-icons";
+import type { IFuseOptions } from "fuse.js";
 import { parsePhoneNumberWithError } from "libphonenumber-js";
 import { getToken, Text } from "tamagui";
 
@@ -11,11 +12,13 @@ import {
   EmptyPlaceholder,
   HeaderTitle,
   ScreenView,
+  SearchInput,
   Spacer,
   UserCard,
   YStack,
 } from "~/components/ui";
 import { useContactsInfinite } from "~/hooks/contacts/useContactsInfinite";
+import useSearch from "~/hooks/useSearch";
 
 const PhoneIcon = React.createElement(Phone);
 
@@ -42,6 +45,28 @@ const SelectContact = () => {
   } = useContactsInfinite();
 
   const contacts = data?.pages.flatMap((page) => page.items) ?? [];
+
+  const searchOptions: IFuseOptions<Contact> = {
+    keys: [
+      "name",
+      {
+        name: "phoneNumber",
+        getFn: (contact) => contact.phoneNumbers?.[0]?.number ?? "",
+      },
+    ],
+    threshold: 0.3,
+  };
+
+  const {
+    searchQuery,
+    setSearchQuery,
+    filteredItems: searchResults,
+  } = useSearch<Contact>({
+    data: contacts,
+    fuseOptions: searchOptions,
+  });
+
+  const displayContacts = searchQuery ? searchResults : contacts;
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -91,9 +116,15 @@ const SelectContact = () => {
       <YStack flex={1} paddingHorizontal="$4" gap="$4" paddingTop="$8">
         <YStack gap="$2">
           <HeaderTitle>Select a Contact</HeaderTitle>
+          <SearchInput
+            placeholder="Search contacts..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onClear={() => setSearchQuery("")}
+          />
         </YStack>
         <FlashList
-          data={contacts}
+          data={displayContacts}
           estimatedItemSize={80}
           numColumns={2}
           refreshControl={
