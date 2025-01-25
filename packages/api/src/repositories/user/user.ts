@@ -74,7 +74,7 @@ export class UserRepository {
   @handleDatabaseErrors
   async getUserStatus(userId: string) {
     return await this.db.query.userStatus.findFirst({
-      where: eq(schema.user.id, userId),
+      where: eq(schema.userStatus.userId, userId),
     });
   }
 
