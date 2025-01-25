@@ -15,16 +15,12 @@ import {
   View,
   YStack,
 } from "~/components/ui";
-import { useContacts } from "~/hooks/contacts";
 import { useUploadProfilePicture } from "~/hooks/media";
 import { api } from "~/utils/api";
 
 const ProfilePicture = () => {
   const router = useRouter();
   const theme = useTheme();
-
-  const { syncContacts } = useContacts();
-
   const completedOnboarding = api.user.completedOnboarding.useMutation();
 
   const { imageUri, pickAndUploadImage, uploadStatus } =
@@ -50,16 +46,6 @@ const ProfilePicture = () => {
     void completedOnboarding.mutateAsync();
     router.replace("/tutorial/intro");
   };
-
-  useEffect(() => {
-    const fn = async () => {
-      await syncContacts();
-    };
-
-    void fn();
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <ScreenView

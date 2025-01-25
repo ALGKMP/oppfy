@@ -21,6 +21,7 @@ const useContacts = (syncNow = false): ContactFns => {
   const syncContactsMutation = api.contacts.syncContacts.useMutation();
   const filterContactsOnApp =
     api.contacts.filterOutPhoneNumbersOnApp.useMutation();
+  const utils = api.useUtils();
 
   const syncContacts = useCallback(async () => {
     // make sure its allowed

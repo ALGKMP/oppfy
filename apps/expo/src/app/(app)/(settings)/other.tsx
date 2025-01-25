@@ -16,6 +16,7 @@ import {
 } from "~/components/ui";
 import { useContacts } from "~/hooks/contacts";
 import { useAuth } from "~/hooks/useAuth";
+import { api } from "~/utils/api";
 
 const Other = () => {
   const { deleteAccount } = useAuth();
@@ -24,6 +25,7 @@ const Other = () => {
     deleteContacts: handleDeleteContacts,
   } = useContacts();
   const actionSheet = useActionSheetController();
+  const utils = api.useUtils();
 
   const handleClearCache = () => {
     if (FileSystem.cacheDirectory === null) return;
@@ -55,7 +57,11 @@ const Other = () => {
       buttonOptions: [
         {
           text: "Sync Contacts",
-          onPress: () => void handleSyncContacts(),
+          onPress: () => {
+            void handleSyncContacts();
+            // invalidate query
+            utils.contacts.getRecommendationProfilesSelf.invalidate();
+          },
         },
       ],
     });
