@@ -136,11 +136,21 @@ const SelectContact = () => {
             onEndReachedThreshold={0.5}
             ListEmptyComponent={() => {
               return (
-                <EmptyPlaceholder
-                  icon={PhoneIcon}
-                  title="No Contacts Found"
-                  subtitle="We couldn't find any contacts that aren't already on the app. Try inviting some friends!"
-                />
+                <>
+                  {isLoadingContacts ? (
+                    <YStack flex={1} gap="$4" paddingTop="$4">
+                      {Array.from({ length: 6 }).map((_, index) => (
+                        <UserCard.Skeleton key={index} width={getToken("$12", "size")} />
+                      ))}
+                    </YStack>
+                  ) : (
+                    <EmptyPlaceholder
+                      icon={PhoneIcon}
+                      title="No Contacts Found"
+                      subtitle="We couldn't find any contacts that aren't already on the app. Try inviting some friends!"
+                    />
+                  )}
+                </>
               );
             }}
             ItemSeparatorComponent={() => <YStack height="$4" />}
