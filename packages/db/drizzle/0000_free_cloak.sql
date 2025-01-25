@@ -221,6 +221,7 @@ CREATE TABLE IF NOT EXISTS "user" (
 	"notification_settings_id" uuid NOT NULL,
 	"privacy_setting" "privacy_setting" DEFAULT 'public' NOT NULL,
 	"phone_number" text NOT NULL,
+	"posted" boolean DEFAULT false NOT NULL,
 	"account_status" "account_status" DEFAULT 'onApp' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,

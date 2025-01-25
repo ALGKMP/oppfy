@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { DomainError, ErrorCode } from "../../errors";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -8,34 +9,6 @@ import {
 } from "../../trpc";
 
 export const userRouter = createTRPCRouter({
-  // createUser: publicProcedure
-  //   .input(
-  //     z.object({
-  //       userId: z.string(),
-  //       phoneNumber: z.string(),
-  //     }),
-  //   )
-  //   .mutation(async ({ ctx, input }) => {
-  //     try {
-  //       // check if user already exists with phonenumber is is offapp, if so update the user id
-  //       const user = await ctx.services.user.getUserByPhoneNumberNoThrow(
-  //         input.phoneNumber,
-  //       );
-  //       if (user && user.accountStatus === "notOnApp") {
-  //         await ctx.services.user.updateUserId(user.id, input.userId);
-  //         await ctx.services.user.updateUserAccountStatus(user.id, "onApp");
-  //       } else {
-  //         await ctx.services.user.createUser(input.userId, input.phoneNumber);
-  //       }
-  //     } catch (err) {
-  //       throw new TRPCError({
-  //         code: "INTERNAL_SERVER_ERROR",
-  //         message: "Failed to create a new user",
-  //         cause: err,
-  //       });
-  //     }
-  //   }),
-
   deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
     try {
       await ctx.services.user.deleteUser(ctx.session.uid);
@@ -50,8 +23,15 @@ export const userRouter = createTRPCRouter({
 
   onboardingComplete: publicProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.services.user.checkOnboardingComplete(ctx.session?.uid);
+      if (!ctx.session?.uid) return false;
+      const user = await ctx.services.user.getUserStatus(ctx.session.uid);
+      return user.hasCompletedOnboarding;
     } catch (err) {
+      if (err instanceof DomainError) {
+        if (err.code === ErrorCode.USER_NOT_FOUND) {
+          return false;
+        }
+      }
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to check if user has completed the onboarding process",
@@ -62,7 +42,53 @@ export const userRouter = createTRPCRouter({
 
   checkOnboardingComplete: publicProcedure.mutation(async ({ ctx }) => {
     try {
-      return await ctx.services.user.checkOnboardingComplete(ctx.session?.uid);
+      if (!ctx.session?.uid) return false;
+      const user = await ctx.services.user.getUserStatus(ctx.session.uid);
+      return user.hasCompletedOnboarding;
+    } catch (err) {
+      if (err instanceof DomainError) {
+        if (err.code === ErrorCode.USER_NOT_FOUND) {
+          return false;
+        }
+      }
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to check if user has completed the onboarding process",
+        cause: err,
+      });
+    }
+  }),
+
+  completedOnboarding: publicProcedure.mutation(async ({ ctx }) => {
+    try {
+      if (!ctx.session?.uid) return false;
+      await ctx.services.user.completedOnboarding(ctx.session.uid);
+    } catch (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to complete onboarding",
+        cause: err,
+      });
+    }
+  }),
+
+  completedTutorial: publicProcedure.mutation(async ({ ctx }) => {
+    try {
+      if (!ctx.session?.uid) return false;
+      await ctx.services.user.completedTutorial(ctx.session.uid);
+    } catch (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to complete tutorial",
+        cause: err,
+      });
+    }
+  }),
+
+  tutorialComplete: publicProcedure.mutation(async ({ ctx }) => {
+    try {
+      if (!ctx.session?.uid) return false;
+      return await ctx.services.user.getUserStatus(ctx.session.uid);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",

@@ -17,12 +17,15 @@ import {
 } from "~/components/ui";
 import { useContacts } from "~/hooks/contacts";
 import { useUploadProfilePicture } from "~/hooks/media";
+import { api } from "~/utils/api";
 
 const ProfilePicture = () => {
   const router = useRouter();
   const theme = useTheme();
 
   const { syncContacts } = useContacts();
+
+  const completedOnboarding = api.user.completedOnboarding.useMutation();
 
   const { imageUri, pickAndUploadImage, uploadStatus } =
     useUploadProfilePicture({
@@ -36,15 +39,17 @@ const ProfilePicture = () => {
     if (result.success) setHasUploadedPic(true);
   };
 
-  const onSubmit = useCallback(() => {
+  const onSubmit = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void completedOnboarding.mutateAsync();
     router.replace("/(app)/(bottom-tabs)/(home)");
-  }, [router]);
+  };
 
-  const onSkip = useCallback(() => {
+  const onSkip = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void completedOnboarding.mutateAsync();
     router.replace("/(app)/(bottom-tabs)/(home)");
-  }, [router]);
+  };
 
   useEffect(() => {
     const fn = async () => {

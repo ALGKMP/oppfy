@@ -61,11 +61,6 @@ export const reportUserReasonEnum = pgEnum("report_user_reason", [
   "Scam/spam account",
 ]);
 
-export const accountStatusEnum = pgEnum("account_status", [
-  "onApp",
-  "notOnApp",
-]);
-
 export const user = pgTable("user", {
   id: uuid("id").primaryKey().defaultRandom(),
   profileId: uuid("profile_id")
@@ -78,7 +73,6 @@ export const user = pgTable("user", {
     .default("public")
     .notNull(),
   phoneNumber: text("phone_number").notNull().unique(),
-  accountStatus: accountStatusEnum("account_status").default("onApp").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -86,6 +80,31 @@ export const user = pgTable("user", {
     .defaultNow()
     .notNull(),
 });
+
+export const userStatus = pgTable("user_status", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  isOnApp: boolean("is_on_app").default(true).notNull(),
+  hasCompletedTutorial: boolean("has_posted").default(false).notNull(),
+  hasCompletedOnboarding: boolean("has_completed_onboarding")
+    .default(false)
+    .notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const userStatusRelations = relations(userStatus, ({ one }) => ({
+  user: one(user, {
+    fields: [userStatus.userId],
+    references: [user.id],
+  }),
+}));
 
 export const userRelations = relations(user, ({ one, many }) => ({
   profile: one(profile, {
@@ -95,6 +114,10 @@ export const userRelations = relations(user, ({ one, many }) => ({
   notificationSettings: one(notificationSettings, {
     fields: [user.notificationSettingsId],
     references: [notificationSettings.id],
+  }),
+  userStatus: one(userStatus, {
+    fields: [user.id],
+    references: [userStatus.userId],
   }),
   postViews: many(postView),
   receivedNotifications: many(notifications, {

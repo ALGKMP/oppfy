@@ -269,7 +269,7 @@ const PostTo = () => {
           type,
           width,
           height,
-          name: contact.name ?? "user",
+          name: contact.name,
           number: formattedPhoneNumber,
           userType: "notOnApp",
           recipientName: contact.name,

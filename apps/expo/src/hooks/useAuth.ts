@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 
 import { api, queryClient } from "~/utils/api";
-import { authService } from "~/utils/auth";
+import { auth } from "~/utils/auth";
 
 export function useAuth() {
   const router = useRouter();
@@ -15,19 +15,19 @@ export function useAuth() {
   // Subscribe to auth state changes
   useEffect(() => {
     setIsLoading(false);
-    return authService.subscribe(() => {
+    return auth.subscribe(() => {
       // Force a re-render when auth state changes
       setIsLoading(false);
     });
   }, []);
 
   const sendVerificationCode = async (phoneNumber: string) => {
-    await authService.sendVerificationCode(phoneNumber);
+    await auth.sendVerificationCode(phoneNumber);
     return true;
   };
 
   const verifyPhoneNumber = async (phoneNumber: string, code: string) => {
-    await authService.verifyPhoneNumber(phoneNumber, code);
+    await auth.verifyPhoneNumber(phoneNumber, code);
 
     // Check if user needs onboarding
     const userOnboardingCompleted =
@@ -46,22 +46,22 @@ export function useAuth() {
   };
 
   const signOut = () => {
-    authService.signOut();
+    auth.signOut();
     queryClient.clear();
     router.replace("/(onboarding)");
   };
 
-  const deleteAccount = () => {
-    void deleteUserMutation.mutateAsync();
-    authService.signOut();
+  const deleteAccount = async () => {
+    await deleteUserMutation.mutateAsync();
+    auth.signOut();
     queryClient.clear();
     router.replace("/(onboarding)");
   };
 
   return {
-    user: authService.currentUser,
+    user: auth.currentUser,
     isLoading,
-    isSignedIn: authService.isSignedIn,
+    isSignedIn: auth.isSignedIn,
     sendVerificationCode,
     verifyPhoneNumber,
     signOut,

@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import type { accountStatusEnum } from "../../../../db/src/schema";
 import { DomainError, ErrorCode } from "../../errors";
 import {
   BlockRepository,
@@ -31,7 +30,7 @@ export class UserService {
     userId: string,
     phoneNumber: string,
     name: string,
-    accountStatus: InferEnum<typeof accountStatusEnum> = "onApp",
+    isOnApp = true,
   ) {
     let username;
     let usernameExists;
@@ -52,16 +51,12 @@ export class UserService {
       userId,
       phoneNumber,
       username,
-      accountStatus,
+      isOnApp,
       name,
     );
   }
 
-  async createUser(
-    userId: string,
-    phoneNumber: string,
-    accountStatus: InferEnum<typeof accountStatusEnum> = "onApp",
-  ) {
+  async createUser(userId: string, phoneNumber: string, isOnApp = true) {
     let username;
     let usernameExists;
     do {
@@ -78,7 +73,7 @@ export class UserService {
       userId,
       phoneNumber,
       username,
-      accountStatus,
+      isOnApp,
     );
   }
 
@@ -123,18 +118,68 @@ export class UserService {
     await this.userRepository.deleteUser(userId);
   }
 
-  async checkOnboardingComplete(userId: string | undefined) {
-    if (userId === undefined) return false;
+  // async checkOnboardingComplete(userId: string | undefined) {
+  //   if (userId === undefined) return false;
 
-    const user = await this.profileRepository.getUserProfile(userId);
+  //   const user = await this.profileRepository.getUserProfile(userId);
 
-    if (user === undefined) return false;
+  //   if (user === undefined) return false;
 
-    return [
-      user.profile.dateOfBirth,
-      user.profile.name,
-      user.profile.username,
-    ].every((field) => !!field);
+  //   return [
+  //     user.profile.dateOfBirth,
+  //     user.profile.name,
+  //     user.profile.username,
+  //   ].every((field) => !!field);
+  // }
+
+  // async checkTutorialComplete(userId: string) {
+  //   const userStatus = await this.userRepository.getUserStatus(userId);
+
+  //   if (userStatus === undefined) return false;
+
+  //   return userStatus.hasCompletedTutorial;
+  // }
+
+  async completedOnboarding(userId: string) {
+    await this.userRepository.updateUserOnboardingComplete(userId, true);
+  }
+
+  async completedTutorial(userId: string) {
+    await this.userRepository.updateUserTutorialComplete(userId, true);
+  }
+
+  async getUserStatus(userId: string) {
+    const userStatus = await this.userRepository.getUserStatus(userId);
+
+    if (userStatus === undefined) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+
+    return userStatus;
+  }
+
+  async updateUserOnAppStatus(userId: string, isOnApp: boolean) {
+    await this.userRepository.updateUserOnAppStatus(userId, isOnApp);
+  }
+
+  async updateUserTutorialComplete(
+    userId: string,
+    hasCompletedTutorial: boolean,
+  ) {
+    await this.userRepository.updateUserTutorialComplete(
+      userId,
+      hasCompletedTutorial,
+    );
+  }
+
+  async updateUserOnboardingComplete(
+    userId: string,
+    hasCompletedOnboarding: boolean,
+  ) {
+    await this.userRepository.updateUserOnboardingComplete(
+      userId,
+      hasCompletedOnboarding,
+    );
   }
 
   async canAccessUserData({
@@ -181,17 +226,5 @@ export class UserService {
     }
 
     await this.userRepository.updateUserId(oldUserId, newUserId);
-  }
-
-  async updateUserAccountStatus(
-    userId: string,
-    status: InferEnum<typeof accountStatusEnum>,
-  ) {
-    const user = await this.userRepository.getUser(userId);
-    if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
-    }
-
-    await this.userRepository.updateAccountStatus(userId, status);
   }
 }
