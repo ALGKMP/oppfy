@@ -7,7 +7,10 @@ const LockedLayout = () => {
         header: () => null,
       }}
     >
-      <Stack.Screen name="invite" />
+      <Stack.Screen name="select-contact" />
+      <Stack.Screen name="select-photo" />
+      <Stack.Screen name="post-to" />
+      <Stack.Screen name="successfully-posted" /> {/* confetti animation with photo */}
     </Stack>
   );
 };
