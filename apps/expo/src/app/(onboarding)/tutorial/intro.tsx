@@ -4,7 +4,6 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRouter } from "expo-router";
-import { Camera, MessageCircle, Share2 } from "@tamagui/lucide-icons";
 
 import {
   H1,
@@ -25,17 +24,17 @@ const GIF_WIDTH = PREVIEW_WIDTH * 0.8; // Make GIF smaller than full width
 
 const STEPS = [
   {
-    icon: Camera,
+    icon: "📸",
     title: "Take a Photo",
     description: "Capture a moment or choose from your gallery",
   },
   {
-    icon: MessageCircle,
+    icon: "💭",
     title: "Add a Message",
     description: "Write something fun to share with your friend",
   },
   {
-    icon: Share2,
+    icon: "✨",
     title: "Share Instantly",
     description: "Send it to your friend, even if they're not on Oppfy yet",
   },
@@ -138,10 +137,10 @@ const Intro = () => {
               index < currentStep && (
                 <XStack
                   key={step.title}
-                  backgroundColor="$backgroundTransparent"
+                  backgroundColor="$gray3"
                   borderWidth={1}
                   borderColor="$borderColor"
-                  padding="$4"
+                  padding="$2"
                   borderRadius="$6"
                   gap="$4"
                   alignItems="center"
@@ -153,18 +152,17 @@ const Intro = () => {
                   }}
                 >
                   <View
-                    backgroundColor="$primary"
                     padding="$3"
                     borderRadius="$4"
                     opacity={0.9}
                   >
-                    <step.icon size={24} color="$color" />
+                    <Text fontSize={50}>{step.icon}</Text>
                   </View>
                   <YStack flex={1}>
-                    <Text fontWeight="bold" fontSize="$5" color="$color">
+                    <Text fontWeight="bold" fontSize="$8" color="$color">
                       {step.title}
                     </Text>
-                    <Text color="$gray11" fontSize="$3">
+                    <Text color="$gray11" fontSize="$5">
                       {step.description}
                     </Text>
                   </YStack>
@@ -182,7 +180,7 @@ const Intro = () => {
         borderTopColor="$borderColor"
       >
         <OnboardingButton
-          icon={isLastStep ? Camera : undefined}
+          icon={isLastStep ? undefined : undefined}
           onPress={handleNext}
           animation="quick"
           enterStyle={{
