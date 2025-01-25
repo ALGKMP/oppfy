@@ -30,7 +30,7 @@ const STEPS = [
   },
   {
     icon: "💭",
-    title: "Add a Message",
+    title: "Add a Caption",
     description: "Write something fun to share with your friend",
   },
   {
@@ -180,7 +180,6 @@ const Intro = () => {
         borderTopColor="$borderColor"
       >
         <OnboardingButton
-          icon={isLastStep ? undefined : undefined}
           onPress={handleNext}
           animation="quick"
           enterStyle={{
