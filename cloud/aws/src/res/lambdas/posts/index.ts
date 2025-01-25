@@ -83,7 +83,6 @@ const lambdaHandler = async (
 
     console.log("metadata", metadata);
     console.log("metadata.postid", metadata.postid);
-    // if (metadata.type === "onApp") {
     try {
       const { insertId: postId } = await db.transaction(async (tx) => {
         const [post] = await tx

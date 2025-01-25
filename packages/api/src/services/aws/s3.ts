@@ -26,15 +26,7 @@ interface GetObjectPresignedUrlInput {
   Bucket: string;
 }
 
-export type PostMetadataUserOnApp = z.infer<
-  typeof sharedValidators.aws.s3ObjectMetadataForUserOnAppSchema
->;
-
-export type PostMetadataUserNotOnApp = z.infer<
-  typeof sharedValidators.aws.s3ObjectMetadataForUserNotOnAppSchema
->;
-
-export type PostMetadata = PostMetadataUserOnApp | PostMetadataUserNotOnApp;
+export type PostMetadata = z.infer<typeof sharedValidators.aws.metadataSchema>;
 
 export type ProfilePictureMetadata = z.infer<
   typeof sharedValidators.aws.s3ObjectMetadataForProfilePicturesSchema
@@ -108,11 +100,9 @@ export class S3Service {
           caption,
           height,
           width,
-          type: "onApp",
           postid: postId,
         },
       });
-
 
       return presignedUrl;
     } catch (err) {
@@ -161,10 +151,8 @@ export class S3Service {
           width,
           recipient,
           postid: postId,
-          type: "notOnApp",
         },
       });
-
 
       return presignedUrl;
     } catch (err) {

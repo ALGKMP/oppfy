@@ -17,7 +17,7 @@ const generateTokens = (uid: string) => {
 
   // Refresh token expires in 7 days
   const refreshToken = jwt.sign({ uid }, env.JWT_REFRESH_SECRET, {
-    expiresIn: "30d",
+    expiresIn: "60d",
   });
 
   return { accessToken, refreshToken };
@@ -72,23 +72,23 @@ export const authRouter = createTRPCRouter({
 
         let isNewUser = false;
 
-        if (user && user.accountStatus === "notOnApp") {
-          // Update existing user's ID and status
-          await ctx.services.user.updateUserId(user.id, userId);
-          await ctx.services.user.updateUserAccountStatus(userId, "onApp");
-          isNewUser = true;
+        if (user) {
+          const userStatus = await ctx.services.user.getUserStatus(user.id);
 
-          // Fetch the updated user
-          user = await ctx.services.user.getUserByPhoneNumber(
-            input.phoneNumber,
-          );
-        } else if (!user) {
+          if (!userStatus.isOnApp) {
+            // Update existing user's ID and status
+            await ctx.services.user.updateUserId(user.id, userId);
+            await ctx.services.user.updateUserOnAppStatus(userId, true);
+            isNewUser = true;
+
+            // Fetch the updated user
+            user = await ctx.services.user.getUserByPhoneNumber(
+              input.phoneNumber,
+            );
+          }
+        } else {
           // Create new user if they don't exist
-          await ctx.services.user.createUser(
-            userId,
-            input.phoneNumber,
-            "onApp",
-          );
+          await ctx.services.user.createUser(userId, input.phoneNumber, true);
           isNewUser = true;
 
           // Fetch the newly created user

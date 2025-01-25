@@ -3,6 +3,7 @@ import { Redirect, SplashScreen } from "expo-router";
 
 import { Stack } from "~/components/Layouts/Navigation";
 import { usePermissions } from "~/contexts/PermissionsContext";
+import { useContacts } from "~/hooks/contacts";
 import {
   useNotificationObserver,
   usePushNotifications,
@@ -14,7 +15,8 @@ const DELAY_TO_HIDE_SPLASH_SCREEN = 250;
 const AppLayout = () => {
   usePushNotifications();
   useNotificationObserver();
-  // useContacts(true);
+
+  const { syncContacts } = useContacts();
 
   const { isLoading: sessionIsLoading, isSignedIn } = useAuth();
   const { isLoading: permissionsIsLoading, permissions } = usePermissions();
@@ -29,6 +31,12 @@ const AppLayout = () => {
       );
     }
   }, [sessionIsLoading, permissionsIsLoading]);
+
+  useEffect(() => {
+    void syncContacts();
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (sessionIsLoading || permissionsIsLoading) {
     return null;

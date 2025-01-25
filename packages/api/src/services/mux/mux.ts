@@ -4,15 +4,7 @@ import type { sharedValidators } from "@oppfy/validators";
 
 import { MuxRepository } from "../../repositories/mux/mux";
 
-export type PostMetadataUserOnApp = z.infer<
-  typeof sharedValidators.aws.s3ObjectMetadataForUserOnAppSchema
->;
-
-export type PostMetadataUserNotOnApp = z.infer<
-  typeof sharedValidators.aws.s3ObjectMetadataForUserNotOnAppSchema
->;
-
-export type PostMetadata = PostMetadataUserOnApp | PostMetadataUserNotOnApp;
+export type PostMetadata = z.infer<typeof sharedValidators.aws.metadataSchema>;
 
 export class MuxService {
   private muxRepository = new MuxRepository();

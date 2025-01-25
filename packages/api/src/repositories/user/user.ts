@@ -3,7 +3,6 @@ import { and, eq, inArray, or, sql } from "drizzle-orm"; // Add inArray import
 import { db, schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
 
-import type { accountStatusEnum } from "../../../../db/src/schema";
 import { handleDatabaseErrors } from "../../errors";
 import type { InferEnum } from "../../services/user/user";
 
@@ -19,7 +18,7 @@ export class UserRepository {
     userId: string,
     phoneNumber: string,
     username: string,
-    accountStatus: InferEnum<typeof accountStatusEnum>,
+    isOnApp: boolean,
     name?: string,
   ) {
     await this.db.transaction(async (tx) => {
@@ -56,7 +55,11 @@ export class UserRepository {
         profileId: profile.id,
         notificationSettingsId: notificationSetting.id,
         phoneNumber,
-        accountStatus,
+      });
+
+      await tx.insert(schema.userStatus).values({
+        userId,
+        isOnApp: isOnApp,
       });
     });
   }
@@ -65,6 +68,13 @@ export class UserRepository {
   async getUser(userId: string) {
     return await this.db.query.user.findFirst({
       where: eq(schema.user.id, userId),
+    });
+  }
+
+  @handleDatabaseErrors
+  async getUserStatus(userId: string) {
+    return await this.db.query.userStatus.findFirst({
+      where: eq(schema.userStatus.userId, userId),
     });
   }
 
@@ -114,10 +124,14 @@ export class UserRepository {
     const existingNumbers = await this.db
       .select({ phoneNumber: schema.user.phoneNumber })
       .from(schema.user)
+      .innerJoin(
+        schema.userStatus,
+        eq(schema.user.id, schema.userStatus.userId),
+      )
       .where(
         and(
           inArray(schema.user.phoneNumber, phoneNumbers),
-          eq(schema.user.accountStatus, "onApp"),
+          eq(schema.userStatus.isOnApp, true),
         ),
       );
 
@@ -250,13 +264,32 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async updateAccountStatus(
+  async updateUserOnAppStatus(userId: string, isOnApp: boolean) {
+    await this.db
+      .update(schema.userStatus)
+      .set({ isOnApp })
+      .where(eq(schema.userStatus.userId, userId));
+  }
+
+  @handleDatabaseErrors
+  async updateUserTutorialComplete(
     userId: string,
-    status: InferEnum<typeof accountStatusEnum>,
+    hasCompletedTutorial: boolean,
   ) {
     await this.db
-      .update(schema.user)
-      .set({ accountStatus: status })
-      .where(eq(schema.user.id, userId));
+      .update(schema.userStatus)
+      .set({ hasCompletedTutorial })
+      .where(eq(schema.userStatus.userId, userId));
+  }
+
+  @handleDatabaseErrors
+  async updateUserOnboardingComplete(
+    userId: string,
+    hasCompletedOnboarding: boolean,
+  ) {
+    await this.db
+      .update(schema.userStatus)
+      .set({ hasCompletedOnboarding })
+      .where(eq(schema.userStatus.userId, userId));
   }
 }

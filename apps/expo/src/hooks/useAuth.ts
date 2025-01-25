@@ -2,66 +2,69 @@ import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 
 import { api, queryClient } from "~/utils/api";
-import { authService } from "~/utils/auth";
+import { auth } from "~/utils/auth";
 
 export function useAuth() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
   const deleteUserMutation = api.user.deleteUser.useMutation();
+  const tutorialCompleteMutation = api.user.checkTutorialComplete.useMutation();
   const userOnboardingCompletedMutation =
     api.user.checkOnboardingComplete.useMutation();
 
   // Subscribe to auth state changes
   useEffect(() => {
     setIsLoading(false);
-    return authService.subscribe(() => {
+    return auth.subscribe(() => {
       // Force a re-render when auth state changes
       setIsLoading(false);
     });
   }, []);
 
   const sendVerificationCode = async (phoneNumber: string) => {
-    await authService.sendVerificationCode(phoneNumber);
+    await auth.sendVerificationCode(phoneNumber);
     return true;
   };
 
   const verifyPhoneNumber = async (phoneNumber: string, code: string) => {
-    await authService.verifyPhoneNumber(phoneNumber, code);
+    await auth.verifyPhoneNumber(phoneNumber, code);
 
     // Check if user needs onboarding
     const userOnboardingCompleted =
       await userOnboardingCompletedMutation.mutateAsync();
+    const tutorialComplete = await tutorialCompleteMutation.mutateAsync();
 
-    // Navigate based on onboarding status
-    router.replace(
-      userOnboardingCompleted
-        ? "/(app)/(bottom-tabs)/(home)"
-        : "/user-info/name",
-    );
+    if (!userOnboardingCompleted) {
+      router.replace("/user-info/name");
+      return;
+    }
 
-    return {
-      isNewUser: !userOnboardingCompleted,
-    };
+    if (!tutorialComplete) {
+      router.replace("/tutorial/intro");
+      return;
+    }
+
+    router.replace("/(app)/(bottom-tabs)/(home)");
   };
 
   const signOut = () => {
-    authService.signOut();
+    auth.signOut();
     queryClient.clear();
     router.replace("/(onboarding)");
   };
 
-  const deleteAccount = () => {
-    void deleteUserMutation.mutateAsync();
-    authService.signOut();
+  const deleteAccount = async () => {
+    await deleteUserMutation.mutateAsync();
+    auth.signOut();
     queryClient.clear();
     router.replace("/(onboarding)");
   };
 
   return {
-    user: authService.currentUser,
+    user: auth.currentUser,
     isLoading,
-    isSignedIn: authService.isSignedIn,
+    isSignedIn: auth.isSignedIn,
     sendVerificationCode,
     verifyPhoneNumber,
     signOut,

@@ -6,7 +6,7 @@ export class TwilioService {
   private client: Twilio;
 
   constructor() {
-    this.client = new Twilio(env.TWILIO_ACCOUNT_SID, env.TWILIO_AUTH_TOKEN, {});
+    this.client = new Twilio(env.TWILIO_ACCOUNT_SID, env.TWILIO_AUTH_TOKEN);
   }
 
   async sendVerificationCode(phoneNumber: string): Promise<string> {
