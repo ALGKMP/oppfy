@@ -2,12 +2,12 @@ import React, { useEffect } from "react";
 import { Dimensions } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { SplashScreen, useNavigation, useRouter } from "expo-router";
-import { ArrowRight, Share2, UserPlus2 } from "@tamagui/lucide-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useNavigation, useRouter } from "expo-router";
+import { Camera, MessageCircle, Share2 } from "@tamagui/lucide-icons";
 
 import {
   H1,
-  H3,
   Icon,
   OnboardingButton,
   Paragraph,
@@ -21,20 +21,24 @@ import {
 import { useAuth } from "~/hooks/useAuth";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const FEATURE_IMAGE_SIZE = SCREEN_WIDTH - 64;
+const PREVIEW_WIDTH = SCREEN_WIDTH - 64;
+const PREVIEW_HEIGHT = (PREVIEW_WIDTH * 16) / 9;
 
-const FEATURES = [
+const STEPS = [
+  {
+    icon: Camera,
+    title: "Take a Photo",
+    description: "Capture a moment or choose from your gallery",
+  },
+  {
+    icon: MessageCircle,
+    title: "Add a Message",
+    description: "Write something fun to share with your friend",
+  },
   {
     icon: Share2,
     title: "Share Instantly",
-    description:
-      "Share photos and videos with friends, even if they're not on Oppfy yet",
-  },
-  {
-    icon: UserPlus2,
-    title: "Invite Friends",
-    description:
-      "Your friends will get a special invite to join when you share with them",
+    description: "Send it to your friend, even if they're not on Oppfy yet",
   },
 ];
 
@@ -53,7 +57,7 @@ const Intro = () => {
             const confirmed = await alertDialog.show({
               title: "Exit Tutorial",
               subtitle:
-                "Are you sure you want to quit? You're about to learn an amazing feature!",
+                "Are you sure you want to quit? You're about to create your first post!",
               acceptText: "Exit",
               cancelText: "Stay",
             });
@@ -74,29 +78,33 @@ const Intro = () => {
   };
 
   return (
-    <ScreenView
-      backgroundColor="$background"
-      padding="$0"
-      justifyContent="space-between"
-    >
+    <ScreenView padding="$0" justifyContent="space-between">
+      <LinearGradient
+        colors={["$primary", "$background"]}
+        style={{
+          position: "absolute",
+          width: "100%",
+          height: "100%",
+        }}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      />
+
       <YStack flex={1} paddingHorizontal="$4" gap="$6" paddingTop="$8">
-        <YStack gap="$2">
-          <H1 textAlign="center" color="$primary">
-            Share with Anyone
+        <YStack gap="$2" animation="quick" enterStyle={{ opacity: 0, y: -20 }}>
+          <H1 textAlign="center" color="$color">
+            Let's Create Your{"\n"}First Post!
           </H1>
           <Paragraph textAlign="center" color="$gray11">
-            Share amazing moments with your friends, even if they haven't joined
-            Oppfy yet
+            We'll walk you through creating and sharing your first moment
           </Paragraph>
         </YStack>
 
-        {/* Feature Image */}
+        {/* Preview Example */}
         <View
-          backgroundColor="$gray3"
-          borderRadius="$10"
-          padding="$6"
-          alignItems="center"
-          marginTop="$4"
+          backgroundColor="$backgroundTransparent"
+          borderRadius="$6"
+          overflow="hidden"
           animation="quick"
           enterStyle={{
             opacity: 0,
@@ -104,24 +112,40 @@ const Intro = () => {
           }}
         >
           {/* <Image
-            source={require("~/assets/images/share-illustration.png")}
+            source={require("~/assets/images/tutorial-preview.png")}
             style={{
-              width: FEATURE_IMAGE_SIZE,
-              height: FEATURE_IMAGE_SIZE,
-              borderRadius: 24,
+              width: PREVIEW_WIDTH,
+              height: PREVIEW_HEIGHT,
+              borderRadius: 16,
             }}
             contentFit="cover"
           /> */}
+          <View
+            position="absolute"
+            bottom={0}
+            left={0}
+            right={0}
+            padding="$4"
+            backgroundColor="$backgroundTransparent"
+            borderTopWidth={1}
+            borderTopColor="$borderColor"
+          >
+            <Text color="$color" fontSize="$4">
+              Your friend will capture moments like this for you
+            </Text>
+          </View>
         </View>
 
-        {/* Features List */}
-        <YStack gap="$4" paddingTop="$4">
-          {FEATURES.map((feature, index) => (
+        {/* Steps List */}
+        <YStack gap="$4">
+          {STEPS.map((step, index) => (
             <XStack
-              key={feature.title}
+              key={step.title}
               backgroundColor="$gray3"
-              padding="$4"
-              borderRadius="$4"
+              borderWidth={1}
+              borderColor="$borderColor"
+              padding="$5"
+              borderRadius="$6"
               gap="$4"
               alignItems="center"
               animation="quick"
@@ -132,13 +156,20 @@ const Intro = () => {
               }}
               animation-delay={`${index * 200}ms`}
             >
-              <feature.icon size={24} color="$primary" />
+              <View
+                backgroundColor="$primary"
+                padding="$3"
+                borderRadius="$4"
+                opacity={0.9}
+              >
+                <step.icon size={24} color="$color" />
+              </View>
               <YStack flex={1}>
-                <Text fontWeight="bold" fontSize="$5">
-                  {feature.title}
+                <Text fontWeight="bold" fontSize="$5" color="$color">
+                  {step.title}
                 </Text>
                 <Text color="$gray11" fontSize="$3">
-                  {feature.description}
+                  {step.description}
                 </Text>
               </YStack>
             </XStack>
@@ -149,12 +180,12 @@ const Intro = () => {
       {/* Bottom Button */}
       <YStack
         paddingBottom="$6"
-        backgroundColor="$background"
+        backgroundColor="$backgroundTransparent"
         borderTopWidth={1}
-        borderTopColor="$gray5"
+        borderTopColor="$borderColor"
       >
         <OnboardingButton
-          icon={ArrowRight}
+          icon={Camera}
           onPress={handleContinue}
           animation="quick"
           enterStyle={{
@@ -163,7 +194,7 @@ const Intro = () => {
             y: 20,
           }}
         >
-          Let's Try It
+          Let's Start
         </OnboardingButton>
       </YStack>
     </ScreenView>
