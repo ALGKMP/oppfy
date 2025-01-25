@@ -134,7 +134,7 @@ const SelectContact = () => {
           <EmptyPlaceholder
             icon={PhoneIcon}
             title="No Contacts Found"
-            subtitle="We couldn't find any contacts that aren't already on the app. Try inviting some friends!"
+            subtitle="We couldn't find any contacts that aren't already on the app. Make sure you have contacts enabled in your settings."
           />
         );
       }}
