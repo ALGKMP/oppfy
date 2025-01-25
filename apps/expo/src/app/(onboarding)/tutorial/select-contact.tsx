@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { RefreshControl, useWindowDimensions } from "react-native";
+import { Keyboard, RefreshControl, useWindowDimensions } from "react-native";
 import type { Contact } from "expo-contacts";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
@@ -113,12 +113,13 @@ const SelectContact = () => {
       estimatedItemSize={80}
       numColumns={2}
       contentContainerStyle={{
-        paddingHorizontal: getToken("$4", "space"),
-        paddingTop: getToken("$6", "space"),
+        paddingHorizontal: getToken("$4", "space") as number,
+        paddingTop: getToken("$6", "space") as number,
       }}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
       }
+      onScrollBeginDrag={Keyboard.dismiss}
       onEndReached={loadMoreContacts}
       onEndReachedThreshold={0.5}
       ItemSeparatorComponent={Spacer}
@@ -137,9 +138,12 @@ const SelectContact = () => {
           />
         );
       }}
+      ListHeaderComponentStyle={{
+        marginBottom: getToken("$4", "space") as number,
+      }}
       ListHeaderComponent={() => {
         return (
-          <YStack gap="$2" paddingBottom="$4">
+          <YStack gap="$4" >
             <H1 textAlign="center" color="$color">
               Choose a Contact Not On The App!
             </H1>
