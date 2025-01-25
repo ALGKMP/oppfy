@@ -3,7 +3,7 @@ import * as Contacts from "expo-contacts";
 import type { Contact } from "expo-contacts";
 import { PermissionStatus } from "expo-contacts";
 import * as Crypto from "expo-crypto";
-import { parsePhoneNumber, parsePhoneNumberWithError } from "libphonenumber-js";
+import { parsePhoneNumberWithError } from "libphonenumber-js";
 import type { CountryCode } from "libphonenumber-js";
 
 import { api } from "~/utils/api";
