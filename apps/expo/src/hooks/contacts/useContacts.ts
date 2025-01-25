@@ -50,13 +50,18 @@ const useContacts = (syncNow = false): ContactFns => {
       [],
     );
 
-    const numbers = phoneNumbers.map((numberthing) => {
-      const phoneNumber = parsePhoneNumberWithError(
-        numberthing.number,
-        numberthing.country.toLocaleUpperCase() as CountryCode,
-      );
-      return phoneNumber.formatInternational().replaceAll(" ", "");
-    });
+    const numbers = phoneNumbers.reduce<string[]>((acc, numberthing) => {
+      try {
+        const phoneNumber = parsePhoneNumberWithError(
+          numberthing.number,
+          numberthing.country.toLocaleUpperCase() as CountryCode,
+        );
+        acc.push(phoneNumber.formatInternational().replaceAll(" ", ""));
+      } catch (error) {
+        // Skip invalid phone numbers
+      }
+      return acc;
+    }, []);
 
     const hashedNumbers = await Promise.all(
       numbers.map(async (number) => {
