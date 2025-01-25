@@ -10,7 +10,6 @@ import {
   H1,
   Icon,
   OnboardingButton,
-  Paragraph,
   ScreenView,
   Text,
   useAlertDialogController,
@@ -22,7 +21,7 @@ import { useAuth } from "~/hooks/useAuth";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const PREVIEW_WIDTH = SCREEN_WIDTH - 64;
-const PREVIEW_HEIGHT = (PREVIEW_WIDTH * 16) / 9;
+const GIF_WIDTH = PREVIEW_WIDTH * 0.8; // Make GIF smaller than full width
 
 const STEPS = [
   {
@@ -43,6 +42,8 @@ const STEPS = [
 ];
 
 const WELCOME_GIFS = [
+  // TODO: Make our own Oppfy welcome gif
+  "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGI2ajZvdm9ycTkxYXh3djhsbGM3bm1rcXlyeXR1YXc0bjFua2dycCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/FQyQEYd0KlYQ/giphy.gif", // Welcome Aboard
   "https://media.giphy.com/media/XD9o33QG9BoMis7iM4/giphy.gif", // B 99
   "https://media.giphy.com/media/l4JyOCNEfXvVYEqB2/giphy.gif", // Welcome To the Club
   "https://media.giphy.com/media/BPJmthQ3YRwD6QqcVD/giphy.gif", // welcome hand drawn
@@ -99,25 +100,11 @@ const Intro = () => {
 
   return (
     <ScreenView padding="$0" justifyContent="space-between">
-      <LinearGradient
-        colors={["$primary", "$background"]}
-        style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-        }}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      />
-
-      <YStack flex={1} paddingHorizontal="$4" gap="$6" paddingTop="$8">
+      <YStack flex={1} paddingHorizontal="$4" gap="$4" paddingTop="$6">
         <YStack gap="$2" animation="quick" enterStyle={{ opacity: 0, y: -20 }}>
           <H1 textAlign="center" color="$color">
             Let's Create Your{"\n"}First Post!
           </H1>
-          <Paragraph textAlign="center" color="$gray11">
-            We'll walk you through creating and sharing your first moment
-          </Paragraph>
         </YStack>
 
         {/* Welcome GIF */}
@@ -130,12 +117,13 @@ const Intro = () => {
             opacity: 0,
             scale: 0.9,
           }}
+          alignSelf="center"
         >
           <Image
             source={{ uri: welcomeGif }}
             style={{
-              width: PREVIEW_WIDTH,
-              height: PREVIEW_WIDTH * 0.75, // Adjust aspect ratio for GIFs
+              width: GIF_WIDTH,
+              height: GIF_WIDTH * 0.6, // Make height proportionally smaller
               borderRadius: 16,
             }}
             contentFit="cover"
@@ -144,7 +132,7 @@ const Intro = () => {
         </View>
 
         {/* Steps List */}
-        <YStack gap="$4" minHeight={280}>
+        <YStack gap="$3" minHeight={240}>
           {STEPS.map(
             (step, index) =>
               index < currentStep && (
@@ -153,7 +141,7 @@ const Intro = () => {
                   backgroundColor="$backgroundTransparent"
                   borderWidth={1}
                   borderColor="$borderColor"
-                  padding="$5"
+                  padding="$4"
                   borderRadius="$6"
                   gap="$4"
                   alignItems="center"
