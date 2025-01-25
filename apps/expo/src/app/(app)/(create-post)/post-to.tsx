@@ -277,7 +277,7 @@ const PostTo = () => {
           type,
           width,
           height,
-          name: contact.name,
+          name: contact.name ?? "user",
           number: formattedPhoneNumber,
           userType: "notOnApp",
           recipientName: contact.name,
