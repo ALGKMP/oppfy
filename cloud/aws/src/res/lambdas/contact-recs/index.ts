@@ -144,7 +144,12 @@ export const handler = async (
     console.log("Tier 2", tier2);
 
     // get people 2 edges away, ranked by number of mutual connections
-    const excludeForTier3 = [...peopleIDontWantToRecommend, ...tier1, ...tier2, userId];
+    const excludeForTier3 = [
+      ...peopleIDontWantToRecommend,
+      ...tier1,
+      ...tier2,
+      userId,
+    ];
 
     // get people 2 edges away, ranked by number of mutual connections
     const tier3 = await g
@@ -154,9 +159,7 @@ export const handler = async (
       .where(__.not(__.hasId(P.within(excludeForTier3))))
       .group()
       .by(__.identity())
-      .by(__.in_("contact")
-        .where(__.out("contact").hasId(userId))
-        .count())
+      .by(__.in_("contact").where(__.out("contact").hasId(userId)).count())
       .unfold()
       .order()
       .by(__.select(column.values), order.desc)
