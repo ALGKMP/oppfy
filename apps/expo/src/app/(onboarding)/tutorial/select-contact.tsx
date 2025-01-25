@@ -86,9 +86,9 @@ const SelectContact = () => {
         pathname: "/tutorial/caption",
         params: {
           ...params,
-          name: contact.name ?? "Unknown",
+          name: contact.name,
           number: formattedPhoneNumber,
-          recipientName: contact.name ?? "Unknown",
+          recipientName: contact.name,
           recipientImage: contact.imageAvailable
             ? contact.image?.uri
             : undefined,
@@ -140,7 +140,10 @@ const SelectContact = () => {
                   {isLoadingContacts ? (
                     <YStack flex={1} gap="$4" paddingTop="$4">
                       {Array.from({ length: 6 }).map((_, index) => (
-                        <UserCard.Skeleton key={index} width={getToken("$12", "size")} />
+                        <UserCard.Skeleton
+                          key={index}
+                          width={getToken("$12", "size")}
+                        />
                       ))}
                     </YStack>
                   ) : (
