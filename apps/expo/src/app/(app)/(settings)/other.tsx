@@ -14,11 +14,11 @@ import {
   useActionSheetController,
   YStack,
 } from "~/components/ui";
-import { useSession } from "~/contexts/SessionContext";
 import { useContacts } from "~/hooks/contacts";
+import { useAuth } from "~/hooks/useAuth";
 
 const Other = () => {
-  const { deleteAccount } = useSession();
+  const { deleteAccount } = useAuth();
   const {
     syncContacts: handleSyncContacts,
     deleteContacts: handleDeleteContacts,

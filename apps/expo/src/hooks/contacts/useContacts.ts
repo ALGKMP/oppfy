@@ -3,7 +3,7 @@ import * as Contacts from "expo-contacts";
 import type { Contact } from "expo-contacts";
 import { PermissionStatus } from "expo-contacts";
 import * as Crypto from "expo-crypto";
-import { parsePhoneNumber, parsePhoneNumberWithError } from "libphonenumber-js";
+import { parsePhoneNumberWithError } from "libphonenumber-js";
 import type { CountryCode } from "libphonenumber-js";
 
 import { api } from "~/utils/api";
@@ -50,13 +50,18 @@ const useContacts = (syncNow = false): ContactFns => {
       [],
     );
 
-    const numbers = phoneNumbers.map((numberthing) => {
-      const phoneNumber = parsePhoneNumberWithError(
-        numberthing.number,
-        numberthing.country.toLocaleUpperCase() as CountryCode,
-      );
-      return phoneNumber.formatInternational().replaceAll(" ", "");
-    });
+    const numbers = phoneNumbers.reduce<string[]>((acc, numberthing) => {
+      try {
+        const phoneNumber = parsePhoneNumberWithError(
+          numberthing.number,
+          numberthing.country.toLocaleUpperCase() as CountryCode,
+        );
+        acc.push(phoneNumber.formatInternational().replaceAll(" ", ""));
+      } catch (error) {
+        // Skip invalid phone numbers
+      }
+      return acc;
+    }, []);
 
     const hashedNumbers = await Promise.all(
       numbers.map(async (number) => {

@@ -15,7 +15,7 @@ import {
 } from "~/components/ui";
 import type { MediaListItemActionProps } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
-import { useSession } from "~/contexts/SessionContext";
+import { useAuth } from "~/hooks/useAuth";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
@@ -31,7 +31,7 @@ const Friends = () => {
 
   const { userId } = useLocalSearchParams<{ userId: string }>();
 
-  const { user } = useSession();
+  const { user } = useAuth();
   const { routeProfile } = useRouteProfile();
 
   const [refreshing, setRefreshing] = useState(false);

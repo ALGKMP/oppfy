@@ -80,7 +80,7 @@ export const createTRPCContext = (opts: { headers: Headers }) => {
     try {
       const token = authToken.split("Bearer ")[1];
 
-      if (!token) {
+      if (token === undefined) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "No token provided",

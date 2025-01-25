@@ -25,7 +25,7 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
-import { useSession } from "~/contexts/SessionContext";
+import { useAuth } from "~/hooks/useAuth";
 
 enum WEBSITE_URL {
   PRIVACY = "https://www.oppfy.app/privacy",
@@ -34,7 +34,7 @@ enum WEBSITE_URL {
 
 const Settings = () => {
   const router = useRouter();
-  const { signOut } = useSession();
+  const { signOut } = useAuth();
   const alertDialog = useAlertDialogController();
 
   const handleShare = async () => {

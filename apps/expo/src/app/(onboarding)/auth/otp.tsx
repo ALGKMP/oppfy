@@ -16,7 +16,7 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
-import { useSession } from "~/contexts/SessionContext";
+import { useAuth } from "~/hooks/useAuth";
 
 enum TwilioError {
   INVALID_PHONE_NUMBER = "Invalid phone number format. Please use a valid phone number.",
@@ -36,7 +36,7 @@ enum TwilioError {
 
 const PhoneNumberOTP = () => {
   const { phoneNumber } = useLocalSearchParams<{ phoneNumber: string }>();
-  const { verifyPhoneNumber } = useSession();
+  const { verifyPhoneNumber } = useAuth();
 
   const [phoneNumberOTP, setPhoneNumberOTP] = useState("");
   const [error, setError] = useState<TwilioError | null>(null);

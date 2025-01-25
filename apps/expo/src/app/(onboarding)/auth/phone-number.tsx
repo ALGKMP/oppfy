@@ -25,9 +25,9 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
-import { useSession } from "~/contexts/SessionContext";
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
+import { useAuth } from "~/hooks/useAuth";
 import useSearch from "~/hooks/useSearch";
 
 const countriesWithoutSections = countriesData.filter(
@@ -50,7 +50,7 @@ enum TwilioError {
 
 const PhoneNumber = () => {
   const router = useRouter();
-  const { sendVerificationCode } = useSession();
+  const { sendVerificationCode } = useAuth();
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [countryData, setCountryData] = useState<CountryData>({

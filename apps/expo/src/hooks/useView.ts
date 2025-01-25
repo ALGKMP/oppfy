@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { useSession } from "~/contexts/SessionContext";
+import { useAuth } from "~/hooks/useAuth";
 import { api } from "~/utils/api";
 
 const DEBOUNCE_DELAY = 10000; // 5 seconds

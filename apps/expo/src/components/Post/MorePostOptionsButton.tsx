@@ -7,8 +7,8 @@ import {
   useActionSheetController,
   useAlertDialogController,
 } from "~/components/ui";
-import { useSession } from "~/contexts/SessionContext";
 import { useSaveMedia } from "~/hooks/post/useSaveMedia";
+import { useAuth } from "~/hooks/useAuth";
 import { useDeletePost } from "../../hooks/post/useDeletePost";
 import { useReportPost } from "../../hooks/post/useReportPost";
 import { Author, Recipient } from "./PostCard";
@@ -30,7 +30,7 @@ const MorePostOptionsButton = ({
   const { handleDeletePost, isDeleting } = useDeletePost();
   const { handleReportPost } = useReportPost(postId);
 
-  const { user } = useSession();
+  const { user } = useAuth();
   const { show: showAlert } = useAlertDialogController();
   const { show, hide } = useActionSheetController();
 

@@ -199,11 +199,19 @@ const PostTo = () => {
   }, [searchResults]);
 
   const loadContacts = useCallback(async () => {
-    const contactsNotOnApp = await getDeviceContactsNotOnApp();
-
-    setContacts(contactsNotOnApp);
-    setVisibleContacts(contactsNotOnApp.slice(0, INITIAL_PAGE_SIZE));
-    setIsLoadingContacts(false);
+    try {
+      const contactsNotOnApp = await getDeviceContactsNotOnApp();
+      setContacts(contactsNotOnApp);
+      setVisibleContacts(contactsNotOnApp.slice(0, INITIAL_PAGE_SIZE));
+    } catch (error) {
+      
+      console.error("Failed to load contacts:", error);
+      // Handle error state appropriately
+      setContacts([]);
+      setVisibleContacts([]);
+    } finally {
+      setIsLoadingContacts(false);
+    }
   }, [getDeviceContactsNotOnApp]);
 
   const loadMoreContacts = useCallback(() => {
@@ -434,7 +442,7 @@ const PostTo = () => {
       case "friend":
         return `friend-${item.data.userId}`;
       case "contact":
-        return `contact-${item.data.id ?? item.data.phoneNumbers?.[0]?.number ?? Math.random()}`;
+        return `contact-${item.data.id ?? item.data.phoneNumbers?.[0]?.number}`;
     }
   }, []);
 
