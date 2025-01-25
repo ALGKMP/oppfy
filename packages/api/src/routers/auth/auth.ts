@@ -66,6 +66,7 @@ export const authRouter = createTRPCRouter({
         let user = await ctx.services.user.getUserByPhoneNumberNoThrow(
           input.phoneNumber,
         );
+        console.log("user", user);
 
         // Generate a new user ID
         const userId = crypto.randomUUID();

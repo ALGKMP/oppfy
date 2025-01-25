@@ -4,7 +4,6 @@ import { db, schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
 
 import { handleDatabaseErrors } from "../../errors";
-import type { InferEnum } from "../../services/user/user";
 
 export type PrivacySettings = NonNullable<
   InferInsertModel<typeof schema.user>["privacySetting"]
