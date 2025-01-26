@@ -3,13 +3,32 @@ import * as Contacts from "expo-contacts";
 import type { Contact } from "expo-contacts";
 import { PermissionStatus } from "expo-contacts";
 import * as Crypto from "expo-crypto";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import type {
+  InfiniteData,
+  QueryFunctionContext,
+  UseInfiniteQueryResult,
+} from "@tanstack/react-query";
 import { parsePhoneNumberWithError } from "libphonenumber-js";
 import type { CountryCode } from "libphonenumber-js";
 
 import { api } from "~/utils/api";
 
+const INITIAL_PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
+
+interface ContactsPage {
+  items: Contact[];
+  nextCursor: number | null;
+  hasNextPage: boolean;
+}
+
+type ContactsQueryKey = ["contacts"];
+type ContactsInfiniteData = InfiniteData<ContactsPage>;
+
 export interface ContactFns {
   syncContacts: () => Promise<void>;
+  contactsPaginatedQuery: UseInfiniteQueryResult<ContactsInfiniteData, Error>;
   deleteContacts: () => Promise<void>;
   getDeviceContacts: () => Promise<Contacts.Contact[]>;
   getRecomendedContacts: () => Promise<Contacts.Contact[]>;
@@ -21,7 +40,6 @@ const useContacts = (syncNow = false): ContactFns => {
   const syncContactsMutation = api.contacts.syncContacts.useMutation();
   const filterContactsOnApp =
     api.contacts.filterOutPhoneNumbersOnApp.useMutation();
-  const utils = api.useUtils();
 
   const syncContacts = useCallback(async () => {
     // make sure its allowed
@@ -58,7 +76,7 @@ const useContacts = (syncNow = false): ContactFns => {
           numberthing.country.toLocaleUpperCase() as CountryCode,
         );
         acc.push(phoneNumber.formatInternational().replaceAll(" ", ""));
-      } catch (error) {
+      } catch {
         // Skip invalid phone numbers
       }
       return acc;
@@ -72,8 +90,6 @@ const useContacts = (syncNow = false): ContactFns => {
         );
       }),
     );
-
-    console.log("syncing contacts", hashedNumbers);
 
     void syncContactsMutation.mutateAsync(hashedNumbers);
   }, [syncContactsMutation]);
@@ -103,11 +119,11 @@ const useContacts = (syncNow = false): ContactFns => {
         try {
           const parsedNumber = parsePhoneNumberWithError(number);
           return parsedNumber.isValid() ? parsedNumber.format("E.164") : null;
-        } catch (error) {
+        } catch {
           return null;
         }
       })
-      .filter((number): number is string => number !== null);
+      .filter((number) => number !== null);
 
     const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({
       phoneNumbers,
@@ -126,7 +142,7 @@ const useContacts = (syncNow = false): ContactFns => {
               parsedNumber.isValid() &&
               parsedNumber.format("E.164") === phoneNumber
             );
-          } catch (error) {
+          } catch {
             return false;
           }
         });
@@ -142,6 +158,37 @@ const useContacts = (syncNow = false): ContactFns => {
 
     return sortedContacts;
   };
+
+  const contactsPaginatedQuery = useInfiniteQuery<
+    ContactsPage,
+    Error,
+    ContactsInfiniteData,
+    ContactsQueryKey,
+    number | null
+  >({
+    queryKey: ["contacts"],
+    queryFn: async (
+      context: QueryFunctionContext<ContactsQueryKey, number | null>,
+    ) => {
+      const isInitialFetch = !context.pageParam;
+      const contacts = await getDeviceContactsNotOnApp();
+
+      const startIndex = context.pageParam ?? 0;
+      const pageSize = isInitialFetch ? INITIAL_PAGE_SIZE : PAGE_SIZE;
+      const endIndex = startIndex + pageSize;
+
+      const items = contacts.slice(startIndex, endIndex);
+      const hasNextPage = endIndex < contacts.length;
+
+      return {
+        items,
+        nextCursor: hasNextPage ? endIndex : null,
+        hasNextPage,
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    initialPageParam: null,
+  });
 
   // Helper function to calculate contact score
   const getContactScore = (contact: Contact): number => {
@@ -199,6 +246,7 @@ const useContacts = (syncNow = false): ContactFns => {
 
   return {
     syncContacts,
+    contactsPaginatedQuery,
     deleteContacts: deleteContactsMutation.mutateAsync,
     getDeviceContacts,
     getRecomendedContacts,

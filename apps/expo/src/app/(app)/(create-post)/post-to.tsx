@@ -204,7 +204,6 @@ const PostTo = () => {
       setContacts(contactsNotOnApp);
       setVisibleContacts(contactsNotOnApp.slice(0, INITIAL_PAGE_SIZE));
     } catch (error) {
-      
       console.error("Failed to load contacts:", error);
       // Handle error state appropriately
       setContacts([]);
