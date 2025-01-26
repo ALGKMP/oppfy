@@ -231,7 +231,7 @@ const CreatePost = () => {
       });
     }
 
-    await completedTutorial.mutateAsync();
+    void completedTutorial.mutateAsync();
 
     router.replace("/(app)/(bottom-tabs)/(home)");
   };
