@@ -19,7 +19,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { ChevronRight, ScrollText } from "@tamagui/lucide-icons";
 import { getToken, useTheme } from "tamagui";
-import {api } from "~/utils/api";
 
 import PlayPause, {
   usePlayPauseAnimations,
@@ -45,6 +44,7 @@ import type {
 } from "~/hooks/media/useUploadMedia";
 import useStoreReview from "~/hooks/useRating";
 import useShare from "~/hooks/useShare";
+import { api } from "~/utils/api";
 
 interface CreatePostBaseParams extends Record<string, string> {
   uri: string;
@@ -96,7 +96,6 @@ const CaptionSheet = ({
   const insets = useSafeAreaInsets();
   const inputRef = useRef<TextInput>(null);
   const [localDraftCaption, setLocalDraftCaption] = useState(caption);
-
 
   useEffect(() => {
     setTimeout(() => {
@@ -326,9 +325,7 @@ const CreatePost = () => {
       >
         {buttonMessage}
       </Button> */}
-      <OnboardingButton onPress={onSubmit}>
-        {buttonMessage}
-      </OnboardingButton>
+      <OnboardingButton onPress={onSubmit}>{buttonMessage}</OnboardingButton>
     </ScreenView>
   );
 };
