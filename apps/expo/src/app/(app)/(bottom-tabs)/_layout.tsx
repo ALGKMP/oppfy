@@ -56,14 +56,14 @@ const BottomTabsLayout = () => {
     if (isDev || !hasSeenWelcome) {
       // 1 second delay
       // setTimeout(() => {
-        bottomSheet.show({
-          snapPoints: ["100%"],
-          headerShown: false,
-          enablePanDownToClose: false,
-          enableHandlePanningGesture: false,
-          enableContentPanningGesture: false,
-          children: <WelcomeBottomSheet onComplete={handleDismissWelcome} />,
-        });
+      bottomSheet.show({
+        snapPoints: ["100%"],
+        headerShown: false,
+        enablePanDownToClose: false,
+        enableHandlePanningGesture: false,
+        enableContentPanningGesture: false,
+        children: <WelcomeBottomSheet onComplete={handleDismissWelcome} />,
+      });
       // }, 1000);
     }
     // eslint-disable-next-line react-compiler/react-compiler
