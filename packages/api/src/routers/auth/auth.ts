@@ -74,9 +74,9 @@ export const authRouter = createTRPCRouter({
         let isNewUser = false;
 
         if (user) {
-          const userStatus = await ctx.services.user.getUserStatus(user.id);
+          const isOnApp = await ctx.services.user.isOnApp(user.id);
 
-          if (!userStatus.isOnApp) {
+          if (!isOnApp) {
             // Update existing user's ID and status
             await ctx.services.user.updateUserId(user.id, userId);
             await ctx.services.user.updateUserOnAppStatus(userId, true);
