@@ -26,9 +26,6 @@ import useSearch from "~/hooks/useSearch";
 import { api } from "~/utils/api";
 import { storage } from "~/utils/storage";
 
-const INITIAL_PAGE_SIZE = 5;
-const ADDITIONAL_PAGE_SIZE = 10;
-
 interface Friend {
   userId: string;
   username: string;
@@ -57,11 +54,22 @@ const PostTo = () => {
   }>();
 
   const [refreshing, setRefreshing] = useState(false);
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [visibleContacts, setVisibleContacts] = useState<Contact[]>([]);
-  const [isLoadingContacts, setIsLoadingContacts] = useState(true);
-  const [contactsPage, setContactsPage] = useState(0);
-  const { getDeviceContactsNotOnApp } = useContacts();
+
+  const {
+    contactsPaginatedQuery: {
+      data: contactsData,
+      isLoading: isLoadingContacts,
+      isFetchingNextPage: isFetchingNextContacts,
+      hasNextPage: hasNextContacts,
+      fetchNextPage: fetchNextContacts,
+      refetch: refetchContacts,
+    },
+  } = useContacts();
+
+  const contacts = useMemo(
+    () => contactsData?.pages.flatMap((page) => page.items) ?? [],
+    [contactsData],
+  );
 
   const {
     data: friendsData,
@@ -104,19 +112,19 @@ const PostTo = () => {
     }
 
     // Add contacts section if there are contacts
-    if (visibleContacts.length > 0) {
+    if (contacts.length > 0) {
       result.push({
         type: "header",
         title: "Post for Anyone",
         isContact: true,
       });
-      visibleContacts.forEach((contact) => {
+      contacts.forEach((contact) => {
         result.push({ type: "contact", data: contact });
       });
     }
 
     return result;
-  }, [friendsList, visibleContacts]);
+  }, [friendsList, contacts]);
 
   const searchableItems = useMemo(() => {
     const result: Extract<ListItem, { type: "friend" | "contact" }>[] = [];
@@ -126,7 +134,7 @@ const PostTo = () => {
       result.push({ type: "friend", data: friend });
     });
 
-    // Add all contacts (not just visible ones)
+    // Add all contacts
     contacts.forEach((contact) => {
       result.push({ type: "contact", data: contact });
     });
@@ -198,39 +206,6 @@ const PostTo = () => {
     return result;
   }, [searchResults]);
 
-  const loadContacts = useCallback(async () => {
-    try {
-      const contactsNotOnApp = await getDeviceContactsNotOnApp();
-      setContacts(contactsNotOnApp);
-      setVisibleContacts(contactsNotOnApp.slice(0, INITIAL_PAGE_SIZE));
-    } catch (error) {
-      console.error("Failed to load contacts:", error);
-      // Handle error state appropriately
-      setContacts([]);
-      setVisibleContacts([]);
-    } finally {
-      setIsLoadingContacts(false);
-    }
-  }, [getDeviceContactsNotOnApp]);
-
-  const loadMoreContacts = useCallback(() => {
-    if (visibleContacts.length >= contacts.length) return;
-
-    const nextPage = contactsPage + 1;
-    const newVisibleContacts = contacts.slice(
-      0,
-      INITIAL_PAGE_SIZE + nextPage * ADDITIONAL_PAGE_SIZE,
-    );
-    setVisibleContacts(newVisibleContacts);
-    setContactsPage(nextPage);
-  }, [contacts, visibleContacts.length, contactsPage]);
-
-  useEffect(() => {
-    void loadContacts();
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   useEffect(() => {
     if (__DEV__) storage.set(HAS_SEEN_SHARE_TIP_KEY, false);
     const hasSeenTip = storage.getBoolean(HAS_SEEN_SHARE_TIP_KEY);
@@ -253,16 +228,25 @@ const PostTo = () => {
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([loadContacts(), refetch()]);
+    await Promise.all([refetchContacts(), refetch()]);
     setRefreshing(false);
-  }, [loadContacts, refetch]);
+  }, [refetchContacts, refetch]);
 
   const handleOnEndReached = useCallback(async () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
     }
-    loadMoreContacts();
-  }, [isFetchingNextPage, hasNextPage, fetchNextPage, loadMoreContacts]);
+    if (!isFetchingNextContacts && hasNextContacts) {
+      await fetchNextContacts();
+    }
+  }, [
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextContacts,
+    hasNextContacts,
+    fetchNextContacts,
+  ]);
 
   const onContactSelected = useCallback(
     (contact: Contact) => {
@@ -276,7 +260,7 @@ const PostTo = () => {
           type,
           width,
           height,
-          name: contact.name ?? "user",
+          name: contact.name,
           number: formattedPhoneNumber,
           userType: "notOnApp",
           recipientName: contact.name,
