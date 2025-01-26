@@ -69,7 +69,7 @@ export const authRouter = createTRPCRouter({
         console.log("user", user);
 
         // Generate a new user ID
-        const userId = crypto.randomUUID();
+        // const userId = crypto.randomUUID();
 
         let isNewUser = false;
 
@@ -78,8 +78,8 @@ export const authRouter = createTRPCRouter({
 
           if (!userStatus.isOnApp) {
             // Update existing user's ID and status
-            await ctx.services.user.updateUserId(user.id, userId);
-            await ctx.services.user.updateUserOnAppStatus(userId, true);
+            // await ctx.services.user.updateUserId(user.id, userId);
+            await ctx.services.user.updateUserOnAppStatus(user.id, true);
             isNewUser = true;
 
             // Fetch the updated user
@@ -89,6 +89,7 @@ export const authRouter = createTRPCRouter({
           }
         } else {
           // Create new user if they don't exist
+          const userId = crypto.randomUUID();
           await ctx.services.user.createUser(userId, input.phoneNumber, true);
           isNewUser = true;
 
