@@ -232,6 +232,7 @@ const CreatePost = () => {
     }
 
     void completedTutorial.mutateAsync();
+
     router.replace("/(app)/(bottom-tabs)/(home)");
   };
 
