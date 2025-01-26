@@ -32,6 +32,7 @@ import {
   CardContainer,
   H5,
   HeaderTitle,
+  OnboardingButton,
   ScreenView,
   Text,
   useBottomSheetController,
@@ -253,8 +254,8 @@ const CreatePost = () => {
   const previewHeight = previewWidth * ASPECT_RATIO;
 
   return (
-    <ScreenView safeAreaEdges={["bottom"]}>
-      <YStack flex={1} gap="$5">
+    <ScreenView safeAreaEdges={["bottom"]} paddingHorizontal="$0">
+      <YStack flex={1} gap="$5" paddingHorizontal="$4">
         <YStack gap="$4" alignItems="center">
           {type === "photo" ? (
             <Image
@@ -314,14 +315,17 @@ const CreatePost = () => {
         </CardContainer>
       </YStack>
 
-      <Button
+      {/* <Button
         variant="primary"
         onPress={onSubmit}
         pressStyle={{ scale: 0.95 }}
         animation="bouncy"
       >
         {buttonMessage}
-      </Button>
+      </Button> */}
+      <OnboardingButton>
+        {buttonMessage}
+      </OnboardingButton>
     </ScreenView>
   );
 };
