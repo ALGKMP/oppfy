@@ -41,7 +41,7 @@ const useNotificationObserver = () => {
       //     });
       //     break;
       // }
-      router.navigate("/(inbox)");
+      // router.navigate("/");
     };
 
     const invalidateData = (notification?: Notification) => {

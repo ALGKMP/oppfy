@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Keyboard, RefreshControl, useWindowDimensions } from "react-native";
 import type { Contact } from "expo-contacts";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -11,13 +11,12 @@ import { getToken } from "tamagui";
 import {
   EmptyPlaceholder,
   H1,
-  HeaderTitle,
   SearchInput,
   Spacer,
   UserCard,
   YStack,
 } from "~/components/ui";
-import { useContactsInfinite } from "~/hooks/contacts/useContactsInfinite";
+import { useContacts } from "~/hooks/contacts";
 import useSearch from "~/hooks/useSearch";
 
 const PhoneIcon = React.createElement(Phone);
@@ -36,13 +35,15 @@ const SelectContact = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const {
-    data,
-    isLoading: isLoadingContacts,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-    refetch,
-  } = useContactsInfinite();
+    contactsPaginatedQuery: {
+      data,
+      isLoading: isLoadingContacts,
+      isFetchingNextPage,
+      hasNextPage,
+      fetchNextPage,
+      refetch,
+    },
+  } = useContacts();
 
   const contacts = data?.pages.flatMap((page) => page.items) ?? [];
 
