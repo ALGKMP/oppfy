@@ -38,13 +38,21 @@ const ProfilePicture = () => {
   const onSubmit = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     void completedOnboarding.mutateAsync();
-    router.replace("/tutorial/intro");
+    if (__DEV__) {
+      router.replace("/(app)/(bottom-tabs)/(home)");
+    } else {
+      router.replace("/tutorial/intro");
+    }
   };
 
   const onSkip = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     void completedOnboarding.mutateAsync();
-    router.replace("/tutorial/intro");
+    if (__DEV__) {
+      router.replace("/(app)/(bottom-tabs)/(home)");
+    } else {
+      router.replace("/tutorial/intro");
+    }
   };
 
   return (
