@@ -75,7 +75,6 @@ const OnboardingLayout = () => (
       options={{
         headerShown: false,
         presentation: "modal",
-        animation: "fade",
       }}
     />
   </Stack>
