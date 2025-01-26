@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Redirect, SplashScreen } from "expo-router";
+import { Redirect, SplashScreen, useRouter } from "expo-router";
 
 import { Stack } from "~/components/Layouts/Navigation";
 import { usePermissions } from "~/contexts/PermissionsContext";
@@ -16,10 +16,11 @@ const AppLayout = () => {
   usePushNotifications();
   useNotificationObserver();
 
+  const router = useRouter();
   const { syncContacts } = useContacts();
 
-  const { isSignedIn } = useAuth();
-  const { permissions } = usePermissions();
+  const { isLoading: isLoadingAuth, isSignedIn } = useAuth();
+  const { isLoading: isLoadingPermissions, permissions } = usePermissions();
 
   const requiredPermissions = permissions.camera && permissions.contacts;
 
@@ -29,19 +30,27 @@ const AppLayout = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!isSignedIn) {
-    console.log("!isSignedIn");
-    return <Redirect href="/(onboarding)" />;
-  }
+  useEffect(() => {
+    if (isLoadingAuth || isLoadingPermissions) {
+      return;
+    }
 
-  if (!requiredPermissions) {
-    console.log("!requiredPermissions");
-    return <Redirect href="/(onboarding)/misc/permissions" />;
-  }
+    if (!isSignedIn) {
+      router.replace("/(onboarding)");
+      return;
+    }
 
-  // if (profileData && profileData.profileStats.posts < 0) {
-  //   return <Redirect href="/(locked)/invite" />;
-  // }
+    if (!requiredPermissions) {
+      router.push("/(onboarding)/misc/permissions");
+      return;
+    }
+  }, [
+    isLoadingAuth,
+    isLoadingPermissions,
+    isSignedIn,
+    requiredPermissions,
+    router,
+  ]);
 
   return (
     <Stack
