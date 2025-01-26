@@ -64,7 +64,7 @@ const Settings = () => {
     });
 
     if (confirmed) {
-      void signOut();
+      signOut();
     }
   };
 
