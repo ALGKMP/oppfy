@@ -17,11 +17,9 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight, ScrollText } from "@tamagui/lucide-icons";
-import { Controller, useForm } from "react-hook-form";
 import { getToken, useTheme } from "tamagui";
-import { z } from "zod";
+import {api } from "~/utils/api";
 
 import PlayPause, {
   usePlayPauseAnimations,
@@ -99,6 +97,7 @@ const CaptionSheet = ({
   const inputRef = useRef<TextInput>(null);
   const [localDraftCaption, setLocalDraftCaption] = useState(caption);
 
+
   useEffect(() => {
     setTimeout(() => {
       inputRef.current?.focus();
@@ -161,6 +160,8 @@ const CreatePost = () => {
   const { promptForReview } = useStoreReview();
   const { show, hide } = useBottomSheetController();
   const { sharePostToNewUser } = useShare();
+
+  const completedTutorial = api.user.completedTutorial.useMutation();
 
   const [caption, setCaption] = useState("");
 
@@ -231,7 +232,9 @@ const CreatePost = () => {
       });
     }
 
-    router.dismissTo("/(app)/(bottom-tabs)/(camera)");
+    completedTutorial.mutateAsync();
+
+    router.replace("/(app)/(bottom-tabs)/(home)");
   };
 
   const openCaptionSheet = () => {
@@ -323,7 +326,7 @@ const CreatePost = () => {
       >
         {buttonMessage}
       </Button> */}
-      <OnboardingButton>
+      <OnboardingButton onPress={onSubmit}>
         {buttonMessage}
       </OnboardingButton>
     </ScreenView>
@@ -346,7 +349,7 @@ const PreviewVideo = ({
     player.play();
   });
 
-  const togglePlayback = async () => {
+  const togglePlayback = () => {
     if (player.playing) {
       player.pause();
       addPause();
