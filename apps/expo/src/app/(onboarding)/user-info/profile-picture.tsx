@@ -38,13 +38,13 @@ const ProfilePicture = () => {
   const onSubmit = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     void completedOnboarding.mutateAsync();
-    router.replace("/tutorial/intro");
+      router.replace("/tutorial/intro")
   };
 
   const onSkip = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     void completedOnboarding.mutateAsync();
-    router.replace("/tutorial/intro");
+    router.replace("/tutorial/intro")
   };
 
   return (

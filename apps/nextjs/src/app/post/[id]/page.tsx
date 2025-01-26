@@ -41,18 +41,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     height = Math.max(height, 600);
 
     return {
-      title: `${post.authorUsername} opped ${post.recipientUsername} | Oppfy`,
+      title: `${post.authorName} opped ${post.recipientName} | Oppfy`,
       description: post.caption.length === 0 ? "No caption" : post.caption,
       themeColor: "#F214FF",
       openGraph: {
-        title: `${post.authorUsername} opped ${post.recipientUsername}`,
+        title: `${post.authorName} opped ${post.recipientName}`,
         description: post.caption,
         images: [
           {
             url: post.imageUrl,
             width,
             height,
-            alt: `${post.authorUsername} opped ${post.recipientUsername}`,
+            alt: `${post.authorName} opped ${post.recipientName}`,
           },
         ],
         type: "article",
@@ -61,14 +61,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
       twitter: {
         card: "summary_large_image",
-        title: `${post.authorUsername} opped ${post.recipientUsername}`,
+        title: `${post.authorName} opped ${post.recipientName}`,
         description: post.caption,
         images: [
           {
             url: post.imageUrl,
             width,
             height,
-            alt: `${post.authorUsername} opped ${post.recipientUsername}`,
+            alt: `${post.authorName} opped ${post.recipientName}`,
           },
         ],
         site: "@oppfyapp",

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { DomainError, ErrorCode } from "../../errors";
 import {
   BlockRepository,
+  ContactsRepository,
   FollowRepository,
   PostRepository,
   PostStatsRepository,
@@ -23,6 +24,7 @@ export class UserService {
   private profileRepository = new ProfileRepository();
   private followRepository = new FollowRepository();
   private blockRepository = new BlockRepository();
+  private contactsRepository = new ContactsRepository();
   private profileStatsRepository = new ProfileStatsRepository();
   private postStatsRepository = new PostStatsRepository();
 
@@ -116,6 +118,7 @@ export class UserService {
     await this.profileRepository.deleteProfile(user.profileId);
     await this.searchRepository.deleteProfile(userId);
     await this.userRepository.deleteUser(userId);
+    await this.contactsRepository.deleteContacts(userId);
   }
 
   // async checkOnboardingComplete(userId: string | undefined) {

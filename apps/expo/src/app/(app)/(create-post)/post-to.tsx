@@ -55,7 +55,7 @@ const PostTo = () => {
 
   const [refreshing, setRefreshing] = useState(false);
 
-  const {
+/*   const {
     contactsPaginatedQuery: {
       data: contactsData,
       isLoading: isLoadingContacts,
@@ -70,7 +70,7 @@ const PostTo = () => {
     () => contactsData?.pages.flatMap((page) => page.items) ?? [],
     [contactsData],
   );
-
+ */
   const {
     data: friendsData,
     isLoading: isLoadingFriends,
@@ -111,7 +111,7 @@ const PostTo = () => {
       });
     }
 
-    // Add contacts section if there are contacts
+/*     // Add contacts section if there are contacts
     if (contacts.length > 0) {
       result.push({
         type: "header",
@@ -121,10 +121,10 @@ const PostTo = () => {
       contacts.forEach((contact) => {
         result.push({ type: "contact", data: contact });
       });
-    }
+    } */
 
     return result;
-  }, [friendsList, contacts]);
+  }, [friendsList, /*contacts*/]);
 
   const searchableItems = useMemo(() => {
     const result: Extract<ListItem, { type: "friend" | "contact" }>[] = [];
@@ -134,13 +134,13 @@ const PostTo = () => {
       result.push({ type: "friend", data: friend });
     });
 
-    // Add all contacts
+/*     // Add all contacts
     contacts.forEach((contact) => {
       result.push({ type: "contact", data: contact });
     });
-
+ */
     return result;
-  }, [friendsList, contacts]);
+  }, [friendsList, /*contacts*/]);
 
   const searchOptions: IFuseOptions<ListItem> = {
     keys: [
@@ -228,24 +228,24 @@ const PostTo = () => {
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([refetchContacts(), refetch()]);
+    await Promise.all([/* refetchContacts(), */ refetch()]);
     setRefreshing(false);
-  }, [refetchContacts, refetch]);
+  }, [/* refetchContacts */, refetch]);
 
   const handleOnEndReached = useCallback(async () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
     }
-    if (!isFetchingNextContacts && hasNextContacts) {
+/*     if (!isFetchingNextContacts && hasNextContacts) {
       await fetchNextContacts();
-    }
+    } */
   }, [
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
-    isFetchingNextContacts,
+/*     isFetchingNextContacts,
     hasNextContacts,
-    fetchNextContacts,
+    fetchNextContacts, */
   ]);
 
   const onContactSelected = useCallback(
@@ -379,7 +379,7 @@ const PostTo = () => {
   );
 
   const ListEmptyComponent = useCallback(() => {
-    const isLoading = isLoadingFriends || isLoadingContacts;
+    const isLoading = isLoadingFriends /* || isLoadingContacts */;
 
     if (isLoading) {
       return (
@@ -412,7 +412,7 @@ const PostTo = () => {
     }
 
     return null;
-  }, [isLoadingFriends, isLoadingContacts, items.length, searchResults.length]);
+  }, [isLoadingFriends, /* isLoadingContacts, */ items.length, searchResults.length]);
 
   const getItemType = useCallback((item: ListItem) => {
     return item.type;
