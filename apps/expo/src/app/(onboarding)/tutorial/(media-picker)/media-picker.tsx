@@ -110,10 +110,15 @@ const MediaPickerScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
 
-  const { albumId, albumTitle } = useLocalSearchParams<{
-    albumId: string;
-    albumTitle: string;
-  }>();
+  const { albumId, albumTitle, name, number, recipientName, recipientImage } =
+    useLocalSearchParams<{
+      albumId: string;
+      albumTitle: string;
+      name: string;
+      number: string;
+      recipientName: string;
+      recipientImage?: string;
+    }>();
 
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
     useMediaAssets({ albumId });
@@ -150,23 +155,35 @@ const MediaPickerScreen = () => {
                   assetInfo.localUri,
                 );
 
+                router.dismissTo("/tutorial/select-contact");
                 router.push({
-                  pathname: "/tutorial/preview",
+                  pathname: "/tutorial/create-post",
                   params: {
                     uri: localUri,
                     type: assetInfo.mediaType,
                     height: assetInfo.height.toString(),
                     width: assetInfo.width.toString(),
+                    userType: "notOnApp",
+                    name,
+                    number,
+                    recipientName,
+                    recipientImage,
                   },
                 });
               } else {
+                router.dismissTo("/tutorial/select-contact");
                 router.push({
-                  pathname: "/tutorial/preview",
+                  pathname: "/tutorial/create-post",
                   params: {
                     uri: assetInfo.uri,
                     type: assetInfo.mediaType,
                     height: assetInfo.height.toString(),
                     width: assetInfo.width.toString(),
+                    userType: "notOnApp",
+                    name,
+                    number,
+                    recipientName,
+                    recipientImage,
                   },
                 });
               }
@@ -193,7 +210,7 @@ const MediaPickerScreen = () => {
         </Stack>
       );
     },
-    [router],
+    [router, name, number, recipientName, recipientImage],
   );
 
   return (
