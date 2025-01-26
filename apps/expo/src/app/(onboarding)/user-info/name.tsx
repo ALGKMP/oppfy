@@ -57,7 +57,7 @@ const Name = () => {
             console.log("confirmed", confirmed);
 
             if (confirmed) {
-              await signOut();
+              signOut();
             }
           }}
           blurred

@@ -195,7 +195,7 @@ export const PostStats = ({
       bottom={24}
       paddingRight="$4"
       gap="$5"
-      zIndex={2}
+      zIndex={3}
       alignItems="flex-end"
     >
       <LikeAction

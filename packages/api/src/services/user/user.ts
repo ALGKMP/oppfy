@@ -143,6 +143,12 @@ export class UserService {
   //   return userStatus.hasCompletedTutorial;
   // }
 
+  async isOnApp(userId: string) {
+    const userStatus = await this.userRepository.getUserStatus(userId);
+    if (!userStatus) return false;
+    return userStatus.isOnApp;
+  }
+
   async completedOnboarding(userId: string) {
     await this.userRepository.updateUserOnboardingComplete(userId, true);
   }

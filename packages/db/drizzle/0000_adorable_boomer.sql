@@ -1,10 +1,4 @@
 DO $$ BEGIN
- CREATE TYPE "public"."account_status" AS ENUM('onApp', 'notOnApp');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
  CREATE TYPE "public"."entity_type" AS ENUM('post', 'profile', 'comment');
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -221,8 +215,6 @@ CREATE TABLE IF NOT EXISTS "user" (
 	"notification_settings_id" uuid NOT NULL,
 	"privacy_setting" "privacy_setting" DEFAULT 'public' NOT NULL,
 	"phone_number" text NOT NULL,
-	"posted" boolean DEFAULT false NOT NULL,
-	"account_status" "account_status" DEFAULT 'onApp' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "user_phone_number_unique" UNIQUE("phone_number")
@@ -233,6 +225,16 @@ CREATE TABLE IF NOT EXISTS "user_contact" (
 	"contact_id" varchar(128) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "user_contact_user_id_contact_id_pk" PRIMARY KEY("user_id","contact_id")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "user_status" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"is_on_app" boolean DEFAULT true NOT NULL,
+	"has_posted" boolean DEFAULT false NOT NULL,
+	"has_completed_onboarding" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 DO $$ BEGIN
@@ -429,6 +431,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "user_contact" ADD CONSTRAINT "user_contact_contact_id_contact_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contact"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "user_status" ADD CONSTRAINT "user_status_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

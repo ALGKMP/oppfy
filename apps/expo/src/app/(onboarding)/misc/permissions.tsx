@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Linking, TouchableOpacity } from "react-native";
 import * as Contacts from "expo-contacts";
 import * as Haptics from "expo-haptics";
@@ -24,6 +24,7 @@ import {
   YStack,
 } from "~/components/ui";
 import { usePermissions } from "~/contexts/PermissionsContext";
+import { useContacts } from "~/hooks/contacts";
 import { useAuth } from "~/hooks/useAuth";
 
 type PermissionType = "Camera" | "Contacts" | "Notifications";
@@ -32,6 +33,7 @@ const Permissions = () => {
   const router = useRouter();
   const { isSignedIn } = useAuth();
   const { permissions, checkPermissions } = usePermissions();
+  const { syncContacts } = useContacts();
 
   const alertDialog = useAlertDialogController();
   const learnMoreDialog = useDialogController();
@@ -100,12 +102,18 @@ const Permissions = () => {
       ImagePicker.getCameraPermissionsAsync,
     );
 
-  const requestContactsPermission = (): Promise<void> =>
-    handlePermissionRequest(
+  const requestContactsPermission = async (): Promise<void> => {
+    await handlePermissionRequest(
       "Contacts",
       Contacts.requestPermissionsAsync,
       Contacts.getPermissionsAsync,
     );
+    // If we have contacts permission after the request, sync contacts
+    const currentPermissions = await Contacts.getPermissionsAsync();
+    if (currentPermissions.status === PermissionStatus.GRANTED) {
+      void syncContacts();
+    }
+  };
 
   const requestNotificationsPermission = (): Promise<void> =>
     handlePermissionRequest(

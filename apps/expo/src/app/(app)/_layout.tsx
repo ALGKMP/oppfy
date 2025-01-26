@@ -10,7 +10,7 @@ import {
 } from "~/hooks/notifications";
 import { useAuth } from "~/hooks/useAuth";
 
-const DELAY_TO_HIDE_SPLASH_SCREEN = 250;
+void SplashScreen.hideAsync();
 
 const AppLayout = () => {
   usePushNotifications();
@@ -18,29 +18,16 @@ const AppLayout = () => {
 
   const { syncContacts } = useContacts();
 
-  const { isLoading: sessionIsLoading, isSignedIn } = useAuth();
-  const { isLoading: permissionsIsLoading, permissions } = usePermissions();
+  const { isSignedIn } = useAuth();
+  const { permissions } = usePermissions();
 
   const requiredPermissions = permissions.camera && permissions.contacts;
-
-  useEffect(() => {
-    if (!sessionIsLoading && !permissionsIsLoading) {
-      void setTimeout(
-        () => void SplashScreen.hideAsync(),
-        DELAY_TO_HIDE_SPLASH_SCREEN,
-      );
-    }
-  }, [sessionIsLoading, permissionsIsLoading]);
 
   useEffect(() => {
     void syncContacts();
     // eslint-disable-next-line react-compiler/react-compiler
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  if (sessionIsLoading || permissionsIsLoading) {
-    return null;
-  }
 
   if (!isSignedIn) {
     console.log("!isSignedIn");
