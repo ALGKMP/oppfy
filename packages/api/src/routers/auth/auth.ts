@@ -127,7 +127,6 @@ export const authRouter = createTRPCRouter({
       }
     }),
     
-
   // Add a new procedure to refresh tokens
   refreshToken: publicProcedure
     .input(z.object({ refreshToken: z.string() }))
