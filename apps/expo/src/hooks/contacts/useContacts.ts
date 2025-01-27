@@ -50,6 +50,40 @@ const useContacts = (syncNow = false): ContactFns => {
   const filterContactsOnApp =
     api.contacts.filterOutPhoneNumbersOnApp.useMutation();
 
+  const contactsToE164Numbers = (contacts: Contacts.Contact[]) => {
+    return contacts
+      .map((contact) => {
+        const number = contact.phoneNumbers?.[0]?.number;
+        if (number === undefined) return null;
+        try {
+          const parsedNumber = parsePhoneNumberWithError(number);
+          return parsedNumber.isValid() ? parsedNumber.format("E.164") : null;
+        } catch {
+          return null;
+        }
+      })
+      .filter((number) => number !== null);
+  };
+
+  const contactsNotOnApp = (
+    contacts: Contacts.Contact[],
+    numbers: string[],
+  ) => {
+    return contacts.filter((contact) => {
+      const number = contact.phoneNumbers?.[0]?.number;
+      if (number === undefined) return false;
+      try {
+        const parsedNumber = parsePhoneNumberWithError(number);
+        return (
+          parsedNumber.isValid() &&
+          !numbers.includes(parsedNumber.format("E.164"))
+        );
+      } catch {
+        return false;
+      }
+    });
+  };
+
   const syncContacts = useCallback(async () => {
     // make sure its allowed
     const { status } = await Contacts.getPermissionsAsync();
@@ -120,46 +154,16 @@ const useContacts = (syncNow = false): ContactFns => {
       ],
     });
 
-    const phoneNumbers = data
-      .map((contact) => {
-        const number = contact.phoneNumbers?.[0]?.number;
-        if (number === undefined) return null;
-
-        try {
-          const parsedNumber = parsePhoneNumberWithError(number);
-          return parsedNumber.isValid() ? parsedNumber.format("E.164") : null;
-        } catch {
-          return null;
-        }
-      })
-      .filter((number) => number !== null);
+    const phoneNumbers = contactsToE164Numbers(data);
 
     const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({
       phoneNumbers,
     });
 
-    const contactsNotOnApp = phoneNumbersNotOnApp
-      .map((phoneNumber) => {
-        return data.find((contact) => {
-          const number = contact.phoneNumbers?.[0]?.number;
-
-          if (number === undefined) return false;
-
-          try {
-            const parsedNumber = parsePhoneNumberWithError(number);
-            return (
-              parsedNumber.isValid() &&
-              parsedNumber.format("E.164") === phoneNumber
-            );
-          } catch {
-            return false;
-          }
-        });
-      })
-      .filter((contact): contact is Contact => contact !== undefined);
+    const contacts = contactsNotOnApp(data, phoneNumbersNotOnApp);
 
     // Sort contacts based on criteria
-    const sortedContacts = contactsNotOnApp.sort((a, b) => {
+    const sortedContacts = contacts.sort((a, b) => {
       const aScore = getContactScore(a);
       const bScore = getContactScore(b);
       return bScore - aScore; // Higher score first
@@ -190,46 +194,16 @@ const useContacts = (syncNow = false): ContactFns => {
       pageSize,
     });
 
-    const phoneNumbers = data
-      .map((contact) => {
-        const number = contact.phoneNumbers?.[0]?.number;
-        if (number === undefined) return null;
-
-        try {
-          const parsedNumber = parsePhoneNumberWithError(number);
-          return parsedNumber.isValid() ? parsedNumber.format("E.164") : null;
-        } catch {
-          return null;
-        }
-      })
-      .filter((number) => number !== null);
+    const phoneNumbers = contactsToE164Numbers(data);
 
     const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({
       phoneNumbers,
     });
 
-    const contactsNotOnApp = phoneNumbersNotOnApp
-      .map((phoneNumber) => {
-        return data.find((contact) => {
-          const number = contact.phoneNumbers?.[0]?.number;
-
-          if (number === undefined) return false;
-
-          try {
-            const parsedNumber = parsePhoneNumberWithError(number);
-            return (
-              parsedNumber.isValid() &&
-              parsedNumber.format("E.164") === phoneNumber
-            );
-          } catch {
-            return false;
-          }
-        });
-      })
-      .filter((contact): contact is Contact => contact !== undefined);
+    const contacts = contactsNotOnApp(data, phoneNumbersNotOnApp);
 
     // Sort contacts based on criteria
-    const sortedContacts = contactsNotOnApp.sort((a, b) => {
+    const sortedContacts = contacts.sort((a, b) => {
       const aScore = getContactScore(a);
       const bScore = getContactScore(b);
       return bScore - aScore; // Higher score first
@@ -335,7 +309,45 @@ const useContacts = (syncNow = false): ContactFns => {
       ],
       name,
     });
-    return result.data;
+
+    // filter not on app
+    const phoneNumbers = result.data
+      .map((contact) => {
+        const number = contact.phoneNumbers?.[0]?.number;
+        if (number === undefined) return null;
+        try {
+          const parsedNumber = parsePhoneNumberWithError(number);
+          return parsedNumber.isValid() ? parsedNumber.format("E.164") : null;
+        } catch {
+          return null;
+        }
+      })
+      .filter((number) => number !== null);
+
+    const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({
+      phoneNumbers,
+    });
+
+    const contactsNotOnApp = phoneNumbersNotOnApp
+      .map((phoneNumber) => {
+        return result.data.find((contact) => {
+          const number = contact.phoneNumbers?.[0]?.number;
+          if (number === undefined) return false;
+          try {
+            const parsedNumber = parsePhoneNumberWithError(number);
+            return (
+              parsedNumber.isValid() &&
+              parsedNumber.format("E.164") === phoneNumber
+            );
+          } catch {
+            return false;
+          }
+        });
+      })
+
+      .filter((contact): contact is Contact => contact !== undefined);
+
+    return contactsNotOnApp;
   };
 
   useEffect(() => {
