@@ -94,6 +94,7 @@ const PostTo = () => {
           setSearchedContacts([]);
           return;
         }
+        console.log("in here");
         setIsSearchingContacts(true);
         try {
           const results = await searchContacts(query);
@@ -111,6 +112,7 @@ const PostTo = () => {
 
   const handleSearchChange = useCallback(
     (text: string) => {
+      console.log("seaech changed");
       setSearchQuery(text);
       debouncedSearchContacts(text);
     },

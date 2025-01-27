@@ -172,10 +172,6 @@ const useContacts = (syncNow = false): ContactFns => {
     pageOffset?: number,
     pageSize?: number,
   ) => {
-    console.log(
-      `[getDeviceContactsNotOnApp] Called with offset: ${pageOffset}, size: ${pageSize}`,
-    );
-
     // First, get total number of contacts to help with pagination
     const { data: allContacts } = await Contacts.getContactsAsync({
       fields: [Contacts.Fields.PhoneNumbers],
@@ -194,10 +190,6 @@ const useContacts = (syncNow = false): ContactFns => {
       pageSize,
     });
 
-    console.log(
-      `[getDeviceContactsNotOnApp] Raw contacts fetched: ${data.length}, Total contacts: ${totalContacts}`,
-    );
-
     const phoneNumbers = data
       .map((contact) => {
         const number = contact.phoneNumbers?.[0]?.number;
@@ -212,17 +204,9 @@ const useContacts = (syncNow = false): ContactFns => {
       })
       .filter((number) => number !== null);
 
-    console.log(
-      `[getDeviceContactsNotOnApp] Valid phone numbers: ${phoneNumbers.length}`,
-    );
-
     const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({
       phoneNumbers,
     });
-
-    console.log(
-      `[getDeviceContactsNotOnApp] Numbers not on app: ${phoneNumbersNotOnApp.length}`,
-    );
 
     const contactsNotOnApp = phoneNumbersNotOnApp
       .map((phoneNumber) => {
@@ -254,10 +238,6 @@ const useContacts = (syncNow = false): ContactFns => {
     // Calculate if there are more contacts to load
     const currentOffset = pageOffset ?? 0;
     const hasMore = currentOffset + (pageSize ?? 0) < totalContacts;
-
-    console.log(
-      `[getDeviceContactsNotOnApp] Final filtered contacts: ${sortedContacts.length}, Has more: ${hasMore}`,
-    );
 
     return {
       contacts: sortedContacts,
