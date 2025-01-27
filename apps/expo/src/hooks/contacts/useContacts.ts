@@ -41,6 +41,7 @@ export interface ContactFns {
     totalContacts: number;
   }>;
   getDeviceContactsNotOnApp: () => Promise<Contacts.Contact[]>;
+  searchContacts: (name: string) => Promise<Contacts.Contact[]>
 }
 
 const useContacts = (syncNow = false): ContactFns => {
@@ -356,6 +357,18 @@ const useContacts = (syncNow = false): ContactFns => {
     ];
   };
 
+  const searchContacts = async (name: string) => {
+    const result = await Contacts.getContactsAsync({
+      fields: [
+        Contacts.Fields.PhoneNumbers,
+        Contacts.Fields.Image,
+        Contacts.Fields.Name,
+      ],
+      name,
+    });
+    return result.data;
+  };
+
   useEffect(() => {
     if (syncNow) {
       void syncContacts();
@@ -367,6 +380,7 @@ const useContacts = (syncNow = false): ContactFns => {
     contactsPaginatedQuery,
     deleteContacts: deleteContactsMutation.mutateAsync,
     getDeviceContacts,
+    searchContacts,
     getRecomendedContacts,
     getDeviceContactsNotOnApp,
     getDeviceContactsNotOnAppPaginated,

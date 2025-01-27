@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Keyboard, RefreshControl, useWindowDimensions } from "react-native";
 import type { Contact } from "expo-contacts";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -6,6 +6,7 @@ import { FlashList } from "@shopify/flash-list";
 import { Phone } from "@tamagui/lucide-icons";
 import type { IFuseOptions } from "fuse.js";
 import { parsePhoneNumberWithError } from "libphonenumber-js";
+import { debounce } from "lodash";
 import { getToken } from "tamagui";
 
 import {
@@ -33,6 +34,8 @@ const SelectContact = () => {
   const { width: screenWidth } = useWindowDimensions();
   const cardWidth = screenWidth - getToken("$8", "space");
   const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Contact[]>([]);
 
   const {
     contactsPaginatedQuery: {
@@ -43,11 +46,12 @@ const SelectContact = () => {
       fetchNextPage,
       refetch,
     },
+    searchContacts
   } = useContacts();
 
   const contacts = data?.pages.flatMap((page) => page.items) ?? [];
 
-  const searchOptions: IFuseOptions<Contact> = {
+  /*   const searchOptions: IFuseOptions<Contact> = {
     keys: [
       "name",
       {
@@ -65,7 +69,7 @@ const SelectContact = () => {
   } = useSearch<Contact>({
     data: contacts,
     fuseOptions: searchOptions,
-  });
+  }); */
 
   const displayContacts = searchQuery ? searchResults : contacts;
 
@@ -106,6 +110,21 @@ const SelectContact = () => {
   const SCREEN_PADDING = getToken("$4", "space") as number;
   const GAP = getToken("$2", "space") as number;
   const TILE_WIDTH = (screenWidth - SCREEN_PADDING * 2 - GAP) / 2; // Account for screen padding and gap between tiles
+
+  const debouncedSearch = useMemo(
+     () =>
+      debounce(async (text: string) => {
+        const contacts = await searchContacts(text);
+        setSearchResults(contacts);
+      }, 300),
+    [],
+  );
+
+  useEffect(() => {
+    return () => {
+      
+    };
+  }, [debouncedSearch]);
 
   return (
     <FlashList
@@ -151,13 +170,20 @@ const SelectContact = () => {
               <SearchInput
                 placeholder="Search contacts..."
                 value={searchQuery}
-                onChangeText={setSearchQuery}
-                onClear={() => setSearchQuery("")}
+                onChangeText={(txt) => {
+                  //TODO: mak ebetter
+                  setSearchQuery(txt);
+                  void debouncedSearch(txt);
+                }}
+                onClear={() => {
+                  debouncedSearch.cancel();
+                  setSearchQuery("");
+                }}
               />
             </YStack>
           </YStack>
         );
-      }, [searchQuery, setSearchQuery])}
+      }, [searchQuery, debouncedSearch])}
       renderItem={({ item: contact, index }) => (
         <UserCard
           userId={contact.id ?? Math.random().toString()}
