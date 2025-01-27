@@ -203,7 +203,7 @@ const useContacts = (syncNow = false): ContactFns => {
 
     const contacts = contactsNotOnApp(data, phoneNumbersNotOnApp);
 
-/*     // Sort contacts based on criteria
+    /*     // Sort contacts based on criteria
     const sortedContacts = contacts.sort((a, b) => {
       const aScore = getContactScore(a);
       const bScore = getContactScore(b);
@@ -302,7 +302,7 @@ const useContacts = (syncNow = false): ContactFns => {
   };
 
   const searchContacts = async (name: string) => {
-    const result = await Contacts.getContactsAsync({
+    const { data } = await Contacts.getContactsAsync({
       fields: [
         Contacts.Fields.PhoneNumbers,
         Contacts.Fields.Image,
@@ -311,44 +311,13 @@ const useContacts = (syncNow = false): ContactFns => {
       name,
     });
 
-    // filter not on app
-    const phoneNumbers = result.data
-      .map((contact) => {
-        const number = contact.phoneNumbers?.[0]?.number;
-        if (number === undefined) return null;
-        try {
-          const parsedNumber = parsePhoneNumberWithError(number);
-          return parsedNumber.isValid() ? parsedNumber.format("E.164") : null;
-        } catch {
-          return null;
-        }
-      })
-      .filter((number) => number !== null);
+    const phoneNumbers = contactsToE164Numbers(data);
 
     const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({
       phoneNumbers,
     });
 
-    const contactsNotOnApp = phoneNumbersNotOnApp
-      .map((phoneNumber) => {
-        return result.data.find((contact) => {
-          const number = contact.phoneNumbers?.[0]?.number;
-          if (number === undefined) return false;
-          try {
-            const parsedNumber = parsePhoneNumberWithError(number);
-            return (
-              parsedNumber.isValid() &&
-              parsedNumber.format("E.164") === phoneNumber
-            );
-          } catch {
-            return false;
-          }
-        });
-      })
-
-      .filter((contact): contact is Contact => contact !== undefined);
-
-    return contactsNotOnApp;
+    return contactsNotOnApp(data, phoneNumbersNotOnApp);
   };
 
   useEffect(() => {
