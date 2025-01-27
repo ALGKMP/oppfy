@@ -8,6 +8,7 @@ import { FlashList } from "@shopify/flash-list";
 import { ChevronRight, UserRoundX } from "@tamagui/lucide-icons";
 import type { IFuseOptions } from "fuse.js";
 import { parsePhoneNumberWithError } from "libphonenumber-js";
+import { debounce } from "lodash";
 import { getToken, useTheme } from "tamagui";
 
 import {
@@ -54,6 +55,8 @@ const PostTo = () => {
   }>();
 
   const [refreshing, setRefreshing] = useState(false);
+  const [searchedContacts, setSearchedContacts] = useState<Contact[]>([]);
+  const [isSearchingContacts, setIsSearchingContacts] = useState(false);
 
   const {
     contactsPaginatedQuery: {
@@ -64,6 +67,7 @@ const PostTo = () => {
       fetchNextPage: fetchNextContacts,
       refetch: refetchContacts,
     },
+    searchContacts,
   } = useContacts();
 
   const contacts = useMemo(
@@ -83,6 +87,42 @@ const PostTo = () => {
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
+  const debouncedSearchContacts = useMemo(
+    () =>
+      debounce(async (text: string) => {
+        try {
+          if (text) {
+            setIsSearchingContacts(true);
+            const contacts = await searchContacts(text);
+            setSearchedContacts(contacts);
+          } else {
+            setSearchedContacts([]);
+          }
+        } finally {
+          setIsSearchingContacts(false);
+        }
+      }, 100),
+    [searchContacts],
+  );
+
+  useEffect(() => {
+    return () => debouncedSearchContacts.cancel();
+  }, [debouncedSearchContacts]);
+
+  const handleSearchChange = useCallback(
+    (text: string) => {
+      setSearchQuery(text);
+      if (text) {
+        setIsSearchingContacts(true);
+      } else {
+        setIsSearchingContacts(false);
+        setSearchedContacts([]);
+      }
+      debouncedSearchContacts(text);
+    },
+    [debouncedSearchContacts],
+  );
+
   const formatPhoneNumber = useCallback((phoneNumber: string | undefined) => {
     if (phoneNumber === undefined) return;
     try {
@@ -100,118 +140,51 @@ const PostTo = () => {
     [friendsData],
   );
 
-  const items = useMemo(() => {
-    const result: ListItem[] = [];
-
-    // Add friends section if there are friends
-    if (friendsList.length > 0) {
-      result.push({ type: "header", title: "Friends" });
-      friendsList.forEach((friend) => {
-        result.push({ type: "friend", data: friend });
-      });
-    }
-
-    // Add contacts section if there are contacts
-    if (contacts.length > 0) {
-      result.push({
-        type: "header",
-        title: "Post for Anyone",
-        isContact: true,
-      });
-      contacts.forEach((contact) => {
-        result.push({ type: "contact", data: contact });
-      });
-    }
-
-    return result;
-  }, [friendsList, contacts]);
-
-  const searchableItems = useMemo(() => {
-    const result: Extract<ListItem, { type: "friend" | "contact" }>[] = [];
-
-    // Add all friends
-    friendsList.forEach((friend) => {
-      result.push({ type: "friend", data: friend });
-    });
-
-    // Add all contacts
-    contacts.forEach((contact) => {
-      result.push({ type: "contact", data: contact });
-    });
-
-    return result;
-  }, [friendsList, contacts]);
-
-  const searchOptions: IFuseOptions<ListItem> = {
-    keys: [
-      {
-        name: "data.username",
-        getFn: (item: ListItem) =>
-          item.type === "friend" ? item.data.username : "",
-      },
-      {
-        name: "data.name",
-        getFn: (item: ListItem) =>
-          item.type === "friend"
-            ? item.data.name
-            : item.type === "contact"
-              ? item.data.name
-              : "",
-      },
-      {
-        name: "data.phoneNumber",
-        getFn: (item: ListItem) =>
-          item.type === "contact"
-            ? (item.data.phoneNumbers?.[0]?.number ?? "")
-            : "",
-      },
-    ],
+  const searchOptions: IFuseOptions<Friend> = {
+    keys: ["username", "name"],
     threshold: 0.3,
   };
 
   const {
+    filteredItems: filteredFriends,
     searchQuery,
     setSearchQuery,
-    filteredItems: searchResults,
-  } = useSearch<ListItem>({
-    data: searchableItems,
+  } = useSearch<Friend>({
+    data: friendsList,
     fuseOptions: searchOptions,
   });
 
   const displayItems = useMemo(() => {
     const result: ListItem[] = [];
-    const friends = searchResults.filter(
-      (item): item is Extract<ListItem, { type: "friend" }> =>
-        item.type === "friend",
-    );
-    const contacts = searchResults.filter(
-      (item): item is Extract<ListItem, { type: "contact" }> =>
-        item.type === "contact",
-    );
+    const friends = searchQuery ? filteredFriends : friendsList;
+    const contactsToShow = searchQuery ? searchedContacts : contacts;
 
     if (friends.length > 0) {
       result.push({ type: "header", title: "Friends" });
-      result.push(...friends);
+      friends.forEach((friend) => {
+        result.push({ type: "friend", data: friend });
+      });
     }
 
-    if (contacts.length > 0) {
+    if (contactsToShow.length > 0) {
       result.push({
         type: "header",
         title: "Post for Anyone",
         isContact: true,
       });
-      result.push(...contacts);
+      contactsToShow.forEach((contact) => {
+        result.push({ type: "contact", data: contact });
+      });
     }
 
     return result;
-  }, [searchResults]);
+  }, [searchQuery, filteredFriends, friendsList, searchedContacts, contacts]);
 
   useEffect(() => {
     if (__DEV__) storage.set(HAS_SEEN_SHARE_TIP_KEY, false);
     const hasSeenTip = storage.getBoolean(HAS_SEEN_SHARE_TIP_KEY);
 
     if (!hasSeenTip) {
-      // Show the fun popup after a short delay to let the screen mount smoothly
       const timer = setTimeout(() => {
         void infoDialog.show({
           title: "Pro Tip: Friendly Peer Pressure 😈",
@@ -233,10 +206,10 @@ const PostTo = () => {
   }, [refetchContacts, refetch]);
 
   const handleOnEndReached = useCallback(async () => {
-    if (!isFetchingNextPage && hasNextPage) {
+    if (!isFetchingNextPage && hasNextPage && !searchQuery) {
       await fetchNextPage();
     }
-    if (!isFetchingNextContacts && hasNextContacts) {
+    if (!isFetchingNextContacts && hasNextContacts && !searchQuery) {
       await fetchNextContacts();
     }
   }, [
@@ -246,6 +219,7 @@ const PostTo = () => {
     isFetchingNextContacts,
     hasNextContacts,
     fetchNextContacts,
+    searchQuery,
   ]);
 
   const onContactSelected = useCallback(
@@ -370,28 +344,33 @@ const PostTo = () => {
         <SearchInput
           placeholder="Search..."
           value={searchQuery}
-          onChangeText={setSearchQuery}
-          onClear={() => setSearchQuery("")}
+          onChangeText={handleSearchChange}
+          onClear={() => {
+            debouncedSearchContacts.cancel();
+            setSearchQuery("");
+            setSearchedContacts([]);
+          }}
         />
       </YStack>
     ),
-    [searchQuery, setSearchQuery],
+    [searchQuery, handleSearchChange, debouncedSearchContacts],
   );
 
   const ListEmptyComponent = useCallback(() => {
-    const isLoading = isLoadingFriends || isLoadingContacts;
+    const isLoading =
+      isLoadingFriends || isLoadingContacts || isSearchingContacts;
 
     if (isLoading) {
       return (
         <YStack gap="$2.5">
-          {Array.from({ length: 20 }).map((_, index) => (
+          {Array.from({ length: 5 }).map((_, index) => (
             <MediaListItem.Skeleton key={index} />
           ))}
         </YStack>
       );
     }
 
-    if (items.length === 0) {
+    if (friendsList.length === 0 && contacts.length === 0) {
       return (
         <YStack flex={1} justifyContent="center">
           <EmptyPlaceholder
@@ -403,16 +382,24 @@ const PostTo = () => {
       );
     }
 
-    if (searchResults.length === 0) {
+    if (searchQuery && displayItems.length === 0) {
       return (
         <YStack flex={1}>
-          <HeaderTitle>No Users Found</HeaderTitle>
+          <HeaderTitle>No Results Found</HeaderTitle>
         </YStack>
       );
     }
 
     return null;
-  }, [isLoadingFriends, isLoadingContacts, items.length, searchResults.length]);
+  }, [
+    isLoadingFriends,
+    isLoadingContacts,
+    isSearchingContacts,
+    friendsList.length,
+    contacts.length,
+    searchQuery,
+    displayItems.length,
+  ]);
 
   const getItemType = useCallback((item: ListItem) => {
     return item.type;

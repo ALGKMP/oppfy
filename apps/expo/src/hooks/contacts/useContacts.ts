@@ -32,7 +32,16 @@ export interface ContactFns {
   deleteContacts: () => Promise<void>;
   getDeviceContacts: () => Promise<Contacts.Contact[]>;
   getRecomendedContacts: () => Promise<Contacts.Contact[]>;
+  getDeviceContactsNotOnAppPaginated: (
+    pageOffset?: number,
+    pageSize?: number,
+  ) => Promise<{
+    contacts: Contacts.Contact[];
+    hasMore: boolean;
+    totalContacts: number;
+  }>;
   getDeviceContactsNotOnApp: () => Promise<Contacts.Contact[]>;
+  searchContacts: (name: string) => Promise<Contacts.Contact[]>;
 }
 
 const useContacts = (syncNow = false): ContactFns => {
@@ -159,6 +168,84 @@ const useContacts = (syncNow = false): ContactFns => {
     return sortedContacts;
   };
 
+  const getDeviceContactsNotOnAppPaginated = async (
+    pageOffset?: number,
+    pageSize?: number,
+  ) => {
+    // First, get total number of contacts to help with pagination
+    const { data: allContacts } = await Contacts.getContactsAsync({
+      fields: [Contacts.Fields.PhoneNumbers],
+    });
+    const totalContacts = allContacts.length;
+
+    const { data } = await Contacts.getPagedContactsAsync({
+      fields: [
+        Contacts.Fields.PhoneNumbers,
+        Contacts.Fields.Image,
+        Contacts.Fields.Name,
+        Contacts.Fields.Birthday,
+        Contacts.Fields.Addresses,
+      ],
+      pageOffset,
+      pageSize,
+    });
+
+    const phoneNumbers = data
+      .map((contact) => {
+        const number = contact.phoneNumbers?.[0]?.number;
+        if (number === undefined) return null;
+
+        try {
+          const parsedNumber = parsePhoneNumberWithError(number);
+          return parsedNumber.isValid() ? parsedNumber.format("E.164") : null;
+        } catch {
+          return null;
+        }
+      })
+      .filter((number) => number !== null);
+
+    const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({
+      phoneNumbers,
+    });
+
+    const contactsNotOnApp = phoneNumbersNotOnApp
+      .map((phoneNumber) => {
+        return data.find((contact) => {
+          const number = contact.phoneNumbers?.[0]?.number;
+
+          if (number === undefined) return false;
+
+          try {
+            const parsedNumber = parsePhoneNumberWithError(number);
+            return (
+              parsedNumber.isValid() &&
+              parsedNumber.format("E.164") === phoneNumber
+            );
+          } catch {
+            return false;
+          }
+        });
+      })
+      .filter((contact): contact is Contact => contact !== undefined);
+
+    // Sort contacts based on criteria
+    const sortedContacts = contactsNotOnApp.sort((a, b) => {
+      const aScore = getContactScore(a);
+      const bScore = getContactScore(b);
+      return bScore - aScore; // Higher score first
+    });
+
+    // Calculate if there are more contacts to load
+    const currentOffset = pageOffset ?? 0;
+    const hasMore = currentOffset + (pageSize ?? 0) < totalContacts;
+
+    return {
+      contacts: sortedContacts,
+      hasMore,
+      totalContacts,
+    };
+  };
+
   const contactsPaginatedQuery = useInfiniteQuery<
     ContactsPage,
     Error,
@@ -171,22 +258,23 @@ const useContacts = (syncNow = false): ContactFns => {
       context: QueryFunctionContext<ContactsQueryKey, number | null>,
     ) => {
       const isInitialFetch = !context.pageParam;
-      const contacts = await getDeviceContactsNotOnApp();
-
-      const startIndex = context.pageParam ?? 0;
       const pageSize = isInitialFetch ? INITIAL_PAGE_SIZE : PAGE_SIZE;
-      const endIndex = startIndex + pageSize;
+      const pageOffset = context.pageParam ?? 0;
 
-      const items = contacts.slice(startIndex, endIndex);
-      const hasNextPage = endIndex < contacts.length;
+      const result = await getDeviceContactsNotOnAppPaginated(
+        pageOffset,
+        pageSize,
+      );
 
       return {
-        items,
-        nextCursor: hasNextPage ? endIndex : null,
-        hasNextPage,
+        items: result.contacts,
+        nextCursor: result.hasMore ? pageOffset + pageSize : null,
+        hasNextPage: result.hasMore,
       };
     },
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    getNextPageParam: (lastPage) => {
+      return lastPage.nextCursor;
+    },
     initialPageParam: null,
   });
 
@@ -238,6 +326,18 @@ const useContacts = (syncNow = false): ContactFns => {
     ];
   };
 
+  const searchContacts = async (name: string) => {
+    const result = await Contacts.getContactsAsync({
+      fields: [
+        Contacts.Fields.PhoneNumbers,
+        Contacts.Fields.Image,
+        Contacts.Fields.Name,
+      ],
+      name,
+    });
+    return result.data;
+  };
+
   useEffect(() => {
     if (syncNow) {
       void syncContacts();
@@ -249,8 +349,10 @@ const useContacts = (syncNow = false): ContactFns => {
     contactsPaginatedQuery,
     deleteContacts: deleteContactsMutation.mutateAsync,
     getDeviceContacts,
+    searchContacts,
     getRecomendedContacts,
     getDeviceContactsNotOnApp,
+    getDeviceContactsNotOnAppPaginated,
   };
 };
 
