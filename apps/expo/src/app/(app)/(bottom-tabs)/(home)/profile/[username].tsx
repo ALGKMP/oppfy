@@ -132,14 +132,21 @@ import { Text } from "tamagui";
 
 // export default Post;
 import useRouteProfile from "~/hooks/useRouteProfile";
+import { api } from "~/utils/api";
 
 const Profile = () => {
   const { username } = useLocalSearchParams<{ username: string }>();
+  // todo: impl this route
+  // const data = api.user.getProfileIdByUsername.useQuery({ username });
   const routeProfile = useRouteProfile();
 
   return <Text>Profile Username: {username}</Text>;
 
-  // return <Redirect href={`/profile/${postId}`} />;
+  // if (isLoading) {
+  //   return null;
+  // }
+
+  return <Text>Profile Username: {username}</Text>;
 };
 
 export default Profile;

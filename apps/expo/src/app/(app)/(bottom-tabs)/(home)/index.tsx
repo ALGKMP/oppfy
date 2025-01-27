@@ -214,7 +214,7 @@ const HomeScreen = () => {
         </YStack>
       </YStack>
     );
-  }, [isLoading, profile?.profilePictureUrl, profile?.username, router]);
+  }, [isLoading, profile?.name, profile?.profilePictureUrl, router]);
 
   const renderFooter = useCallback(() => {
     if (isLoading) {
