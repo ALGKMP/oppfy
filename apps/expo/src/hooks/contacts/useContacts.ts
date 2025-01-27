@@ -41,7 +41,7 @@ export interface ContactFns {
     totalContacts: number;
   }>;
   getDeviceContactsNotOnApp: () => Promise<Contacts.Contact[]>;
-  searchContacts: (name: string) => Promise<Contacts.Contact[]>
+  searchContacts: (name: string) => Promise<Contacts.Contact[]>;
 }
 
 const useContacts = (syncNow = false): ContactFns => {
@@ -261,17 +261,9 @@ const useContacts = (syncNow = false): ContactFns => {
       const pageSize = isInitialFetch ? INITIAL_PAGE_SIZE : PAGE_SIZE;
       const pageOffset = context.pageParam ?? 0;
 
-      console.log(
-        `[contactsPaginatedQuery] Fetching page - offset: ${pageOffset}, size: ${pageSize}, isInitial: ${isInitialFetch}`,
-      );
-
       const result = await getDeviceContactsNotOnAppPaginated(
         pageOffset,
         pageSize,
-      );
-
-      console.log(
-        `[contactsPaginatedQuery] Results - contacts: ${result.contacts.length}, hasMore: ${result.hasMore}`,
       );
 
       return {
@@ -281,9 +273,6 @@ const useContacts = (syncNow = false): ContactFns => {
       };
     },
     getNextPageParam: (lastPage) => {
-      console.log(
-        `[contactsPaginatedQuery] Next cursor: ${lastPage.nextCursor}`,
-      );
       return lastPage.nextCursor;
     },
     initialPageParam: null,

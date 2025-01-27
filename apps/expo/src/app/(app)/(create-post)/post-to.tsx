@@ -89,21 +89,11 @@ const PostTo = () => {
 
   const debouncedSearchContacts = useMemo(
     () =>
-      debounce(async (query: string) => {
-        if (!query) {
-          setSearchedContacts([]);
-          return;
-        }
-        console.log("in here");
-        setIsSearchingContacts(true);
-        try {
-          const results = await searchContacts(query);
-          setSearchedContacts(results);
-        } finally {
-          setIsSearchingContacts(false);
-        }
-      }, 300),
-    [searchContacts],
+      debounce(async (text: string) => {
+        const contacts = await searchContacts(text);
+        setSearchedContacts(contacts);
+      }, 100),
+    [],
   );
 
   useEffect(() => {
@@ -112,9 +102,8 @@ const PostTo = () => {
 
   const handleSearchChange = useCallback(
     (text: string) => {
-      console.log("seaech changed");
       setSearchQuery(text);
-      debouncedSearchContacts(text);
+      void debouncedSearchContacts(text);
     },
     [debouncedSearchContacts],
   );
@@ -344,6 +333,7 @@ const PostTo = () => {
           onClear={() => {
             debouncedSearchContacts.cancel();
             setSearchQuery("");
+            setSearchedContacts([]);
           }}
         />
       </YStack>

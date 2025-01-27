@@ -116,7 +116,7 @@ const SelectContact = () => {
       debounce(async (text: string) => {
         const contacts = await searchContacts(text);
         setSearchResults(contacts);
-      }, 300),
+      }, 100),
     [],
   );
 
@@ -176,6 +176,7 @@ const SelectContact = () => {
                 onClear={() => {
                   debouncedSearch.cancel();
                   setSearchQuery("");
+                  setSearchResults([]);
                 }}
               />
             </YStack>
