@@ -162,7 +162,7 @@ const HomeScreen = () => {
               Welcome to OPPFY
             </H1>
             <H3 color="$gray11" textAlign="center" fontWeight="400" size="$6">
-              {profile?.username}!
+              {profile?.name}!
             </H3>
           </YStack>
 
