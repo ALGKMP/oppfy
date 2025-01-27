@@ -28,10 +28,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     entitlements: {
       "aps-environment": "development",
     },
-    associatedDomains: [
-      "applinks:oppfy.app",
-      "applinks:www.oppfy.app",
-    ],
+    associatedDomains: ["applinks:oppfy.app", "applinks:www.oppfy.app"],
     infoPlist: {
       UIBackgroundModes: ["fetch"],
     },

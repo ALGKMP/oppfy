@@ -46,7 +46,7 @@ const SelectContact = () => {
       fetchNextPage,
       refetch,
     },
-    searchContacts
+    searchContacts,
   } = useContacts();
 
   const contacts = data?.pages.flatMap((page) => page.items) ?? [];
@@ -112,7 +112,7 @@ const SelectContact = () => {
   const TILE_WIDTH = (screenWidth - SCREEN_PADDING * 2 - GAP) / 2; // Account for screen padding and gap between tiles
 
   const debouncedSearch = useMemo(
-     () =>
+    () =>
       debounce(async (text: string) => {
         const contacts = await searchContacts(text);
         setSearchResults(contacts);
@@ -121,9 +121,7 @@ const SelectContact = () => {
   );
 
   useEffect(() => {
-    return () => {
-      
-    };
+    return () => {};
   }, [debouncedSearch]);
 
   return (
