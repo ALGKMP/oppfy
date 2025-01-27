@@ -76,7 +76,7 @@ const useContacts = (syncNow = false): ContactFns => {
         const parsedNumber = parsePhoneNumberWithError(number);
         return (
           parsedNumber.isValid() &&
-          !numbers.includes(parsedNumber.format("E.164"))
+          numbers.includes(parsedNumber.format("E.164"))
         );
       } catch {
         return false;
@@ -190,6 +190,7 @@ const useContacts = (syncNow = false): ContactFns => {
         Contacts.Fields.Birthday,
         Contacts.Fields.Addresses,
       ],
+      sort: "firstName",
       pageOffset,
       pageSize,
     });
@@ -202,19 +203,19 @@ const useContacts = (syncNow = false): ContactFns => {
 
     const contacts = contactsNotOnApp(data, phoneNumbersNotOnApp);
 
-    // Sort contacts based on criteria
+/*     // Sort contacts based on criteria
     const sortedContacts = contacts.sort((a, b) => {
       const aScore = getContactScore(a);
       const bScore = getContactScore(b);
       return bScore - aScore; // Higher score first
-    });
+    }); */
 
     // Calculate if there are more contacts to load
     const currentOffset = pageOffset ?? 0;
     const hasMore = currentOffset + (pageSize ?? 0) < totalContacts;
 
     return {
-      contacts: sortedContacts,
+      contacts,
       hasMore,
       totalContacts,
     };
