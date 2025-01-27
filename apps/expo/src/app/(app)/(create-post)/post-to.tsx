@@ -90,10 +90,19 @@ const PostTo = () => {
   const debouncedSearchContacts = useMemo(
     () =>
       debounce(async (text: string) => {
-        const contacts = await searchContacts(text);
-        setSearchedContacts(contacts);
+        try {
+          if (text) {
+            setIsSearchingContacts(true);
+            const contacts = await searchContacts(text);
+            setSearchedContacts(contacts);
+          } else {
+            setSearchedContacts([]);
+          }
+        } finally {
+          setIsSearchingContacts(false);
+        }
       }, 100),
-    [],
+    [searchContacts],
   );
 
   useEffect(() => {
@@ -103,7 +112,13 @@ const PostTo = () => {
   const handleSearchChange = useCallback(
     (text: string) => {
       setSearchQuery(text);
-      void debouncedSearchContacts(text);
+      if (text) {
+        setIsSearchingContacts(true);
+      } else {
+        setIsSearchingContacts(false);
+        setSearchedContacts([]);
+      }
+      debouncedSearchContacts(text);
     },
     [debouncedSearchContacts],
   );
@@ -348,7 +363,7 @@ const PostTo = () => {
     if (isLoading) {
       return (
         <YStack gap="$2.5">
-          {Array.from({ length: 20 }).map((_, index) => (
+          {Array.from({ length: 5 }).map((_, index) => (
             <MediaListItem.Skeleton key={index} />
           ))}
         </YStack>
