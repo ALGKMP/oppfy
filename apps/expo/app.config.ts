@@ -15,6 +15,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     backgroundColor: "#F214FF",
   },
   updates: {
+    enabled: true,
     fallbackToCacheTimeout: 0,
     url: "https://u.expo.dev/68175593-c314-48a6-8892-7afeeb66ab9f",
   },
