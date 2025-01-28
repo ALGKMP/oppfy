@@ -1,9 +1,10 @@
 import { useMemo } from "react";
+import { Linking } from "react-native";
 import { Stack, usePathname, useRouter } from "expo-router";
 import { X } from "@tamagui/lucide-icons";
 
+import { OnboardingHeader } from "~/components/Layouts";
 import { Button, Icon, useAlertDialogController, View } from "~/components/ui";
-import { OnboardingHeader } from "~/components/ui/OnboardingHeader";
 import { useAuth } from "~/hooks/useAuth";
 
 const ROUTES = ["name", "username", "date-of-birth", "profile-picture"];
@@ -43,14 +44,17 @@ export default function UserInfoLayout() {
     });
 
     if (confirmed) {
-      signOut();
+      await signOut();
     }
+  };
+
+  const handleInfo = () => {
+    void Linking.openURL("https://www.oppfy.app");
   };
 
   return (
     <View flex={1} backgroundColor="$background">
       <OnboardingHeader
-        title={stepTitle}
         showBack={false}
         customLeftButton={
           <Button
@@ -62,6 +66,7 @@ export default function UserInfoLayout() {
             opacity={0.7}
           />
         }
+        onInfoPress={handleInfo}
         progress={{
           currentStep: Math.max(0, currentIndex),
           totalSteps: ROUTES.length,
