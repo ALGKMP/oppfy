@@ -13,6 +13,7 @@ import {
   DialogProvider,
 } from "~/components/ui";
 import { BottomSheetProvider } from "~/components/ui/BottomSheet";
+import { UpdateHandler } from "~/components/Layouts/UpdateHandler";
 import { AudioProvider } from "~/contexts/AudioContext";
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { FontProvider } from "~/providers/FontProvider";
@@ -22,7 +23,6 @@ import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "../../tamagui.config";
 
 const RootLayout = () => {
-
   return (
     <SentryProvider>
       <TRPCProvider>
@@ -41,6 +41,7 @@ const RootLayout = () => {
                                 <ToastProvider native={true}>
                                   <BottomSheetProvider>
                                     <StatusBar style="auto" />
+                                    <UpdateHandler />
                                     <Slot />
                                     <ToastViewport />
                                   </BottomSheetProvider>
