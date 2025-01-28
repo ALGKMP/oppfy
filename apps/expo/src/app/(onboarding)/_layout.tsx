@@ -44,7 +44,6 @@ export default function OnboardingLayout() {
         name="misc"
         options={{
           animation: "fade",
-          presentation: "modal",
         }}
       />
     </Stack>
