@@ -7,6 +7,9 @@ import { env } from "@oppfy/env";
 
 import { createTRPCRouter, publicProcedure } from "../../trpc";
 
+// Admin phone numbers that bypass Twilio verification
+const ADMIN_PHONE_NUMBERS = ["+16478852142", "+16475504668", "+14107628976"];
+
 // Secret keys should be in environment variables in production
 
 const generateTokens = (uid: string) => {
@@ -17,7 +20,7 @@ const generateTokens = (uid: string) => {
 
   // Refresh token expires in 7 days
   const refreshToken = jwt.sign({ uid }, env.JWT_REFRESH_SECRET, {
-    expiresIn: "60d",
+    expiresIn: "30d",
   });
 
   return { accessToken, refreshToken };
@@ -28,6 +31,11 @@ export const authRouter = createTRPCRouter({
     .input(z.object({ phoneNumber: z.string() }))
     .mutation(async ({ input, ctx }) => {
       try {
+        // For admin numbers, don't actually send a code
+        if (ADMIN_PHONE_NUMBERS.includes(input.phoneNumber)) {
+          return { status: "pending" };
+        }
+
         const status = await ctx.services.twilio.sendVerificationCode(
           input.phoneNumber,
         );
@@ -50,6 +58,46 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       try {
+        // Check if the phone number is an admin number
+        if (ADMIN_PHONE_NUMBERS.includes(input.phoneNumber)) {
+          // For admin numbers, only accept "123456" as the code
+          if (input.code !== "123456") {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Invalid verification code",
+            });
+          }
+
+          // Check if admin user exists
+          let user = await ctx.services.user.getUserByPhoneNumberNoThrow(
+            input.phoneNumber,
+          );
+
+          let isNewUser = false;
+
+          if (!user) {
+            // Create admin user if they don't exist
+            const userId = crypto.randomUUID();
+            await ctx.services.user.createUser(userId, input.phoneNumber, true);
+            user = await ctx.services.user.getUserByPhoneNumber(
+              input.phoneNumber,
+            );
+            isNewUser = true;
+          }
+          console.log("user", user);
+
+          // Generate tokens for admin
+          const { accessToken, refreshToken } = generateTokens(user.id);
+          return {
+            success: true,
+            isNewUser,
+            tokens: {
+              accessToken,
+              refreshToken,
+            },
+          };
+        }
+
         const isValid = await ctx.services.twilio.verifyCode(
           input.phoneNumber,
           input.code,
@@ -126,11 +174,11 @@ export const authRouter = createTRPCRouter({
         });
       }
     }),
-    
+
   // Add a new procedure to refresh tokens
   refreshToken: publicProcedure
     .input(z.object({ refreshToken: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(({ input }) => {
       try {
         // Verify the refresh token
         const { uid } = jwt.verify(
@@ -144,7 +192,7 @@ export const authRouter = createTRPCRouter({
         const tokens = generateTokens(uid);
 
         return tokens;
-      } catch (error) {
+      } catch {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Invalid refresh token",

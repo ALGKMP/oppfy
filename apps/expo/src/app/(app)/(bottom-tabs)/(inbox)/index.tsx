@@ -4,11 +4,7 @@ import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { useScrollToTop } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import {
-  UserRoundCheck,
-  UserRoundPlus,
-  UserRoundX,
-} from "@tamagui/lucide-icons";
+import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import { getToken } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
@@ -17,7 +13,6 @@ import {
   CardContainer,
   Circle,
   EmptyPlaceholder,
-  H5,
   MediaListItem,
   Paragraph,
   SizableText,
