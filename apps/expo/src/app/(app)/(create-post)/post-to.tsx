@@ -87,39 +87,6 @@ const PostTo = () => {
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
-  const debouncedSearchContacts = useMemo(
-    () =>
-      debounce(async (text: string) => {
-        const contacts = await searchContacts(text);
-        setSearchedContacts(contacts);
-      }, 100),
-    [],
-  );
-
-  useEffect(() => {
-    return () => debouncedSearchContacts.cancel();
-  }, [debouncedSearchContacts]);
-
-  const handleSearchChange = useCallback(
-    (text: string) => {
-      setSearchQuery(text);
-      void debouncedSearchContacts(text);
-    },
-    [debouncedSearchContacts],
-  );
-
-  const formatPhoneNumber = useCallback((phoneNumber: string | undefined) => {
-    if (phoneNumber === undefined) return;
-    try {
-      const parsedNumber = parsePhoneNumberWithError(phoneNumber);
-      return parsedNumber.isValid()
-        ? parsedNumber.formatNational()
-        : phoneNumber;
-    } catch {
-      return phoneNumber;
-    }
-  }, []);
-
   const friendsList = useMemo(
     () => friendsData?.pages.flatMap((page) => page.items) ?? [],
     [friendsData],
@@ -138,6 +105,39 @@ const PostTo = () => {
     data: friendsList,
     fuseOptions: searchOptions,
   });
+
+  const debouncedSearchContacts = useMemo(
+    () =>
+      debounce(async (text: string) => {
+        const contacts = await searchContacts(text);
+        setSearchedContacts(contacts);
+      }, 100),
+    [],
+  );
+
+  useEffect(() => {
+    return () => debouncedSearchContacts.cancel();
+  }, [debouncedSearchContacts]);
+
+  const handleSearchChange = useCallback(
+    (text: string) => {
+      setSearchQuery(text);
+      void debouncedSearchContacts(text);
+    },
+    [debouncedSearchContacts, setSearchQuery],
+  );
+
+  const formatPhoneNumber = useCallback((phoneNumber: string | undefined) => {
+    if (phoneNumber === undefined) return;
+    try {
+      const parsedNumber = parsePhoneNumberWithError(phoneNumber);
+      return parsedNumber.isValid()
+        ? parsedNumber.formatNational()
+        : phoneNumber;
+    } catch {
+      return phoneNumber;
+    }
+  }, []);
 
   const displayItems = useMemo(() => {
     const result: ListItem[] = [];
@@ -338,7 +338,7 @@ const PostTo = () => {
         />
       </YStack>
     ),
-    [searchQuery, handleSearchChange, debouncedSearchContacts],
+    [searchQuery, handleSearchChange, debouncedSearchContacts, setSearchQuery],
   );
 
   const ListEmptyComponent = useCallback(() => {

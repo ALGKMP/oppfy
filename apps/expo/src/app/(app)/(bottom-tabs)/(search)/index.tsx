@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Keyboard, RefreshControl } from "react-native";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
+import { debounce } from "lodash";
 import { getToken, YStack } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
@@ -35,6 +36,10 @@ const Search = () => {
     setSearchResults(results);
   };
 
+  const debouncedSearch = debounce((username: string) => {
+    void performSearch(username);
+  }, 300);
+
   const handleRefresh = async () => {
     setRefreshing(true);
     if (searchTerm) {
@@ -62,10 +67,14 @@ const Search = () => {
     <SearchInput
       value={searchTerm}
       placeholder="Search by username"
-      onChangeText={performSearch}
+      onChangeText={(text) => {
+        setSearchTerm(text);
+        debouncedSearch(text);
+      }}
       onClear={() => {
         setSearchTerm("");
         setSearchResults([]);
+        debouncedSearch.cancel();
       }}
     />
   );
