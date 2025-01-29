@@ -158,6 +158,8 @@ interface OnboardingInputProps {
     | "email-address"
     | "phone-pad";
   secureTextEntry?: boolean;
+  editable?: boolean;
+  onPressIn?: () => void;
 }
 
 export function OnboardingInput({
@@ -170,6 +172,8 @@ export function OnboardingInput({
   autoCorrect = false,
   keyboardType = "default",
   secureTextEntry = false,
+  editable = true,
+  onPressIn,
 }: OnboardingInputProps) {
   const [currentPlaceholder, setCurrentPlaceholder] = React.useState(
     placeholder ?? placeholders[0] ?? "",
@@ -234,6 +238,8 @@ export function OnboardingInput({
         autoCorrect={autoCorrect}
         keyboardType={keyboardType}
         secureTextEntry={secureTextEntry}
+        editable={editable}
+        onPressIn={onPressIn}
       />
     </Animated.View>
   );
