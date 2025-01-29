@@ -12,14 +12,6 @@ export default function AuthLayout() {
   return (
     <OnboardingStack
       screenOptions={{
-        headerRight: () => (
-          <Button
-            chromeless
-            icon={<Info size={20} color="$color" />}
-            onPress={handleInfo}
-            scaleIcon={1}
-          />
-        ),
         title: "Sign In",
       }}
     />

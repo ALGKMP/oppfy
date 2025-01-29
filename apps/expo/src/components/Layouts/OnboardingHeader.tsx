@@ -84,25 +84,32 @@ export function OnboardingProgress({
 }
 
 interface OnboardingHeaderProps {
-  showBack?: boolean;
-  customLeftButton?: React.ReactNode;
-  onInfoPress?: () => void;
+  title?: string;
+  HeaderLeft?: React.ReactNode;
+  HeaderRight?: React.ReactNode;
+  HeaderTitle?: React.ReactNode;
   progress?: {
     currentStep: number;
     totalSteps: number;
   };
-  title?: string;
 }
 
 export function OnboardingHeader({
-  showBack = true,
-  customLeftButton,
-  onInfoPress,
-  progress,
   title,
+  HeaderLeft,
+  HeaderRight,
+  HeaderTitle,
+  progress,
 }: OnboardingHeaderProps) {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
+
+  const content =
+    HeaderTitle ??
+    (title && (
+      <Text fontSize="$6" fontWeight="bold">
+        {title}
+      </Text>
+    ));
 
   return (
     <YStack paddingTop={insets.top} backgroundColor="$background">
@@ -112,38 +119,17 @@ export function OnboardingHeader({
         alignItems="center"
         justifyContent="space-between"
       >
-        <XStack width="$5">
-          {customLeftButton ??
-            (showBack && (
-              <Button
-                chromeless
-                icon={<ChevronLeft size={24} />}
-                onPress={router.back}
-                scaleIcon={1}
-                marginLeft="$-2"
-              />
-            ))}
-        </XStack>
+        <View flex={1} alignItems="flex-start">
+          {HeaderLeft}
+        </View>
 
-        {progress ? (
-          <OnboardingProgress {...progress} />
-        ) : title ? (
-          <Text fontSize="$7" fontWeight="bold">
-            {title}
-          </Text>
-        ) : null}
+        <View flex={2} alignItems="center">
+          {progress ? <OnboardingProgress {...progress} /> : content}
+        </View>
 
-        <XStack width="$5" justifyContent="flex-end">
-          {onInfoPress && (
-            <Button
-              chromeless
-              icon={<Info size={24} />}
-              onPress={onInfoPress}
-              scaleIcon={1}
-              opacity={0.7}
-            />
-          )}
-        </XStack>
+        <View flex={1} alignItems="flex-end">
+          {HeaderRight}
+        </View>
       </XStack>
     </YStack>
   );

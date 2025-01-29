@@ -39,7 +39,6 @@ const CustomNavigator = ({
           return (
             <OnboardingHeader
               title={title}
-              showBack={!!back}
               HeaderLeft={
                 options.headerLeft?.({
                   canGoBack: !!back,
@@ -56,15 +55,6 @@ const CustomNavigator = ({
                   canGoBack: !!back,
                   tintColor: options.headerTintColor,
                 }) ?? <DefaultHeaderRight />
-              }
-              onInfoPress={
-                options.headerRight
-                  ? () =>
-                      options.headerRight?.({
-                        canGoBack: !!back,
-                        tintColor: options.headerTintColor,
-                      })
-                  : undefined
               }
               progress={(options as OnboardingStackOptions).progress}
             />
@@ -96,7 +86,7 @@ const DefaultHeaderLeft = ({
 const DefaultHeaderRight = () => {
   return (
     <Icon
-      name="information"
+      name="help-circle"
       onPress={() => Linking.openURL("https://oppfy.app")}
       blurred
     />
