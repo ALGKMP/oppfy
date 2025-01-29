@@ -231,8 +231,9 @@ export default function DateOfBirth() {
             pressStyle={{
               scale: 0.95,
               opacity: 0.9,
+              backgroundColor: "white",
             }}
-            animation="quick"
+            animation="medium"
             onPress={handleSubmit}
           >
             {updateProfile.isPending ? (

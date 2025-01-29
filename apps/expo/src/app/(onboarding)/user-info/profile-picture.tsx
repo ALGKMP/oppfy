@@ -71,15 +71,17 @@ export default function ProfilePicture() {
       true,
     );
 
-    // Initial image animation
-    imageRotate.value = withSequence(
-      withTiming(7.2, { duration: 1000 }),
-      withTiming(0, { duration: 1000 }),
-    );
-    imageScale.value = withSequence(
-      withSpring(1.05, { mass: 0.5, damping: 8 }),
-      withSpring(1, { mass: 0.5, damping: 10 }),
-    );
+    // Initial image animation - elegant fade in with subtle scale
+    imageScale.value = withTiming(0, { duration: 0 });
+    imageRotate.value = withTiming(0, { duration: 0 });
+
+    setTimeout(() => {
+      imageScale.value = withSpring(1, {
+        mass: 1,
+        damping: 15,
+        stiffness: 100,
+      });
+    }, 400);
   }, []);
 
   // Animated styles
@@ -90,10 +92,8 @@ export default function ProfilePicture() {
   }));
 
   const imageStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: imageScale.value },
-      { rotate: `${imageRotate.value}deg` },
-    ],
+    transform: [{ scale: imageScale.value }],
+    opacity: interpolate(imageScale.value, [0, 1], [0, 1]),
   }));
 
   const buttonStyle = useAnimatedStyle(() => ({
@@ -203,7 +203,7 @@ export default function ProfilePicture() {
             textAlign="center"
             fontWeight="800"
           >
-            Show us your{"\n"}beautiful face
+            Show us a{"\n"}beautiful face
           </Text>
         </AnimatedYStack>
 
@@ -219,29 +219,35 @@ export default function ProfilePicture() {
                 alignItems="center"
                 entering={FadeIn.delay(400)}
               >
-                <AnimatedImage
-                  source={selectedImageUri ?? DefaultProfilePicture}
-                  style={{
-                    width: 200,
-                    height: 200,
-                    borderRadius: 100,
-                    borderColor: tokens.color.primary.val,
-                    borderWidth: 3,
-                  }}
-                  contentFit="cover"
-                />
-                <View
-                  position="absolute"
-                  bottom={4}
-                  right={4}
-                  backgroundColor="rgba(255,255,255,0.15)"
-                  backdropFilter="blur(12px)"
-                  borderRadius={40}
-                  padding="$4"
-                  borderWidth={2}
-                  borderColor={tokens.color.primary.val}
-                >
-                  <Camera size={24} color="white" />
+                <View>
+                  <AnimatedImage
+                    source={selectedImageUri ?? DefaultProfilePicture}
+                    style={{
+                      width: 200,
+                      height: 200,
+                      borderRadius: 100,
+                      borderColor: "white",
+                      borderWidth: 3,
+                      shadowColor: "white",
+                      shadowOffset: { width: 0, height: 0 },
+                      shadowOpacity: 0.2,
+                      shadowRadius: 10,
+                    }}
+                    contentFit="cover"
+                  />
+                  <View
+                    position="absolute"
+                    right={0}
+                    bottom={0}
+                    backgroundColor="white"
+                    backdropFilter="blur(12px)"
+                    borderRadius={32}
+                    padding="$3"
+                    borderWidth={2}
+                    borderColor={tokens.color.primary.val}
+                  >
+                    <Camera size={24} color={tokens.color.primary.val} />
+                  </View>
                 </View>
               </AnimatedView>
             </Animated.View>
@@ -251,11 +257,15 @@ export default function ProfilePicture() {
               {error}
             </Text>
           ) : (
-            <Text color="$gray11" textAlign="center" fontSize="$5">
-              {selectedImageUri
-                ? "Looking good! You're ready to go."
-                : "Add a profile picture so people know it's you."}
-            </Text>
+            selectedImageUri && (
+              <AnimatedText
+                textAlign="center"
+                fontSize="$5"
+                entering={FadeIn.duration(800).delay(200)}
+              >
+                Looking good! You're ready to go.
+              </AnimatedText>
+            )
           )}
         </YStack>
       </YStack>
@@ -264,15 +274,17 @@ export default function ProfilePicture() {
         <AnimatedXStack entering={FadeIn.delay(600)}>
           <Button
             flex={1}
-            backgroundColor={selectedImageUri ? "white" : "$gray8"}
+            backgroundColor={selectedImageUri ? "white" : "rgba(255,255,255,0)"}
             borderRadius="$10"
-            paddingVertical="$5"
             disabled={isPickerLoading || isUploading}
             pressStyle={{
               scale: 0.95,
               opacity: 0.9,
+              backgroundColor: selectedImageUri
+                ? "white"
+                : "rgba(255,255,255,0)",
             }}
-            animation="quick"
+            animation="medium"
             onPress={handleSubmit}
           >
             {isUploading ? (
