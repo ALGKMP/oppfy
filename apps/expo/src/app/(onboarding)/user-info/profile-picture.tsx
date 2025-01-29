@@ -277,6 +277,7 @@ export default function ProfilePicture() {
             backgroundColor={selectedImageUri ? "white" : "rgba(255,255,255,0)"}
             borderRadius="$10"
             disabled={isPickerLoading || isUploading}
+            opacity={selectedImageUri ? 1 : 0.7}
             pressStyle={{
               scale: 0.95,
               opacity: 0.9,
