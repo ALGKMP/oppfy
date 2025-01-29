@@ -1,36 +1,20 @@
-import { useMemo } from "react";
-import { Linking } from "react-native";
-import { Stack, usePathname, useRouter } from "expo-router";
-import { X } from "@tamagui/lucide-icons";
+import { usePathname } from "expo-router";
 
-import { OnboardingHeader } from "~/components/Layouts";
-import { Button, Icon, useAlertDialogController, View } from "~/components/ui";
+import { OnboardingStack } from "~/components/Layouts/Navigation/OnboardingStack";
+import type { OnboardingStackOptions } from "~/components/Layouts/Navigation/OnboardingStack";
+import { Icon, useAlertDialogController } from "~/components/ui";
 import { useAuth } from "~/hooks/useAuth";
 
 const ROUTES = ["intro", "select-contact", "create-post"];
 
 export default function TutorialLayout() {
   const pathname = usePathname();
-  const router = useRouter();
   const { signOut } = useAuth();
   const alertDialog = useAlertDialogController();
 
   // Get the last segment of the path
   const currentRoute = pathname.split("/").pop();
   const currentIndex = ROUTES.indexOf(currentRoute ?? "");
-
-  const stepTitle = useMemo(() => {
-    switch (currentRoute) {
-      case "intro":
-        return "How It Works";
-      case "select-contact":
-        return "Choose Friends";
-      case "create-post":
-        return "Create Your First Post";
-      default:
-        return "";
-    }
-  }, [currentRoute]);
 
   const handleClose = async () => {
     const confirmed = await alertDialog.show({
@@ -42,53 +26,37 @@ export default function TutorialLayout() {
     });
 
     if (confirmed) {
-      await signOut();
+      signOut();
     }
   };
 
-  const handleInfo = () => {
-    void Linking.openURL("https://www.oppfy.app");
-  };
-
   return (
-    <View flex={1} backgroundColor="$background">
-      <OnboardingHeader
-        showBack={false}
-        customLeftButton={
-          <Button
-            chromeless
-            icon={<X size={24} />}
-            onPress={handleClose}
-            scaleIcon={1}
-            marginLeft="$-2"
-            opacity={0.7}
-          />
-        }
-        onInfoPress={handleInfo}
-        progress={{
-          currentStep: Math.max(0, currentIndex),
-          totalSteps: ROUTES.length,
-          showStepCount: true,
+    <OnboardingStack
+      screenOptions={
+        {
+          animation: "fade",
+          gestureEnabled: false,
+          progress: {
+            currentStep: Math.max(0, currentIndex),
+            totalSteps: ROUTES.length,
+          },
+        } as OnboardingStackOptions
+      }
+    >
+      <OnboardingStack.Screen
+        name="intro"
+        options={{
+          headerLeft: () => <Icon name="close" onPress={handleClose} blurred />,
         }}
       />
-
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          animation: "fade",
-          animationDuration: 200,
-          gestureEnabled: true,
-          gestureDirection: "horizontal",
+      <OnboardingStack.Screen name="select-contact" />
+      <OnboardingStack.Screen name="create-post" />
+      <OnboardingStack.Screen
+        name="(media-picker)"
+        options={{
+          presentation: "modal",
         }}
-      >
-        {/* Media picker modal */}
-        <Stack.Screen
-          name="(media-picker)"
-          options={{
-            presentation: "modal",
-          }}
-        />
-      </Stack>
-    </View>
+      />
+    </OnboardingStack>
   );
 }
