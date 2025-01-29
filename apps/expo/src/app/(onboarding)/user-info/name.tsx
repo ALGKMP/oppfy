@@ -205,7 +205,7 @@ export default function Name() {
               selectionColor="white"
               autoFocus
               autoCorrect={false}
-              maxLength={50}
+              autoCapitalize={"words"}
             />
           </Animated.View>
           {error && (
