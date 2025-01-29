@@ -40,32 +40,6 @@ const Name = () => {
     router.push("/user-info/username");
   };
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (
-        <Icon
-          name="close"
-          onPress={async () => {
-            const confirmed = await alertDialog.show({
-              title: "Exit Onboarding",
-              subtitle:
-                "Are you sure you want to quit? You'll lose any changes you've made.",
-              acceptText: "Exit",
-              cancelText: "Cancel",
-            });
-
-            console.log("confirmed", confirmed);
-
-            if (confirmed) {
-              signOut();
-            }
-          }}
-          blurred
-        />
-      ),
-    });
-  }, [navigation, signOut, alertDialog]);
-
   return (
     <ScreenView
       paddingBottom={0}

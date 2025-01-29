@@ -77,7 +77,7 @@ export function OnboardingProgress({
   );
 
   return (
-    <XStack flex={1} maxWidth={280} marginHorizontal="$4" gap="$1">
+    <XStack width="100%" paddingHorizontal="$4" gap="$1" alignItems="center">
       {segments}
     </XStack>
   );
@@ -123,8 +123,14 @@ export function OnboardingHeader({
           {HeaderLeft}
         </View>
 
-        <View flex={2} alignItems="center">
-          {progress ? <OnboardingProgress {...progress} /> : content}
+        <View flex={2} alignItems="center" justifyContent="center">
+          {progress ? (
+            <View width="100%" paddingHorizontal="$2">
+              <OnboardingProgress {...progress} />
+            </View>
+          ) : (
+            content
+          )}
         </View>
 
         <View flex={1} alignItems="flex-end">

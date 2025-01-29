@@ -1,18 +1,14 @@
-import { useMemo } from "react";
-import { Linking } from "react-native";
-import { usePathname, useRouter } from "expo-router";
-import { Info, X } from "@tamagui/lucide-icons";
+import { usePathname } from "expo-router";
 
 import { OnboardingStack } from "~/components/Layouts/Navigation/OnboardingStack";
 import type { OnboardingStackOptions } from "~/components/Layouts/Navigation/OnboardingStack";
-import { Button, useAlertDialogController } from "~/components/ui";
+import { Icon, useAlertDialogController } from "~/components/ui";
 import { useAuth } from "~/hooks/useAuth";
 
 const ROUTES = ["name", "username", "date-of-birth", "profile-picture"];
 
 export default function UserInfoLayout() {
   const pathname = usePathname();
-  const router = useRouter();
   const { signOut } = useAuth();
   const alertDialog = useAlertDialogController();
 
@@ -34,36 +30,28 @@ export default function UserInfoLayout() {
     }
   };
 
-  const handleInfo = () => {
-    void Linking.openURL("https://www.oppfy.app");
-  };
-
   return (
     <OnboardingStack
       screenOptions={
         {
-          headerLeft: () => (
-            <Button
-              chromeless
-              icon={<X size={20} color="$color" />}
-              onPress={handleClose}
-              scaleIcon={1}
-            />
-          ),
-          headerRight: () => (
-            <Button
-              chromeless
-              icon={<Info size={20} color="$color" />}
-              onPress={handleInfo}
-              scaleIcon={1}
-            />
-          ),
+          animation: "fade",
+          gestureEnabled: false,
           progress: {
             currentStep: Math.max(0, currentIndex),
             totalSteps: ROUTES.length,
           },
         } as OnboardingStackOptions
       }
-    />
+    >
+      <OnboardingStack.Screen
+        name="name"
+        options={{
+          headerLeft: () => <Icon name="close" onPress={handleClose} />,
+        }}
+      />
+      <OnboardingStack.Screen name="username" />
+      <OnboardingStack.Screen name="date-of-birth" />
+      <OnboardingStack.Screen name="profile-picture" />
+    </OnboardingStack>
   );
 }

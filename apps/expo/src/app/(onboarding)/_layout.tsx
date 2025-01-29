@@ -12,6 +12,7 @@ export default function OnboardingLayout() {
   return (
     <OnboardingStack
       screenOptions={{
+        gestureEnabled: false,
         headerRight: () => (
           <Button
             chromeless
