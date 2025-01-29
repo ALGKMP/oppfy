@@ -20,6 +20,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "@tamagui/lucide-icons";
+import { AsYouType } from "libphonenumber-js";
 import { getToken, getTokens, useTheme } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
@@ -498,27 +499,8 @@ export function OnboardingPhoneInput({
   const [lastValidState, setLastValidState] = React.useState(false);
   const theme = useTheme();
   const inputScale = useSharedValue(1);
-
-  const isValidPhoneNumber = useMemo(
-    () =>
-      sharedValidators.user.phoneNumber.safeParse({
-        phoneNumber: value,
-        countryCode: countryData.countryCode,
-      }).success,
-    [value, countryData.countryCode],
-  );
-
-  // Track when the phone number becomes valid
-  useEffect(() => {
-    if (isValidPhoneNumber && !lastValidState) {
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      inputScale.value = withSequence(
-        withSpring(1.02, BUTTON_SPRING_CONFIG),
-        withSpring(1, BUTTON_SPRING_CONFIG),
-      );
-    }
-    setLastValidState(isValidPhoneNumber);
-  }, [isValidPhoneNumber]);
+  const inputRef = React.useRef<TextInput>(null);
+  const [focused, setFocused] = React.useState(false);
 
   const { searchQuery, setSearchQuery, filteredItems } = useSearch<CountryData>(
     {
@@ -534,6 +516,32 @@ export function OnboardingPhoneInput({
     ? [...suggestedCountriesData, ...countriesData]
     : filteredItems;
 
+  const formattedValue = useMemo(() => {
+    if (!value) return "";
+    const asYouType = new AsYouType(countryData.countryCode);
+    return asYouType.input(value);
+  }, [value, countryData.countryCode]);
+
+  const isValidPhoneNumber = useMemo(
+    () =>
+      sharedValidators.user.phoneNumber.safeParse({
+        phoneNumber: value,
+        countryCode: countryData.countryCode,
+      }).success,
+    [value, countryData.countryCode],
+  );
+
+  useEffect(() => {
+    if (isValidPhoneNumber && !lastValidState) {
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      inputScale.value = withSequence(
+        withSpring(1.02, BUTTON_SPRING_CONFIG),
+        withSpring(1, BUTTON_SPRING_CONFIG),
+      );
+    }
+    setLastValidState(isValidPhoneNumber);
+  }, [isValidPhoneNumber]);
+
   const onCountrySelect = (selectedCountry: CountryData) => {
     onCountryChange(selectedCountry);
     setModalVisible(false);
@@ -544,19 +552,32 @@ export function OnboardingPhoneInput({
     );
   };
 
-  const handleTextChange = (text: string) => {
-    onChangeText(text);
+  const handleTextChange = React.useCallback(
+    (text: string) => {
+      // Remove all non-numeric characters
+      const numericValue = text.replace(/\D/g, "");
 
-    if (text.length === 0 && value.length > 0) {
-      inputScale.value = withSpring(0.98, BUTTON_SPRING_CONFIG);
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    } else if (text.length === 1 && value.length === 0) {
-      inputScale.value = withSpring(1.02, BUTTON_SPRING_CONFIG);
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    } else {
-      inputScale.value = withSpring(1, BUTTON_SPRING_CONFIG);
-    }
-  };
+      if (numericValue !== value) {
+        onChangeText(numericValue);
+
+        if (numericValue.length === 0 && value.length > 0) {
+          inputScale.value = withSpring(0.98, BUTTON_SPRING_CONFIG);
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        } else if (numericValue.length > value.length) {
+          inputScale.value = withSpring(1.02, BUTTON_SPRING_CONFIG);
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        } else {
+          inputScale.value = withSpring(1, BUTTON_SPRING_CONFIG);
+        }
+      }
+    },
+    [value, onChangeText],
+  );
+
+  const handlePress = React.useCallback(() => {
+    inputRef.current?.focus();
+    setFocused(true);
+  }, []);
 
   const inputStyle = useAnimatedStyle(() => ({
     transform: [{ scale: inputScale.value }],
@@ -707,26 +728,47 @@ export function OnboardingPhoneInput({
             </XStack>
           </TouchableOpacity>
 
-          <AnimatedInput
-            flex={1}
-            value={value}
-            onChangeText={handleTextChange}
-            placeholder={placeholder}
-            keyboardType="phone-pad"
-            autoFocus={autoFocus}
-            placeholderTextColor="rgba(255,255,255,0.4)"
-            borderTopLeftRadius={0}
-            borderBottomLeftRadius={0}
-            borderWidth={0}
-            size="$7"
-            fontSize={24}
-            color="#fff"
-            textAlign="left"
-            fontWeight="bold"
-            padding={16}
-            backgroundColor="transparent"
-            selectionColor="white"
-          />
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={handlePress}
+            style={{ flex: 1 }}
+          >
+            <View height="$7">
+              <TextInput
+                ref={inputRef}
+                value={value}
+                onChangeText={handleTextChange}
+                keyboardType="number-pad"
+                style={{
+                  position: "absolute",
+                  width: 1,
+                  height: 1,
+                  opacity: 0,
+                }}
+                autoFocus={autoFocus}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+              />
+              <AnimatedInput
+                flex={1}
+                value={formattedValue}
+                editable={false}
+                placeholder={placeholder}
+                placeholderTextColor="rgba(255,255,255,0.4)"
+                borderTopLeftRadius={0}
+                borderBottomLeftRadius={0}
+                borderWidth={0}
+                size="$7"
+                fontSize={24}
+                color="#fff"
+                textAlign="left"
+                fontWeight="bold"
+                padding={16}
+                backgroundColor="transparent"
+                selectionColor="white"
+              />
+            </View>
+          </TouchableOpacity>
         </AnimatedXStack>
       </Animated.View>
     </>
