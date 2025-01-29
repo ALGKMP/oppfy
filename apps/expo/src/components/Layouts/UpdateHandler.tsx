@@ -7,6 +7,8 @@ export const UpdateHandler = () => {
   const dialog = useDialogController();
 
   const checkForUpdates = async () => {
+    if (__DEV__) return; // Skip update check in development
+
     try {
       const update = await Updates.checkForUpdateAsync();
 
