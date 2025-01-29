@@ -63,33 +63,30 @@ export default function DateOfBirth() {
   };
 
   return (
-    <>
-      <OnboardingScreen
-        subtitle="Tell us about yourself"
-        title="When's your birthday?"
-        error={error}
-        footer={
-          <OnboardingButton
-            onPress={handleSubmit}
-            disabled={!isValidDateOfBirth}
-            isLoading={updateProfile.isPending}
-            isValid={isValidDateOfBirth}
-          />
-        }
-      >
-        <OnboardingInput
-          value={dateOfBirth?.toLocaleDateString() ?? ""}
-          onChangeText={() => {}}
-          placeholders={PLACEHOLDERS}
-          autoFocus
-          onPressIn={() => {
-            setIsOpen(true);
-            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          }}
-          editable={false}
+    <OnboardingScreen
+      subtitle="Must be 13 years or older"
+      title="When's your birthday?"
+      error={error}
+      footer={
+        <OnboardingButton
+          onPress={handleSubmit}
+          disabled={!isValidDateOfBirth}
+          isLoading={updateProfile.isPending}
+          isValid={isValidDateOfBirth}
         />
-      </OnboardingScreen>
-
+      }
+    >
+      <OnboardingInput
+        value={dateOfBirth?.toLocaleDateString() ?? ""}
+        onChangeText={() => {}}
+        placeholders={PLACEHOLDERS}
+        autoFocus
+        onPressIn={() => {
+          setIsOpen(true);
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }}
+        editable={false}
+      />
       <DatePicker
         modal
         mode="date"
@@ -98,6 +95,6 @@ export default function DateOfBirth() {
         onConfirm={handleDateConfirm}
         onCancel={() => setIsOpen(false)}
       />
-    </>
+    </OnboardingScreen>
   );
 }

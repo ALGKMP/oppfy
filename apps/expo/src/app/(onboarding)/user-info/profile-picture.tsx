@@ -33,7 +33,6 @@ export default function ProfilePicture() {
       await pickImage();
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {
-      setError(Error.UNKNOWN);
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
