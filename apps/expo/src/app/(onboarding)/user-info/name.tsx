@@ -156,7 +156,7 @@ export default function Name() {
       paddingHorizontal="$6"
       justifyContent="space-between"
     >
-      <YStack gap="$8" paddingTop="$8">
+      <YStack gap="$8" paddingTop="$12">
         <AnimatedYStack
           gap="$2"
           entering={FadeIn.delay(200)}
@@ -203,6 +203,7 @@ export default function Name() {
                 shadowRadius: 20,
                 shadowOffset: { width: 0, height: 10 },
               }}
+              selectionColor="white"
               autoFocus
               autoCorrect={false}
               maxLength={50}
