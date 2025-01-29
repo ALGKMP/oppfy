@@ -51,8 +51,6 @@ export default function ProfilePicture() {
     uploadImage,
     isPickerLoading,
     isUploading,
-    pickError,
-    uploadError,
   } = useUploadProfilePicture();
 
   // Shared values for animations
@@ -107,13 +105,13 @@ export default function ProfilePicture() {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     try {
-      const uri = await pickImage();
+      await pickImage();
       imageScale.value = withSequence(
         withSpring(1.1, { mass: 0.5, damping: 8 }),
         withSpring(1, { mass: 0.5, damping: 10 }),
       );
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch (err) {
+    } catch {
       imageScale.value = withSpring(1, { mass: 0.5, damping: 12 });
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setError(Error.UNKNOWN);
