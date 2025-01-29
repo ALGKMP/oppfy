@@ -155,7 +155,7 @@ export default function Name() {
       paddingHorizontal="$6"
       justifyContent="space-between"
     >
-      <YStack gap="$8" paddingTop="$12">
+      <YStack gap="$6" paddingTop="$12">
         <AnimatedYStack
           gap="$2"
           entering={FadeIn.delay(200)}
@@ -205,7 +205,7 @@ export default function Name() {
               selectionColor="white"
               autoFocus
               autoCorrect={false}
-              autoCapitalize={"words"}
+              autoCapitalize="words"
             />
           </Animated.View>
           {error && (
