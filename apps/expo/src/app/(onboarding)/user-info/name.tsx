@@ -18,8 +18,15 @@ import { getTokens } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
-import { Button, ScreenView, Text, XStack, YStack } from "~/components/ui";
-import { api } from "~/utils/api";
+import {
+  Button,
+  ScreenView,
+  Spinner,
+  Text,
+  XStack,
+  YStack,
+} from "~/components/ui";
+import { api, isTRPCClientError } from "~/utils/api";
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 const AnimatedYStack = Animated.createAnimatedComponent(YStack);
@@ -33,21 +40,27 @@ const PLACEHOLDERS = [
   "Your name goes here",
 ];
 
+enum Error {
+  UNKNOWN = "Something went wrong. Please try again.",
+}
+
 export default function Name() {
   const router = useRouter();
   const tokens = getTokens();
   const updateProfile = api.profile.updateProfile.useMutation();
-  const [isNameValid, setIsNameValid] = React.useState(false);
+  const [name, setName] = React.useState("");
+  const [error, setError] = React.useState<Error | null>(null);
   const [currentPlaceholder, setCurrentPlaceholder] = React.useState(
     PLACEHOLDERS[0],
   );
 
-  // Shared values for better performance
-  const nameText = useSharedValue("");
-  const isValid = useSharedValue(false);
+  // Shared values for animations
   const welcomeFloat = useSharedValue(0);
   const inputScale = useSharedValue(1);
   const buttonScale = useSharedValue(1);
+
+  // Constant schema validation
+  const isValidName = sharedValidators.user.name.safeParse(name).success;
 
   // Start animations
   useEffect(() => {
@@ -62,12 +75,10 @@ export default function Name() {
     );
 
     // Rotate placeholders
+    let index = 0;
     const interval = setInterval(() => {
-      setCurrentPlaceholder((prev) => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const currentIndex = PLACEHOLDERS.indexOf(prev!);
-        return PLACEHOLDERS[(currentIndex + 1) % PLACEHOLDERS.length];
-      });
+      index = (index + 1) % PLACEHOLDERS.length;
+      setCurrentPlaceholder(PLACEHOLDERS[index]);
     }, 3000);
 
     return () => clearInterval(interval);
@@ -87,45 +98,55 @@ export default function Name() {
   }));
 
   const buttonStyle = useAnimatedStyle(() => ({
-    opacity: isValid.value ? 1 : 0.7,
     transform: [{ scale: buttonScale.value }],
   }));
 
   // Optimized text handling
   const handleTextChange = (text: string) => {
-    "worklet";
-    const prevLength = nameText.value.length;
-    nameText.value = text;
-
-    // Validate on the worklet thread
-    const valid = text.length >= 2 && text.length <= 50;
-    isValid.value = valid;
-    runOnJS(setIsNameValid)(valid);
+    setName(text);
+    setError(null);
 
     // Scale animations based on text length changes
-    if (text.length === 0 && prevLength > 0) {
+    if (text.length === 0 && name.length > 0) {
       inputScale.value = withSpring(0.98, { mass: 0.5, damping: 12 });
-      runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
-    } else if (text.length === 1 && prevLength === 0) {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } else if (text.length === 1 && name.length === 0) {
       inputScale.value = withSpring(1.02, { mass: 0.5, damping: 12 });
-      runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Medium);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     } else {
       inputScale.value = withSpring(1, { mass: 0.5, damping: 12 });
     }
   };
 
   const handleSubmit = async () => {
-    if (!isNameValid) return;
+    if (!isValidName) return;
 
-    buttonScale.value = withSequence(
-      withSpring(0.95, { mass: 0.5, damping: 10 }),
-      withSpring(1.05, { mass: 0.5, damping: 8 }),
-      withSpring(1, { mass: 0.5, damping: 5 }),
-    );
+    try {
+      buttonScale.value = withSequence(
+        withSpring(0.95, { mass: 0.5, damping: 10 }),
+        withSpring(1.05, { mass: 0.5, damping: 8 }),
+        withSpring(1, { mass: 0.5, damping: 5 }),
+      );
 
-    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    await updateProfile.mutateAsync({ name: nameText.value });
-    router.push("/user-info/username");
+      await updateProfile.mutateAsync({ name });
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      router.push("/user-info/username");
+    } catch (err) {
+      if (isTRPCClientError(err)) {
+        switch (err.data?.code) {
+          default:
+            setError(Error.UNKNOWN);
+            break;
+        }
+      } else {
+        setError(Error.UNKNOWN);
+      }
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      buttonScale.value = withSequence(
+        withSpring(0.95, { damping: 15 }),
+        withSpring(1, { damping: 12 }),
+      );
+    }
   };
 
   return (
@@ -161,40 +182,47 @@ export default function Name() {
           </Text>
         </AnimatedYStack>
 
-        <Animated.View style={inputStyle}>
-          <AnimatedTextInput
-            defaultValue=""
-            onChangeText={handleTextChange}
-            entering={FadeIn.delay(400)}
-            placeholder={currentPlaceholder}
-            placeholderTextColor="rgba(255,255,255,0.4)"
-            style={{
-              fontSize: 24,
-              color: "#fff",
-              textAlign: "center",
-              fontWeight: "500",
-              padding: 16,
-              backgroundColor: "rgba(255,255,255,0.1)",
-              borderRadius: 16,
-              shadowColor: "#fff",
-              shadowOpacity: 0.1,
-              shadowRadius: 20,
-              shadowOffset: { width: 0, height: 10 },
-            }}
-            autoFocus
-            autoCorrect={false}
-            maxLength={50}
-          />
-        </Animated.View>
+        <YStack gap="$2">
+          <Animated.View style={inputStyle}>
+            <AnimatedTextInput
+              value={name}
+              onChangeText={handleTextChange}
+              entering={FadeIn.delay(400)}
+              placeholder={currentPlaceholder}
+              placeholderTextColor="rgba(255,255,255,0.4)"
+              style={{
+                fontSize: 24,
+                color: "#fff",
+                textAlign: "center",
+                fontWeight: "500",
+                padding: 16,
+                backgroundColor: "rgba(255,255,255,0.1)",
+                borderRadius: 16,
+                shadowColor: "#fff",
+                shadowOpacity: 0.1,
+                shadowRadius: 20,
+                shadowOffset: { width: 0, height: 10 },
+              }}
+              autoFocus
+              autoCorrect={false}
+              maxLength={50}
+            />
+          </Animated.View>
+          {error && (
+            <Text color="$red11" textAlign="center" fontSize="$5">
+              {error}
+            </Text>
+          )}
+        </YStack>
       </YStack>
 
       <Animated.View style={buttonStyle}>
         <AnimatedXStack entering={FadeIn.delay(600)}>
           <Button
             flex={1}
-            backgroundColor={isNameValid ? "white" : "rgba(255,255,255,0)"}
+            backgroundColor={isValidName ? "white" : "rgba(255,255,255,0)"}
             borderRadius="$10"
-            disabled={!isNameValid}
+            disabled={!isValidName || updateProfile.isPending}
             pressStyle={{
               scale: 0.95,
               opacity: 0.9,
@@ -203,19 +231,23 @@ export default function Name() {
             animation="medium"
             onPress={handleSubmit}
           >
-            <XStack gap="$2" alignItems="center" justifyContent="center">
-              <Text
-                color={isNameValid ? tokens.color.primary.val : "white"}
-                fontSize="$6"
-                fontWeight="600"
-              >
-                Continue
-              </Text>
-              <ChevronRight
-                size={20}
-                color={isNameValid ? tokens.color.primary.val : "white"}
-              />
-            </XStack>
+            {updateProfile.isPending ? (
+              <Spinner />
+            ) : (
+              <XStack gap="$2" alignItems="center" justifyContent="center">
+                <Text
+                  color={isValidName ? tokens.color.primary.val : "white"}
+                  fontSize="$6"
+                  fontWeight="600"
+                >
+                  Continue
+                </Text>
+                <ChevronRight
+                  size={20}
+                  color={isValidName ? tokens.color.primary.val : "white"}
+                />
+              </XStack>
+            )}
           </Button>
         </AnimatedXStack>
       </Animated.View>
