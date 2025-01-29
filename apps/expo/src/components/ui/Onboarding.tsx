@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Modal, TextInput, TouchableOpacity } from "react-native";
 import Animated, {
   FadeIn,
@@ -21,6 +21,8 @@ import {
   ChevronRight,
 } from "@tamagui/lucide-icons";
 import { getToken, getTokens, useTheme } from "tamagui";
+
+import { sharedValidators } from "@oppfy/validators";
 
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
@@ -493,8 +495,30 @@ export function OnboardingPhoneInput({
   autoFocus = true,
 }: OnboardingPhoneInputProps) {
   const [modalVisible, setModalVisible] = React.useState(false);
+  const [lastValidState, setLastValidState] = React.useState(false);
   const theme = useTheme();
   const inputScale = useSharedValue(1);
+
+  const isValidPhoneNumber = useMemo(
+    () =>
+      sharedValidators.user.phoneNumber.safeParse({
+        phoneNumber: value,
+        countryCode: countryData.countryCode,
+      }).success,
+    [value, countryData.countryCode],
+  );
+
+  // Track when the phone number becomes valid
+  useEffect(() => {
+    if (isValidPhoneNumber && !lastValidState) {
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      inputScale.value = withSequence(
+        withSpring(1.02, BUTTON_SPRING_CONFIG),
+        withSpring(1, BUTTON_SPRING_CONFIG),
+      );
+    }
+    setLastValidState(isValidPhoneNumber);
+  }, [isValidPhoneNumber]);
 
   const { searchQuery, setSearchQuery, filteredItems } = useSearch<CountryData>(
     {
@@ -730,22 +754,21 @@ export function OnboardingOTPInput({
       const newValue = text.replace(/[^0-9]/g, "").slice(0, 6);
       onChange(newValue);
 
-      if (text.length === 0 && value.length > 0) {
-        inputScale.value = withSpring(0.98, BUTTON_SPRING_CONFIG);
-        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      } else if (text.length === 1 && value.length === 0) {
-        inputScale.value = withSpring(1.02, BUTTON_SPRING_CONFIG);
-        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      } else if (text.length === 6) {
+      // Only animate when adding numbers, not when deleting
+      if (text.length > value.length) {
         inputScale.value = withSequence(
           withSpring(1.02, BUTTON_SPRING_CONFIG),
           withSpring(1, BUTTON_SPRING_CONFIG),
         );
-        void Haptics.notificationAsync(
-          Haptics.NotificationFeedbackType.Success,
-        );
-      } else {
-        inputScale.value = withSpring(1, BUTTON_SPRING_CONFIG);
+
+        if (text.length === 6) {
+          void Haptics.notificationAsync(
+            Haptics.NotificationFeedbackType.Success,
+          );
+        } else {
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+      } else if (text.length < value.length) {
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
     },
@@ -811,16 +834,6 @@ export function OnboardingOTPInput({
                 <Text fontSize={24} fontWeight="bold" color="#fff">
                   {value[index] ?? ""}
                 </Text>
-                {focused &&
-                  (index === value.length ||
-                    (value.length === 6 && index === 5)) && (
-                    <View
-                      position="absolute"
-                      width={2}
-                      height={32}
-                      backgroundColor="#fff"
-                    />
-                  )}
               </AnimatedYStack>
             ))}
           </AnimatedXStack>

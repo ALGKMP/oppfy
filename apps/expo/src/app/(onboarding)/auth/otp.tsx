@@ -115,7 +115,7 @@ export default function PhoneNumberOTP() {
 
   return (
     <OnboardingScreen
-      title="Enter your verification code"
+      title={`Enter your ${"\n "} verification code`}
       subtitle="We sent a code to your phone"
       error={error}
       footer={
