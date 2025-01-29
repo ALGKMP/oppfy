@@ -1,9 +1,7 @@
-import React, { useCallback, useEffect } from "react";
-import { TextInput } from "react-native";
+import React, { useEffect } from "react";
 import Animated, {
   FadeIn,
   interpolate,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -20,6 +18,7 @@ import { sharedValidators } from "@oppfy/validators";
 
 import {
   Button,
+  Input,
   ScreenView,
   Spinner,
   Text,
@@ -28,10 +27,10 @@ import {
 } from "~/components/ui";
 import { api, isTRPCClientError } from "~/utils/api";
 
-const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 const AnimatedYStack = Animated.createAnimatedComponent(YStack);
 const AnimatedXStack = Animated.createAnimatedComponent(XStack);
 const AnimatedText = Animated.createAnimatedComponent(Text);
+const AnimatedOnboardingInput = Animated.createAnimatedComponent(Input);
 
 const PLACEHOLDERS = [
   "Enter your name",
@@ -184,25 +183,25 @@ export default function Name() {
 
         <YStack gap="$2">
           <Animated.View style={inputStyle}>
-            <AnimatedTextInput
+            <AnimatedOnboardingInput
               value={name}
               onChangeText={handleTextChange}
               entering={FadeIn.delay(400)}
               placeholder={currentPlaceholder}
               placeholderTextColor="rgba(255,255,255,0.4)"
-              style={{
-                fontSize: 24,
-                color: "#fff",
-                textAlign: "center",
-                fontWeight: "500",
-                padding: 16,
-                backgroundColor: "rgba(255,255,255,0.1)",
-                borderRadius: 16,
-                shadowColor: "#fff",
-                shadowOpacity: 0.1,
-                shadowRadius: 20,
-                shadowOffset: { width: 0, height: 10 },
-              }}
+              borderWidth={0}
+              size="$6"
+              fontSize={24}
+              color="#fff"
+              textAlign="center"
+              fontWeight="bold"
+              padding={16}
+              backgroundColor="rgba(255,255,255,0.1)"
+              borderRadius={16}
+              shadowColor="#fff"
+              shadowOpacity={0.1}
+              shadowRadius={20}
+              shadowOffset={{ width: 0, height: 10 }}
               selectionColor="white"
               autoFocus
               autoCorrect={false}
