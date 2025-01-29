@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Modal, TouchableOpacity } from "react-native";
+import { Modal, TextInput, TouchableOpacity } from "react-native";
 import Animated, {
   FadeIn,
   interpolate,
@@ -103,7 +103,7 @@ export function OnboardingScreen({
       paddingHorizontal="$6"
       justifyContent="space-between"
     >
-      <YStack gap="$6" paddingTop="$12">
+      <YStack gap="$6" paddingTop="$10">
         <AnimatedYStack
           gap="$2"
           entering={FadeIn.delay(200)}
@@ -706,5 +706,126 @@ export function OnboardingPhoneInput({
         </AnimatedXStack>
       </Animated.View>
     </>
+  );
+}
+
+// OTP Input Component
+interface OnboardingOTPInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  autoFocus?: boolean;
+}
+
+export function OnboardingOTPInput({
+  value,
+  onChange,
+  autoFocus = true,
+}: OnboardingOTPInputProps) {
+  const inputRef = React.useRef<TextInput>(null);
+  const [focused, setFocused] = React.useState(false);
+  const inputScale = useSharedValue(1);
+
+  const handleTextChange = React.useCallback(
+    (text: string) => {
+      const newValue = text.replace(/[^0-9]/g, "").slice(0, 6);
+      onChange(newValue);
+
+      if (text.length === 0 && value.length > 0) {
+        inputScale.value = withSpring(0.98, BUTTON_SPRING_CONFIG);
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } else if (text.length === 1 && value.length === 0) {
+        inputScale.value = withSpring(1.02, BUTTON_SPRING_CONFIG);
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      } else if (text.length === 6) {
+        inputScale.value = withSequence(
+          withSpring(1.02, BUTTON_SPRING_CONFIG),
+          withSpring(1, BUTTON_SPRING_CONFIG),
+        );
+        void Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Success,
+        );
+      } else {
+        inputScale.value = withSpring(1, BUTTON_SPRING_CONFIG);
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    },
+    [onChange, value.length],
+  );
+
+  const handlePress = React.useCallback(() => {
+    inputRef.current?.focus();
+    setFocused(true);
+  }, []);
+
+  const inputStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: inputScale.value }],
+  }));
+
+  return (
+    <Animated.View style={inputStyle}>
+      <TouchableOpacity activeOpacity={1} onPress={handlePress}>
+        <View>
+          <TextInput
+            ref={inputRef}
+            value={value}
+            onChangeText={handleTextChange}
+            keyboardType="number-pad"
+            maxLength={6}
+            style={{
+              position: "absolute",
+              width: 1,
+              height: 1,
+              opacity: 0,
+            }}
+            autoFocus={autoFocus}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+          />
+          <AnimatedXStack
+            entering={FadeIn.delay(400)}
+            width="100%"
+            justifyContent="space-between"
+            gap="$2"
+          >
+            {[0, 1, 2, 3, 4, 5].map((index) => (
+              <AnimatedYStack
+                key={index}
+                width={50}
+                height={60}
+                borderRadius={16}
+                backgroundColor={
+                  focused &&
+                  (index === value.length ||
+                    (value.length === 6 && index === 5))
+                    ? "rgba(255,255,255,0.15)"
+                    : "rgba(255,255,255,0.1)"
+                }
+                justifyContent="center"
+                alignItems="center"
+                shadowColor="#fff"
+                shadowOpacity={0.1}
+                shadowRadius={20}
+                shadowOffset={{ width: 0, height: 10 }}
+                animation="quick"
+              >
+                <Text fontSize={24} fontWeight="bold" color="#fff">
+                  {value[index] ?? ""}
+                </Text>
+                {focused &&
+                  (index === value.length ||
+                    (value.length === 6 && index === 5)) && (
+                    <View
+                      position="absolute"
+                      width={2}
+                      height={32}
+                      backgroundColor="#fff"
+                    />
+                  )}
+              </AnimatedYStack>
+            ))}
+          </AnimatedXStack>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 }
