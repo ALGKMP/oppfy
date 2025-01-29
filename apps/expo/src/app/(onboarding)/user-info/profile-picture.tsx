@@ -76,7 +76,7 @@ export default function ProfilePicture() {
   return (
     <OnboardingScreen
       subtitle="One last thing"
-      title="Show us a beautiful face"
+      title={`Show us your ${"\n"} beautiful face`}
       error={error}
       successMessage={
         selectedImageUri ? "Looking good! You're ready to go." : undefined
@@ -85,6 +85,8 @@ export default function ProfilePicture() {
         <OnboardingButton
           onPress={handleSubmit}
           disabled={isPickerLoading || isUploading}
+          opacity={selectedImageUri ? 1 : 0.7}
+          backgroundColor={selectedImageUri ? "white" : "rgba(255,255,255,0)"}
           isLoading={isUploading}
           isValid={selectedImageUri !== null}
           text={selectedImageUri ? "Continue" : "Skip for now"}

@@ -266,6 +266,8 @@ export function OnboardingInput({
 // Button Component
 interface OnboardingButtonProps {
   onPress: () => void;
+  opacity?: number;
+  backgroundColor?: string;
   disabled?: boolean;
   isLoading?: boolean;
   text?: string;
@@ -274,6 +276,8 @@ interface OnboardingButtonProps {
 
 export function OnboardingButton({
   onPress,
+  opacity = 1,
+  backgroundColor = "white",
   disabled = false,
   isLoading = false,
   text = "Continue",
@@ -300,13 +304,14 @@ export function OnboardingButton({
       <AnimatedXStack entering={FadeIn.delay(600)}>
         <Button
           flex={1}
-          backgroundColor={isValid ? "white" : "rgba(255,255,255,0)"}
+          backgroundColor={isValid ? backgroundColor : "rgba(255,255,255,0)"}
           borderRadius="$10"
           disabled={disabled || isLoading}
+          opacity={opacity}
           pressStyle={{
             scale: 0.95,
             opacity: 0.9,
-            backgroundColor: "white",
+            backgroundColor: backgroundColor,
           }}
           animation="medium"
           onPress={handlePress}
