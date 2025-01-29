@@ -9,15 +9,9 @@ import { getToken, useTheme } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
-import { Header } from "~/components/Layouts";
 import {
-  H2,
   H6,
   ListItem,
-  OnboardingButton,
-  OnboardingInput,
-  Paragraph,
-  ScreenView,
   SearchInput,
   Spinner,
   Text,
@@ -25,6 +19,11 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
+import {
+  OnboardingButton,
+  OnboardingPhoneInput,
+  OnboardingScreen,
+} from "~/components/ui/Onboarding";
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
 import { useAuth } from "~/hooks/useAuth";
@@ -84,6 +83,9 @@ const PhoneNumber = () => {
       const success = await sendVerificationCode(e164PhoneNumber);
 
       if (success) {
+        await Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Success,
+        );
         router.push({
           params: {
             phoneNumber: e164PhoneNumber,
@@ -93,6 +95,7 @@ const PhoneNumber = () => {
       }
     } catch (err: unknown) {
       console.error("Error sending verification code:", err);
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       if (err && typeof err === "object" && "message" in err) {
         const errorMessage = (err as { message: string }).message;
         switch (errorMessage) {
@@ -138,58 +141,34 @@ const PhoneNumber = () => {
   };
 
   return (
-    <ScreenView
-      paddingBottom={0}
-      paddingTop="$10"
-      justifyContent="space-between"
-      keyboardAvoiding
-      safeAreaEdges={["bottom"]}
+    <OnboardingScreen
+      title="What's your phone number?"
+      error={error}
+      footer={
+        <OnboardingButton
+          onPress={onSubmit}
+          disabled={!isValidPhoneNumber || isLoading}
+          isLoading={isLoading}
+          isValid={isValidPhoneNumber}
+          text={isLoading ? "Sending..." : "Send Verification Text"}
+        />
+      }
+      successMessage={
+        !error
+          ? "By Continuing you agree to our Privacy Policy and Terms of Service."
+          : undefined
+      }
     >
-      <YStack alignItems="center" gap="$6">
-        <H2 textAlign="center">What's your{"\n"}phone number?</H2>
-
-        <XStack>
-          <CountryPicker
-            selectedCountryData={countryData}
-            setSelectedCountryData={setCountryData}
-          />
-          <OnboardingInput
-            flex={1}
-            value={phoneNumber}
-            onChangeText={(text) => {
-              setPhoneNumber(text);
-              setError(null);
-            }}
-            placeholder="Your number here"
-            keyboardType="phone-pad"
-            autoFocus
-            placeholderTextColor="$gray8"
-            borderTopLeftRadius={0}
-            borderBottomLeftRadius={0}
-          />
-        </XStack>
-
-        {error ? (
-          <Paragraph size="$5" color="$red9" textAlign="center">
-            {error}
-          </Paragraph>
-        ) : (
-          <Paragraph size="$5" color="$gray11" textAlign="center">
-            By Continuing you agree to our{" "}
-            <Text fontWeight="bold">Privacy Policy</Text> and{" "}
-            <Text fontWeight="bold">Terms of Service</Text>.
-          </Paragraph>
-        )}
-      </YStack>
-
-      <OnboardingButton
-        marginHorizontal="$-4"
-        onPress={onSubmit}
-        disabled={!isValidPhoneNumber || isLoading}
-      >
-        {isLoading ? <Spinner /> : "Send Verification Text"}
-      </OnboardingButton>
-    </ScreenView>
+      <OnboardingPhoneInput
+        value={phoneNumber}
+        onChangeText={(text) => {
+          setPhoneNumber(text);
+          setError(null);
+        }}
+        countryData={countryData}
+        onCountryChange={setCountryData}
+      />
+    </OnboardingScreen>
   );
 };
 
@@ -236,17 +215,21 @@ const CountryPicker = ({
         onRequestClose={() => setModalVisible(false)}
       >
         <View flex={1} backgroundColor="$background">
-          <Header
-            title="Select Country"
-            HeaderLeft={
-              <TouchableOpacity
-                hitSlop={10}
-                onPress={() => setModalVisible(false)}
-              >
-                <ChevronLeft />
-              </TouchableOpacity>
-            }
-          />
+          <YStack
+            paddingVertical="$4"
+            paddingHorizontal="$4"
+            flexDirection="row"
+            alignItems="center"
+            gap="$4"
+          >
+            <TouchableOpacity
+              hitSlop={10}
+              onPress={() => setModalVisible(false)}
+            >
+              <ChevronLeft />
+            </TouchableOpacity>
+            <H6>Select Country</H6>
+          </YStack>
           <YStack
             flex={1}
             padding="$4"
@@ -266,7 +249,6 @@ const CountryPicker = ({
               selectedCountryCode={selectedCountryData?.countryCode}
             />
           </YStack>
-          {/* </View> */}
         </View>
       </Modal>
 

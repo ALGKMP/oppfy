@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { TouchableOpacity } from "react-native";
+import { Modal, TouchableOpacity } from "react-native";
 import Animated, {
   FadeIn,
   interpolate,
@@ -12,13 +12,26 @@ import Animated, {
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { Camera, ChevronRight } from "@tamagui/lucide-icons";
-import { getTokens } from "tamagui";
+import type { FlashList as FlashListType } from "@shopify/flash-list";
+import { FlashList } from "@shopify/flash-list";
+import {
+  Camera,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+} from "@tamagui/lucide-icons";
+import { getToken, getTokens, useTheme } from "tamagui";
 
+import type { CountryData } from "~/data/groupedCountries";
+import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
+import useSearch from "~/hooks/useSearch";
 import {
   Button,
+  H6,
   Input,
+  ListItem,
   ScreenView,
+  SearchInput,
   Spinner,
   Text,
   View,
@@ -49,7 +62,7 @@ const BUTTON_SPRING_CONFIG = {
 // Base Screen Component
 interface OnboardingScreenProps {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   children: React.ReactNode;
   error?: string | null;
   successMessage?: string;
@@ -96,15 +109,17 @@ export function OnboardingScreen({
           entering={FadeIn.delay(200)}
           style={welcomeStyle}
         >
-          <AnimatedText
-            color="rgba(255,255,255,0.7)"
-            fontSize="$6"
-            textAlign="center"
-            fontWeight="600"
-            entering={FadeIn.duration(1000)}
-          >
-            {subtitle}
-          </AnimatedText>
+          {subtitle && (
+            <AnimatedText
+              color="rgba(255,255,255,0.7)"
+              fontSize="$6"
+              textAlign="center"
+              fontWeight="600"
+              entering={FadeIn.duration(1000)}
+            >
+              {subtitle}
+            </AnimatedText>
+          )}
           <Text
             color="white"
             fontSize="$9"
@@ -220,7 +235,7 @@ export function OnboardingInput({
         placeholder={currentPlaceholder}
         placeholderTextColor="rgba(255,255,255,0.4)"
         borderWidth={0}
-        size="$6"
+        size="$7"
         fontSize={24}
         color="#fff"
         textAlign="center"
@@ -452,5 +467,244 @@ export function OnboardingDatePicker({
       onPressIn={handlePress}
       editable={false}
     />
+  );
+}
+
+// Phone Input Component
+const countriesWithoutSections = countriesData.filter(
+  (item): item is CountryData => typeof item !== "string",
+);
+
+interface OnboardingPhoneInputProps {
+  value: string;
+  onChangeText: (text: string) => void;
+  countryData: CountryData;
+  onCountryChange: (countryData: CountryData) => void;
+  placeholder?: string;
+  autoFocus?: boolean;
+}
+
+export function OnboardingPhoneInput({
+  value,
+  onChangeText,
+  countryData,
+  onCountryChange,
+  placeholder = "Your number here",
+  autoFocus = true,
+}: OnboardingPhoneInputProps) {
+  const [modalVisible, setModalVisible] = React.useState(false);
+  const theme = useTheme();
+  const inputScale = useSharedValue(1);
+
+  const { searchQuery, setSearchQuery, filteredItems } = useSearch<CountryData>(
+    {
+      data: countriesWithoutSections,
+      fuseOptions: {
+        keys: ["name", "dialingCode", "countryCode"],
+        threshold: 0.3,
+      },
+    },
+  );
+
+  const displayData = !searchQuery
+    ? [...suggestedCountriesData, ...countriesData]
+    : filteredItems;
+
+  const onCountrySelect = (selectedCountry: CountryData) => {
+    onCountryChange(selectedCountry);
+    setModalVisible(false);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    inputScale.value = withSequence(
+      withSpring(1.02, BUTTON_SPRING_CONFIG),
+      withSpring(1, BUTTON_SPRING_CONFIG),
+    );
+  };
+
+  const handleTextChange = (text: string) => {
+    onChangeText(text);
+
+    if (text.length === 0 && value.length > 0) {
+      inputScale.value = withSpring(0.98, BUTTON_SPRING_CONFIG);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } else if (text.length === 1 && value.length === 0) {
+      inputScale.value = withSpring(1.02, BUTTON_SPRING_CONFIG);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } else {
+      inputScale.value = withSpring(1, BUTTON_SPRING_CONFIG);
+    }
+  };
+
+  const inputStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: inputScale.value }],
+  }));
+
+  return (
+    <>
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View flex={1} backgroundColor="$background">
+          <YStack
+            paddingVertical="$4"
+            paddingHorizontal="$4"
+            flexDirection="row"
+            alignItems="center"
+            gap="$4"
+          >
+            <TouchableOpacity
+              hitSlop={10}
+              onPress={() => setModalVisible(false)}
+            >
+              <ChevronLeft />
+            </TouchableOpacity>
+            <H6>Select Country</H6>
+          </YStack>
+          <YStack
+            flex={1}
+            padding="$4"
+            paddingBottom={0}
+            gap={searchQuery ? "$4" : "$2"}
+          >
+            <SearchInput
+              value={searchQuery}
+              placeholder="Search countries"
+              onChangeText={setSearchQuery}
+              onClear={() => setSearchQuery("")}
+            />
+
+            <FlashList<CountryData | string>
+              data={displayData}
+              estimatedItemSize={43}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              renderItem={({
+                item,
+                index,
+              }: {
+                item: CountryData | string;
+                index: number;
+              }) => {
+                if (typeof item === "string") {
+                  return (
+                    <View paddingVertical={8}>
+                      <H6 theme="alt1">{item}</H6>
+                    </View>
+                  );
+                }
+
+                const isSelected = item.countryCode === countryData.countryCode;
+                const isFirstInGroup =
+                  index === 0 || typeof displayData[index - 1] === "string";
+                const isLastInGroup =
+                  index === displayData.length - 1 ||
+                  typeof displayData[index + 1] === "string";
+                const borderRadius = getToken("$6", "radius") as number;
+
+                return (
+                  <ListItem
+                    size="$4.5"
+                    padding={12}
+                    borderBottomWidth={1}
+                    backgroundColor="$gray2"
+                    {...(isFirstInGroup && {
+                      borderTopLeftRadius: borderRadius,
+                      borderTopRightRadius: borderRadius,
+                    })}
+                    {...(isLastInGroup && {
+                      borderBottomWidth: 0,
+                      borderBottomLeftRadius: borderRadius,
+                      borderBottomRightRadius: borderRadius,
+                    })}
+                    pressStyle={{
+                      backgroundColor: "$gray3",
+                    }}
+                    onPress={() => onCountrySelect(item)}
+                  >
+                    <XStack
+                      flex={1}
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <XStack alignItems="center" gap="$2">
+                        <Text fontSize="$8">{item.flag}</Text>
+                        <Text fontSize="$5">{item.name}</Text>
+                        <Text fontSize="$5" color="$gray9">
+                          ({item.dialingCode})
+                        </Text>
+                      </XStack>
+
+                      {isSelected && <CheckCircle2 />}
+                    </XStack>
+                  </ListItem>
+                );
+              }}
+              getItemType={(item: CountryData | string) =>
+                typeof item === "string" ? "sectionHeader" : "row"
+              }
+            />
+          </YStack>
+        </View>
+      </Modal>
+
+      <Animated.View style={inputStyle}>
+        <AnimatedXStack
+          backgroundColor="rgba(255,255,255,0.1)"
+          borderRadius={16}
+          shadowColor="#fff"
+          shadowOpacity={0.1}
+          shadowRadius={20}
+          shadowOffset={{ width: 0, height: 10 }}
+          entering={FadeIn.delay(400)}
+          alignItems="center"
+        >
+          <TouchableOpacity
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setModalVisible(true);
+            }}
+          >
+            <XStack
+              flex={1}
+              width={74}
+              justifyContent="center"
+              backgroundColor="rgba(255,255,255,0.1)"
+              borderTopLeftRadius={16}
+              borderBottomLeftRadius={16}
+              paddingHorizontal="$4"
+              alignItems="center"
+              gap="$1.5"
+            >
+              <Text fontSize="$8" fontWeight="bold" color="#fff">
+                {countryData.dialingCode}
+              </Text>
+            </XStack>
+          </TouchableOpacity>
+
+          <AnimatedInput
+            flex={1}
+            value={value}
+            onChangeText={handleTextChange}
+            placeholder={placeholder}
+            keyboardType="phone-pad"
+            autoFocus={autoFocus}
+            placeholderTextColor="rgba(255,255,255,0.4)"
+            borderTopLeftRadius={0}
+            borderBottomLeftRadius={0}
+            borderWidth={0}
+            size="$7"
+            fontSize={24}
+            color="#fff"
+            textAlign="left"
+            fontWeight="bold"
+            padding={16}
+            backgroundColor="transparent"
+            selectionColor="white"
+          />
+        </AnimatedXStack>
+      </Animated.View>
+    </>
   );
 }
