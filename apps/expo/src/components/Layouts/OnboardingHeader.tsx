@@ -2,19 +2,14 @@ import { useMemo } from "react";
 import { Platform } from "react-native";
 import Animated, {
   useAnimatedStyle,
-  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { ChevronLeft, Info } from "@tamagui/lucide-icons";
-import { getTokens, H2 } from "tamagui";
 
-import { Button, Text, View, XStack, YStack } from "~/components/ui";
+import { Text, View, XStack, YStack } from "~/components/ui";
 
 const HEADER_HEIGHT = Platform.OS === "ios" ? 44 : 56;
-const SEGMENT_HEIGHT = 8;
-const SEGMENT_MAX_WIDTH = 280; // Maximum width for the progress bar
+const SEGMENT_HEIGHT = 6;
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 
@@ -25,8 +20,6 @@ interface ProgressSegmentProps {
 }
 
 function ProgressSegment({ isActive }: ProgressSegmentProps) {
-  const tokens = getTokens();
-
   const animatedStyle = useAnimatedStyle(() => {
     return {
       position: "absolute",
@@ -34,11 +27,11 @@ function ProgressSegment({ isActive }: ProgressSegmentProps) {
       bottom: 0,
       left: 0,
       width: withTiming(isActive ? "100%" : "0%", {
-        duration: 300,
+        duration: 400,
       }),
-      backgroundColor: tokens.color.primary.val,
+      backgroundColor: "#fff",
       borderRadius: SEGMENT_HEIGHT,
-      opacity: withTiming(isActive ? 1 : 0.5, { duration: 200 }),
+      opacity: withTiming(isActive ? 1 : 0, { duration: 300 }),
     };
   }, [isActive]);
 
@@ -46,11 +39,10 @@ function ProgressSegment({ isActive }: ProgressSegmentProps) {
     <View
       flex={1}
       height={SEGMENT_HEIGHT}
-      marginHorizontal="$0.5"
+      marginHorizontal="$1"
       overflow="hidden"
-      backgroundColor="$gray5"
+      backgroundColor="rgba(255,255,255,0.2)"
       borderRadius={SEGMENT_HEIGHT}
-      opacity={0.8}
     >
       <AnimatedView style={animatedStyle} />
     </View>
@@ -81,11 +73,11 @@ export function OnboardingProgress({
 
   return (
     <XStack
-      maxWidth={SEGMENT_MAX_WIDTH}
       width="100%"
-      gap="$1.5"
+      gap="$2"
       alignItems="center"
       justifyContent="center"
+      paddingHorizontal="$4"
     >
       {segments}
     </XStack>
@@ -115,13 +107,13 @@ export function OnboardingHeader({
   const content =
     HeaderTitle ??
     (title && (
-      <Text fontSize="$6" fontWeight="bold">
+      <Text fontSize="$6" fontWeight="bold" color="$white">
         {title}
       </Text>
     ));
 
   return (
-    <YStack paddingTop={insets.top} backgroundColor="$background">
+    <YStack paddingTop={insets.top}>
       <XStack
         height={HEADER_HEIGHT}
         paddingHorizontal="$4"
@@ -132,9 +124,9 @@ export function OnboardingHeader({
           {HeaderLeft}
         </View>
 
-        <View flex={2} alignItems="center" justifyContent="center">
+        <View flex={4} alignItems="center" justifyContent="center">
           {progress ? (
-            <View width="100%" paddingHorizontal="$2">
+            <View width="100%">
               <OnboardingProgress {...progress} />
             </View>
           ) : (

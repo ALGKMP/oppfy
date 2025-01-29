@@ -16,7 +16,7 @@ export default function OnboardingLayout() {
         headerRight: () => (
           <Button
             chromeless
-            icon={<Info size={20} color="$color" />}
+            icon={<Info size={20} color="#fff" />}
             onPress={handleInfo}
             scaleIcon={1}
           />

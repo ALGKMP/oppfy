@@ -12,6 +12,7 @@ import type {
   NativeStackNavigationEventMap,
   NativeStackNavigationOptions,
 } from "@react-navigation/native-stack";
+import { useTheme } from "tamagui";
 
 import { Icon } from "~/components/ui";
 import { OnboardingHeader } from "../OnboardingHeader";
@@ -29,6 +30,8 @@ const CustomNavigator = ({
   children,
   ...rest
 }: React.ComponentProps<typeof Navigator>) => {
+  const theme = useTheme();
+
   return (
     <Navigator
       {...rest}
@@ -42,7 +45,7 @@ const CustomNavigator = ({
               HeaderLeft={
                 options.headerLeft?.({
                   canGoBack: !!back,
-                  tintColor: options.headerTintColor,
+                  tintColor: "#fff",
                 }) ?? (
                   <DefaultHeaderLeft
                     navigation={navigation}
@@ -53,7 +56,7 @@ const CustomNavigator = ({
               HeaderRight={
                 options.headerRight?.({
                   canGoBack: !!back,
-                  tintColor: options.headerTintColor,
+                  tintColor: "#fff",
                 }) ?? <DefaultHeaderRight />
               }
               progress={(options as OnboardingStackOptions).progress}
@@ -61,6 +64,10 @@ const CustomNavigator = ({
           );
         },
         animation: "fade",
+        contentStyle: {
+          backgroundColor: theme.primary.val as string,
+        },
+        headerTintColor: "#fff",
         ...rest.screenOptions,
       }}
     >

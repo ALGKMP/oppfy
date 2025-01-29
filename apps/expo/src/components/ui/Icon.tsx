@@ -42,7 +42,7 @@ export const Icon = ({
       disabled={disabled}
     >
       {blurred ? (
-        <BlurView intensity={30} style={styles.blurView}>
+        <BlurView intensity={50} style={styles.blurView}>
           {iconElement}
         </BlurView>
       ) : (
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     padding: 8,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(64, 64, 64, 0.4)",
+    // backgroundColor: "rgba(64, 64, 64, 0.4)",
   },
 });
 
