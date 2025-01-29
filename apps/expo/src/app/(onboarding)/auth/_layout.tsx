@@ -1,22 +1,27 @@
-import { Stack } from "expo-router";
+import { Linking } from "react-native";
+import { Info } from "@tamagui/lucide-icons";
 
-import { View } from "~/components/ui";
-import { OnboardingHeader } from "~/components/ui/OnboardingHeader";
+import { OnboardingStack } from "~/components/Layouts/Navigation/OnboardingStack";
+import { Button } from "~/components/ui";
 
 export default function AuthLayout() {
-  return (
-    <View flex={1} backgroundColor="$background">
-      <OnboardingHeader title="Sign In" showBack={false} />
+  const handleInfo = () => {
+    void Linking.openURL("https://www.oppfy.app");
+  };
 
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          animation: "fade",
-          animationDuration: 200,
-          gestureEnabled: true,
-          gestureDirection: "horizontal",
-        }}
-      />
-    </View>
+  return (
+    <OnboardingStack
+      screenOptions={{
+        headerRight: () => (
+          <Button
+            chromeless
+            icon={<Info size={20} color="$color" />}
+            onPress={handleInfo}
+            scaleIcon={1}
+          />
+        ),
+        title: "Sign In",
+      }}
+    />
   );
 }

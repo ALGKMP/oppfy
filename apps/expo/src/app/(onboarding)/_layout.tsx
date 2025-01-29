@@ -1,51 +1,63 @@
 import React from "react";
-import { Stack } from "expo-router";
+import { Info } from "@tamagui/lucide-icons";
+
+import { OnboardingStack } from "~/components/Layouts/Navigation/OnboardingStack";
+import { Button } from "~/components/ui";
 
 export default function OnboardingLayout() {
+  const handleInfo = () => {
+    // TODO: Add info action
+  };
+
   return (
-    <Stack
+    <OnboardingStack
       screenOptions={{
-        headerShown: false,
-        animation: "fade",
-        animationDuration: 200,
+        headerRight: () => (
+          <Button
+            chromeless
+            icon={<Info size={20} color="$color" />}
+            onPress={handleInfo}
+            scaleIcon={1}
+          />
+        ),
       }}
     >
-      <Stack.Screen
+      <OnboardingStack.Screen
         name="index"
         options={{
-          animation: "fade",
+          headerShown: false,
         }}
       />
 
       {/* Main route groups */}
-      <Stack.Screen
+      <OnboardingStack.Screen
         name="auth"
         options={{
-          animation: "fade",
+          headerShown: false,
         }}
       />
 
-      <Stack.Screen
+      <OnboardingStack.Screen
         name="user-info"
         options={{
-          animation: "fade",
+          headerShown: false,
         }}
       />
 
-      <Stack.Screen
+      <OnboardingStack.Screen
         name="tutorial"
         options={{
-          animation: "fade",
+          headerShown: false,
         }}
       />
 
       {/* Misc screens like permissions that can be accessed from anywhere */}
-      <Stack.Screen
+      <OnboardingStack.Screen
         name="misc"
         options={{
-          animation: "fade",
+          headerShown: false,
         }}
       />
-    </Stack>
+    </OnboardingStack>
   );
 }

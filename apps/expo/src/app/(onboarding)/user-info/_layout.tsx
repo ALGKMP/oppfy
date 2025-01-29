@@ -1,10 +1,11 @@
 import { useMemo } from "react";
 import { Linking } from "react-native";
-import { Stack, usePathname, useRouter } from "expo-router";
-import { X } from "@tamagui/lucide-icons";
+import { usePathname, useRouter } from "expo-router";
+import { Info, X } from "@tamagui/lucide-icons";
 
-import { OnboardingHeader } from "~/components/Layouts";
-import { Button, Icon, useAlertDialogController, View } from "~/components/ui";
+import { OnboardingStack } from "~/components/Layouts/Navigation/OnboardingStack";
+import type { OnboardingStackOptions } from "~/components/Layouts/Navigation/OnboardingStack";
+import { Button, useAlertDialogController } from "~/components/ui";
 import { useAuth } from "~/hooks/useAuth";
 
 const ROUTES = ["name", "username", "date-of-birth", "profile-picture"];
@@ -19,21 +20,6 @@ export default function UserInfoLayout() {
   const currentRoute = pathname.split("/").pop();
   const currentIndex = ROUTES.indexOf(currentRoute ?? "");
 
-  const stepTitle = useMemo(() => {
-    switch (currentRoute) {
-      case "name":
-        return "Your Name";
-      case "username":
-        return "Choose Username";
-      case "date-of-birth":
-        return "Date of Birth";
-      case "profile-picture":
-        return "Profile Picture";
-      default:
-        return "";
-    }
-  }, [currentRoute]);
-
   const handleClose = async () => {
     const confirmed = await alertDialog.show({
       title: "Exit Onboarding",
@@ -44,7 +30,7 @@ export default function UserInfoLayout() {
     });
 
     if (confirmed) {
-      await signOut();
+      signOut();
     }
   };
 
@@ -53,36 +39,31 @@ export default function UserInfoLayout() {
   };
 
   return (
-    <View flex={1} backgroundColor="$background">
-      <OnboardingHeader
-        showBack={false}
-        customLeftButton={
-          <Button
-            chromeless
-            icon={<X size={24} />}
-            onPress={handleClose}
-            scaleIcon={1}
-            marginLeft="$-2"
-            opacity={0.7}
-          />
-        }
-        onInfoPress={handleInfo}
-        progress={{
-          currentStep: Math.max(0, currentIndex),
-          totalSteps: ROUTES.length,
-          showStepCount: true,
-        }}
-      />
-
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          animation: "fade",
-          animationDuration: 200,
-          gestureEnabled: true,
-          gestureDirection: "horizontal",
-        }}
-      />
-    </View>
+    <OnboardingStack
+      screenOptions={
+        {
+          headerLeft: () => (
+            <Button
+              chromeless
+              icon={<X size={20} color="$color" />}
+              onPress={handleClose}
+              scaleIcon={1}
+            />
+          ),
+          headerRight: () => (
+            <Button
+              chromeless
+              icon={<Info size={20} color="$color" />}
+              onPress={handleInfo}
+              scaleIcon={1}
+            />
+          ),
+          progress: {
+            currentStep: Math.max(0, currentIndex),
+            totalSteps: ROUTES.length,
+          },
+        } as OnboardingStackOptions
+      }
+    />
   );
 }

@@ -8,9 +8,9 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { ChevronLeft, Info } from "@tamagui/lucide-icons";
-import { getTokens } from "tamagui";
+import { getTokens, H2 } from "tamagui";
 
-import { Button, View, XStack, YStack } from "~/components/ui";
+import { Button, Text, View, XStack, YStack } from "~/components/ui";
 
 const HEADER_HEIGHT = Platform.OS === "ios" ? 44 : 56;
 const SEGMENT_HEIGHT = 4;
@@ -33,7 +33,7 @@ function ProgressSegment({ isActive }: ProgressSegmentProps) {
       bottom: 0,
       left: 0,
       width: withTiming(isActive ? "100%" : "0%", {
-        duration: 600,
+        duration: 100,
       }),
       backgroundColor: tokens.color.primary.val,
       borderRadius: SEGMENT_HEIGHT / 2,
@@ -91,6 +91,7 @@ interface OnboardingHeaderProps {
     currentStep: number;
     totalSteps: number;
   };
+  title?: string;
 }
 
 export function OnboardingHeader({
@@ -98,17 +99,13 @@ export function OnboardingHeader({
   customLeftButton,
   onInfoPress,
   progress,
+  title,
 }: OnboardingHeaderProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
   return (
-    <YStack
-      paddingTop={insets.top}
-      backgroundColor="$background"
-      borderBottomWidth={1}
-      borderBottomColor="$gray6"
-    >
+    <YStack paddingTop={insets.top} backgroundColor="$background">
       <XStack
         height={HEADER_HEIGHT}
         paddingHorizontal="$4"
@@ -128,7 +125,13 @@ export function OnboardingHeader({
             ))}
         </XStack>
 
-        {progress && <OnboardingProgress {...progress} />}
+        {progress ? (
+          <OnboardingProgress {...progress} />
+        ) : title ? (
+          <Text fontSize="$7" fontWeight="bold">
+            {title}
+          </Text>
+        ) : null}
 
         <XStack width="$5" justifyContent="flex-end">
           {onInfoPress && (
