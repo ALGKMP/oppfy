@@ -13,8 +13,10 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { SplashScreen, useRouter } from "expo-router";
 import Splash from "@assets/splash.png";
+import { getToken } from "tamagui";
 
-import { H2, OnboardingButton, ScreenView, View } from "~/components/ui";
+import { H2, ScreenView, View } from "~/components/ui";
+import { OnboardingButton } from "~/components/ui/Onboarding";
 import { usePermissions } from "~/contexts/PermissionsContext";
 
 const { width, height } = Dimensions.get("window");
@@ -232,14 +234,15 @@ const Start = () => {
         style={[
           {
             position: "absolute",
-            bottom: 0,
             left: 0,
             right: 0,
+            bottom: getToken("$4", "space") as number,
+            paddingHorizontal: getToken("$6", "space") as number,
           },
           animatedButtonStyle,
         ]}
       >
-        <OnboardingButton onPress={onSubmit}>Welcome</OnboardingButton>
+        <OnboardingButton onPress={onSubmit} isValid={true} text="Welcome" />
       </Animated.View>
     </ScreenView>
   );

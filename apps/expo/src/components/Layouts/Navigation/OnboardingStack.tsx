@@ -86,7 +86,13 @@ const DefaultHeaderLeft = ({
   if (!canGoBack) return null;
 
   return (
-    <Icon name="chevron-back" onPress={() => navigation.goBack()} blurred />
+    <Icon
+      name="chevron-back"
+      onPress={() => navigation.goBack()}
+      iconStyle={{
+        opacity: 0.7,
+      }}
+    />
   );
 };
 
@@ -95,7 +101,9 @@ const DefaultHeaderRight = () => {
     <Icon
       name="help-circle"
       onPress={() => Linking.openURL("https://oppfy.app")}
-      blurred
+      iconStyle={{
+        opacity: 0.7,
+      }}
     />
   );
 };

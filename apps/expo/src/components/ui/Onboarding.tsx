@@ -545,7 +545,7 @@ export function OnboardingPhoneInput({
       );
     }
     setLastValidState(isValidPhoneNumber);
-  }, [isValidPhoneNumber]);
+  }, [inputScale, isValidPhoneNumber, lastValidState]);
 
   const onCountrySelect = (selectedCountry: CountryData) => {
     onCountryChange(selectedCountry);
@@ -576,7 +576,7 @@ export function OnboardingPhoneInput({
         }
       }
     },
-    [value, onChangeText],
+    [value, onChangeText, inputScale],
   );
 
   const handlePress = React.useCallback(() => {
@@ -771,6 +771,7 @@ export function OnboardingPhoneInput({
                 padding={16}
                 backgroundColor="transparent"
                 selectionColor="white"
+                pointerEvents="none"
               />
             </View>
           </TouchableOpacity>
@@ -855,6 +856,7 @@ export function OnboardingOTPInput({
             entering={FadeIn.delay(400)}
             width="100%"
             justifyContent="space-between"
+            pointerEvents="none"
             gap="$2"
           >
             {[0, 1, 2, 3, 4, 5].map((index) => (
