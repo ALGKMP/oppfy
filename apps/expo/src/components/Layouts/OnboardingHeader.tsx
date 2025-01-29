@@ -13,7 +13,8 @@ import { getTokens, H2 } from "tamagui";
 import { Button, Text, View, XStack, YStack } from "~/components/ui";
 
 const HEADER_HEIGHT = Platform.OS === "ios" ? 44 : 56;
-const SEGMENT_HEIGHT = 4;
+const SEGMENT_HEIGHT = 8;
+const SEGMENT_MAX_WIDTH = 280; // Maximum width for the progress bar
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 
@@ -33,10 +34,11 @@ function ProgressSegment({ isActive }: ProgressSegmentProps) {
       bottom: 0,
       left: 0,
       width: withTiming(isActive ? "100%" : "0%", {
-        duration: 100,
+        duration: 300,
       }),
       backgroundColor: tokens.color.primary.val,
-      borderRadius: SEGMENT_HEIGHT / 2,
+      borderRadius: SEGMENT_HEIGHT,
+      opacity: withTiming(isActive ? 1 : 0.5, { duration: 200 }),
     };
   }, [isActive]);
 
@@ -44,10 +46,11 @@ function ProgressSegment({ isActive }: ProgressSegmentProps) {
     <View
       flex={1}
       height={SEGMENT_HEIGHT}
-      marginHorizontal="$1"
+      marginHorizontal="$0.5"
       overflow="hidden"
-      backgroundColor="$gray6"
-      borderRadius={SEGMENT_HEIGHT / 2}
+      backgroundColor="$gray5"
+      borderRadius={SEGMENT_HEIGHT}
+      opacity={0.8}
     >
       <AnimatedView style={animatedStyle} />
     </View>
@@ -77,7 +80,13 @@ export function OnboardingProgress({
   );
 
   return (
-    <XStack width="100%" paddingHorizontal="$4" gap="$1" alignItems="center">
+    <XStack
+      maxWidth={SEGMENT_MAX_WIDTH}
+      width="100%"
+      gap="$1.5"
+      alignItems="center"
+      justifyContent="center"
+    >
       {segments}
     </XStack>
   );
