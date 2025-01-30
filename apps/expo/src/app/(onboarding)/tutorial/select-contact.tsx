@@ -66,21 +66,26 @@ const SelectContact = () => {
     (contact: Contact) => {
       if (!contact.phoneNumbers?.[0]?.number) return;
 
-      const formattedPhoneNumber = parsePhoneNumberWithError(
-        contact.phoneNumbers[0].number,
-      ).format("E.164");
+      try {
+        const formattedPhoneNumber = parsePhoneNumberWithError(
+          contact.phoneNumbers[0].number,
+        ).format("E.164");
 
-      router.push({
-        pathname: "/tutorial/album-picker",
-        params: {
-          name: contact.name,
-          number: formattedPhoneNumber,
-          recipientName: contact.name,
-          recipientImage: contact.imageAvailable
-            ? contact.image?.uri
-            : undefined,
-        },
-      });
+        router.push({
+          pathname: "/tutorial/album-picker",
+          params: {
+            name: encodeURIComponent(contact.name),
+            number: encodeURIComponent(formattedPhoneNumber),
+            recipientName: encodeURIComponent(contact.name),
+            recipientImage:
+              contact.imageAvailable && contact.image?.uri
+                ? encodeURIComponent(contact.image.uri)
+                : undefined,
+          },
+        });
+      } catch (error) {
+        console.error("Error formatting phone number:", error);
+      }
     },
     [router],
   );

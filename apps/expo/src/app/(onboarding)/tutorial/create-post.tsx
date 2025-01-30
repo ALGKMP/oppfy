@@ -18,7 +18,7 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { ChevronRight, ScrollText } from "@tamagui/lucide-icons";
-import { getToken, useTheme } from "tamagui";
+import { getToken, getTokens, useTheme } from "tamagui";
 
 import PlayPause, {
   usePlayPauseAnimations,
@@ -279,11 +279,11 @@ const CreatePost = () => {
             <Avatar
               size={28}
               source={recipientImage ?? DefaultProfilePicture}
-              bordered
+              style={{ borderWidth: 1, borderColor: theme.color.val }}
             />
-            <Text color="$gray11">
+            <Text>
               Posting to{" "}
-              <Text fontWeight="bold" color="$primary">
+              <Text fontWeight="bold">
                 {params.userType === "onApp" ? "@" : ""}
                 {displayName}
               </Text>
@@ -291,22 +291,18 @@ const CreatePost = () => {
           </XStack>
         </YStack>
 
-        <CardContainer padding="$4" paddingBottom="$5">
+        <CardContainer padding="$4" paddingBottom="$5" backgroundColor="white">
           <YStack gap="$3">
-            <HeaderTitle>Post Details</HeaderTitle>
+            <HeaderTitle color="$primary">Post Details</HeaderTitle>
             <XStack
               justifyContent="space-between"
               alignItems="center"
               onPress={openCaptionSheet}
             >
               <XStack flex={1} alignItems="center" gap="$3" mr="$4">
-                <Ionicons
-                  name="chatbubble-outline"
-                  size={24}
-                  color={theme.gray10.val}
-                />
+                <Ionicons name="chatbubble-outline" size={24} />
                 <View flex={1}>
-                  <Text fontSize="$5" fontWeight="500">
+                  <Text fontSize="$5" fontWeight="500" color="$color1">
                     {caption || "Add caption"}
                   </Text>
                 </View>
