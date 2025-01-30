@@ -277,6 +277,7 @@ interface OnboardingButtonProps {
   isLoading?: boolean;
   text?: string;
   isValid?: boolean;
+  hideIcon?: boolean;
 }
 
 export function OnboardingButton({
@@ -287,6 +288,7 @@ export function OnboardingButton({
   isLoading = false,
   text = "Continue",
   isValid = true,
+  hideIcon = false,
 }: OnboardingButtonProps) {
   const tokens = getTokens();
   const buttonScale = useSharedValue(1);
@@ -332,10 +334,12 @@ export function OnboardingButton({
               >
                 {text}
               </Text>
-              <ChevronRight
-                size={20}
-                color={isValid ? tokens.color.primary.val : "white"}
-              />
+              {!hideIcon && (
+                <ChevronRight
+                  size={20}
+                  color={isValid ? tokens.color.primary.val : "white"}
+                />
+              )}
             </XStack>
           )}
         </Button>

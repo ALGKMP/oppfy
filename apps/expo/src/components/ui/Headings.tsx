@@ -41,7 +41,7 @@ export const H6 = styled(TamaguiH6, {});
 
 export const HeaderTitle = ({
   children,
-  color,
+  color = "$primary",
   icon,
   iconAfter,
   iconSize = 14,
