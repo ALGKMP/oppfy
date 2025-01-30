@@ -2,13 +2,16 @@ import { parser } from "@aws-lambda-powertools/parser/middleware";
 import { S3Schema } from "@aws-lambda-powertools/parser/schemas";
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   HeadObjectCommand,
+  PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
 import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
 import middy from "@middy/core";
 import { createEnv } from "@t3-oss/env-core";
 import type { Context } from "aws-lambda";
+import Sharp from "sharp";
 import { z } from "zod";
 
 import { db, eq, schema, sql } from "@oppfy/db";
@@ -51,6 +54,71 @@ const deleteS3Object = async (bucket: string, key: string) => {
   await s3.send(command);
 };
 
+const processImage = async (bucket: string, key: string) => {
+  try {
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    });
+
+    const { Body } = await s3.send(command);
+    if (!Body) throw new Error("No image data");
+
+    const imageBuffer = await Body.transformToByteArray();
+    const image = Sharp(imageBuffer);
+    const metadata = await image.metadata();
+
+    if (!metadata.width || !metadata.height) {
+      throw new Error("Could not get image dimensions");
+    }
+
+    let resizedImage;
+    if (metadata.width > metadata.height) {
+      // Landscape orientation
+      if (metadata.width > 1920) {
+        resizedImage = await image
+          .resize(1920, null, {
+            withoutEnlargement: true,
+          })
+          .toBuffer();
+      }
+    } else {
+      // Portrait orientation
+      if (metadata.height > 1920) {
+        resizedImage = await image
+          .resize(null, 1920, {
+            withoutEnlargement: true,
+          })
+          .toBuffer();
+      }
+    }
+
+    if (resizedImage) {
+      // Upload the resized image back to S3
+      const putCommand = new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        Body: resizedImage,
+        ContentType: "image/jpeg",
+        Metadata: (await s3.send(command)).Metadata,
+      });
+      await s3.send(putCommand);
+    }
+
+    const finalMetadata = resizedImage
+      ? await Sharp(resizedImage).metadata()
+      : metadata;
+
+    return {
+      width: finalMetadata.width,
+      height: finalMetadata.height,
+    };
+  } catch (error) {
+    console.error("Error processing image:", error);
+    throw error;
+  }
+};
+
 const lambdaHandler = async (
   event: S3ObjectLambdaEvent,
   _context: Context,
@@ -84,6 +152,8 @@ const lambdaHandler = async (
     console.log("metadata", metadata);
     console.log("metadata.postid", metadata.postid);
     try {
+      const { width, height } = await processImage(objectBucket, key);
+
       const { insertId: postId } = await db.transaction(async (tx) => {
         const [post] = await tx
           .insert(schema.post)
@@ -93,8 +163,8 @@ const lambdaHandler = async (
             recipientId: metadata.recipient,
             key: key,
             mediaType: "image" as const,
-            height: parseInt(metadata.height),
-            width: parseInt(metadata.width),
+            height: height,
+            width: width,
             caption: metadata.caption,
           })
           .returning({ insertId: schema.post.id });
@@ -102,7 +172,7 @@ const lambdaHandler = async (
         if (post === undefined) {
           throw new Error("Failed to insert post");
         }
-/* 
+        /* 
         // force friendship between author and recipient if recipient is not on app
         if (metadata.type === "notOnApp") {
           await tx.insert(schema.friend).values({
