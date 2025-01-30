@@ -23,7 +23,9 @@ const Other = () => {
   const {
     syncContacts: handleSyncContacts,
     deleteContacts: handleDeleteContacts,
+    getDeviceContactsNotOnApp
   } = useContacts();
+
   const actionSheet = useActionSheetController();
   const utils = api.useUtils();
 
@@ -126,6 +128,12 @@ const Other = () => {
             iconAfter={<ChevronRight />}
             onPress={handleShowDeleteContacts}
           />
+          <SettingsGroup.Item
+            title="Test button"
+            onPress={async () => {
+              await getDeviceContactsNotOnApp();
+            }}
+          ></SettingsGroup.Item>
         </SettingsGroup>
 
         <Button variant="danger" onPress={handleShowDeleteAccount}>

@@ -9,6 +9,7 @@ import {
   UserRepository,
 } from "../../repositories";
 import { CloudFrontService } from "../aws/cloudfront";
+import { SQSService } from "../aws/sqs";
 
 type RelationshipStatus = "notFollowing" | "following" | "requested";
 
@@ -18,6 +19,7 @@ export class ContactService {
   private profileRepository = new ProfileRepository();
 
   private cloudFrontService = new CloudFrontService();
+  private sqsService = new SQSService();
 
   async syncContacts(userId: string, contacts: string[]) {
     const user = await this.userRepository.getUser(userId);
@@ -44,21 +46,11 @@ export class ContactService {
 
     console.log("sending sqs message to contact sync queue");
 
-    try {
-      await sqs.send({
-        id: userId + "_contactsync_" + Date.now().toString(),
-        body: JSON.stringify({
-          userId,
-          userPhoneNumberHash,
-          contacts: filteredContacts,
-        }),
-      });
-    } catch (error) {
-      throw new DomainError(
-        ErrorCode.AWS_ERROR,
-        "Failed to send sqs message to contact sync queue",
-      );
-    }
+    await this.sqsService.sendContactSyncMessage({
+      userId,
+      userPhoneNumberHash,
+      contacts: filteredContacts,
+    });
   }
 
   async deleteContacts(userId: string) {
@@ -77,21 +69,11 @@ export class ContactService {
 
     await this.contactsRepository.deleteContacts(userId);
 
-    try {
-      await sqs.send({
-        id: userId + "_contactsync_" + Date.now().toString(),
-        body: JSON.stringify({
-          userId,
-          userPhoneNumberHash,
-          contacts: [],
-        }),
-      });
-    } catch (error) {
-      throw new DomainError(
-        ErrorCode.AWS_ERROR,
-        "Failed to send sqs message to contact sync queue",
-      );
-    }
+    await this.sqsService.sendContactSyncMessage({
+      userId,
+      userPhoneNumberHash,
+      contacts: [],
+    });
   }
 
   async filterPhoneNumbersOnApp(phoneNumbers: string[]) {

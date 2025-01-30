@@ -154,6 +154,8 @@ const useContacts = (syncNow = false): ContactFns => {
       ],
     });
 
+    console.log(data);
+
     const phoneNumbers = contactsToE164Numbers(data);
 
     const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({

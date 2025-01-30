@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { createHash } from "crypto";
 
 import { DomainError, ErrorCode } from "../../errors";
 import {
@@ -12,6 +12,7 @@ import {
   SearchRepository,
   UserRepository,
 } from "../../repositories";
+import { SQSService } from "../aws/sqs";
 
 //TODO: move to validators
 export type InferEnum<T extends { enumValues: string[] }> =
@@ -27,6 +28,8 @@ export class UserService {
   private contactsRepository = new ContactsRepository();
   private profileStatsRepository = new ProfileStatsRepository();
   private postStatsRepository = new PostStatsRepository();
+
+  private sqsService = new SQSService();
 
   async createUserWithUsername(
     userId: string,
@@ -119,6 +122,16 @@ export class UserService {
     await this.searchRepository.deleteProfile(userId);
     await this.userRepository.deleteUser(userId);
     await this.contactsRepository.deleteContacts(userId);
+
+    const userPhoneNumberHash = createHash("sha512")
+      .update(user.phoneNumber)
+      .digest("hex");
+
+    await this.sqsService.sendContactSyncMessage({
+      userId,
+      userPhoneNumberHash,
+      contacts: [],
+    });
   }
 
   // async checkOnboardingComplete(userId: string | undefined) {
