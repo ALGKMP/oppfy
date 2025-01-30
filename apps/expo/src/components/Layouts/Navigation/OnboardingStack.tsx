@@ -1,4 +1,5 @@
 import React from "react";
+import { Linking } from "react-native";
 import { withLayoutContext } from "expo-router";
 import { getHeaderTitle } from "@react-navigation/elements";
 import type {
@@ -11,17 +12,26 @@ import type {
   NativeStackNavigationEventMap,
   NativeStackNavigationOptions,
 } from "@react-navigation/native-stack";
-import { Text } from "tamagui";
+import { useTheme } from "tamagui";
 
 import { Icon } from "~/components/ui";
-import { Header } from "../Header";
+import { OnboardingHeader } from "../OnboardingHeader";
 
 const { Navigator } = createNativeStackNavigator();
+
+export interface OnboardingStackOptions extends NativeStackNavigationOptions {
+  progress?: {
+    currentStep: number;
+    totalSteps: number;
+  };
+}
 
 const CustomNavigator = ({
   children,
   ...rest
 }: React.ComponentProps<typeof Navigator>) => {
+  const theme = useTheme();
+
   return (
     <Navigator
       {...rest}
@@ -30,14 +40,12 @@ const CustomNavigator = ({
           const title = getHeaderTitle(options, route.name);
 
           return (
-            <Header
-              backgroundColor={
-                options.headerTransparent ? "transparent" : undefined
-              }
+            <OnboardingHeader
+              title={title}
               HeaderLeft={
                 options.headerLeft?.({
                   canGoBack: !!back,
-                  tintColor: options.headerTintColor,
+                  tintColor: "#fff",
                 }) ?? (
                   <DefaultHeaderLeft
                     navigation={navigation}
@@ -45,25 +53,21 @@ const CustomNavigator = ({
                   />
                 )
               }
-              HeaderTitle={
-                typeof options.headerTitle === "function" ? (
-                  options.headerTitle({
-                    children: title,
-                    tintColor: options.headerTintColor,
-                  })
-                ) : (
-                  <Text fontSize="$5" fontWeight="bold">
-                    {title}
-                  </Text>
-                )
+              HeaderRight={
+                options.headerRight?.({
+                  canGoBack: !!back,
+                  tintColor: "#fff",
+                }) ?? <DefaultHeaderRight />
               }
-              HeaderRight={options.headerRight?.({
-                canGoBack: !!back,
-                tintColor: options.headerTintColor,
-              })}
+              progress={(options as OnboardingStackOptions).progress}
             />
           );
         },
+        animation: "fade",
+        contentStyle: {
+          backgroundColor: theme.primary.val as string,
+        },
+        headerTintColor: "#fff",
         ...rest.screenOptions,
       }}
     >
@@ -82,12 +86,30 @@ const DefaultHeaderLeft = ({
   if (!canGoBack) return null;
 
   return (
-    <Icon name="chevron-back" onPress={() => navigation.goBack()} blurred />
+    <Icon
+      name="chevron-back"
+      onPress={() => navigation.goBack()}
+      iconStyle={{
+        opacity: 0.7,
+      }}
+    />
   );
 };
 
-export const Stack = withLayoutContext<
-  NativeStackNavigationOptions,
+const DefaultHeaderRight = () => {
+  return (
+    <Icon
+      name="help-circle"
+      onPress={() => Linking.openURL("https://oppfy.app")}
+      iconStyle={{
+        opacity: 0.7,
+      }}
+    />
+  );
+};
+
+export const OnboardingStack = withLayoutContext<
+  OnboardingStackOptions,
   typeof Navigator,
   StackNavigationState<ParamListBase>,
   NativeStackNavigationEventMap

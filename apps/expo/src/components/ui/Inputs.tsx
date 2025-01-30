@@ -10,6 +10,8 @@ import {
 } from "tamagui";
 import type { InputProps } from "tamagui";
 
+import { Icon } from "./Icon";
+
 export const Input = styled(TamaguiInput, {});
 export const TextArea = styled(TamaguiTextArea, {});
 
@@ -79,7 +81,7 @@ export const SearchInput = (props: SearchInputProps) => {
       paddingHorizontal="$2.5"
       backgroundColor="$gray2"
     >
-      <Ionicons name="search" color={theme.gray7.val} size={24} />
+      <Icon name="search" color={theme.gray8.val} />
       <Input
         flex={1}
         borderWidth={0}
@@ -95,7 +97,7 @@ export const SearchInput = (props: SearchInputProps) => {
         }}
       >
         <TouchableOpacity onPress={props.onClear}>
-          <Ionicons name="close-circle" color={theme.gray7.val} size={24} />
+          <Ionicons name="close-circle" color={theme.gray8.val} size={24} />
         </TouchableOpacity>
       </Animated.View>
     </XStack>

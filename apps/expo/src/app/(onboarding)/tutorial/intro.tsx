@@ -1,194 +1,219 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Dimensions } from "react-native";
+import Animated, { SlideInUp } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
+import { getToken } from "tamagui";
 
-import {
-  H1,
-  Icon,
-  OnboardingButton,
-  ScreenView,
-  Text,
-  useAlertDialogController,
-  View,
-  XStack,
-  YStack,
-} from "~/components/ui";
-import { useAuth } from "~/hooks/useAuth";
+import { Text, YStack } from "~/components/ui";
+import type { MessageProps } from "~/components/ui/Messages/Message";
+import { MessageList } from "~/components/ui/Messages/MessageList";
+import { OnboardingButton, OnboardingScreen } from "~/components/ui/Onboarding";
+import useContacts from "~/hooks/contacts/useContacts";
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
-const PREVIEW_WIDTH = SCREEN_WIDTH - 64;
-const GIF_WIDTH = PREVIEW_WIDTH * 0.8; // Make GIF smaller than full width
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-const STEPS = [
-  {
-    icon: "👥",
-    title: "Choose a Friend",
-    description: "Select someone to share your first moment with",
-  },
-  {
-    icon: "📸",
-    title: "Pick a Photo",
-    description: "Capture a moment or choose from your gallery",
-  },
-  {
-    icon: "💭",
-    title: "Add a Caption",
-    description: "Write something fun to share with your friend",
-  },
-];
+const AnimatedImage = Animated.createAnimatedComponent(Image);
 
-const WELCOME_GIFS = [
-  // TODO: Make our own Oppfy welcome gif
-  "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGI2ajZvdm9ycTkxYXh3djhsbGM3bm1rcXlyeXR1YXc0bjFua2dycCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/FQyQEYd0KlYQ/giphy.gif", // Welcome Aboard
-  "https://media.giphy.com/media/XD9o33QG9BoMis7iM4/giphy.gif", // B 99
-  "https://media.giphy.com/media/l4JyOCNEfXvVYEqB2/giphy.gif", // Welcome To the Club
-  "https://media.giphy.com/media/BPJmthQ3YRwD6QqcVD/giphy.gif", // welcome hand drawn
-];
+const MESSAGES = (contactName: string, contactImage?: string) =>
+  [
+    {
+      id: 1,
+      type: "system",
+      text: "🚨 VIOLATION ALERT 🚨",
+      animation: {
+        isSpecial: true,
+        delay: 500,
+        duration: 800,
+        hapticFeedback: "heavy",
+      },
+    },
+    {
+      id: 2,
+      type: "you",
+      text: "YO CHECK THIS OUT 💀",
+      animation: {
+        isShook: true,
+        delay: 400,
+        duration: 600,
+        hapticFeedback: "medium",
+      },
+    },
+    {
+      id: 3,
+      type: "friend",
+      text: "what did u do... 😭",
+      animation: {
+        delay: 500,
+        duration: 600,
+        hapticFeedback: "light",
+      },
+    },
+    {
+      id: 4,
+      type: "you",
+      text: "made u an oppfy profile with THAT video 😈",
+      animation: {
+        isShook: true,
+        delay: 400,
+        duration: 700,
+        hapticFeedback: "medium",
+      },
+    },
+    {
+      id: 5,
+      type: "preview",
+      text: `${contactName}'s first post\nOpped by @you 🫣`,
+      author: {
+        name: contactName,
+        avatar: contactImage,
+      },
+      media: {
+        type: "gif",
+        url: "https://media1.tenor.com/m/Wqa8eM7Hcd8AAAAC/fall-trip-and-fall.gif",
+        aspectRatio: 0.7,
+      },
+      animation: {
+        isSpecial: true,
+        delay: 800,
+        duration: 1500,
+        hapticFeedback: "heavy",
+      },
+    },
+    {
+      id: 6,
+      type: "friend",
+      text: "NAHHHH WTFFFFF 💀💀💀",
+      animation: {
+        isAngry: true,
+        delay: 500,
+        duration: 800,
+        hapticFeedback: "heavy",
+      },
+    },
+    {
+      id: 7,
+      type: "friend",
+      text: "DELETE THIS RN OR UR DEAD FR",
+      animation: {
+        isAngry: true,
+        delay: 300,
+        duration: 600,
+        hapticFeedback: "heavy",
+      },
+    },
+    {
+      id: 8,
+      type: "you",
+      text: "nope everyone needs to see this 😂",
+      animation: {
+        isShook: true,
+        delay: 500,
+        duration: 800,
+        hapticFeedback: "medium",
+      },
+    },
+  ] satisfies MessageProps[];
 
-const Intro = () => {
-  const router = useRouter();
-  const navigation = useNavigation();
-  const alertDialog = useAlertDialogController();
-  const { signOut } = useAuth();
-  const [currentStep, setCurrentStep] = useState(1);
+interface ChatExperienceProps {
+  onComplete: () => void;
+}
 
-  // Select a random welcome GIF on component mount
-  const welcomeGif = useMemo(() => {
-    const randomIndex = Math.floor(Math.random() * WELCOME_GIFS.length);
-    return WELCOME_GIFS[randomIndex];
-  }, []);
+const ChatExperience = ({ onComplete }: ChatExperienceProps) => {
+  // const { getDeviceContactsNotOnApp } = useContacts();
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (
-        <Icon
-          name="close"
-          onPress={async () => {
-            const confirmed = await alertDialog.show({
-              title: "Exit Tutorial",
-              subtitle:
-                "Are you sure you want to quit? You're about to create your first post!",
-              acceptText: "Exit",
-              cancelText: "Stay",
-            });
+  // const [story, setStory] = useState<MessageProps[]>(MESSAGES("Friend"));
 
-            if (confirmed) {
-              signOut();
-            }
-          }}
-          blurred
-        />
-      ),
-    });
-  }, [navigation, signOut, alertDialog]);
+  // useEffect(() => {
+  //   const initializeStory = async () => {
+  //     const contacts = await getDeviceContactsNotOnApp();
+  //     const bestContact = contacts.find((c) => c.imageAvailable) ?? contacts[0];
 
-  const handleNext = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  //     if (bestContact === undefined) {
+  //       setStory(MESSAGES("Friend"));
+  //       return;
+  //     }
 
-    if (currentStep < STEPS.length) {
-      setCurrentStep((prev) => prev + 1);
-    } else {
-      router.push("/tutorial/select-contact");
-    }
-  };
+  //     setStory(MESSAGES(bestContact.name, bestContact.image?.uri));
+  //   };
 
-  const isLastStep = currentStep === STEPS.length;
+  //   void initializeStory();
+  //   // eslint-disable-next-line react-compiler/react-compiler
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
+
+  // if (!story.length) return null;
 
   return (
-    <ScreenView padding="$0" justifyContent="space-between">
-      <YStack flex={1} paddingHorizontal="$4" gap="$4" paddingTop="$6">
-        <YStack gap="$2" animation="quick" enterStyle={{ opacity: 0, y: -20 }}>
-          <H1 textAlign="center" color="$color">
-            Let's Create Your{"\n"}First Post!
-          </H1>
-        </YStack>
-
-        {/* Welcome GIF */}
-        <View
-          backgroundColor="$backgroundTransparent"
-          borderRadius="$6"
-          overflow="hidden"
-          animation="quick"
-          enterStyle={{
-            opacity: 0,
-            scale: 0.9,
-          }}
-          alignSelf="center"
-        >
-          <Image
-            source={{ uri: welcomeGif }}
-            style={{
-              width: GIF_WIDTH,
-              height: GIF_WIDTH * 0.6, // Make height proportionally smaller
-              borderRadius: 16,
-            }}
-            contentFit="cover"
-            transition={200}
-          />
-        </View>
-
-        {/* Steps List */}
-        <YStack gap="$3" minHeight={240}>
-          {STEPS.map(
-            (step, index) =>
-              index < currentStep && (
-                <XStack
-                  key={step.title}
-                  backgroundColor="$gray3"
-                  borderWidth={1}
-                  borderColor="$borderColor"
-                  padding="$2"
-                  borderRadius="$6"
-                  gap="$4"
-                  alignItems="center"
-                  animation="quick"
-                  enterStyle={{
-                    opacity: 0,
-                    scale: 0.9,
-                    y: 10,
-                  }}
-                >
-                  <View padding="$3" borderRadius="$4" opacity={0.9}>
-                    <Text fontSize={50}>{step.icon}</Text>
-                  </View>
-                  <YStack flex={1}>
-                    <Text fontWeight="bold" fontSize="$8" color="$color">
-                      {step.title}
-                    </Text>
-                    <Text color="$gray11" fontSize="$5">
-                      {step.description}
-                    </Text>
-                  </YStack>
-                </XStack>
-              ),
-          )}
-        </YStack>
-      </YStack>
-
-      {/* Bottom Button */}
-      <YStack
-        paddingBottom="$6"
-        backgroundColor="$backgroundTransparent"
-        borderTopWidth={1}
-        borderTopColor="$borderColor"
-      >
-        <OnboardingButton
-          onPress={handleNext}
-          animation="quick"
-          enterStyle={{
-            opacity: 0,
-            scale: 0.9,
-            y: 20,
-          }}
-        >
-          {isLastStep ? "Let's Start" : "Next"}
-        </OnboardingButton>
-      </YStack>
-    </ScreenView>
+    <MessageList
+      messages={MESSAGES("Friend")}
+      onAnimationComplete={onComplete}
+      autoScroll={true}
+      scrollEnabled={false}
+    />
   );
+};
+
+const WelcomeScreen = () => {
+  const router = useRouter();
+
+  const handleStart = () => {
+    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    router.push("/tutorial/select-contact");
+  };
+
+  return (
+    <OnboardingScreen
+      title="Your Friends Won't See This Coming 🤫"
+      subtitle="It's about to get real interesting"
+      footer={
+        <OnboardingButton
+          onPress={handleStart}
+          text="Time to Choose Violence 😈"
+        />
+      }
+    >
+      <YStack
+        alignItems="center"
+        justifyContent="center"
+        paddingHorizontal="$4"
+        gap="$6"
+      >
+        <AnimatedImage
+          entering={SlideInUp.delay(400)}
+          source={{
+            uri: "https://media.tenor.com/dB5dAKM1B4sAAAAM/bad-evil-laugh.gif",
+          }}
+          style={{
+            width: "100%",
+            aspectRatio: 1.5,
+            borderRadius: getToken("$8", "radius") as number,
+          }}
+        />
+        <Animated.View entering={SlideInUp.delay(400)}>
+          <Text
+            color="white"
+            fontSize="$7"
+            textAlign="center"
+            fontWeight="bold"
+          >
+            Share their most questionable moments
+          </Text>
+        </Animated.View>
+      </YStack>
+    </OnboardingScreen>
+  );
+};
+
+const Intro = () => {
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  if (showWelcome) {
+    return <WelcomeScreen />;
+  }
+
+  return <ChatExperience onComplete={() => setShowWelcome(true)} />;
 };
 
 export default Intro;

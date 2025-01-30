@@ -10,7 +10,7 @@ import type {
   StackNavigationState,
 } from "@react-navigation/native";
 
-import TopTabBar from "../TopTabBar";
+import { TopTabBar } from "../TopTabBar";
 
 const { Navigator } = createMaterialTopTabNavigator();
 
@@ -31,11 +31,9 @@ const CustomNavigator = ({
   );
 };
 
-const TopTabs = withLayoutContext<
+export const TopTabs = withLayoutContext<
   MaterialTopTabNavigationOptions,
   typeof Navigator,
   StackNavigationState<ParamListBase>,
   MaterialTopTabNavigationEventMap
 >(CustomNavigator);
-
-export { TopTabs };

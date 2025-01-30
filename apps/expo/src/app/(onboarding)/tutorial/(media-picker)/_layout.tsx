@@ -18,7 +18,12 @@ const MediaPickerLayout = () => (
         title: "Albums",
       }}
     />
-    <Stack.Screen name="media-picker" />
+    <Stack.Screen
+      name="media-picker"
+      options={{
+        title: "Media",
+      }}
+    />
   </Stack>
 );
 

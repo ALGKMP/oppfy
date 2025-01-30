@@ -10,6 +10,7 @@ import { Spinner } from "~/components/ui/Spinner";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 
+type Icon = React.FC<IconProps>;
 type NetworkRelationships = RouterOutputs["profile"]["getNetworkRelationships"];
 
 interface ActionButtonProps {
@@ -18,12 +19,10 @@ interface ActionButtonProps {
   networkRelationships?: NetworkRelationships;
 }
 
-type IconComponent = React.FC<IconProps>;
-
 interface ButtonConfig {
   label: string;
   action: string;
-  icon: IconComponent;
+  icon: Icon;
   iconSize?: number;
   isPrimary?: boolean;
 }

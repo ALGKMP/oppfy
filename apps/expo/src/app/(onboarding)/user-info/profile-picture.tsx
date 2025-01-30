@@ -1,115 +1,103 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { TouchableOpacity } from "react-native";
+import React, { useState } from "react";
 import * as Haptics from "expo-haptics";
-import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
-import Feather from "@expo/vector-icons/Feather";
-import { Paragraph, useTheme } from "tamagui";
 
 import {
-  H2,
   OnboardingButton,
-  ScreenView,
-  Spinner,
-  View,
-  YStack,
-} from "~/components/ui";
+  OnboardingProfilePicture,
+  OnboardingScreen,
+} from "~/components/ui/Onboarding";
 import { useUploadProfilePicture } from "~/hooks/media";
-import { api } from "~/utils/api";
+import { api, isTRPCClientError } from "~/utils/api";
 
-const ProfilePicture = () => {
+enum Error {
+  UNKNOWN = "Something went wrong. Please try again.",
+}
+
+export default function ProfilePicture() {
   const router = useRouter();
-  const theme = useTheme();
   const completedOnboarding = api.user.completedOnboarding.useMutation();
+  const [error, setError] = useState<Error | null>(null);
 
-  const { imageUri, pickAndUploadImage, uploadStatus } =
-    useUploadProfilePicture({
-      optimisticallyUpdate: true,
-    });
+  const {
+    selectedImageUri,
+    pickImage,
+    uploadImage,
+    isPickerLoading,
+    isUploading,
+  } = useUploadProfilePicture();
 
-  const [hasUploadedPic, setHasUploadedPic] = useState(false);
-
-  const handleImageUpload = async () => {
-    const result = await pickAndUploadImage();
-    if (result.success) setHasUploadedPic(true);
+  const handleImagePick = async () => {
+    try {
+      await pickImage();
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch {
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
   };
 
-  const onSubmit = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    void completedOnboarding.mutateAsync();
-      router.replace("/tutorial/intro")
-  };
+  const handleSubmit = async () => {
+    if (!selectedImageUri) {
+      // Skip flow
+      try {
+        await completedOnboarding.mutateAsync();
+        await Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Success,
+        );
+        router.replace("/tutorial/intro");
+      } catch (err) {
+        setError(Error.UNKNOWN);
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+      return;
+    }
 
-  const onSkip = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    void completedOnboarding.mutateAsync();
-    router.replace("/tutorial/intro")
+    // Upload flow
+    try {
+      await uploadImage(selectedImageUri);
+      await completedOnboarding.mutateAsync();
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      router.replace("/tutorial/intro");
+    } catch (err) {
+      if (isTRPCClientError(err)) {
+        switch (err.data?.code) {
+          default:
+            setError(Error.UNKNOWN);
+            break;
+        }
+      } else {
+        setError(Error.UNKNOWN);
+      }
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
   };
 
   return (
-    <ScreenView
-      paddingBottom={0}
-      paddingTop="$10"
-      justifyContent="space-between"
-      keyboardAvoiding
-      safeAreaEdges={["bottom"]}
+    <OnboardingScreen
+      subtitle="One last thing"
+      title={`Show us your ${"\n"} beautiful face`}
+      error={error}
+      successMessage={
+        selectedImageUri ? "Looking good! You're ready to go." : undefined
+      }
+      footer={
+        <OnboardingButton
+          onPress={handleSubmit}
+          disabled={isPickerLoading || isUploading}
+          opacity={selectedImageUri ? 1 : 0.7}
+          backgroundColor={selectedImageUri ? "white" : "rgba(255,255,255,0)"}
+          isLoading={isUploading}
+          isValid={selectedImageUri !== null}
+          text={selectedImageUri ? "Continue" : "Skip for now"}
+        />
+      }
     >
-      <YStack alignItems="center" gap="$6">
-        <H2 textAlign="center">Upload your{"\n"}profile pic!</H2>
-
-        <YStack alignItems="center" gap="$3">
-          <TouchableOpacity onPress={handleImageUpload}>
-            <View position="relative">
-              <Image
-                source={imageUri ?? DefaultProfilePicture}
-                style={{
-                  width: 200,
-                  height: 200,
-                  borderRadius: 100,
-                  borderColor: "#F214FF",
-                  borderWidth: 2,
-                }}
-              />
-              <View
-                position="absolute"
-                bottom={0}
-                right={0}
-                borderRadius={40}
-                borderWidth="$2"
-                borderColor={theme.background.val}
-                backgroundColor="$gray5"
-                padding="$2"
-              >
-                <Feather name="edit-3" size={24} color={theme.blue9.val} />
-              </View>
-            </View>
-          </TouchableOpacity>
-        </YStack>
-
-        <Paragraph size="$5" color="$gray11" textAlign="center">
-          {hasUploadedPic
-            ? "You really understood the assignment with that pic!"
-            : "Because a face like yours is hard to forget."}
-        </Paragraph>
-      </YStack>
-
-      <OnboardingButton
-        marginHorizontal="$-4"
-        disabled={uploadStatus === "pending"}
-        onPress={hasUploadedPic ? onSubmit : onSkip}
-        {...(!hasUploadedPic ? { backgroundColor: "$gray7" } : {})}
-      >
-        {uploadStatus === "pending" ? (
-          <Spinner />
-        ) : hasUploadedPic ? (
-          "Continue"
-        ) : (
-          "Skip"
-        )}
-      </OnboardingButton>
-    </ScreenView>
+      <OnboardingProfilePicture
+        imageUri={selectedImageUri}
+        defaultImage={DefaultProfilePicture}
+        onPress={handleImagePick}
+      />
+    </OnboardingScreen>
   );
-};
-
-export default ProfilePicture;
+}

@@ -14,7 +14,7 @@ interface HeaderProps {
 
 const HEADER_HEIGHT = Platform.OS === "ios" ? 44 : 56;
 
-const Header = ({
+export const Header = ({
   title,
   HeaderLeft,
   HeaderRight,
@@ -59,5 +59,3 @@ const Header = ({
     </Stack>
   );
 };
-
-export default Header;
