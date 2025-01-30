@@ -39,10 +39,6 @@ export const Icon = ({
     />
   );
 
-  if (!onPress) {
-    return iconElement;
-  }
-
   return (
     <TouchableOpacity
       style={[styles(size).iconButton, style]}

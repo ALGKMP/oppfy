@@ -33,9 +33,11 @@ import { sharedValidators } from "@oppfy/validators";
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
 import useSearch from "~/hooks/useSearch";
+import { Header } from "../Layouts";
 import {
   Button,
   H6,
+  Icon,
   Input,
   ListItem,
   ScreenView,
@@ -606,21 +608,12 @@ export function OnboardingPhoneInput({
         onRequestClose={() => setModalVisible(false)}
       >
         <View flex={1} backgroundColor="$background">
-          <YStack
-            paddingVertical="$4"
-            paddingHorizontal="$4"
-            flexDirection="row"
-            alignItems="center"
-            gap="$4"
-          >
-            <TouchableOpacity
-              hitSlop={10}
-              onPress={() => setModalVisible(false)}
-            >
-              <ChevronLeft />
-            </TouchableOpacity>
-            <H6>Select Country</H6>
-          </YStack>
+          <Header
+            title="Select Country"
+            HeaderLeft={
+              <Icon name="close" onPress={() => setModalVisible(false)} />
+            }
+          />
           <YStack
             flex={1}
             padding="$4"
