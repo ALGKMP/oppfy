@@ -1,25 +1,17 @@
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import * as Updates from "expo-updates";
-
-import { useDialogController } from "~/components/ui";
+import { Button, Dialog, Text, YStack } from "tamagui";
 
 export const UpdateHandler = () => {
-  const dialog = useDialogController();
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
 
   const checkForUpdates = async () => {
     if (__DEV__) return; // Skip update check in development
-
     try {
       const update = await Updates.checkForUpdateAsync();
 
       if (update.isAvailable) {
-        await dialog.show({
-          title: "Update Available",
-          subtitle:
-            "A new version of Oppfy is available. Please update to continue using the app.",
-          acceptText: "Update Now",
-          onAccept: () => void downloadAndReload,
-        });
+        setShowUpdateDialog(true);
       }
     } catch (error) {
       console.log("Error checking for updates:", error);
@@ -39,5 +31,46 @@ export const UpdateHandler = () => {
     void checkForUpdates();
   }, []);
 
-  return null;
+  return (
+    <Dialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
+      <Dialog.Portal>
+        <Dialog.Overlay
+          key="overlay"
+          animation="quick"
+          opacity={0.5}
+          enterStyle={{ opacity: 0 }}
+          exitStyle={{ opacity: 0 }}
+        />
+        <Dialog.Content
+          bordered
+          elevate
+          key="content"
+          animation={[
+            "quick",
+            {
+              opacity: {
+                overshootClamping: true,
+              },
+            },
+          ]}
+          enterStyle={{ x: 0, y: -20, opacity: 0, scale: 0.9 }}
+          exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
+        >
+          <YStack space="$4">
+            <Dialog.Title>Update Available</Dialog.Title>
+            <Dialog.Description>
+              A new version of Oppfy is available. Please update to continue
+              using the app.
+            </Dialog.Description>
+
+            <YStack space="$2">
+              <Button theme="active" onPress={downloadAndReload}>
+                Update Now
+              </Button>
+            </YStack>
+          </YStack>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog>
+  );
 };
