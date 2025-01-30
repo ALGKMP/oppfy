@@ -121,33 +121,33 @@ interface ChatExperienceProps {
 }
 
 const ChatExperience = ({ onComplete }: ChatExperienceProps) => {
-  const { getDeviceContactsNotOnApp } = useContacts();
+  // const { getDeviceContactsNotOnApp } = useContacts();
 
-  const [story, setStory] = useState<MessageProps[]>(MESSAGES("Friend"));
+  // const [story, setStory] = useState<MessageProps[]>(MESSAGES("Friend"));
 
-  useEffect(() => {
-    const initializeStory = async () => {
-      const contacts = await getDeviceContactsNotOnApp();
-      const bestContact = contacts.find((c) => c.imageAvailable) ?? contacts[0];
+  // useEffect(() => {
+  //   const initializeStory = async () => {
+  //     const contacts = await getDeviceContactsNotOnApp();
+  //     const bestContact = contacts.find((c) => c.imageAvailable) ?? contacts[0];
 
-      if (bestContact === undefined) {
-        setStory(MESSAGES("Friend"));
-        return;
-      }
+  //     if (bestContact === undefined) {
+  //       setStory(MESSAGES("Friend"));
+  //       return;
+  //     }
 
-      setStory(MESSAGES(bestContact.name, bestContact.image?.uri));
-    };
+  //     setStory(MESSAGES(bestContact.name, bestContact.image?.uri));
+  //   };
 
-    void initializeStory();
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  //   void initializeStory();
+  //   // eslint-disable-next-line react-compiler/react-compiler
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
-  if (!story.length) return null;
+  // if (!story.length) return null;
 
   return (
     <MessageList
-      messages={story}
+      messages={MESSAGES("Friend")}
       onAnimationComplete={onComplete}
       autoScroll={true}
       scrollEnabled={false}
