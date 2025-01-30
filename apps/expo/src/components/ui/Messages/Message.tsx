@@ -74,6 +74,12 @@ const ANIMATION_CONFIG = {
   special: { mass: 0.3, stiffness: 400 },
 } as const;
 
+// iOS Message bubble tail SVG path
+const IOS_BUBBLE_TAIL = {
+  friend: "M20,0 C11.667,0 0,10 0,20 L0,20 C0,11.667 5,0 20,0",
+  you: "M0,0 C8.333,0 20,10 20,20 L20,20 C20,11.667 15,0 0,0",
+};
+
 export const Message: React.FC<MessageProps> = ({
   text,
   type,
@@ -149,6 +155,41 @@ export const Message: React.FC<MessageProps> = ({
     ],
     opacity: opacity.value,
   }));
+
+  if (isSystem) {
+    return (
+      <Animated.View
+        style={[
+          animatedStyle,
+          {
+            alignSelf: "center",
+            maxWidth: "85%",
+            marginVertical: 12,
+            paddingHorizontal: 14,
+            paddingVertical: 8,
+            backgroundColor: "rgba(60, 60, 67, 0.29)",
+            borderRadius: 13,
+          },
+          style.container,
+        ]}
+      >
+        <Text
+          style={[
+            {
+              fontSize: 15,
+              lineHeight: 18,
+              textAlign: "center",
+              color: theme.colors?.text ?? "#FFFFFF",
+              fontWeight: "500",
+            },
+            style.text,
+          ]}
+        >
+          {text}
+        </Text>
+      </Animated.View>
+    );
+  }
 
   if (isPreview && media) {
     return (
@@ -241,14 +282,11 @@ export const Message: React.FC<MessageProps> = ({
       style={[
         animatedStyle,
         {
-          alignSelf: isFriend
-            ? "flex-start"
-            : type === "you"
-              ? "flex-end"
-              : "center",
-          maxWidth: isSystem ? "90%" : "70%",
-          marginVertical: 4,
+          alignSelf: isFriend ? "flex-start" : "flex-end",
+          maxWidth: "75%",
+          marginVertical: 2,
           marginHorizontal: 12,
+          flexDirection: "row",
         },
         style.container,
       ]}
@@ -256,17 +294,14 @@ export const Message: React.FC<MessageProps> = ({
       <View
         style={[
           {
-            backgroundColor: isSystem
-              ? "transparent"
-              : isFriend
-                ? (theme.colors?.secondary ?? "#1A1A1A")
-                : (theme.colors?.primary ?? "#007AFF"),
-            padding: 16,
-            paddingVertical: isSystem ? 12 : 16,
-            borderRadius: theme.borderRadius ?? 20,
-            borderTopLeftRadius: isFriend ? 6 : (theme.borderRadius ?? 20),
-            borderTopRightRadius:
-              type === "you" ? 6 : (theme.borderRadius ?? 20),
+            backgroundColor: isFriend
+              ? (theme.colors?.secondary ?? "rgba(60, 60, 67, 0.29)")
+              : (theme.colors?.primary ?? "#007AFF"),
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            borderRadius: 18,
+            borderTopLeftRadius: isFriend ? 4 : 18,
+            borderTopRightRadius: isFriend ? 18 : 4,
           },
           style.bubble,
         ]}
@@ -274,11 +309,10 @@ export const Message: React.FC<MessageProps> = ({
         <Text
           style={[
             {
-              color: theme.colors?.text ?? "#FFFFFF",
-              fontSize: isSystem ? 24 : 16,
-              textAlign: isSystem ? "center" : "left",
-              fontWeight: isSystem ? "900" : "600",
-              lineHeight: 24,
+              fontSize: 17,
+              lineHeight: 22,
+              color: isFriend ? (theme.colors?.text ?? "#000000") : "#FFFFFF",
+              fontWeight: "400",
             },
             style.text,
           ]}
