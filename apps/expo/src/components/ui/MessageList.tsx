@@ -16,7 +16,7 @@ export interface MessageListProps {
   style?: React.ComponentProps<typeof View>["style"];
 }
 
-export const MessageList: React.FC<MessageListProps> = ({
+export const MessageList = ({
   messages,
   theme = {
     colors: {
@@ -31,7 +31,7 @@ export const MessageList: React.FC<MessageListProps> = ({
   onAnimationComplete,
   estimatedItemSize = 80,
   style,
-}) => {
+}: MessageListProps) => {
   const listRef = useRef<FlashList<MessageProps>>(null);
   const { bottom } = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();

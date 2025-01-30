@@ -46,7 +46,13 @@ export default function TutorialLayout() {
       <OnboardingStack.Screen
         name="intro"
         options={{
-          headerLeft: () => <Icon name="close" onPress={handleClose} blurred />,
+          headerLeft: () => (
+            <Icon
+              name="close"
+              onPress={handleClose}
+              iconStyle={{ opacity: 0.7 }}
+            />
+          ),
         }}
       />
       <OnboardingStack.Screen name="select-contact" />

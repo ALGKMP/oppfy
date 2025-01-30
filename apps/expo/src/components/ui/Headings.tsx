@@ -10,7 +10,7 @@ import {
   H6 as TamaguiH6,
   XStack,
 } from "tamagui";
-import type { XStackProps } from "tamagui";
+import type { ColorTokens, XStackProps } from "tamagui";
 
 import { useDialogController } from "./Dialog";
 import { Icon } from "./Icon";
@@ -24,10 +24,11 @@ interface InfoDialogProps {
 
 export interface HeaderTitleProps extends XStackProps {
   children: React.ReactNode;
+  color?: ColorTokens;
   icon?: IconName;
   iconAfter?: IconName;
   iconSize?: number;
-  iconColor?: string;
+  iconColor?: ColorTokens;
   info?: InfoDialogProps;
 }
 
@@ -40,6 +41,7 @@ export const H6 = styled(TamaguiH6, {});
 
 export const HeaderTitle = ({
   children,
+  color,
   icon,
   iconAfter,
   iconSize = 14,
@@ -52,7 +54,7 @@ export const HeaderTitle = ({
   return (
     <XStack alignItems="center" gap="$2" opacity={0.7} {...props}>
       {icon && <Icon name={icon} size={iconSize} color={iconColor} />}
-      <H5>{children}</H5>
+      <H5 color={color}>{children}</H5>
       {iconAfter && <Icon name={iconAfter} size={iconSize} color={iconColor} />}
       {info && (
         <TouchableOpacity

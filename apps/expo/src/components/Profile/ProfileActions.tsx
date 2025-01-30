@@ -18,12 +18,11 @@ interface ActionButtonProps {
   networkRelationships?: NetworkRelationships;
 }
 
-type IconComponent = React.FC<IconProps>;
 
 interface ButtonConfig {
   label: string;
   action: string;
-  icon: IconComponent;
+  icon: IconProps;
   iconSize?: number;
   isPrimary?: boolean;
 }

@@ -1,5 +1,2 @@
-export { AlertDialog } from "./AlertDialog";
-export {
-  AlertDialogProvider,
-  useAlertDialogController,
-} from "./AlertDialogContext";
+export * from "./AlertDialog";
+export * from "./AlertDialogContext";

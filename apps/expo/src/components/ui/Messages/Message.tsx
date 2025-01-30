@@ -74,13 +74,7 @@ const ANIMATION_CONFIG = {
   special: { mass: 0.3, stiffness: 400 },
 } as const;
 
-// iOS Message bubble tail SVG path
-const IOS_BUBBLE_TAIL = {
-  friend: "M20,0 C11.667,0 0,10 0,20 L0,20 C0,11.667 5,0 20,0",
-  you: "M0,0 C8.333,0 20,10 20,20 L20,20 C20,11.667 15,0 0,0",
-};
-
-export const Message: React.FC<MessageProps> = ({
+export const Message = ({
   text,
   type,
   author,
@@ -88,7 +82,7 @@ export const Message: React.FC<MessageProps> = ({
   animation = {},
   style = {},
   theme = {},
-}) => {
+}: MessageProps) => {
   const mergedAnimation = { ...DEFAULT_ANIMATION, ...animation };
   const isSystem = type === "system" || type === "announcement";
   const isFriend = type === "friend";

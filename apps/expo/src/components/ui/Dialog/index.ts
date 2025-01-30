@@ -1,2 +1,2 @@
-export { Dialog } from "./Dialog";
-export { DialogProvider, useDialogController } from "./DialogContext";
+export * from "./Dialog";
+export * from "./DialogContext";

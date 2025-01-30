@@ -4,6 +4,7 @@ import Animated, { SlideInUp } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import { getToken } from "tamagui";
 
 import { Text, YStack } from "~/components/ui";
 import type { MessageProps } from "~/components/ui/Messages/Message";
@@ -12,6 +13,8 @@ import { OnboardingButton, OnboardingScreen } from "~/components/ui/Onboarding";
 import useContacts from "~/hooks/contacts/useContacts";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 const MESSAGES = (contactName: string, contactImage?: string) =>
   [
@@ -118,9 +121,9 @@ interface ChatExperienceProps {
 }
 
 const ChatExperience = ({ onComplete }: ChatExperienceProps) => {
-  const { getDeviceContactsNotOnApp } = useContacts();
+  // const { getDeviceContactsNotOnApp } = useContacts();
 
-  const [story, setStory] = useState<MessageProps[]>(MESSAGES("Friend"));
+  // const [story, setStory] = useState<MessageProps[]>(MESSAGES("Friend"));
 
   // useEffect(() => {
   //   const initializeStory = async () => {
@@ -140,10 +143,15 @@ const ChatExperience = ({ onComplete }: ChatExperienceProps) => {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, []);
 
-  if (!story.length) return null;
+  // if (!story.length) return null;
 
   return (
-    <MessageList messages={story} onAnimationComplete={onComplete} autoScroll />
+    <MessageList
+      messages={MESSAGES("Friend")}
+      onAnimationComplete={onComplete}
+      autoScroll={true}
+      scrollEnabled={true}
+    />
   );
 };
 
@@ -167,39 +175,32 @@ const WelcomeScreen = () => {
       }
     >
       <YStack
-        justifyContent="center"
-        gap="$6"
-        paddingHorizontal="$4"
         alignItems="center"
+        justifyContent="center"
+        paddingHorizontal="$4"
+        gap="$6"
       >
-        <Animated.View
-          entering={SlideInUp.delay(200)}
-          style={{ width: SCREEN_WIDTH * 0.85, height: SCREEN_WIDTH * 0.6 }}
-        >
-          <Image
-            source={{
-              uri: "https://media.tenor.com/dB5dAKM1B4sAAAAM/bad-evil-laugh.gif",
-            }}
-            style={{
-              width: "100%",
-              height: "100%",
-              borderRadius: 16,
-            }}
-            contentFit="cover"
-          />
+        <AnimatedImage
+          entering={SlideInUp.delay(400)}
+          source={{
+            uri: "https://media.tenor.com/dB5dAKM1B4sAAAAM/bad-evil-laugh.gif",
+          }}
+          style={{
+            width: "100%",
+            aspectRatio: 1.5,
+            borderRadius: getToken("$4", "radius") as number,
+          }}
+        />
+        <Animated.View entering={SlideInUp.delay(400)}>
+          <Text
+            color="white"
+            fontSize="$7"
+            textAlign="center"
+            fontWeight="bold"
+          >
+            Share their most questionable moments
+          </Text>
         </Animated.View>
-        <YStack gap="$4" alignItems="center">
-          <Animated.View entering={SlideInUp.delay(400)}>
-            <Text
-              color="white"
-              fontSize="$7"
-              textAlign="center"
-              fontWeight="bold"
-            >
-              Share their most questionable moments
-            </Text>
-          </Animated.View>
-        </YStack>
       </YStack>
     </OnboardingScreen>
   );

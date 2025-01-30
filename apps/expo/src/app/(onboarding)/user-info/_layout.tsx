@@ -46,7 +46,13 @@ export default function UserInfoLayout() {
       <OnboardingStack.Screen
         name="name"
         options={{
-          headerLeft: () => <Icon name="close" onPress={handleClose} blurred />,
+          headerLeft: () => (
+            <Icon
+              name="close"
+              onPress={handleClose}
+              iconStyle={{ opacity: 0.7 }}
+            />
+          ),
         }}
       />
       <OnboardingStack.Screen name="username" />

@@ -1,9 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Keyboard, RefreshControl, useWindowDimensions } from "react-native";
+import {
+  Dimensions,
+  Keyboard,
+  RefreshControl,
+  useWindowDimensions,
+} from "react-native";
 import type { Contact } from "expo-contacts";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { Phone } from "@tamagui/lucide-icons";
+import { Phone, PhoneMissed } from "@tamagui/lucide-icons";
 import type { IFuseOptions } from "fuse.js";
 import { parsePhoneNumberWithError } from "libphonenumber-js";
 import { debounce } from "lodash";
@@ -12,6 +17,7 @@ import { getToken } from "tamagui";
 import {
   EmptyPlaceholder,
   H1,
+  HeaderTitle,
   SearchInput,
   Spacer,
   UserCard,
@@ -20,19 +26,11 @@ import {
 import { useContacts } from "~/hooks/contacts";
 import useSearch from "~/hooks/useSearch";
 
-const PhoneIcon = React.createElement(Phone);
+const { width: screenWidth } = Dimensions.get("window");
 
 const SelectContact = () => {
   const router = useRouter();
-  const params = useLocalSearchParams<{
-    uri: string;
-    width: string;
-    height: string;
-    type: string;
-  }>();
 
-  const { width: screenWidth } = useWindowDimensions();
-  const cardWidth = screenWidth - getToken("$8", "space");
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Contact[]>([]);
@@ -50,26 +48,6 @@ const SelectContact = () => {
   } = useContacts();
 
   const contacts = data?.pages.flatMap((page) => page.items) ?? [];
-
-  /*   const searchOptions: IFuseOptions<Contact> = {
-    keys: [
-      "name",
-      {
-        name: "phoneNumber",
-        getFn: (contact) => contact.phoneNumbers?.[0]?.number ?? "",
-      },
-    ],
-    threshold: 0.3,
-  };
-
-  const {
-    searchQuery,
-    setSearchQuery,
-    filteredItems: searchResults,
-  } = useSearch<Contact>({
-    data: contacts,
-    fuseOptions: searchOptions,
-  }); */
 
   const displayContacts = searchQuery ? searchResults : contacts;
 
@@ -111,17 +89,15 @@ const SelectContact = () => {
   const GAP = getToken("$2", "space") as number;
   const TILE_WIDTH = (screenWidth - SCREEN_PADDING * 2 - GAP) / 2; // Account for screen padding and gap between tiles
 
-  const debouncedSearch = useMemo(
-    () =>
-      debounce(async (text: string) => {
-        const contacts = await searchContacts(text);
-        setSearchResults(contacts);
-      }, 100),
-    [],
-  );
+  const debouncedSearch = debounce(async (text: string) => {
+    const contacts = await searchContacts(text);
+    setSearchResults(contacts);
+  }, 100);
 
   useEffect(() => {
-    return () => {};
+    return () => {
+      debouncedSearch.cancel();
+    };
   }, [debouncedSearch]);
 
   return (
@@ -148,11 +124,7 @@ const SelectContact = () => {
             ))}
           </YStack>
         ) : (
-          <EmptyPlaceholder
-            icon={PhoneIcon}
-            title="No Contacts Found"
-            subtitle="We couldn't find any contacts that aren't already on the app. Make sure you have contacts enabled in your settings."
-          />
+          <HeaderTitle >No Users Found</HeaderTitle>
         );
       }}
       ListHeaderComponentStyle={{

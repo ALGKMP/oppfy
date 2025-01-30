@@ -11,12 +11,13 @@ export interface MessageListProps {
   messages: Omit<MessageProps, "theme">[];
   theme?: MessageProps["theme"];
   autoScroll?: boolean;
+  scrollEnabled?: boolean;
   onAnimationComplete?: () => void;
   estimatedItemSize?: number;
   style?: React.ComponentProps<typeof View>["style"];
 }
 
-export const MessageList: React.FC<MessageListProps> = ({
+export const MessageList = ({
   messages,
   theme = {
     colors: {
@@ -28,10 +29,11 @@ export const MessageList: React.FC<MessageListProps> = ({
     borderRadius: 20,
   },
   autoScroll = true,
+  scrollEnabled = true,
   onAnimationComplete,
   estimatedItemSize = 80,
   style,
-}) => {
+}: MessageListProps) => {
   const listRef = useRef<FlashList<MessageProps>>(null);
   const { bottom } = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
@@ -112,6 +114,7 @@ export const MessageList: React.FC<MessageListProps> = ({
         estimatedItemSize={estimatedItemSize}
         getItemType={getItemType}
         showsVerticalScrollIndicator={false}
+        scrollEnabled={scrollEnabled}
         contentContainerStyle={{
           paddingVertical: 24,
           paddingBottom: bottom + 24,
