@@ -171,7 +171,6 @@ export const Message = ({
           style={[
             {
               fontSize: 15,
-              lineHeight: 18,
               textAlign: "center",
               color: theme.colors?.text ?? "#FFFFFF",
               fontWeight: "500",
@@ -294,8 +293,8 @@ export const Message = ({
             paddingHorizontal: 12,
             paddingVertical: 8,
             borderRadius: 18,
-            borderTopLeftRadius: isFriend ? 4 : 18,
-            borderTopRightRadius: isFriend ? 18 : 4,
+            borderBottomLeftRadius: isFriend ? 4 : 18,
+            borderBottomRightRadius: isFriend ? 18 : 4,
           },
           style.bubble,
         ]}
@@ -304,7 +303,6 @@ export const Message = ({
           style={[
             {
               fontSize: 17,
-              lineHeight: 22,
               color: isFriend ? (theme.colors?.text ?? "#000000") : "#FFFFFF",
               fontWeight: "400",
             },

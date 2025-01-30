@@ -224,14 +224,14 @@ export default function Start() {
         if (!isMounted) return;
         setPhaseIndex(i);
         await new Promise((resolve) =>
-          setTimeout(resolve, CONFIG.PHASES[i].duration),
+          setTimeout(resolve, CONFIG.PHASES[i]?.duration ?? 0),
         );
       }
       // Done with all phases
       setShouldSpawn(false);
     };
 
-    runPhases().catch(() => {});
+    void runPhases();
     return () => {
       isMounted = false;
     };
@@ -242,7 +242,7 @@ export default function Start() {
     const animateStartup = async () => {
       // Let splash be visible for a bit, then hide
       await new Promise((resolve) => setTimeout(resolve, 300));
-      await SplashScreen.hideAsync().catch(() => {});
+      await SplashScreen.hideAsync();
 
       // Big scale entrance
       scale.value = withSequence(
@@ -292,7 +292,7 @@ export default function Start() {
       );
     };
 
-    animateStartup().catch(() => {});
+    void animateStartup();
   }, [
     scale,
     rotate,
