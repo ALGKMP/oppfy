@@ -12,7 +12,7 @@ export default function AuthLayout() {
   return (
     <OnboardingStack
       screenOptions={{
-        title: "Sign In",
+        title: "",
       }}
     />
   );
