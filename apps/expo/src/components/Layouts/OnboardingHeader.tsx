@@ -19,7 +19,7 @@ interface ProgressSegmentProps {
   totalSteps: number;
 }
 
-function ProgressSegment({ isActive }: ProgressSegmentProps) {
+const ProgressSegment = ({ isActive }: ProgressSegmentProps) => {
   const animatedStyle = useAnimatedStyle(() => {
     return {
       position: "absolute",
@@ -47,17 +47,17 @@ function ProgressSegment({ isActive }: ProgressSegmentProps) {
       <AnimatedView style={animatedStyle} />
     </View>
   );
-}
+};
 
 interface OnboardingProgressProps {
   currentStep: number;
   totalSteps: number;
 }
 
-export function OnboardingProgress({
+export const OnboardingProgress = ({
   currentStep,
   totalSteps,
-}: OnboardingProgressProps) {
+}: OnboardingProgressProps) => {
   const segments = useMemo(
     () =>
       Array.from({ length: totalSteps }, (_, i) => (
@@ -82,7 +82,7 @@ export function OnboardingProgress({
       {segments}
     </XStack>
   );
-}
+};
 
 interface OnboardingHeaderProps {
   title?: string;
@@ -95,13 +95,13 @@ interface OnboardingHeaderProps {
   };
 }
 
-export function OnboardingHeader({
+export const OnboardingHeader = ({
   title,
   HeaderLeft,
   HeaderRight,
   HeaderTitle,
   progress,
-}: OnboardingHeaderProps) {
+}: OnboardingHeaderProps) => {
   const insets = useSafeAreaInsets();
 
   const content =
@@ -140,4 +140,4 @@ export function OnboardingHeader({
       </XStack>
     </YStack>
   );
-}
+};

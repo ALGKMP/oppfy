@@ -71,7 +71,7 @@ const SelectContact = () => {
       ).format("E.164");
 
       router.push({
-        pathname: "/tutorial/media-picker",
+        pathname: "/tutorial/album-picker",
         params: {
           name: contact.name,
           number: formattedPhoneNumber,
@@ -124,7 +124,7 @@ const SelectContact = () => {
             ))}
           </YStack>
         ) : (
-          <HeaderTitle >No Users Found</HeaderTitle>
+          <HeaderTitle>No Users Found</HeaderTitle>
         );
       }}
       ListHeaderComponentStyle={{

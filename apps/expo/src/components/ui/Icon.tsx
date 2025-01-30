@@ -4,7 +4,7 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 
-type IconName = keyof typeof Ionicons.glyphMap;
+export type IconName = keyof typeof Ionicons.glyphMap;
 
 interface IconProps {
   name: IconName;
@@ -42,7 +42,7 @@ export const Icon = ({
       disabled={disabled}
     >
       {blurred ? (
-        <BlurView intensity={50} style={styles.blurView}>
+        <BlurView intensity={30} style={styles.blurView}>
           {iconElement}
         </BlurView>
       ) : (
@@ -60,11 +60,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   blurView: {
-    padding: 8,
+    width: "100%",
+    height: "100%",
     justifyContent: "center",
     alignItems: "center",
-    // backgroundColor: "rgba(64, 64, 64, 0.4)",
+    backgroundColor: "rgba(64, 64, 64, 0.4)",
   },
 });
-
-export type { IconName };

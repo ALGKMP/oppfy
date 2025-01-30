@@ -14,23 +14,9 @@ import type {
 import { Text } from "tamagui";
 
 import { Icon } from "~/components/ui";
-import Header from "../Header";
+import { Header } from "../Header";
 
 const { Navigator } = createNativeStackNavigator();
-
-const DefaultHeaderLeft = ({
-  navigation,
-  canGoBack,
-}: {
-  navigation: NativeStackHeaderProps["navigation"];
-  canGoBack: boolean;
-}) => {
-  if (!canGoBack) return null;
-
-  return (
-    <Icon name="chevron-back" onPress={() => navigation.goBack()} blurred />
-  );
-};
 
 const CustomNavigator = ({
   children,
@@ -86,11 +72,23 @@ const CustomNavigator = ({
   );
 };
 
-const Stack = withLayoutContext<
+const DefaultHeaderLeft = ({
+  navigation,
+  canGoBack,
+}: {
+  navigation: NativeStackHeaderProps["navigation"];
+  canGoBack: boolean;
+}) => {
+  if (!canGoBack) return null;
+
+  return (
+    <Icon name="chevron-back" onPress={() => navigation.goBack()} blurred />
+  );
+};
+
+export const Stack = withLayoutContext<
   NativeStackNavigationOptions,
   typeof Navigator,
   StackNavigationState<ParamListBase>,
   NativeStackNavigationEventMap
 >(CustomNavigator);
-
-export { Stack };

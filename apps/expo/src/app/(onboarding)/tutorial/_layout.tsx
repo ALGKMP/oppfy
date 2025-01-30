@@ -60,6 +60,9 @@ export default function TutorialLayout() {
       <OnboardingStack.Screen
         name="(media-picker)"
         options={{
+          headerShown: false,
+          gestureEnabled: true,
+          animation: "slide_from_bottom",
           presentation: "modal",
         }}
       />

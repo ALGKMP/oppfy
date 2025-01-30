@@ -150,7 +150,7 @@ const ChatExperience = ({ onComplete }: ChatExperienceProps) => {
       messages={MESSAGES("Friend")}
       onAnimationComplete={onComplete}
       autoScroll={true}
-      scrollEnabled={true}
+      scrollEnabled={false}
     />
   );
 };

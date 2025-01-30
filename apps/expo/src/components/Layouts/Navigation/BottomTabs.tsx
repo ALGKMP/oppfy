@@ -13,18 +13,10 @@ import type {
 import { Text } from "tamagui";
 
 import { Icon } from "~/components/ui";
-import BottomTabBar from "../BottomTabBar";
-import Header from "../Header";
+import { BottomTabBar } from "../BottomTabBar";
+import { Header } from "../Header";
 
 const { Navigator } = createBottomTabNavigator();
-
-const DefaultHeaderLeft = ({ canGoBack }: { canGoBack?: boolean }) => {
-  const router = useRouter();
-
-  if (!canGoBack) return null;
-
-  return <Icon name="chevron-back" onPress={() => router.back()} blurred />;
-};
 
 const CustomNavigator = ({
   children,
@@ -78,11 +70,17 @@ const CustomNavigator = ({
   );
 };
 
-const BottomTabs = withLayoutContext<
+const DefaultHeaderLeft = ({ canGoBack }: { canGoBack?: boolean }) => {
+  const router = useRouter();
+
+  if (!canGoBack) return null;
+
+  return <Icon name="chevron-back" onPress={() => router.back()} blurred />;
+};
+
+export const BottomTabs = withLayoutContext<
   BottomTabNavigationOptions,
   typeof Navigator,
   StackNavigationState<ParamListBase>,
   BottomTabNavigationEventMap
 >(CustomNavigator);
-
-export { BottomTabs };
