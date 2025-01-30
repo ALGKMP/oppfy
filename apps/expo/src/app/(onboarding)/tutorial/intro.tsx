@@ -68,13 +68,13 @@ const MESSAGES = (contactName: string, contactImage?: string) =>
       },
       media: {
         type: "gif",
-        url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMzM5YTBjMzY2ZmQ5ZmE4ZWM4ZjFkYzM5ZDM4ZjM2ZjM1ZTI1ZjE4YyZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/E1w0yvMxBIv5M8WkL8/giphy.gif",
+        url: "https://media1.tenor.com/m/Wqa8eM7Hcd8AAAAC/fall-trip-and-fall.gif",
         aspectRatio: 0.7,
       },
       animation: {
         isSpecial: true,
         delay: 800,
-        duration: 1200,
+        duration: 1500,
         hapticFeedback: "heavy",
       },
     },
@@ -122,23 +122,23 @@ const ChatExperience = ({ onComplete }: ChatExperienceProps) => {
 
   const [story, setStory] = useState<MessageProps[]>(MESSAGES("Friend"));
 
-  useEffect(() => {
-    const initializeStory = async () => {
-      const contacts = await getDeviceContactsNotOnApp();
-      const bestContact = contacts.find((c) => c.imageAvailable) ?? contacts[0];
+  // useEffect(() => {
+  //   const initializeStory = async () => {
+  //     const contacts = await getDeviceContactsNotOnApp();
+  //     const bestContact = contacts.find((c) => c.imageAvailable) ?? contacts[0];
 
-      if (bestContact === undefined) {
-        setStory(MESSAGES("Friend"));
-        return;
-      }
+  //     if (bestContact === undefined) {
+  //       setStory(MESSAGES("Friend"));
+  //       return;
+  //     }
 
-      setStory(MESSAGES(bestContact.name, bestContact.image?.uri));
-    };
+  //     setStory(MESSAGES(bestContact.name, bestContact.image?.uri));
+  //   };
 
-    void initializeStory();
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  //   void initializeStory();
+  //   // eslint-disable-next-line react-compiler/react-compiler
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   if (!story.length) return null;
 
