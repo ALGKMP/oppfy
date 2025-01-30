@@ -188,7 +188,7 @@ const WelcomeScreen = () => {
           style={{
             width: "100%",
             aspectRatio: 1.5,
-            borderRadius: getToken("$4", "radius") as number,
+            borderRadius: getToken("$8", "radius") as number,
           }}
         />
         <Animated.View entering={SlideInUp.delay(400)}>

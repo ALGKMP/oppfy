@@ -8,11 +8,11 @@ import {
 import type { Contact } from "expo-contacts";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { Phone, PhoneMissed } from "@tamagui/lucide-icons";
+import { Phone, PhoneMissed, UserRoundX } from "@tamagui/lucide-icons";
 import type { IFuseOptions } from "fuse.js";
 import { parsePhoneNumberWithError } from "libphonenumber-js";
 import { debounce } from "lodash";
-import { getToken } from "tamagui";
+import { getToken, Theme } from "tamagui";
 
 import {
   EmptyPlaceholder,
@@ -26,18 +26,28 @@ import {
 import { useContacts } from "~/hooks/contacts";
 import useSearch from "~/hooks/useSearch";
 
-const { width: screenWidth } = Dimensions.get("window");
+interface ListItem {
+  id: string;
+  contact: Contact;
+}
 
 const SelectContact = () => {
   const router = useRouter();
 
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Contact[]>([]);
+  const [searchedContacts, setSearchedContacts] = useState<Contact[]>([]);
+  const [isSearchingContacts, setIsSearchingContacts] = useState(false);
+
+  // Constants for layout calculations
+  const SCREEN_PADDING = getToken("$4", "space") as number;
+  const GAP = getToken("$2", "space") as number;
+  const SCREEN_WIDTH = Dimensions.get("window").width;
+  const TILE_WIDTH = (SCREEN_WIDTH - SCREEN_PADDING * 2 - GAP) / 2;
 
   const {
     contactsPaginatedQuery: {
-      data,
+      data: contactsData,
       isLoading: isLoadingContacts,
       isFetchingNextPage,
       hasNextPage,
@@ -47,20 +57,44 @@ const SelectContact = () => {
     searchContacts,
   } = useContacts();
 
-  const contacts = data?.pages.flatMap((page) => page.items) ?? [];
+  const contacts = useMemo(
+    () => contactsData?.pages.flatMap((page) => page.items) ?? [],
+    [contactsData],
+  );
 
-  const displayContacts = searchQuery ? searchResults : contacts;
+  const debouncedSearchContacts = useMemo(
+    () =>
+      debounce(async (text: string) => {
+        setIsSearchingContacts(true);
+        const contacts = await searchContacts(text);
+        setSearchedContacts(contacts);
+        setIsSearchingContacts(false);
+      }, 100),
+    [],
+  );
 
-  const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
-  }, [refetch]);
+  useEffect(() => {
+    return () => debouncedSearchContacts.cancel();
+  }, [debouncedSearchContacts]);
 
-  const loadMoreContacts = useCallback(() => {
-    if (!hasNextPage || isFetchingNextPage) return;
-    void fetchNextPage();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  const handleSearchChange = useCallback(
+    (text: string) => {
+      setSearchQuery(text);
+      void debouncedSearchContacts(text);
+    },
+    [debouncedSearchContacts],
+  );
+
+  const displayItems = useMemo(() => {
+    const contactsToShow = searchQuery ? searchedContacts : contacts;
+    return contactsToShow.map((contact) => ({
+      id:
+        contact.id ??
+        contact.phoneNumbers?.[0]?.number ??
+        Math.random().toString(),
+      contact,
+    }));
+  }, [searchQuery, searchedContacts, contacts]);
 
   const onContactSelected = useCallback(
     (contact: Contact) => {
@@ -90,96 +124,134 @@ const SelectContact = () => {
     [router],
   );
 
-  const SCREEN_PADDING = getToken("$4", "space") as number;
-  const GAP = getToken("$2", "space") as number;
-  const TILE_WIDTH = (screenWidth - SCREEN_PADDING * 2 - GAP) / 2; // Account for screen padding and gap between tiles
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
-  const debouncedSearch = debounce(async (text: string) => {
-    const contacts = await searchContacts(text);
-    setSearchResults(contacts);
-  }, 100);
+  const handleOnEndReached = useCallback(() => {
+    if (!isFetchingNextPage && hasNextPage && !searchQuery) {
+      void fetchNextPage();
+    }
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage, searchQuery]);
 
-  useEffect(() => {
-    return () => {
-      debouncedSearch.cancel();
-    };
-  }, [debouncedSearch]);
+  const renderItem = useCallback(
+    ({ item, index }: { item: ListItem; index: number }) => (
+      <UserCard
+        userId={item.id}
+        username={item.contact.name}
+        profilePictureUrl={
+          item.contact.imageAvailable && item.contact.image?.uri
+            ? item.contact.image.uri
+            : null
+        }
+        bio={item.contact.phoneNumbers?.[0]?.number}
+        width={TILE_WIDTH}
+        index={index}
+        onPress={() => onContactSelected(item.contact)}
+        actionButton={{
+          label: "Select",
+          onPress: () => onContactSelected(item.contact),
+          icon: "add",
+        }}
+      />
+    ),
+    [TILE_WIDTH, onContactSelected],
+  );
+
+  const ListHeaderComponent = useMemo(
+    () => (
+      <YStack gap="$4">
+        <H1 textAlign="center" color="$color">
+          Post for someone not on the app!
+        </H1>
+        <Theme name="light">
+          <SearchInput
+            placeholder="Search contacts..."
+            value={searchQuery}
+            onChangeText={handleSearchChange}
+            onClear={() => {
+              debouncedSearchContacts.cancel();
+              setSearchQuery("");
+              setSearchedContacts([]);
+            }}
+          />
+        </Theme>
+      </YStack>
+    ),
+    [searchQuery, handleSearchChange, debouncedSearchContacts],
+  );
+
+  const ListEmptyComponent = useCallback(() => {
+    const isLoading = isLoadingContacts || isSearchingContacts;
+
+    if (isLoading) {
+      return (
+        <YStack gap="$2.5" flexDirection="row" flexWrap="wrap">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <UserCard.Skeleton key={index} width={TILE_WIDTH} />
+          ))}
+        </YStack>
+      );
+    }
+
+    if (contacts.length === 0) {
+      return (
+        <YStack flex={1} justifyContent="center">
+          <EmptyPlaceholder
+            title="No Contacts Found"
+            subtitle="We couldn't find any contacts on your device."
+            icon={<UserRoundX />}
+          />
+        </YStack>
+      );
+    }
+
+    if (searchQuery && displayItems.length === 0) {
+      return (
+        <YStack flex={1}>
+          <HeaderTitle>No Results Found</HeaderTitle>
+        </YStack>
+      );
+    }
+
+    return null;
+  }, [
+    isLoadingContacts,
+    isSearchingContacts,
+    contacts.length,
+    searchQuery,
+    displayItems.length,
+    TILE_WIDTH,
+  ]);
+
+  const keyExtractor = useCallback((item: ListItem) => item.id, []);
 
   return (
     <FlashList
-      data={displayContacts}
+      data={displayItems}
+      renderItem={renderItem}
+      keyExtractor={keyExtractor}
       estimatedItemSize={80}
       numColumns={2}
-      contentContainerStyle={{
-        paddingHorizontal: getToken("$4", "space") as number,
-        paddingTop: getToken("$6", "space") as number,
-      }}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-      }
-      onScrollBeginDrag={Keyboard.dismiss}
-      onEndReached={loadMoreContacts}
-      onEndReachedThreshold={0.5}
       ItemSeparatorComponent={Spacer}
-      ListEmptyComponent={() => {
-        return isLoadingContacts ? (
-          <YStack flex={1} flexDirection="row" flexWrap="wrap" gap={GAP}>
-            {Array.from({ length: 6 }).map((_, index) => (
-              <UserCard.Skeleton key={index} width={TILE_WIDTH} />
-            ))}
-          </YStack>
-        ) : (
-          <HeaderTitle>No Users Found</HeaderTitle>
-        );
-      }}
+      ListHeaderComponent={ListHeaderComponent}
+      ListEmptyComponent={ListEmptyComponent}
+      onScrollBeginDrag={Keyboard.dismiss}
+      keyboardShouldPersistTaps="handled"
       ListHeaderComponentStyle={{
         marginBottom: getToken("$4", "space") as number,
       }}
-      ListHeaderComponent={useMemo(() => {
-        return (
-          <YStack gap="$4">
-            <H1 textAlign="center" color="$color">
-              Choose a Contact Not On The App!
-            </H1>
-            <YStack gap="$2">
-              <SearchInput
-                placeholder="Search contacts..."
-                value={searchQuery}
-                onChangeText={(txt) => {
-                  //TODO: mak ebetter
-                  setSearchQuery(txt);
-                  void debouncedSearch(txt);
-                }}
-                onClear={() => {
-                  debouncedSearch.cancel();
-                  setSearchQuery("");
-                  setSearchResults([]);
-                }}
-              />
-            </YStack>
-          </YStack>
-        );
-      }, [searchQuery, debouncedSearch])}
-      renderItem={({ item: contact, index }) => (
-        <UserCard
-          userId={contact.id ?? Math.random().toString()}
-          username={contact.name}
-          profilePictureUrl={
-            contact.imageAvailable && contact.image?.uri
-              ? contact.image.uri
-              : null
-          }
-          bio={contact.phoneNumbers?.[0]?.number ?? undefined}
-          width={TILE_WIDTH}
-          index={index}
-          onPress={() => onContactSelected(contact)}
-          actionButton={{
-            label: "Select",
-            onPress: () => onContactSelected(contact),
-            icon: "add",
-          }}
-        />
-      )}
+      contentContainerStyle={{
+        padding: SCREEN_PADDING,
+        paddingHorizontal: SCREEN_PADDING - GAP / 2,
+      }}
+      onEndReached={handleOnEndReached}
+      onEndReachedThreshold={0.5}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
     />
   );
 };
