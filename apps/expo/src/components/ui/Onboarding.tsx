@@ -1,5 +1,10 @@
 import React, { useEffect, useMemo } from "react";
-import { Modal, TextInput, TouchableOpacity } from "react-native";
+import {
+  ImageSourcePropType,
+  Modal,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import Animated, {
   FadeIn,
   interpolate,
@@ -281,7 +286,7 @@ export function OnboardingButton({
   disabled = false,
   isLoading = false,
   text = "Continue",
-  isValid = false,
+  isValid = true,
 }: OnboardingButtonProps) {
   const tokens = getTokens();
   const buttonScale = useSharedValue(1);
@@ -342,7 +347,7 @@ export function OnboardingButton({
 // Profile Picture Component
 interface OnboardingProfilePictureProps {
   imageUri?: string | null;
-  defaultImage: any;
+  defaultImage: ImageSourcePropType | string | null;
   onPress: () => void;
   onImageLoad?: () => void;
 }
