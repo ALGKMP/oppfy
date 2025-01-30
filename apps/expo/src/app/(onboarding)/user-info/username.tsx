@@ -5,96 +5,85 @@ import { useRouter } from "expo-router";
 import { sharedValidators } from "@oppfy/validators";
 
 import {
-  H2,
   OnboardingButton,
   OnboardingInput,
-  Paragraph,
-  ScreenView,
-  YStack,
-} from "~/components/ui";
+  OnboardingScreen,
+} from "~/components/ui/Onboarding";
 import { api, isTRPCClientError } from "~/utils/api";
+
+const PLACEHOLDERS = [
+  "Enter a username",
+  "Pick your username",
+  "Choose your handle",
+  "Create your username",
+];
 
 enum Error {
   USERNAME_TAKEN = "Username is already taken.",
+  UNKNOWN = "Something went wrong. Please try again.",
 }
 
-const Username = () => {
+export default function Username() {
   const router = useRouter();
+  const updateProfile = api.profile.updateProfile.useMutation();
 
   const [username, setUsername] = useState("");
   const [error, setError] = useState<Error | null>(null);
-
-  const updateProfile = api.profile.updateProfile.useMutation();
 
   const isValidUsername = sharedValidators.user.username.safeParse(
     username.toLowerCase(),
   ).success;
 
-  const handleUsernameChange = (text: string) => {
-    const formattedText = text.replace(/\s/g, "_");
-    setUsername(formattedText);
-  };
-
-  const onSubmit = async () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  const handleSubmit = async () => {
+    if (!isValidUsername) return;
 
     try {
-      await updateProfile.mutateAsync({
-        username: username.toLowerCase(),
-      });
-
+      await updateProfile.mutateAsync({ username: username.toLowerCase() });
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.push("/user-info/date-of-birth");
-    } catch (error) {
-      if (isTRPCClientError(error)) {
-        switch (error.data?.code) {
+    } catch (err) {
+      if (isTRPCClientError(err)) {
+        switch (err.data?.code) {
           case "CONFLICT":
             setError(Error.USERNAME_TAKEN);
             break;
+          default:
+            setError(Error.UNKNOWN);
+            break;
         }
+      } else {
+        setError(Error.UNKNOWN);
       }
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
 
   return (
-    <ScreenView
-      paddingBottom={0}
-      paddingTop="$10"
-      justifyContent="space-between"
-      keyboardAvoiding
-      safeAreaEdges={["bottom"]}
-    >
-      <YStack alignItems="center" gap="$6">
-        <H2 textAlign="center">Choose a{"\n"}username!</H2>
-
-        <OnboardingInput
-          value={username}
-          onChangeText={handleUsernameChange}
-          textAlign="center"
-          autoCorrect={false}
-          autoCapitalize="none"
-          autoFocus
+    <OnboardingScreen
+      subtitle="Create your identity"
+      title="Choose a username!"
+      error={error}
+      footer={
+        <OnboardingButton
+          onPress={handleSubmit}
+          disabled={!isValidUsername}
+          isLoading={updateProfile.isPending}
+          isValid={isValidUsername}
         />
-
-        {error ? (
-          <Paragraph size="$5" color="$red9" textAlign="center">
-            {error}
-          </Paragraph>
-        ) : (
-          <Paragraph size="$5" color="$gray11" textAlign="center">
-            Your username is how people find you. Your username must be unique.
-          </Paragraph>
-        )}
-      </YStack>
-
-      <OnboardingButton
-        marginHorizontal="$-4"
-        onPress={onSubmit}
-        disabled={!isValidUsername}
-      >
-        Continue
-      </OnboardingButton>
-    </ScreenView>
+      }
+    >
+      <OnboardingInput
+        value={username}
+        onChangeText={(text) => {
+          const formattedText = text.replace(/\s/g, "_");
+          setUsername(formattedText);
+          setError(null);
+        }}
+        placeholders={PLACEHOLDERS}
+        autoFocus
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+    </OnboardingScreen>
   );
-};
-
-export default Username;
+}

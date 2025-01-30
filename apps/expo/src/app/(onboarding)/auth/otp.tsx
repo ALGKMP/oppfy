@@ -1,21 +1,14 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import React, { useMemo, useState } from "react";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams } from "expo-router";
-import { Paragraph, styled } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
 import {
-  H2,
   OnboardingButton,
-  ScreenView,
-  Spinner,
-  Text,
-  View,
-  XStack,
-  YStack,
-} from "~/components/ui";
+  OnboardingOTPInput,
+  OnboardingScreen,
+} from "~/components/ui/Onboarding";
 import { useAuth } from "~/hooks/useAuth";
 
 enum TwilioError {
@@ -34,7 +27,7 @@ enum TwilioError {
   UNKNOWN_ERROR = "An unknown error occurred. Please try again later.",
 }
 
-const PhoneNumberOTP = () => {
+export default function PhoneNumberOTP() {
   const { phoneNumber } = useLocalSearchParams<{ phoneNumber: string }>();
   const { verifyPhoneNumber } = useAuth();
 
@@ -121,134 +114,30 @@ const PhoneNumberOTP = () => {
   };
 
   return (
-    <ScreenView
-      paddingBottom={0}
-      paddingTop="$10"
-      justifyContent="space-between"
-      keyboardAvoiding
-      safeAreaEdges={["bottom"]}
+    <OnboardingScreen
+      title={`Enter your ${"\n "} verification code`}
+      subtitle="We sent a code to your phone"
+      error={error}
+      footer={
+        <OnboardingButton
+          onPress={onSubmit}
+          disabled={!isValidPhoneNumberOTP || isLoading}
+          isLoading={isLoading}
+          isValid={isValidPhoneNumberOTP}
+          text={isLoading ? "Verifying..." : "Verify Code"}
+        />
+      }
+      successMessage={
+        !error ? `Verification code sent to ${phoneNumber}` : undefined
+      }
     >
-      <YStack alignItems="center" gap="$6">
-        <H2 textAlign="center">Enter your{"\n"}verification code</H2>
-
-        <OTPInput
-          value={phoneNumberOTP}
-          onChange={(value) => {
-            setPhoneNumberOTP(value);
-            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          }}
-        />
-
-        {error ? (
-          <Paragraph size="$5" color="$red9" textAlign="center">
-            {error}
-          </Paragraph>
-        ) : (
-          <Paragraph size="$5" color="$gray11" textAlign="center">
-            Verification code sent to{" "}
-            <Text fontWeight="bold">{phoneNumber}</Text>
-          </Paragraph>
-        )}
-      </YStack>
-
-      <OnboardingButton
-        marginHorizontal="$-4"
-        onPress={onSubmit}
-        disabled={!isValidPhoneNumberOTP || isLoading}
-      >
-        {isLoading ? <Spinner /> : "Verify Code"}
-      </OnboardingButton>
-    </ScreenView>
+      <OnboardingOTPInput
+        value={phoneNumberOTP}
+        onChange={(value) => {
+          setPhoneNumberOTP(value);
+          setError(null);
+        }}
+      />
+    </OnboardingScreen>
   );
-};
-
-interface OTPInputProps {
-  value: string;
-  onChange: (value: string) => void;
 }
-
-const OTPInput = ({ value, onChange }: OTPInputProps) => {
-  const inputRef = useRef<TextInput>(null);
-  const [focused, setFocused] = useState(false);
-
-  const handleChangeText = useCallback(
-    (text: string) => {
-      const newValue = text.replace(/[^0-9]/g, "").slice(0, 6);
-      onChange(newValue);
-    },
-    [onChange],
-  );
-
-  const handlePress = useCallback(() => {
-    inputRef.current?.focus();
-    setFocused(true);
-  }, []);
-
-  return (
-    <TouchableOpacity activeOpacity={1} onPress={handlePress}>
-      <View>
-        <TextInput
-          ref={inputRef}
-          value={value}
-          onChangeText={handleChangeText}
-          keyboardType="number-pad"
-          maxLength={6}
-          style={styles.hiddenInput}
-          autoFocus={true}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-        />
-        <XStack width="100%" justifyContent="space-between">
-          {[0, 1, 2, 3, 4, 5].map((index) => (
-            <OTPBox
-              key={index}
-              {...(focused &&
-                (index === value.length ||
-                  (value.length === 6 && index === 5)) && {
-                  backgroundColor: "$gray4",
-                })}
-            >
-              <Text fontSize="$7" fontWeight="bold" color="$color">
-                {value[index] ?? ""}
-              </Text>
-              {focused &&
-                (index === value.length ||
-                  (value.length === 6 && index === 5)) && (
-                  <View style={styles.cursor} />
-                )}
-            </OTPBox>
-          ))}
-        </XStack>
-      </View>
-    </TouchableOpacity>
-  );
-};
-
-const OTPBox = styled(View, {
-  width: 50,
-  height: 60,
-  borderRadius: "$6",
-  backgroundColor: "$gray3",
-  justifyContent: "center",
-  alignItems: "center",
-  shadowColor: "$gray6",
-  shadowRadius: 5,
-  shadowOpacity: 0.2,
-});
-
-const styles = StyleSheet.create({
-  hiddenInput: {
-    position: "absolute",
-    width: 1,
-    height: 1,
-    opacity: 0,
-  },
-  cursor: {
-    width: 2,
-    height: 32,
-    backgroundColor: "$color",
-    position: "absolute",
-  },
-});
-
-export default PhoneNumberOTP;

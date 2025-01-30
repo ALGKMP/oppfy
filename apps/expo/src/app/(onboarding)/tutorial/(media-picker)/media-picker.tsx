@@ -110,15 +110,23 @@ const MediaPickerScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
 
-  const { albumId, albumTitle, name, number, recipientName, recipientImage } =
-    useLocalSearchParams<{
-      albumId: string;
-      albumTitle: string;
-      name: string;
-      number: string;
-      recipientName: string;
-      recipientImage?: string;
-    }>();
+  const params = useLocalSearchParams<{
+    albumId: string;
+    albumTitle: string;
+    name: string;
+    number: string;
+    recipientName: string;
+    recipientImage?: string;
+  }>();
+
+  const albumId = params.albumId;
+  const albumTitle = params.albumTitle;
+  const name = decodeURIComponent(params.name);
+  const number = decodeURIComponent(params.number);
+  const recipientName = decodeURIComponent(params.recipientName);
+  const recipientImage = params.recipientImage
+    ? decodeURIComponent(params.recipientImage)
+    : undefined;
 
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
     useMediaAssets({ albumId });

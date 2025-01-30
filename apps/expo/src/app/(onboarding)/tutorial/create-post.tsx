@@ -18,7 +18,7 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { ChevronRight, ScrollText } from "@tamagui/lucide-icons";
-import { getToken, useTheme } from "tamagui";
+import { getToken, Theme, useTheme } from "tamagui";
 
 import PlayPause, {
   usePlayPauseAnimations,
@@ -29,7 +29,7 @@ import {
   CardContainer,
   H5,
   HeaderTitle,
-  OnboardingButton,
+  Icon,
   ScreenView,
   Text,
   useBottomSheetController,
@@ -37,6 +37,7 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
+import { OnboardingButton } from "~/components/ui/Onboarding";
 import { useUploadMedia } from "~/hooks/media";
 import type {
   UploadMediaInputNotOnApp,
@@ -256,76 +257,63 @@ const CreatePost = () => {
   const previewHeight = previewWidth * ASPECT_RATIO;
 
   return (
-    <ScreenView safeAreaEdges={["bottom"]} paddingHorizontal="$0">
-      <YStack flex={1} gap="$5" paddingHorizontal="$4">
-        <YStack gap="$4" alignItems="center">
-          {type === "photo" ? (
-            <Image
-              source={{ uri }}
-              style={[
-                styles.media,
-                { width: previewWidth, height: previewHeight },
-              ]}
-            />
-          ) : (
-            <PreviewVideo
-              uri={uri}
-              width={previewWidth}
-              height={previewHeight}
-            />
-          )}
+    <ScreenView safeAreaEdges={["bottom"]} paddingHorizontal="$6">
+      <Theme name="light">
+        <YStack flex={1} gap="$5">
+          <YStack gap="$4" alignItems="center">
+            {type === "photo" ? (
+              <Image
+                source={{ uri }}
+                style={[
+                  styles.media,
+                  { width: previewWidth, height: previewHeight },
+                ]}
+              />
+            ) : (
+              <PreviewVideo
+                uri={uri}
+                width={previewWidth}
+                height={previewHeight}
+              />
+            )}
 
-          <XStack gap="$2" alignItems="center">
-            <Avatar
-              size={28}
-              source={recipientImage ?? DefaultProfilePicture}
-              bordered
-            />
-            <Text color="$gray11">
-              Posting to{" "}
-              <Text fontWeight="bold" color="$primary">
-                {params.userType === "onApp" ? "@" : ""}
-                {displayName}
+            <XStack gap="$2" alignItems="center">
+              <Avatar
+                size={28}
+                source={recipientImage ?? DefaultProfilePicture}
+                bordered
+                style={{ borderColor: theme.color.val, borderWidth: 1 }}
+              />
+              <Text>
+                Posting to <Text fontWeight="bold">@{displayName}</Text>
               </Text>
-            </Text>
-          </XStack>
-        </YStack>
-
-        <CardContainer padding="$4" paddingBottom="$5">
-          <YStack gap="$3">
-            <HeaderTitle>Post Details</HeaderTitle>
-            <XStack
-              justifyContent="space-between"
-              alignItems="center"
-              onPress={openCaptionSheet}
-            >
-              <XStack flex={1} alignItems="center" gap="$3" mr="$4">
-                <Ionicons
-                  name="chatbubble-outline"
-                  size={24}
-                  color={theme.gray10.val}
-                />
-                <View flex={1}>
-                  <Text fontSize="$5" fontWeight="500">
-                    {caption || "Add caption"}
-                  </Text>
-                </View>
-              </XStack>
-              <ChevronRight size={24} color="$gray10" />
             </XStack>
           </YStack>
-        </CardContainer>
-      </YStack>
 
-      {/* <Button
-        variant="primary"
-        onPress={onSubmit}
-        pressStyle={{ scale: 0.95 }}
-        animation="bouncy"
-      >
-        {buttonMessage}
-      </Button> */}
-      <OnboardingButton onPress={onSubmit}>{buttonMessage}</OnboardingButton>
+          <CardContainer padding="$4" paddingBottom="$5">
+            <YStack gap="$3">
+              <HeaderTitle>Post Details</HeaderTitle>
+              <XStack
+                justifyContent="space-between"
+                alignItems="center"
+                onPress={openCaptionSheet}
+              >
+                <XStack flex={1} alignItems="center" gap="$3" mr="$4">
+                  <Icon name="chatbubble-outline" />
+                  <View flex={1}>
+                    <Text fontSize="$5" fontWeight="500">
+                      {caption || "Add caption"}
+                    </Text>
+                  </View>
+                </XStack>
+                <Icon name="chevron-forward" />
+              </XStack>
+            </YStack>
+          </CardContainer>
+        </YStack>
+
+        <OnboardingButton text={buttonMessage} onPress={onSubmit} hideIcon />
+      </Theme>
     </ScreenView>
   );
 };

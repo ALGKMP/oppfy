@@ -11,11 +11,9 @@ import type {
 
 const { Navigator } = createDrawerNavigator();
 
-const Drawer = withLayoutContext<
+export const Drawer = withLayoutContext<
   DrawerNavigationOptions,
   typeof Navigator,
   StackNavigationState<ParamListBase>,
   DrawerNavigationEventMap
 >(Navigator);
-
-export { Drawer };

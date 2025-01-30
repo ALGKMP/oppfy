@@ -6,32 +6,55 @@ import { useMutation } from "@tanstack/react-query";
 import { api } from "~/utils/api";
 
 interface UseUploadProfilePictureInput {
-  optimisticallyUpdate: boolean;
+  optimisticallyUpdate?: boolean;
 }
 
-const useUploadProfilePicture = ({
-  optimisticallyUpdate,
-}: UseUploadProfilePictureInput) => {
-  const [imageUri, setImageUri] = useState<string | null>(null);
-
+export default function useUploadProfilePicture({
+  optimisticallyUpdate = true,
+}: UseUploadProfilePictureInput = {}) {
+  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const utils = api.useUtils();
 
-  const generatePresignedUrlForProfilePicture =
+  const generatePresignedUrl =
     api.profile.generatePresignedUrlForProfilePicture.useMutation();
 
-  const getMediaBlob = async (uri: string) => {
-    const response = await fetch(uri);
-    return await response.blob();
-  };
+  // Pick image mutation
+  const pickImage = useMutation({
+    mutationFn: async () => {
+      // Let user pick an image
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
 
-  const uploadProfilePicture = useMutation<void, Error, string>({
+      if (result.canceled || !result.assets[0]) {
+        throw new Error("Image selection cancelled");
+      }
+
+      // Reduce image resolution
+      const { uri } = await ImageManipulator.manipulateAsync(
+        result.assets[0].uri,
+        undefined,
+        { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG },
+      );
+
+      return uri;
+    },
+    onSuccess: (uri) => {
+      setSelectedImageUri(uri);
+    },
+  });
+
+  // Upload image mutation
+  const uploadImage = useMutation({
     mutationFn: async (uri: string) => {
-      const profilePictureBlob = await getMediaBlob(uri);
+      const profilePictureBlob = await fetch(uri).then((r) => r.blob());
 
-      const presignedUrl =
-        await generatePresignedUrlForProfilePicture.mutateAsync({
-          contentLength: profilePictureBlob.size,
-        });
+      const presignedUrl = await generatePresignedUrl.mutateAsync({
+        contentLength: profilePictureBlob.size,
+      });
 
       const response = await fetch(presignedUrl, {
         method: "PUT",
@@ -41,93 +64,65 @@ const useUploadProfilePicture = ({
       if (!response.ok) {
         throw new Error("Failed to upload profile picture");
       }
+
+      return uri;
     },
     onMutate: async (newProfilePictureUrl: string) => {
       if (!optimisticallyUpdate) return;
 
-      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      // Cancel outgoing fetches
       await utils.profile.getFullProfileSelf.cancel();
 
-      // Get the data from the queryCache
+      // Get current data
       const prevData = utils.profile.getFullProfileSelf.getData();
-      if (prevData === undefined) return;
+      if (!prevData) return;
 
-      // Optimistically update the data
+      // Optimistically update
       utils.profile.getFullProfileSelf.setData(undefined, {
         ...prevData,
         profilePictureUrl: newProfilePictureUrl,
       });
 
-      // Return the previous data so we can revert if something goes wrong
       return { prevData };
     },
-    onError: (err: Error, newProfilePictureUrl: string, ctx: any) => {
-      if (!optimisticallyUpdate) return;
-      if (ctx === undefined) return;
+    onError: (err, newUrl, ctx) => {
+      if (!optimisticallyUpdate || !ctx) return;
 
-      // If the mutation fails, use the context-value from onMutate
+      // Revert optimistic update on error
       utils.profile.getFullProfileSelf.setData(undefined, ctx.prevData);
     },
     onSettled: () => {
       if (!optimisticallyUpdate) return;
-      // Sync with server once mutation has settled
+
+      // Sync with server after delay
       setTimeout(
         () => void utils.profile.getFullProfileSelf.invalidate(),
         10000,
       );
-      // await utils.profile.getFullProfileSelf.invalidate();
     },
   });
 
-  const pickImage = async () => {
-    // Let the user pick an image
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (result.canceled || !result.assets[0]) {
-      return { success: false };
-    }
-
-    return { success: true, uri: result.assets[0].uri };
-  };
-
-  const pickAndUploadImage = async () => {
-    // Let the user pick an image
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (result.canceled || !result.assets[0]) {
-      return { success: false };
-    }
-
-    // Reduce image resolution
-    const { uri } = await ImageManipulator.manipulateAsync(
-      result.assets[0].uri,
-      undefined,
-      { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG },
-    );
-
-    setImageUri(uri);
-
-    await uploadProfilePicture.mutateAsync(uri);
-
-    return { success: true };
-  };
-
   return {
-    imageUri,
-    pickAndUploadImage,
-    uploadStatus: uploadProfilePicture.status,
-    error: uploadProfilePicture.error,
-  };
-};
+    // State
+    selectedImageUri,
 
-export default useUploadProfilePicture;
+    // Actions
+    pickImage: () => pickImage.mutateAsync(),
+    uploadImage: (uri: string) => uploadImage.mutateAsync(uri),
+
+    // Status
+    isPickerLoading: pickImage.isPending,
+    isUploading: uploadImage.isPending,
+
+    // Errors
+    pickError: pickImage.error,
+    uploadError: uploadImage.error,
+
+    // Reset
+    reset: () => {
+      setSelectedImageUri(null);
+      pickImage.reset();
+      uploadImage.reset();
+    },
+  };
+}

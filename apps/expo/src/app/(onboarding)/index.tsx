@@ -1,98 +1,192 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { Dimensions } from "react-native";
 import Animated, {
   Easing,
+  interpolate,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
-  withRepeat,
   withSequence,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { SplashScreen, useRouter } from "expo-router";
 import Splash from "@assets/splash.png";
+import { getToken } from "tamagui";
 
-import { H2, OnboardingButton, ScreenView, View } from "~/components/ui";
+import { H2, ScreenView, View } from "~/components/ui";
+import { OnboardingButton } from "~/components/ui/Onboarding";
 import { usePermissions } from "~/contexts/PermissionsContext";
 
-const { width, height } = Dimensions.get("window");
+// ====================== CONFIG ======================
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+// Fixed-size pool for performance
+const MAX_EMOJI_POOL = 50;
+const SPAWN_INTERVAL_MS = 100;
 
 const CONFIG = {
-  MAX_CAMERAS: 50,
-  CAMERA_SIZE: 30,
-  INITIAL_SPAWN_INTERVAL: 100,
-  NORMAL_SPAWN_INTERVAL: 200,
-  MIN_DURATION: 2000,
-  MAX_DURATION: 4000,
-  MAX_X_SPEED: 250,
-  MAX_Y_SPEED: 250,
+  EMOJI_SIZE: 40,
+  // Fall durations let you see the arc
+  FALL_DURATION_MIN: 2000,
+  FALL_DURATION_MAX: 2500,
+
+  // We'll do a single half-cosine in X
+  // amplitude picks a random sign for left or right
+  ARC_AMPLITUDE_MIN: 40,
+  ARC_AMPLITUDE_MAX: 120,
+
+  // We'll rotate up to ±20° across the fall
+  MAX_ROTATION_DEG: 20,
+
+  PHASES: [
+    { key: "FIRE", emoji: "🔥", duration: 1200 },
+    { key: "SKULL", emoji: "💀", duration: 1200 },
+    { key: "LAUGH", emoji: "😈", duration: 1200 },
+    { key: "CAMERA", emoji: "📸", duration: 2000 },
+  ],
 };
 
-const Camera = () => {
-  const translateY = useSharedValue(-CONFIG.CAMERA_SIZE - 200);
-  const translateX = useSharedValue(Math.random() * width);
-  const rotate = useSharedValue(0);
+// ================== FLOATING EMOJI (POOL ITEM) ==================
+export interface FloatingEmojiRef {
+  resetAndAnimate: (emoji: string) => void;
+}
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-      { rotate: `${rotate.value}deg` },
-    ],
-  }));
+interface FloatingEmojiProps {
+  size: number;
+}
 
-  useEffect(() => {
-    const duration =
-      CONFIG.MIN_DURATION +
-      Math.random() * (CONFIG.MAX_DURATION - CONFIG.MIN_DURATION);
-    const yDistance = height + CONFIG.CAMERA_SIZE * 2;
-    const ySpeed = Math.min(yDistance / (duration / 1000), CONFIG.MAX_Y_SPEED);
-    const adjustedDuration = (yDistance / ySpeed) * 1000;
+/**
+ * A single re-usable emoji that arcs from top to bottom.
+ */
+const FloatingEmoji = forwardRef<FloatingEmojiRef, FloatingEmojiProps>(
+  ({ size }, ref) => {
+    // We store the actual character in normal React state
+    const [emoji, setEmoji] = useState("🔥");
 
-    translateY.value = withTiming(yDistance, {
-      duration: adjustedDuration,
-      easing: Easing.linear,
+    // Reanimated shared values
+    const progress = useSharedValue(0); // 0→1 over the fall
+    const startX = useSharedValue(0); // random initial x
+    const arcAmp = useSharedValue(0); // amplitude for arc
+    const scale = useSharedValue(0);
+
+    // Called by the parent to spawn a new fall
+    useImperativeHandle(ref, () => ({
+      resetAndAnimate(newEmoji: string) {
+        setEmoji(newEmoji);
+
+        progress.value = 0;
+
+        // random initial X
+        const x = Math.random() * SCREEN_WIDTH;
+        startX.value = x;
+
+        // random arc amplitude ±
+        const ampBase =
+          CONFIG.ARC_AMPLITUDE_MIN +
+          Math.random() * (CONFIG.ARC_AMPLITUDE_MAX - CONFIG.ARC_AMPLITUDE_MIN);
+        // 50% chance left or right
+        arcAmp.value = Math.random() < 0.5 ? -ampBase : ampBase;
+
+        // random fall time
+        const duration =
+          CONFIG.FALL_DURATION_MIN +
+          Math.random() * (CONFIG.FALL_DURATION_MAX - CONFIG.FALL_DURATION_MIN);
+
+        // animate progress 0→1
+        progress.value = withTiming(1, {
+          duration,
+          easing: Easing.out(Easing.quad),
+        });
+
+        // pop-in scale
+        scale.value = 0;
+        scale.value = withSequence(
+          withSpring(1.1, { damping: 9 }),
+          withSpring(1, { damping: 8 }),
+        );
+      },
+    }));
+
+    // Animate x/y from progress
+    const animatedStyle = useAnimatedStyle(() => {
+      // y: linear from well above top to well below bottom
+      const y = interpolate(
+        progress.value,
+        [0, 1],
+        [-size - 200, SCREEN_HEIGHT + size * 2],
+      );
+
+      // x: single half-cosine arc from 0 to 2 * amplitude
+      // x(t) = startX + arcAmp * (1 - cos(pi * t))
+      //  - at t=0 => x(0) = startX
+      //  - at t=1 => x(1) = startX + 2 * arcAmp
+      const arcFactor = 1 - Math.cos(Math.PI * progress.value);
+      const x = startX.value + arcAmp.value * arcFactor;
+
+      // rotation: from 0 to ±MAX_ROTATION_DEG across progress
+      // sign determined by arcAmp. So if we arc right, we rotate right.
+      const rotationSign = arcAmp.value > 0 ? 1 : -1;
+      const rotateDeg = rotationSign * CONFIG.MAX_ROTATION_DEG * progress.value;
+
+      return {
+        transform: [
+          { translateX: x },
+          { translateY: y },
+          { rotate: `${rotateDeg}deg` },
+          { scale: scale.value },
+        ],
+        // fade slightly at the bottom
+        opacity: progress.value < 0.98 ? 1 : 0.99,
+      };
     });
 
-    translateX.value = withTiming(
-      translateX.value + (Math.random() - 0.5) * CONFIG.MAX_X_SPEED * 2,
-      { duration: adjustedDuration, easing: Easing.linear },
+    return (
+      <Animated.Text
+        style={[
+          {
+            position: "absolute",
+            fontSize: size,
+            textShadowColor: "rgba(0,0,0,0.2)",
+            textShadowOffset: { width: 1, height: 1 },
+            textShadowRadius: 4,
+          },
+          animatedStyle,
+        ]}
+      >
+        {emoji}
+      </Animated.Text>
     );
+  },
+);
+FloatingEmoji.displayName = "FloatingEmoji";
 
-    rotate.value = withRepeat(
-      withTiming(360, {
-        duration: adjustedDuration / 3,
-        easing: Easing.linear,
-      }),
-      -1,
-      false,
-    );
-  }, [rotate, translateX, translateY]);
-
-  return (
-    <Animated.Text
-      style={[
-        { position: "absolute", fontSize: CONFIG.CAMERA_SIZE },
-        animatedStyle,
-      ]}
-    >
-      📸
-    </Animated.Text>
-  );
-};
-
+// =================== MAIN SCREEN ===================
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 
-const Start = () => {
+export default function Start() {
   const router = useRouter();
   const { permissions } = usePermissions();
   const requiredPermissions = permissions.camera && permissions.contacts;
 
-  const [cameras, setCameras] = useState<number[]>([]);
-  const [isInitialSpawn, setIsInitialSpawn] = useState(true);
+  // Phase index
+  const [phaseIndex, setPhaseIndex] = useState(0);
+  // Stop spawning after final phase
+  const [shouldSpawn, setShouldSpawn] = useState(true);
 
+  // Our pool of 50 references
+  const emojiRefs = useRef<FloatingEmojiRef[]>([]);
+  const poolCursorRef = useRef(0);
+
+  // Main logo reanimated
   const scale = useSharedValue(1);
   const rotate = useSharedValue(0);
   const translateY = useSharedValue(0);
@@ -100,84 +194,137 @@ const Start = () => {
   const subtitleTranslateY = useSharedValue(20);
   const buttonOpacity = useSharedValue(0);
   const buttonTranslateY = useSharedValue(50);
+  const glowOpacity = useSharedValue(0);
 
-  const onSubmit = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    requiredPermissions
-      ? router.push("/auth/phone-number")
-      : router.push("/misc/permissions");
-  };
-
-  const addCamera = () => {
-    setCameras((prev) => {
-      if (prev.length >= CONFIG.MAX_CAMERAS) {
-        return [...prev.slice(1), Date.now()];
-      }
-      return [...prev, Date.now()];
-    });
-  };
-
+  // =================== SPAWNING ===================
   useEffect(() => {
-    const interval = setInterval(
-      () => {
-        addCamera();
-        if (cameras.length >= CONFIG.MAX_CAMERAS && isInitialSpawn) {
-          setIsInitialSpawn(false);
+    if (!shouldSpawn) return undefined;
+
+    const intervalId = setInterval(() => {
+      const phase = CONFIG.PHASES[phaseIndex];
+      const emoji = phase ? phase.emoji : "🔥";
+
+      if (emojiRefs.current.length > 0) {
+        const i = poolCursorRef.current;
+        if (emojiRefs.current[i]) {
+          emojiRefs.current[i].resetAndAnimate(emoji);
         }
-      },
-      isInitialSpawn
-        ? CONFIG.INITIAL_SPAWN_INTERVAL
-        : CONFIG.NORMAL_SPAWN_INTERVAL,
-    );
+        poolCursorRef.current = (i + 1) % MAX_EMOJI_POOL;
+      }
+    }, SPAWN_INTERVAL_MS);
 
-    return () => clearInterval(interval);
-  }, [cameras.length, isInitialSpawn]);
+    return () => clearInterval(intervalId);
+  }, [phaseIndex, shouldSpawn]);
 
+  // =================== PHASE PROGRESSION ===================
   useEffect(() => {
-    const fn = async () => {
+    let isMounted = true;
+    const runPhases = async () => {
+      for (let i = 0; i < CONFIG.PHASES.length; i++) {
+        if (!isMounted) return;
+        setPhaseIndex(i);
+        await new Promise((resolve) =>
+          setTimeout(resolve, CONFIG.PHASES[i]?.duration ?? 0),
+        );
+      }
+      // Done with all phases
+      setShouldSpawn(false);
+    };
+
+    void runPhases();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // =================== SPLASH + LOGO ANIMATION ===================
+  useEffect(() => {
+    const animateStartup = async () => {
+      // Let splash be visible for a bit, then hide
       await new Promise((resolve) => setTimeout(resolve, 300));
       await SplashScreen.hideAsync();
 
+      // Big scale entrance
       scale.value = withSequence(
-        withTiming(0.9, { duration: 1500, easing: Easing.bounce }),
-        withTiming(1, { duration: 300 }),
+        withTiming(0.8, { duration: 100 }),
+        withSpring(1.2, { damping: 12, stiffness: 100 }),
+        withSpring(1, { damping: 10 }),
       );
 
+      // Wiggle rotate
       rotate.value = withSequence(
-        withTiming(10, { duration: 100 }),
-        withTiming(-10, { duration: 100 }),
-        withTiming(0, { duration: 100 }),
+        withTiming(12, { duration: 200 }),
+        withTiming(-12, { duration: 200 }),
+        withTiming(0, { duration: 200 }),
       );
 
+      // Bounce
       translateY.value = withSequence(
-        withTiming(-30, { duration: 500 }),
-        withTiming(0, { duration: 500 }),
+        withTiming(-50, { duration: 300 }),
+        withSpring(0, { damping: 8, stiffness: 100 }),
       );
 
-      subtitleOpacity.value = withDelay(1800, withTiming(1, { duration: 800 }));
+      // Glow effect
+      glowOpacity.value = withSequence(
+        withTiming(1, { duration: 500 }),
+        withTiming(0.4, { duration: 500 }),
+        withTiming(1, { duration: 500 }),
+        withTiming(0.7, { duration: 500 }), // final
+      );
+
+      // Subtitle + button
+      subtitleOpacity.value = withDelay(
+        700,
+        withSpring(1, { damping: 12, stiffness: 80 }),
+      );
       subtitleTranslateY.value = withDelay(
-        1800,
-        withTiming(0, { duration: 800, easing: Easing.out(Easing.back(2)) }),
+        700,
+        withSpring(0, { damping: 12, stiffness: 80 }),
       );
 
-      buttonOpacity.value = withDelay(2200, withTiming(1, { duration: 500 }));
+      buttonOpacity.value = withDelay(
+        1000,
+        withSpring(1, { damping: 12, stiffness: 80 }),
+      );
       buttonTranslateY.value = withDelay(
-        2200,
-        withTiming(0, { duration: 500, easing: Easing.out(Easing.back(2)) }),
+        1000,
+        withSpring(0, { damping: 12, stiffness: 80 }),
       );
     };
 
-    void fn();
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    void animateStartup();
+  }, [
+    scale,
+    rotate,
+    translateY,
+    glowOpacity,
+    subtitleOpacity,
+    subtitleTranslateY,
+    buttonOpacity,
+    buttonTranslateY,
+  ]);
 
+  // =================== HANDLER ===================
+  const onSubmit = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    if (requiredPermissions) {
+      router.push("/auth/phone-number");
+    } else {
+      router.push("/misc/permissions");
+    }
+  };
+
+  // =================== ANIMATED STYLES ===================
   const animatedIconStyle = useAnimatedStyle(() => ({
     transform: [
       { scale: scale.value },
       { rotate: `${rotate.value}deg` },
       { translateY: translateY.value },
     ],
+  }));
+
+  const animatedGlowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
   }));
 
   const animatedSubtitleStyle = useAnimatedStyle(() => ({
@@ -190,19 +337,25 @@ const Start = () => {
     transform: [{ translateY: buttonTranslateY.value }],
   }));
 
-  const renderedCameras = useMemo(
-    () => cameras.map((id) => <Camera key={id} />),
-    [cameras],
-  );
-
+  // =================== RENDER ===================
   return (
     <ScreenView
       padding={0}
       backgroundColor="$primary"
       safeAreaEdges={["bottom"]}
     >
-      {renderedCameras}
+      {/* Pooled emojis, each arcs once. */}
+      {Array.from({ length: MAX_EMOJI_POOL }, (_, i) => (
+        <FloatingEmoji
+          key={`emoji-${i}`}
+          ref={(ref) => {
+            if (ref) emojiRefs.current[i] = ref;
+          }}
+          size={CONFIG.EMOJI_SIZE}
+        />
+      ))}
 
+      {/* Main Logo & UI */}
       <View
         position="absolute"
         width="100%"
@@ -210,6 +363,21 @@ const Start = () => {
         justifyContent="center"
         alignItems="center"
       >
+        {/* Glow behind logo */}
+        <Animated.View
+          style={[
+            {
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(255,255,255,0.1)",
+              borderRadius: 9999,
+              transform: [{ scale: 1.2 }],
+            },
+            animatedGlowStyle,
+          ]}
+        />
+
         <AnimatedImage
           source={Splash}
           contentFit="contain"
@@ -223,8 +391,17 @@ const Start = () => {
           ]}
         />
 
-        <Animated.View style={[animatedSubtitleStyle]}>
-          <H2 textAlign="center">Other people post for you</H2>
+        <Animated.View style={animatedSubtitleStyle}>
+          <H2
+            textAlign="center"
+            style={{
+              textShadowColor: "rgba(0,0,0,0.2)",
+              textShadowOffset: { width: 1, height: 1 },
+              textShadowRadius: 10,
+            }}
+          >
+            Other people post for you
+          </H2>
         </Animated.View>
       </View>
 
@@ -232,17 +409,20 @@ const Start = () => {
         style={[
           {
             position: "absolute",
-            bottom: 0,
             left: 0,
             right: 0,
+            bottom: getToken("$4", "space") as number,
+            paddingHorizontal: getToken("$6", "space") as number,
           },
           animatedButtonStyle,
         ]}
       >
-        <OnboardingButton onPress={onSubmit}>Welcome</OnboardingButton>
+        <OnboardingButton
+          onPress={onSubmit}
+          isValid
+          text="Welcome to Chaos 😈"
+        />
       </Animated.View>
     </ScreenView>
   );
-};
-
-export default Start;
+}

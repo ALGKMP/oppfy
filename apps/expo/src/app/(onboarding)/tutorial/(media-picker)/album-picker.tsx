@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as MediaLibrary from "expo-media-library";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { ChevronRight } from "@tamagui/lucide-icons";
 import { getToken, Image, Text, XStack, YStack } from "tamagui";
@@ -15,6 +15,12 @@ type AlbumWithCover = MediaLibrary.Album & {
 const AlbumPickerScreen = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { name, number, recipientName, recipientImage } = useLocalSearchParams<{
+    name: string;
+    number: string;
+    recipientName: string;
+    recipientImage?: string;
+  }>();
 
   const [albums, setAlbums] = useState<AlbumWithCover[]>([]);
 
@@ -85,6 +91,10 @@ const AlbumPickerScreen = () => {
           params: {
             albumId: id,
             albumTitle: title,
+            name,
+            number,
+            recipientName,
+            recipientImage,
           },
         });
       };
@@ -122,7 +132,7 @@ const AlbumPickerScreen = () => {
         </XStack>
       );
     },
-    [router, albums],
+    [router, albums, name, number, recipientName, recipientImage],
   );
 
   /**
