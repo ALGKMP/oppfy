@@ -5,6 +5,7 @@ import {
   BlockRepository,
   ContactsRepository,
   FollowRepository,
+  NotificationsRepository,
   PostRepository,
   PostStatsRepository,
   ProfileRepository,
@@ -29,6 +30,7 @@ export class UserService {
   private contactsRepository = new ContactsRepository();
   private profileStatsRepository = new ProfileStatsRepository();
   private postStatsRepository = new PostStatsRepository();
+  private notificationsRepository = new NotificationsRepository();
 
   private sqsService = new SQSService();
   // private notificationService = new NotificationsService();
@@ -62,7 +64,7 @@ export class UserService {
       name,
     );
 
-/*     const fetchAndSendNotifications = async (userId: string) => {
+    const fetchAndSendNotifications = async (userId: string) => {
       const pageSize = 10;
       let cursor: { createdAt: Date; postId: string } | null = null;
 
@@ -93,7 +95,20 @@ export class UserService {
             }),
           );
 
-          await this.notificationService.sendNotifications(notis);
+          const mappedNotis = await Promise.all(
+            notis.map(async (noti) => {
+              return {
+                pushTokens: await this.notificationsRepository.getPushTokens(
+                  noti.recipientId,
+                ),
+                senderId: noti.senderId,
+                recipientId: noti.recipientId,
+                notificationData: noti.notificationData,
+              };
+            }),
+          );
+
+          await this.notificationsRepository.sendNotifications(mappedNotis);
 
           cursor = hasMore
             ? {
@@ -107,7 +122,7 @@ export class UserService {
         }
       } while (cursor !== null);
     };
- */
+
     // await fetchAndSendNotifications(userId);
   }
 
