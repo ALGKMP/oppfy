@@ -36,8 +36,8 @@ const SPAWN_INTERVAL_MS = 100;
 const CONFIG = {
   EMOJI_SIZE: 40,
   // Fall durations let you see the arc
-  FALL_DURATION_MIN: 2000,
-  FALL_DURATION_MAX: 2500,
+  FALL_DURATION_MIN: 1500,
+  FALL_DURATION_MAX: 2000,
 
   // We'll do a single half-cosine in X
   // amplitude picks a random sign for left or right
@@ -51,7 +51,7 @@ const CONFIG = {
     { key: "FIRE", emoji: "🔥", duration: 1200 },
     { key: "SKULL", emoji: "💀", duration: 1200 },
     { key: "LAUGH", emoji: "😈", duration: 1200 },
-    { key: "CAMERA", emoji: "📸", duration: 2000 },
+    { key: "CAMERA", emoji: "📸", duration: 3000 },
   ],
 };
 
@@ -110,7 +110,7 @@ const FloatingEmoji = forwardRef<FloatingEmojiRef, FloatingEmojiProps>(
         // pop-in scale
         scale.value = 0;
         scale.value = withSequence(
-          withSpring(1.1, { damping: 9 }),
+          withSpring(1.05, { damping: 9 }),
           withSpring(1, { damping: 8 }),
         );
       },
