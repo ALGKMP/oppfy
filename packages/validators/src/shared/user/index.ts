@@ -7,9 +7,9 @@ import { AgeChecker } from "@oppfy/utils";
 export const name = z
   .string()
   .min(1, { message: "Name is too short" })
-  .max(24, { message: "Name is too long" })
-  .regex(/^[a-zA-Z]+$/, {
-    message: "Name can only contain letters",
+  .max(50, { message: "Name is too long" })
+  .regex(/^[a-zA-Z]+(?:\s[a-zA-Z]+)?$/, {
+    message: "Name can only contain letters and a single space between names",
   });
 
 export const username = z
@@ -17,7 +17,7 @@ export const username = z
   .min(1, "Too short")
   .max(30, "Too long")
   .regex(/^[a-z0-9_]/, "Must start with letter, number, or underscore")
-  .regex(/^[a-z0-9_\.]*$/, "Only lowercase, numbers, underscores, dots allowed")
+  .regex(/^[a-z0-9_.]*$/, "Only lowercase, numbers, underscores, dots allowed")
   .regex(/[a-z0-9]$/, "Must end with letter or number");
 
 export const bio = z
