@@ -8,7 +8,7 @@ import { env } from "@oppfy/env";
 import { createTRPCRouter, publicProcedure } from "../../trpc";
 
 // Admin phone numbers that bypass Twilio verification
-const ADMIN_PHONE_NUMBERS = ["+16475504668", "+14107628976"];
+const ADMIN_PHONE_NUMBERS = ["+16478852142", "+16475504668", "+14107628976"];
 
 // Secret keys should be in environment variables in production
 
