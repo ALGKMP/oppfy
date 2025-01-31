@@ -62,7 +62,7 @@ export class UserService {
       name,
     );
 
-    const fetchAndSendNotifications = async (userId: string) => {
+/*     const fetchAndSendNotifications = async (userId: string) => {
       const pageSize = 10;
       let cursor: { createdAt: Date; postId: string } | null = null;
 
@@ -107,7 +107,7 @@ export class UserService {
         }
       } while (cursor !== null);
     };
-
+ */
     // await fetchAndSendNotifications(userId);
   }
 
