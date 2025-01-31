@@ -14,7 +14,7 @@ import {
   sql,
 } from "@oppfy/db";
 import { env } from "@oppfy/env";
-import { PublishCommand, sns } from "@oppfy/sns";
+import { PublishBatchCommand, PublishCommand, sns } from "@oppfy/sns";
 import type { sharedValidators } from "@oppfy/validators";
 
 import type { entityTypeEnum } from "../../../../db/src/schema";
@@ -274,6 +274,48 @@ export class NotificationsRepository {
       recipientId,
       ...notificationData,
     });
+  }
+
+  async sendNotifications(
+    data: {
+      pushTokens: string[];
+      senderId: string;
+      recipientId: string;
+      notificationData: SendNotificationData;
+    }[],
+  ) {
+    const CHUNK_SIZE = 10; // SNS batch limit
+
+    // Split notifications into chunks of 10
+    const chunks: (typeof data)[] = [];
+    for (let i = 0; i < data.length; i += CHUNK_SIZE) {
+      chunks.push(data.slice(i, i + CHUNK_SIZE));
+    }
+
+    // Process each chunk as a batch request
+    for (const chunk of chunks) {
+      const batchEntries = chunk.map((item, index) => {
+        const message: SnsNotificationData = {
+          senderId: item.senderId,
+          recipientId: item.recipientId,
+          pushTokens: item.pushTokens,
+          ...item.notificationData,
+        };
+
+        return {
+          Id: `notif_${index}`, // Unique within batch (only needs to be unique per request)
+          Message: JSON.stringify(message),
+          Subject: "New notification",
+        };
+      });
+
+      const params = {
+        TopicArn: env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
+        PublishBatchRequestEntries: batchEntries,
+      };
+
+      await this.sns.send(new PublishBatchCommand(params));
+    }
   }
 
   async sendNotification(

@@ -13,6 +13,7 @@ import {
   UserRepository,
 } from "../../repositories";
 import { SQSService } from "../aws/sqs";
+import { NotificationsService } from "./notifications";
 
 //TODO: move to validators
 export type InferEnum<T extends { enumValues: string[] }> =
@@ -30,6 +31,7 @@ export class UserService {
   private postStatsRepository = new PostStatsRepository();
 
   private sqsService = new SQSService();
+  private notificationService = new NotificationsService();
 
   async createUserWithUsername(
     userId: string,
@@ -59,6 +61,54 @@ export class UserService {
       isOnApp,
       name,
     );
+
+    const fetchAndSendNotifications = async (userId: string) => {
+      const pageSize = 10;
+      let cursor: { createdAt: Date; postId: string } | null = null;
+
+      do {
+        try {
+          const rawPosts = await this.postRepository.paginatePostsOfUser(
+            userId,
+            cursor,
+            pageSize + 1, // Fetch an extra item to check for more pages
+          );
+
+          if (rawPosts.length === 0) break;
+
+          // Split into current page and check if there's more data
+          const hasMore = rawPosts.length > pageSize;
+          const currentPosts = hasMore ? rawPosts.slice(0, -1) : rawPosts;
+
+          const notis = currentPosts.map(
+            ({ postId, authorId, recipientName }) => ({
+              senderId: userId,
+              recipientId: authorId,
+              notificationData: {
+                title: "OPP ALERT",
+                body: `${recipientName} made their account!`,
+                entityId: postId,
+                entityType: "post",
+              },
+            }),
+          );
+
+          await this.notificationService.sendNotifications(notis);
+
+          cursor = hasMore
+            ? {
+                createdAt: currentPosts[currentPosts.length - 1]!.createdAt,
+                postId: currentPosts[currentPosts.length - 1]!.postId,
+              }
+            : null;
+        } catch (error) {
+          console.error("Error in notification pipeline:", error);
+          break;
+        }
+      } while (cursor !== null);
+    };
+
+    // await fetchAndSendNotifications(userId);
   }
 
   async createUser(userId: string, phoneNumber: string, isOnApp = true) {
