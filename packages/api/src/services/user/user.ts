@@ -33,7 +33,6 @@ export class UserService {
   private notificationsRepository = new NotificationsRepository();
 
   private sqsService = new SQSService();
-  // private notificationService = new NotificationsService();
 
   async createUserWithUsername(
     userId: string,
