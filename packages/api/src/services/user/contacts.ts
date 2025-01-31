@@ -76,9 +76,6 @@ export class ContactService {
     if (phoneNumbers.length === 0) {
       return [];
     }
-
-    console.log("phoneNumbers", phoneNumbers);
-
     const existingPhoneNumbers =
       await this.userRepository.existingPhoneNumbers(phoneNumbers);
 
@@ -111,6 +108,7 @@ export class ContactService {
       ...recommendationsIds.tier2,
       ...recommendationsIds.tier3,
     ];
+
     if (allRecommendations.length === 0) {
       const randomProfiles =
         await this.userRepository.getRandomActiveProfilesForRecs(userId, 10);
