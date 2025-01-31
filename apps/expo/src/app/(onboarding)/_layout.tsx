@@ -48,7 +48,7 @@ export default function OnboardingLayout() {
       <OnboardingStack.Screen
         name="misc/permissions"
         options={{
-          title: "Permissions",
+          title: "",
         }}
       />
     </OnboardingStack>
