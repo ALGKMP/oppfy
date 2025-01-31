@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { DimensionValue } from "react-native";
+import type { DimensionValue } from "react-native";
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,6 +16,7 @@ import {
   Button,
   CardContainer,
   HeaderTitle,
+  Icon,
   ScreenView,
   Separator,
   Spinner,
@@ -299,7 +300,13 @@ const BioSheet = ({
 
 const EditProfile = () => {
   const theme = useTheme();
-  const { pickAndUploadImage } = useUploadProfilePicture({
+  const {
+    selectedImageUri,
+    pickImage,
+    uploadImage,
+    isPickerLoading,
+    isUploading,
+  } = useUploadProfilePicture({
     optimisticallyUpdate: true,
   });
   const { show, hide } = useBottomSheetController();
@@ -307,6 +314,11 @@ const EditProfile = () => {
 
   const utils = api.useUtils();
   const { data: defaultValues } = api.profile.getFullProfileSelf.useQuery();
+
+  const handleProfilePictureUpdate = async () => {
+    const imageUri = await pickImage();
+    await uploadImage(imageUri);
+  };
 
   const updateProfile = api.profile.updateProfile.useMutation({
     onMutate: async (newData) => {
@@ -388,7 +400,10 @@ const EditProfile = () => {
     <ScreenView scrollable safeAreaEdges={["bottom"]}>
       <YStack gap="$5">
         {/* Profile Picture Section */}
-        <TouchableOpacity onPress={pickAndUploadImage}>
+        <TouchableOpacity
+          onPress={handleProfilePictureUpdate}
+          disabled={isPickerLoading || isUploading}
+        >
           <YStack alignItems="center" gap="$3">
             <View position="relative">
               <Image
@@ -408,15 +423,21 @@ const EditProfile = () => {
                 bottom={0}
                 right={0}
                 borderRadius={40}
-                borderWidth="$2"
-                borderColor={theme.background.val}
+                borderWidth={3}
+                borderColor="$background"
                 backgroundColor="$gray5"
                 padding="$2"
               >
-                <Ionicons name="camera" size={24} color={theme.blue9.val} />
+                {isUploading ? (
+                  <Spinner size="small" color={theme.primary.val as string} />
+                ) : (
+                  <Icon name="camera" color={theme.primary.val as string} />
+                )}
               </View>
             </View>
-            <Text color="$blue10">Change photo</Text>
+            <Text color="$primary">
+              {isUploading ? "Uploading..." : "Change photo"}
+            </Text>
           </YStack>
         </TouchableOpacity>
 

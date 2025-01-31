@@ -41,7 +41,7 @@ export const H6 = styled(TamaguiH6, {});
 
 export const HeaderTitle = ({
   children,
-  color = "$primary",
+  color,
   icon,
   iconAfter,
   iconSize = 14,
@@ -52,7 +52,7 @@ export const HeaderTitle = ({
   const dialog = useDialogController();
 
   return (
-    <XStack alignItems="center" gap="$2" opacity={0.7} {...props}>
+    <XStack alignItems="center" gap="$2" {...props}>
       {icon && <Icon name={icon} size={iconSize} color={iconColor} />}
       <H5 color={color}>{children}</H5>
       {iconAfter && <Icon name={iconAfter} size={iconSize} color={iconColor} />}

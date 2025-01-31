@@ -85,8 +85,6 @@ export default function ProfilePicture() {
         <OnboardingButton
           onPress={handleSubmit}
           disabled={isPickerLoading || isUploading}
-          opacity={selectedImageUri ? 1 : 0.7}
-          backgroundColor={selectedImageUri ? "white" : "rgba(255,255,255,0)"}
           isLoading={isUploading}
           isValid={selectedImageUri !== null}
           text={selectedImageUri ? "Continue" : "Skip for now"}
