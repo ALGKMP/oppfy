@@ -1,13 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { DimensionValue } from "react-native";
-import {
-  Dimensions,
-  Linking,
-  Platform,
-  Pressable,
-  Share,
-  StyleSheet,
-} from "react-native";
+import { Dimensions, Pressable, StyleSheet } from "react-native";
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -17,7 +10,6 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import { ChevronRight, ScrollText } from "@tamagui/lucide-icons";
 import { getToken, Theme, useTheme } from "tamagui";
 
 import PlayPause, {
@@ -27,7 +19,6 @@ import {
   Avatar,
   Button,
   CardContainer,
-  H5,
   HeaderTitle,
   Icon,
   ScreenView,
@@ -43,7 +34,6 @@ import type {
   UploadMediaInputNotOnApp,
   UploadMediaInputOnApp,
 } from "~/hooks/media/useUploadMedia";
-import useStoreReview from "~/hooks/useRating";
 import useShare from "~/hooks/useShare";
 import { api } from "~/utils/api";
 
@@ -157,7 +147,6 @@ const CaptionSheet = ({
 const CreatePost = () => {
   const theme = useTheme();
   const router = useRouter();
-  const { promptForReview } = useStoreReview();
   const { show, hide } = useBottomSheetController();
   const { sharePostToNewUser } = useShare();
 

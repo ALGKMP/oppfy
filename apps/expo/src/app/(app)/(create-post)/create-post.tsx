@@ -1,13 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { DimensionValue } from "react-native";
-import {
-  Dimensions,
-  Linking,
-  Platform,
-  Pressable,
-  Share,
-  StyleSheet,
-} from "react-native";
+import { Dimensions, Pressable, StyleSheet } from "react-native";
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -17,11 +10,7 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronRight, ScrollText } from "@tamagui/lucide-icons";
-import { Controller, useForm } from "react-hook-form";
-import { getToken, useTheme } from "tamagui";
-import { z } from "zod";
+import { getToken, Theme, useTheme } from "tamagui";
 
 import PlayPause, {
   usePlayPauseAnimations,
@@ -30,8 +19,8 @@ import {
   Avatar,
   Button,
   CardContainer,
-  H5,
   HeaderTitle,
+  Icon,
   ScreenView,
   Text,
   useBottomSheetController,
@@ -39,13 +28,14 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
+import { OnboardingButton } from "~/components/ui/Onboarding";
 import { useUploadMedia } from "~/hooks/media";
 import type {
   UploadMediaInputNotOnApp,
   UploadMediaInputOnApp,
 } from "~/hooks/media/useUploadMedia";
-import useStoreReview from "~/hooks/useRating";
 import useShare from "~/hooks/useShare";
+import { api } from "~/utils/api";
 
 interface CreatePostBaseParams extends Record<string, string> {
   uri: string;
@@ -157,9 +147,10 @@ const CaptionSheet = ({
 const CreatePost = () => {
   const theme = useTheme();
   const router = useRouter();
-  const { promptForReview } = useStoreReview();
   const { show, hide } = useBottomSheetController();
   const { sharePostToNewUser } = useShare();
+
+  const completedTutorial = api.user.completedTutorial.useMutation();
 
   const [caption, setCaption] = useState("");
 
@@ -230,7 +221,9 @@ const CreatePost = () => {
       });
     }
 
-    router.dismissTo("/(app)/(bottom-tabs)/(camera)");
+    void completedTutorial.mutateAsync();
+
+    router.replace("/(app)/(bottom-tabs)/(home)");
   };
 
   const openCaptionSheet = () => {
@@ -253,7 +246,7 @@ const CreatePost = () => {
   const previewHeight = previewWidth * ASPECT_RATIO;
 
   return (
-    <ScreenView safeAreaEdges={["bottom"]}>
+    <ScreenView paddingBottom={0} safeAreaEdges={["bottom"]}>
       <YStack flex={1} gap="$5">
         <YStack gap="$4" alignItems="center">
           {type === "photo" ? (
@@ -277,13 +270,10 @@ const CreatePost = () => {
               size={28}
               source={recipientImage ?? DefaultProfilePicture}
               bordered
+              style={{ borderColor: theme.color.val, borderWidth: 1 }}
             />
-            <Text color="$gray11">
-              Posting to{" "}
-              <Text fontWeight="bold" color="$primary">
-                {params.userType === "onApp" ? "@" : ""}
-                {displayName}
-              </Text>
+            <Text>
+              Posting to <Text fontWeight="bold">@{displayName}</Text>
             </Text>
           </XStack>
         </YStack>
@@ -297,18 +287,14 @@ const CreatePost = () => {
               onPress={openCaptionSheet}
             >
               <XStack flex={1} alignItems="center" gap="$3" mr="$4">
-                <Ionicons
-                  name="chatbubble-outline"
-                  size={24}
-                  color={theme.gray10.val}
-                />
+                <Icon name="chatbubble-outline" />
                 <View flex={1}>
                   <Text fontSize="$5" fontWeight="500">
                     {caption || "Add caption"}
                   </Text>
                 </View>
               </XStack>
-              <ChevronRight size={24} color="$gray10" />
+              <Icon name="chevron-forward" />
             </XStack>
           </YStack>
         </CardContainer>
@@ -342,7 +328,7 @@ const PreviewVideo = ({
     player.play();
   });
 
-  const togglePlayback = async () => {
+  const togglePlayback = () => {
     if (player.playing) {
       player.pause();
       addPause();
