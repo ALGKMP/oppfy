@@ -39,12 +39,8 @@ export class ContactService {
       (contact) => contact !== userPhoneNumberHash,
     );
 
-    console.log("filtered contacts on server", filteredContacts);
-
     // update the contacts in the db
     await this.contactsRepository.updateUserContacts(userId, filteredContacts);
-
-    console.log("sending sqs message to contact sync queue");
 
     await this.sqsService.sendContactSyncMessage({
       userId,

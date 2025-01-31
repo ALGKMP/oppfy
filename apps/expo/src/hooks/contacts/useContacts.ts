@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from "react";
 import * as Contacts from "expo-contacts";
-import type { Contact } from "expo-contacts";
+import type { Contact, PhoneNumber } from "expo-contacts";
 import { PermissionStatus } from "expo-contacts";
 import * as Crypto from "expo-crypto";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -50,80 +50,54 @@ const useContacts = (syncNow = false): ContactFns => {
   const filterContactsOnApp =
     api.contacts.filterOutPhoneNumbersOnApp.useMutation();
 
-  const contactsToE164Numbers = (contacts: Contacts.Contact[]) => {
-    return contacts
-      .map((contact) => {
-        const number = contact.phoneNumbers?.[0]?.number;
-        if (number === undefined) return null;
-        try {
-          const parsedNumber = parsePhoneNumberWithError(number);
-          return parsedNumber.isValid() ? parsedNumber.format("E.164") : null;
-        } catch {
-          return null;
-        }
-      })
-      .filter((number) => number !== null);
+  const parsePhoneNumberEntry = (phoneNumber: PhoneNumber): string | null => {
+    const { number, countryCode } = phoneNumber;
+    if (!number || !countryCode) return null;
+
+    try {
+      const parsed = parsePhoneNumberWithError(
+        number,
+        countryCode.toUpperCase() as CountryCode,
+      );
+      return parsed.isValid() ? parsed.format("E.164") : null;
+    } catch {
+      return null;
+    }
   };
 
-  const contactsNotOnApp = (
-    contacts: Contacts.Contact[],
-    numbers: string[],
-  ) => {
+  const getFirstValidE164Number = (contact: Contact): string | null => {
+    const firstPhoneNumber = contact.phoneNumbers?.[0];
+    return firstPhoneNumber ? parsePhoneNumberEntry(firstPhoneNumber) : null;
+  };
+
+  const getContactE164Numbers = (contact: Contact): string[] => {
+    return (contact.phoneNumbers ?? [])
+      .map((pn) => parsePhoneNumberEntry(pn))
+      .filter((num): num is string => num !== null);
+  };
+
+  const contactsToE164Numbers = (contacts: Contact[]) => {
+    return contacts
+      .map(getFirstValidE164Number)
+      .filter((num): num is string => num !== null);
+  };
+
+  const contactsNotOnApp = (contacts: Contact[], numbers: string[]) => {
     return contacts.filter((contact) => {
-      const number = contact.phoneNumbers?.[0]?.number;
-      if (number === undefined) return false;
-      try {
-        const parsedNumber = parsePhoneNumberWithError(number);
-        return (
-          parsedNumber.isValid() &&
-          numbers.includes(parsedNumber.format("E.164"))
-        );
-      } catch {
-        return false;
-      }
+      const e164 = getFirstValidE164Number(contact);
+      return e164 !== null && numbers.includes(e164);
     });
   };
 
   const syncContacts = useCallback(async () => {
-    // make sure its allowed
     const { status } = await Contacts.getPermissionsAsync();
-    if (status !== PermissionStatus.GRANTED) {
-      return;
-    }
+    if (status !== PermissionStatus.GRANTED) return;
 
     const { data } = await Contacts.getContactsAsync({
       fields: [Contacts.Fields.PhoneNumbers],
     });
 
-    const phoneNumbers = data.reduce<{ country: string; number: string }[]>(
-      (acc, contact) => {
-        if (contact.phoneNumbers) {
-          for (const phoneNumber of contact.phoneNumbers) {
-            if (!phoneNumber.countryCode || !phoneNumber.number) continue;
-
-            acc.push({
-              country: phoneNumber.countryCode,
-              number: phoneNumber.number,
-            });
-          }
-        }
-        return acc;
-      },
-      [],
-    );
-
-    const numbers = phoneNumbers.reduce<string[]>((acc, numberthing) => {
-      try {
-        const phoneNumber = parsePhoneNumberWithError(
-          numberthing.number,
-          numberthing.country.toLocaleUpperCase() as CountryCode,
-        );
-        acc.push(phoneNumber.formatInternational().replaceAll(" ", ""));
-      } catch {
-        // Skip invalid phone numbers
-      }
-      return acc;
-    }, []);
+    const numbers = data.flatMap(getContactE164Numbers);
 
     const hashedNumbers = await Promise.all(
       numbers.map(async (number) => {
@@ -139,7 +113,6 @@ const useContacts = (syncNow = false): ContactFns => {
 
   const getDeviceContacts = async () => {
     const { data } = await Contacts.getContactsAsync();
-
     return data;
   };
 
@@ -154,31 +127,26 @@ const useContacts = (syncNow = false): ContactFns => {
       ],
     });
 
-    console.log(data);
-
     const phoneNumbers = contactsToE164Numbers(data);
-
     const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({
       phoneNumbers,
     });
 
     const contacts = contactsNotOnApp(data, phoneNumbersNotOnApp);
 
-    // Sort contacts based on criteria
     const sortedContacts = contacts.sort((a, b) => {
       const aScore = getContactScore(a);
       const bScore = getContactScore(b);
-      return bScore - aScore; // Higher score first
+      return bScore - aScore;
     });
 
     return sortedContacts;
   };
 
   const getDeviceContactsNotOnAppPaginated = async (
-    pageOffset?: number,
-    pageSize?: number,
+    pageOffset = 0,
+    pageSize = PAGE_SIZE,
   ) => {
-    // First, get total number of contacts to help with pagination
     const { data: allContacts } = await Contacts.getContactsAsync({
       fields: [Contacts.Fields.PhoneNumbers],
     });
@@ -198,29 +166,14 @@ const useContacts = (syncNow = false): ContactFns => {
     });
 
     const phoneNumbers = contactsToE164Numbers(data);
-
     const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({
       phoneNumbers,
     });
 
     const contacts = contactsNotOnApp(data, phoneNumbersNotOnApp);
+    const hasMore = pageOffset + pageSize < totalContacts;
 
-    /*     // Sort contacts based on criteria
-    const sortedContacts = contacts.sort((a, b) => {
-      const aScore = getContactScore(a);
-      const bScore = getContactScore(b);
-      return bScore - aScore; // Higher score first
-    }); */
-
-    // Calculate if there are more contacts to load
-    const currentOffset = pageOffset ?? 0;
-    const hasMore = currentOffset + (pageSize ?? 0) < totalContacts;
-
-    return {
-      contacts,
-      hasMore,
-      totalContacts,
-    };
+    return { contacts, hasMore, totalContacts };
   };
 
   const contactsPaginatedQuery = useInfiniteQuery<
@@ -249,23 +202,19 @@ const useContacts = (syncNow = false): ContactFns => {
         hasNextPage: result.hasMore,
       };
     },
-    getNextPageParam: (lastPage) => {
-      return lastPage.nextCursor;
-    },
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
     initialPageParam: null,
   });
 
-  // Helper function to calculate contact score
   const getContactScore = (contact: Contact): number => {
     let score = 0;
-    if (contact.imageAvailable) score += 4; // Highest priority
+    if (contact.imageAvailable) score += 4;
     if (contact.addresses?.length) score += 3;
     if (contact.birthday) score += 2;
     return score;
   };
 
   const getRecomendedContacts = async () => {
-    // get contacts with profile pictures
     const { data } = await Contacts.getContactsAsync({
       fields: [
         Contacts.Fields.PhoneNumbers,
@@ -277,18 +226,10 @@ const useContacts = (syncNow = false): ContactFns => {
       ],
     });
 
-    // filter data for ones that actually have an image
     const imageContacts = data.filter((contact) => contact.imageAvailable);
     const addressContacts = data.filter((contact) => contact.addresses?.length);
     const birthdayContacts = data.filter((contact) => contact.birthday);
     const noteContacts = data.filter((contact) => contact.note);
-
-    // get the phone numbers
-    // tier 1: people with images
-    // tier2: people with address, people with notes, people with birthdays
-    // everyone else
-
-    // put those ones
 
     const goodOnes = [
       ...imageContacts,
@@ -314,7 +255,6 @@ const useContacts = (syncNow = false): ContactFns => {
     });
 
     const phoneNumbers = contactsToE164Numbers(data);
-
     const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({
       phoneNumbers,
     });
@@ -323,9 +263,7 @@ const useContacts = (syncNow = false): ContactFns => {
   };
 
   useEffect(() => {
-    if (syncNow) {
-      void syncContacts();
-    }
+    if (syncNow) void syncContacts();
   }, [syncContacts, syncNow]);
 
   return {

@@ -19,7 +19,7 @@ export class SQSService {
   }: ContactSyncMessage) {
     try {
       const messageId = `${userId}_contactsync_${Date.now().toString()}`;
-      
+
       await this.sqsRepository.sendMessage({
         QueueUrl: env.SQS_CONTACT_QUEUE,
         MessageBody: JSON.stringify({
@@ -27,8 +27,6 @@ export class SQSService {
           userPhoneNumberHash,
           contacts,
         }),
-        MessageGroupId: messageId, // Optional: Useful for FIFO queues
-        MessageDeduplicationId: messageId, // Optional: Useful for FIFO queues
       });
 
       return { success: true, messageId };
