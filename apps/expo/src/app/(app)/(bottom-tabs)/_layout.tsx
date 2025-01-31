@@ -99,6 +99,7 @@ const BottomTabsLayout = () => {
             iconStyle={{
               opacity: focused ? 1 : 0.5,
             }}
+            disabled
           />
         </Animated.View>
       );
