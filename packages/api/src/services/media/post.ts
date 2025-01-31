@@ -383,7 +383,7 @@ export class PostService {
                 title: "New like",
                 body: `${profile.username} liked your post`,
                 entityType: "post",
-                entityId: postId.toString(),
+                entityId: postId,
               },
             );
           }
@@ -496,7 +496,7 @@ export class PostService {
             {
               title: "New Comment",
               body: `${profile.username} commented on your post`,
-              entityId: postId.toString(),
+              entityId: postId,
               entityType: "post",
             },
           );
