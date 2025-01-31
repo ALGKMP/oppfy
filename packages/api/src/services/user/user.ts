@@ -31,7 +31,7 @@ export class UserService {
   private postStatsRepository = new PostStatsRepository();
 
   private sqsService = new SQSService();
-  private notificationService = new NotificationsService();
+  // private notificationService = new NotificationsService();
 
   async createUserWithUsername(
     userId: string,
