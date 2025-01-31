@@ -267,21 +267,21 @@ const PostTo = () => {
       if (item.type === "header") {
         return (
           <XStack alignItems="center" gap="$1">
-            <HeaderTitle>{item.title}</HeaderTitle>
-            {item.isContact && (
-              <Icon
-                name="information-circle"
-                color={theme.primary.val as string}
-                onPress={() =>
-                  void infoDialog.show({
-                    title: "Post for Anyone",
-                    subtitle:
-                      "You can share posts with friends who aren't on Oppfy yet! They'll get a text invite to join and see your post when they do. It's a great way to bring your friends into the fun.",
-                    acceptText: "Got it",
-                  })
-                }
-              />
-            )}
+            <HeaderTitle
+              iconAfter={item.isContact ? "information-circle" : undefined}
+              iconSize={18}
+              iconColor={theme.primary.val as string}
+              onPress={() =>
+                void infoDialog.show({
+                  title: "Post for Anyone",
+                  subtitle:
+                    "You can share posts with friends who aren't on Oppfy yet! They'll get a text invite to join and see your post when they do. It's a great way to bring your friends into the fun.",
+                  acceptText: "Got it",
+                })
+              }
+            >
+              {item.title}
+            </HeaderTitle>
           </XStack>
         );
       }
