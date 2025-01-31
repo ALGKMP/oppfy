@@ -13,14 +13,6 @@ export default function OnboardingLayout() {
     <OnboardingStack
       screenOptions={{
         gestureEnabled: false,
-        headerRight: () => (
-          <Button
-            chromeless
-            icon={<Info size={20} color="#fff" />}
-            onPress={handleInfo}
-            scaleIcon={1}
-          />
-        ),
       }}
     >
       <OnboardingStack.Screen
@@ -54,9 +46,9 @@ export default function OnboardingLayout() {
 
       {/* Misc screens like permissions that can be accessed from anywhere */}
       <OnboardingStack.Screen
-        name="misc"
+        name="misc/permissions"
         options={{
-          headerShown: false,
+          title: "Permissions",
         }}
       />
     </OnboardingStack>

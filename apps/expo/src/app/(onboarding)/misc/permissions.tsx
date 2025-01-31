@@ -1,5 +1,13 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Linking, TouchableOpacity } from "react-native";
+import Animated, {
+  FadeInDown,
+  FadeOut,
+  SlideInRight,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 import * as Contacts from "expo-contacts";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
@@ -7,15 +15,12 @@ import { PermissionStatus } from "expo-modules-core";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import { Check, Info } from "@tamagui/lucide-icons";
+import { Theme } from "tamagui";
 
 import {
   Checkbox,
   Group,
-  H3,
-  H4,
-  OnboardingButton,
   Paragraph,
-  ScreenView,
   Separator,
   Text,
   useAlertDialogController,
@@ -23,11 +28,148 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
+import { OnboardingButton, OnboardingScreen } from "~/components/ui/Onboarding";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useContacts } from "~/hooks/contacts";
 import { useAuth } from "~/hooks/useAuth";
 
 type PermissionType = "Camera" | "Contacts" | "Notifications";
+
+interface Permission {
+  type: PermissionType;
+  emoji: string;
+  title: string;
+  subtitle: string;
+  isRequired: boolean;
+  description: string;
+}
+
+const PERMISSIONS: Permission[] = [
+  {
+    type: "Camera",
+    emoji: "📸",
+    title: "Camera Access",
+    subtitle: "Take photos of your friends",
+    isRequired: true,
+    description:
+      "Oppfy is a photo-sharing app, and we require camera permissions so users can take photos directly within the app. This allows you to capture and share moments instantly with your friends. Without camera access, you won't be able to use key features of the app.",
+  },
+  {
+    type: "Contacts",
+    emoji: "📱",
+    title: "Contacts Access",
+    subtitle: "Find and connect with friends",
+    isRequired: true,
+    description:
+      "We use your contacts so you can easily find and share posts with friends. Oppfy is a social app which doesn't work without your contacts. We encrypt your contacts for maximum security.",
+  },
+  {
+    type: "Notifications",
+    emoji: "🔔",
+    title: "Push Notifications",
+    subtitle: "Stay updated on what's happening",
+    isRequired: false,
+    description:
+      "Enable notifications to stay updated when friends post about you or interact with your content. You can always change this later in settings.",
+  },
+];
+
+const AnimatedPermissionItem = ({
+  permission,
+  onRequestPermission,
+  isGranted,
+  index,
+  onLearnMore,
+}: {
+  permission: Permission;
+  onRequestPermission: () => void;
+  isGranted: boolean;
+  index: number;
+  onLearnMore: () => void;
+}) => {
+  const scale = useSharedValue(1);
+
+  const handlePress = async () => {
+    if (!isGranted) {
+      scale.value = withSpring(0.95, { mass: 0.5, damping: 4 });
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      scale.value = withSpring(1, { mass: 0.5, damping: 4 });
+      onRequestPermission();
+    }
+  };
+
+  const containerStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View
+      entering={FadeInDown.delay(index * 200).springify()}
+      exiting={FadeOut}
+      style={containerStyle}
+    >
+      <TouchableOpacity
+        onPress={handlePress}
+        disabled={isGranted}
+        style={{ width: "100%" }}
+      >
+        <YStack
+          backgroundColor="rgba(255,255,255,0.1)"
+          borderRadius={16}
+          padding="$4"
+          borderWidth={2}
+          borderColor={isGranted ? "rgba(255,255,255,0.2)" : "transparent"}
+          shadowColor="#fff"
+          shadowOpacity={0.1}
+          shadowRadius={20}
+          shadowOffset={{ width: 0, height: 10 }}
+          gap="$2"
+        >
+          <XStack alignItems="center" justifyContent="space-between">
+            <Text fontSize="$6" fontWeight="600" color="white">
+              {permission.emoji} {permission.title}
+            </Text>
+
+            <YStack
+              backgroundColor={
+                isGranted ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.1)"
+              }
+              padding="$2"
+              borderRadius={12}
+            >
+              {isGranted ? (
+                <Check color="white" size={20} />
+              ) : (
+                <Text color="white" fontSize="$3" fontWeight="500">
+                  {permission.isRequired ? "Required" : "Optional"}
+                </Text>
+              )}
+            </YStack>
+          </XStack>
+
+          <YStack gap="$2">
+            <Paragraph color="$gray11" size="$4">
+              {permission.subtitle}
+            </Paragraph>
+
+            <TouchableOpacity onPress={onLearnMore}>
+              <XStack alignItems="center" gap="$2">
+                <Info size={16} color="rgba(255,255,255,0.5)" />
+                <Text
+                  color="rgba(255,255,255,0.5)"
+                  fontSize="$3"
+                  fontWeight="500"
+                >
+                  Learn more
+                </Text>
+              </XStack>
+            </TouchableOpacity>
+          </YStack>
+        </YStack>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
 
 const Permissions = () => {
   const router = useRouter();
@@ -44,19 +186,22 @@ const Permissions = () => {
     await Linking.openSettings();
   };
 
-  const onPress = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    void router.push(
-      isSignedIn ? "/(app)/(bottom-tabs)/(home)" : "/auth/phone-number",
-    );
+  const onContinue = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (requiredPermissions) {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      router.push(
+        isSignedIn ? "/(app)/(bottom-tabs)/(home)" : "/auth/phone-number",
+      );
+    }
   };
 
   const showPermissionAlert = async (permissionType: PermissionType) => {
     const confirmed = await alertDialog.show({
-      title: `${permissionType} Permission`,
-      subtitle: `Oppfy uses ${permissionType} to offer users the best experience. You can enable or disable this permission at any time in the settings.`,
-      cancelText: "OK",
-      acceptText: "Settings",
+      title: `Enable ${permissionType}`,
+      subtitle: `Please enable ${permissionType.toLowerCase()} access in your device settings to continue using Oppfy.`,
+      cancelText: "Not Now",
+      acceptText: "Open Settings",
       acceptTextProps: {
         color: "$blue9",
       },
@@ -81,207 +226,113 @@ const Permissions = () => {
       canAskAgain: boolean;
     }>,
   ): Promise<void> => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
     const { canAskAgain, status } = await getStatusFunction();
 
     if (status !== PermissionStatus.GRANTED && canAskAgain) {
       try {
-        await requestFunction();
+        const result = await requestFunction();
+        if (result.status === PermissionStatus.GRANTED) {
+          await Haptics.notificationAsync(
+            Haptics.NotificationFeedbackType.Success,
+          );
+        } else {
+          await Haptics.notificationAsync(
+            Haptics.NotificationFeedbackType.Error,
+          );
+        }
         await checkPermissions();
       } catch (error) {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         void showPermissionAlert(permissionType);
       }
-    } else {
+    } else if (status !== PermissionStatus.GRANTED) {
       void showPermissionAlert(permissionType);
     }
   };
 
-  const requestCameraPermission = (): Promise<void> =>
-    handlePermissionRequest(
-      "Camera",
-      ImagePicker.requestCameraPermissionsAsync,
-      ImagePicker.getCameraPermissionsAsync,
-    );
-
-  const requestContactsPermission = async (): Promise<void> => {
-    await handlePermissionRequest(
-      "Contacts",
-      Contacts.requestPermissionsAsync,
-      Contacts.getPermissionsAsync,
-    );
-    // If we have contacts permission after the request, sync contacts
-    const currentPermissions = await Contacts.getPermissionsAsync();
-    if (currentPermissions.status === PermissionStatus.GRANTED) {
-      void syncContacts();
+  const requestPermission = async (type: PermissionType) => {
+    switch (type) {
+      case "Camera":
+        return handlePermissionRequest(
+          type,
+          ImagePicker.requestCameraPermissionsAsync,
+          ImagePicker.getCameraPermissionsAsync,
+        );
+      case "Contacts":
+        const result = await handlePermissionRequest(
+          type,
+          Contacts.requestPermissionsAsync,
+          Contacts.getPermissionsAsync,
+        );
+        const currentPermissions = await Contacts.getPermissionsAsync();
+        if (currentPermissions.status === PermissionStatus.GRANTED) {
+          void syncContacts();
+        }
+        return result;
+      case "Notifications":
+        return handlePermissionRequest(
+          type,
+          Notifications.requestPermissionsAsync,
+          Notifications.getPermissionsAsync,
+        );
     }
   };
 
-  const requestNotificationsPermission = (): Promise<void> =>
-    handlePermissionRequest(
-      "Notifications",
-      Notifications.requestPermissionsAsync,
-      Notifications.getPermissionsAsync,
-    );
+  const getPermissionStatus = (type: PermissionType) => {
+    switch (type) {
+      case "Camera":
+        return permissions.camera;
+      case "Contacts":
+        return permissions.contacts;
+      case "Notifications":
+        return permissions.notifications;
+    }
+  };
 
   return (
-    <ScreenView
-      paddingBottom={0}
-      safeAreaEdges={["bottom"]}
-      justifyContent="space-between"
+    <OnboardingScreen
+      title="Just a few things..."
+      subtitle="We need some permissions to give you the best experience"
+      footer={
+        <OnboardingButton
+          onPress={onContinue}
+          disabled={!requiredPermissions}
+          text={
+            requiredPermissions ? "Continue" : "Enable Required Permissions"
+          }
+          isValid={requiredPermissions}
+        />
+      }
+      successMessage={
+        requiredPermissions
+          ? "All required permissions are enabled! 🎉"
+          : undefined
+      }
     >
-      <YStack flex={1} gap="$6">
-        <H3 textAlign="center">
-          We'll just need a few permissions to get started.
-        </H3>
-
-        <Group orientation="vertical" gap="$4">
-          <Group.Item>
-            <ListItem
-              emoji="📸"
-              title="Camera"
-              subTitle="So you can take and upload photos of your friends"
-              checkbox={
-                <Checkbox
-                  size="$6"
-                  onPress={requestCameraPermission}
-                  checked={permissions.camera}
-                  disabled={permissions.camera}
-                >
-                  <Checkbox.Indicator>
-                    <Check />
-                  </Checkbox.Indicator>
-                </Checkbox>
+      <Group orientation="vertical" gap="$4">
+        {PERMISSIONS.map((permission, index) => (
+          <Group.Item key={permission.type}>
+            <AnimatedPermissionItem
+              permission={permission}
+              onRequestPermission={() =>
+                void requestPermission(permission.type)
               }
-              underText={
-                <TouchableOpacity
-                  onPress={() => {
-                    void learnMoreDialog.show({
-                      title: "Camera Permission",
-                      subtitle:
-                        "Oppfy is a photo-sharing app, and we require camera permissions so users can take photos directly within the app. This allows you to capture and share moments instantly with your friends. Without camera access, you won't be able to use key features of the app.",
-                      acceptText: "Got it",
-                    });
-                  }}
-                >
-                  <XStack alignItems="center" gap="$2">
-                    <Info size="$1" />
-                    <Text color="$blue9" fontWeight="bold">
-                      Learn more
-                    </Text>
-                  </XStack>
-                </TouchableOpacity>
-              }
+              isGranted={getPermissionStatus(permission.type)}
+              index={index}
+              onLearnMore={() => {
+                void learnMoreDialog.show({
+                  title: permission.title,
+                  subtitle: permission.description,
+                  acceptText: "Got it",
+                });
+              }}
             />
           </Group.Item>
-
-          <Separator />
-
-          <Group.Item>
-            <ListItem
-              emoji="📱"
-              title="Contacts"
-              subTitle="So you can find your friends and your friends can find you"
-              checkbox={
-                <Checkbox
-                  size="$6"
-                  onPress={requestContactsPermission}
-                  checked={permissions.contacts}
-                  disabled={permissions.contacts}
-                >
-                  <Checkbox.Indicator>
-                    <Check />
-                  </Checkbox.Indicator>
-                </Checkbox>
-              }
-              underText={
-                <TouchableOpacity
-                  onPress={() => {
-                    void learnMoreDialog.show({
-                      title: "Contacts Permission",
-                      subtitle:
-                        "We use your contacts so you can easily find and share posts with friends. Oppfy is a social app which doesn't work without your contacts. We encrypt your contacts for maximum security.",
-                      acceptText: "Got it",
-                    });
-                  }}
-                >
-                  <XStack alignItems="center" gap="$2">
-                    <Info size="$1" />
-                    <Text color="$blue9" fontWeight="bold">
-                      Learn more
-                    </Text>
-                  </XStack>
-                </TouchableOpacity>
-              }
-            />
-          </Group.Item>
-
-          <Separator />
-
-          <Group.Item>
-            <ListItem
-              emoji="🔔"
-              title="Notifications"
-              subTitle="So you don't miss out on what's happening"
-              checkbox={
-                <Checkbox
-                  size="$6"
-                  onPress={requestNotificationsPermission}
-                  checked={permissions.notifications}
-                  disabled={permissions.notifications}
-                >
-                  <Checkbox.Indicator>
-                    <Check />
-                  </Checkbox.Indicator>
-                </Checkbox>
-              }
-              underText={
-                <XStack alignItems="center" gap="$2">
-                  <Info size="$1" />
-                  <Text color="$gray9" fontWeight="bold">
-                    Optional
-                  </Text>
-                </XStack>
-              }
-            />
-          </Group.Item>
-        </Group>
-      </YStack>
-
-      <OnboardingButton
-        marginHorizontal="$-4"
-        onPress={onPress}
-        disabled={!requiredPermissions}
-      >
-        Continue
-      </OnboardingButton>
-    </ScreenView>
-  );
-};
-
-interface ListItemProps {
-  emoji: string;
-  title: string;
-  subTitle: string;
-  checkbox: React.ReactNode;
-  underText?: React.ReactNode;
-}
-
-const ListItem = ({
-  emoji,
-  title,
-  subTitle,
-  checkbox,
-  underText,
-}: ListItemProps) => {
-  return (
-    <XStack alignItems="center" gap="$4">
-      <Text fontSize={42}>{emoji}</Text>
-      <YStack flex={1} gap>
-        <H4>{title}</H4>
-        <Paragraph color="$gray11">{subTitle}</Paragraph>
-        {underText && <YStack marginTop="$2">{underText}</YStack>}
-      </YStack>
-      {checkbox}
-    </XStack>
+        ))}
+      </Group>
+    </OnboardingScreen>
   );
 };
 
