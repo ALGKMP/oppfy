@@ -1,5 +1,3 @@
-import { TouchableOpacity } from "react-native";
-import { Info } from "@tamagui/lucide-icons";
 import {
   styled,
   H1 as TamaguiH1,
@@ -10,9 +8,8 @@ import {
   H6 as TamaguiH6,
   XStack,
 } from "tamagui";
-import type { ColorTokens, XStackProps } from "tamagui";
+import type { XStackProps } from "tamagui";
 
-import { useDialogController } from "./Dialog";
 import { Icon } from "./Icon";
 import type { IconName } from "./Icon";
 
@@ -24,11 +21,11 @@ interface InfoDialogProps {
 
 export interface HeaderTitleProps extends XStackProps {
   children: React.ReactNode;
-  color?: ColorTokens;
+  color?: string;
   icon?: IconName;
   iconAfter?: IconName;
   iconSize?: number;
-  iconColor?: ColorTokens;
+  iconColor?: string;
   info?: InfoDialogProps;
 }
 
@@ -46,29 +43,11 @@ export const HeaderTitle = ({
   iconAfter,
   iconSize = 14,
   iconColor,
-  info,
   ...props
-}: HeaderTitleProps) => {
-  const dialog = useDialogController();
-
-  return (
-    <XStack alignItems="center" gap="$2" {...props}>
-      {icon && <Icon name={icon} size={iconSize} color={iconColor} />}
-      <H5 color={color}>{children}</H5>
-      {iconAfter && <Icon name={iconAfter} size={iconSize} color={iconColor} />}
-      {info && (
-        <TouchableOpacity
-          onPress={() => {
-            void dialog.show({
-              title: info.title,
-              subtitle: info.subtitle,
-              acceptText: info.acceptText,
-            });
-          }}
-        >
-          <Info size={iconSize} color={iconColor ?? "$blue9"} />
-        </TouchableOpacity>
-      )}
-    </XStack>
-  );
-};
+}: HeaderTitleProps) => (
+  <XStack alignItems="center" gap="$2" {...props}>
+    {icon && <Icon name={icon} size={iconSize} color={iconColor} />}
+    <H5 color={color}>{children}</H5>
+    {iconAfter && <Icon name={iconAfter} size={iconSize} color={iconColor} />}
+  </XStack>
+);

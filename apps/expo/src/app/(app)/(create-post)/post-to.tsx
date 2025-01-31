@@ -14,7 +14,6 @@ import { getToken, useTheme } from "tamagui";
 import {
   EmptyPlaceholder,
   HeaderTitle,
-  Icon,
   MediaListItem,
   SearchInput,
   Spacer,
@@ -268,9 +267,9 @@ const PostTo = () => {
         return (
           <XStack alignItems="center" gap="$1">
             <HeaderTitle
-              iconAfter={item.isContact ? "information-circle" : undefined}
               iconSize={18}
               iconColor={theme.primary.val as string}
+              iconAfter={item.isContact ? "information-circle" : undefined}
               onPress={() =>
                 void infoDialog.show({
                   title: "Post for Anyone",
