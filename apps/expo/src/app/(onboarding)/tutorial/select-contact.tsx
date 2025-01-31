@@ -10,7 +10,10 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Phone, PhoneMissed, UserRoundX } from "@tamagui/lucide-icons";
 import type { IFuseOptions } from "fuse.js";
-import { parsePhoneNumberWithError } from "libphonenumber-js";
+import {
+  CountryCode,
+  parsePhoneNumberWithError,
+} from "libphonenumber-js";
 import { debounce } from "lodash";
 import { getToken, Theme } from "tamagui";
 
@@ -55,6 +58,7 @@ const SelectContact = () => {
       refetch,
     },
     searchContacts,
+    parsePhoneNumberEntry,
   } = useContacts();
 
   const contacts = useMemo(
@@ -98,12 +102,12 @@ const SelectContact = () => {
 
   const onContactSelected = useCallback(
     (contact: Contact) => {
-      if (!contact.phoneNumbers?.[0]?.number) return;
-
       try {
-        const formattedPhoneNumber = parsePhoneNumberWithError(
-          contact.phoneNumbers[0].number,
-        ).format("E.164");
+        const formattedPhoneNumber = parsePhoneNumberEntry(
+          contact.phoneNumbers?.[0],
+        );
+
+        if (!formattedPhoneNumber) return;
 
         router.push({
           pathname: "/tutorial/album-picker",
