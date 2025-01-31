@@ -113,7 +113,7 @@ export function OnboardingScreen({
       paddingHorizontal="$6"
       justifyContent="space-between"
     >
-      <YStack gap="$6" paddingTop="$10">
+      <YStack gap="$6" paddingTop="$8">
         <AnimatedYStack
           gap="$2"
           entering={FadeIn.delay(200)}

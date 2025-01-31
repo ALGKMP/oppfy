@@ -18,8 +18,10 @@ import { Check, Info } from "@tamagui/lucide-icons";
 import { Theme } from "tamagui";
 
 import {
+  Button,
   Checkbox,
   Group,
+  Icon,
   Paragraph,
   Separator,
   Text,
@@ -48,7 +50,7 @@ const PERMISSIONS: Permission[] = [
   {
     type: "Camera",
     emoji: "📸",
-    title: "Camera Access",
+    title: "Camera",
     subtitle: "Take photos of your friends",
     isRequired: true,
     description:
@@ -57,7 +59,7 @@ const PERMISSIONS: Permission[] = [
   {
     type: "Contacts",
     emoji: "📱",
-    title: "Contacts Access",
+    title: "Contacts",
     subtitle: "Find and connect with friends",
     isRequired: true,
     description:
@@ -115,55 +117,61 @@ const AnimatedPermissionItem = ({
       >
         <YStack
           backgroundColor="rgba(255,255,255,0.1)"
-          borderRadius={16}
-          padding="$4"
+          borderRadius="$6"
+          padding="$3"
           borderWidth={2}
           borderColor={isGranted ? "rgba(255,255,255,0.2)" : "transparent"}
           shadowColor="#fff"
           shadowOpacity={0.1}
           shadowRadius={20}
           shadowOffset={{ width: 0, height: 10 }}
-          gap="$2"
         >
           <XStack alignItems="center" justifyContent="space-between">
             <Text fontSize="$6" fontWeight="600" color="white">
               {permission.emoji} {permission.title}
             </Text>
 
-            <YStack
-              backgroundColor={
-                isGranted ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.1)"
-              }
-              padding="$2"
-              borderRadius={12}
+            <TouchableOpacity
+              onPress={onLearnMore}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              {isGranted ? (
-                <Check color="white" size={20} />
-              ) : (
-                <Text color="white" fontSize="$3" fontWeight="500">
-                  {permission.isRequired ? "Required" : "Optional"}
-                </Text>
-              )}
-            </YStack>
+              <XStack
+                padding="$2"
+                borderRadius="$4"
+                alignItems="center"
+                alignSelf="flex-start"
+                backgroundColor="rgba(255,255,255,0.1)"
+                gap="$2"
+              >
+                <Icon name="information-circle" />
+              </XStack>
+            </TouchableOpacity>
           </XStack>
 
-          <YStack gap="$2">
-            <Paragraph color="$gray11" size="$4">
+          <YStack gap="$3">
+            <Paragraph color="rgba(255,255,255,0.5)" size="$4">
               {permission.subtitle}
             </Paragraph>
 
-            <TouchableOpacity onPress={onLearnMore}>
-              <XStack alignItems="center" gap="$2">
-                <Info size={16} color="rgba(255,255,255,0.5)" />
-                <Text
-                  color="rgba(255,255,255,0.5)"
-                  fontSize="$3"
-                  fontWeight="500"
-                >
-                  Learn more
-                </Text>
-              </XStack>
-            </TouchableOpacity>
+            <YStack
+              backgroundColor={
+                isGranted ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.3)"
+              }
+              opacity={isGranted ? 0.8 : 1}
+              padding="$3"
+              borderRadius="$6"
+              justifyContent="center"
+              alignItems="center"
+              flexDirection="row"
+              gap="$2"
+            >
+              <Text color="white" fontSize="$3" fontWeight="600">
+                {isGranted ? "Enabled" : "Enable Access"}
+              </Text>
+              {isGranted ? (
+                <Icon name="checkmark" size={18} color="white" />
+              ) : null}
+            </YStack>
           </YStack>
         </YStack>
       </TouchableOpacity>
@@ -260,7 +268,7 @@ const Permissions = () => {
           ImagePicker.requestCameraPermissionsAsync,
           ImagePicker.getCameraPermissionsAsync,
         );
-      case "Contacts":
+      case "Contacts": {
         const result = await handlePermissionRequest(
           type,
           Contacts.requestPermissionsAsync,
@@ -271,6 +279,7 @@ const Permissions = () => {
           void syncContacts();
         }
         return result;
+      }
       case "Notifications":
         return handlePermissionRequest(
           type,
