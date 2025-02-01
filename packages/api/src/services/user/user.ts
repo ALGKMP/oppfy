@@ -122,7 +122,7 @@ export class UserService {
       } while (cursor !== null);
     };
 
-    // await fetchAndSendNotifications(userId);
+    await fetchAndSendNotifications(userId);
   }
 
   async createUser(userId: string, phoneNumber: string, isOnApp = true) {
