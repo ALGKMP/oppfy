@@ -281,13 +281,11 @@ const CreatePost = () => {
         <CardContainer padding="$4" paddingBottom="$5">
           <YStack gap="$3">
             <HeaderTitle>Post Details</HeaderTitle>
-            <TouchableOpacity onPress={openCaptionSheet} activeOpacity={0.7}>
+            <TouchableOpacity onPress={openCaptionSheet}>
               <XStack
                 justifyContent="space-between"
                 alignItems="center"
-                backgroundColor="$gray3"
-                padding="$4"
-                borderRadius="$4"
+                onPress={openCaptionSheet}
               >
                 <XStack flex={1} alignItems="center" gap="$3" mr="$4">
                   <Icon name="chatbubble-outline" />
