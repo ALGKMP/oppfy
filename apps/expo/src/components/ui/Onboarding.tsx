@@ -720,7 +720,7 @@ export function OnboardingPhoneInput({
           >
             <XStack
               flex={1}
-              width={74}
+              minWidth={74}
               justifyContent="center"
               backgroundColor="rgba(255,255,255,0.1)"
               borderTopLeftRadius={16}
