@@ -1,4 +1,5 @@
 import { Image, Share } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
@@ -15,6 +16,7 @@ import {
   ShieldCheck,
   Star,
 } from "@tamagui/lucide-icons";
+import { getToken } from "tamagui";
 
 import {
   Button,
@@ -34,8 +36,10 @@ enum WEBSITE_URL {
 
 const Settings = () => {
   const router = useRouter();
-  const { signOut } = useAuth();
+  const insets = useSafeAreaInsets();
   const alertDialog = useAlertDialogController();
+
+  const { signOut } = useAuth();
 
   const handleShare = async () => {
     await Share.share({
@@ -69,8 +73,13 @@ const Settings = () => {
   };
 
   return (
-    <ScreenView scrollable>
-      <YStack gap="$4" flex={1} paddingBottom="$8">
+    <ScreenView
+      scrollable
+      contentContainerStyle={{
+        flexGrow: 1,
+      }}
+    >
+      <YStack flex={1} gap="$4">
         <SettingsGroup title="Settings">
           <SettingsGroup.Item
             title="Notifications"
@@ -128,29 +137,33 @@ const Settings = () => {
             Sitemap
           </Button>
         )}
+      </YStack>
 
-        <YStack alignItems="center" paddingTop="$4" gap="$4">
-          <Image
-            source={Logo}
-            style={{
-              width: 60,
-              height: 60,
-              borderRadius: 16,
-              marginBottom: 4,
-            }}
-          />
+      <YStack
+        alignItems="center"
+        paddingBottom={(insets.bottom + getToken("$2", "space")) as number}
+        gap="$4"
+      >
+        <Image
+          source={Logo}
+          style={{
+            width: 60,
+            height: 60,
+            borderRadius: 16,
+            marginBottom: 4,
+          }}
+        />
 
-          <YStack alignItems="center" gap="$2">
-            <XStack alignItems="center" gap="$2">
-              <Text fontSize="$3">Made with</Text>
-              <Heart size={16} color="$red11" />
-              <Text fontSize="$3">by Oppfy</Text>
-            </XStack>
+        <YStack alignItems="center" gap="$2">
+          <XStack alignItems="center" gap="$2">
+            <Text fontSize="$3">Made with</Text>
+            <Heart size={16} color="$red11" />
+            <Text fontSize="$3">by Oppfy</Text>
+          </XStack>
 
-            <Text color="$gray11" fontSize="$2" fontWeight="400">
-              Version {Constants.expoConfig?.version ?? "1.0.0"}
-            </Text>
-          </YStack>
+          <Text color="$gray11" fontSize="$2" fontWeight="400">
+            Version {Constants.expoConfig?.version ?? "1.0.0"}
+          </Text>
         </YStack>
       </YStack>
     </ScreenView>
