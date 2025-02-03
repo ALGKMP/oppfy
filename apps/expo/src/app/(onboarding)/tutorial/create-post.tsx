@@ -29,7 +29,6 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
-import { OnboardingButton } from "~/components/ui/Onboarding";
 import { useUploadMedia } from "~/hooks/media";
 import type {
   UploadMediaInputNotOnApp,
@@ -146,7 +145,6 @@ const CaptionSheet = ({
 };
 
 const CreatePost = () => {
-  const theme = useTheme();
   const router = useRouter();
   const { show, hide } = useBottomSheetController();
   const { sharePostToNewUser } = useShare();
