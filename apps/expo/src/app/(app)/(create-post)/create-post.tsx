@@ -278,7 +278,6 @@ const CreatePost = () => {
               size={28}
               source={recipientImage ?? DefaultProfilePicture}
               bordered
-              style={{ borderColor: theme.color.val, borderWidth: 1 }}
             />
             <Text>
               Posting to <Text fontWeight="bold">@{displayName}</Text>
