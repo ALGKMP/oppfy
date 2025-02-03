@@ -33,7 +33,7 @@ import { usePermissions } from "~/contexts/PermissionsContext";
 import { useContacts } from "~/hooks/contacts";
 import { useAuth } from "~/hooks/useAuth";
 
-type PermissionType = "Camera" | "Contacts" | "Notifications";
+type PermissionType = "Camera" | "Contacts" | "Notifications" | "Meida";
 
 interface Permission {
   type: PermissionType;
@@ -53,6 +53,15 @@ const PERMISSIONS: Permission[] = [
     isRequired: true,
     description:
       "Oppfy is a photo-sharing app, and we require camera permissions so users can take photos directly within the app. This allows you to capture and share moments instantly with your friends. Without camera access, you won't be able to use key features of the app.",
+  },
+  {
+    type: "Meida",
+    emoji: "🖼️",
+    title: "Meida",
+    subtitle: "Upload photos of your friends",
+    isRequired: true,
+    description:
+      "Oppfy is a photo-sharing app, and we require media permissions so users can upload photos directly eithin the app. This allows you to capture and share moments instantly with your friends. Without media library access, you won't be able to use key features of the app.",
   },
   {
     type: "Contacts",
@@ -276,6 +285,8 @@ export default function Permissions() {
         return permissions.contacts;
       case "Notifications":
         return permissions.notifications;
+      case "Meida":
+        return permissions.media;
     }
   }
 
