@@ -447,72 +447,66 @@ const EditProfile = () => {
             <HeaderTitle>Profile Information</HeaderTitle>
 
             {/* Name Field */}
-            <XStack
-              justifyContent="space-between"
-              alignItems="center"
-              onPress={openNameSheet}
-            >
-              <XStack flex={1} alignItems="center" gap="$3">
-                <Ionicons
-                  name="person-outline"
-                  size={24}
-                  color={theme.gray10.val}
-                />
-                <YStack flex={1}>
-                  <Text fontSize="$5" fontWeight="500">
-                    {defaultValues?.name || "Add name"}
-                  </Text>
-                  <Text color="$gray10">Name</Text>
-                </YStack>
+            <TouchableOpacity onPress={openNameSheet}>
+              <XStack justifyContent="space-between" alignItems="center">
+                <XStack flex={1} alignItems="center" gap="$3">
+                  <Ionicons
+                    name="person-outline"
+                    size={24}
+                    color={theme.gray10.val}
+                  />
+                  <YStack flex={1}>
+                    <Text fontSize="$5" fontWeight="500">
+                      {defaultValues?.name ?? "Add name"}
+                    </Text>
+                    <Text color="$gray10">Name</Text>
+                  </YStack>
+                </XStack>
+                <ChevronRight size={24} color="$gray10" />
               </XStack>
-              <ChevronRight size={24} color="$gray10" />
-            </XStack>
+            </TouchableOpacity>
             <Separator />
 
             {/* Username Field */}
-            <XStack
-              justifyContent="space-between"
-              alignItems="center"
-              onPress={openUsernameSheet}
-            >
-              <XStack flex={1} alignItems="center" gap="$3">
-                <Ionicons name="at" size={24} color={theme.gray10.val} />
-                <YStack flex={1}>
-                  <Text fontSize="$5" fontWeight="500">
-                    {defaultValues?.username || "Add username"}
-                  </Text>
-                  <Text color="$gray10">Username</Text>
-                </YStack>
+            <TouchableOpacity onPress={openUsernameSheet}>
+              <XStack justifyContent="space-between" alignItems="center">
+                <XStack flex={1} alignItems="center" gap="$3">
+                  <Ionicons name="at" size={24} color={theme.gray10.val} />
+                  <YStack flex={1}>
+                    <Text fontSize="$5" fontWeight="500">
+                      {defaultValues?.username ?? "Add username"}
+                    </Text>
+                    <Text color="$gray10">Username</Text>
+                  </YStack>
+                </XStack>
+                <ChevronRight size={24} color="$gray10" />
               </XStack>
-              <ChevronRight size={24} color="$gray10" />
-            </XStack>
+            </TouchableOpacity>
             <Separator />
 
             {/* Bio Field */}
-            <XStack
-              justifyContent="space-between"
-              alignItems="center"
-              onPress={openBioSheet}
-            >
-              <XStack flex={1} alignItems="center" gap="$3">
-                <Ionicons
-                  name="information-circle-outline"
-                  size={24}
-                  color={theme.gray10.val}
-                />
-                <YStack flex={1}>
-                  <Text fontSize="$5" fontWeight="500">
-                    {defaultValues?.bio ? "Edit Bio" : "Add bio"}
-                  </Text>
-                  {defaultValues?.bio && (
-                    <Text color="$gray10" numberOfLines={1}>
-                      {defaultValues.bio}
+            <TouchableOpacity onPress={openBioSheet}>
+              <XStack justifyContent="space-between" alignItems="center">
+                <XStack flex={1} alignItems="center" gap="$3">
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={24}
+                    color={theme.gray10.val}
+                  />
+                  <YStack flex={1}>
+                    <Text fontSize="$5" fontWeight="500">
+                      {defaultValues?.bio ? "Edit Bio" : "Add bio"}
                     </Text>
-                  )}
-                </YStack>
+                    {defaultValues?.bio && (
+                      <Text color="$gray10" numberOfLines={1}>
+                        {defaultValues.bio}
+                      </Text>
+                    )}
+                  </YStack>
+                </XStack>
+                <ChevronRight size={24} color="$gray10" />
               </XStack>
-              <ChevronRight size={24} color="$gray10" />
-            </XStack>
+            </TouchableOpacity>
           </YStack>
         </CardContainer>
 
