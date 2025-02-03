@@ -281,21 +281,25 @@ const CreatePost = () => {
         <CardContainer padding="$4" paddingBottom="$5">
           <YStack gap="$3">
             <HeaderTitle>Post Details</HeaderTitle>
-            <XStack
-              justifyContent="space-between"
-              alignItems="center"
-              onPress={openCaptionSheet}
-            >
-              <XStack flex={1} alignItems="center" gap="$3" mr="$4">
-                <Icon name="chatbubble-outline" />
-                <View flex={1}>
-                  <Text fontSize="$5" fontWeight="500">
-                    {caption || "Add caption"}
-                  </Text>
-                </View>
+            <TouchableOpacity onPress={openCaptionSheet} activeOpacity={0.7}>
+              <XStack
+                justifyContent="space-between"
+                alignItems="center"
+                backgroundColor="$gray3"
+                padding="$4"
+                borderRadius="$4"
+              >
+                <XStack flex={1} alignItems="center" gap="$3" mr="$4">
+                  <Icon name="chatbubble-outline" />
+                  <View flex={1}>
+                    <Text fontSize="$5" fontWeight="500">
+                      {caption || "Add caption"}
+                    </Text>
+                  </View>
+                </XStack>
+                <Icon name="chevron-forward" />
               </XStack>
-              <Icon name="chevron-forward" />
-            </XStack>
+            </TouchableOpacity>
           </YStack>
         </CardContainer>
       </YStack>
