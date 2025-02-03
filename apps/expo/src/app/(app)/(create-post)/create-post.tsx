@@ -22,6 +22,7 @@ import {
   HeaderTitle,
   Icon,
   ScreenView,
+  Spinner,
   Text,
   useBottomSheetController,
   View,
@@ -153,6 +154,7 @@ const CreatePost = () => {
   const completedTutorial = api.user.completedTutorial.useMutation();
 
   const [caption, setCaption] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     type,
@@ -186,44 +188,50 @@ const CreatePost = () => {
   });
 
   const onSubmit = async () => {
-    const baseData = {
-      uri: uri,
-      width: parseInt(width),
-      height: parseInt(height),
-      caption,
-    };
+    setIsLoading(true);
+    try {
+      const baseData = {
+        uri: uri,
+        width: parseInt(width),
+        height: parseInt(height),
+        caption,
+      };
 
-    const input =
-      params.userType === "onApp"
-        ? ({
-            ...baseData,
-            recipient: params.recipient,
-            type: "onApp",
-          } satisfies UploadMediaInputOnApp)
-        : ({
-            ...baseData,
-            number: params.number,
-            type: "notOnApp",
-            name: params.name,
-          } satisfies UploadMediaInputNotOnApp);
+      const input =
+        params.userType === "onApp"
+          ? ({
+              ...baseData,
+              recipient: params.recipient,
+              type: "onApp",
+            } satisfies UploadMediaInputOnApp)
+          : ({
+              ...baseData,
+              number: params.number,
+              type: "notOnApp",
+              name: params.name,
+            } satisfies UploadMediaInputNotOnApp);
 
-    console.log("before upload", input);
+      console.log("before upload", input);
 
-    const postId =
-      type === "photo"
-        ? await uploadPhotoMutation.mutateAsync(input)
-        : await uploadVideoMutation.mutateAsync(input);
+      const postId =
+        type === "photo"
+          ? await uploadPhotoMutation.mutateAsync(input)
+          : await uploadVideoMutation.mutateAsync(input);
 
-    if (params.userType === "notOnApp" && params.number) {
-      await sharePostToNewUser({
-        postId,
-        phoneNumber: params.number,
-      });
+      if (params.userType === "notOnApp" && params.number) {
+        await sharePostToNewUser({
+          postId,
+          phoneNumber: params.number,
+        });
+      }
+
+      await completedTutorial.mutateAsync();
+      router.replace("/(app)/(bottom-tabs)/(home)");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
     }
-
-    void completedTutorial.mutateAsync();
-
-    router.replace("/(app)/(bottom-tabs)/(home)");
   };
 
   const openCaptionSheet = () => {
@@ -304,11 +312,12 @@ const CreatePost = () => {
 
       <Button
         variant="primary"
+        disabled={isLoading}
         onPress={onSubmit}
         pressStyle={{ scale: 0.95 }}
         animation="bouncy"
       >
-        {buttonMessage}
+        {isLoading ? <Spinner size="small" color="$color" /> : buttonMessage}
       </Button>
     </ScreenView>
   );
