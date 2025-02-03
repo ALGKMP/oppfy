@@ -2,18 +2,18 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Dimensions,
   Keyboard,
+  Linking,
   RefreshControl,
   useWindowDimensions,
 } from "react-native";
 import type { Contact } from "expo-contacts";
+import { PermissionStatus } from "expo-media-library";
+import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Phone, PhoneMissed, UserRoundX } from "@tamagui/lucide-icons";
 import type { IFuseOptions } from "fuse.js";
-import {
-  CountryCode,
-  parsePhoneNumberWithError,
-} from "libphonenumber-js";
+import { CountryCode, parsePhoneNumberWithError } from "libphonenumber-js";
 import { debounce } from "lodash";
 import { getToken, Theme } from "tamagui";
 
@@ -23,6 +23,7 @@ import {
   HeaderTitle,
   SearchInput,
   Spacer,
+  useAlertDialogController,
   UserCard,
   YStack,
 } from "~/components/ui";
@@ -36,6 +37,7 @@ interface ListItem {
 
 const SelectContact = () => {
   const router = useRouter();
+  const alertDialog = useAlertDialogController();
 
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -101,31 +103,63 @@ const SelectContact = () => {
   }, [searchQuery, searchedContacts, contacts]);
 
   const onContactSelected = useCallback(
-    (contact: Contact) => {
-      try {
-        const formattedPhoneNumber = parsePhoneNumberEntry(
-          contact.phoneNumbers?.[0],
-        );
+    async (contact: Contact) => {
+      const { status, canAskAgain } = await MediaLibrary.getPermissionsAsync();
 
-        if (!formattedPhoneNumber) return;
+      if (status === PermissionStatus.GRANTED) {
+        try {
+          const formattedPhoneNumber = parsePhoneNumberEntry(
+            contact.phoneNumbers?.[0],
+          );
 
-        router.push({
-          pathname: "/tutorial/album-picker",
-          params: {
-            name: encodeURIComponent(contact.name),
-            number: encodeURIComponent(formattedPhoneNumber),
-            recipientName: encodeURIComponent(contact.name),
-            recipientImage:
-              contact.imageAvailable && contact.image?.uri
-                ? encodeURIComponent(contact.image.uri)
-                : undefined,
-          },
-        });
-      } catch (error) {
-        console.error("Error formatting phone number:", error);
+          if (formattedPhoneNumber === null) return;
+
+          router.push({
+            pathname: "/tutorial/album-picker",
+            params: {
+              name: encodeURIComponent(contact.name),
+              number: encodeURIComponent(formattedPhoneNumber),
+              recipientName: encodeURIComponent(contact.name),
+              recipientImage:
+                contact.imageAvailable && contact.image?.uri
+                  ? encodeURIComponent(contact.image.uri)
+                  : undefined,
+            },
+          });
+          return;
+        } catch (error) {
+          console.error("Error formatting phone number:", error);
+        }
+      }
+
+      if (canAskAgain) {
+        const { granted } = await MediaLibrary.requestPermissionsAsync();
+        if (granted) {
+          router.push(
+            "/(app)/(bottom-tabs)/(camera)/(media-picker)/album-picker",
+          );
+          return;
+        }
+      }
+
+      const confirmed = await alertDialog.show({
+        title: "Media Library Permission",
+        subtitle: "Please grant permission to access your media.",
+        cancelText: "OK",
+        acceptText: "Settings",
+        acceptTextProps: {
+          color: "$blue9",
+        },
+        cancelTextProps: {
+          color: "$color",
+        },
+      });
+
+      if (confirmed) {
+        await Linking.openSettings();
       }
     },
-    [router],
+    [alertDialog, parsePhoneNumberEntry, router],
   );
 
   const handleRefresh = useCallback(async () => {
@@ -156,7 +190,7 @@ const SelectContact = () => {
         onPress={() => onContactSelected(item.contact)}
         actionButton={{
           label: "Select",
-          onPress: () => onContactSelected(item.contact),
+          onPress: () => void onContactSelected(item.contact),
           icon: "add",
         }}
       />
