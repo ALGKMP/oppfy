@@ -170,6 +170,26 @@ const SelectContact = () => {
     setRefreshing(false);
   }, [refetch]);
 
+  const handleAddContacts = useCallback(async () => {
+    const confirmed = await alertDialog.show({
+      title: "Add Contacts",
+      subtitle:
+        "Please open your phone's Contacts app and add some contacts. Then return here.",
+      cancelText: "OK",
+      acceptText: "Settings",
+      acceptTextProps: {
+        color: "$blue9",
+      },
+      cancelTextProps: {
+        color: "$color",
+      },
+    });
+
+    if (confirmed) {
+      void Linking.openSettings();
+    }
+  }, [alertDialog]);
+
   const handleOnEndReached = useCallback(() => {
     if (!isFetchingNextPage && hasNextPage && !searchQuery) {
       void fetchNextPage();
@@ -240,22 +260,12 @@ const SelectContact = () => {
       return (
         <YStack flex={1} justifyContent="center" gap="$4">
           <EmptyPlaceholder
-            title="No Contacts Found"
-            subtitle="Do we have access to your contacts?"
+            title="No Contacts Selected"
+            subtitle="You haven't selected any contacts. Please add contacts from your phone to continue."
             icon={<Phone />}
           />
-          <Button
-            variant="primary"
-            onPress={async () => {
-              const { status } = await Contacts.requestPermissionsAsync();
-              if (status === "granted") {
-                void handleRefresh();
-              } else {
-                await Linking.openSettings();
-              }
-            }}
-          >
-            Grant Access
+          <Button variant="white" onPress={handleAddContacts}>
+            Add Contacts
           </Button>
         </YStack>
       );
@@ -277,6 +287,7 @@ const SelectContact = () => {
     searchQuery,
     displayItems.length,
     TILE_WIDTH,
+    handleAddContacts,
   ]);
 
   const keyExtractor = useCallback((item: ListItem) => item.id, []);
