@@ -264,7 +264,12 @@ const SelectContact = () => {
             subtitle="Please select contacts to share with the app in your phone's settings"
             icon={<UserRoundX />}
           />
-          <Button variant="primary" onPress={handleAddContacts}>
+          <Button
+            alignSelf="center"
+            width="70%"
+            variant="white"
+            onPress={handleAddContacts}
+          >
             Open Settings
           </Button>
         </YStack>
