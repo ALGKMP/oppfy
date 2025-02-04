@@ -172,11 +172,11 @@ const SelectContact = () => {
 
   const handleAddContacts = useCallback(async () => {
     const confirmed = await alertDialog.show({
-      title: "Add Contacts",
+      title: "Select Contacts",
       subtitle:
-        "Please open your phone's Contacts app and add some contacts. Then return here.",
-      cancelText: "OK",
-      acceptText: "Settings",
+        "Please go to Settings and select which contacts you'd like to share with the app",
+      cancelText: "Cancel",
+      acceptText: "Open Settings",
       acceptTextProps: {
         color: "$blue9",
       },
@@ -261,11 +261,11 @@ const SelectContact = () => {
         <YStack flex={1} justifyContent="center" gap="$4">
           <EmptyPlaceholder
             title="No Contacts Selected"
-            subtitle="You haven't selected any contacts. Please add contacts from your phone to continue."
-            icon={<Phone />}
+            subtitle="Please select contacts to share with the app in your phone's settings"
+            icon={<UserRoundX />}
           />
-          <Button variant="white" onPress={handleAddContacts}>
-            Add Contacts
+          <Button variant="primary" onPress={handleAddContacts}>
+            Open Settings
           </Button>
         </YStack>
       );
