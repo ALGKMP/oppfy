@@ -7,6 +7,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import type { Contact } from "expo-contacts";
+import * as Contacts from "expo-contacts"; // Add this import at the top
 import { PermissionStatus } from "expo-media-library";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -18,6 +19,7 @@ import { debounce } from "lodash";
 import { getToken, Theme } from "tamagui";
 
 import {
+  Button,
   EmptyPlaceholder,
   H1,
   HeaderTitle,
@@ -236,12 +238,25 @@ const SelectContact = () => {
 
     if (contacts.length === 0) {
       return (
-        <YStack flex={1} justifyContent="center">
+        <YStack flex={1} justifyContent="center" gap="$4">
           <EmptyPlaceholder
             title="No Contacts Found"
-            subtitle="We couldn't find any contacts on your device."
-            icon={<UserRoundX />}
+            subtitle="Do we have access to your contacts?"
+            icon={<Phone />}
           />
+          <Button
+            variant="primary"
+            onPress={async () => {
+              const { status } = await Contacts.requestPermissionsAsync();
+              if (status === "granted") {
+                void handleRefresh();
+              } else {
+                await Linking.openSettings();
+              }
+            }}
+          >
+            Grant Access
+          </Button>
         </YStack>
       );
     }
