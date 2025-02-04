@@ -1,10 +1,10 @@
-import React from "react";
 import { Linking, TouchableOpacity } from "react-native";
 import Animated, {
   FadeInDown,
   FadeOut,
-  // No container-scale animations
-  // SlideInRight, useAnimatedStyle, useSharedValue, withSpring,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
 } from "react-native-reanimated";
 import * as Contacts from "expo-contacts";
 import * as Haptics from "expo-haptics";
@@ -12,19 +12,14 @@ import * as ImagePicker from "expo-image-picker";
 import { PermissionStatus } from "expo-modules-core";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
-import { Theme } from "tamagui";
 
 import {
-  Button,
-  Checkbox,
   Group,
   Icon,
   Paragraph,
-  Separator,
   Text,
   useAlertDialogController,
   useDialogController,
-  View,
   XStack,
   YStack,
 } from "~/components/ui";
@@ -33,7 +28,7 @@ import { usePermissions } from "~/contexts/PermissionsContext";
 import { useContacts } from "~/hooks/contacts";
 import { useAuth } from "~/hooks/useAuth";
 
-type PermissionType = "Camera" | "Contacts" | "Notifications" | "Meida";
+type PermissionType = "Camera" | "Contacts" | "Notifications";
 
 interface Permission {
   type: PermissionType;
@@ -55,15 +50,6 @@ const PERMISSIONS: Permission[] = [
       "Oppfy is a photo-sharing app, and we require camera permissions so users can take photos directly within the app. This allows you to capture and share moments instantly with your friends. Without camera access, you won't be able to use key features of the app.",
   },
   {
-    type: "Meida",
-    emoji: "🖼️",
-    title: "Meida",
-    subtitle: "Upload photos of your friends",
-    isRequired: true,
-    description:
-      "Oppfy is a photo-sharing app, and we require media permissions so users can upload photos directly eithin the app. This allows you to capture and share moments instantly with your friends. Without media library access, you won't be able to use key features of the app.",
-  },
-  {
     type: "Contacts",
     emoji: "📱",
     title: "Contacts",
@@ -83,91 +69,96 @@ const PERMISSIONS: Permission[] = [
   },
 ];
 
-/**
- * A stable item that doesn't change layout between granted vs. not granted.
- * - Always has borderWidth={2}, never 'transparent'
- * - No scale on press, to avoid reflow.
- * - If you truly want an animation on press, consider an opacity or highlight that doesn't affect container layout.
- */
-function PermissionItem({
+const AnimatedPermissionItem = ({
   permission,
   onRequestPermission,
   isGranted,
+  index,
   onLearnMore,
 }: {
   permission: Permission;
   onRequestPermission: () => void;
   isGranted: boolean;
+  index: number;
   onLearnMore: () => void;
-}) {
-  return (
-    <TouchableOpacity onPress={!isGranted ? onRequestPermission : undefined}>
-      <YStack
-        padding="$3"
-        borderRadius="$6"
-        borderWidth={2}
-        borderColor={
-          isGranted ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.1)"
-        }
-        backgroundColor="rgba(255,255,255,0.1)"
-        shadowColor="#fff"
-        shadowOpacity={0.1}
-        shadowRadius={20}
-        shadowOffset={{ width: 0, height: 10 }}
-      >
-        {/* Title + info icon */}
-        <XStack alignItems="center" justifyContent="space-between">
-          <Text fontSize="$6" fontWeight="600" color="white">
-            {permission.emoji} {permission.title}
-          </Text>
+}) => {
+  const scale = useSharedValue(1);
 
-          <TouchableOpacity
-            onPress={onLearnMore}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <XStack
-              padding="$2"
-              borderRadius="$4"
+  const handlePress = async () => {
+    if (!isGranted) {
+      scale.value = withSpring(0.95, { mass: 0.5, damping: 4 });
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      scale.value = withSpring(1, { mass: 0.5, damping: 4 });
+      onRequestPermission();
+    }
+  };
+
+  const containerStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View
+      entering={FadeInDown.delay(index * 200).springify()}
+      exiting={FadeOut}
+      style={containerStyle}
+    >
+      <TouchableOpacity
+        onPress={handlePress}
+        disabled={isGranted}
+        style={{ width: "100%" }}
+      >
+        <YStack
+          backgroundColor="rgba(255,255,255,0.1)"
+          borderRadius="$6"
+          padding="$3"
+          borderWidth={2}
+          borderColor={isGranted ? "rgba(255,255,255,0.2)" : "transparent"}
+          shadowColor="#fff"
+          shadowOpacity={0.1}
+          shadowRadius={20}
+          shadowOffset={{ width: 0, height: 10 }}
+        >
+          <XStack alignItems="center" justifyContent="space-between">
+            <Text fontSize="$6" fontWeight="600" color="white">
+              {permission.emoji} {permission.title}
+            </Text>
+
+            <Icon name="information-circle" onPress={onLearnMore} />
+          </XStack>
+
+          <YStack gap="$2">
+            <Paragraph color="rgba(255,255,255,0.5)" size="$4">
+              {permission.subtitle}
+            </Paragraph>
+
+            <YStack
+              backgroundColor={
+                isGranted ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.3)"
+              }
+              opacity={isGranted ? 0.8 : 1}
+              padding="$3"
+              borderRadius="$6"
+              justifyContent="center"
               alignItems="center"
-              alignSelf="flex-start"
-              backgroundColor="rgba(255,255,255,0.1)"
+              flexDirection="row"
               gap="$2"
             >
-              <Icon name="information-circle" disabled />
-            </XStack>
-          </TouchableOpacity>
-        </XStack>
-
-        <YStack gap="$3">
-          <Paragraph color="rgba(255,255,255,0.5)" size="$4">
-            {permission.subtitle}
-          </Paragraph>
-
-          <YStack
-            backgroundColor={
-              isGranted ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.3)"
-            }
-            opacity={isGranted ? 0.9 : 1}
-            padding="$3"
-            borderRadius="$6"
-            justifyContent="center"
-            alignItems="center"
-            flexDirection="row"
-            gap="$2"
-          >
-            <Text fontSize="$3" fontWeight="600">
-              {isGranted ? "Enabled" : "Enable Access"}
-            </Text>
-            {isGranted && <Icon name="checkmark" size={18} disabled />}
+              <Text color="white" fontSize="$3" fontWeight="600">
+                {isGranted ? "Enabled" : "Enable Access"}
+              </Text>
+              {isGranted ? (
+                <Icon name="checkmark" size={18} color="white" />
+              ) : null}
+            </YStack>
           </YStack>
         </YStack>
-      </YStack>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </Animated.View>
   );
-}
+};
 
-// The main Permissions screen, rewritten to keep layout stable:
-export default function Permissions() {
+const Permissions = () => {
   const router = useRouter();
   const { isSignedIn } = useAuth();
   const { permissions, checkPermissions } = usePermissions();
@@ -176,7 +167,6 @@ export default function Permissions() {
   const alertDialog = useAlertDialogController();
   const learnMoreDialog = useDialogController();
 
-  // required means both camera + contacts must be granted
   const requiredPermissions = permissions.camera && permissions.contacts;
 
   const openSettings = async (): Promise<void> => {
@@ -187,7 +177,7 @@ export default function Permissions() {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (requiredPermissions) {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.replace(
+      router.push(
         isSignedIn ? "/(app)/(bottom-tabs)/(home)" : "/auth/phone-number",
       );
     }
@@ -206,13 +196,13 @@ export default function Permissions() {
         color: "$gray9",
       },
     });
+
     if (confirmed) {
       void openSettings();
     }
   };
 
-  // A single function to handle each permission
-  async function handlePermissionRequest(
+  const handlePermissionRequest = async (
     permissionType: PermissionType,
     requestFunction: () => Promise<{
       status: PermissionStatus;
@@ -222,10 +212,11 @@ export default function Permissions() {
       status: PermissionStatus;
       canAskAgain: boolean;
     }>,
-  ) {
+  ): Promise<void> => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-    const { status, canAskAgain } = await getStatusFunction();
+    const { canAskAgain, status } = await getStatusFunction();
+
     if (status !== PermissionStatus.GRANTED && canAskAgain) {
       try {
         const result = await requestFunction();
@@ -246,9 +237,9 @@ export default function Permissions() {
     } else if (status !== PermissionStatus.GRANTED) {
       void showPermissionAlert(permissionType);
     }
-  }
+  };
 
-  async function requestPermission(type: PermissionType) {
+  const requestPermission = async (type: PermissionType) => {
     switch (type) {
       case "Camera":
         return handlePermissionRequest(
@@ -262,8 +253,8 @@ export default function Permissions() {
           Contacts.requestPermissionsAsync,
           Contacts.getPermissionsAsync,
         );
-        const current = await Contacts.getPermissionsAsync();
-        if (current.status === PermissionStatus.GRANTED) {
+        const currentPermissions = await Contacts.getPermissionsAsync();
+        if (currentPermissions.status === PermissionStatus.GRANTED) {
           void syncContacts();
         }
         return result;
@@ -275,9 +266,9 @@ export default function Permissions() {
           Notifications.getPermissionsAsync,
         );
     }
-  }
+  };
 
-  function getPermissionStatus(type: PermissionType) {
+  const getPermissionStatus = (type: PermissionType) => {
     switch (type) {
       case "Camera":
         return permissions.camera;
@@ -285,10 +276,8 @@ export default function Permissions() {
         return permissions.contacts;
       case "Notifications":
         return permissions.notifications;
-      case "Meida":
-        return permissions.media;
     }
-  }
+  };
 
   return (
     <OnboardingScreen
@@ -304,28 +293,35 @@ export default function Permissions() {
           isValid={requiredPermissions}
         />
       }
+      successMessage={
+        requiredPermissions
+          ? "All required permissions are enabled! 🎉"
+          : undefined
+      }
     >
-      <Animated.View entering={FadeInDown.springify()}>
-        <YStack gap="$4">
-          {PERMISSIONS.map((perm) => (
-            <PermissionItem
-              key={perm.type}
-              permission={perm}
-              isGranted={getPermissionStatus(perm.type)}
+      <Group orientation="vertical" gap="$3">
+        {PERMISSIONS.map((permission, index) => (
+          <Group.Item key={permission.type}>
+            <AnimatedPermissionItem
+              permission={permission}
+              onRequestPermission={() =>
+                void requestPermission(permission.type)
+              }
+              isGranted={getPermissionStatus(permission.type)}
+              index={index}
               onLearnMore={() => {
                 void learnMoreDialog.show({
-                  title: perm.title,
-                  subtitle: perm.description,
+                  title: permission.title,
+                  subtitle: permission.description,
                   acceptText: "Got it",
                 });
               }}
-              onRequestPermission={() => {
-                void requestPermission(perm.type);
-              }}
             />
-          ))}
-        </YStack>
-      </Animated.View>
+          </Group.Item>
+        ))}
+      </Group>
     </OnboardingScreen>
   );
-}
+};
+
+export default Permissions;
