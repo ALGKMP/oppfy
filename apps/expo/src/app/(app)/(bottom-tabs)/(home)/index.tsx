@@ -1,14 +1,11 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Dimensions, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
-import LogoText from "@assets/splash.png";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import { ArrowRight, Sparkles, Users } from "@tamagui/lucide-icons";
 import {
   Button,
   getToken,
@@ -17,7 +14,6 @@ import {
   H5,
   SizableText,
   Spacer,
-  View,
   XStack,
   YStack,
 } from "tamagui";

@@ -102,7 +102,7 @@ const lambdaHandler = async (
         if (post === undefined) {
           throw new Error("Failed to insert post");
         }
-/* 
+        /* 
         // force friendship between author and recipient if recipient is not on app
         if (metadata.type === "notOnApp") {
           await tx.insert(schema.friend).values({

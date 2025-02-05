@@ -110,7 +110,6 @@ const MediaPickerScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
 
-
   const { albumId, albumTitle } = useLocalSearchParams<{
     albumId: string;
     albumTitle: string;

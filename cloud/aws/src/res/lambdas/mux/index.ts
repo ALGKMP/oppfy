@@ -79,59 +79,59 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
   const assetId = body.object.id;
 
   try {
-      try {
-        const { insertId: postId } = await db.transaction(async (tx) => {
-          const [post] = await tx
-            .insert(schema.post)
-            .values({
-              id: metadata.postid,
-              key,
-              mediaType: "video" as const,
-              authorId: metadata.author,
-              height: parseInt(metadata.height),
-              width: parseInt(metadata.width),
-              caption: metadata.caption,
-              recipientId: metadata.recipient,
-            })
-            .returning({ insertId: schema.post.id });
+    try {
+      const { insertId: postId } = await db.transaction(async (tx) => {
+        const [post] = await tx
+          .insert(schema.post)
+          .values({
+            id: metadata.postid,
+            key,
+            mediaType: "video" as const,
+            authorId: metadata.author,
+            height: parseInt(metadata.height),
+            width: parseInt(metadata.width),
+            caption: metadata.caption,
+            recipientId: metadata.recipient,
+          })
+          .returning({ insertId: schema.post.id });
 
-          if (post === undefined) {
-            throw new Error("Failed to insert post");
-          }
-
-          await tx.insert(schema.postStats).values({ postId: post.insertId });
-          return post;
-        });
-
-        await storeNotification(metadata.author, metadata.recipient, {
-          eventType: "post",
-          entityType: "post",
-          entityId: postId.toString(),
-        });
-
-        const { posts } = await getNotificationSettings(metadata.recipient);
-        if (posts) {
-          const pushTokens = await getPushTokens(metadata.recipient);
-          if (pushTokens.length > 0) {
-            const senderProfile = await getProfile(metadata.author);
-            await sendNotification(
-              pushTokens,
-              metadata.author,
-              metadata.recipient,
-              {
-                title: "You've been opped",
-                body: `${senderProfile.username} posted a video of you`,
-                entityId: postId.toString(),
-                entityType: "post",
-              },
-            );
-          }
+        if (post === undefined) {
+          throw new Error("Failed to insert post");
         }
-      } catch (error) {
-        // If the transaction fails, delete the Mux asset
-        await deleteAsset(assetId);
-        throw error;
+
+        await tx.insert(schema.postStats).values({ postId: post.insertId });
+        return post;
+      });
+
+      await storeNotification(metadata.author, metadata.recipient, {
+        eventType: "post",
+        entityType: "post",
+        entityId: postId.toString(),
+      });
+
+      const { posts } = await getNotificationSettings(metadata.recipient);
+      if (posts) {
+        const pushTokens = await getPushTokens(metadata.recipient);
+        if (pushTokens.length > 0) {
+          const senderProfile = await getProfile(metadata.author);
+          await sendNotification(
+            pushTokens,
+            metadata.author,
+            metadata.recipient,
+            {
+              title: "You've been opped",
+              body: `${senderProfile.username} posted a video of you`,
+              entityId: postId.toString(),
+              entityType: "post",
+            },
+          );
+        }
       }
+    } catch (error) {
+      // If the transaction fails, delete the Mux asset
+      await deleteAsset(assetId);
+      throw error;
+    }
   } catch (error) {
     console.error("Error processing video:", error);
     // Ensure Mux asset is deleted in case of any error

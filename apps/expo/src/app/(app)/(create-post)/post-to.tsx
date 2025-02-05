@@ -7,7 +7,8 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { ChevronRight, UserRoundX } from "@tamagui/lucide-icons";
 import type { IFuseOptions } from "fuse.js";
-import { CountryCode, parsePhoneNumberWithError } from "libphonenumber-js";
+import type { CountryCode} from "libphonenumber-js";
+import { parsePhoneNumberWithError } from "libphonenumber-js";
 import { debounce } from "lodash";
 import { getToken, useTheme } from "tamagui";
 

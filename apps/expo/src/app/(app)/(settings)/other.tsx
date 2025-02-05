@@ -23,7 +23,7 @@ const Other = () => {
   const {
     syncContacts: handleSyncContacts,
     deleteContacts: handleDeleteContacts,
-    getDeviceContactsNotOnApp
+    getDeviceContactsNotOnApp,
   } = useContacts();
 
   const actionSheet = useActionSheetController();

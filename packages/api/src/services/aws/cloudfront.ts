@@ -5,9 +5,10 @@ import { CloudFrontRepository } from "../../repositories/aws/cloudfront";
 export class CloudFrontService {
   private cloudFrontRepository = new CloudFrontRepository();
 
-
   async getSignedUrlForPublicPost(objectKey: string) {
-    const url = this._getPublicPostDistributionDomainUrlForObject(`${objectKey}`);
+    const url = this._getPublicPostDistributionDomainUrlForObject(
+      `${objectKey}`,
+    );
     const signedUrl = await this.cloudFrontRepository.getSignedUrl({ url });
     return signedUrl;
   }
@@ -48,7 +49,9 @@ export class CloudFrontService {
     return `https://${postDistributionDomain}/${objectKey.replace(/^\//, "")}`;
   }
 
-  private _getPublicPostDistributionDomainUrlForObject(objectKey: string): string {
+  private _getPublicPostDistributionDomainUrlForObject(
+    objectKey: string,
+  ): string {
     const postDistributionDomain =
       env.CLOUDFRONT_PUBLIC_POSTS_DISTRIBUTION_DOMAIN;
     return `https://${postDistributionDomain}/${objectKey.replace(/^\//, "")}`;

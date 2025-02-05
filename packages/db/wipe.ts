@@ -76,9 +76,7 @@ const wipeDatabase = async () => {
       console.log("Drizzle meta directory not found.");
     }
 
-    console.log(
-      "Database wiped and meta directory deleted.",
-    );
+    console.log("Database wiped and meta directory deleted.");
   } catch (error) {
     console.error("Error during wipe process:", error);
   } finally {

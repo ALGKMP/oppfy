@@ -42,7 +42,9 @@ export interface ContactFns {
   }>;
   getDeviceContactsNotOnApp: () => Promise<Contacts.Contact[]>;
   searchContacts: (name: string) => Promise<Contacts.Contact[]>;
-  parsePhoneNumberEntry: (phoneNumber: PhoneNumber | undefined) => string | null;
+  parsePhoneNumberEntry: (
+    phoneNumber: PhoneNumber | undefined,
+  ) => string | null;
 }
 
 const useContacts = (syncNow = false): ContactFns => {
@@ -51,7 +53,9 @@ const useContacts = (syncNow = false): ContactFns => {
   const filterContactsOnApp =
     api.contacts.filterOutPhoneNumbersOnApp.useMutation();
 
-  const parsePhoneNumberEntry = (phoneNumber: PhoneNumber | undefined): string | null => {
+  const parsePhoneNumberEntry = (
+    phoneNumber: PhoneNumber | undefined,
+  ): string | null => {
     if (!phoneNumber) return null;
 
     const { number, countryCode } = phoneNumber;

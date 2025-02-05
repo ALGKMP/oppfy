@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from "react";
+import type {
+  ImageSourcePropType} from "react-native";
 import {
-  ImageSourcePropType,
   Modal,
   TextInput,
   TouchableOpacity,

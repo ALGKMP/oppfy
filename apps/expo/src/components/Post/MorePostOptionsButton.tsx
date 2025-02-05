@@ -11,7 +11,7 @@ import { useSaveMedia } from "~/hooks/post/useSaveMedia";
 import { useAuth } from "~/hooks/useAuth";
 import { useDeletePost } from "../../hooks/post/useDeletePost";
 import { useReportPost } from "../../hooks/post/useReportPost";
-import { Author, Recipient } from "./PostCard";
+import type { Author, Recipient } from "./PostCard";
 
 interface MorePostOptionsButtonProps {
   postId: string;

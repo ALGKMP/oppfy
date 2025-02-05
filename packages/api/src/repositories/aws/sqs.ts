@@ -1,11 +1,12 @@
 import {
   DeleteMessageCommand,
   ReceiveMessageCommand,
-  SendMessageCommand,
-  type DeleteMessageCommandInput,
-  type ReceiveMessageCommandInput,
-  type SendMessageCommandInput,
+  SendMessageCommand
+  
+  
+  
 } from "@aws-sdk/client-sqs";
+import type {DeleteMessageCommandInput, ReceiveMessageCommandInput, SendMessageCommandInput} from "@aws-sdk/client-sqs";
 
 import { sqs } from "@oppfy/sqs";
 

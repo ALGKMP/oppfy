@@ -79,6 +79,6 @@ const Name = () => {
       />
     </OnboardingScreen>
   );
-}
+};
 
 export default Name;
