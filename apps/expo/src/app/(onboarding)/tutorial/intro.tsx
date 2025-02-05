@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Dimensions } from "react-native";
 import Animated, { SlideInUp } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
@@ -10,10 +9,7 @@ import { Text, YStack } from "~/components/ui";
 import type { MessageProps } from "~/components/ui/Messages/Message";
 import { MessageList } from "~/components/ui/Messages/MessageList";
 import { OnboardingButton, OnboardingScreen } from "~/components/ui/Onboarding";
-import useContacts from "~/hooks/contacts/useContacts";
 import { storage } from "~/utils/storage";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 

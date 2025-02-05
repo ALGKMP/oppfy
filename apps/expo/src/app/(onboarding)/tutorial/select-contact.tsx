@@ -1,20 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Dimensions,
-  Keyboard,
-  Linking,
-  RefreshControl,
-  useWindowDimensions,
-} from "react-native";
+import { Dimensions, Keyboard, Linking, RefreshControl } from "react-native";
 import type { Contact } from "expo-contacts";
-import * as Contacts from "expo-contacts"; // Add this import at the top
 import { PermissionStatus } from "expo-media-library";
 import * as MediaLibrary from "expo-media-library";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { Phone, PhoneMissed, UserRoundX } from "@tamagui/lucide-icons";
-import type { IFuseOptions } from "fuse.js";
-import { CountryCode, parsePhoneNumberWithError } from "libphonenumber-js";
+import { UserRoundX } from "@tamagui/lucide-icons";
 import { debounce } from "lodash";
 import { getToken, Theme } from "tamagui";
 
@@ -30,7 +21,6 @@ import {
   YStack,
 } from "~/components/ui";
 import { useContacts } from "~/hooks/contacts";
-import useSearch from "~/hooks/useSearch";
 
 interface ListItem {
   id: string;
