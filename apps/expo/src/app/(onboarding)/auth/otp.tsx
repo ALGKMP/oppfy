@@ -11,7 +11,7 @@ import {
 } from "~/components/ui/Onboarding";
 import { useAuth } from "~/hooks/useAuth";
 
-export default function PhoneNumberOTP() {
+const PhoneNumberOTP = () => {
   const { phoneNumber } = useLocalSearchParams<{ phoneNumber: string }>();
   const { verifyPhoneNumber } = useAuth();
 
@@ -78,4 +78,6 @@ export default function PhoneNumberOTP() {
       />
     </OnboardingScreen>
   );
-}
+};
+
+export default PhoneNumberOTP;

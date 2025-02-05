@@ -15,7 +15,7 @@ enum Error {
   UNKNOWN = "Something went wrong. Please try again.",
 }
 
-export default function ProfilePicture() {
+const ProfilePicture = () => {
   const router = useRouter();
   const completedOnboarding = api.user.completedOnboarding.useMutation();
   const [error, setError] = useState<Error | null>(null);
@@ -98,4 +98,6 @@ export default function ProfilePicture() {
       />
     </OnboardingScreen>
   );
-}
+};
+
+export default ProfilePicture;

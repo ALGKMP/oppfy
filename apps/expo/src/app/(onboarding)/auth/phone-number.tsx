@@ -12,7 +12,7 @@ import {
 import type { CountryData } from "~/data/groupedCountries";
 import { useAuth } from "~/hooks/useAuth";
 
-export default function PhoneNumber() {
+const PhoneNumber = () => {
   const router = useRouter();
   const { sendVerificationCode } = useAuth();
 
@@ -101,4 +101,6 @@ export default function PhoneNumber() {
       />
     </OnboardingScreen>
   );
-}
+};
+
+export default PhoneNumber;
