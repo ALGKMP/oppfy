@@ -128,6 +128,7 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
         }
       }
     } catch (error) {
+      console.error("Error processing video:", error);
       // If the transaction fails, delete the Mux asset
       await deleteAsset(assetId);
       throw error;
