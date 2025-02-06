@@ -22,6 +22,7 @@ import {
   View,
   XStack,
 } from "~/components/ui";
+import { useContacts } from "~/hooks/contacts";
 import useSaveMedia from "~/hooks/useSaveMedia";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -38,6 +39,7 @@ const PreviewScreen = () => {
 
   const router = useRouter();
   const { saveState, saveToCameraRoll } = useSaveMedia();
+  const { contactsPaginatedQuery: _ } = useContacts();
 
   const onContinue = async () => {
     router.push({
@@ -50,8 +52,6 @@ const PreviewScreen = () => {
       },
     });
   };
-
-  console.log("Preview screen uri:", uri);
 
   return (
     <ScreenView padding={0} safeAreaEdges={["top"]}>

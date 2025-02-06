@@ -4,7 +4,6 @@ import { z } from "zod";
 
 import { postContentType } from "../../../../validators/src/shared/media";
 import { DomainError, ErrorCode } from "../../errors";
-import { PendingUserService } from "../../services/user/pendingUser";
 import {
   createTRPCRouter,
   protectedProcedure,

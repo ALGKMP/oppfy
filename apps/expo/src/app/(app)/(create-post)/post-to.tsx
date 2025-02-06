@@ -7,6 +7,7 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { ChevronRight, UserRoundX } from "@tamagui/lucide-icons";
 import type { IFuseOptions } from "fuse.js";
+import type { CountryCode} from "libphonenumber-js";
 import { parsePhoneNumberWithError } from "libphonenumber-js";
 import { debounce } from "lodash";
 import { getToken, useTheme } from "tamagui";
@@ -14,7 +15,6 @@ import { getToken, useTheme } from "tamagui";
 import {
   EmptyPlaceholder,
   HeaderTitle,
-  Icon,
   MediaListItem,
   SearchInput,
   Spacer,
@@ -68,6 +68,7 @@ const PostTo = () => {
       refetch: refetchContacts,
     },
     searchContacts,
+    parsePhoneNumberEntry,
   } = useContacts();
 
   const contacts = useMemo(
@@ -127,17 +128,23 @@ const PostTo = () => {
     [debouncedSearchContacts, setSearchQuery],
   );
 
-  const formatPhoneNumber = useCallback((phoneNumber: string | undefined) => {
-    if (phoneNumber === undefined) return;
-    try {
-      const parsedNumber = parsePhoneNumberWithError(phoneNumber);
-      return parsedNumber.isValid()
-        ? parsedNumber.formatNational()
-        : phoneNumber;
-    } catch {
-      return phoneNumber;
-    }
-  }, []);
+  const formatPhoneNumber = useCallback(
+    (phoneNumber: string | undefined, countryCode: string | undefined) => {
+      if (phoneNumber === undefined || countryCode === undefined) return;
+      try {
+        const parsedNumber = parsePhoneNumberWithError(
+          phoneNumber,
+          countryCode.toUpperCase() as CountryCode,
+        );
+        return parsedNumber.isValid()
+          ? parsedNumber.formatNational()
+          : phoneNumber;
+      } catch {
+        return phoneNumber;
+      }
+    },
+    [],
+  );
 
   const displayItems = useMemo(() => {
     const result: ListItem[] = [];
@@ -209,9 +216,12 @@ const PostTo = () => {
 
   const onContactSelected = useCallback(
     (contact: Contact) => {
-      const formattedPhoneNumber = parsePhoneNumberWithError(
-        contact.phoneNumbers?.[0]?.number ?? "",
-      ).format("E.164");
+      const formattedPhoneNumber = parsePhoneNumberEntry(
+        contact.phoneNumbers?.[0],
+      );
+
+      if (!formattedPhoneNumber) return;
+
       router.navigate({
         pathname: "/create-post",
         params: {
@@ -257,21 +267,21 @@ const PostTo = () => {
       if (item.type === "header") {
         return (
           <XStack alignItems="center" gap="$1">
-            <HeaderTitle>{item.title}</HeaderTitle>
-            {item.isContact && (
-              <Icon
-                name="information-circle"
-                color={theme.primary.val as string}
-                onPress={() =>
-                  void infoDialog.show({
-                    title: "Post for Anyone",
-                    subtitle:
-                      "You can share posts with friends who aren't on Oppfy yet! They'll get a text invite to join and see your post when they do. It's a great way to bring your friends into the fun.",
-                    acceptText: "Got it",
-                  })
-                }
-              />
-            )}
+            <HeaderTitle
+              iconSize={18}
+              iconColor={theme.primary.val as string}
+              iconAfter={item.isContact ? "information-circle" : undefined}
+              onPress={() =>
+                void infoDialog.show({
+                  title: "Post for Anyone",
+                  subtitle:
+                    "You can share posts with friends who aren't on Oppfy yet! They'll get a text invite to join and see your post when they do. It's a great way to bring your friends into the fun.",
+                  acceptText: "Got it",
+                })
+              }
+            >
+              {item.title}
+            </HeaderTitle>
           </XStack>
         );
       }
@@ -299,7 +309,10 @@ const PostTo = () => {
       return (
         <MediaListItem
           title={item.data.name}
-          subtitle={formatPhoneNumber(item.data.phoneNumbers?.[0]?.number)}
+          subtitle={formatPhoneNumber(
+            item.data.phoneNumbers?.[0]?.number,
+            item.data.phoneNumbers?.[0]?.countryCode,
+          )}
           imageUrl={
             item.data.imageAvailable
               ? { uri: item.data.image?.uri }

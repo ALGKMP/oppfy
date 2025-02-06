@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Dimensions } from "react-native";
 import Animated, { SlideInUp } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
@@ -10,9 +9,7 @@ import { Text, YStack } from "~/components/ui";
 import type { MessageProps } from "~/components/ui/Messages/Message";
 import { MessageList } from "~/components/ui/Messages/MessageList";
 import { OnboardingButton, OnboardingScreen } from "~/components/ui/Onboarding";
-import useContacts from "~/hooks/contacts/useContacts";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+import { storage } from "~/utils/storage";
 
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 
@@ -207,7 +204,21 @@ const WelcomeScreen = () => {
 };
 
 const Intro = () => {
-  const [showWelcome, setShowWelcome] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(() => {
+    // In dev mode, always show the animation
+    if (__DEV__) return false;
+
+    // Check if user has seen the animation before
+    const hasSeenIntro = storage.getBoolean("has_seen_intro");
+    return hasSeenIntro ?? false;
+  });
+
+  useEffect(() => {
+    if (showWelcome && !__DEV__) {
+      // Mark the intro as seen when transitioning to welcome screen
+      storage.set("has_seen_intro", true);
+    }
+  }, [showWelcome]);
 
   if (showWelcome) {
     return <WelcomeScreen />;

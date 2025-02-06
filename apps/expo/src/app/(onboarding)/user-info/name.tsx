@@ -22,7 +22,7 @@ enum Error {
   UNKNOWN = "Something went wrong. Please try again.",
 }
 
-export default function Name() {
+const Name = () => {
   const router = useRouter();
   const updateProfile = api.profile.updateProfile.useMutation();
 
@@ -79,4 +79,6 @@ export default function Name() {
       />
     </OnboardingScreen>
   );
-}
+};
+
+export default Name;

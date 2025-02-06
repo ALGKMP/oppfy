@@ -4,9 +4,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { getToken } from "tamagui";
-import { Spacer, YStack } from "~/components/ui";
 
-import { EmptyPlaceholder, HeaderTitle, MediaListItem } from "~/components/ui";
+import {
+  EmptyPlaceholder,
+  HeaderTitle,
+  MediaListItem,
+  Spacer,
+  YStack,
+} from "~/components/ui";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";

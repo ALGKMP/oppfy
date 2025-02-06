@@ -133,7 +133,6 @@ const ShareProfile = () => {
 
           <YStack gap="$4" mb="$4">
             <Button
-              size="$6"
               variant="white"
               icon={
                 <Ionicons
@@ -149,7 +148,7 @@ const ShareProfile = () => {
             </Button>
 
             <Button
-              size="$6"
+              // size="$6"
               variant="white"
               icon={
                 <Ionicons

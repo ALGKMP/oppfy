@@ -34,6 +34,7 @@ import {
 } from "react-native-vision-camera";
 import { BlurView } from "expo-blur";
 import * as MediaLibrary from "expo-media-library";
+import { PermissionStatus } from "expo-media-library";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
@@ -130,7 +131,7 @@ const CameraPage = () => {
         height = Math.max(format?.videoHeight ?? 0, format?.videoWidth ?? 0);
       }
 
-      if (width === undefined || height === undefined) {
+      if (width === 0 || height === 0) {
         throw new Error("Captured media dimensions not found");
       }
 
@@ -155,12 +156,18 @@ const CameraPage = () => {
         });
       }
     },
-    [router],
+    [
+      format?.photoHeight,
+      format?.photoWidth,
+      format?.videoHeight,
+      format?.videoWidth,
+      router,
+    ],
   );
 
   const onOpenMediaPicker = useCallback(async () => {
     const { status, canAskAgain } = await MediaLibrary.getPermissionsAsync();
-    if (status === "granted") {
+    if (status === PermissionStatus.GRANTED) {
       router.push("/(app)/(bottom-tabs)/(camera)/(media-picker)/album-picker");
       return;
     }
@@ -179,7 +186,14 @@ const CameraPage = () => {
       subtitle: "Please grant permission to access your media.",
       cancelText: "OK",
       acceptText: "Settings",
+      acceptTextProps: {
+        color: "$blue9",
+      },
+      cancelTextProps: {
+        color: "$color",
+      },
     });
+
     if (confirmed) {
       await Linking.openSettings();
     }

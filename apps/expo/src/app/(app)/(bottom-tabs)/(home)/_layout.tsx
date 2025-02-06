@@ -9,9 +9,7 @@ const HomeLayout = () => (
     <Stack.Screen name="index" />
 
     <Stack.Screen name="profile/[username]" />
-    <Stack.Screen
-      name="post/[postId]"
-    />
+    <Stack.Screen name="post/[postId]" />
   </Stack>
 );
 

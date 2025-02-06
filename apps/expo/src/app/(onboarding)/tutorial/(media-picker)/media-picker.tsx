@@ -11,6 +11,7 @@ import type { InfiniteData, QueryFunctionContext } from "@tanstack/react-query";
 import { getToken, Image, ScrollView } from "tamagui";
 
 import { Stack } from "~/components/ui";
+import { useContacts } from "~/hooks/contacts";
 
 const MAX_VIDEO_DURATION = 60;
 const NUM_COLUMNS = 3;
@@ -109,6 +110,7 @@ const MediaPickerScreen = () => {
   const router = useRouter();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+  // const { contactsPaginatedQuery: _ } = useContacts();
 
   const params = useLocalSearchParams<{
     albumId: string;

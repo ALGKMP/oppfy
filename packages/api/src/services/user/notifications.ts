@@ -135,6 +135,29 @@ export class NotificationsService {
     );
   }
 
+  async sendNotifications(
+    notis: {
+      senderId: string;
+      recipientId: string;
+      notificationData: SendNotificationData;
+    }[],
+  ) {
+    const mappedNotis = await Promise.all(
+      notis.map(async (noti) => {
+        return {
+          pushTokens: await this.notificationsRepository.getPushTokens(
+            noti.recipientId,
+          ),
+          senderId: noti.senderId,
+          recipientId: noti.recipientId,
+          notificationData: noti.notificationData,
+        };
+      }),
+    );
+
+    this.notificationsRepository.sendNotifications(mappedNotis);
+  }
+
   async storePushToken(userId: string, pushToken: string) {
     await this.notificationsRepository.storePushToken(userId, pushToken);
   }

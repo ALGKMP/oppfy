@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from "react";
+import type {
+  ImageSourcePropType} from "react-native";
 import {
-  ImageSourcePropType,
   Modal,
   TextInput,
   TouchableOpacity,
@@ -113,7 +114,7 @@ export function OnboardingScreen({
       paddingHorizontal="$6"
       justifyContent="space-between"
     >
-      <YStack gap="$6" paddingTop="$10">
+      <YStack gap="$6" paddingTop="$8">
         <AnimatedYStack
           gap="$2"
           entering={FadeIn.delay(200)}
@@ -720,7 +721,7 @@ export function OnboardingPhoneInput({
           >
             <XStack
               flex={1}
-              width={74}
+              minWidth={74}
               justifyContent="center"
               backgroundColor="rgba(255,255,255,0.1)"
               borderTopLeftRadius={16}

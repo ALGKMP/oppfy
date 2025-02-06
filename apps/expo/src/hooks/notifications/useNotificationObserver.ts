@@ -20,7 +20,6 @@ const useNotificationObserver = () => {
     const redirect = (_notification: Notification) => {
       // const { entityId, entityType } = notification.request.content
       //   .data as EntityData;
-
       // switch (entityType) {
       //   case "profile":
       //     router.navigate({

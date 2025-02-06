@@ -2,7 +2,7 @@ import { SNSClient } from "@aws-sdk/client-sns";
 
 import { env } from "@oppfy/env";
 
-export { PublishCommand } from "@aws-sdk/client-sns";
+export { PublishCommand, PublishBatchCommand } from "@aws-sdk/client-sns";
 
 export const sns = new SNSClient({
   region: env.AWS_REGION,

@@ -68,6 +68,18 @@ const AlbumPickerScreen = () => {
       setAlbums(withCover);
     } catch (error) {
       console.error("Error fetching albums:", error);
+      // requyest perms again lol
+      await MediaLibrary.requestPermissionsAsync();
+      // reroute to page again
+      router.push({
+        pathname: "/tutorial/album-picker",
+        params: {
+          name,
+          number,
+          recipientName,
+          recipientImage,
+        },
+      });
     }
   }, []);
 

@@ -9,7 +9,6 @@ import {
   followRouter,
   friendRouter,
   notificationsRouter,
-  pendingUserRouter,
   postRouter,
   profileRouter,
   reportRouter,
@@ -32,7 +31,6 @@ export const appRouter = createTRPCRouter({
   contacts: contactsRouter,
   search: searchRouter,
   report: reportRouter,
-  pendingUser: pendingUserRouter,
 });
 
 export const createCaller = createCallerFactory(appRouter);

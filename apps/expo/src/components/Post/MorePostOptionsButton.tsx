@@ -11,7 +11,7 @@ import { useSaveMedia } from "~/hooks/post/useSaveMedia";
 import { useAuth } from "~/hooks/useAuth";
 import { useDeletePost } from "../../hooks/post/useDeletePost";
 import { useReportPost } from "../../hooks/post/useReportPost";
-import { Author, Recipient } from "./PostCard";
+import type { Author, Recipient } from "./PostCard";
 
 interface MorePostOptionsButtonProps {
   postId: string;
@@ -107,28 +107,28 @@ const MorePostOptionsButton = ({
       onPress: () => void handleSavePost(mediaUrl),
       autoClose: true,
     },
-    // {
-    //   text: "Delete Post",
-    //   textProps: {
-    //     color: "$red9",
-    //   },
-    //   disabled: isDeleting,
-    //   onPress: async () => {
-    //     hide();
-    //     const shouldDelete = await showAlert({
-    //       title: "Delete Post",
-    //       subtitle:
-    //         "Are you sure you want to delete this post? This action cannot be undone.",
-    //       acceptText: "Delete",
-    //       cancelText: "Cancel",
-    //     });
+    {
+      text: "Delete Post",
+      textProps: {
+        color: "$red9",
+      },
+      disabled: isDeleting,
+      onPress: async () => {
+        hide();
+        const shouldDelete = await showAlert({
+          title: "Delete Post",
+          subtitle:
+            "Are you sure you want to delete this post? This action cannot be undone.",
+          acceptText: "Delete",
+          cancelText: "Cancel",
+        });
 
-    //     if (shouldDelete) {
-    //       void handleDeletePost(postId);
-    //     }
-    //   },
-    //   autoClose: false,
-    // },
+        if (shouldDelete) {
+          void handleDeletePost(postId);
+        }
+      },
+      autoClose: false,
+    },
   ];
 
   return (

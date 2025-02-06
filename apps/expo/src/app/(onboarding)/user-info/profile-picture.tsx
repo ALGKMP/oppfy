@@ -15,7 +15,7 @@ enum Error {
   UNKNOWN = "Something went wrong. Please try again.",
 }
 
-export default function ProfilePicture() {
+const ProfilePicture = () => {
   const router = useRouter();
   const completedOnboarding = api.user.completedOnboarding.useMutation();
   const [error, setError] = useState<Error | null>(null);
@@ -85,8 +85,6 @@ export default function ProfilePicture() {
         <OnboardingButton
           onPress={handleSubmit}
           disabled={isPickerLoading || isUploading}
-          opacity={selectedImageUri ? 1 : 0.7}
-          backgroundColor={selectedImageUri ? "white" : "rgba(255,255,255,0)"}
           isLoading={isUploading}
           isValid={selectedImageUri !== null}
           text={selectedImageUri ? "Continue" : "Skip for now"}
@@ -100,4 +98,6 @@ export default function ProfilePicture() {
       />
     </OnboardingScreen>
   );
-}
+};
+
+export default ProfilePicture;

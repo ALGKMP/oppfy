@@ -23,7 +23,7 @@ enum Error {
   UNKNOWN = "Something went wrong. Please try again.",
 }
 
-export default function DateOfBirth() {
+const DateOfBirth = () => {
   const router = useRouter();
   const updateProfile = api.profile.updateProfile.useMutation();
 
@@ -97,4 +97,6 @@ export default function DateOfBirth() {
       />
     </OnboardingScreen>
   );
-}
+};
+
+export default DateOfBirth;

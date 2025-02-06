@@ -1,13 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { DimensionValue } from "react-native";
-import {
-  Dimensions,
-  Linking,
-  Platform,
-  Pressable,
-  Share,
-  StyleSheet,
-} from "react-native";
+import { Dimensions, Pressable, StyleSheet } from "react-native";
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -17,7 +10,6 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import { ChevronRight, ScrollText } from "@tamagui/lucide-icons";
 import { getToken, Theme, useTheme } from "tamagui";
 
 import PlayPause, {
@@ -27,23 +19,21 @@ import {
   Avatar,
   Button,
   CardContainer,
-  H5,
   HeaderTitle,
   Icon,
   ScreenView,
+  Spinner,
   Text,
   useBottomSheetController,
   View,
   XStack,
   YStack,
 } from "~/components/ui";
-import { OnboardingButton } from "~/components/ui/Onboarding";
 import { useUploadMedia } from "~/hooks/media";
 import type {
   UploadMediaInputNotOnApp,
   UploadMediaInputOnApp,
 } from "~/hooks/media/useUploadMedia";
-import useStoreReview from "~/hooks/useRating";
 import useShare from "~/hooks/useShare";
 import { api } from "~/utils/api";
 
@@ -155,15 +145,14 @@ const CaptionSheet = ({
 };
 
 const CreatePost = () => {
-  const theme = useTheme();
   const router = useRouter();
-  const { promptForReview } = useStoreReview();
   const { show, hide } = useBottomSheetController();
   const { sharePostToNewUser } = useShare();
 
   const completedTutorial = api.user.completedTutorial.useMutation();
 
   const [caption, setCaption] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     type,
@@ -197,44 +186,50 @@ const CreatePost = () => {
   });
 
   const onSubmit = async () => {
-    const baseData = {
-      uri: uri,
-      width: parseInt(width),
-      height: parseInt(height),
-      caption,
-    };
+    setIsLoading(true);
+    try {
+      const baseData = {
+        uri: uri,
+        width: parseInt(width),
+        height: parseInt(height),
+        caption,
+      };
 
-    const input =
-      params.userType === "onApp"
-        ? ({
-            ...baseData,
-            recipient: params.recipient,
-            type: "onApp",
-          } satisfies UploadMediaInputOnApp)
-        : ({
-            ...baseData,
-            number: params.number,
-            type: "notOnApp",
-            name: params.name,
-          } satisfies UploadMediaInputNotOnApp);
+      const input =
+        params.userType === "onApp"
+          ? ({
+              ...baseData,
+              recipient: params.recipient,
+              type: "onApp",
+            } satisfies UploadMediaInputOnApp)
+          : ({
+              ...baseData,
+              number: params.number,
+              type: "notOnApp",
+              name: params.name,
+            } satisfies UploadMediaInputNotOnApp);
 
-    console.log("before upload", input);
+      console.log("before upload", input);
 
-    const postId =
-      type === "photo"
-        ? await uploadPhotoMutation.mutateAsync(input)
-        : await uploadVideoMutation.mutateAsync(input);
+      const postId =
+        type === "photo"
+          ? await uploadPhotoMutation.mutateAsync(input)
+          : await uploadVideoMutation.mutateAsync(input);
 
-    if (params.userType === "notOnApp" && params.number) {
-      await sharePostToNewUser({
-        postId,
-        phoneNumber: params.number,
-      });
+      if (params.userType === "notOnApp" && params.number) {
+        await sharePostToNewUser({
+          postId,
+          phoneNumber: params.number,
+        });
+      }
+
+      await completedTutorial.mutateAsync();
+      router.replace("/(app)/(bottom-tabs)/(home)");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
     }
-
-    void completedTutorial.mutateAsync();
-
-    router.replace("/(app)/(bottom-tabs)/(home)");
   };
 
   const openCaptionSheet = () => {
@@ -282,7 +277,6 @@ const CreatePost = () => {
                 size={28}
                 source={recipientImage ?? DefaultProfilePicture}
                 bordered
-                style={{ borderColor: theme.color.val, borderWidth: 1 }}
               />
               <Text>
                 Posting to <Text fontWeight="bold">@{displayName}</Text>
@@ -293,26 +287,36 @@ const CreatePost = () => {
           <CardContainer padding="$4" paddingBottom="$5">
             <YStack gap="$3">
               <HeaderTitle>Post Details</HeaderTitle>
-              <XStack
-                justifyContent="space-between"
-                alignItems="center"
-                onPress={openCaptionSheet}
-              >
-                <XStack flex={1} alignItems="center" gap="$3" mr="$4">
-                  <Icon name="chatbubble-outline" />
-                  <View flex={1}>
-                    <Text fontSize="$5" fontWeight="500">
-                      {caption || "Add caption"}
-                    </Text>
-                  </View>
+              <TouchableOpacity onPress={openCaptionSheet}>
+                <XStack
+                  justifyContent="space-between"
+                  alignItems="center"
+                  onPress={openCaptionSheet}
+                >
+                  <XStack flex={1} alignItems="center" gap="$3" mr="$4">
+                    <Icon name="chatbubble-outline" />
+                    <View flex={1}>
+                      <Text fontSize="$5" fontWeight="500">
+                        {caption || "Add caption"}
+                      </Text>
+                    </View>
+                  </XStack>
+                  <Icon name="chevron-forward" />
                 </XStack>
-                <Icon name="chevron-forward" />
-              </XStack>
+              </TouchableOpacity>
             </YStack>
           </CardContainer>
         </YStack>
 
-        <OnboardingButton text={buttonMessage} onPress={onSubmit} hideIcon />
+        <Button
+          variant="primary"
+          disabled={isLoading}
+          onPress={onSubmit}
+          pressStyle={{ scale: 0.95 }}
+          animation="bouncy"
+        >
+          {isLoading ? <Spinner size="small" color="$color" /> : buttonMessage}
+        </Button>
       </Theme>
     </ScreenView>
   );

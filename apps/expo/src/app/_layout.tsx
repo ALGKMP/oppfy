@@ -7,13 +7,13 @@ import { ThemeProvider } from "@react-navigation/native";
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
 import { PortalProvider, TamaguiProvider } from "tamagui";
 
+import { UpdateHandler } from "~/components/Layouts/UpdateHandler";
 import {
   ActionSheetProvider,
   AlertDialogProvider,
   DialogProvider,
 } from "~/components/ui";
 import { BottomSheetProvider } from "~/components/ui/BottomSheet";
-import { UpdateHandler } from "~/components/Layouts/UpdateHandler";
 import { AudioProvider } from "~/contexts/AudioContext";
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { FontProvider } from "~/providers/FontProvider";
