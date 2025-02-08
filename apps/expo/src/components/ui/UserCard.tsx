@@ -12,7 +12,7 @@ import Animated, {
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
+import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import {
   Check,
   ChevronRight,

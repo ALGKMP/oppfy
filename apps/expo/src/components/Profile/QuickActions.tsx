@@ -1,6 +1,6 @@
 import React from "react";
 import { useRouter } from "expo-router";
-import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
+import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { Ban, Settings, Share } from "@tamagui/lucide-icons";
 import { XStack } from "tamagui";
 

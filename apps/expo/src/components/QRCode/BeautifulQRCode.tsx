@@ -1,7 +1,7 @@
 import React from "react";
 import QRCode from "react-native-qrcode-svg";
 import { LinearGradient } from "expo-linear-gradient";
-import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
+import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { View } from "tamagui";
 
 interface BeautifulQRCodeProps {

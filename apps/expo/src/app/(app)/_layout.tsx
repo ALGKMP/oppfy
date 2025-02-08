@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Redirect, SplashScreen, useRouter } from "expo-router";
+import { SplashScreen, useRouter } from "expo-router";
 
 import { Stack } from "~/components/Layouts/Navigation";
 import { usePermissions } from "~/contexts/PermissionsContext";
@@ -35,13 +35,8 @@ const AppLayout = () => {
       return;
     }
 
-    if (!isSignedIn) {
+    if (!isSignedIn || !requiredPermissions) {
       router.replace("/(onboarding)");
-      return;
-    }
-
-    if (!requiredPermissions) {
-      router.push("/(onboarding)/misc/permissions");
       return;
     }
   }, [

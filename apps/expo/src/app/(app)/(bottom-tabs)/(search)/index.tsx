@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { Keyboard, RefreshControl } from "react-native";
-import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
+import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { debounce } from "lodash";
 import { getToken, YStack } from "tamagui";

@@ -1,6 +1,6 @@
 import React from "react";
 import type { ImageSourcePropType } from "react-native";
-import defaultProfilePicture from "@assets/default-profile-picture.jpg";
+import defaultProfilePicture from "@assets/default_profile_picture.jpg";
 import type { ImageProps } from "tamagui";
 import { Image, Stack, useTheme } from "tamagui";
 

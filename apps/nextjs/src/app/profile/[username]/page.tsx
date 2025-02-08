@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           `Check out ${profile.name ?? profile.username}'s profile on Oppfy`,
         images: [
           {
-            url: profile.profilePictureUrl ?? "/default-profile-picture.jpg",
+            url: profile.profilePictureUrl ?? "/default_profile_picture.jpg",
             width: 800,
             height: 800,
             alt: `${profile.name ?? profile.username}'s profile picture`,
@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description:
           profile.bio ??
           `Check out ${profile.name ?? profile.username}'s profile on Oppfy`,
-        images: [profile.profilePictureUrl ?? "/default-profile-picture.jpg"],
+        images: [profile.profilePictureUrl ?? "/default_profile_picture.jpg"],
         site: "@oppfyapp",
         creator: "@oppfyapp",
       },

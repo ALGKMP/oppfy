@@ -88,7 +88,7 @@ export default function AnimatedPostPage({ post, aspectRatio }: PostPageProps) {
               <div className="relative h-14 w-14 md:h-16 md:w-16">
                 <Image
                   src={
-                    post.authorProfilePicture ?? "/default-profile-picture.jpg"
+                    post.authorProfilePicture ?? "/default_profile_picture.jpg"
                   }
                   alt={`${post.authorUsername}'s profile`}
                   className="rounded-full border-2 border-[#F214FF]"
@@ -116,7 +116,7 @@ export default function AnimatedPostPage({ post, aspectRatio }: PostPageProps) {
                 <Image
                   src={
                     post.recipientProfilePicture ??
-                    "/default-profile-picture.jpg"
+                    "/default_profile_picture.jpg"
                   }
                   alt={`${post.recipientUsername}'s profile`}
                   className="rounded-full border-2 border-[#F214FF]"

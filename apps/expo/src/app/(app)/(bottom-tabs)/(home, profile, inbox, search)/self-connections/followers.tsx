@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { RefreshControl } from "react-native";
-import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
+import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { getToken, H6, YStack } from "tamagui";

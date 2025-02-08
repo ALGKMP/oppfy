@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
+import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 
 import {
   OnboardingButton,

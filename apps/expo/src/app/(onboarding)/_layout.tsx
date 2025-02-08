@@ -4,6 +4,11 @@ import { Info } from "@tamagui/lucide-icons";
 import { OnboardingStack } from "~/components/Layouts/Navigation/OnboardingStack";
 import { Button } from "~/components/ui";
 
+export const unstable_settings = {
+  // Ensure any route can link back to `/`
+  initialRouteName: "index",
+};
+
 export default function OnboardingLayout() {
   const handleInfo = () => {
     // TODO: Add info action

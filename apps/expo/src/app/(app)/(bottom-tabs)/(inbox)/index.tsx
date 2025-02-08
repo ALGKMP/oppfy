@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { RefreshControl, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
+import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { useScrollToTop } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";

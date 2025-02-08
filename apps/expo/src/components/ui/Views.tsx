@@ -77,10 +77,9 @@ export const ScreenView = ({
 
   const wrappedContent = keyboardAvoiding ? (
     <KeyboardAvoidingView
-      style={{ flex: 1, width: "100%" }}
+      style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={keyboardOffset}
-      enabled
     >
       {content}
     </KeyboardAvoidingView>
