@@ -69,9 +69,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "expo-build-properties",
       {
         android: {
-          compileSdkVersion: 34,
-          targetSdkVersion: 34,
-          buildToolsVersion: "34.0.0",
+          compileSdkVersion: 35,
+          targetSdkVersion: 35,
+          buildToolsVersion: "35.0.0",
         },
         ios: {
           useFrameworks: "static",
@@ -112,10 +112,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     //       "Oppfy uses your location to tag photos with where they were taken.",
     //   },
     // ],
-    [
-      "./snapchat-plugin",
-      { snapchatClientId: "e029e4cb-efc7-43c4-bab3-608dce70c69f" },
-    ],
     [
       "expo-contacts",
       {
