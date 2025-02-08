@@ -171,9 +171,7 @@ const SelfProfile = () => {
         />
         {isLoadingProfile ? null : (
           <>
-            {profileData?.friendCount &&
-            profileData.friendCount > 0 &&
-            !networkRelationships?.blocked ? (
+            {profileData?.friendCount && profileData.friendCount > 0 ? (
               <FriendCarousel paddingHorizontal="$2.5" />
             ) : (
               <RecommendationCarousel paddingHorizontal="$2.5" />
