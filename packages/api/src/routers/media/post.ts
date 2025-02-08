@@ -150,11 +150,13 @@ export const postRouter = createTRPCRouter({
         const postId = randomUUID().toString();
 
         const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
-          ...input,
           author: ctx.session.uid,
           type: "notOnApp",
           recipient: userId,
           postid: postId,
+          width: input.width,
+          height: input.height,
+          caption: input.caption,
         });
 
         return { url, postId };
