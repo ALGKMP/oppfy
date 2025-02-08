@@ -6,24 +6,26 @@ import { useAuth } from "~/hooks/useAuth";
 import { api } from "~/utils/api";
 
 const Index = () => {
-  const { isLoading: permissionsIsLoading } = usePermissions();
-  const { isLoading: sessionIsLoading, isSignedIn } = useAuth();
-  const { isLoading: onboardingCompleteIsLoading, data: onboardingComplete } =
+  const { isLoading: isLoadingAuth, isSignedIn } = useAuth();
+  const { isLoading: isLoadingOnboardingComplete, data: onboardingComplete } =
     api.user.onboardingComplete.useQuery();
-  const { isLoading: tutorialCompleteIsLoading, data: tutorialComplete } =
+  const { isLoading: isLoadingTutorialComplete, data: tutorialComplete } =
     api.user.tutorialComplete.useQuery();
 
+  const { isLoading: isLoadingPermissions, permissions } = usePermissions();
+  const requiredPermissions = permissions.camera && permissions.contacts;
+
   const isLoading =
-    sessionIsLoading ||
-    permissionsIsLoading ||
-    onboardingCompleteIsLoading ||
-    tutorialCompleteIsLoading;
+    isLoadingAuth ||
+    isLoadingPermissions ||
+    isLoadingTutorialComplete ||
+    isLoadingOnboardingComplete;
 
   if (isLoading) {
     return null;
   }
 
-  if (!isSignedIn) {
+  if (!isSignedIn || !requiredPermissions) {
     return <Redirect href="/(onboarding)" />;
   }
 
