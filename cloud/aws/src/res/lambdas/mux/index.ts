@@ -23,6 +23,8 @@ type SendNotificationData = z.infer<
 
 type APIGatewayProxyEvent = z.infer<typeof APIGatewayProxyEventV2Schema>;
 
+const MUX_READY_EVENT = "video.asset.ready";
+
 const env = createEnv({
   server: {
     SNS_PUSH_NOTIFICATION_TOPIC_ARN: z.string().min(1),
@@ -36,7 +38,7 @@ const sns = new SNSClient({
 
 const muxBodySchema = z
   .object({
-    type: z.literal("video.asset.ready"),
+    type: z.string(),
     object: z.object({
       id: z.string(),
       type: z.string(),
@@ -73,6 +75,12 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
   }
 
   const body = muxBodySchema.parse(JSON.parse(rawBody));
+
+  // Early return for non-video.asset.ready events
+  if (body.type !== MUX_READY_EVENT) {
+    console.log(`Ignoring Mux event of type: ${body.type}`);
+    return;
+  }
 
   const key = body.data.playback_ids[0].id;
   const metadata = body.data.passthrough;
