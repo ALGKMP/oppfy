@@ -14,9 +14,7 @@ import {
   UserRepository,
 } from "../../repositories";
 import { SQSService } from "../aws/sqs";
-import { NotificationsService } from "./notifications";
 
-//TODO: move to validators
 export type InferEnum<T extends { enumValues: string[] }> =
   T["enumValues"][number];
 
