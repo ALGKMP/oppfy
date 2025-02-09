@@ -753,6 +753,7 @@ export function OnboardingPhoneInput({
                   height: 1,
                   opacity: 0,
                 }}
+                autoComplete="off"
                 autoFocus={autoFocus}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
