@@ -104,9 +104,10 @@ export const postRouter = createTRPCRouter({
       try {
         const postId = randomUUID().toString();
 
-        const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
+        const { url } = await ctx.services.post.getPresignedUrlForVideo({
           ...input,
           author: ctx.session.uid,
+          recipient: input.recipient,
           postid: postId,
         });
 
@@ -149,9 +150,8 @@ export const postRouter = createTRPCRouter({
 
         const postId = randomUUID().toString();
 
-        const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
+        const { url } = await ctx.services.post.getPresignedUrlForVideo({
           author: ctx.session.uid,
-          type: "notOnApp",
           recipient: userId,
           postid: postId,
           width: input.width,
