@@ -1,10 +1,10 @@
-import { Dashboard } from "aws-cdk-lib/aws-cloudwatch";
 import { aliasedTable, and, asc, desc, eq, gt, lt, or, sql } from "drizzle-orm";
 
 import { db, inArray, schema } from "@oppfy/db";
 
-import { handleDatabaseErrors } from "../../errors";
+import { handleDatabaseErrors, handleMuxErrors } from "../../errors";
 import { ContactsRepository } from "../user/contacts";
+import { mux } from "@oppfy/mux";
 
 export class PostRepository {
   private db = db;
@@ -491,6 +491,41 @@ export class PostRepository {
             sql`(SELECT profile_id FROM "user" WHERE id = ${post.recipientId})`,
           ),
         );
+    });
+  }
+
+  @handleMuxErrors
+  async PresignedUrlWithPostMetadata({
+    author,
+    recipient,
+    caption,
+    height,
+    width,
+    postid,
+  }: {
+    author: string;
+    recipient: string;
+    caption: string;
+    height: string;
+    width: string;
+    postid: string;
+  }) {
+    return await mux.video.uploads.create({
+      cors_origin: "*",
+      new_asset_settings: {
+        test: false,
+        encoding_tier: "smart",
+        mp4_support: "standard",
+        playback_policy: ["public"],
+        passthrough: JSON.stringify({
+          author,
+          recipient,
+          caption,
+          height,
+          width,
+          postid,
+        }),
+      },
     });
   }
 }
