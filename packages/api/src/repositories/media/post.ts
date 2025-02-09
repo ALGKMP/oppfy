@@ -102,6 +102,7 @@ export class PostRepository {
     return result[0];
   }
 
+
   @handleDatabaseErrors
   async getPostFromCommentId(commentId: string) {
     const author = aliasedTable(schema.user, "author");

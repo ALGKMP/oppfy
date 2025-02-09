@@ -8,12 +8,10 @@ import {
   UserRepository,
   ViewRepository,
 } from "../../repositories";
-import { S3Repository } from "../../repositories/aws/s3";
 import { CommentRepository } from "../../repositories/media/comment";
 import { LikeRepository } from "../../repositories/media/like";
 import { PostRepository } from "../../repositories/media/post";
 import { PostStatsRepository } from "../../repositories/media/post-stats";
-import { MuxRepository } from "../../repositories/mux/mux";
 import { CloudFrontService } from "../aws/cloudfront";
 import { NotificationsService } from "../user/notifications";
 import { UserService } from "../user/user";
