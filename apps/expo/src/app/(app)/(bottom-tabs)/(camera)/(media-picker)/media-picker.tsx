@@ -15,7 +15,7 @@ import { Stack } from "~/components/ui";
 const MAX_VIDEO_DURATION = 60;
 const NUM_COLUMNS = 3;
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const ITEM_SIZE = SCREEN_WIDTH / NUM_COLUMNS;
+const ITEM_SIZE = 143;
 const PAGE_SIZE = 500;
 const INITIAL_PAGE_SIZE = 1000;
 
@@ -203,7 +203,7 @@ const MediaPickerScreen = () => {
     <FlashList
       data={assets}
       renderItem={renderItem}
-      keyExtractor={(item) => item.uri}
+      keyExtractor={(item) => item.id}
       numColumns={NUM_COLUMNS}
       estimatedItemSize={ITEM_SIZE}
       onEndReached={() => {

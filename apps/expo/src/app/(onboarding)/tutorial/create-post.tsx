@@ -29,6 +29,7 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
+import { OnboardingButton } from "~/components/ui/Onboarding";
 import { useUploadMedia } from "~/hooks/media";
 import type {
   UploadMediaInputNotOnApp,
@@ -308,15 +309,12 @@ const CreatePost = () => {
           </CardContainer>
         </YStack>
 
-        <Button
-          variant="primary"
+        <OnboardingButton
           disabled={isLoading}
           onPress={onSubmit}
-          pressStyle={{ scale: 0.95 }}
-          animation="bouncy"
-        >
-          {isLoading ? <Spinner size="small" color="$color" /> : buttonMessage}
-        </Button>
+          text={buttonMessage}
+          isLoading={isLoading}
+        />
       </Theme>
     </ScreenView>
   );

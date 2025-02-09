@@ -227,7 +227,7 @@ const MediaPickerScreen = () => {
     <FlashList
       data={assets}
       renderItem={renderItem}
-      keyExtractor={(item) => item.uri}
+      keyExtractor={(item) => item.id}
       numColumns={NUM_COLUMNS}
       estimatedItemSize={ITEM_SIZE}
       onEndReached={() => {
