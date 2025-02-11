@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { cloudfront } from "@oppfy/cloudfront";
 import { env } from "@oppfy/env";
+import { openSearch, OpenSearchIndex } from "@oppfy/opensearch";
+import type { OpenSearchProfileIndexResult } from "@oppfy/opensearch";
 import { s3 } from "@oppfy/s3";
 import { sharedValidators } from "@oppfy/validators";
 
@@ -14,9 +16,6 @@ import {
 import { BlockService } from "../network/block";
 import { FollowService } from "../network/follow";
 import { FriendService } from "../network/friend";
-import { OpenSearchIndex } from "@oppfy/opensearch";
-import { openSearch } from "@oppfy/opensearch";
-import type { OpenSearchProfileIndexResult } from "@oppfy/opensearch";
 
 const updateProfile = z.object({
   name: sharedValidators.user.name.optional(),
@@ -282,6 +281,18 @@ export class ProfileService {
       index: OpenSearchIndex.PROFILE,
       id: userId,
       body: documentBody,
+    });
+  }
+
+  async getProfilePictureUploadUrl(userId: string, contentLength: number) {
+    const user = await this.userRepository.getUser(userId);
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+    }
+
+    return await this.profileRepository.uploadProfilePictureUrl({
+      userId,
+      contentLength,
     });
   }
 }

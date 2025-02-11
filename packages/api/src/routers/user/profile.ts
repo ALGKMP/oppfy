@@ -55,10 +55,17 @@ export const profileRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      return await ctx.services.s3.uploadProfilePictureUrl({
-        userId: ctx.session.uid,
-        contentLength: input.contentLength,
-      });
+      try {
+        return await ctx.services.profile.getProfilePictureUploadUrl(
+          ctx.session.uid,
+          input.contentLength,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to get profile picture upload URL",
+        });
+      }
     }),
 
   removeProfilePicture: protectedProcedure.mutation(async ({ ctx }) => {
@@ -141,12 +148,6 @@ export const profileRouter = createTRPCRouter({
         userId: z.string(),
       }),
     )
-    // .output(
-    //   z.object({
-    //     currentUserRelationshipToOtherUser: sharedValidators.user.NetworkRelationshipState,
-    //     otherUserRelationshipToCurrentUser: sharedValidators.user.NetworkRelationshipState,
-    //   }),
-    // ) TODO: Don't Remove this comment. It's for if I wanna change how this shit works in the future
     .query(async ({ ctx, input }) => {
       return await ctx.services.profile.getNetworkConnectionStatesBetweenUsers({
         currentUserId: ctx.session.uid,

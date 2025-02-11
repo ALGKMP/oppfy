@@ -5,11 +5,10 @@ import { sqs } from "@oppfy/sqs";
 import { DomainError, ErrorCode } from "../../errors";
 import {
   ContactsRepository,
+  PostRepository,
   ProfileRepository,
   UserRepository,
-  PostRepository,
 } from "../../repositories";
-import { CloudFrontService } from "../aws/cloudfront";
 import { SQSService } from "../aws/sqs";
 
 type RelationshipStatus = "notFollowing" | "following" | "requested";
@@ -18,9 +17,6 @@ export class ContactService {
   private contactsRepository = new ContactsRepository();
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
-  private postRepository = new PostRepository();
-
-  private cloudFrontService = new CloudFrontService();
   private sqsService = new SQSService();
 
   async syncContacts(userId: string, contacts: string[]) {

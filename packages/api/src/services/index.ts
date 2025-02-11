@@ -1,4 +1,3 @@
-import { CloudFrontService } from "./aws/cloudfront";
 import { S3Service } from "./aws/s3";
 import { SearchService } from "./aws/search";
 import { PaginationService } from "./media/paginate";
@@ -28,6 +27,5 @@ export const services = {
   post: new PostService(),
   paginate: new PaginationService(),
   report: new ReportService(),
-  cloudfront: new CloudFrontService(),
   twilio: new TwilioService(),
 };
