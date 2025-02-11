@@ -1,12 +1,10 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { S3Repository } from "../../repositories/aws/s3";
 import { SearchRepository } from "../../repositories/aws/search";
 import { UserRepository } from "../../repositories/user/user";
 import { CloudFrontService } from "./cloudfront";
 
 export class SearchService {
   private searchRepository = new SearchRepository();
-  private s3Repository = new S3Repository();
   private userRepository = new UserRepository();
 
   private cloudFrontService = new CloudFrontService();

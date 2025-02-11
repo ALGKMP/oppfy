@@ -1,7 +1,7 @@
 import { env } from "@oppfy/env";
+import { sqs } from "@oppfy/sqs";
 
 import { DomainError, ErrorCode } from "../../errors";
-import { SQSRepository } from "../../repositories/aws/sqs";
 
 interface ContactSyncMessage {
   userId: string;
@@ -10,17 +10,13 @@ interface ContactSyncMessage {
 }
 
 export class SQSService {
-  private sqsRepository = new SQSRepository();
-
   async sendContactSyncMessage({
     userId,
     userPhoneNumberHash,
     contacts,
   }: ContactSyncMessage) {
     try {
-      const messageId = `${userId}_contactsync_${Date.now().toString()}`;
-
-      await this.sqsRepository.sendMessage({
+      await sqs.sendMessage({
         QueueUrl: env.SQS_CONTACT_QUEUE,
         MessageBody: JSON.stringify({
           userId,
@@ -29,7 +25,10 @@ export class SQSService {
         }),
       });
 
-      return { success: true, messageId };
+      return {
+        success: true,
+        messageId: `${userId}_contactsync_${Date.now().toString()}`,
+      };
     } catch (err) {
       throw new DomainError(
         ErrorCode.SQS_FAILED_TO_SEND_MESSAGE,

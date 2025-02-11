@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 import { env } from "@oppfy/env";
+import { s3 } from "@oppfy/s3";
 import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import {
   BlockRepository,
   ProfileRepository,
-  S3Repository,
   SearchRepository,
   UserRepository,
 } from "../../repositories";
@@ -27,7 +27,6 @@ export class ProfileService {
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
   private searchRepository = new SearchRepository();
-  private s3Repository = new S3Repository();
   private blockRepository = new BlockRepository();
 
   private friendService = new FriendService();
@@ -181,7 +180,7 @@ export class ProfileService {
     }
 
     const key = `profile-pictures/${userId}.jpg`;
-    await this.s3Repository.deleteObject(env.S3_POST_BUCKET, key);
+    await s3.deleteObject(env.S3_POST_BUCKET, key);
 
     await this.profileRepository.removeProfilePicture(user.profile.id);
   }

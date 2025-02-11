@@ -1,10 +1,10 @@
 import type { z } from "zod";
 
 import { env } from "@oppfy/env";
+import { s3 } from "@oppfy/s3";
 import type { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
-import { S3Repository } from "../../repositories/aws/s3";
 import { CloudFrontService } from "./cloudfront";
 
 type ContentType = z.infer<typeof sharedValidators.media.postContentType>;
@@ -33,7 +33,6 @@ export type ProfilePictureMetadata = z.infer<
 >;
 
 export class S3Service {
-  private s3Repository = new S3Repository();
   private cloudFrontService = new CloudFrontService();
 
   async uploadProfilePictureUrl({
@@ -49,7 +48,7 @@ export class S3Service {
       user: userId,
     };
 
-    const presignedUrl = await this.s3Repository.putObjectPresignedUrl({
+    const presignedUrl = await s3.putObjectPresignedUrl({
       Key: key,
       Bucket: env.S3_PROFILE_BUCKET,
       ContentLength: contentLength,
@@ -89,7 +88,7 @@ export class S3Service {
 
       caption = encodeURIComponent(caption);
 
-      const presignedUrl = await this.s3Repository.putObjectPresignedUrl({
+      const presignedUrl = await s3.putObjectPresignedUrl({
         Bucket: env.S3_POST_BUCKET,
         Key: objectKey,
         ContentLength: contentLength,
@@ -139,7 +138,7 @@ export class S3Service {
 
       caption = encodeURIComponent(caption);
 
-      const presignedUrl = await this.s3Repository.putObjectPresignedUrl({
+      const presignedUrl = await s3.putObjectPresignedUrl({
         Bucket: env.S3_POST_BUCKET,
         Key: objectKey,
         ContentLength: contentLength,
@@ -166,16 +165,16 @@ export class S3Service {
   async putObjectPresignedUrl(
     putObjectCommandInput: PutObjectPresignedUrlInput,
   ) {
-    return await this.s3Repository.putObjectPresignedUrl(putObjectCommandInput);
+    return await s3.putObjectPresignedUrl(putObjectCommandInput);
   }
 
   async getObjectPresignedUrl(
     getObjectCommandInput: GetObjectPresignedUrlInput,
   ) {
-    return await this.s3Repository.getObjectPresignedUrl(getObjectCommandInput);
+    return await s3.getObjectPresignedUrl(getObjectCommandInput);
   }
 
   async deleteObject(bucket: string, key: string) {
-    return await this.s3Repository.deleteObject(bucket, key);
+    return await s3.deleteObject(bucket, key);
   }
 }
