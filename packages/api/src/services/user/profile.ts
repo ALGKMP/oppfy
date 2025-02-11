@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { cloudfront } from "@oppfy/cloudfront";
 import { env } from "@oppfy/env";
 import { s3 } from "@oppfy/s3";
 import { sharedValidators } from "@oppfy/validators";
@@ -11,7 +12,6 @@ import {
   SearchRepository,
   UserRepository,
 } from "../../repositories";
-import { CloudFrontService } from "../aws/cloudfront";
 import { BlockService } from "../network/block";
 import { FollowService } from "../network/follow";
 import { FriendService } from "../network/friend";
@@ -32,7 +32,6 @@ export class ProfileService {
   private friendService = new FriendService();
   private followService = new FollowService();
   private blockService = new BlockService();
-  private cloudFrontService = new CloudFrontService();
 
   async updateProfile(
     userId: string,
@@ -76,9 +75,7 @@ export class ProfileService {
     }
 
     const profilePictureUrl = profile.profilePictureKey
-      ? await this.cloudFrontService.getSignedUrlForProfilePicture(
-          profile.profilePictureKey,
-        )
+      ? await this._getSignedProfilePictureUrl(profile.profilePictureKey)
       : null;
 
     return {
@@ -100,7 +97,7 @@ export class ProfileService {
     }
 
     const profilePictureUrl = user.profile.profilePictureKey
-      ? await this.cloudFrontService.getSignedUrlForProfilePicture(
+      ? await this._getSignedProfilePictureUrl(
           user.profile.profilePictureKey,
         )
       : null;
@@ -139,7 +136,7 @@ export class ProfileService {
     }
 
     const profilePictureUrl = user.profile.profilePictureKey
-      ? await this.cloudFrontService.getSignedUrlForProfilePicture(
+      ? await this._getSignedProfilePictureUrl(
           user.profile.profilePictureKey,
         )
       : null;
@@ -255,5 +252,16 @@ export class ProfileService {
       isTargetUserBlocked,
       isOtherUserBlocked,
     };
+  }
+
+  async invalidateProfilePicture(userId: string) {
+    const distributionId = env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID;
+    const objectPattern = `/profile-pictures/${userId}.jpg`;
+    await cloudfront.createInvalidation(distributionId, objectPattern);
+  }
+
+  private async _getSignedProfilePictureUrl(key: string) {
+    const url = cloudfront.getProfilePictureUrl(key);
+    return await cloudfront.getSignedUrl({ url });
   }
 }
