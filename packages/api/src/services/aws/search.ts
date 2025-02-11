@@ -2,11 +2,12 @@ import { DomainError, ErrorCode } from "../../errors";
 import { SearchRepository } from "../../repositories/aws/search";
 import { UserRepository } from "../../repositories/user/user";
 import { CloudFrontService } from "./cloudfront";
+import { ProfileRepository } from "../../repositories/user/profile";
 
 export class SearchService {
   private searchRepository = new SearchRepository();
   private userRepository = new UserRepository();
-
+  private profileRepository = new ProfileRepository();
   private cloudFrontService = new CloudFrontService();
 
   async profilesByUsername(username: string, currentUserId: string) {
@@ -16,7 +17,7 @@ export class SearchService {
       throw new DomainError(ErrorCode.USER_NOT_FOUND);
     }
 
-    const profiles = await this.searchRepository.profilesByUsername(
+    const profiles = await this.profileRepository.profilesByUsername(
       username,
       user.id, // userId to ignore, we dont want to display ourselves
     );

@@ -15,11 +15,12 @@ import {
 } from "../../repositories";
 import { SQSService } from "../aws/sqs";
 
+import { openSearch, OpenSearchIndex } from "@oppfy/opensearch";
+
 export type InferEnum<T extends { enumValues: string[] }> =
   T["enumValues"][number];
 
 export class UserService {
-  private searchRepository = new SearchRepository();
   private userRepository = new UserRepository();
   private postRepository = new PostRepository();
   private profileRepository = new ProfileRepository();
@@ -181,7 +182,8 @@ export class UserService {
     await this.userRepository.updateStatsOnUserDelete(userId);
 
     await this.profileRepository.deleteProfile(user.profileId);
-    await this.searchRepository.deleteProfile(userId);
+    await this.deleteProfileFromOpenSearch(userId);
+
     await this.userRepository.deleteUser(userId);
     await this.contactsRepository.deleteContacts(userId);
 
@@ -310,5 +312,12 @@ export class UserService {
     }
 
     await this.userRepository.updateUserId(oldUserId, newUserId);
+  }
+
+  async deleteProfileFromOpenSearch(userId: string) {
+    await openSearch.delete({
+      index: OpenSearchIndex.PROFILE,
+      id: userId,
+    });
   }
 }

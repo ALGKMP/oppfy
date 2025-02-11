@@ -63,54 +63,6 @@ export class SearchRepository {
   //   }));
   // }
 
-  @handleDatabaseErrors
-  async profilesByUsername(
-    username: string,
-    currentUserId: string,
-    limit = 15,
-  ) {
-    const results = await db
-      .select({
-        userId: schema.user.id,
-        username: schema.profile.username,
-        name: schema.profile.name,
-        bio: schema.profile.bio,
-        profilePictureKey: schema.profile.profilePictureKey,
-      })
-      .from(schema.user)
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .leftJoin(
-        schema.block,
-        or(
-          and(
-            eq(schema.block.userId, currentUserId),
-            eq(schema.block.blockedUserId, schema.user.id),
-          ),
-          and(
-            eq(schema.block.userId, schema.user.id),
-            eq(schema.block.blockedUserId, currentUserId),
-          ),
-        ),
-      )
-      .where(
-        and(
-          ilike(schema.profile.username, `%${username}%`),
-          ne(schema.user.id, currentUserId),
-          isNotNull(schema.user.profileId), // Ensure user is onboarded
-          isNull(schema.block.id), // Ensure user is not blocked
-        ),
-      )
-      .limit(limit);
-
-    return results.map((result) => ({
-      userId: result.userId,
-      username: result.username,
-      name: result.name ?? "",
-      bio: result.bio ?? "",
-      profilePictureKey: result.profilePictureKey ?? "",
-    }));
-  }
-
   @handleOpensearchErrors
   async upsertProfile(
     userId: string,

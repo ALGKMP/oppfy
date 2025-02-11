@@ -1,5 +1,11 @@
-import { eq, inArray, sql } from "drizzle-orm";
-
+import {
+  and,
+  ilike,
+  isNull,
+  isNotNull,
+  ne,
+  inArray,
+  or, eq } from "drizzle-orm";
 import { db, schema } from "@oppfy/db";
 
 import { handleDatabaseErrors } from "../../errors";
@@ -103,5 +109,47 @@ export class ProfileRepository {
     await this.db
       .delete(schema.profile)
       .where(eq(schema.profile.id, profileId));
+  }
+
+  @handleDatabaseErrors
+  async profilesByUsername(
+    username: string,
+    currentUserId: string,
+    limit = 15,
+  ) {
+    const results = await this.db
+      .select({
+        userId: schema.user.id,
+        username: schema.profile.username,
+        name: schema.profile.name,
+        bio: schema.profile.bio,
+        profilePictureKey: schema.profile.profilePictureKey,
+      })
+      .from(schema.user)
+      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .leftJoin(
+        schema.block,
+        or(
+          and(
+            eq(schema.block.userId, currentUserId),
+            eq(schema.block.blockedUserId, schema.user.id),
+          ),
+          and(
+            eq(schema.block.userId, schema.user.id),
+            eq(schema.block.blockedUserId, currentUserId),
+          ),
+        ),
+      )
+      .where(
+        and(
+          ilike(schema.profile.username, `%${username}%`),
+          ne(schema.user.id, currentUserId),
+          isNotNull(schema.user.profileId),
+          isNull(schema.block.id),
+        ),
+      )
+      .limit(limit);
+
+    return results;
   }
 }
