@@ -16,6 +16,18 @@ const client = new CloudFrontClient({
   },
 });
 
+const getPublicPostDistributionDomainUrlForObject = (objectKey: string) => {
+  return `https://${env.CLOUDFRONT_PUBLIC_POSTS_DISTRIBUTION_DOMAIN}/${objectKey}`;
+};
+
+const getPostDistributionDomainUrlForObject = (objectKey: string) => {
+  return `https://${env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_DOMAIN}/${objectKey}`;
+};
+
+const getProfileDistributionDomainUrlForObject = (objectKey: string) => {
+  return `https://${env.CLOUDFRONT_PROFILE_DISTRIBUTION_DOMAIN}/${objectKey}`;
+};
+
 export const cloudfront = {
   client,
 
@@ -42,4 +54,8 @@ export const cloudfront = {
 
     await client.send(command);
   },
+
+  getPublicPostUrl: getPublicPostDistributionDomainUrlForObject,
+  getPrivatePostUrl: getPostDistributionDomainUrlForObject,
+  getProfilePictureUrl: getProfileDistributionDomainUrlForObject,
 };
