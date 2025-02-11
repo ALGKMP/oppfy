@@ -1,5 +1,7 @@
 import type { z } from "zod";
 
+import { cloudfront } from "@oppfy/cloudfront";
+import { env } from "@oppfy/env";
 import type { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
@@ -12,7 +14,6 @@ import { CommentRepository } from "../../repositories/media/comment";
 import { LikeRepository } from "../../repositories/media/like";
 import { PostRepository } from "../../repositories/media/post";
 import { PostStatsRepository } from "../../repositories/media/post-stats";
-import { CloudFrontService } from "../aws/cloudfront";
 import { NotificationsService } from "../user/notifications";
 import { UserService } from "../user/user";
 
@@ -51,7 +52,6 @@ export class PostService {
   private profileRepository = new ProfileRepository();
   private viewRepository = new ViewRepository();
 
-  private cloudFrontService = new CloudFrontService();
   private notificationsService = new NotificationsService();
   private userService = new UserService();
 
@@ -652,27 +652,29 @@ export class PostService {
     });
   }
 
+  async invalidateUserPosts(userId: string) {
+    const distributionId = env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_ID;
+    const objectPattern = `/posts/*-${userId}-*.jpg`;
+    await cloudfront.createInvalidation(distributionId, objectPattern);
+  }
+
   private async _processPostData(data: Post): Promise<Post> {
     try {
       // Update author profile picture URL
       if (data.authorProfilePicture !== null) {
-        data.authorProfilePicture =
-          await this.cloudFrontService.getSignedUrlForProfilePicture(
-            data.authorProfilePicture,
-          );
+        data.authorProfilePicture = await this._getSignedPostUrl(
+          data.authorProfilePicture,
+        );
       }
 
       if (data.recipientProfilePicture !== null) {
-        data.recipientProfilePicture =
-          await this.cloudFrontService.getSignedUrlForProfilePicture(
-            data.recipientProfilePicture,
-          );
+        data.recipientProfilePicture = await this._getSignedPostUrl(
+          data.recipientProfilePicture,
+        );
       }
 
       if (data.mediaType === "image") {
-        const imageUrl = await this.cloudFrontService.getSignedUrlForPost(
-          data.imageUrl,
-        );
+        const imageUrl = await this._getSignedPostUrl(data.imageUrl);
         data.imageUrl = imageUrl;
       } else {
         data.imageUrl = `https://stream.mux.com/${data.imageUrl}.m3u8`;
@@ -696,23 +698,19 @@ export class PostService {
     try {
       // Update author profile picture URL
       if (data.authorProfilePicture !== null) {
-        data.authorProfilePicture =
-          await this.cloudFrontService.getSignedUrlForProfilePicture(
-            data.authorProfilePicture,
-          );
+        data.authorProfilePicture = await this._getSignedPostUrl(
+          data.authorProfilePicture,
+        );
       }
 
       if (data.recipientProfilePicture !== null) {
-        data.recipientProfilePicture =
-          await this.cloudFrontService.getSignedUrlForProfilePicture(
-            data.recipientProfilePicture,
-          );
+        data.recipientProfilePicture = await this._getSignedPostUrl(
+          data.recipientProfilePicture,
+        );
       }
 
       if (data.mediaType === "image") {
-        const imageUrl = await this.cloudFrontService.getSignedUrlForPublicPost(
-          data.imageUrl,
-        );
+        const imageUrl = await this._getSignedPublicPostUrl(data.imageUrl);
         data.imageUrl = imageUrl;
       } else {
         data.imageUrl = `https://image.mux.com/${data.imageUrl}/thumbnail.jpg`;
@@ -737,23 +735,19 @@ export class PostService {
     const items = data.map(async (item) => {
       try {
         if (item.authorProfilePicture !== null) {
-          item.authorProfilePicture =
-            await this.cloudFrontService.getSignedUrlForProfilePicture(
-              item.authorProfilePicture,
-            );
+          item.authorProfilePicture = await this._getSignedPostUrl(
+            item.authorProfilePicture,
+          );
         }
 
         if (item.recipientProfilePicture !== null) {
-          item.recipientProfilePicture =
-            await this.cloudFrontService.getSignedUrlForProfilePicture(
-              item.recipientProfilePicture,
-            );
+          item.recipientProfilePicture = await this._getSignedPostUrl(
+            item.recipientProfilePicture,
+          );
         }
 
         if (item.mediaType === "image") {
-          const imageUrl = await this.cloudFrontService.getSignedUrlForPost(
-            item.imageUrl,
-          );
+          const imageUrl = await this._getSignedPostUrl(item.imageUrl);
           item.imageUrl = imageUrl;
         } else {
           item.imageUrl = `https://stream.mux.com/${item.imageUrl}.m3u8`;
@@ -798,23 +792,19 @@ export class PostService {
     const items = data.map(async (item) => {
       try {
         if (item.authorProfilePicture !== null) {
-          item.authorProfilePicture =
-            await this.cloudFrontService.getSignedUrlForProfilePicture(
-              item.authorProfilePicture,
-            );
+          item.authorProfilePicture = await this._getSignedPostUrl(
+            item.authorProfilePicture,
+          );
         }
 
         if (item.recipientProfilePicture !== null) {
-          item.recipientProfilePicture =
-            await this.cloudFrontService.getSignedUrlForProfilePicture(
-              item.recipientProfilePicture,
-            );
+          item.recipientProfilePicture = await this._getSignedPostUrl(
+            item.recipientProfilePicture,
+          );
         }
 
         if (item.mediaType === "image") {
-          const imageUrl = await this.cloudFrontService.getSignedUrlForPost(
-            item.imageUrl,
-          );
+          const imageUrl = await this._getSignedPostUrl(item.imageUrl);
           item.imageUrl = imageUrl;
         } else {
           item.imageUrl = `https://stream.mux.com/${item.imageUrl}.m3u8`;
@@ -860,10 +850,9 @@ export class PostService {
     const items = data.map(async (item) => {
       try {
         if (item.profilePictureUrl !== null) {
-          item.profilePictureUrl =
-            await this.cloudFrontService.getSignedUrlForProfilePicture(
-              item.profilePictureUrl,
-            );
+          item.profilePictureUrl = await this._getSignedPostUrl(
+            item.profilePictureUrl,
+          );
         }
       } catch (error) {
         console.error(
@@ -897,5 +886,15 @@ export class PostService {
       items: await Promise.all(items),
       nextCursor,
     };
+  }
+
+  private async _getSignedPostUrl(key: string) {
+    const url = cloudfront.getPrivatePostUrl(key);
+    return await cloudfront.getSignedUrl({ url });
+  }
+
+  private async _getSignedPublicPostUrl(key: string) {
+    const url = cloudfront.getPublicPostUrl(key);
+    return await cloudfront.getSignedUrl({ url });
   }
 }
