@@ -16,6 +16,7 @@ import { PostRepository } from "../../repositories/media/post";
 import { PostStatsRepository } from "../../repositories/media/post-stats";
 import { NotificationsService } from "../user/notifications";
 import { UserService } from "../user/user";
+import { randomUUID } from "crypto";
 
 interface BaseCursor {
   createdAt: Date;
@@ -656,6 +657,88 @@ export class PostService {
     const distributionId = env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_ID;
     const objectPattern = `/posts/*-${userId}-*.jpg`;
     await cloudfront.createInvalidation(distributionId, objectPattern);
+  }
+
+  async uploadPicturePostForUserOnApp({
+    author,
+    recipient,
+    caption,
+    height,
+    width,
+    contentLength,
+    contentType,
+  }: {
+    author: string;
+    recipient: string;
+    caption: string;
+    height: string;
+    width: string;
+    contentLength: number;
+    contentType: "image/jpeg" | "image/png" | "image/heic";
+  }) {
+    const postId = randomUUID().toString();
+
+    const presignedUrl = await this.postRepository.uploadPostUrl({
+      author,
+      recipient,
+      caption,
+      height,
+      width,
+      contentLength,
+      contentType,
+      postId,
+      isRecipientOnApp: true,
+    });
+
+    return { url: presignedUrl, postId };
+  }
+
+  async uploadPicturePostForUserNotOnApp({
+    author,
+    number,
+    name,
+    caption,
+    height,
+    width,
+    contentLength,
+    contentType,
+  }: {
+    author: string;
+    number: string;
+    name: string;
+    caption: string;
+    height: string;
+    width: string;
+    contentLength: number;
+    contentType: "image/jpeg" | "image/png" | "image/heic";
+  }) {
+    // Get or create user
+    const user = await this.userRepository.getUserByPhoneNumber(number);
+    const userId = user ? user.id : randomUUID();
+
+    if (!user) {
+      await this.userService.createUserWithUsername(
+        userId,
+        number,
+        name,
+        false,
+      );
+    }
+
+    const postId = randomUUID().toString();
+    const presignedUrl = await this.postRepository.uploadPostUrl({
+      author,
+      recipient: userId,
+      caption,
+      height,
+      width,
+      contentLength,
+      contentType,
+      postId,
+      isRecipientOnApp: false,
+    });
+
+    return { url: presignedUrl, postId };
   }
 
   private async _processPostData(data: Post): Promise<Post> {

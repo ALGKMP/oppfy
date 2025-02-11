@@ -7,6 +7,7 @@ import {
   ContactsRepository,
   ProfileRepository,
   UserRepository,
+  PostRepository,
 } from "../../repositories";
 import { CloudFrontService } from "../aws/cloudfront";
 import { SQSService } from "../aws/sqs";
@@ -17,6 +18,7 @@ export class ContactService {
   private contactsRepository = new ContactsRepository();
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
+  private postRepository = new PostRepository();
 
   private cloudFrontService = new CloudFrontService();
   private sqsService = new SQSService();
@@ -128,7 +130,7 @@ export class ContactService {
           ...profileWithoutKey,
           relationshipStatus: "notFollowing" as RelationshipStatus,
           profilePictureUrl: profilePictureKey
-            ? await this.cloudFrontService.getSignedUrlForProfilePicture(
+            ? await this.profileRepository.getSignedProfilePictureUrl(
                 profilePictureKey,
               )
             : null,

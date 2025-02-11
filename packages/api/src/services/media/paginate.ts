@@ -3,8 +3,8 @@ import {
   BlockRepository,
   FollowRepository,
   FriendRepository,
+  ProfileRepository,
 } from "../../repositories";
-import { CloudFrontService } from "../aws/cloudfront";
 import { UserService } from "../user/user";
 
 // TODO: Move these types into a types file and put the paginated functions into their services.
@@ -23,8 +23,7 @@ export class PaginationService {
   private followRepository = new FollowRepository();
   private friendRepository = new FriendRepository();
   private blockRepository = new BlockRepository();
-  private cloudFrontService = new CloudFrontService();
-
+  private profileRepository = new ProfileRepository();
   private userService = new UserService();
 
   async paginateFollowersSelf(
@@ -200,7 +199,7 @@ export class PaginationService {
         data.map(async (item) => {
           if (item.profilePictureUrl) {
             const profilePicturePresignedUrl =
-              await this.cloudFrontService.getSignedUrlForProfilePicture(
+              await this.profileRepository.getSignedProfilePictureUrl(
                 item.profilePictureUrl,
               );
             item.profilePictureUrl = profilePicturePresignedUrl;

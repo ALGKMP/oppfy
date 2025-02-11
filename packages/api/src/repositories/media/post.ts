@@ -1,10 +1,18 @@
 import { aliasedTable, and, asc, desc, eq, gt, lt, or, sql } from "drizzle-orm";
 
+import { cloudfront } from "@oppfy/cloudfront";
 import { db, inArray, schema } from "@oppfy/db";
-
-import { handleDatabaseErrors, handleMuxErrors } from "../../errors";
-import { ContactsRepository } from "../user/contacts";
+import { env } from "@oppfy/env";
 import { mux } from "@oppfy/mux";
+import { s3 } from "@oppfy/s3";
+
+import {
+  handleAwsErrors,
+  handleDatabaseErrors,
+  handleMuxErrors,
+} from "../../errors";
+import { DomainError, ErrorCode } from "../../errors";
+import { ContactsRepository } from "../user/contacts";
 
 export class PostRepository {
   private db = db;
@@ -101,7 +109,6 @@ export class PostRepository {
 
     return result[0];
   }
-
 
   @handleDatabaseErrors
   async getPostFromCommentId(commentId: string) {
@@ -527,5 +534,76 @@ export class PostRepository {
         }),
       },
     });
+  }
+
+  @handleAwsErrors
+  async getSignedPublicPostUrl(objectKey: string) {
+    const url = cloudfront.getPublicPostUrl(objectKey);
+    return await cloudfront.getSignedUrl({ url });
+  }
+
+  @handleAwsErrors
+  async getSignedPrivatePostUrl(objectKey: string) {
+    const url = cloudfront.getPrivatePostUrl(objectKey);
+    return await cloudfront.getSignedUrl({ url });
+  }
+
+  @handleAwsErrors
+  async invalidateUserPosts(userId: string) {
+    const distributionId = env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_ID;
+    const objectPattern = `/posts/*-${userId}-*.jpg`;
+    await cloudfront.createInvalidation(distributionId, objectPattern);
+  }
+
+  async uploadPostUrl({
+    author,
+    recipient,
+    caption,
+    height,
+    width,
+    contentLength,
+    contentType,
+    postId,
+    isRecipientOnApp,
+  }: {
+    author: string;
+    recipient: string;
+    caption: string;
+    height: string;
+    width: string;
+    contentLength: number;
+    contentType: "image/jpeg" | "image/png" | "image/heic";
+    postId: string;
+    isRecipientOnApp: boolean;
+  }) {
+    try {
+      const currentDate = Date.now();
+      const objectKey = `posts/${currentDate}-${recipient}-${author}.jpg`;
+
+      caption = encodeURIComponent(caption);
+
+      const presignedUrl = await s3.putObjectPresignedUrl({
+        Bucket: env.S3_POST_BUCKET,
+        Key: objectKey,
+        ContentLength: contentLength,
+        ContentType: contentType,
+        Metadata: {
+          author,
+          recipient,
+          caption,
+          height,
+          width,
+          postid: postId,
+          ...(isRecipientOnApp ? {} : { recipientNotOnApp: "true" }),
+        },
+      });
+
+      return presignedUrl;
+    } catch (err) {
+      throw new DomainError(
+        ErrorCode.S3_FAILED_TO_UPLOAD,
+        "S3 failed while trying to upload post",
+      );
+    }
   }
 }

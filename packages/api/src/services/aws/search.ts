@@ -1,12 +1,10 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { UserRepository } from "../../repositories/user/user";
-import { CloudFrontService } from "./cloudfront";
 import { ProfileRepository } from "../../repositories/user/profile";
+import { UserRepository } from "../../repositories/user/user";
 
 export class SearchService {
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
-  private cloudFrontService = new CloudFrontService();
 
   async profilesByUsername(username: string, currentUserId: string) {
     const user = await this.userRepository.getUser(currentUserId);
@@ -24,7 +22,7 @@ export class SearchService {
     const profilesWithUrls = await Promise.all(
       profiles.map(async ({ profilePictureKey, ...restProfile }) => {
         const profilePictureUrl = profilePictureKey
-          ? await this.cloudFrontService.getSignedUrlForProfilePicture(
+          ? await this.profileRepository.getSignedProfilePictureUrl(
               profilePictureKey,
             )
           : null;

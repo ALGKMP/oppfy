@@ -1,14 +1,20 @@
 import {
   and,
+  eq,
   ilike,
-  isNull,
-  isNotNull,
-  ne,
   inArray,
-  or, eq } from "drizzle-orm";
-import { db, schema } from "@oppfy/db";
+  isNotNull,
+  isNull,
+  ne,
+  or,
+} from "drizzle-orm";
 
-import { handleDatabaseErrors } from "../../errors";
+import { cloudfront } from "@oppfy/cloudfront";
+import { db, schema } from "@oppfy/db";
+import { env } from "@oppfy/env";
+import { s3 } from "@oppfy/s3";
+
+import { handleAwsErrors, handleDatabaseErrors } from "../../errors";
 
 export class ProfileRepository {
   private db = db;
@@ -151,5 +157,45 @@ export class ProfileRepository {
       .limit(limit);
 
     return results;
+  }
+
+  @handleAwsErrors
+  async getSignedProfilePictureUrl(objectKey: string) {
+    const url = cloudfront.getProfilePictureUrl(objectKey);
+    return await cloudfront.getSignedUrl({ url });
+  }
+
+  @handleAwsErrors
+  async invalidateProfilePicture(userId: string) {
+    const distributionId = env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID;
+    const objectPattern = `/profile-pictures/${userId}.jpg`;
+    await cloudfront.createInvalidation(distributionId, objectPattern);
+  }
+
+  @handleAwsErrors
+  async uploadProfilePictureUrl({
+    userId,
+    contentLength,
+  }: {
+    userId: string;
+    contentLength: number;
+  }) {
+    const key = `profile-pictures/${userId}.jpg`;
+
+    const metadata = {
+      user: userId,
+    };
+
+    const presignedUrl = await s3.putObjectPresignedUrl({
+      Key: key,
+      Bucket: env.S3_PROFILE_BUCKET,
+      ContentLength: contentLength,
+      ContentType: "image/jpeg",
+      Metadata: metadata,
+    });
+
+    await this.invalidateProfilePicture(userId);
+
+    return presignedUrl;
   }
 }

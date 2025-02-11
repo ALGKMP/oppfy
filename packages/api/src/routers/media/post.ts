@@ -24,15 +24,10 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const postId = randomUUID().toString();
-
-        const presignedUrl = await ctx.services.s3.uploadPostForUserOnAppUrl({
+        return await ctx.services.post.uploadPicturePostForUserOnApp({
           author: ctx.session.uid,
           ...input,
-          postId,
         });
-
-        return { url: presignedUrl, postId };
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -55,34 +50,10 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        // make/check for account
-        const user = await ctx.services.user.getUserByPhoneNumberNoThrow(
-          input.number,
-        );
-
-        const userId = user ? user.id : randomUUID();
-
-        if (!user) {
-          await ctx.services.user.createUserWithUsername(
-            userId,
-            input.number,
-            input.name,
-            false,
-          );
-        }
-
-        // post id is
-        const postId = randomUUID();
-        const presignedUrl = await ctx.services.s3.uploadPostForUserNotOnAppUrl(
-          {
-            author: ctx.session.uid,
-            recipient: userId,
-            ...input,
-            postId,
-          },
-        );
-
-        return { url: presignedUrl, postId };
+        return await ctx.services.post.uploadPicturePostForUserNotOnApp({
+          author: ctx.session.uid,
+          ...input,
+        });
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

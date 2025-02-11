@@ -7,14 +7,14 @@ import type {
   SendNotificationData,
   StoreNotificationData,
 } from "../../repositories/user/notifications";
-import { CloudFrontService } from "../aws/cloudfront";
+import { ProfileRepository } from "../../repositories/user/profile";
 import { UserService } from "./user";
 
 export class NotificationsService {
   private notificationsRepository = new NotificationsRepository();
 
   private userService = new UserService();
-  private cloudFrontService = new CloudFrontService();
+  private profileRepository = new ProfileRepository();
 
   async getNotificationSettings(userId: string) {
     const user = await this.userService.getUser(userId);
@@ -63,7 +63,7 @@ export class NotificationsService {
         const { profilePictureKey, ...rest } = notification;
 
         const profilePictureUrl = profilePictureKey
-          ? await this.cloudFrontService.getSignedUrlForProfilePicture(
+          ? await this.profileRepository.getSignedProfilePictureUrl(
               profilePictureKey,
             )
           : null;
