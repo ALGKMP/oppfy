@@ -10,7 +10,6 @@ import {
   PostStatsRepository,
   ProfileRepository,
   ProfileStatsRepository,
-  SearchRepository,
   UserRepository,
 } from "../../repositories";
 import { SQSService } from "../aws/sqs";

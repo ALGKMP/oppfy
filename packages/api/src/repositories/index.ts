@@ -1,6 +1,4 @@
 // import all the repositories and export them
-
-export { SearchRepository } from "./aws/search";
 export { UserRepository } from "./user/user";
 export { BlockRepository } from "./network/block";
 export { FollowRepository } from "./network/follow";

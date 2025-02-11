@@ -9,12 +9,14 @@ import { DomainError, ErrorCode } from "../../errors";
 import {
   BlockRepository,
   ProfileRepository,
-  SearchRepository,
   UserRepository,
 } from "../../repositories";
 import { BlockService } from "../network/block";
 import { FollowService } from "../network/follow";
 import { FriendService } from "../network/friend";
+import { OpenSearchIndex } from "@oppfy/opensearch";
+import { openSearch } from "@oppfy/opensearch";
+import type { OpenSearchProfileIndexResult } from "@oppfy/opensearch";
 
 const updateProfile = z.object({
   name: sharedValidators.user.name.optional(),
@@ -26,7 +28,6 @@ const updateProfile = z.object({
 export class ProfileService {
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
-  private searchRepository = new SearchRepository();
   private blockRepository = new BlockRepository();
 
   private friendService = new FriendService();
@@ -60,7 +61,7 @@ export class ProfileService {
 
     await this.profileRepository.updateProfile(profile.id, newData);
     console.log("upserting profile");
-    await this.searchRepository.upsertProfile(userWithProfile.id, {
+    await this._upsertProfileSearch(userWithProfile.id, {
       name: newData.name,
       username: newData.username,
       bio: newData.bio,
@@ -97,9 +98,7 @@ export class ProfileService {
     }
 
     const profilePictureUrl = user.profile.profilePictureKey
-      ? await this._getSignedProfilePictureUrl(
-          user.profile.profilePictureKey,
-        )
+      ? await this._getSignedProfilePictureUrl(user.profile.profilePictureKey)
       : null;
 
     return {
@@ -136,9 +135,7 @@ export class ProfileService {
     }
 
     const profilePictureUrl = user.profile.profilePictureKey
-      ? await this._getSignedProfilePictureUrl(
-          user.profile.profilePictureKey,
-        )
+      ? await this._getSignedProfilePictureUrl(user.profile.profilePictureKey)
       : null;
 
     const networkStatus = await this.getNetworkConnectionStatesBetweenUsers({
@@ -263,5 +260,28 @@ export class ProfileService {
   private async _getSignedProfilePictureUrl(key: string) {
     const url = cloudfront.getProfilePictureUrl(key);
     return await cloudfront.getSignedUrl({ url });
+  }
+
+  private async _upsertProfileSearch(
+    userId: string,
+    newProfileData: Partial<OpenSearchProfileIndexResult>,
+  ) {
+    const userWithProfile = await this.profileRepository.getUserProfile(userId);
+
+    if (userWithProfile === undefined) {
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+    }
+    const profileData = userWithProfile.profile;
+
+    const documentBody = {
+      ...profileData,
+      ...newProfileData,
+    };
+
+    await openSearch.index({
+      index: OpenSearchIndex.PROFILE,
+      id: userId,
+      body: documentBody,
+    });
   }
 }
