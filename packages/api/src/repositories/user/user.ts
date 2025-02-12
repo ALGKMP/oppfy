@@ -253,16 +253,6 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async updateUserId(oldUserId: string, newUserId: string) {
-    await this.db.transaction(async (tx) => {
-      await tx
-        .update(schema.user)
-        .set({ id: newUserId })
-        .where(eq(schema.user.id, oldUserId));
-    });
-  }
-
-  @handleDatabaseErrors
   async updateUserOnAppStatus(userId: string, isOnApp: boolean) {
     await this.db
       .update(schema.userStatus)

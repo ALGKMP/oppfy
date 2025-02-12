@@ -156,25 +156,6 @@ export const userRouter = createTRPCRouter({
       }
     }),
 
-  updateUserId: publicProcedure
-    .input(
-      z.object({
-        oldUserId: z.string(),
-        newUserId: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      try {
-        await ctx.services.user.updateUserId(input.oldUserId, input.newUserId);
-      } catch (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update user ID",
-          cause: err,
-        });
-      }
-    }),
-
   getUserByPhoneNumber: publicProcedure
     .input(
       z.object({
