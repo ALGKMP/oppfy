@@ -21,23 +21,6 @@ export const blockRouter = createTRPCRouter({
       }
     }),
 
-  isUserBlocked: protectedProcedure
-    .input(
-      z.object({
-        userId: z.string(),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      try {
-        return await ctx.services.block.areEitherUsersBlocked(
-          ctx.session.uid,
-          input.userId,
-        );
-      } catch (err) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
-    }),
-
   unblockUser: protectedProcedure
     .input(
       z.object({

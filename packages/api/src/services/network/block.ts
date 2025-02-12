@@ -180,14 +180,6 @@ export class BlockService {
     }
   }
 
-  async isUserBlocked(userId: string, blockedUserId: string) {
-    const blockedUser = await this.blockRepository.getBlockedUser(
-      userId,
-      blockedUserId,
-    );
-    return !!blockedUser;
-  }
-
   async areEitherUsersBlocked(userId: string, otherUserId: string) {
     const [userBlocked, otherUserBlocked] = await Promise.all([
       this.blockRepository.getBlockedUser(userId, otherUserId),
