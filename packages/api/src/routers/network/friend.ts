@@ -54,42 +54,6 @@ export const friendRouter = createTRPCRouter({
       }
     }),
 
-  paginateFriendsOthersByProfileId: protectedProcedure
-    .input(
-      z.object({
-        userId: z.string(),
-        cursor: z
-          .object({
-            createdAt: z.date(),
-            profileId: z.string(),
-          })
-          .optional(),
-        pageSize: z.number().optional(),
-      }),
-    )
-    .query(async ({ input, ctx }) => {
-      try {
-        return await ctx.services.paginate.paginateFriendsOthers(
-          input.userId,
-          input.cursor,
-          input.pageSize,
-          ctx.session.uid,
-        );
-      } catch (err) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
-      }
-    }),
-
-  paginateFriendRequestsSelf: protectedProcedure.mutation(async ({ ctx }) => {
-    try {
-      return await ctx.services.paginate.paginateFriendRequests(
-        ctx.session.uid,
-      );
-    } catch (err) {
-      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
-    }
-  }),
-
   paginateFriendRequests: protectedProcedure
     .input(
       z.object({
