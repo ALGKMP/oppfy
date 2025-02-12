@@ -159,10 +159,6 @@ export class ProfileService {
     };
   }
 
-  async getBatchProfiles(userIds: string[]) {
-    return await this.profileRepository.getBatchProfiles(userIds);
-  }
-
   async getNetworkConnectionStatesBetweenUsers({
     currentUserId,
     otherUserId,

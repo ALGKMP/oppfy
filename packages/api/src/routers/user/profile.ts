@@ -76,12 +76,6 @@ export const profileRouter = createTRPCRouter({
       }
     }),
 
-  getBatchProfiles: protectedProcedure
-    .input(z.array(z.string()).nonempty())
-    .query(async ({ ctx, input }) => {
-      return await ctx.services.profile.getBatchProfiles(input);
-    }),
-
   getFullProfileSelf: protectedProcedure.query(async ({ ctx }) => {
     try {
       return await ctx.services.profile.getFullProfileSelf(ctx.session.uid);
