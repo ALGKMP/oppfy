@@ -203,24 +203,6 @@ export const followRouter = createTRPCRouter({
       }
     }),
 
-  followUsers: protectedProcedure
-    .input(
-      z.object({
-        userIds: z.array(z.string()),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      try {
-        return await ctx.services.follow.followUsers(
-          ctx.session.uid,
-          input.userIds,
-        );
-      } catch (err) {
-        console.error(err);
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
-    }),
-
   unfollowUser: protectedProcedure
     .input(
       z.object({

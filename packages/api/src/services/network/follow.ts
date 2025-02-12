@@ -20,12 +20,6 @@ export class FollowService {
     return !!(await this.followRepository.getFollower(senderId, recipientId));
   }
 
-  async followUsers(senderId: string, recipientIds: string[]) {
-    await Promise.all(
-      recipientIds.map((recipientId) => this.followUser(senderId, recipientId)),
-    );
-  }
-
   async followUser(senderId: string, recipientId: string) {
     if (senderId === recipientId) {
       throw new DomainError(ErrorCode.CANNOT_FOLLOW_SELF);
