@@ -175,4 +175,25 @@ export const profileRouter = createTRPCRouter({
         });
       }
     }),
+
+  searchByUsername: protectedProcedure
+    .input(
+      z.object({
+        username: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await ctx.services.profile.searchProfilesByUsername(
+          input.username,
+          ctx.session.uid,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to search for profiles by username",
+          cause: err,
+        });
+      }
+    }),
 });

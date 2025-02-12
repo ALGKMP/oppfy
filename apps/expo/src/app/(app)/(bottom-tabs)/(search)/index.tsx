@@ -12,7 +12,7 @@ import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 
-type SearchResultItem = RouterOutputs["search"]["profilesByUsername"][number];
+type SearchResultItem = RouterOutputs["profile"]["searchByUsername"][number];
 
 const Search = () => {
   const { routeProfile } = useRouteProfile();
@@ -22,7 +22,7 @@ const Search = () => {
   const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
 
   const { mutateAsync: searchProfilesByUsername, isPending: isSearching } =
-    api.search.profilesByUsername.useMutation();
+    api.profile.searchByUsername.useMutation();
 
   const performSearch = async (username: string) => {
     setSearchTerm(username);

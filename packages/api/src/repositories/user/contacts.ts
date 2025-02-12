@@ -1,7 +1,8 @@
-import { and, db, eq, inArray, or, schema } from "@oppfy/db";
+import { and, db, eq, inArray, schema } from "@oppfy/db";
 import { env } from "@oppfy/env";
+import { sqs } from "@oppfy/sqs";
 
-import { handleDatabaseErrors } from "../../errors";
+import { handleDatabaseErrors, DomainError, ErrorCode } from "../../errors";
 
 export class ContactsRepository {
   private db = db;
@@ -114,5 +115,36 @@ export class ContactsRepository {
       tier2: string[];
       tier3: string[];
     };
+  }
+
+  async sendContactSyncMessage({
+    userId,
+    userPhoneNumberHash,
+    contacts,
+  }: {
+    userId: string;
+    userPhoneNumberHash: string;
+    contacts: string[];
+  }) {
+    try {
+      await sqs.sendMessage({
+        QueueUrl: env.SQS_CONTACT_QUEUE,
+        MessageBody: JSON.stringify({
+          userId,
+          userPhoneNumberHash,
+          contacts,
+        }),
+      });
+
+      return {
+        success: true,
+        messageId: `${userId}_contactsync_${Date.now().toString()}`,
+      };
+    } catch (err) {
+      throw new DomainError(
+        ErrorCode.SQS_FAILED_TO_SEND_MESSAGE,
+        "SQS failed while trying to send contact sync message",
+      );
+    }
   }
 }

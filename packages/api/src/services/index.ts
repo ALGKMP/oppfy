@@ -1,4 +1,3 @@
-import { SearchService } from "./aws/search";
 import { PaginationService } from "./media/paginate";
 import { PostService } from "./media/post";
 import { BlockService } from "./network/block";
@@ -21,7 +20,6 @@ export const services = {
   follow: new FollowService(),
   friend: new FriendService(),
   profile: new ProfileService(),
-  search: new SearchService(),
   post: new PostService(),
   paginate: new PaginationService(),
   report: new ReportService(),

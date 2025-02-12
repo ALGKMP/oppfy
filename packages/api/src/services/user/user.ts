@@ -7,12 +7,9 @@ import {
   FollowRepository,
   NotificationsRepository,
   PostRepository,
-  PostStatsRepository,
   ProfileRepository,
-  ProfileStatsRepository,
   UserRepository,
 } from "../../repositories";
-import { SQSService } from "../aws/sqs";
 
 import { openSearch, OpenSearchIndex } from "@oppfy/opensearch";
 
@@ -26,11 +23,7 @@ export class UserService {
   private followRepository = new FollowRepository();
   private blockRepository = new BlockRepository();
   private contactsRepository = new ContactsRepository();
-  private profileStatsRepository = new ProfileStatsRepository();
-  private postStatsRepository = new PostStatsRepository();
   private notificationsRepository = new NotificationsRepository();
-
-  private sqsService = new SQSService();
 
   async createUserWithUsername(
     userId: string,
@@ -190,7 +183,7 @@ export class UserService {
       .update(user.phoneNumber)
       .digest("hex");
 
-    await this.sqsService.sendContactSyncMessage({
+    await this.contactsRepository.sendContactSyncMessage({
       userId,
       userPhoneNumberHash,
       contacts: [],

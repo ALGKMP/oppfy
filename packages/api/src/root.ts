@@ -13,7 +13,6 @@ import {
   profileRouter,
   reportRouter,
   requestRouter,
-  searchRouter,
   userRouter,
 } from "./routers";
 import { createCallerFactory, createTRPCRouter } from "./trpc";
@@ -29,7 +28,6 @@ export const appRouter = createTRPCRouter({
   block: blockRouter,
   notifications: notificationsRouter,
   contacts: contactsRouter,
-  search: searchRouter,
   report: reportRouter,
 });
 

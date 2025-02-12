@@ -295,4 +295,34 @@ export class ProfileService {
       contentLength,
     });
   }
+
+  async searchProfilesByUsername(username: string, currentUserId: string) {
+    const user = await this.userRepository.getUser(currentUserId);
+
+    if (user === undefined) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+    }
+
+    const profiles = await this.profileRepository.profilesByUsername(
+      username,
+      user.id,
+    );
+
+    const profilesWithUrls = await Promise.all(
+      profiles.map(async ({ profilePictureKey, ...restProfile }) => {
+        const profilePictureUrl = profilePictureKey
+          ? await this.profileRepository.getSignedProfilePictureUrl(
+              profilePictureKey,
+            )
+          : null;
+
+        return {
+          ...restProfile,
+          profilePictureUrl,
+        };
+      }),
+    );
+
+    return profilesWithUrls;
+  }
 }

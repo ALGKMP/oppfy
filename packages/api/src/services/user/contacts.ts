@@ -1,15 +1,11 @@
 import { createHash } from "crypto";
 
-import { sqs } from "@oppfy/sqs";
-
 import { DomainError, ErrorCode } from "../../errors";
 import {
   ContactsRepository,
-  PostRepository,
   ProfileRepository,
   UserRepository,
 } from "../../repositories";
-import { SQSService } from "../aws/sqs";
 
 type RelationshipStatus = "notFollowing" | "following" | "requested";
 
@@ -17,7 +13,6 @@ export class ContactService {
   private contactsRepository = new ContactsRepository();
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
-  private sqsService = new SQSService();
 
   async syncContacts(userId: string, contacts: string[]) {
     const user = await this.userRepository.getUser(userId);
@@ -40,7 +35,7 @@ export class ContactService {
     // update the contacts in the db
     await this.contactsRepository.updateUserContacts(userId, filteredContacts);
 
-    await this.sqsService.sendContactSyncMessage({
+    await this.contactsRepository.sendContactSyncMessage({
       userId,
       userPhoneNumberHash,
       contacts: filteredContacts,
@@ -63,7 +58,7 @@ export class ContactService {
 
     await this.contactsRepository.deleteContacts(userId);
 
-    await this.sqsService.sendContactSyncMessage({
+    await this.contactsRepository.sendContactSyncMessage({
       userId,
       userPhoneNumberHash,
       contacts: [],
