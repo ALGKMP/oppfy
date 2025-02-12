@@ -163,21 +163,6 @@ export class ProfileService {
     return await this.profileRepository.getBatchProfiles(userIds);
   }
 
-  async removeProfilePicture(userId: string) {
-    const user = await this.profileRepository.getUserProfile(userId);
-    if (!user) {
-      throw new DomainError(
-        ErrorCode.USER_NOT_FOUND,
-        "User not found for the provided user ID.",
-      );
-    }
-
-    const key = `profile-pictures/${userId}.jpg`;
-    await s3.deleteObject(env.S3_POST_BUCKET, key);
-
-    await this.profileRepository.removeProfilePicture(user.profile.id);
-  }
-
   async getNetworkConnectionStatesBetweenUsers({
     currentUserId,
     otherUserId,

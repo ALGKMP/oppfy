@@ -76,14 +76,6 @@ export class ProfileRepository {
   }
 
   @handleDatabaseErrors
-  async removeProfilePicture(profileId: string) {
-    await this.db
-      .update(schema.profile)
-      .set({ profilePictureKey: "profile-pictures/default.jpg" })
-      .where(eq(schema.profile.id, profileId));
-  }
-
-  @handleDatabaseErrors
   async usernameExists(username: string) {
     return await this.db.query.profile.findFirst({
       where: eq(schema.profile.username, username),

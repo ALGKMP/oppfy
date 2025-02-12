@@ -27,27 +27,6 @@ export const profileRouter = createTRPCRouter({
     return possibleUser.profileId;
   }),
 
-  getProfileIdByUsername: protectedProcedure
-    .input(
-      z.object({
-        username: z.string().min(1),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      const possibleProfile = await ctx.db.query.profile.findFirst({
-        where: eq(schema.profile.username, input.username),
-      });
-
-      if (possibleProfile === undefined) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "User not found",
-        });
-      }
-
-      return possibleProfile.id;
-    }),
-
   generatePresignedUrlForProfilePicture: protectedProcedure
     .input(
       z.object({
@@ -67,17 +46,6 @@ export const profileRouter = createTRPCRouter({
         });
       }
     }),
-
-  removeProfilePicture: protectedProcedure.mutation(async ({ ctx }) => {
-    try {
-      await ctx.services.profile.removeProfilePicture(ctx.session.uid);
-    } catch (err) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to remove profile picture",
-      });
-    }
-  }),
 
   updateProfile: protectedProcedure
     .input(
