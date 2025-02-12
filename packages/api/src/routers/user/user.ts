@@ -110,10 +110,10 @@ export const userRouter = createTRPCRouter({
     }
   }),
 
-  completedTutorial: publicProcedure.mutation(async ({ ctx }) => {
+  setTutorialComplete: publicProcedure.mutation(async ({ ctx }) => {
     try {
       if (!ctx.session?.uid) return false;
-      await ctx.services.user.completedTutorial(ctx.session.uid);
+      await ctx.services.user.setTutorialComplete(ctx.session.uid);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
