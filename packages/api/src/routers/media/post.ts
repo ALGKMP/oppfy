@@ -140,25 +140,6 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  editPost: protectedProcedure
-    .input(
-      z.object({
-        postId: z.string(),
-        caption: z.string().max(255).default(""),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { postId, caption } = input;
-      try {
-        await ctx.services.post.editPost({ postId, caption });
-      } catch (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: `Failed to edit post with ID ${input.postId}. The post may not exist or the database could be unreachable.`,
-        });
-      }
-    }),
-
   deletePost: protectedProcedure
     .input(
       z.object({
@@ -238,40 +219,6 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  paginatePostsOfRecommended: protectedProcedure
-    .input(
-      z.object({
-        cursor: z
-          .object({
-            postId: z.string(),
-            createdAt: z.date(),
-          })
-          .optional(),
-        pageSize: z.number().nonnegative().optional().default(10),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      try {
-        return await ctx.services.post.paginatePostsOfRecommended(
-          ctx.session.uid,
-          input.cursor,
-          input.pageSize,
-        );
-      } catch (err) {
-        console.error("TRPC getPosts error: ", err);
-        if (err instanceof DomainError) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: err.message,
-          });
-        }
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to paginate posts.",
-        });
-      }
-    }),
-
   paginatePostsForFeed: protectedProcedure
     .input(
       z.object({
@@ -329,78 +276,6 @@ export const postRouter = createTRPCRouter({
           currentUserId: ctx.session.uid,
         });
 
-        return result;
-      } catch (err) {
-        console.error("TRPC getPosts error: ", err);
-        if (err instanceof DomainError) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: err.message,
-          });
-        }
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to paginate posts.",
-        });
-      }
-    }),
-
-  paginatePostsByUserSelf: protectedProcedure
-    .input(
-      z.object({
-        cursor: z
-          .object({
-            postId: z.string(),
-            createdAt: z.date(),
-          })
-          .optional(),
-        pageSize: z.number().nonnegative().optional().default(10),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      try {
-        const result = await ctx.services.post.paginatePostsOfUserSelf(
-          ctx.session.uid,
-          input.cursor ?? null,
-          input.pageSize,
-        );
-        return result;
-      } catch (err) {
-        console.error("TRPC getPosts error: ", err);
-        if (err instanceof DomainError) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: err.message,
-          });
-        }
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to paginate posts.",
-        });
-      }
-    }),
-
-  paginatePostsByUserOther: protectedProcedure
-    .input(
-      z.object({
-        userId: z.string(),
-        cursor: z
-          .object({
-            postId: z.string(),
-            createdAt: z.date(),
-          })
-          .optional(),
-        pageSize: z.number().nonnegative().optional().default(10),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      try {
-        const result = await ctx.services.post.paginatePostsOfUserOther({
-          userId: input.userId,
-          cursor: input.cursor ?? null,
-          pageSize: input.pageSize ?? 10,
-          currentUserId: ctx.session.uid,
-        });
         return result;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
@@ -557,38 +432,6 @@ export const postRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to paginate comments.",
-        });
-      }
-    }),
-
-  viewPost: protectedProcedure
-    .input(z.object({ postId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      try {
-        await ctx.services.post.viewPost({
-          userId: ctx.session.uid,
-          postId: input.postId,
-        });
-      } catch (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: `Failed to view post for ${input.postId}`,
-        });
-      }
-    }),
-
-  viewMultiplePosts: protectedProcedure
-    .input(z.object({ postIds: z.array(z.string()) }))
-    .mutation(async ({ ctx, input }) => {
-      try {
-        await ctx.services.post.viewMultiplePosts({
-          userId: ctx.session.uid,
-          postIds: input.postIds,
-        });
-      } catch (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: `Failed to view multiple posts for ${input.postIds}`,
         });
       }
     }),
