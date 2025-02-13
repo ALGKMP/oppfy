@@ -5,9 +5,9 @@ import { env } from "@oppfy/env";
 interface GetPresignedUrlForVideoOptions {
   author: string;
   recipient: string;
-  caption?: string;
-  height?: number;
-  width?: number;
+  caption: string;
+  height: number;
+  width: number;
   postid: string;
 }
 
