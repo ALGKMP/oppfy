@@ -7,6 +7,8 @@ import {
 } from "../../repositories";
 import { UserService } from "../user/user";
 
+import { cloudfront } from "@oppfy/cloudfront";
+
 // TODO: Move these types into a types file and put the paginated functions into their services.
 
 export interface PaginatedResponse<T> {
@@ -199,9 +201,7 @@ export class PaginationService {
         data.map(async (item) => {
           if (item.profilePictureUrl) {
             const profilePicturePresignedUrl =
-              await this.profileRepository.getSignedProfilePictureUrl(
-                item.profilePictureUrl,
-              );
+              await cloudfront.getSignedProfilePictureUrl(item.profilePictureUrl);
             item.profilePictureUrl = profilePicturePresignedUrl;
           }
           return item;
