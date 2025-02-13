@@ -16,6 +16,7 @@ import {
 import { BlockService } from "../network/block";
 import { FollowService } from "../network/follow";
 import { FriendService } from "../network/friend";
+import { UserService } from "./user";
 
 const updateProfile = z.object({
   name: sharedValidators.user.name.optional(),
@@ -32,6 +33,8 @@ export class ProfileService {
   private friendService = new FriendService();
   private followService = new FollowService();
   private blockService = new BlockService();
+
+  private userService = new UserService();
 
   async updateProfile(
     userId: string,
@@ -67,19 +70,69 @@ export class ProfileService {
     });
   }
 
-  async getProfileByUsername(username: string) {
-    const profile = await this.profileRepository.getProfileByUsername(username);
+  async getProfileByUserId(userId: string) {
+    const user = await this.userRepository.getUser(userId);
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+    }
 
-    if (profile === undefined) {
+    const profile = await this.profileRepository.getProfile(user.profileId);
+    if (!profile) {
       throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
     }
 
-    const profilePictureUrl = profile.profilePictureKey
-      ? await this._getSignedProfilePictureUrl(profile.profilePictureKey)
+    const { profilePictureKey, ...rest } = profile;
+
+    const profilePictureUrl = profilePictureKey
+      ? await this.getSignedProfilePictureUrl(profilePictureKey)
       : null;
 
     return {
-      ...profile,
+      ...rest,
+      profilePictureUrl,
+    };
+  }
+
+  async getProfileByUserIdWithRelationship(
+    userId: string,
+    currentUserId: string,
+  ) {
+    const user = await this.userRepository.getUser(userId);
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+    }
+
+    const profile = await this.profileRepository.getProfile(user.profileId);
+    if (!profile) {
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+    }
+
+    const { profilePictureKey, ...rest } = profile;
+
+    const profilePictureUrl = profilePictureKey
+      ? await this.getSignedProfilePictureUrl(profilePictureKey)
+      : null;
+
+    return {
+      ...rest,
+      profilePictureUrl,
+    };
+  }
+
+  async getProfileByUsername(username: string) {
+    const profile = await this.profileRepository.getProfileByUsername(username);
+    if (!profile) {
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+    }
+
+    const { profilePictureKey, ...rest } = profile;
+
+    const profilePictureUrl = profilePictureKey
+      ? await this.getSignedProfilePictureUrl(profilePictureKey)
+      : null;
+
+    return {
+      ...rest,
       profilePictureUrl,
     };
   }
@@ -97,7 +150,7 @@ export class ProfileService {
     }
 
     const profilePictureUrl = user.profile.profilePictureKey
-      ? await this._getSignedProfilePictureUrl(user.profile.profilePictureKey)
+      ? await this.getSignedProfilePictureUrl(user.profile.profilePictureKey)
       : null;
 
     return {
@@ -231,15 +284,30 @@ export class ProfileService {
     };
   }
 
-  async invalidateProfilePicture(userId: string) {
-    const distributionId = env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID;
-    const objectPattern = `/profile-pictures/${userId}.jpg`;
-    await cloudfront.createInvalidation(distributionId, objectPattern);
+  async getSignedProfilePictureUrl(objectKey: string): Promise<string> {
+    return await cloudfront.getSignedProfilePictureUrl(objectKey);
   }
 
-  private async _getSignedProfilePictureUrl(key: string) {
-    const url = cloudfront.getProfilePictureUrl(key);
-    return await cloudfront.getSignedUrl({ url });
+  async invalidateProfilePicture(userId: string): Promise<void> {
+    await cloudfront.invalidateProfilePicture(userId);
+  }
+
+  async uploadProfilePictureUrl({
+    userId,
+    contentLength,
+  }: {
+    userId: string;
+    contentLength: number;
+  }): Promise<string> {
+    const presignedUrl = await s3.uploadProfilePicture({
+      bucket: env.S3_PROFILE_BUCKET,
+      userId,
+      contentLength,
+    });
+
+    await this.invalidateProfilePicture(userId);
+
+    return presignedUrl;
   }
 
   private async _upsertProfileSearch(
@@ -265,45 +333,30 @@ export class ProfileService {
     });
   }
 
-  async getProfilePictureUploadUrl(userId: string, contentLength: number) {
-    const user = await this.userRepository.getUser(userId);
-    if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
-    }
-
-    return await this.profileRepository.uploadProfilePictureUrl({
-      userId,
-      contentLength,
-    });
-  }
-
   async searchProfilesByUsername(username: string, currentUserId: string) {
-    const user = await this.userRepository.getUser(currentUserId);
-
-    if (user === undefined) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
-    }
-
     const profiles = await this.profileRepository.profilesByUsername(
       username,
-      user.id,
+      currentUserId,
     );
 
     const profilesWithUrls = await Promise.all(
-      profiles.map(async ({ profilePictureKey, ...restProfile }) => {
-        const profilePictureUrl = profilePictureKey
-          ? await this.profileRepository.getSignedProfilePictureUrl(
-              profilePictureKey,
-            )
-          : null;
-
+      profiles.map(async (profile) => {
+        const { profilePictureKey, ...rest } = profile;
         return {
-          ...restProfile,
-          profilePictureUrl,
+          ...rest,
+          profilePictureUrl: profilePictureKey
+            ? await this.getSignedProfilePictureUrl(profilePictureKey)
+            : null,
         };
       }),
     );
 
     return profilesWithUrls;
+  }
+
+  private async _getSignedProfilePictureUrl(
+    objectKey: string,
+  ): Promise<string> {
+    return await cloudfront.getSignedProfilePictureUrl(objectKey);
   }
 }

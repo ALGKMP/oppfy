@@ -1,11 +1,15 @@
 import { createHash } from "crypto";
 
+import { env } from "@oppfy/env";
+import { sqs } from "@oppfy/sqs";
+
 import { DomainError, ErrorCode } from "../../errors";
 import {
   ContactsRepository,
   ProfileRepository,
   UserRepository,
 } from "../../repositories";
+import { ProfileService } from "./profile";
 
 type RelationshipStatus = "notFollowing" | "following" | "requested";
 
@@ -13,6 +17,7 @@ export class ContactService {
   private contactsRepository = new ContactsRepository();
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
+  private profileService = new ProfileService();
 
   async syncContacts(userId: string, contacts: string[]) {
     const user = await this.userRepository.getUser(userId);
@@ -23,7 +28,6 @@ export class ContactService {
 
     // hash the users own phone number and remove from contacts if its in there
     const userPhoneNumber = user.phoneNumber;
-
     const userPhoneNumberHash = createHash("sha512")
       .update(userPhoneNumber)
       .digest("hex");
@@ -35,11 +39,18 @@ export class ContactService {
     // update the contacts in the db
     await this.contactsRepository.updateUserContacts(userId, filteredContacts);
 
-    await this.contactsRepository.sendContactSyncMessage({
-      userId,
-      userPhoneNumberHash,
-      contacts: filteredContacts,
-    });
+    try {
+      await sqs.sendContactSyncMessage({
+        userId,
+        userPhoneNumberHash,
+        contacts: filteredContacts,
+      });
+    } catch (err) {
+      throw new DomainError(
+        ErrorCode.SQS_FAILED_TO_SEND_MESSAGE,
+        "SQS failed while trying to send contact sync message",
+      );
+    }
   }
 
   async deleteContacts(userId: string) {
@@ -51,18 +62,24 @@ export class ContactService {
 
     // hash the users own phone number and remove from contacts if its in there
     const userPhoneNumber = user.phoneNumber;
-
     const userPhoneNumberHash = createHash("sha512")
       .update(userPhoneNumber)
       .digest("hex");
 
     await this.contactsRepository.deleteContacts(userId);
 
-    await this.contactsRepository.sendContactSyncMessage({
-      userId,
-      userPhoneNumberHash,
-      contacts: [],
-    });
+    try {
+      await sqs.sendContactSyncMessage({
+        userId,
+        userPhoneNumberHash,
+        contacts: [],
+      });
+    } catch (err) {
+      throw new DomainError(
+        ErrorCode.SQS_FAILED_TO_SEND_MESSAGE,
+        "SQS failed while trying to send contact sync message",
+      );
+    }
   }
 
   async filterPhoneNumbersOnApp(phoneNumbers: string[]) {
@@ -121,7 +138,7 @@ export class ContactService {
           ...profileWithoutKey,
           relationshipStatus: "notFollowing" as RelationshipStatus,
           profilePictureUrl: profilePictureKey
-            ? await this.profileRepository.getSignedProfilePictureUrl(
+            ? await this.profileService.getSignedProfilePictureUrl(
                 profilePictureKey,
               )
             : null,

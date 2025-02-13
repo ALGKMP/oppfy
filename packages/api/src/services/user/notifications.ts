@@ -1,3 +1,6 @@
+import { env } from "@oppfy/env";
+import { sns } from "@oppfy/sns";
+
 import { DomainError, ErrorCode } from "../../errors";
 import { NotificationsRepository } from "../../repositories/user/notifications";
 import type {
@@ -8,6 +11,7 @@ import type {
   StoreNotificationData,
 } from "../../repositories/user/notifications";
 import { ProfileRepository } from "../../repositories/user/profile";
+import { ProfileService } from "./profile";
 import { UserService } from "./user";
 
 export class NotificationsService {
@@ -15,6 +19,7 @@ export class NotificationsService {
 
   private userService = new UserService();
   private profileRepository = new ProfileRepository();
+  private profileService = new ProfileService();
 
   async getNotificationSettings(userId: string) {
     const user = await this.userService.getUser(userId);
@@ -63,7 +68,7 @@ export class NotificationsService {
         const { profilePictureKey, ...rest } = notification;
 
         const profilePictureUrl = profilePictureKey
-          ? await this.profileRepository.getSignedProfilePictureUrl(
+          ? await this.profileService.getSignedProfilePictureUrl(
               profilePictureKey,
             )
           : null;
@@ -117,45 +122,47 @@ export class NotificationsService {
     );
   }
 
-  async sendNotification(
-    senderId: string,
-    recipientId: string,
-    notificationData: SendNotificationData,
-  ) {
-    const pushTokens =
-      await this.notificationsRepository.getPushTokens(recipientId);
-
-    if (pushTokens.length === 0) return;
-
-    await this.notificationsRepository.sendNotification(
-      pushTokens,
-      senderId,
-      recipientId,
-      notificationData,
-    );
-  }
-
   async sendNotifications(
-    notis: {
+    data: {
+      pushTokens: string[];
       senderId: string;
       recipientId: string;
       notificationData: SendNotificationData;
     }[],
-  ) {
-    const mappedNotis = await Promise.all(
-      notis.map(async (noti) => {
-        return {
-          pushTokens: await this.notificationsRepository.getPushTokens(
-            noti.recipientId,
-          ),
-          senderId: noti.senderId,
-          recipientId: noti.recipientId,
-          notificationData: noti.notificationData,
-        };
-      }),
-    );
+  ): Promise<void> {
+    const messages = data.map((item) => ({
+      senderId: item.senderId,
+      recipientId: item.recipientId,
+      pushTokens: item.pushTokens,
+      ...item.notificationData,
+    }));
 
-    this.notificationsRepository.sendNotifications(mappedNotis);
+    await sns.sendBatchNotifications(
+      env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
+      messages,
+      "New notification",
+    );
+  }
+
+  async sendNotification(
+    senderId: string,
+    recipientId: string,
+    notificationData: SendNotificationData,
+  ): Promise<void> {
+    const pushTokens =
+      await this.notificationsRepository.getPushTokens(recipientId);
+    const message = {
+      senderId,
+      recipientId,
+      pushTokens,
+      ...notificationData,
+    };
+
+    await sns.sendNotification(
+      env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
+      message,
+      "New notification",
+    );
   }
 
   async storePushToken(userId: string, pushToken: string) {

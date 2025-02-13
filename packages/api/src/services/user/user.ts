@@ -1,5 +1,8 @@
 import { createHash } from "crypto";
 
+import { openSearch, OpenSearchIndex } from "@oppfy/opensearch";
+import { sqs } from "@oppfy/sqs";
+
 import { DomainError, ErrorCode } from "../../errors";
 import {
   BlockRepository,
@@ -10,8 +13,7 @@ import {
   ProfileRepository,
   UserRepository,
 } from "../../repositories";
-
-import { openSearch, OpenSearchIndex } from "@oppfy/opensearch";
+import { NotificationsService } from "./notifications";
 
 export type InferEnum<T extends { enumValues: string[] }> =
   T["enumValues"][number];
@@ -24,6 +26,7 @@ export class UserService {
   private blockRepository = new BlockRepository();
   private contactsRepository = new ContactsRepository();
   private notificationsRepository = new NotificationsRepository();
+  private notificationsService = new NotificationsService();
 
   async createUserWithUsername(
     userId: string,
@@ -98,7 +101,7 @@ export class UserService {
             }),
           );
 
-          await this.notificationsRepository.sendNotifications(mappedNotis);
+          await this.notificationsService.sendNotifications(mappedNotis);
 
           cursor = hasMore
             ? {
@@ -183,11 +186,18 @@ export class UserService {
       .update(user.phoneNumber)
       .digest("hex");
 
-    await this.contactsRepository.sendContactSyncMessage({
-      userId,
-      userPhoneNumberHash,
-      contacts: [],
-    });
+    try {
+      await sqs.sendContactSyncMessage({
+        userId,
+        userPhoneNumberHash,
+        contacts: [],
+      });
+    } catch (err) {
+      throw new DomainError(
+        ErrorCode.SQS_FAILED_TO_SEND_MESSAGE,
+        "SQS failed while trying to send contact sync message",
+      );
+    }
   }
 
   // async checkOnboardingComplete(userId: string | undefined) {
@@ -222,7 +232,7 @@ export class UserService {
     await this.userRepository.updateUserOnboardingComplete(userId, true);
   }
 
-  async completedTutorial(userId: string) {
+  async setTutorialComplete(userId: string) {
     await this.userRepository.updateUserTutorialComplete(userId, true);
   }
 

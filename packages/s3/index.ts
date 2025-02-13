@@ -14,29 +14,87 @@ import { env } from "@oppfy/env";
 
 const FIVE_MINUTES = 300;
 
-const client = new S3Client({
-  region: env.AWS_REGION,
-  credentials: {
-    accessKeyId: env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
-  },
-});
+export class S3Service {
+  private client: S3Client;
 
-export const s3 = {
-  client,
+  constructor() {
+    this.client = new S3Client({
+      region: env.AWS_REGION,
+      credentials: {
+        accessKeyId: env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+      },
+    });
+  }
 
-  async putObjectPresignedUrl(putObjectCommandInput: PutObjectCommandInput) {
+  async putObjectPresignedUrl(
+    putObjectCommandInput: PutObjectCommandInput,
+  ): Promise<string> {
     const command = new PutObjectCommand(putObjectCommandInput);
-    return await getSignedUrl(client, command, { expiresIn: FIVE_MINUTES });
-  },
+    return await getSignedUrl(this.client, command, {
+      expiresIn: FIVE_MINUTES,
+    });
+  }
 
-  async getObjectPresignedUrl(getObjectCommandInput: GetObjectCommandInput) {
+  async getObjectPresignedUrl(
+    getObjectCommandInput: GetObjectCommandInput,
+  ): Promise<string> {
     const command = new GetObjectCommand(getObjectCommandInput);
-    return await getSignedUrl(client, command, { expiresIn: FIVE_MINUTES });
-  },
+    return await getSignedUrl(this.client, command, {
+      expiresIn: FIVE_MINUTES,
+    });
+  }
 
-  async deleteObject(bucket: string, key: string) {
+  async deleteObject(bucket: string, key: string): Promise<void> {
     const command = new DeleteObjectCommand({ Bucket: bucket, Key: key });
-    return await client.send(command);
-  },
-};
+    await this.client.send(command);
+  }
+
+  // New methods for post-related operations
+  async uploadPost({
+    bucket,
+    objectKey,
+    contentLength,
+    contentType,
+    metadata,
+  }: {
+    bucket: string;
+    objectKey: string;
+    contentLength: number;
+    contentType: "image/jpeg" | "image/png" | "image/heic";
+    metadata: Record<string, string>;
+  }): Promise<string> {
+    return await this.putObjectPresignedUrl({
+      Bucket: bucket,
+      Key: objectKey,
+      ContentLength: contentLength,
+      ContentType: contentType,
+      Metadata: metadata,
+    });
+  }
+
+  // New methods for profile picture operations
+  async uploadProfilePicture({
+    bucket,
+    userId,
+    contentLength,
+  }: {
+    bucket: string;
+    userId: string;
+    contentLength: number;
+  }): Promise<string> {
+    const key = `profile-pictures/${userId}.jpg`;
+    const metadata = { user: userId };
+
+    return await this.putObjectPresignedUrl({
+      Key: key,
+      Bucket: bucket,
+      ContentLength: contentLength,
+      ContentType: "image/jpeg",
+      Metadata: metadata,
+    });
+  }
+}
+
+// Export a singleton instance
+export const s3 = new S3Service();
