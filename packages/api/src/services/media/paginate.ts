@@ -25,7 +25,6 @@ export class PaginationService {
   private followRepository = new FollowRepository();
   private friendRepository = new FriendRepository();
   private blockRepository = new BlockRepository();
-  private profileRepository = new ProfileRepository();
   private userService = new UserService();
 
   async paginateFollowersSelf(
