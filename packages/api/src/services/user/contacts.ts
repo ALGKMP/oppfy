@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
 
-import { env } from "@oppfy/env";
 import { sqs } from "@oppfy/sqs";
+import { cloudfront } from "@oppfy/cloudfront";
 
 import { DomainError, ErrorCode } from "../../errors";
 import {
@@ -9,7 +9,6 @@ import {
   ProfileRepository,
   UserRepository,
 } from "../../repositories";
-import { ProfileService } from "./profile";
 
 type RelationshipStatus = "notFollowing" | "following" | "requested";
 
@@ -17,7 +16,6 @@ export class ContactService {
   private contactsRepository = new ContactsRepository();
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
-  private profileService = new ProfileService();
 
   async syncContacts(userId: string, contacts: string[]) {
     const user = await this.userRepository.getUser(userId);
@@ -138,9 +136,7 @@ export class ContactService {
           ...profileWithoutKey,
           relationshipStatus: "notFollowing" as RelationshipStatus,
           profilePictureUrl: profilePictureKey
-            ? await this.profileService.getSignedProfilePictureUrl(
-                profilePictureKey,
-              )
+            ? await cloudfront.getSignedProfilePictureUrl(profilePictureKey)
             : null,
         };
       }),
