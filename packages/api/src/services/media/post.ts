@@ -172,6 +172,93 @@ export class PostService {
     }
   }
 
+  // Post for user on app
+  async uploadVideoPostForUserOnAppUrl({
+    author,
+    recipient,
+    caption,
+    height,
+    width,
+  }: {
+    author: string;
+    recipient: string;
+    caption: string;
+    height: string;
+    width: string;
+  }) {
+    try {
+      const postId = randomUUID();
+      caption = encodeURIComponent(caption);
+
+      const uploadUrl = await mux.getPresignedUrlForVideo({
+        author,
+        recipient,
+        caption,
+        height: parseInt(height),
+        width: parseInt(width),
+        postid: postId,
+      });
+
+      return uploadUrl;
+    } catch (err) {
+      throw new DomainError(
+        ErrorCode.MUX_FAILED_TO_UPLOAD,
+        "Mux failed while trying to upload video",
+      );
+    }
+  }
+
+  // post for user not on app
+  async uploadVideoPostForUserNotOnAppUrl({
+    author,
+    recipientNotOnAppPhoneNumber,
+    recipientNotOnAppName,
+    caption,
+    height,
+    width,
+  }: {
+    author: string;
+    recipientNotOnAppPhoneNumber: string;
+    recipientNotOnAppName: string;
+    caption: string;
+    height: string;
+    width: string;
+  }) {
+    try {
+      const recipient = await this.userRepository.getUserByPhoneNumber(
+        recipientNotOnAppPhoneNumber,
+      );
+      const recipientId = recipient ? recipient.id : randomUUID();
+
+      if (!recipient) {
+        await this.userService.createUserWithUsername(
+          recipientId,
+          recipientNotOnAppPhoneNumber,
+          recipientNotOnAppName,
+        );
+      }
+
+      const postId = randomUUID();
+      caption = encodeURIComponent(caption);
+
+      const uploadUrl = await mux.getPresignedUrlForVideo({
+        author,
+        recipient: recipientId,
+        caption,
+        height: parseInt(height),
+        width: parseInt(width),
+        postid: postId,
+      });
+
+      return { uploadUrl, postId };
+    } catch (err) {
+      throw new DomainError(
+        ErrorCode.MUX_FAILED_TO_UPLOAD,
+        "Mux failed while trying to upload video",
+      );
+    }
+  }
+
   async paginatePostsOfUserSelf(
     userId: string,
     cursor: PostCursor | null = null,
@@ -715,8 +802,8 @@ export class PostService {
       author,
       recipient,
       caption,
-      height,
-      width,
+      height: parseInt(height),
+      width: parseInt(width),
       postid,
     });
   }

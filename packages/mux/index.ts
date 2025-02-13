@@ -5,9 +5,9 @@ import { env } from "@oppfy/env";
 interface GetPresignedUrlForVideoOptions {
   author: string;
   recipient: string;
-  caption: string;
-  height: string;
-  width: string;
+  caption?: string;
+  height?: number;
+  width?: number;
   postid: string;
 }
 
@@ -24,24 +24,35 @@ export class MuxService {
   /**
    * Creates a presigned URL for video upload to Mux
    */
-  async getPresignedUrlForVideo(options: GetPresignedUrlForVideoOptions) {
-    return await this.client.video.uploads.create({
+  async getPresignedUrlForVideo({
+    author,
+    recipient,
+    caption,
+    height,
+    width,
+    postid,
+  }: GetPresignedUrlForVideoOptions) {
+    const upload = await this.client.video.uploads.create({
       cors_origin: "*",
       new_asset_settings: {
-        test: false,
-        encoding_tier: "smart",
-        mp4_support: "standard",
         playback_policy: ["public"],
+        mp4_support: "standard",
         passthrough: JSON.stringify({
-          author: options.author,
-          recipient: options.recipient,
-          caption: options.caption,
-          height: options.height,
-          width: options.width,
-          postid: options.postid,
+          author,
+          recipient,
+          caption,
+          height,
+          width,
+          postid,
         }),
       },
+      test: false,
     });
+
+    return {
+      url: upload.url,
+      id: upload.id,
+    };
   }
 
   /**
