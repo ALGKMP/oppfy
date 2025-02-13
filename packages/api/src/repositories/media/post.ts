@@ -498,39 +498,4 @@ export class PostRepository {
         );
     });
   }
-
-  @handleMuxErrors
-  async PresignedUrlWithPostMetadata({
-    author,
-    recipient,
-    caption,
-    height,
-    width,
-    postid,
-  }: {
-    author: string;
-    recipient: string;
-    caption: string;
-    height: string;
-    width: string;
-    postid: string;
-  }) {
-    return await mux.video.uploads.create({
-      cors_origin: "*",
-      new_asset_settings: {
-        test: false,
-        encoding_tier: "smart",
-        mp4_support: "standard",
-        playback_policy: ["public"],
-        passthrough: JSON.stringify({
-          author,
-          recipient,
-          caption,
-          height,
-          width,
-          postid,
-        }),
-      },
-    });
-  }
 }
