@@ -730,59 +730,6 @@ export class PostService {
     });
   }
 
-  async invalidateUserPosts(userId: string): Promise<void> {
-    await cloudfront.invalidateUserPosts(userId);
-  }
-
-  async uploadPostUrl({
-    author,
-    recipient,
-    caption,
-    height,
-    width,
-    contentLength,
-    contentType,
-    postId,
-    isRecipientOnApp,
-  }: {
-    author: string;
-    recipient: string;
-    caption: string;
-    height: string;
-    width: string;
-    contentLength: number;
-    contentType: "image/jpeg" | "image/png" | "image/heic";
-    postId: string;
-    isRecipientOnApp: boolean;
-  }): Promise<string> {
-    try {
-      const currentDate = Date.now();
-      const objectKey = `posts/${currentDate}-${recipient}-${author}.jpg`;
-      caption = encodeURIComponent(caption);
-
-      return await s3.uploadPost({
-        bucket: env.S3_POST_BUCKET,
-        objectKey,
-        contentLength,
-        contentType,
-        metadata: {
-          author,
-          recipient,
-          caption,
-          height,
-          width,
-          postid: postId,
-          ...(isRecipientOnApp ? {} : { recipientNotOnApp: "true" }),
-        },
-      });
-    } catch (err) {
-      throw new DomainError(
-        ErrorCode.S3_FAILED_TO_UPLOAD,
-        "S3 failed while trying to upload post",
-      );
-    }
-  }
-
   private async _processPostData(data: Post): Promise<Post> {
     try {
       // Update author profile picture URL
