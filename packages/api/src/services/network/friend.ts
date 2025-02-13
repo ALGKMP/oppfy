@@ -1,19 +1,20 @@
+import { env } from "@oppfy/env";
+import { sns } from "@oppfy/sns";
 import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { FollowRepository } from "../../repositories";
 import { FriendRepository } from "../../repositories/network/friend";
+import { NotificationsRepository } from "../../repositories/user/notifications";
 import { ProfileRepository } from "../../repositories/user/profile";
-import { NotificationsService } from "../user/notifications";
-import { UserService } from "../user/user";
+import { UserRepository } from "../../repositories/user/user";
 
 export class FriendService {
   private friendRepository = new FriendRepository();
   private profileRepository = new ProfileRepository();
   private followRepository = new FollowRepository();
-
-  private userService = new UserService();
-  private notificationsService = new NotificationsService();
+  private userRepository = new UserRepository();
+  private notificationsRepository = new NotificationsRepository();
 
   async isFollowing(senderId: string, recipientId: string) {
     if (senderId === recipientId) return true; // Temporary fix
@@ -56,8 +57,15 @@ export class FriendService {
 
     const isFollowing = await this.isFollowing(senderId, recipientId);
 
-    const sender = await this.userService.getUser(senderId);
-    const recipient = await this.userService.getUser(recipientId);
+    const sender = await this.userRepository.getUser(senderId);
+    const recipient = await this.userRepository.getUser(recipientId);
+
+    if (!sender || !recipient) {
+      throw new DomainError(
+        ErrorCode.USER_NOT_FOUND,
+        "One or both users not found",
+      );
+    }
 
     if (!isFollowing) {
       if (recipient.privacySetting === "private") {
@@ -78,32 +86,25 @@ export class FriendService {
       );
     }
 
-    const { friendRequests } =
-      await this.notificationsService.getNotificationSettings(recipientId);
+    const settings = await this.notificationsRepository.getNotificationSettings(
+      recipient.notificationSettingsId,
+    );
 
-    if (friendRequests) {
-      await this.notificationsService.sendNotification(senderId, recipientId, {
-        title: "Friend Request",
-        body: `${profile.username} has sent you a friend request`,
-
-        entityType: "profile",
-        entityId: sender.id,
-      });
+    if (settings?.friendRequests) {
+      const pushTokens =
+        await this.notificationsRepository.getPushTokens(recipientId);
+      await sns.sendFriendRequestNotification(
+        pushTokens,
+        senderId,
+        recipientId,
+        profile.username,
+      );
     }
   }
 
   async acceptFriendRequest(senderId: string, recipientId: string) {
     if (senderId === recipientId) {
       throw new DomainError(ErrorCode.CANNOT_FRIEND_SELF);
-    }
-
-    const friendshipExists = await this.friendshipExists(senderId, recipientId);
-
-    if (friendshipExists) {
-      throw new DomainError(
-        ErrorCode.USER_ALREADY_FRIENDS,
-        `Users "${senderId}" and "${recipientId}" are already friends`,
-      );
     }
 
     const friendRequest = await this.friendRepository.getFriendRequest(
@@ -118,41 +119,32 @@ export class FriendService {
       );
     }
 
-    const recipient = await this.userService.getUser(recipientId);
+    const sender = await this.userRepository.getUser(senderId);
+    const recipient = await this.userRepository.getUser(recipientId);
+
+    if (!sender || !recipient) {
+      throw new DomainError(
+        ErrorCode.USER_NOT_FOUND,
+        "One or both users not found",
+      );
+    }
+
+    const senderProfile = await this.profileRepository.getProfile(
+      sender.profileId,
+    );
     const recipientProfile = await this.profileRepository.getProfile(
       recipient.profileId,
     );
 
-    if (recipientProfile === undefined) {
+    if (!senderProfile || !recipientProfile) {
       throw new DomainError(
         ErrorCode.PROFILE_NOT_FOUND,
-        `Profile not found for user ID "${recipientId}"`,
+        "One or both profiles not found",
       );
     }
 
-    // Determine user1 and user2 based on UUID comparison
-    const [user1, user2] =
-      senderId > recipientId
-        ? [senderId, recipientId]
-        : [recipientId, senderId];
-
-    await this.friendRepository.createFriend(user1, user2);
-
     await this.friendRepository.deleteFriendRequest(senderId, recipientId);
-
-    const senderFollowRequestToRecipient =
-      await this.followRepository.getFollowRequest(senderId, recipientId);
-
-    const recipientFollowRequestToSender =
-      await this.followRepository.getFollowRequest(recipientId, senderId);
-
-    if (senderFollowRequestToRecipient) {
-      await this.followRepository.removeFollowRequest(senderId, recipientId);
-    }
-
-    if (recipientFollowRequestToSender) {
-      await this.followRepository.removeFollowRequest(recipientId, senderId);
-    }
+    await this.friendRepository.createFriend(senderId, recipientId);
 
     const senderFollowsRecipient = await this.followRepository.getFollower(
       senderId,
@@ -170,64 +162,68 @@ export class FriendService {
     if (!recipientFollowsSender) {
       await this.followRepository.createFollower(recipientId, senderId);
 
-      // Send follow notification
-      const sender = await this.userService.getUser(senderId);
-      const senderProfile = await this.profileRepository.getProfile(
-        sender.profileId,
+      // Store follow notification
+      await this.notificationsRepository.storeNotification(
+        recipientId,
+        senderId,
+        {
+          eventType: "follow",
+          entityType: "profile",
+          entityId: recipientId,
+        },
       );
 
-      if (senderProfile) {
-        await this.notificationsService.storeNotification(
-          recipientId,
-          senderId,
-          {
-            eventType: "follow",
-            entityType: "profile",
-            entityId: recipientId,
-          },
+      const settings =
+        await this.notificationsRepository.getNotificationSettings(
+          sender.notificationSettingsId,
         );
 
-        const { followRequests } =
-          await this.notificationsService.getNotificationSettings(senderId);
-
-        if (followRequests) {
-          await this.notificationsService.sendNotification(
-            recipientId,
-            senderId,
-            {
-              title: "New follower",
-              body: `${recipientProfile.username} is now following you.`,
-              entityType: "profile",
-              entityId: recipientId,
-            },
-          );
-        }
+      if (settings?.followRequests) {
+        const pushTokens =
+          await this.notificationsRepository.getPushTokens(senderId);
+        await sns.sendFollowAcceptedNotification(
+          pushTokens,
+          recipientId,
+          senderId,
+          recipientProfile.username,
+        );
       }
     }
 
-    // Update notification storing to use user1 and user2
-    await this.notificationsService.storeNotification(user2, user1, {
-      eventType: "friend",
-      entityType: "profile",
-      entityId: recipient.id,
-    });
-
-    await this.notificationsService.storeNotification(user1, user2, {
-      eventType: "friend",
-      entityType: "profile",
-      entityId: recipient.id,
-    });
-
-    const { friendRequests } =
-      await this.notificationsService.getNotificationSettings(senderId);
-
-    if (friendRequests) {
-      await this.notificationsService.sendNotification(recipientId, senderId, {
-        title: "Friend Request Accepted",
-        body: `${recipientProfile.username} has accepted your friend request`,
+    // Store friend notifications
+    await this.notificationsRepository.storeNotification(
+      recipientId,
+      senderId,
+      {
+        eventType: "friend",
         entityType: "profile",
         entityId: recipient.id,
-      });
+      },
+    );
+
+    await this.notificationsRepository.storeNotification(
+      senderId,
+      recipientId,
+      {
+        eventType: "friend",
+        entityType: "profile",
+        entityId: recipient.id,
+      },
+    );
+
+    const settings = await this.notificationsRepository.getNotificationSettings(
+      sender.notificationSettingsId,
+    );
+
+    if (settings?.friendRequests) {
+      const pushTokens =
+        await this.notificationsRepository.getPushTokens(senderId);
+      await sns.sendFriendAcceptedNotification(
+        pushTokens,
+        recipientId,
+        senderId,
+        recipientProfile.username,
+      );
     }
   }
 

@@ -1,19 +1,20 @@
+import { env } from "@oppfy/env";
+import { sns } from "@oppfy/sns";
 import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
-import { FriendRepository } from "../../repositories";
 import { FollowRepository } from "../../repositories/network/follow";
+import { FriendRepository } from "../../repositories/network/friend";
+import { NotificationsRepository } from "../../repositories/user/notifications";
 import { ProfileRepository } from "../../repositories/user/profile";
-import { NotificationsService } from "../user/notifications";
-import { UserService } from "../user/user";
+import { UserRepository } from "../../repositories/user/user";
 
 export class FollowService {
   private followRepository = new FollowRepository();
+  private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
+  private notificationsRepository = new NotificationsRepository();
   private friendRepository = new FriendRepository();
-
-  private userService = new UserService();
-  private notificationsService = new NotificationsService();
 
   async isFollowing(senderId: string, recipientId: string) {
     if (senderId === recipientId) return true; // Temporary fix
@@ -34,8 +35,15 @@ export class FollowService {
       );
     }
 
-    const sender = await this.userService.getUser(senderId);
-    const recipient = await this.userService.getUser(recipientId);
+    const sender = await this.userRepository.getUser(senderId);
+    const recipient = await this.userRepository.getUser(recipientId);
+
+    if (!sender || !recipient) {
+      throw new DomainError(
+        ErrorCode.USER_NOT_FOUND,
+        "One or both users not found",
+      );
+    }
 
     const senderProfile = await this.profileRepository.getProfile(
       sender.profileId,
@@ -51,20 +59,19 @@ export class FollowService {
     if (recipient.privacySetting === "private") {
       await this.followRepository.createFollowRequest(senderId, recipientId);
 
-      const { followRequests } =
-        await this.notificationsService.getNotificationSettings(recipient.id);
+      const settings =
+        await this.notificationsRepository.getNotificationSettings(
+          recipient.notificationSettingsId,
+        );
 
-      if (followRequests) {
-        await this.notificationsService.sendNotification(
+      if (settings?.followRequests) {
+        const pushTokens =
+          await this.notificationsRepository.getPushTokens(recipientId);
+        await sns.sendFollowRequestNotification(
+          pushTokens,
           sender.id,
           recipient.id,
-          {
-            title: "Follow Request",
-            body: `${senderProfile.username} has sent you a follow request.`,
-
-            entityType: "profile",
-            entityId: sender.id,
-          },
+          senderProfile.username,
         );
       }
       return;
@@ -72,26 +79,28 @@ export class FollowService {
 
     await this.followRepository.createFollower(senderId, recipientId);
 
-    await this.notificationsService.storeNotification(sender.id, recipient.id, {
-      eventType: "follow",
-      entityType: "profile",
-      entityId: sender.id,
-    });
+    await this.notificationsRepository.storeNotification(
+      sender.id,
+      recipient.id,
+      {
+        eventType: "follow",
+        entityType: "profile",
+        entityId: sender.id,
+      },
+    );
 
-    const { followRequests } =
-      await this.notificationsService.getNotificationSettings(recipient.id);
+    const settings = await this.notificationsRepository.getNotificationSettings(
+      recipient.notificationSettingsId,
+    );
 
-    if (followRequests) {
-      await this.notificationsService.sendNotification(
+    if (settings?.followRequests) {
+      const pushTokens =
+        await this.notificationsRepository.getPushTokens(recipientId);
+      await sns.sendFollowAcceptedNotification(
+        pushTokens,
         sender.id,
         recipient.id,
-        {
-          title: "New follower",
-          body: `${senderProfile.username} is now following you.`,
-
-          entityType: "profile",
-          entityId: sender.id,
-        },
+        senderProfile.username,
       );
     }
   }
@@ -152,7 +161,15 @@ export class FollowService {
     await this.followRepository.removeFollowRequest(senderId, recipientId);
     await this.followRepository.createFollower(senderId, recipientId);
 
-    const recipient = await this.userService.getUser(recipientId);
+    const recipient = await this.userRepository.getUser(recipientId);
+
+    if (!recipient) {
+      throw new DomainError(
+        ErrorCode.USER_NOT_FOUND,
+        `User not found: ${recipientId}`,
+      );
+    }
+
     const recipientProfile = await this.profileRepository.getProfile(
       recipient.profileId,
     );
@@ -164,22 +181,28 @@ export class FollowService {
       );
     }
 
-    await this.notificationsService.storeNotification(senderId, recipientId, {
-      eventType: "follow",
-      entityType: "profile",
-      entityId: senderId,
-    });
-
-    const { followRequests } =
-      await this.notificationsService.getNotificationSettings(senderId);
-
-    if (followRequests) {
-      await this.notificationsService.sendNotification(recipientId, senderId, {
-        title: "Follow Request Accepted",
-        body: `${recipientProfile.username} has accepted your follow request`,
+    await this.notificationsRepository.storeNotification(
+      senderId,
+      recipientId,
+      {
+        eventType: "follow",
         entityType: "profile",
-        entityId: recipient.id,
-      });
+        entityId: senderId,
+      },
+    );
+
+    const settings =
+      await this.notificationsRepository.getNotificationSettings(senderId);
+
+    if (settings?.followRequests) {
+      const pushTokens =
+        await this.notificationsRepository.getPushTokens(senderId);
+      await sns.sendFollowAcceptedNotification(
+        pushTokens,
+        recipientId,
+        senderId,
+        recipientProfile.username,
+      );
     }
   }
 

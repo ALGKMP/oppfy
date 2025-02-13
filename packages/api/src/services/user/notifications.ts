@@ -1,28 +1,26 @@
-import { env } from "@oppfy/env";
-import { sns } from "@oppfy/sns";
-
 import { DomainError, ErrorCode } from "../../errors";
 import { NotificationsRepository } from "../../repositories/user/notifications";
 import type {
   EntityType,
   EventType,
   NotificationSettings,
-  SendNotificationData,
-  StoreNotificationData,
 } from "../../repositories/user/notifications";
+import { UserRepository } from "../../repositories/user/user";
 import { ProfileRepository } from "../../repositories/user/profile";
-import { ProfileService } from "./profile";
-import { UserService } from "./user";
+
+import { cloudfront } from "@oppfy/cloudfront";
 
 export class NotificationsService {
   private notificationsRepository = new NotificationsRepository();
-
-  private userService = new UserService();
+  private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
-  private profileService = new ProfileService();
 
   async getNotificationSettings(userId: string) {
-    const user = await this.userService.getUser(userId);
+    const user = await this.userRepository.getUser(userId);
+
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
 
     const notificationSettings =
       await this.notificationsRepository.getNotificationSettings(
@@ -68,9 +66,7 @@ export class NotificationsService {
         const { profilePictureKey, ...rest } = notification;
 
         const profilePictureUrl = profilePictureKey
-          ? await this.profileService.getSignedProfilePictureUrl(
-              profilePictureKey,
-            )
+          ? await cloudfront.getSignedProfilePictureUrl(profilePictureKey)
           : null;
 
         return {
@@ -94,7 +90,11 @@ export class NotificationsService {
     userId: string,
     newNotificationSettings: NotificationSettings,
   ) {
-    const user = await this.userService.getUser(userId);
+    const user = await this.userRepository.getUser(userId);
+
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
 
     const notificationSettings =
       await this.notificationsRepository.getNotificationSettings(
@@ -107,61 +107,6 @@ export class NotificationsService {
     await this.notificationsRepository.updateNotificationSettings(
       user.notificationSettingsId,
       newNotificationSettings,
-    );
-  }
-
-  async storeNotification(
-    senderId: string,
-    recipientId: string,
-    notificationData: StoreNotificationData,
-  ) {
-    await this.notificationsRepository.storeNotification(
-      senderId,
-      recipientId,
-      notificationData,
-    );
-  }
-
-  async sendNotifications(
-    data: {
-      pushTokens: string[];
-      senderId: string;
-      recipientId: string;
-      notificationData: SendNotificationData;
-    }[],
-  ): Promise<void> {
-    const messages = data.map((item) => ({
-      senderId: item.senderId,
-      recipientId: item.recipientId,
-      pushTokens: item.pushTokens,
-      ...item.notificationData,
-    }));
-
-    await sns.sendBatchNotifications(
-      env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
-      messages,
-      "New notification",
-    );
-  }
-
-  async sendNotification(
-    senderId: string,
-    recipientId: string,
-    notificationData: SendNotificationData,
-  ): Promise<void> {
-    const pushTokens =
-      await this.notificationsRepository.getPushTokens(recipientId);
-    const message = {
-      senderId,
-      recipientId,
-      pushTokens,
-      ...notificationData,
-    };
-
-    await sns.sendNotification(
-      env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
-      message,
-      "New notification",
     );
   }
 

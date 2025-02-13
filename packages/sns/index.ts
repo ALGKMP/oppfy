@@ -10,11 +10,21 @@ import type {
 
 import { env } from "@oppfy/env";
 
+export type NotificationType =
+  | "like"
+  | "comment"
+  | "follow"
+  | "friend"
+  | "followRequest"
+  | "friendRequest";
+
+export type EntityType = "post" | "profile";
+
 export interface SendNotificationData {
   title: string;
   body: string;
   entityId?: string;
-  entityType?: string;
+  entityType?: EntityType;
 }
 
 export interface NotificationMessage {
@@ -24,7 +34,17 @@ export interface NotificationMessage {
   title: string;
   body: string;
   entityId?: string;
-  entityType?: string;
+  entityType?: EntityType;
+  notificationType?: NotificationType;
+}
+
+export interface NotificationSettings {
+  posts: boolean;
+  likes: boolean;
+  comments: boolean;
+  mentions: boolean;
+  friendRequests: boolean;
+  followRequests: boolean;
 }
 
 export class SNSService {
@@ -88,6 +108,117 @@ export class SNSService {
         PublishBatchRequestEntries: batchEntries,
       });
     }
+  }
+
+  // Helper methods for common notification types
+  async sendLikeNotification(
+    pushTokens: string[],
+    senderId: string,
+    recipientId: string,
+    username: string,
+    postId: string,
+  ): Promise<void> {
+    await this.sendNotification(env.SNS_PUSH_NOTIFICATION_TOPIC_ARN, {
+      pushTokens,
+      senderId,
+      recipientId,
+      title: "New like",
+      body: `${username} liked your post`,
+      entityType: "post",
+      entityId: postId,
+      notificationType: "like",
+    });
+  }
+
+  async sendCommentNotification(
+    pushTokens: string[],
+    senderId: string,
+    recipientId: string,
+    username: string,
+    postId: string,
+  ): Promise<void> {
+    await this.sendNotification(env.SNS_PUSH_NOTIFICATION_TOPIC_ARN, {
+      pushTokens,
+      senderId,
+      recipientId,
+      title: "New Comment",
+      body: `${username} commented on your post`,
+      entityType: "post",
+      entityId: postId,
+      notificationType: "comment",
+    });
+  }
+
+  async sendFollowRequestNotification(
+    pushTokens: string[],
+    senderId: string,
+    recipientId: string,
+    username: string,
+  ): Promise<void> {
+    await this.sendNotification(env.SNS_PUSH_NOTIFICATION_TOPIC_ARN, {
+      pushTokens,
+      senderId,
+      recipientId,
+      title: "Follow Request",
+      body: `${username} has sent you a follow request.`,
+      entityType: "profile",
+      entityId: senderId,
+      notificationType: "followRequest",
+    });
+  }
+
+  async sendFollowAcceptedNotification(
+    pushTokens: string[],
+    senderId: string,
+    recipientId: string,
+    username: string,
+  ): Promise<void> {
+    await this.sendNotification(env.SNS_PUSH_NOTIFICATION_TOPIC_ARN, {
+      pushTokens,
+      senderId,
+      recipientId,
+      title: "Follow Request Accepted",
+      body: `${username} has accepted your follow request`,
+      entityType: "profile",
+      entityId: senderId,
+      notificationType: "follow",
+    });
+  }
+
+  async sendFriendRequestNotification(
+    pushTokens: string[],
+    senderId: string,
+    recipientId: string,
+    username: string,
+  ): Promise<void> {
+    await this.sendNotification(env.SNS_PUSH_NOTIFICATION_TOPIC_ARN, {
+      pushTokens,
+      senderId,
+      recipientId,
+      title: "Friend Request",
+      body: `${username} has sent you a friend request.`,
+      entityType: "profile",
+      entityId: senderId,
+      notificationType: "friendRequest",
+    });
+  }
+
+  async sendFriendAcceptedNotification(
+    pushTokens: string[],
+    senderId: string,
+    recipientId: string,
+    username: string,
+  ): Promise<void> {
+    await this.sendNotification(env.SNS_PUSH_NOTIFICATION_TOPIC_ARN, {
+      pushTokens,
+      senderId,
+      recipientId,
+      title: "Friend Request Accepted",
+      body: `${username} has accepted your friend request`,
+      entityType: "profile",
+      entityId: senderId,
+      notificationType: "friend",
+    });
   }
 }
 

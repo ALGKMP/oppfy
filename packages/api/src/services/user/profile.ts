@@ -292,24 +292,6 @@ export class ProfileService {
     await cloudfront.invalidateProfilePicture(userId);
   }
 
-  async uploadProfilePictureUrl({
-    userId,
-    contentLength,
-  }: {
-    userId: string;
-    contentLength: number;
-  }): Promise<string> {
-    const presignedUrl = await s3.uploadProfilePicture({
-      bucket: env.S3_PROFILE_BUCKET,
-      userId,
-      contentLength,
-    });
-
-    await this.invalidateProfilePicture(userId);
-
-    return presignedUrl;
-  }
-
   private async _upsertProfileSearch(
     userId: string,
     newProfileData: Partial<OpenSearchProfileIndexResult>,

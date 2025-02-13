@@ -5,6 +5,7 @@ import { cloudfront } from "@oppfy/cloudfront";
 import { env } from "@oppfy/env";
 import { mux } from "@oppfy/mux";
 import { s3 } from "@oppfy/s3";
+import { sns } from "@oppfy/sns";
 import type { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
@@ -17,7 +18,7 @@ import { CommentRepository } from "../../repositories/media/comment";
 import { LikeRepository } from "../../repositories/media/like";
 import { PostRepository } from "../../repositories/media/post";
 import { PostStatsRepository } from "../../repositories/media/post-stats";
-import { NotificationsService } from "../user/notifications";
+import { NotificationsRepository } from "../../repositories/user/notifications";
 import { UserService } from "../user/user";
 
 interface BaseCursor {
@@ -54,8 +55,8 @@ export class PostService {
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
   private viewRepository = new ViewRepository();
+  private notificationsRepository = new NotificationsRepository();
 
-  private notificationsService = new NotificationsService();
   private userService = new UserService();
 
   async paginatePostsOfUserSelf(
@@ -342,7 +343,7 @@ export class PostService {
       // Only store and send notification if the liker is not the post owner
       if (userId !== post.recipientId) {
         const recentNotifications =
-          await this.notificationsService.getRecentNotifications({
+          await this.notificationsRepository.getRecentNotifications({
             senderId: userId,
             recipientId: post.recipientId,
             eventType: "like",
@@ -353,7 +354,7 @@ export class PostService {
           });
 
         if (recentNotifications.length === 0) {
-          await this.notificationsService.storeNotification(
+          await this.notificationsRepository.storeNotification(
             userId,
             post.recipientId,
             {
@@ -363,12 +364,12 @@ export class PostService {
             },
           );
 
-          const { likes } =
-            await this.notificationsService.getNotificationSettings(
+          const settings =
+            await this.notificationsRepository.getNotificationSettings(
               post.recipientId,
             );
 
-          if (likes) {
+          if (settings?.likes) {
             const user = await this.profileRepository.getUserProfile(userId);
 
             if (user === undefined) {
@@ -376,16 +377,16 @@ export class PostService {
             }
 
             const { profile } = user;
+            const pushTokens = await this.notificationsRepository.getPushTokens(
+              post.recipientId,
+            );
 
-            await this.notificationsService.sendNotification(
+            await sns.sendLikeNotification(
+              pushTokens,
               userId,
               post.recipientId,
-              {
-                title: "New like",
-                body: `${profile.username} liked your post`,
-                entityType: "post",
-                entityId: postId,
-              },
+              profile.username,
+              postId,
             );
           }
         }
@@ -456,7 +457,7 @@ export class PostService {
     // Only store and send notification if the commenter is not the post owner
     if (userId !== post.recipientId) {
       const recentNotifications =
-        await this.notificationsService.getRecentNotifications({
+        await this.notificationsRepository.getRecentNotifications({
           senderId: userId,
           recipientId: post.recipientId,
           eventType: "comment",
@@ -467,7 +468,7 @@ export class PostService {
         });
 
       if (recentNotifications.length === 0) {
-        await this.notificationsService.storeNotification(
+        await this.notificationsRepository.storeNotification(
           userId,
           post.recipientId,
           {
@@ -477,12 +478,12 @@ export class PostService {
           },
         );
 
-        const { comments } =
-          await this.notificationsService.getNotificationSettings(
+        const settings =
+          await this.notificationsRepository.getNotificationSettings(
             post.recipientId,
           );
 
-        if (comments) {
+        if (settings?.comments) {
           const user = await this.profileRepository.getUserProfile(userId);
 
           if (user === undefined) {
@@ -490,16 +491,16 @@ export class PostService {
           }
 
           const { profile } = user;
+          const pushTokens = await this.notificationsRepository.getPushTokens(
+            post.recipientId,
+          );
 
-          await this.notificationsService.sendNotification(
+          await sns.sendCommentNotification(
+            pushTokens,
             userId,
             post.recipientId,
-            {
-              title: "New Comment",
-              body: `${profile.username} commented on your post`,
-              entityId: postId,
-              entityType: "post",
-            },
+            profile.username,
+            postId,
           );
         }
       }

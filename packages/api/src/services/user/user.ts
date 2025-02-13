@@ -2,7 +2,7 @@ import { createHash } from "crypto";
 
 import { env } from "@oppfy/env";
 import { openSearch, OpenSearchIndex } from "@oppfy/opensearch";
-import { sns } from "@oppfy/sns";
+import { NotificationMessage, sns } from "@oppfy/sns";
 import { sqs } from "@oppfy/sqs";
 
 import { DomainError, ErrorCode } from "../../errors";
@@ -93,7 +93,7 @@ export class UserService {
 
           await sns.sendBatchNotifications(
             env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
-            notis,
+            notis as NotificationMessage[],
             "New notification",
           );
 
