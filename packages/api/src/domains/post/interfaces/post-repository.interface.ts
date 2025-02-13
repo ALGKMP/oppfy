@@ -5,14 +5,19 @@ import type { schema } from "@oppfy/db";
 export type Post = InferSelectModel<typeof schema.post>;
 export type InsertPost = InferInsertModel<typeof schema.post>;
 export type PostStats = InferSelectModel<typeof schema.postStats>;
+export type Like = InferSelectModel<typeof schema.like>;
 
 export interface IPostRepository {
   getPostById(postId: string): Promise<Post | undefined>;
-  createPost(post: InsertPost): Promise<Post | undefined>;
+  createPost(post: InsertPost): Promise<Post>;
   deletePost(postId: string): Promise<void>;
   getPostsByUserId(userId: string): Promise<Post[]>;
   getPostsByRecipientId(recipientId: string): Promise<Post[]>;
-  // Add other post-specific methods
+  getPaginatedPosts(params: {
+    cursor?: { createdAt: Date; id: string };
+    limit: number;
+    userId: string;
+  }): Promise<Post[]>;
 }
 
 export interface IPostStatsRepository {
@@ -21,12 +26,14 @@ export interface IPostStatsRepository {
   incrementLikesCount(postId: string): Promise<void>;
   decrementLikesCount(postId: string): Promise<void>;
   getPostStats(postId: string): Promise<PostStats | undefined>;
-  // Add other stats-specific methods
+  createPostStats(postId: string): Promise<PostStats>;
+  incrementViewsCount(postId: string): Promise<void>;
 }
 
 export interface IPostLikeRepository {
   getLike(userId: string, postId: string): Promise<boolean>;
-  createLike(params: { userId: string; postId: string }): Promise<void>;
+  createLike(params: { userId: string; postId: string }): Promise<Like>;
   deleteLike(userId: string, postId: string): Promise<void>;
-  // Add other like-specific methods
+  getLikesByPostId(postId: string): Promise<Like[]>;
+  getLikesByUserId(userId: string): Promise<Like[]>;
 }
