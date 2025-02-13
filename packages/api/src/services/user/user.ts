@@ -1,6 +1,8 @@
 import { createHash } from "crypto";
 
+import { env } from "@oppfy/env";
 import { openSearch, OpenSearchIndex } from "@oppfy/opensearch";
+import { sns } from "@oppfy/sns";
 import { sqs } from "@oppfy/sqs";
 
 import { DomainError, ErrorCode } from "../../errors";
@@ -13,7 +15,6 @@ import {
   ProfileRepository,
   UserRepository,
 } from "../../repositories";
-import { NotificationsService } from "./notifications";
 
 export type InferEnum<T extends { enumValues: string[] }> =
   T["enumValues"][number];
@@ -26,7 +27,6 @@ export class UserService {
   private blockRepository = new BlockRepository();
   private contactsRepository = new ContactsRepository();
   private notificationsRepository = new NotificationsRepository();
-  private notificationsService = new NotificationsService();
 
   async createUserWithUsername(
     userId: string,
@@ -66,42 +66,36 @@ export class UserService {
           const rawPosts = await this.postRepository.paginatePostsOfUser(
             userId,
             cursor,
-            pageSize + 1, // Fetch an extra item to check for more pages
+            pageSize + 1,
           );
 
           if (rawPosts.length === 0) break;
 
-          // Split into current page and check if there's more data
           const hasMore = rawPosts.length > pageSize;
           const currentPosts = hasMore ? rawPosts.slice(0, -1) : rawPosts;
 
-          const notis = currentPosts.map(
-            ({ postId, authorId, recipientName }) => ({
-              senderId: userId,
-              recipientId: authorId,
-              notificationData: {
+          const notis = await Promise.all(
+            currentPosts.map(async ({ postId, authorId, recipientName }) => {
+              const pushTokens =
+                await this.notificationsRepository.getPushTokens(authorId);
+
+              return {
+                pushTokens,
+                senderId: userId,
+                recipientId: authorId,
                 title: "OPP ALERT",
                 body: `${recipientName} made their account!`,
                 entityId: postId,
                 entityType: "post",
-              },
-            }),
-          );
-
-          const mappedNotis = await Promise.all(
-            notis.map(async (noti) => {
-              return {
-                pushTokens: await this.notificationsRepository.getPushTokens(
-                  noti.recipientId,
-                ),
-                senderId: noti.senderId,
-                recipientId: noti.recipientId,
-                notificationData: noti.notificationData,
               };
             }),
           );
 
-          await this.notificationsService.sendNotifications(mappedNotis);
+          await sns.sendBatchNotifications(
+            env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
+            notis,
+            "New notification",
+          );
 
           cursor = hasMore
             ? {

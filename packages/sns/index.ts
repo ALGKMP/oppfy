@@ -10,6 +10,23 @@ import type {
 
 import { env } from "@oppfy/env";
 
+export interface SendNotificationData {
+  title: string;
+  body: string;
+  entityId?: string;
+  entityType?: string;
+}
+
+export interface NotificationMessage {
+  pushTokens: string[];
+  senderId: string;
+  recipientId: string;
+  title: string;
+  body: string;
+  entityId?: string;
+  entityType?: string;
+}
+
 export class SNSService {
   private client: SNSClient;
 
@@ -33,10 +50,9 @@ export class SNSService {
     await this.client.send(command);
   }
 
-  // New method for sending notifications
   async sendNotification(
     topicArn: string,
-    message: Record<string, any>,
+    message: NotificationMessage,
     subject: string = "New notification",
   ): Promise<void> {
     await this.publish({
@@ -46,16 +62,15 @@ export class SNSService {
     });
   }
 
-  // New method for sending batch notifications
   async sendBatchNotifications(
     topicArn: string,
-    messages: Record<string, any>[],
+    messages: NotificationMessage[],
     subject: string = "New notification",
   ): Promise<void> {
     const CHUNK_SIZE = 10; // SNS batch limit
 
     // Split notifications into chunks of 10
-    const chunks: Record<string, any>[][] = [];
+    const chunks: NotificationMessage[][] = [];
     for (let i = 0; i < messages.length; i += CHUNK_SIZE) {
       chunks.push(messages.slice(i, i + CHUNK_SIZE));
     }
