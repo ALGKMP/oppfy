@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto";
 import type { z } from "zod";
 
 import { cloudfront } from "@oppfy/cloudfront";
@@ -20,6 +19,7 @@ import { PostRepository } from "../../repositories/media/post";
 import { PostStatsRepository } from "../../repositories/media/post-stats";
 import { NotificationsRepository } from "../../repositories/user/notifications";
 import { UserService } from "../user/user";
+import { randomUUID } from "crypto";
 
 interface BaseCursor {
   createdAt: Date;
@@ -58,6 +58,119 @@ export class PostService {
   private notificationsRepository = new NotificationsRepository();
 
   private userService = new UserService();
+
+   // Post for user on app
+   async uploadPostForUserOnAppUrl({
+    author,
+    recipient,
+    caption,
+    height,
+    width,
+    contentLength,
+    contentType,
+  }: {
+    author: string;
+    recipient: string;
+    caption: string;
+    height: string;
+    width: string;
+    contentLength: number;
+    contentType: "image/jpeg" | "image/png" | "image/heic";
+  }) {
+    try {
+      const currentDate = Date.now();
+      const objectKey = `posts/${currentDate}-${recipient}-${author}.jpg`;
+      const postId = randomUUID();
+
+      caption = encodeURIComponent(caption);
+
+      const presignedUrl = await s3.putObjectPresignedUrl({
+        Bucket: env.S3_POST_BUCKET,
+        Key: objectKey,
+        ContentLength: contentLength,
+        ContentType: contentType,
+        Metadata: {
+          author,
+          recipient,
+          caption,
+          height,
+          width,
+          postid: postId,
+        },
+      });
+
+      return presignedUrl;
+    } catch (err) {
+      throw new DomainError(
+        ErrorCode.S3_FAILED_TO_UPLOAD,
+        "S3 failed while trying to upload post",
+      );
+    }
+  }
+
+  // post for user not on app
+  async uploadPostForUserNotOnAppUrl({
+    author,
+    recipientNotOnAppPhoneNumber,
+    recipientNotOnAppName,
+    caption,
+    height,
+    width,
+    contentLength,
+    contentType,
+  }: {
+    author: string;
+    recipientNotOnAppPhoneNumber: string;
+    recipientNotOnAppName: string;
+    caption: string;
+    height: string;
+    width: string;
+    contentLength: number;
+    contentType: "image/jpeg" | "image/png" | "image/heic";
+  }) {
+    try {
+
+      const recipient = await this.userRepository.getUserByPhoneNumber(recipientNotOnAppPhoneNumber);
+      const recipientId = recipient ? recipient.id : randomUUID();
+
+      if (!recipient) {
+        await this.userService.createUserWithUsername(
+          recipientId,
+          recipientNotOnAppPhoneNumber,
+          recipientNotOnAppName,
+        );
+      }
+
+      const currentDate = Date.now();
+      const objectKey = `posts/${currentDate}-${recipientId}-${author}.jpg`;
+      const postId = randomUUID();
+
+      caption = encodeURIComponent(caption);
+
+      const presignedUrl = await s3.putObjectPresignedUrl({
+        Bucket: env.S3_POST_BUCKET,
+        Key: objectKey,
+        ContentLength: contentLength,
+        ContentType: contentType,
+        Metadata: {
+          author,
+          caption,
+          height,
+          width,
+          recipient: recipientId,
+          postid: postId,
+        },
+      });
+
+      return { presignedUrl, postId };
+    } catch (err) {
+      throw new DomainError(
+        ErrorCode.S3_FAILED_TO_UPLOAD,
+        "S3 failed while trying to upload post",
+      );
+    }
+  }
+
 
   async paginatePostsOfUserSelf(
     userId: string,

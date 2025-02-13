@@ -24,7 +24,7 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        return await ctx.services.post.uploadPicturePostForUserOnApp({
+        return await ctx.services.post.uploadPostForUserOnAppUrl({
           author: ctx.session.uid,
           ...input,
         });
@@ -50,10 +50,16 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        return await ctx.services.post.uploadPicturePostForUserNotOnApp({
-          author: ctx.session.uid,
-          ...input,
-        });
+        const { presignedUrl, postId } = await ctx.services.post.uploadPostForUserNotOnAppUrl(
+          {
+            author: ctx.session.uid,
+            recipientNotOnAppPhoneNumber: input.number,
+            recipientNotOnAppName: input.name,
+            ...input,
+          },
+        );
+
+        return { presignedUrl, postId };
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
