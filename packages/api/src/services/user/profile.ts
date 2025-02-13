@@ -14,9 +14,8 @@ import {
 import { BlockService } from "../network/block";
 import { FollowService } from "../network/follow";
 import { FriendService } from "../network/friend";
-import { UserService } from "./user";
 
-const updateProfile = z.object({
+const _updateProfile = z.object({
   name: sharedValidators.user.name.optional(),
   username: sharedValidators.user.username.optional(),
   bio: sharedValidators.user.bio.optional(),
@@ -34,7 +33,7 @@ export class ProfileService {
 
   async updateProfile(
     userId: string,
-    newData: z.infer<typeof updateProfile>,
+    newData: z.infer<typeof _updateProfile>,
   ): Promise<void> {
     const userWithProfile = await this.profileRepository.getUserProfile(userId);
 
