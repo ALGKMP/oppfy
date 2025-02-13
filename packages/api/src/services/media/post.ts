@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import type { z } from "zod";
 
 import { cloudfront } from "@oppfy/cloudfront";
@@ -19,7 +20,6 @@ import { PostRepository } from "../../repositories/media/post";
 import { PostStatsRepository } from "../../repositories/media/post-stats";
 import { NotificationsRepository } from "../../repositories/user/notifications";
 import { UserService } from "../user/user";
-import { randomUUID } from "crypto";
 
 interface BaseCursor {
   createdAt: Date;
@@ -59,8 +59,8 @@ export class PostService {
 
   private userService = new UserService();
 
-   // Post for user on app
-   async uploadPostForUserOnAppUrl({
+  // Post for user on app
+  async uploadPostForUserOnAppUrl({
     author,
     recipient,
     caption,
@@ -129,8 +129,9 @@ export class PostService {
     contentType: "image/jpeg" | "image/png" | "image/heic";
   }) {
     try {
-
-      const recipient = await this.userRepository.getUserByPhoneNumber(recipientNotOnAppPhoneNumber);
+      const recipient = await this.userRepository.getUserByPhoneNumber(
+        recipientNotOnAppPhoneNumber,
+      );
       const recipientId = recipient ? recipient.id : randomUUID();
 
       if (!recipient) {
@@ -170,7 +171,6 @@ export class PostService {
       );
     }
   }
-
 
   async paginatePostsOfUserSelf(
     userId: string,
@@ -711,22 +711,13 @@ export class PostService {
     width: string;
     postid: string;
   }) {
-    return await mux.video.uploads.create({
-      cors_origin: "*",
-      new_asset_settings: {
-        test: false,
-        encoding_tier: "smart",
-        mp4_support: "standard",
-        playback_policy: ["public"],
-        passthrough: JSON.stringify({
-          author,
-          recipient,
-          caption,
-          height,
-          width,
-          postid,
-        }),
-      },
+    return await mux.getPresignedUrlForVideo({
+      author,
+      recipient,
+      caption,
+      height,
+      width,
+      postid,
     });
   }
 
@@ -749,7 +740,7 @@ export class PostService {
         const imageUrl = await this._getSignedPostUrl(data.imageUrl);
         data.imageUrl = imageUrl;
       } else {
-        data.imageUrl = `https://stream.mux.com/${data.imageUrl}.m3u8`;
+        data.imageUrl = mux.getStreamUrl(data.imageUrl);
       }
     } catch (error) {
       console.error(
@@ -785,7 +776,7 @@ export class PostService {
         const imageUrl = await this._getSignedPublicPostUrl(data.imageUrl);
         data.imageUrl = imageUrl;
       } else {
-        data.imageUrl = `https://image.mux.com/${data.imageUrl}/thumbnail.jpg`;
+        data.imageUrl = mux.getThumbnailUrl(data.imageUrl);
       }
     } catch (error) {
       console.error(
@@ -822,7 +813,7 @@ export class PostService {
           const imageUrl = await this._getSignedPostUrl(item.imageUrl);
           item.imageUrl = imageUrl;
         } else {
-          item.imageUrl = `https://stream.mux.com/${item.imageUrl}.m3u8`;
+          item.imageUrl = mux.getStreamUrl(item.imageUrl);
         }
       } catch (error) {
         console.error(
@@ -879,7 +870,7 @@ export class PostService {
           const imageUrl = await this._getSignedPostUrl(item.imageUrl);
           item.imageUrl = imageUrl;
         } else {
-          item.imageUrl = `https://stream.mux.com/${item.imageUrl}.m3u8`;
+          item.imageUrl = mux.getStreamUrl(item.imageUrl);
         }
       } catch (error) {
         console.error(
