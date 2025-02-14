@@ -1,14 +1,13 @@
 import Mux from "@mux/mux-node";
 
 import { env } from "@oppfy/env";
-import { randomUUID } from "node:crypto";
 
 interface GetPresignedUrlForVideoOptions {
   author: string;
   recipient: string;
   caption: string;
-  height: number;
-  width: number;
+  height: string;
+  width: string;
   postid: string;
 }
 
@@ -36,6 +35,7 @@ export class MuxService {
     const upload = await this.client.video.uploads.create({
       cors_origin: "*",
       new_asset_settings: {
+        encoding_tier: "smart",
         playback_policy: ["public"],
         mp4_support: "standard",
         passthrough: JSON.stringify({

@@ -162,6 +162,8 @@ export class PostService {
         },
       });
 
+      console.log("presignedUrl", presignedUrl);
+
       return { presignedUrl, postId };
     } catch (err) {
       throw new DomainError(
@@ -189,12 +191,12 @@ export class PostService {
       caption = encodeURIComponent(caption);
       const postId = randomUUID();
 
-      const  presignedUrl = await mux.getPresignedUrlForVideo({
+      const presignedUrl = await mux.getPresignedUrlForVideo({
         author,
         recipient,
         caption,
-        height: parseInt(height),
-        width: parseInt(width),
+        height,
+        width,
         postid: postId,
       });
 
@@ -244,8 +246,8 @@ export class PostService {
         author,
         recipient: recipientId,
         caption,
-        height: parseInt(height),
-        width: parseInt(width),
+        height,
+        width,
         postid: postId,
       });
 
@@ -801,8 +803,8 @@ export class PostService {
       author,
       recipient,
       caption,
-      height: parseInt(height),
-      width: parseInt(width),
+      height,
+      width,
       postid,
     });
   }
