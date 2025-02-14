@@ -159,6 +159,7 @@ export class PostService {
           height,
           width,
           recipient: recipientId,
+          postid: postId,
         },
       });
 
