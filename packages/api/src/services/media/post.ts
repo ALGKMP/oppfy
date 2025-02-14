@@ -784,31 +784,6 @@ export class PostService {
     }
   }
 
-  async getPresignedUrlForVideo({
-    author,
-    recipient,
-    caption,
-    height,
-    width,
-    postid,
-  }: {
-    author: string;
-    recipient: string;
-    caption: string;
-    height: string;
-    width: string;
-    postid: string;
-  }) {
-    return await mux.getPresignedUrlForVideo({
-      author,
-      recipient,
-      caption,
-      height,
-      width,
-      postid,
-    });
-  }
-
   private async _processPostData(data: Post): Promise<Post> {
     try {
       // Update author profile picture URL
