@@ -51,7 +51,7 @@ const useUploadMedia = () => {
         height: height.toString(),
       };
 
-      const { url, postId } =
+      const { presignedUrl, postId } =
         input.type === "onApp"
           ? await uploadVideoPostForUserOnApp.mutateAsync({
               ...baseData,
@@ -63,7 +63,7 @@ const useUploadMedia = () => {
               name: input.name,
             });
 
-      const response = await fetch(url, {
+      const response = await fetch(presignedUrl, {
         method: "PUT",
         headers: {
           "Content-Type": videoBlob.type,
@@ -102,7 +102,7 @@ const useUploadMedia = () => {
         contentType: parsedMediaType.data,
       };
 
-      const { url, postId } =
+      const { presignedUrl, postId } =
         input.type === "onApp"
           ? await uploadPicturePostForUserOnApp.mutateAsync({
               ...baseData,
@@ -114,7 +114,7 @@ const useUploadMedia = () => {
               name: input.name,
             });
 
-      const response = await fetch(url, {
+      const response = await fetch(presignedUrl, {
         method: "PUT",
         body: photoBlob,
       });

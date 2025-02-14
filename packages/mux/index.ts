@@ -1,6 +1,7 @@
 import Mux from "@mux/mux-node";
 
 import { env } from "@oppfy/env";
+import { randomUUID } from "node:crypto";
 
 interface GetPresignedUrlForVideoOptions {
   author: string;
@@ -30,7 +31,7 @@ export class MuxService {
     caption,
     height,
     width,
-    postid,
+    postid
   }: GetPresignedUrlForVideoOptions) {
     const upload = await this.client.video.uploads.create({
       cors_origin: "*",
@@ -49,10 +50,7 @@ export class MuxService {
       test: false,
     });
 
-    return {
-      url: upload.url,
-      id: upload.id,
-    };
+    return upload.url;
   }
 
   /**

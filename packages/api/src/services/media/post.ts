@@ -159,7 +159,6 @@ export class PostService {
           height,
           width,
           recipient: recipientId,
-          postid: postId,
         },
       });
 
@@ -187,10 +186,10 @@ export class PostService {
     width: string;
   }) {
     try {
-      const postId = randomUUID();
       caption = encodeURIComponent(caption);
+      const postId = randomUUID();
 
-      const presignedUrl = await mux.getPresignedUrlForVideo({
+      const  presignedUrl = await mux.getPresignedUrlForVideo({
         author,
         recipient,
         caption,

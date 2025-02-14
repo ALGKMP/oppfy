@@ -80,16 +80,13 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const postId = randomUUID().toString();
-
-        const { url } = await ctx.services.post.getPresignedUrlForVideo({
+        const { presignedUrl, postId } = await ctx.services.post.uploadVideoPostForUserOnAppUrl({
           ...input,
           author: ctx.session.uid,
           recipient: input.recipient,
-          postid: postId,
         });
 
-        return { url, postId };
+        return { presignedUrl, postId };
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -111,33 +108,17 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const user = await ctx.services.user.getUserByPhoneNumberNoThrow(
-          input.number,
-        );
 
-        const userId = user ? user.id : randomUUID();
-
-        if (!user) {
-          await ctx.services.user.createUserWithUsername(
-            userId,
-            input.number,
-            input.name,
-            false,
-          );
-        }
-
-        const postId = randomUUID().toString();
-
-        const { url } = await ctx.services.post.getPresignedUrlForVideo({
+        const { presignedUrl, postId } = await ctx.services.post.uploadVideoPostForUserNotOnAppUrl({
           author: ctx.session.uid,
-          recipient: userId,
-          postid: postId,
+          recipientNotOnAppPhoneNumber: input.number,
+          recipientNotOnAppName: input.name,
           width: input.width,
           height: input.height,
           caption: input.caption,
         });
 
-        return { url, postId };
+        return { presignedUrl, postId };
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
