@@ -15,9 +15,8 @@ export const Avatar = (props: AvatarProps) => {
   const { source, size = 46, bordered = false, style } = props;
 
   const theme = useTheme();
-  // If there's a border, let's add those extra pixels around the image instead of shrinking it
+
   const borderWidth = bordered ? 2 : 0;
-  // The total bounding box includes the outer border
   const totalSize = size + borderWidth * 2;
 
   return (
