@@ -8,46 +8,41 @@ interface AvatarProps {
   source: ImageSourcePropType | string | null | undefined;
   size?: number;
   bordered?: boolean;
-  recyclingKey?: string;
   style?: ImageProps["style"];
 }
 
 export const Avatar = (props: AvatarProps) => {
+  const { source, size = 46, bordered = false, style } = props;
+
   const theme = useTheme();
-  const size = props.size ?? 46;
-  const imageSize = size - (props.bordered ? 4 : 0);
+  // If there's a border, let's add those extra pixels around the image instead of shrinking it
+  const borderWidth = bordered ? 2 : 0;
+  // The total bounding box includes the outer border
+  const totalSize = size + borderWidth * 2;
 
   return (
     <Stack
-      width={size}
-      height={size}
-      justifyContent="center"
+      width={totalSize}
+      height={totalSize}
       alignItems="center"
+      justifyContent="center"
+      borderRadius={totalSize / 2}
+      borderWidth={borderWidth}
+      borderColor={theme.primary.val as string}
+      backgroundColor="$gray4"
     >
-      {/* Gray background */}
-      <Stack
-        position="absolute"
-        width={imageSize}
-        height={imageSize}
-        backgroundColor="$gray4"
-        borderRadius={imageSize / 2}
-      />
-
-      {/* Image */}
       <Image
         source={
-          typeof props.source === "string"
-            ? { uri: props.source }
-            : (props.source ?? defaultProfilePicture)
+          typeof source === "string"
+            ? { uri: source }
+            : (source ?? defaultProfilePicture)
         }
         style={[
-          props.style,
+          style,
           {
-            width: imageSize,
-            height: imageSize,
-            borderRadius: imageSize / 2,
-            borderWidth: props.bordered ? 2 : 0,
-            borderColor: theme.primary.val as string,
+            width: size,
+            height: size,
+            borderRadius: size / 2,
           },
         ]}
       />
