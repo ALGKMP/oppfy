@@ -32,6 +32,7 @@ export const postRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to retrieve presigned URL for post upload.",
+          cause: err,
         });
       }
     }),

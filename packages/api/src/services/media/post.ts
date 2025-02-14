@@ -80,9 +80,9 @@ export class PostService {
     try {
       const currentDate = Date.now();
       const objectKey = `posts/${currentDate}-${recipient}-${author}.jpg`;
-      const postId = randomUUID();
 
       caption = encodeURIComponent(caption);
+      const postId = randomUUID();
 
       const presignedUrl = await s3.putObjectPresignedUrl({
         Bucket: env.S3_POST_BUCKET,
@@ -99,7 +99,7 @@ export class PostService {
         },
       });
 
-      return presignedUrl;
+      return { presignedUrl, postId };
     } catch (err) {
       throw new DomainError(
         ErrorCode.S3_FAILED_TO_UPLOAD,
@@ -190,7 +190,7 @@ export class PostService {
       const postId = randomUUID();
       caption = encodeURIComponent(caption);
 
-      const uploadUrl = await mux.getPresignedUrlForVideo({
+      const presignedUrl = await mux.getPresignedUrlForVideo({
         author,
         recipient,
         caption,
@@ -199,7 +199,7 @@ export class PostService {
         postid: postId,
       });
 
-      return uploadUrl;
+      return { presignedUrl, postId };
     } catch (err) {
       throw new DomainError(
         ErrorCode.MUX_FAILED_TO_UPLOAD,
@@ -241,7 +241,7 @@ export class PostService {
       const postId = randomUUID();
       caption = encodeURIComponent(caption);
 
-      const uploadUrl = await mux.getPresignedUrlForVideo({
+      const presignedUrl = await mux.getPresignedUrlForVideo({
         author,
         recipient: recipientId,
         caption,
@@ -250,7 +250,7 @@ export class PostService {
         postid: postId,
       });
 
-      return { uploadUrl, postId };
+      return { presignedUrl, postId };
     } catch (err) {
       throw new DomainError(
         ErrorCode.MUX_FAILED_TO_UPLOAD,
