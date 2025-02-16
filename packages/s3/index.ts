@@ -75,11 +75,9 @@ export class S3Service {
 
   // New methods for profile picture operations
   async uploadProfilePicture({
-    bucket,
     userId,
     contentLength,
   }: {
-    bucket: string;
     userId: string;
     contentLength: number;
   }): Promise<string> {
@@ -88,7 +86,7 @@ export class S3Service {
 
     return await this.putObjectPresignedUrl({
       Key: key,
-      Bucket: bucket,
+      Bucket: env.S3_PROFILE_PICTURE_BUCKET,
       ContentLength: contentLength,
       ContentType: "image/jpeg",
       Metadata: metadata,
