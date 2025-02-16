@@ -55,12 +55,12 @@ export class FriendRepository {
         .where(
           or(
             and(
-              eq(schema.friend.userId1, userId1),
-              eq(schema.friend.userId2, userId2),
+              eq(schema.friend.userIdA, userId1),
+              eq(schema.friend.userIdB, userId2),
             ),
             and(
-              eq(schema.friend.userId1, userId2),
-              eq(schema.friend.userId2, userId1),
+              eq(schema.friend.userIdA, userId2),
+              eq(schema.friend.userIdB, userId1),
             ),
           ),
         );
@@ -93,12 +93,12 @@ export class FriendRepository {
     return await this.db.query.friend.findFirst({
       where: or(
         and(
-          eq(schema.friend.userId1, userId1),
-          eq(schema.friend.userId2, userId2),
+          eq(schema.friend.userIdA, userId1),
+          eq(schema.friend.userIdB, userId2),
         ),
         and(
-          eq(schema.friend.userId1, userId2),
-          eq(schema.friend.userId2, userId1),
+          eq(schema.friend.userIdA, userId2),
+          eq(schema.friend.userIdB, userId1),
         ),
       ),
     });
@@ -111,8 +111,8 @@ export class FriendRepository {
       .from(schema.friend)
       .where(
         or(
-          eq(schema.friend.userId1, userId),
-          eq(schema.friend.userId2, userId),
+          eq(schema.friend.userIdA, userId),
+          eq(schema.friend.userIdB, userId),
         ),
       );
     return result[0]?.count;
@@ -178,16 +178,16 @@ export class FriendRepository {
       .innerJoin(
         schema.user,
         or(
-          eq(schema.friend.userId1, schema.user.id),
-          eq(schema.friend.userId2, schema.user.id),
+          eq(schema.friend.userIdA, schema.user.id),
+          eq(schema.friend.userIdB, schema.user.id),
         ),
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .where(
         and(
           or(
-            eq(schema.friend.userId1, forUserId),
-            eq(schema.friend.userId2, forUserId),
+            eq(schema.friend.userIdA, forUserId),
+            eq(schema.friend.userIdB, forUserId),
           ),
           not(eq(schema.user.id, forUserId)), // Exclude the current user
           cursor
@@ -256,16 +256,16 @@ export class FriendRepository {
       .innerJoin(
         schema.user,
         or(
-          eq(schema.friend.userId1, schema.user.id),
-          eq(schema.friend.userId2, schema.user.id),
+          eq(schema.friend.userIdA, schema.user.id),
+          eq(schema.friend.userIdB, schema.user.id),
         ),
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .where(
         and(
           or(
-            eq(schema.friend.userId1, forUserId),
-            eq(schema.friend.userId2, forUserId),
+            eq(schema.friend.userIdA, forUserId),
+            eq(schema.friend.userIdB, forUserId),
           ),
           not(eq(schema.user.id, forUserId)), // Exclude the current user
           cursor

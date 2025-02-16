@@ -238,12 +238,12 @@ export class UserRepository {
                 schema.user,
                 or(
                   and(
-                    eq(schema.friend.userId1, userId),
-                    eq(schema.friend.userId2, schema.user.id),
+                    eq(schema.friend.userIdA, userId),
+                    eq(schema.friend.userIdB, schema.user.id),
                   ),
                   and(
-                    eq(schema.friend.userId2, userId),
-                    eq(schema.friend.userId1, schema.user.id),
+                    eq(schema.friend.userIdB, userId),
+                    eq(schema.friend.userIdA, schema.user.id),
                   ),
                 ),
               ),

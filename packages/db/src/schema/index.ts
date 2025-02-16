@@ -63,9 +63,6 @@ export const reportUserReasonEnum = pgEnum("report_user_reason", [
 
 export const user = pgTable("user", {
   id: uuid("id").primaryKey().defaultRandom(),
-  profileId: uuid("profile_id")
-    .notNull()
-    .references(() => profile.id, { onDelete: "cascade" }),
   notificationSettingsId: uuid("notification_settings_id")
     .notNull()
     .references(() => notificationSettings.id, { onDelete: "cascade" }),
@@ -87,7 +84,9 @@ export const userStatus = pgTable("user_status", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   isOnApp: boolean("is_on_app").default(true).notNull(),
-  hasCompletedTutorial: boolean("has_posted").default(false).notNull(),
+  hasCompletedTutorial: boolean("has_completed_tutorial")
+    .default(false)
+    .notNull(),
   hasCompletedOnboarding: boolean("has_completed_onboarding")
     .default(false)
     .notNull(),
@@ -108,8 +107,8 @@ export const userStatusRelations = relations(userStatus, ({ one }) => ({
 
 export const userRelations = relations(user, ({ one, many }) => ({
   profile: one(profile, {
-    fields: [user.profileId],
-    references: [profile.id],
+    fields: [user.id],
+    references: [profile.userId],
   }),
   notificationSettings: one(notificationSettings, {
     fields: [user.notificationSettingsId],
@@ -119,7 +118,6 @@ export const userRelations = relations(user, ({ one, many }) => ({
     fields: [user.id],
     references: [userStatus.userId],
   }),
-  postViews: many(postView),
   receivedNotifications: many(notifications, {
     relationName: "notificationRecipient",
   }),
@@ -156,6 +154,9 @@ export const userContact = pgTable(
 
 export const profile = pgTable("profile", {
   id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
   username: varchar("username", { length: 30 }).unique().notNull(),
   name: varchar("name", { length: 30 }),
   dateOfBirth: dateType("date_of_birth"),
@@ -172,7 +173,7 @@ export const profile = pgTable("profile", {
 export const profileRelations = relations(profile, ({ one }) => ({
   user: one(user, {
     fields: [profile.id],
-    references: [user.profileId],
+    references: [user.id],
   }),
   profileStats: one(profileStats, {
     fields: [profile.id],
@@ -189,7 +190,6 @@ export const profileStats = pgTable("profile_stats", {
   following: integer("following").notNull().default(0),
   friends: integer("friends").notNull().default(0),
   posts: integer("posts").notNull().default(0),
-  views: integer("views").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -312,33 +312,8 @@ export const postRelations = relations(post, ({ one, many }) => ({
     fields: [post.id],
     references: [postStats.postId],
   }),
-  views: many(postView),
   likes: many(like),
   comments: many(comment),
-}));
-
-export const postView = pgTable("post_view", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  postId: uuid("post_id")
-    .notNull()
-    .references(() => post.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
-
-export const postViewRelation = relations(postView, ({ one }) => ({
-  post: one(post, {
-    fields: [postView.postId],
-    references: [post.id],
-  }),
-  user: one(user, {
-    fields: [postView.userId],
-    references: [user.id],
-  }),
 }));
 
 export const postStats = pgTable("post_stats", {
@@ -348,7 +323,6 @@ export const postStats = pgTable("post_stats", {
     .references(() => post.id, { onDelete: "cascade" }),
   likes: integer("likes").notNull().default(0),
   comments: integer("comments").notNull().default(0),
-  views: integer("views").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -495,10 +469,10 @@ export const followRequestRelations = relations(followRequest, ({ one }) => ({
 
 export const friend = pgTable("friend", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId1: uuid("user_id_1")
+  userIdA: uuid("user_id_a")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  userId2: uuid("user_id_2")
+  userIdB: uuid("user_id_b")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -507,19 +481,19 @@ export const friend = pgTable("friend", {
 });
 
 export const friendRelations = relations(friend, ({ one }) => ({
-  user1: one(user, {
-    relationName: "user1",
-    fields: [friend.userId1],
+  userA: one(user, {
+    relationName: "userA",
+    fields: [friend.userIdA],
     references: [user.id],
   }),
-  user2: one(user, {
-    relationName: "user2",
-    fields: [friend.userId2],
+  userB: one(user, {
+    relationName: "userB",
+    fields: [friend.userIdB],
     references: [user.id],
   }),
 }));
 
-export const block = pgTable("blocked", {
+export const block = pgTable("block", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id")
     .notNull()
@@ -550,7 +524,7 @@ export const reportComment = pgTable("report_comment", {
   commentId: uuid("comment_id")
     .notNull()
     .references(() => comment.id, { onDelete: "cascade" }),
-  reporterUserId: uuid("reporter_user_id")
+  submittedByUserId: uuid("submitted_by_user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
   reason: reportReasonEnum("reason").notNull(),
@@ -564,7 +538,7 @@ export const reportPost = pgTable("report_post", {
   postId: uuid("post_id")
     .notNull()
     .references(() => post.id, { onDelete: "cascade" }),
-  reporterUserId: uuid("reporter_user_id")
+  submitedByUserId: uuid("submited_by_user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
   reason: reportReasonEnum("reason").notNull(),
@@ -573,12 +547,12 @@ export const reportPost = pgTable("report_post", {
     .notNull(),
 });
 
-export const reportUser = pgTable("report_profile", {
+export const reportUser = pgTable("report_user", {
   id: uuid("id").primaryKey().defaultRandom(),
-  targetUserId: uuid("target_user_id")
+  reportedUserId: uuid("reported_user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  reporterUserId: uuid("reporter_user_id")
+  submittedByUserId: uuid("submitted_by_user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
   reason: reportUserReasonEnum("reason").notNull(),
@@ -588,34 +562,34 @@ export const reportUser = pgTable("report_profile", {
 });
 
 export const reportCommentRelations = relations(reportComment, ({ one }) => ({
-  comment: one(comment, {
+  reportedComment: one(comment, {
     fields: [reportComment.commentId],
     references: [comment.id],
   }),
   reporter: one(user, {
-    fields: [reportComment.reporterUserId],
+    fields: [reportComment.submittedByUserId],
     references: [user.id],
   }),
 }));
 
 export const reportPostRelations = relations(reportPost, ({ one }) => ({
-  post: one(post, {
+  reportedPost: one(post, {
     fields: [reportPost.postId],
     references: [post.id],
   }),
   reporter: one(user, {
-    fields: [reportPost.reporterUserId],
+    fields: [reportPost.submitedByUserId],
     references: [user.id],
   }),
 }));
 
-export const reportProfileRelations = relations(reportUser, ({ one }) => ({
-  profile: one(user, {
-    fields: [reportUser.targetUserId],
+export const reportUserRelations = relations(reportUser, ({ one }) => ({
+  reportedUser: one(user, {
+    fields: [reportUser.reportedUserId],
     references: [user.id],
   }),
   reporter: one(user, {
-    fields: [reportUser.reporterUserId],
+    fields: [reportUser.submittedByUserId],
     references: [user.id],
   }),
 }));

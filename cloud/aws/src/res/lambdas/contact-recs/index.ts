@@ -88,15 +88,15 @@ export const handler = async (
       .then((res) => res.map((r) => r.userId));
 
     const friend1s = await db
-      .select({ userId: schema.friend.userId1 })
+      .select({ userId: schema.friend.userIdA })
       .from(schema.friend)
-      .where(eq(schema.friend.userId1, userId))
+      .where(eq(schema.friend.userIdA, userId))
       .then((res) => res.map((r) => r.userId));
 
     const friend2s = await db
-      .select({ userId: schema.friend.userId2 })
+      .select({ userId: schema.friend.userIdB })
       .from(schema.friend)
-      .where(eq(schema.friend.userId2, userId))
+      .where(eq(schema.friend.userIdB, userId))
       .then((res) => res.map((r) => r.userId));
 
     const peopleIDontWantToRecommend = [

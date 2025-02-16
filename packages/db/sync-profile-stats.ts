@@ -39,7 +39,7 @@ async function syncProfileStats() {
         })
         .from(schema.friend)
         .where(
-          sql`${schema.friend.userId1} = ${user.id} OR ${schema.friend.userId2} = ${user.id}`,
+          sql`${schema.friend.userIdA} = ${user.id} OR ${schema.friend.userIdB} = ${user.id}`,
         );
 
       // Count followers (where user is the recipient)
