@@ -31,6 +31,13 @@ export class ProfileService {
   private followService = new FollowService();
   private blockService = new BlockService();
 
+  async getUploadProfilePictureUrl(userId: string) {
+    const userWithProfile = await this.profileRepository.getUserProfile(userId);
+    if (!userWithProfile) {
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+    }
+  }
+
   async updateProfile(
     userId: string,
     newData: z.infer<typeof _updateProfile>,

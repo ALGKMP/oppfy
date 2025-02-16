@@ -8,6 +8,7 @@ import { DomainError, ErrorCode } from "../../errors";
 import {
   createTRPCRouter,
   protectedProcedure,
+  protectedWithUserAccess,
   publicProcedure,
 } from "../../trpc";
 
@@ -35,10 +36,10 @@ export const profileRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       try {
-        return await ctx.services.profile.getProfilePictureUploadUrl(
-          ctx.session.uid,
-          input.contentLength,
-        );
+        return await ctx.s3.uploadProfilePicture({
+          userId: ctx.session.uid,
+          contentLength: input.contentLength,
+        });
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -118,7 +119,7 @@ export const profileRouter = createTRPCRouter({
     }),
 
   // TRPC Procedure for getting a full user profile
-  getFullProfileOther: protectedProcedure
+  getFullProfileOther: protectedWithUserAccess
     .input(
       z.object({
         userId: z.string(),
