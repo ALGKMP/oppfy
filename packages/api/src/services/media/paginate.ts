@@ -3,7 +3,6 @@ import {
   BlockRepository,
   FollowRepository,
   FriendRepository,
-  ProfileRepository,
 } from "../../repositories";
 import { UserService } from "../user/user";
 
@@ -25,7 +24,6 @@ export class PaginationService {
   private followRepository = new FollowRepository();
   private friendRepository = new FriendRepository();
   private blockRepository = new BlockRepository();
-  private userService = new UserService();
 
   async paginateFollowersSelf(
     userId: string,
@@ -46,17 +44,6 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ) {
-    const canAccess = await this.userService.canAccessUserData({
-      currentUserId,
-      targetUserId: userId,
-    });
-    if (!canAccess) {
-      return {
-        items: [],
-        nextCursor: undefined,
-      };
-    }
-
     const data = await this.followRepository.paginateFollowersOthers(
       userId,
       currentUserId,
@@ -85,16 +72,6 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ) {
-    const canAccess = await this.userService.canAccessUserData({
-      currentUserId,
-      targetUserId: userId,
-    });
-    if (!canAccess) {
-      return {
-        items: [],
-        nextCursor: undefined,
-      };
-    }
 
     const data = await this.followRepository.paginateFollowingOthers(
       userId,
@@ -125,16 +102,6 @@ export class PaginationService {
     pageSize = 10,
     currentUserId: string,
   ) {
-    const canAccess = await this.userService.canAccessUserData({
-      currentUserId,
-      targetUserId: userId,
-    });
-    if (!canAccess) {
-      return {
-        items: [],
-        nextCursor: undefined,
-      };
-    }
     const data = await this.friendRepository.paginateFriendsOther(
       userId,
       currentUserId,

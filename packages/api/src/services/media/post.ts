@@ -295,17 +295,6 @@ export class PostService {
     currentUserId: string;
   }): Promise<PaginatedResponse<Post, PostCursor>> {
     try {
-      const canAccess = await this.userService.canAccessUserData({
-        currentUserId,
-        targetUserId: userId,
-      });
-      if (!canAccess) {
-        return {
-          items: [],
-          nextCursor: undefined,
-        };
-      }
-
       const data = await this.postRepository.paginatePostsOfUser(
         userId,
         cursor,
