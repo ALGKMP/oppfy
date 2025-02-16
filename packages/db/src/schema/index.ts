@@ -1,6 +1,7 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   customType,
   integer,
   pgEnum,
@@ -43,7 +44,11 @@ export const entityTypeEnum = pgEnum("entity_type", [
   "comment",
 ]);
 
-export const postTypeEnum = pgEnum("post_type", ["public", "private", "direct"]);
+export const postTypeEnum = pgEnum("post_type", [
+  "public",
+  "private",
+  "direct",
+]);
 
 export const mediaTypeEnum = pgEnum("media_type", ["image", "video"]);
 
@@ -482,18 +487,26 @@ export const followRequestRelations = relations(followRequest, ({ one }) => ({
   }),
 }));
 
-export const friend = pgTable("friend", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userIdA: uuid("user_id_a")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  userIdB: uuid("user_id_b")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const friend = pgTable(
+  "friend",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userIdA: uuid("user_id_a")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    userIdB: uuid("user_id_b")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    uniqueConstraint: primaryKey({ columns: [table.userIdA, table.userIdB] }),
+    orderCheck: check("friend_order_check", sql`user_id_a < user_id_b`),
+    selfCheck: check("friend_self_check", sql`user_id_a != user_id_b`),
+  }),
+);
 
 export const friendRelations = relations(friend, ({ one }) => ({
   userA: one(user, {
