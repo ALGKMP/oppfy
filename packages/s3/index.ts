@@ -86,7 +86,7 @@ export class S3Service {
 
     return await this.putObjectPresignedUrl({
       Key: key,
-      Bucket: env.S3_PROFILE_PICTURE_BUCKET,
+      Bucket: env.S3_PROFILE_BUCKET,
       ContentLength: contentLength,
       ContentType: "image/jpeg",
       Metadata: metadata,
