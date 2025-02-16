@@ -23,11 +23,14 @@ export class BlockRepository {
         profileId: schema.profile.id,
       })
       .from(schema.user)
-      .innerJoin(schema.block, eq(schema.user.id, schema.block.blockedUserId))
+      .innerJoin(
+        schema.block,
+        eq(schema.user.id, schema.block.userWhoIsBlockedId),
+      )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .where(
         and(
-          eq(schema.block.userId, forUserId),
+          eq(schema.block.userWhoIsBlockingId, forUserId),
           cursor
             ? or(
                 gt(schema.block.createdAt, cursor.createdAt),
@@ -47,8 +50,8 @@ export class BlockRepository {
   async getBlockedUser(userId: string, blockedUserId: string) {
     return await this.db.query.block.findFirst({
       where: and(
-        eq(schema.block.userId, userId),
-        eq(schema.block.blockedUserId, blockedUserId),
+        eq(schema.block.userWhoIsBlockingId, userId),
+        eq(schema.block.userWhoIsBlockedId, blockedUserId),
       ),
     });
   }
@@ -68,8 +71,8 @@ export class BlockRepository {
       .delete(schema.block)
       .where(
         and(
-          eq(schema.block.userId, userId),
-          eq(schema.block.blockedUserId, blockedUserId),
+          eq(schema.block.userWhoIsBlockingId, userId),
+          eq(schema.block.userWhoIsBlockedId, blockedUserId),
         ),
       );
     return result[0];

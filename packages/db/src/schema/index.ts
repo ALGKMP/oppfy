@@ -523,10 +523,10 @@ export const friendRelations = relations(friend, ({ one }) => ({
 
 export const block = pgTable("block", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")
+  userWhoIsBlockingId: uuid("user_who_is_blocking_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  blockedUserId: uuid("blocked_user_id")
+  userWhoIsBlockedId: uuid("user_who_is_blocked_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -535,14 +535,14 @@ export const block = pgTable("block", {
 });
 
 export const blockRelations = relations(block, ({ one }) => ({
-  user: one(user, {
-    relationName: "user",
-    fields: [block.userId],
+  userWhoIsBlocking: one(user, {
+    relationName: "userWhoIsBlocking",
+    fields: [block.userWhoIsBlockingId],
     references: [user.id],
   }),
-  blockedUser: one(user, {
-    relationName: "blockedUser",
-    fields: [block.blockedUserId],
+  userWhoIsBlocked: one(user, {
+    relationName: "userWhoIsBlocked",
+    fields: [block.userWhoIsBlockedId],
     references: [user.id],
   }),
 }));
