@@ -6,14 +6,12 @@ import type {
   NotificationSettings,
 } from "../../repositories/user/notifications";
 import { UserRepository } from "../../repositories/user/user";
-import { ProfileRepository } from "../../repositories/user/profile";
 
 import { cloudfront } from "@oppfy/cloudfront";
 
 export class NotificationsService {
   private notificationsRepository = new NotificationsRepository();
   private userRepository = new UserRepository();
-  private profileRepository = new ProfileRepository();
 
   async getNotificationSettings(userId: string) {
     const user = await this.userRepository.getUser(userId);

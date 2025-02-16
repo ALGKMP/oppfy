@@ -4,7 +4,6 @@ import { cloudfront } from "@oppfy/cloudfront";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { UserRepository } from "../../repositories/user/user";
-import { PostRepository } from "../../repositories/media/post";
 
 export type PrivacySettings = NonNullable<
   InferInsertModel<typeof schema.user>["privacySetting"]
@@ -12,7 +11,6 @@ export type PrivacySettings = NonNullable<
 
 export class PrivacyService {
   private userRepository = new UserRepository();
-  private postRepository = new PostRepository();
 
   async getPrivacySettings(userId: string) {
     const user = await this.userRepository.getUser(userId);
