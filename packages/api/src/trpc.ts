@@ -143,7 +143,6 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 export const createTRPCRouter = t.router;
 
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  console.log("in enforceUserIsAuthed");
   if (!ctx.session) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
@@ -176,3 +175,44 @@ export const publicProcedure = t.procedure;
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+
+const enforceCanAccessUserData = t.middleware(async ({ ctx, next, input }) => {
+  if (!ctx.session) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  // We expect the input to have a userId field
+  const inputWithUserId = input as { userId: string };
+
+  if (!inputWithUserId.userId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "userId is required in input",
+    });
+  }
+
+  const canAccess = await ctx.services.user.canAccessUserData({
+    currentUserId: ctx.session.uid,
+    targetUserId: inputWithUserId.userId,
+  });
+  console.log("canAccess", canAccess);
+
+  if (!canAccess) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "You don't have permission to access this user's data",
+    });
+  }
+
+  return next({
+    ctx: {
+      // Pass the session through
+      session: ctx.session,
+    },
+  });
+});
+
+// Create a protected procedure that also enforces user data access
+export const protectedWithUserAccess = protectedProcedure.use(
+  enforceCanAccessUserData,
+);
