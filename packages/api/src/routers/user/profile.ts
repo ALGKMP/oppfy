@@ -36,7 +36,7 @@ export const profileRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       try {
-        return await ctx.s3.uploadProfilePicture({
+        return await ctx.services.profile.getUploadProfilePictureUrl({
           userId: ctx.session.uid,
           contentLength: input.contentLength,
         });

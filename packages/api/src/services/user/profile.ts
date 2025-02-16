@@ -4,6 +4,7 @@ import { cloudfront } from "@oppfy/cloudfront";
 import { openSearch, OpenSearchIndex } from "@oppfy/opensearch";
 import type { OpenSearchProfileIndexResult } from "@oppfy/opensearch";
 import { sharedValidators } from "@oppfy/validators";
+import { s3 } from "@oppfy/s3";
 
 import { DomainError, ErrorCode } from "../../errors";
 import {
@@ -31,11 +32,20 @@ export class ProfileService {
   private followService = new FollowService();
   private blockService = new BlockService();
 
-  async getUploadProfilePictureUrl(userId: string) {
-    const userWithProfile = await this.profileRepository.getUserProfile(userId);
-    if (!userWithProfile) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
-    }
+  async getUploadProfilePictureUrl({
+    userId,
+    contentLength,
+  }: {
+    userId: string;
+    contentLength: number;
+  }) {
+    const url = await s3.uploadProfilePicture({
+      userId,
+      contentLength,
+    });
+
+    await cloudfront.invalidateProfilePicture(userId);
+    return url;
   }
 
   async updateProfile(
