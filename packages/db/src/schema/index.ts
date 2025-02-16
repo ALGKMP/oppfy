@@ -331,18 +331,24 @@ export const postStats = pgTable("post_stats", {
     .notNull(),
 });
 
-export const like = pgTable("like", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  postId: uuid("post_id")
-    .notNull()
-    .references(() => post.id, { onDelete: "cascade" }),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const like = pgTable(
+  "like",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => post.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    uniqueIndex: primaryKey({ columns: [table.postId, table.userId] }),
+  }),
+);
 
 export const likeRelations = relations(like, ({ one }) => ({
   post: one(post, {
@@ -383,18 +389,24 @@ export const commentRelations = relations(comment, ({ one }) => ({
   }),
 }));
 
-export const follower = pgTable("follower", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  senderId: uuid("sender_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  recipientId: uuid("recipient_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const follower = pgTable(
+  "follower",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    senderId: uuid("sender_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    recipientId: uuid("recipient_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    uniqueIndex: primaryKey({ columns: [table.senderId, table.recipientId] }),
+  }),
+);
 
 export const followerRelations = relations(follower, ({ one }) => ({
   sender: one(user, {
@@ -538,7 +550,7 @@ export const reportPost = pgTable("report_post", {
   postId: uuid("post_id")
     .notNull()
     .references(() => post.id, { onDelete: "cascade" }),
-  submitedByUserId: uuid("submited_by_user_id")
+  submittedByUserId: uuid("submitted_by_user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
   reason: reportReasonEnum("reason").notNull(),
@@ -578,7 +590,7 @@ export const reportPostRelations = relations(reportPost, ({ one }) => ({
     references: [post.id],
   }),
   reporter: one(user, {
-    fields: [reportPost.submitedByUserId],
+    fields: [reportPost.submittedByUserId],
     references: [user.id],
   }),
 }));
