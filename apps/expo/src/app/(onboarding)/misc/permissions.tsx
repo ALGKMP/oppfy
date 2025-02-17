@@ -162,7 +162,6 @@ const Permissions = () => {
   const router = useRouter();
   const { isSignedIn } = useAuth();
   const { permissions, checkPermissions } = usePermissions();
-  const { syncContacts } = useContacts();
 
   const alertDialog = useAlertDialogController();
   const learnMoreDialog = useDialogController();
@@ -173,14 +172,12 @@ const Permissions = () => {
     await Linking.openSettings();
   };
 
-  const onContinue = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (requiredPermissions) {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.push(
-        isSignedIn ? "/(app)/(bottom-tabs)/(home)" : "/auth/phone-number",
-      );
-    }
+  const onContinue = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    router.push(
+      isSignedIn ? "/(app)/(bottom-tabs)/(home)" : "/auth/phone-number",
+    );
   };
 
   const showPermissionAlert = async (permissionType: PermissionType) => {
@@ -248,16 +245,11 @@ const Permissions = () => {
           ImagePicker.getCameraPermissionsAsync,
         );
       case "Contacts": {
-        const result = await handlePermissionRequest(
+        return await handlePermissionRequest(
           type,
           Contacts.requestPermissionsAsync,
           Contacts.getPermissionsAsync,
         );
-        const currentPermissions = await Contacts.getPermissionsAsync();
-        if (currentPermissions.status === PermissionStatus.GRANTED) {
-          void syncContacts();
-        }
-        return result;
       }
       case "Notifications":
         return handlePermissionRequest(
