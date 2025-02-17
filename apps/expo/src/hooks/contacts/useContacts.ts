@@ -47,7 +47,7 @@ export interface ContactFns {
   ) => string | null;
 }
 
-const useContacts = (syncNow = false): ContactFns => {
+const useContacts = (): ContactFns => {
   const deleteContactsMutation = api.contacts.deleteContacts.useMutation();
   const syncContactsMutation = api.contacts.syncContacts.useMutation();
   const filterContactsOnApp =
@@ -116,7 +116,7 @@ const useContacts = (syncNow = false): ContactFns => {
     );
 
     void syncContactsMutation.mutateAsync(hashedNumbers);
-  }, [syncContactsMutation]);
+  }, [getContactE164Numbers, syncContactsMutation]);
 
   const getDeviceContacts = async () => {
     const { data } = await Contacts.getContactsAsync();
@@ -268,10 +268,6 @@ const useContacts = (syncNow = false): ContactFns => {
 
     return contactsNotOnApp(data, phoneNumbersNotOnApp);
   };
-
-  useEffect(() => {
-    if (syncNow) void syncContacts();
-  }, [syncContacts, syncNow]);
 
   return {
     syncContacts,
