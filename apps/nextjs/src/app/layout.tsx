@@ -64,6 +64,12 @@ export default function RootLayout(props: { children: React.ReactNode }) {
               >
                 Terms of Service
               </a>
+              <a
+                href="/contact"
+                className="text-sm text-gray-400 transition-colors hover:text-[#F214FF]"
+              >
+                Contact
+              </a>
             </div>
           </footer>
         </TRPCReactProvider>
