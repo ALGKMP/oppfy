@@ -25,12 +25,6 @@ const AppLayout = () => {
   const requiredPermissions = permissions.camera && permissions.contacts;
 
   useEffect(() => {
-    void syncContacts();
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     if (isLoadingAuth || isLoadingPermissions) {
       return;
     }
@@ -39,12 +33,15 @@ const AppLayout = () => {
       router.replace("/(onboarding)");
       return;
     }
+
+    void syncContacts();
   }, [
     isLoadingAuth,
     isLoadingPermissions,
     isSignedIn,
     requiredPermissions,
     router,
+    syncContacts,
   ]);
 
   return (
