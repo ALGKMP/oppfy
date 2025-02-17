@@ -76,7 +76,7 @@ export default function AnimatedProfilePage({ profile }: ProfilePageProps) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            Get Early Access on TestFlight
+            Download Now
           </motion.a>
 
           <p className="text-center text-sm text-gray-500">
