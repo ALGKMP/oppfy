@@ -226,7 +226,7 @@ const CreatePost = () => {
       }
 
       await completedTutorial.mutateAsync();
-      router.replace("/(app)/(bottom-tabs)/(home)");
+      router.dismissTo("/(app)/(bottom-tabs)/(camera)");
     } catch (error) {
       console.error(error);
     } finally {
