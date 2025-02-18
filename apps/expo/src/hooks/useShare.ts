@@ -8,31 +8,6 @@ interface SharePostToNewUserOptions {
   phoneNumber: string;
 }
 
-const NEW_USER_MESSAGE_TEMPLATES = [
-  "🚨 I JUST EXPOSED YOU! Posted your first pic on Oppfy! Come see what I caught you doing",
-  "👀 Caught you in 4K! I created your Oppfy profile & posted your first pic",
-  "🔥 Time to expose you on Oppfy! I just put up your first post",
-  "😱 YOU'VE BEEN OPPED! I just posted your first picture. Come see what I caught",
-  "🫣 I'm making your Oppfy profile blow up & you don't even know it yet",
-  "📸 SURPRISE! I'm making you go viral on Oppfy & you're not even on it",
-];
-
-const SHARE_MESSAGE_TEMPLATES = [
-  "👀 You gotta see this on Oppfy",
-  "🔥 Check this out on Oppfy",
-  "😱 Look what I found on Oppfy",
-  "🫣 This is too good not to share",
-  "📸 Caught in 4K on Oppfy",
-];
-
-const SHARE_PROFILE_TEMPLATES = [
-  "👀 Check out my Oppfy profile",
-  "🔥 Follow me on Oppfy",
-  "💫 Join me on Oppfy",
-  "📸 This is my Oppfy profile",
-  "🫣 Come find me on Oppfy",
-];
-
 const useShare = () => {
   const theme = useTheme();
   const [isSharing, setIsSharing] = useState(false);
@@ -40,17 +15,10 @@ const useShare = () => {
   const sharePost = async (postId: string) => {
     setIsSharing(true);
     try {
-      const randomMessage =
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        SHARE_MESSAGE_TEMPLATES[
-          Math.floor(Math.random() * SHARE_MESSAGE_TEMPLATES.length)
-        ]!;
-
       const url = `https://oppfy.app/post/${postId}`;
 
       await Share.share(
         {
-          message: randomMessage,
           url, // This enables proper URL preview on iOS
         },
         {
@@ -90,13 +58,7 @@ const useShare = () => {
     postId,
     phoneNumber,
   }: SharePostToNewUserOptions) => {
-    const randomMessage =
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      NEW_USER_MESSAGE_TEMPLATES[
-        Math.floor(Math.random() * NEW_USER_MESSAGE_TEMPLATES.length)
-      ]!;
-
-    const message = `${randomMessage}\n\n💫 Oppfy - Where we post for each other. Download now & get me back 😈\n\nhttps://oppfy.app/post/${postId}`;
+    const message = `https://oppfy.app/post/${postId}`;
 
     const url = Platform.select({
       ios: `sms:${phoneNumber}&body=${encodeURIComponent(message)}`,
