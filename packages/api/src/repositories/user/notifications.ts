@@ -210,7 +210,7 @@ export class NotificationsRepository {
           schema.user,
           eq(schema.notifications.senderId, schema.user.id),
         )
-        .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+        .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
         .where(
           and(
             eq(schema.notifications.recipientId, userId),
