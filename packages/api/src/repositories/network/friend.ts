@@ -10,10 +10,13 @@ export class FriendRepository {
   @handleDatabaseErrors
   async createFriend(senderId: string, recipientId: string) {
     return await this.db.transaction(async (tx) => {
-      // Create friend relationship
-      await tx
-        .insert(schema.friend)
-        .values([{ userId1: senderId, userId2: recipientId }]);
+      // Create friend relationship, ensuring userIdA < userIdB
+      const [userIdA, userIdB] =
+        senderId < recipientId
+          ? [senderId, recipientId]
+          : [recipientId, senderId];
+
+      await tx.insert(schema.friend).values([{ userIdA, userIdB }]);
 
       // Delete the friend request
       await tx
@@ -27,10 +30,9 @@ export class FriendRepository {
 
       // Update profileStats for both users
       const updateProfileStats = async (userId: string) => {
-        const [userProfile] = await tx
-          .select({ profileId: schema.user.profileId })
-          .from(schema.user)
-          .where(eq(schema.user.id, userId));
+        const userProfile = await tx.query.profile.findFirst({
+          where: eq(schema.profile.userId, userId),
+        });
 
         if (!userProfile)
           throw new Error(`Profile not found for user ${userId}`);
@@ -38,7 +40,7 @@ export class FriendRepository {
         await tx
           .update(schema.profileStats)
           .set({ friends: sql`${schema.profileStats.friends} + 1` })
-          .where(eq(schema.profileStats.profileId, userProfile.profileId));
+          .where(eq(schema.profileStats.profileId, userProfile.id));
       };
 
       await updateProfileStats(senderId);
@@ -67,10 +69,9 @@ export class FriendRepository {
 
       // Update profileStats for both users
       const updateProfileStats = async (userId: string) => {
-        const [userProfile] = await tx
-          .select({ profileId: schema.user.profileId })
-          .from(schema.user)
-          .where(eq(schema.user.id, userId));
+        const userProfile = await tx.query.profile.findFirst({
+          where: eq(schema.profile.userId, userId),
+        });
 
         if (!userProfile)
           throw new Error(`Profile not found for user ${userId}`);
@@ -78,7 +79,7 @@ export class FriendRepository {
         await tx
           .update(schema.profileStats)
           .set({ friends: sql`${schema.profileStats.friends} - 1` })
-          .where(eq(schema.profileStats.profileId, userProfile.profileId));
+          .where(eq(schema.profileStats.profileId, userProfile.id));
       };
 
       await updateProfileStats(userId1);
@@ -182,7 +183,7 @@ export class FriendRepository {
           eq(schema.friend.userIdB, schema.user.id),
         ),
       )
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
           or(
@@ -199,7 +200,6 @@ export class FriendRepository {
                 ),
               )
             : undefined,
-          // ! as of now drizzle does not update the return type
           isNotNull(schema.profile.username),
           isNotNull(schema.profile.name),
           isNotNull(schema.profile.dateOfBirth),
@@ -208,7 +208,6 @@ export class FriendRepository {
       .orderBy(asc(schema.friend.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
 
-    // todo: remove when drizzle fixes the return type for isNotNull
     return friends as {
       userId: string;
       username: string;
@@ -260,7 +259,7 @@ export class FriendRepository {
           eq(schema.friend.userIdB, schema.user.id),
         ),
       )
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
           or(
@@ -277,7 +276,6 @@ export class FriendRepository {
                 ),
               )
             : undefined,
-          // ! as of now drizzle does not update the return type
           isNotNull(schema.profile.username),
           isNotNull(schema.profile.name),
           isNotNull(schema.profile.dateOfBirth),
@@ -315,11 +313,8 @@ export class FriendRepository {
         createdAt: schema.friendRequest.createdAt,
       })
       .from(schema.friendRequest)
-      .innerJoin(
-        schema.user,
-        eq(schema.friendRequest.senderId, schema.user.id), // Changed to senderId
-      )
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(schema.user, eq(schema.friendRequest.senderId, schema.user.id))
+      .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
           eq(schema.friendRequest.recipientId, forUserId),
