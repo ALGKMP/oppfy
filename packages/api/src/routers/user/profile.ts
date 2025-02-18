@@ -122,7 +122,7 @@ export const profileRouter = createTRPCRouter({
     }),
 
   // TRPC Procedure for getting a full user profile
-  getFullProfileOther: protectedWithUserAccess
+  getFullProfileOther: protectedProcedure
     .input(
       z.object({
         userId: z.string(),
