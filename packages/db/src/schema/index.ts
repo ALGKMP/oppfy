@@ -397,8 +397,8 @@ export const commentRelations = relations(comment, ({ one }) => ({
   }),
 }));
 
-export const follower = pgTable(
-  "follower",
+export const follow = pgTable(
+  "follow",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     senderId: uuid("sender_id")
@@ -411,20 +411,20 @@ export const follower = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => ({
-    uniqueIndex: primaryKey({ columns: [table.senderId, table.recipientId] }),
-  }),
+  // (table) => ({
+  //   uniqueIndex: primaryKey({ columns: [table.senderId, table.recipientId] }),
+  // }),
 );
 
-export const followerRelations = relations(follower, ({ one }) => ({
+export const followRelations = relations(follow, ({ one }) => ({
   sender: one(user, {
     relationName: "sender",
-    fields: [follower.senderId],
+    fields: [follow.senderId],
     references: [user.id],
   }),
   recipient: one(user, {
     relationName: "recipient",
-    fields: [follower.recipientId],
+    fields: [follow.recipientId],
     references: [user.id],
   }),
 }));

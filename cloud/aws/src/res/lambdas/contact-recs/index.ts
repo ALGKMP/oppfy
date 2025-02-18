@@ -70,9 +70,9 @@ export const handler = async (
       .then((res) => res.map((r) => r.userId));
 
     const following = await db
-      .select({ userId: schema.follower.recipientId })
-      .from(schema.follower)
-      .where(eq(schema.follower.senderId, userId))
+      .select({ userId: schema.follow.recipientId })
+      .from(schema.follow)
+      .where(eq(schema.follow.senderId, userId))
       .then((res) => res.map((r) => r.userId));
 
     const blocked = await db

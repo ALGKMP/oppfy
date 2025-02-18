@@ -201,17 +201,17 @@ export class PostRepository {
         ),
       )
       .leftJoin(
-        schema.follower,
+        schema.follow,
         and(
-          eq(schema.follower.senderId, userId),
-          eq(schema.follower.recipientId, schema.post.recipientId),
+          eq(schema.follow.senderId, userId),
+          eq(schema.follow.recipientId, schema.post.recipientId),
         ),
       )
       .where(
         and(
           or(
             // Posts where user follows the recipient
-            eq(schema.follower.senderId, userId),
+            eq(schema.follow.senderId, userId),
             // Posts authored by the user
             eq(schema.post.authorId, userId),
           ),

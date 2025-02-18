@@ -11,7 +11,7 @@ export class FollowRepository {
   async createFollower(senderUserId: string, recipientUserId: string) {
     return await this.db.transaction(async (tx) => {
       await tx
-        .insert(schema.follower)
+        .insert(schema.follow)
         .values({ recipientId: recipientUserId, senderId: senderUserId });
 
       const senderProfile = await tx.query.profile.findFirst({
@@ -42,11 +42,11 @@ export class FollowRepository {
   async removeFollower(senderId: string, recipientId: string) {
     return await this.db.transaction(async (tx) => {
       await tx
-        .delete(schema.follower)
+        .delete(schema.follow)
         .where(
           and(
-            eq(schema.follower.senderId, senderId),
-            eq(schema.follower.recipientId, recipientId),
+            eq(schema.follow.senderId, senderId),
+            eq(schema.follow.recipientId, recipientId),
           ),
         );
 
@@ -90,10 +90,10 @@ export class FollowRepository {
 
   @handleDatabaseErrors
   async getFollower(senderId: string, recipientId: string) {
-    return await this.db.query.follower.findFirst({
+    return await this.db.query.follow.findFirst({
       where: and(
-        eq(schema.follower.senderId, senderId),
-        eq(schema.follower.recipientId, recipientId),
+        eq(schema.follow.senderId, senderId),
+        eq(schema.follow.recipientId, recipientId),
       ),
     });
   }
@@ -102,8 +102,8 @@ export class FollowRepository {
   async countFollowers(userId: string): Promise<number | undefined> {
     const result = await this.db
       .select({ count: count() })
-      .from(schema.follower)
-      .where(eq(schema.follower.recipientId, userId));
+      .from(schema.follow)
+      .where(eq(schema.follow.recipientId, userId));
 
     return result[0]?.count;
   }
@@ -112,8 +112,8 @@ export class FollowRepository {
   async countFollowing(userId: string): Promise<number | undefined> {
     const result = await this.db
       .select({ count: count() })
-      .from(schema.follower)
-      .where(eq(schema.follower.senderId, userId));
+      .from(schema.follow)
+      .where(eq(schema.follow.senderId, userId));
     return result[0]?.count;
   }
 
@@ -148,7 +148,7 @@ export class FollowRepository {
   async acceptFollowRequest(senderId: string, recipientId: string) {
     return await this.db.transaction(async (tx) => {
       // Make sender follow recipient
-      await tx.insert(schema.follower).values({ senderId, recipientId });
+      await tx.insert(schema.follow).values({ senderId, recipientId });
 
       // Delete the follow request from sender to recipient
       await tx
@@ -201,19 +201,19 @@ export class FollowRepository {
         username: schema.profile.username,
         profilePictureUrl: schema.profile.profilePictureKey,
         privacy: schema.user.privacySetting,
-        createdAt: schema.follower.createdAt,
+        createdAt: schema.follow.createdAt,
       })
-      .from(schema.follower)
-      .innerJoin(schema.user, eq(schema.follower.senderId, schema.user.id))
+      .from(schema.follow)
+      .innerJoin(schema.user, eq(schema.follow.senderId, schema.user.id))
       .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
-          eq(schema.follower.recipientId, forUserId),
+          eq(schema.follow.recipientId, forUserId),
           cursor
             ? or(
-                gt(schema.follower.createdAt, cursor.createdAt),
+                gt(schema.follow.createdAt, cursor.createdAt),
                 and(
-                  eq(schema.follower.createdAt, cursor.createdAt),
+                  eq(schema.follow.createdAt, cursor.createdAt),
                   gt(schema.profile.id, cursor.profileId),
                 ),
               )
@@ -223,7 +223,7 @@ export class FollowRepository {
           isNotNull(schema.profile.dateOfBirth),
         ),
       )
-      .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
+      .orderBy(asc(schema.follow.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
 
     return data as {
@@ -252,13 +252,13 @@ export class FollowRepository {
         profilePictureUrl: schema.profile.profilePictureKey,
         profileId: schema.profile.id,
         privacy: schema.user.privacySetting,
-        createdAt: schema.follower.createdAt,
+        createdAt: schema.follow.createdAt,
         relationshipState: sql<
           "following" | "followRequestSent" | "notFollowing"
         >`
         CASE
           WHEN EXISTS (
-            SELECT 1 FROM ${schema.follower} f
+            SELECT 1 FROM ${schema.follow} f
             WHERE f.sender_id = ${currentUserId} AND f.recipient_id = ${schema.user.id}
           ) THEN 'following'
           WHEN EXISTS (
@@ -269,17 +269,17 @@ export class FollowRepository {
         END
         `,
       })
-      .from(schema.follower)
-      .innerJoin(schema.user, eq(schema.follower.senderId, schema.user.id))
+      .from(schema.follow)
+      .innerJoin(schema.user, eq(schema.follow.senderId, schema.user.id))
       .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
-          eq(schema.follower.recipientId, forUserId),
+          eq(schema.follow.recipientId, forUserId),
           cursor
             ? or(
-                gt(schema.follower.createdAt, cursor.createdAt),
+                gt(schema.follow.createdAt, cursor.createdAt),
                 and(
-                  eq(schema.follower.createdAt, cursor.createdAt),
+                  eq(schema.follow.createdAt, cursor.createdAt),
                   gt(schema.profile.id, cursor.profileId),
                 ),
               )
@@ -289,7 +289,7 @@ export class FollowRepository {
           isNotNull(schema.profile.dateOfBirth),
         ),
       )
-      .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
+      .orderBy(asc(schema.follow.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
 
     return followers as {
@@ -307,9 +307,9 @@ export class FollowRepository {
   @handleDatabaseErrors
   async getAllFollowingIds(forUserId: string) {
     const following = await this.db
-      .select({ userId: schema.follower.recipientId })
-      .from(schema.follower)
-      .where(eq(schema.follower.senderId, forUserId));
+      .select({ userId: schema.follow.recipientId })
+      .from(schema.follow)
+      .where(eq(schema.follow.senderId, forUserId));
 
     return following.map((f) => f.userId);
   }
@@ -328,13 +328,13 @@ export class FollowRepository {
         name: schema.profile.name,
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
-        createdAt: schema.follower.createdAt,
+        createdAt: schema.follow.createdAt,
         relationshipState: sql<
           "following" | "followRequestSent" | "notFollowing"
         >`
         CASE
           WHEN EXISTS (
-            SELECT 1 FROM ${schema.follower} f
+            SELECT 1 FROM ${schema.follow} f
             WHERE f.sender_id = ${userId} AND f.recipient_id = ${schema.user.id}
           ) THEN 'following'
           WHEN EXISTS (
@@ -345,17 +345,17 @@ export class FollowRepository {
         END
         `,
       })
-      .from(schema.follower)
-      .innerJoin(schema.user, eq(schema.follower.recipientId, schema.user.id))
+      .from(schema.follow)
+      .innerJoin(schema.user, eq(schema.follow.recipientId, schema.user.id))
       .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
-          eq(schema.follower.senderId, userId),
+          eq(schema.follow.senderId, userId),
           cursor
             ? or(
-                gt(schema.follower.createdAt, cursor.createdAt),
+                gt(schema.follow.createdAt, cursor.createdAt),
                 and(
-                  eq(schema.follower.createdAt, cursor.createdAt),
+                  eq(schema.follow.createdAt, cursor.createdAt),
                   gt(schema.profile.id, cursor.profileId),
                 ),
               )
@@ -365,7 +365,7 @@ export class FollowRepository {
           isNotNull(schema.profile.dateOfBirth),
         ),
       )
-      .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
+      .orderBy(asc(schema.follow.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
 
     return following as {
@@ -395,13 +395,13 @@ export class FollowRepository {
         name: schema.profile.name,
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
-        createdAt: schema.follower.createdAt,
+        createdAt: schema.follow.createdAt,
         relationshipState: sql<
           "following" | "followRequestSent" | "notFollowing"
         >`
         CASE
           WHEN EXISTS (
-            SELECT 1 FROM ${schema.follower} f
+            SELECT 1 FROM ${schema.follow} f
             WHERE f.sender_id = ${currentUserId} AND f.recipient_id = ${schema.user.id}
           ) THEN 'following'
           WHEN EXISTS (
@@ -412,17 +412,17 @@ export class FollowRepository {
         END
         `,
       })
-      .from(schema.follower)
-      .innerJoin(schema.user, eq(schema.follower.recipientId, schema.user.id))
+      .from(schema.follow)
+      .innerJoin(schema.user, eq(schema.follow.recipientId, schema.user.id))
       .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
-          eq(schema.follower.senderId, forUserId),
+          eq(schema.follow.senderId, forUserId),
           cursor
             ? or(
-                gt(schema.follower.createdAt, cursor.createdAt),
+                gt(schema.follow.createdAt, cursor.createdAt),
                 and(
-                  eq(schema.follower.createdAt, cursor.createdAt),
+                  eq(schema.follow.createdAt, cursor.createdAt),
                   gt(schema.profile.id, cursor.profileId),
                 ),
               )
@@ -432,7 +432,7 @@ export class FollowRepository {
           isNotNull(schema.profile.dateOfBirth),
         ),
       )
-      .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
+      .orderBy(asc(schema.follow.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
 
     return followers as {

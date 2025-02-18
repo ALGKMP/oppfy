@@ -197,12 +197,12 @@ export class UserRepository {
             schema.profileStats.profileId,
             tx
               .select({ profileId: schema.user.profileId })
-              .from(schema.follower)
+              .from(schema.follow)
               .innerJoin(
                 schema.user,
-                eq(schema.follower.recipientId, schema.user.id),
+                eq(schema.follow.recipientId, schema.user.id),
               )
-              .where(eq(schema.follower.senderId, userId)),
+              .where(eq(schema.follow.senderId, userId)),
           ),
         );
 
@@ -215,12 +215,12 @@ export class UserRepository {
             schema.profileStats.profileId,
             tx
               .select({ profileId: schema.user.profileId })
-              .from(schema.follower)
+              .from(schema.follow)
               .innerJoin(
                 schema.user,
-                eq(schema.follower.senderId, schema.user.id),
+                eq(schema.follow.senderId, schema.user.id),
               )
-              .where(eq(schema.follower.recipientId, userId)),
+              .where(eq(schema.follow.recipientId, userId)),
           ),
         );
 

@@ -240,7 +240,7 @@ export class FriendRepository {
         >`
         CASE
           WHEN EXISTS (
-            SELECT 1 FROM ${schema.follower} f
+            SELECT 1 FROM ${schema.follow} f
             WHERE f.sender_id = ${currentUserId} AND f.recipient_id = ${schema.user.id}
           ) THEN 'following'
           WHEN EXISTS (
