@@ -1,6 +1,6 @@
 import { and, asc, count, eq, gt, or, sql } from "drizzle-orm";
 
-import { aliasedTable, db, isNotNull, schema } from "@oppfy/db";
+import { db, isNotNull, schema } from "@oppfy/db";
 
 import { handleDatabaseErrors } from "../../errors";
 
@@ -14,29 +14,27 @@ export class FollowRepository {
         .insert(schema.follower)
         .values({ recipientId: recipientUserId, senderId: senderUserId });
 
-      const [senderProfile] = await tx
-        .select({ profileId: schema.user.profileId })
-        .from(schema.user)
-        .where(eq(schema.user.id, senderUserId));
+      const senderProfile = await tx.query.profile.findFirst({
+        where: eq(schema.profile.userId, senderUserId),
+      });
 
       if (!senderProfile) throw new Error("Sender profile not found");
 
       await tx
         .update(schema.profileStats)
         .set({ following: sql`${schema.profileStats.following} + 1` })
-        .where(eq(schema.profileStats.profileId, senderProfile.profileId));
+        .where(eq(schema.profileStats.profileId, senderProfile.id));
 
-      const [recipientProfile] = await tx
-        .select({ profileId: schema.user.profileId })
-        .from(schema.user)
-        .where(eq(schema.user.id, recipientUserId));
+      const recipientProfile = await tx.query.profile.findFirst({
+        where: eq(schema.profile.userId, recipientUserId),
+      });
 
       if (!recipientProfile) throw new Error("Recipient profile not found");
 
       await tx
         .update(schema.profileStats)
         .set({ followers: sql`${schema.profileStats.followers} + 1` })
-        .where(eq(schema.profileStats.profileId, recipientProfile.profileId));
+        .where(eq(schema.profileStats.profileId, recipientProfile.id));
     });
   }
 
@@ -52,10 +50,9 @@ export class FollowRepository {
           ),
         );
 
-      const [senderProfile] = await tx
-        .select({ profileId: schema.user.profileId })
-        .from(schema.user)
-        .where(eq(schema.user.id, senderId));
+      const senderProfile = await tx.query.profile.findFirst({
+        where: eq(schema.profile.userId, senderId),
+      });
 
       if (!senderProfile) throw new Error("Sender profile not found");
 
@@ -63,19 +60,18 @@ export class FollowRepository {
       await tx
         .update(schema.profileStats)
         .set({ following: sql`${schema.profileStats.following} - 1` })
-        .where(eq(schema.profileStats.profileId, senderProfile.profileId));
+        .where(eq(schema.profileStats.profileId, senderProfile.id));
 
-      const [recipientProfile] = await tx
-        .select({ profileId: schema.user.profileId })
-        .from(schema.user)
-        .where(eq(schema.user.id, recipientId));
+      const recipientProfile = await tx.query.profile.findFirst({
+        where: eq(schema.profile.userId, recipientId),
+      });
 
       if (!recipientProfile) throw new Error("Recipient profile not found");
 
       await tx
         .update(schema.profileStats)
         .set({ followers: sql`${schema.profileStats.followers} - 1` })
-        .where(eq(schema.profileStats.profileId, recipientProfile.profileId));
+        .where(eq(schema.profileStats.profileId, recipientProfile.id));
     });
   }
 
@@ -165,29 +161,27 @@ export class FollowRepository {
         );
 
       // Update profileStats for both sender and recipient
-      const [senderProfile] = await tx
-        .select({ profileId: schema.user.profileId })
-        .from(schema.user)
-        .where(eq(schema.user.id, senderId));
+      const senderProfile = await tx.query.profile.findFirst({
+        where: eq(schema.profile.userId, senderId),
+      });
 
       if (!senderProfile) throw new Error("Sender profile not found");
 
       await tx
         .update(schema.profileStats)
         .set({ following: sql`${schema.profileStats.following} + 1` })
-        .where(eq(schema.profileStats.profileId, senderProfile.profileId));
+        .where(eq(schema.profileStats.profileId, senderProfile.id));
 
-      const [recipientProfile] = await tx
-        .select({ profileId: schema.user.profileId })
-        .from(schema.user)
-        .where(eq(schema.user.id, recipientId));
+      const recipientProfile = await tx.query.profile.findFirst({
+        where: eq(schema.profile.userId, recipientId),
+      });
 
       if (!recipientProfile) throw new Error("Recipient profile not found");
 
       await tx
         .update(schema.profileStats)
         .set({ followers: sql`${schema.profileStats.followers} + 1` })
-        .where(eq(schema.profileStats.profileId, recipientProfile.profileId));
+        .where(eq(schema.profileStats.profileId, recipientProfile.id));
 
       return true;
     });
@@ -211,7 +205,7 @@ export class FollowRepository {
       })
       .from(schema.follower)
       .innerJoin(schema.user, eq(schema.follower.senderId, schema.user.id))
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
           eq(schema.follower.recipientId, forUserId),
@@ -224,7 +218,6 @@ export class FollowRepository {
                 ),
               )
             : undefined,
-          // ! as of now drizzle does not update the return type
           isNotNull(schema.profile.username),
           isNotNull(schema.profile.name),
           isNotNull(schema.profile.dateOfBirth),
@@ -233,7 +226,6 @@ export class FollowRepository {
       .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
 
-    // todo: remove when drizzle fixes the return type for isNotNull
     return data as {
       userId: string;
       profileId: string;
@@ -279,7 +271,7 @@ export class FollowRepository {
       })
       .from(schema.follower)
       .innerJoin(schema.user, eq(schema.follower.senderId, schema.user.id))
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
           eq(schema.follower.recipientId, forUserId),
@@ -292,7 +284,6 @@ export class FollowRepository {
                 ),
               )
             : undefined,
-          // ! as of now drizzle does not update the return type
           isNotNull(schema.profile.username),
           isNotNull(schema.profile.name),
           isNotNull(schema.profile.dateOfBirth),
@@ -301,7 +292,6 @@ export class FollowRepository {
       .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
 
-    // todo: remove when drizzle fixes the return type for isNotNull
     return followers as {
       userId: string;
       username: string;
@@ -357,7 +347,7 @@ export class FollowRepository {
       })
       .from(schema.follower)
       .innerJoin(schema.user, eq(schema.follower.recipientId, schema.user.id))
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
           eq(schema.follower.senderId, userId),
@@ -370,7 +360,6 @@ export class FollowRepository {
                 ),
               )
             : undefined,
-          // ! as of now drizzle does not update the return type
           isNotNull(schema.profile.username),
           isNotNull(schema.profile.name),
           isNotNull(schema.profile.dateOfBirth),
@@ -379,7 +368,6 @@ export class FollowRepository {
       .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
 
-    // todo: remove when drizzle fixes the return type for isNotNull
     return following as {
       userId: string;
       profileId: string;
@@ -426,7 +414,7 @@ export class FollowRepository {
       })
       .from(schema.follower)
       .innerJoin(schema.user, eq(schema.follower.recipientId, schema.user.id))
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
           eq(schema.follower.senderId, forUserId),
@@ -439,7 +427,6 @@ export class FollowRepository {
                 ),
               )
             : undefined,
-          // ! as of now drizzle does not update the return type
           isNotNull(schema.profile.username),
           isNotNull(schema.profile.name),
           isNotNull(schema.profile.dateOfBirth),
@@ -448,7 +435,6 @@ export class FollowRepository {
       .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
 
-    // todo: remove when drizzle fixes the return type for isNotNull
     return followers as {
       userId: string;
       profileId: string;
@@ -478,8 +464,8 @@ export class FollowRepository {
         createdAt: schema.followRequest.createdAt,
       })
       .from(schema.followRequest)
-      .innerJoin(schema.user, eq(schema.followRequest.senderId, schema.user.id)) // Changed to senderId
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(schema.user, eq(schema.followRequest.senderId, schema.user.id))
+      .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
           eq(schema.followRequest.recipientId, forUserId),
