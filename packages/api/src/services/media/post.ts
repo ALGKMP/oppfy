@@ -12,7 +12,6 @@ import { DomainError, ErrorCode } from "../../errors";
 import {
   ProfileRepository,
   UserRepository,
-  ViewRepository,
 } from "../../repositories";
 import { CommentRepository } from "../../repositories/media/comment";
 import { LikeRepository } from "../../repositories/media/like";
@@ -54,7 +53,6 @@ export class PostService {
   private postStatsRepository = new PostStatsRepository();
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
-  private viewRepository = new ViewRepository();
   private notificationsRepository = new NotificationsRepository();
 
   private userService = new UserService();
@@ -707,42 +705,6 @@ export class PostService {
       throw new DomainError(
         ErrorCode.FAILED_TO_PAGINATE_COMMENTS,
         `Failed to paginate comments for postId: ${postId}.`,
-      );
-    }
-  }
-
-  async viewPost({ userId, postId }: { userId: string; postId: string }) {
-    try {
-      await this.viewRepository.viewPost({ userId, postId });
-    } catch (error) {
-      console.error(
-        `Error in viewPost for userId: ${userId}, postId: ${postId}: `,
-        error,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_CREATE_VIEW,
-        "Failed to create post view.",
-      );
-    }
-  }
-
-  async viewMultiplePosts({
-    userId,
-    postIds,
-  }: {
-    userId: string;
-    postIds: string[];
-  }) {
-    try {
-      await this.viewRepository.viewMultiplePosts({ userId, postIds });
-    } catch (error) {
-      console.error(
-        `Error in viewMultiplePosts for userId: ${userId}, postIds: ${postIds}: `,
-        error,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_CREATE_VIEW,
-        "Failed to create post view.",
       );
     }
   }
