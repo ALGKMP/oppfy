@@ -27,7 +27,7 @@ export class BlockRepository {
         schema.block,
         eq(schema.user.id, schema.block.userWhoIsBlockedId),
       )
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(schema.profile, eq(schema.user.id, schema.profile.userId))
       .where(
         and(
           eq(schema.block.userWhoIsBlockingId, forUserId),
@@ -59,8 +59,8 @@ export class BlockRepository {
   @handleDatabaseErrors
   async blockUser(userId: string, blockedUserId: string) {
     const blockedUser = await this.db.insert(schema.block).values({
-      userId,
-      blockedUserId,
+      userWhoIsBlockingId: userId,
+      userWhoIsBlockedId: blockedUserId,
     });
     return blockedUser[0];
   }
