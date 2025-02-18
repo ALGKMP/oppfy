@@ -52,9 +52,9 @@ export class PostRepository {
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
       .innerJoin(author, eq(schema.post.authorId, author.id))
-      .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
+      .innerJoin(authorProfile, eq(authorProfile.userId, author.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
-      .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
+      .innerJoin(recipientProfile, eq(recipientProfile.userId, recipient.id))
       .leftJoin(
         schema.like,
         and(
@@ -99,9 +99,9 @@ export class PostRepository {
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
       .innerJoin(author, eq(schema.post.authorId, author.id))
-      .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
+      .innerJoin(authorProfile, eq(authorProfile.userId, author.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
-      .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
+      .innerJoin(recipientProfile, eq(recipientProfile.userId, recipient.id))
       .where(eq(schema.post.id, postId))
       .limit(1);
 
@@ -141,9 +141,9 @@ export class PostRepository {
       .innerJoin(schema.post, eq(schema.comment.postId, schema.post.id))
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
       .innerJoin(author, eq(schema.post.authorId, author.id))
-      .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
+      .innerJoin(authorProfile, eq(authorProfile.userId, author.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
-      .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
+      .innerJoin(recipientProfile, eq(recipientProfile.userId, recipient.id))
       .where(eq(schema.comment.id, commentId))
       .limit(1);
 
@@ -190,9 +190,9 @@ export class PostRepository {
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
       .innerJoin(author, eq(schema.post.authorId, author.id))
-      .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
+      .innerJoin(authorProfile, eq(authorProfile.userId, author.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
-      .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
+      .innerJoin(recipientProfile, eq(recipientProfile.userId, recipient.id))
       .leftJoin(
         schema.like,
         and(
@@ -294,9 +294,9 @@ export class PostRepository {
       .innerJoin(schema.post, eq(schema.post.id, latestPosts.postId))
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
       .innerJoin(author, eq(schema.post.authorId, author.id))
-      .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
+      .innerJoin(authorProfile, eq(authorProfile.userId, author.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
-      .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
+      .innerJoin(recipientProfile, eq(recipientProfile.userId, recipient.id))
       .leftJoin(
         schema.like,
         and(
@@ -359,9 +359,9 @@ export class PostRepository {
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
       .innerJoin(author, eq(schema.post.authorId, author.id))
-      .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
+      .innerJoin(authorProfile, eq(authorProfile.userId, author.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
-      .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
+      .innerJoin(recipientProfile, eq(recipientProfile.userId, recipient.id))
       .leftJoin(
         schema.like,
         and(
@@ -427,9 +427,9 @@ export class PostRepository {
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
       .innerJoin(author, eq(schema.post.authorId, author.id))
-      .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
+      .innerJoin(authorProfile, eq(authorProfile.userId, author.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
-      .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
+      .innerJoin(recipientProfile, eq(recipientProfile.userId, recipient.id))
       .leftJoin(schema.like, eq(schema.like.postId, schema.post.id))
       .where(
         and(
