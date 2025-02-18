@@ -65,7 +65,7 @@ export class CommentRepository {
       })
       .from(schema.comment)
       .innerJoin(schema.user, eq(schema.user.id, schema.comment.userId))
-      .innerJoin(schema.profile, eq(schema.profile.id, schema.user.profileId))
+      .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
           eq(schema.comment.postId, postId),
