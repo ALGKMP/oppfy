@@ -93,7 +93,7 @@ export class ProfileRepository {
         profilePictureKey: profile.profilePictureKey,
       })
       .from(schema.user)
-      .innerJoin(profile, eq(user.profileId, profile.id))
+      .innerJoin(profile, eq(profile.userId, user.id))
       .where(inArray(user.id, userIds));
 
     return fullProfiles;
@@ -121,7 +121,7 @@ export class ProfileRepository {
         profilePictureKey: schema.profile.profilePictureKey,
       })
       .from(schema.user)
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .leftJoin(
         schema.block,
         or(
@@ -139,7 +139,7 @@ export class ProfileRepository {
         and(
           ilike(schema.profile.username, `%${username}%`),
           ne(schema.user.id, currentUserId),
-          isNotNull(schema.user.profileId),
+          isNotNull(schema.profile.userId),
           isNull(schema.block.id),
         ),
       )
