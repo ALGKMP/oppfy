@@ -1,5 +1,5 @@
 {
-  "id": "e735f6a6-d997-4f4e-94a0-d441ed05232c",
+  "id": "4904ee23-0ff6-4577-ab86-680c6b18ea18",
   "prevId": "be5dd729-9615-42d5-b823-b23d29d148dd",
   "version": "6",
   "dialect": "postgresql",
@@ -166,6 +166,69 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "public.follow": {
+      "name": "follow",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "sender_id": {
+          "name": "sender_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recipient_id": {
+          "name": "recipient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "follow_sender_id_user_id_fk": {
+          "name": "follow_sender_id_user_id_fk",
+          "tableFrom": "follow",
+          "tableTo": "user",
+          "columnsFrom": [
+            "sender_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "follow_recipient_id_user_id_fk": {
+          "name": "follow_recipient_id_user_id_fk",
+          "tableFrom": "follow",
+          "tableTo": "user",
+          "columnsFrom": [
+            "recipient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "public.follow_request": {
       "name": "follow_request",
       "schema": "",
@@ -236,77 +299,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.follower": {
-      "name": "follower",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "sender_id": {
-          "name": "sender_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "recipient_id": {
-          "name": "recipient_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "follower_sender_id_user_id_fk": {
-          "name": "follower_sender_id_user_id_fk",
-          "tableFrom": "follower",
-          "tableTo": "user",
-          "columnsFrom": [
-            "sender_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "follower_recipient_id_user_id_fk": {
-          "name": "follower_recipient_id_user_id_fk",
-          "tableFrom": "follower",
-          "tableTo": "user",
-          "columnsFrom": [
-            "recipient_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "follower_sender_id_recipient_id_pk": {
-          "name": "follower_sender_id_recipient_id_pk",
-          "columns": [
-            "sender_id",
-            "recipient_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {}
-    },
     "public.friend": {
       "name": "friend",
       "schema": "",
@@ -367,15 +359,7 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "friend_user_id_a_user_id_b_pk": {
-          "name": "friend_user_id_a_user_id_b_pk",
-          "columns": [
-            "user_id_a",
-            "user_id_b"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
     "public.friend_request": {
@@ -508,15 +492,7 @@
           "onUpdate": "cascade"
         }
       },
-      "compositePrimaryKeys": {
-        "like_post_id_user_id_pk": {
-          "name": "like_post_id_user_id_pk",
-          "columns": [
-            "post_id",
-            "user_id"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
     "public.notification_settings": {
