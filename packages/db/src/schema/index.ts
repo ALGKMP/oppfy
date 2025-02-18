@@ -353,9 +353,9 @@ export const like = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => ({
-    uniqueIndex: primaryKey({ columns: [table.postId, table.userId] }),
-  }),
+  // (table) => ({
+  //   uniqueIndex: primaryKey({ columns: [table.postId, table.userId] }),
+  // }),
 );
 
 export const likeRelations = relations(like, ({ one }) => ({
@@ -502,7 +502,7 @@ export const friend = pgTable(
       .notNull(),
   },
   (table) => ({
-    uniqueConstraint: primaryKey({ columns: [table.userIdA, table.userIdB] }),
+    // uniqueConstraint: primaryKey({ columns: [table.userIdA, table.userIdB] }),
     orderCheck: check("friend_order_check", sql`user_id_a < user_id_b`),
     selfCheck: check("friend_self_check", sql`user_id_a != user_id_b`),
   }),
