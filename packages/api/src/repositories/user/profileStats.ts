@@ -35,13 +35,6 @@ export class ProfileStatsRepository {
       .where(eq(schema.profileStats.profileId, profileId));
   }
 
-  async decrementViewsCount(profileId: string, decrementBy: number) {
-    await db
-      .update(schema.profileStats)
-      .set({ views: sql`${schema.profileStats.views} - ${decrementBy}` })
-      .where(eq(schema.profileStats.profileId, profileId));
-  }
-
   async incrementFollowerCount(profileId: string, incrementBy: number) {
     await db
       .update(schema.profileStats)
@@ -71,13 +64,6 @@ export class ProfileStatsRepository {
     await db
       .update(schema.profileStats)
       .set({ posts: sql`${schema.profileStats.posts} + ${incrementBy}` })
-      .where(eq(schema.profileStats.profileId, profileId));
-  }
-
-  async incrementViewsCount(profileId: string, incrementBy: number) {
-    await db
-      .update(schema.profileStats)
-      .set({ views: sql`${schema.profileStats.views} + ${incrementBy}` })
       .where(eq(schema.profileStats.profileId, profileId));
   }
 
