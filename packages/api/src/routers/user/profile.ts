@@ -16,6 +16,9 @@ export const profileRouter = createTRPCRouter({
   getProfileId: protectedProcedure.input(z.void()).mutation(async ({ ctx }) => {
     const possibleUser = await ctx.db.query.user.findFirst({
       where: eq(schema.user.id, ctx.session.uid),
+      with: {
+        profile: true,
+      },
     });
 
     if (possibleUser === undefined) {
@@ -25,7 +28,7 @@ export const profileRouter = createTRPCRouter({
       });
     }
 
-    return possibleUser.profileId;
+    return possibleUser.profile.id;
   }),
 
   generatePresignedUrlForProfilePicture: protectedProcedure
