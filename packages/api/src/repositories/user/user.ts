@@ -21,10 +21,14 @@ export class UserRepository {
     name?: string,
   ) {
     await this.db.transaction(async (tx) => {
-      // Create an empty profile for the user, ready to be updated later
+      // Create an empty profile for the user
       const [profile] = await tx
         .insert(schema.profile)
-        .values({ username, ...(name && { name }) })
+        .values({
+          userId,
+          username,
+          ...(name && { name }),
+        })
         .returning({ id: schema.profile.id });
 
       if (!profile) throw new Error("Profile was not created");
@@ -48,10 +52,9 @@ export class UserRepository {
         throw new Error("Notification setting was not created");
       }
 
-      // Create the user with the profileId and notificationSettingsId
+      // Create the user
       await tx.insert(schema.user).values({
         id: userId,
-        profileId: profile.id,
         notificationSettingsId: notificationSetting.id,
         phoneNumber,
       });
@@ -74,13 +77,6 @@ export class UserRepository {
   async getUserStatus(userId: string) {
     return await this.db.query.userStatus.findFirst({
       where: eq(schema.userStatus.userId, userId),
-    });
-  }
-
-  @handleDatabaseErrors
-  async getUserByProfileId(profileId: string) {
-    return await this.db.query.user.findFirst({
-      where: eq(schema.user.profileId, profileId),
     });
   }
 
@@ -170,23 +166,6 @@ export class UserRepository {
           ),
         );
 
-      // Decrement views count
-      const viewCounts = await tx
-        .select({
-          postId: schema.postView.postId,
-          viewCount: sql<number>`count(*)`.as("viewCount"),
-        })
-        .from(schema.postView)
-        .where(eq(schema.postView.userId, userId))
-        .groupBy(schema.postView.postId);
-
-      for (const { postId, viewCount } of viewCounts) {
-        await tx
-          .update(schema.postStats)
-          .set({ views: sql`${schema.postStats.views} - ${viewCount}` })
-          .where(eq(schema.postStats.postId, postId));
-      }
-
       // Update profile stats
       // Decrement followers count for users that the deleted user was following
       await tx
@@ -196,7 +175,7 @@ export class UserRepository {
           inArray(
             schema.profileStats.profileId,
             tx
-              .select({ profileId: schema.user.profileId })
+              .select({ profileId: schema.profile.id })
               .from(schema.follow)
               .innerJoin(
                 schema.user,
@@ -214,7 +193,7 @@ export class UserRepository {
           inArray(
             schema.profileStats.profileId,
             tx
-              .select({ profileId: schema.user.profileId })
+              .select({ profileId: schema.profile.id })
               .from(schema.follow)
               .innerJoin(
                 schema.user,
@@ -232,7 +211,7 @@ export class UserRepository {
           inArray(
             schema.profileStats.profileId,
             tx
-              .select({ profileId: schema.user.profileId })
+              .select({ profileId: schema.profile.id })
               .from(schema.friend)
               .innerJoin(
                 schema.user,
