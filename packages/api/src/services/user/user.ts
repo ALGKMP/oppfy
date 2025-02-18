@@ -154,14 +154,6 @@ export class UserService {
     return await this.userRepository.getUserByPhoneNumber(phoneNumber);
   }
 
-  async getUserByProfileId(profileId: string) {
-    const user = await this.userRepository.getUserByProfileId(profileId);
-    if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
-    }
-    return user;
-  }
-
   async deleteUser(userId: string) {
     const user = await this.userRepository.getUser(userId);
     if (!user) {
@@ -170,7 +162,6 @@ export class UserService {
 
     await this.userRepository.updateStatsOnUserDelete(userId);
 
-    await this.profileRepository.deleteProfile(user.profileId);
     await this.deleteProfileFromOpenSearch(userId);
 
     await this.userRepository.deleteUser(userId);
