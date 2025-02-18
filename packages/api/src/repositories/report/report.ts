@@ -16,7 +16,7 @@ export class ReportRepository {
     const reportComment = await db.insert(schema.reportComment).values({
       reason,
       commentId,
-      reporterUserId,
+      submittedByUserId: reporterUserId,
     });
 
     return reportComment;
@@ -32,7 +32,7 @@ export class ReportRepository {
     const reportComment = await db.insert(schema.reportPost).values({
       reason,
       postId,
-      reporterUserId,
+      submittedByUserId: reporterUserId,
     });
 
     return reportComment;
@@ -47,8 +47,8 @@ export class ReportRepository {
   ) {
     const reportComment = await db.insert(schema.reportUser).values({
       reason,
-      targetUserId,
-      reporterUserId,
+      reportedUserId: targetUserId,
+      submittedByUserId: reporterUserId,
     });
 
     return reportComment;
