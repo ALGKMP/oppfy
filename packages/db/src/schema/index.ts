@@ -622,7 +622,7 @@ export const reportUserRelations = relations(reportUser, ({ one }) => ({
   }),
 }));
 
-export const test = pgTable("test", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
-});
+// export const test = pgTable("test", {
+//   id: uuid("id").primaryKey().defaultRandom(),
+//   name: text("name").notNull(),
+// });
