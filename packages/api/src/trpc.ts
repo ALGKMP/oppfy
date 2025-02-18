@@ -10,7 +10,7 @@ import crypto from "crypto";
 import { initTRPC, TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import superjson from "superjson";
-import { ZodError } from "zod";
+import { z, ZodError } from "zod";
 
 import { cloudfront } from "@oppfy/cloudfront";
 import { db } from "@oppfy/db";
@@ -176,43 +176,61 @@ export const publicProcedure = t.procedure;
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
 
-const enforceCanAccessUserData = t.middleware(async ({ ctx, next, input }) => {
+const userIdSchema = z.object({
+  userId: z.string(),
+});
+
+const enforceCanAccessUserData = t.middleware(async (opts) => {
+  const { ctx, next, getRawInput } = opts;
+
   if (!ctx.session) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
-  // We expect the input to have a userId field
-  const inputWithUserId = input as { userId: string };
+  try {
+    const rawInput = await getRawInput();
+    console.log("Raw input:", rawInput);
 
-  if (!inputWithUserId.userId) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "userId is required in input",
+    const result = userIdSchema.safeParse(rawInput);
+    if (!result.success) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "userId is required in input",
+      });
+    }
+    const { userId } = result.data;
+    console.log("Parsed userId:", userId);
+
+    const canAccess = await ctx.services.user.canAccessUserData({
+      currentUserId: ctx.session.uid,
+      targetUserId: userId,
     });
-  }
+    console.log("canAccess", canAccess);
 
-  const canAccess = await ctx.services.user.canAccessUserData({
-    currentUserId: ctx.session.uid,
-    targetUserId: inputWithUserId.userId,
-  });
-  console.log("canAccess", canAccess);
+    if (!canAccess) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "You don't have permission to access this user's data",
+      });
+    }
 
-  if (!canAccess) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "You don't have permission to access this user's data",
+    return next({
+      ctx: {
+        session: ctx.session,
+      },
     });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "userId is required in input",
+      });
+    }
+    throw error;
   }
-
-  return next({
-    ctx: {
-      // Pass the session through
-      session: ctx.session,
-    },
-  });
 });
 
 // Create a protected procedure that also enforces user data access
-export const protectedWithUserAccess = protectedProcedure.use(
-  enforceCanAccessUserData,
-);
+export const protectedWithUserAccess = t.procedure
+  .use(enforceUserIsAuthed)
+  .use(enforceCanAccessUserData);
