@@ -8,82 +8,40 @@ interface AvatarProps {
   source: ImageSourcePropType | string | null | undefined;
   size?: number;
   bordered?: boolean;
-  recyclingKey?: string;
   style?: ImageProps["style"];
 }
 
 export const Avatar = (props: AvatarProps) => {
+  const { source, size = 46, bordered = false, style } = props;
+
   const theme = useTheme();
-  const size = props.size ?? 46;
-  const imageSize = size - (props.bordered ? 4 : 0);
+
+  const borderWidth = bordered ? 2 : 0;
+  const totalSize = size + borderWidth * 2;
 
   return (
     <Stack
-      width={size}
-      height={size}
-      justifyContent="center"
+      width={totalSize}
+      height={totalSize}
       alignItems="center"
+      justifyContent="center"
+      borderRadius={totalSize / 2}
+      borderWidth={borderWidth}
+      borderColor={theme.primary.val as string}
+      backgroundColor="$gray4"
     >
-      {props.bordered && (
-        <>
-          {/* Primary glow effect */}
-          <Stack
-            position="absolute"
-            width={size}
-            height={size}
-            style={{
-              borderRadius: size / 2,
-              borderWidth: 2,
-              borderColor: theme.primary.val as string,
-              shadowColor: theme.primary.val as string,
-              shadowOffset: { width: 0, height: 0 },
-              shadowOpacity: 0.9,
-              shadowRadius: 6,
-              elevation: 10,
-            }}
-          />
-
-          {/* Inner highlight ring */}
-          <Stack
-            position="absolute"
-            width={size - 2}
-            height={size - 2}
-            style={{
-              borderRadius: (size - 2) / 2,
-              borderWidth: 1.5,
-              borderColor: `${theme.primary.val}CC`,
-              shadowColor: theme.primary.val as string,
-              shadowOffset: { width: 0, height: 0 },
-              shadowOpacity: 1,
-              shadowRadius: 3,
-              elevation: 12,
-            }}
-          />
-        </>
-      )}
-
-      {/* Gray background */}
-      <Stack
-        position="absolute"
-        width={imageSize}
-        height={imageSize}
-        backgroundColor="$gray4"
-        borderRadius={imageSize / 2}
-      />
-
-      {/* Image */}
       <Image
         source={
-          typeof props.source === "string"
-            ? { uri: props.source }
-            : (props.source ?? defaultProfilePicture)
+          typeof source === "string"
+            ? { uri: source }
+            : (source ?? defaultProfilePicture)
         }
         style={[
-          props.style,
+          style,
           {
-            width: imageSize,
-            height: imageSize,
-            borderRadius: imageSize / 2,
+            width: size,
+            height: size,
+            borderRadius: size / 2,
           },
         ]}
       />

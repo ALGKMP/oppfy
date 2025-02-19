@@ -127,9 +127,7 @@ const SelectContact = () => {
       if (canAskAgain) {
         const { granted } = await MediaLibrary.requestPermissionsAsync();
         if (granted) {
-          router.push(
-            "/(app)/(bottom-tabs)/(camera)/(media-picker)/album-picker",
-          );
+          router.push("/tutorial/album-picker");
           return;
         }
       }

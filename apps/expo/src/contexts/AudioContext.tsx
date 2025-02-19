@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { Platform } from "react-native";
+import { Audio } from "expo-av";
 
 interface AudioContextType {
   isMuted: boolean;
@@ -14,6 +16,14 @@ interface AudioProviderProps {
 
 const AudioProvider = ({ children }: AudioProviderProps) => {
   const [isMuted, setIsMuted] = useState<boolean>(false);
+
+  useEffect(() => {
+    void Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+    });
+  }, []);
 
   const toggleMute = (): void => {
     setIsMuted((prevMuted) => !prevMuted);
