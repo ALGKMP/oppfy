@@ -24,6 +24,8 @@ const AppLayout = () => {
 
   const requiredPermissions = permissions.camera && permissions.contacts;
 
+  useEffect(() => void syncContacts(), []);
+
   useEffect(() => {
     if (isLoadingAuth || isLoadingPermissions) {
       return;
@@ -33,8 +35,6 @@ const AppLayout = () => {
       router.replace("/(onboarding)");
       return;
     }
-
-    void syncContacts();
   }, [
     isLoadingAuth,
     isLoadingPermissions,
