@@ -3,8 +3,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { ChevronRight } from "@tamagui/lucide-icons";
+import { ChevronRight, Image as ImageIcon } from "@tamagui/lucide-icons";
 import { getToken, Image, Text, XStack, YStack } from "tamagui";
+
+import { EmptyPlaceholder } from "~/components/ui/EmptyPlaceholder";
 
 const EXCLUDED_ALBUMS = ["Bursts", "Raw", "Recently Deleted", "Screenshots"];
 
@@ -130,6 +132,23 @@ const AlbumPickerScreen = () => {
    */
   const keyExtractor = useCallback((album: AlbumWithCover) => album.id, []);
 
+  const ListEmptyComponent = useCallback(() => {
+    return (
+      <YStack
+        flex={1}
+        justifyContent="center"
+        alignItems="center"
+        paddingTop="$10"
+      >
+        <EmptyPlaceholder
+          icon={<ImageIcon size="$10" />}
+          title="No Albums Found"
+          subtitle="There are no photo albums available on your device."
+        />
+      </YStack>
+    );
+  }, []);
+
   return (
     <FlashList
       data={albums}
@@ -137,6 +156,7 @@ const AlbumPickerScreen = () => {
       renderItem={renderAlbumItem}
       showsVerticalScrollIndicator={false}
       estimatedItemSize={80}
+      ListEmptyComponent={ListEmptyComponent}
       contentContainerStyle={{
         paddingBottom: insets.bottom,
         paddingTop: getToken("$3", "space") as number,

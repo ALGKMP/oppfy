@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import React from "react";
 import type { ImageSourcePropType } from "react-native";
 import { TouchableOpacity } from "react-native";
-import { Image } from "tamagui";
 import type { GetProps } from "tamagui";
 
 import { Avatar } from "./Avatar";
