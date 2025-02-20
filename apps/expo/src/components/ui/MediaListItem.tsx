@@ -28,7 +28,6 @@ interface MediaListItemProps {
 }
 
 export const MediaListItem = ({
-  recyclingKey,
   verticalText,
   title,
   subtitle,
@@ -40,14 +39,12 @@ export const MediaListItem = ({
 }: MediaListItemProps) => {
   const content = (
     <XStack alignItems="center" gap="$3">
-      {imageUrl && (
-        <Avatar source={imageUrl} size={56} recyclingKey={recyclingKey} />
-      )}
+      {imageUrl && <Avatar source={imageUrl} size={56} />}
 
       {verticalText ? (
         <Paragraph flex={1}>
           {typeof title === "string" ? (
-            <SizableText size="$4" fontWeight="bold" lineHeight={0}>
+            <SizableText size="$4" fontWeight="bold" lineHeight={20}>
               {title}
             </SizableText>
           ) : (
@@ -55,7 +52,7 @@ export const MediaListItem = ({
           )}{" "}
           {subtitle &&
             (typeof subtitle === "string" ? (
-              <SizableText color="$gray12" size="$3" lineHeight={0}>
+              <SizableText color="$gray12" size="$3" lineHeight={16}>
                 {subtitle}
               </SizableText>
             ) : (
@@ -63,7 +60,7 @@ export const MediaListItem = ({
             ))}{" "}
           {caption &&
             (typeof caption === "string" ? (
-              <SizableText color="$gray10" size="$2" lineHeight={0}>
+              <SizableText color="$gray10" size="$2" lineHeight={14}>
                 {caption}
               </SizableText>
             ) : (
@@ -73,7 +70,7 @@ export const MediaListItem = ({
       ) : (
         <YStack flex={1} gap="$1.5">
           {typeof title === "string" ? (
-            <SizableText size="$4" fontWeight="bold" lineHeight={0}>
+            <SizableText size="$4" fontWeight="bold" lineHeight={20}>
               {title}
             </SizableText>
           ) : (
@@ -82,7 +79,7 @@ export const MediaListItem = ({
 
           {subtitle &&
             (typeof subtitle === "string" ? (
-              <SizableText theme="alt1" size="$3" lineHeight={0}>
+              <SizableText theme="alt1" size="$3" lineHeight={16}>
                 {subtitle}
               </SizableText>
             ) : (
@@ -90,28 +87,26 @@ export const MediaListItem = ({
             ))}
 
           {caption && (
-            <SizableText theme="alt2" size="$2" lineHeight={0}>
+            <SizableText theme="alt2" size="$2" lineHeight={14}>
               {caption}
             </SizableText>
           )}
         </YStack>
       )}
 
-      {(primaryAction || secondaryAction) && (
-        <XStack gap="$2">
-          {primaryAction && (
-            <Button size="$3.5" {...primaryAction}>
-              {primaryAction.label}
-            </Button>
-          )}
+      <XStack gap="$2">
+        {primaryAction && (
+          <Button size="$3.5" {...primaryAction}>
+            {primaryAction.label}
+          </Button>
+        )}
 
-          {secondaryAction && (
-            <Button size="$3.5" {...secondaryAction}>
-              {secondaryAction.label}
-            </Button>
-          )}
-        </XStack>
-      )}
+        {secondaryAction && (
+          <Button size="$3.5" {...secondaryAction}>
+            {secondaryAction.label}
+          </Button>
+        )}
+      </XStack>
     </XStack>
   );
 
