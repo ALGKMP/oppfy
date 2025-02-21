@@ -8,6 +8,7 @@ import React, {
 import {
   Dimensions,
   Linking,
+  Platform,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
@@ -120,6 +121,9 @@ const CameraPage = () => {
     (media: PhotoFile | VideoFile, type: "photo" | "video") => {
       const { path: uri } = media;
 
+      // Handle Android URI
+      const processedUri = Platform.OS === "android" ? `file://${uri}` : uri;
+
       let width: number | undefined = undefined;
       let height: number | undefined = undefined;
 
@@ -140,7 +144,7 @@ const CameraPage = () => {
           pathname: "/preview",
           params: {
             type,
-            uri,
+            uri: processedUri,
             width,
             height,
           },
@@ -149,7 +153,7 @@ const CameraPage = () => {
         router.push({
           pathname: "/preview",
           params: {
-            uri,
+            uri: processedUri,
             width,
             height,
           },
