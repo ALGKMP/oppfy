@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "32535590634",
+    "project_id": "oppfy-bac52",
+    "storage_bucket": "oppfy-bac52.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:32535590634:android:b77ba58ee5b943e5684993",
+        "android_client_info": {
+          "package_name": "com.oppfy.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTnegbC00wVelJtE29jKUgge6xn10_Bmo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
