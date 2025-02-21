@@ -54,30 +54,32 @@ const PreviewScreen = () => {
   };
 
   return (
-    <ScreenView padding={0} safeAreaEdges={["top"]}>
-      <View
-        width={SCREEN_WIDTH}
-        height={PREVIEW_HEIGHT}
-        borderRadius={20}
-        overflow="hidden"
-      >
-        {type === "photo" ? (
-          <PreviewImage uri={uri} />
-        ) : (
-          <PreviewVideo uri={uri} />
-        )}
-
-        <TouchableOpacity
-          style={[
-            styles.iconButton,
-            { position: "absolute", top: 12, left: 12 },
-          ]}
-          onPress={() => router.back()}
+    <ScreenView padding={0} safeAreaEdges={["top", "bottom"]}>
+      <View flex={1}>
+        <View
+          width={SCREEN_WIDTH}
+          height={PREVIEW_HEIGHT}
+          borderRadius={20}
+          overflow="hidden"
         >
-          <BlurView intensity={50} style={styles.blurView}>
-            <X />
-          </BlurView>
-        </TouchableOpacity>
+          {type === "photo" ? (
+            <PreviewImage uri={uri} />
+          ) : (
+            <PreviewVideo uri={uri} />
+          )}
+
+          <TouchableOpacity
+            style={[
+              styles.iconButton,
+              { position: "absolute", top: 12, left: 12 },
+            ]}
+            onPress={() => router.back()}
+          >
+            <BlurView intensity={50} style={styles.blurView}>
+              <X />
+            </BlurView>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <XStack
