@@ -128,12 +128,12 @@ const Other = () => {
             iconAfter={<ChevronRight />}
             onPress={handleShowDeleteContacts}
           />
-          <SettingsGroup.Item
+{/*           <SettingsGroup.Item
             title="Test button"
             onPress={async () => {
               await getDeviceContactsNotOnApp();
             }}
-          ></SettingsGroup.Item>
+          ></SettingsGroup.Item> */}
         </SettingsGroup>
 
         <Button variant="danger" onPress={handleShowDeleteAccount}>
