@@ -19,9 +19,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     fallbackToCacheTimeout: 0,
     url: "https://u.expo.dev/68175593-c314-48a6-8892-7afeeb66ab9f",
   },
-  runtimeVersion: {
-    policy: "nativeVersion",
-  },
+  runtimeVersion: "1.0.0",
   assetBundlePatterns: ["**/*"],
   ios: {
     supportsTablet: false,
@@ -106,13 +104,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           "Oppfy uses your location to tag photos with where they were taken.",
       },
     ],
-    // [
-    //   "expo-location",
-    //   {
-    //     locationWhenInUsePermission:
-    //       "Oppfy uses your location to tag photos with where they were taken.",
-    //   },
-    // ],
     [
       "expo-contacts",
       {

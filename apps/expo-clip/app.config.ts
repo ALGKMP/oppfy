@@ -14,9 +14,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     resizeMode: "contain",
     backgroundColor: "#F214FF",
   },
-  runtimeVersion: {
-    policy: "nativeVersion",
-  },
+  runtimeVersion: "1.0.0",
   assetBundlePatterns: ["**/*"],
 
   ios: {
