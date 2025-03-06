@@ -9,7 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useToastController } from "@tamagui/toast";
 import { Stack, useTheme, View, YStack } from "tamagui";
 
-import BeautifulQRCode from "~/components/QRCode/BeautifulQRCode";
+import { QRCode } from "~/components/ui";
 import { Button, H1 } from "~/components/ui";
 import useShare from "~/hooks/useShare";
 import { api } from "~/utils/api";
@@ -87,7 +87,7 @@ const ShareProfile = () => {
                   shadowOpacity={0.1}
                   shadowRadius={24}
                 >
-                  <BeautifulQRCode
+                  <QRCode
                     value={profileUrl}
                     size={230}
                     profilePictureUrl={profilePictureUrl}

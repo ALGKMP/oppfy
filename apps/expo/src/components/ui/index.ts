@@ -36,6 +36,7 @@ import type { MediaListItemActionProps } from "./MediaListItem";
 import { MediaListItem } from "./MediaListItem";
 import { Popover } from "./Popover";
 import { Progress } from "./Progress";
+import { QRCode } from "./QRCode";
 import { RadioGroup } from "./RadioGroup";
 import { Select } from "./Select";
 import { Separator } from "./Separator";
@@ -126,6 +127,7 @@ export {
   EmptyPlaceholder,
   LoadingIndicatorOverlay,
   BlurContextMenuWrapper,
+  QRCode,
 };
 
 export type {

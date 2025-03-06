@@ -1,20 +1,20 @@
 import React from "react";
-import QRCode from "react-native-qrcode-svg";
+import BaseQRCode from "react-native-qrcode-svg";
 import { LinearGradient } from "expo-linear-gradient";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { View } from "tamagui";
 
-interface BeautifulQRCodeProps {
+interface QRCodeProps {
   value: string;
   size?: number;
   profilePictureUrl?: string | null;
 }
 
-const BeautifulQRCode = ({
+export const QRCode = ({
   value,
   size = 230,
   profilePictureUrl,
-}: BeautifulQRCodeProps) => {
+}: QRCodeProps) => {
   const qrSize = Math.floor(size * 0.8);
   const logoSize = Math.floor(qrSize * 0.28); // Logo takes up 28% of QR code
 
@@ -34,7 +34,7 @@ const BeautifulQRCode = ({
       <View flex={1} ai="center" jc="center">
         <View bg="$primary" br={36} p="$4">
           <View bg="white" br={36} p="$4">
-            <QRCode
+            <BaseQRCode
               value={value}
               size={qrSize}
               color="#F214FF"
@@ -58,5 +58,3 @@ const BeautifulQRCode = ({
     </View>
   );
 };
-
-export default BeautifulQRCode;
