@@ -279,35 +279,37 @@ const useProfileActionButtons = (userId?: string) => {
   const actions = userId
     ? {
         follow: {
-          handler: () => followUser.mutate({ userId }),
+          handler: () => void followUser.mutateAsync({ userId }),
           loading: followUser.isPending || isInvalidatingByAction.follow,
           disabled: isAnyActionLoading,
         },
         unfollow: {
-          handler: () => unfollowUser.mutate({ userId }),
+          handler: () => void unfollowUser.mutateAsync({ userId }),
           loading: unfollowUser.isPending || isInvalidatingByAction.unfollow,
           disabled: isAnyActionLoading,
         },
         addFriend: {
-          handler: () => addFriend.mutate({ recipientId: userId }),
+          handler: () => void addFriend.mutateAsync({ recipientId: userId }),
           loading: addFriend.isPending || isInvalidatingByAction.addFriend,
           disabled: isAnyActionLoading,
         },
         removeFriend: {
-          handler: () => removeFriend.mutate({ recipientId: userId }),
+          handler: () => void removeFriend.mutateAsync({ recipientId: userId }),
           loading:
             removeFriend.isPending || isInvalidatingByAction.removeFriend,
           disabled: isAnyActionLoading,
         },
         cancelFollowRequest: {
-          handler: () => cancelFollowRequest.mutate({ recipientId: userId }),
+          handler: () =>
+            void cancelFollowRequest.mutateAsync({ recipientId: userId }),
           loading:
             cancelFollowRequest.isPending ||
             isInvalidatingByAction.cancelFollowRequest,
           disabled: isAnyActionLoading,
         },
         cancelFriendRequest: {
-          handler: () => cancelFriendRequest.mutate({ recipientId: userId }),
+          handler: () =>
+            void cancelFriendRequest.mutateAsync({ recipientId: userId }),
           loading:
             cancelFriendRequest.isPending ||
             isInvalidatingByAction.cancelFriendRequest,
