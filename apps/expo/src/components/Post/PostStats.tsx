@@ -7,7 +7,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
-import { Text, XStack, YStack } from "tamagui";
+import { Circle, getTokens, Text, XStack, YStack } from "tamagui";
 
 import CommentsBottomSheet from "~/components/Post/Comment/CommentsBottomSheet";
 import { useBottomSheetController } from "~/components/ui/BottomSheet";
@@ -68,20 +68,21 @@ const StatButton = ({
 
   return (
     <BlurView
-      intensity={50}
+      intensity={30}
       style={{
         padding: 12,
-        borderRadius: 24,
+        borderRadius: 20,
         overflow: "hidden",
         justifyContent: "center",
         alignItems: "center",
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.15)",
+        backgroundColor: `${getTokens().color.$primary.val}90`,
       }}
     >
       <XStack justifyContent="center" alignItems="center" gap="$2">
         {count !== undefined && count > 0 && (
-          <Text color="white">{formatCount(count)}</Text>
+          <Text color="white" fontWeight="500">
+            {formatCount(count)}
+          </Text>
         )}
         {children}
       </XStack>
