@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Dimensions, StyleSheet } from "react-native";
+import { Dimensions, Linking, StyleSheet } from "react-native";
 import {
   Camera,
   useCameraDevice,
   useCodeScanner,
 } from "react-native-vision-camera";
 import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 import { LinearGradient } from "@tamagui/linear-gradient";
 import { CameraOff } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
@@ -21,8 +22,6 @@ const ScanQr = () => {
   const device = useCameraDevice("back");
   const [hasPermission, setHasPermission] = useState(false);
   const [isScanning, setIsScanning] = useState(true);
-
-  const { routeProfile } = useRouteProfile();
 
   useEffect(() => {
     const checkPermissions = async () => {
@@ -47,20 +46,10 @@ const ScanQr = () => {
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
         setIsScanning(false);
-        const url = new URL(codes[0].value);
-
-        const userId = url.searchParams.get("userId") ?? "";
-        const username = url.searchParams.get("username") ?? "";
-        const name = url.searchParams.get("name") ?? "";
-        const profilePictureUrl =
-          url.searchParams.get("profilePictureUrl") ?? "";
+        const profileUrl = codes[0].value;
 
         setTimeout(() => {
-          routeProfile(userId, {
-            name,
-            username,
-            profilePictureUrl,
-          });
+          void Linking.openURL(profileUrl);
           setIsScanning(true); // Reset scanning state after navigation
         }, 100);
       }
