@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { BlurView } from "expo-blur";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
@@ -44,7 +44,7 @@ const ShareProfile = () => {
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
-      <BlurView intensity={95} tint="light" style={StyleSheet.absoluteFill}>
+      <BlurView tint="light" style={StyleSheet.absoluteFill}>
         <YStack f={1} p="$6" jc="space-between">
           <YStack f={1} ai="center" jc="center" gap="$6">
             {/* Profile Card */}
@@ -52,7 +52,11 @@ const ShareProfile = () => {
               width={340}
               br={44}
               ov="hidden"
-              bg="rgba(255,255,255,0.1)"
+              bg={
+                Platform.OS === "android"
+                  ? "rgba(255,255,255,0.15)"
+                  : "rgba(255,255,255,0.1)"
+              }
               ai="center"
               jc="center"
               shadowColor="#000"
@@ -61,15 +65,8 @@ const ShareProfile = () => {
               shadowRadius={40}
             >
               {/* Background Layer */}
-              {profilePictureUrl && (
-                <Image
-                  source={profilePictureUrl}
-                  style={[StyleSheet.absoluteFill, { opacity: 0.15 }]}
-                  contentFit="cover"
-                />
-              )}
               <BlurView
-                intensity={80}
+                intensity={Platform.OS === "android" ? 5 : 80}
                 tint="light"
                 style={StyleSheet.absoluteFill}
               />
