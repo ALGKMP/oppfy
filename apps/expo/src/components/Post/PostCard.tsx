@@ -244,7 +244,9 @@ const PostCard = (props: PostCardProps) => {
             isViewable={props.isViewable}
           />
         )} */}
-        <PostCaption caption={props.caption} />
+        <View maxWidth="80%">
+          <PostCaption caption={props.caption} />
+        </View>
       </YStack>
     </View>
   );
