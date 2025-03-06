@@ -13,24 +13,24 @@ async function syncProfileStats() {
   console.log("Starting profile stats sync...");
 
   try {
-    // Get all users with their profile IDs
-    const users = await db
+    // Get all profiles with their user IDs
+    const profiles = await db
       .select({
-        id: schema.user.id,
-        profileId: schema.user.profileId,
+        id: schema.profile.id,
+        userId: schema.profile.userId,
       })
-      .from(schema.user);
+      .from(schema.profile);
 
-    console.log(`Found ${users.length} users to process`);
+    console.log(`Found ${profiles.length} profiles to process`);
 
-    for (const user of users) {
+    for (const profile of profiles) {
       // Count posts where user is the recipient (post owner)
       const regularPostsResult = await db
         .select({
           count: sql<number>`cast(count(*) as integer)`,
         })
         .from(schema.post)
-        .where(sql`${schema.post.recipientId} = ${user.id}`);
+        .where(sql`${schema.post.recipientId} = ${profile.userId}`);
 
       // Count friends (where user is either user1 or user2)
       const friendsResult = await db
@@ -39,7 +39,7 @@ async function syncProfileStats() {
         })
         .from(schema.friend)
         .where(
-          sql`${schema.friend.userIdA} = ${user.id} OR ${schema.friend.userIdB} = ${user.id}`,
+          sql`${schema.friend.userIdA} = ${profile.userId} OR ${schema.friend.userIdB} = ${profile.userId}`,
         );
 
       // Count followers (where user is the recipient)
@@ -48,7 +48,7 @@ async function syncProfileStats() {
           count: sql<number>`cast(count(*) as integer)`,
         })
         .from(schema.follow)
-        .where(sql`${schema.follow.recipientId} = ${user.id}`);
+        .where(sql`${schema.follow.recipientId} = ${profile.userId}`);
 
       // Count following (where user is the sender)
       const followingResult = await db
@@ -56,7 +56,7 @@ async function syncProfileStats() {
           count: sql<number>`cast(count(*) as integer)`,
         })
         .from(schema.follow)
-        .where(sql`${schema.follow.senderId} = ${user.id}`);
+        .where(sql`${schema.follow.senderId} = ${profile.userId}`);
 
       const regularPosts = regularPostsResult[0]?.count ?? 0;
       const friends = friendsResult[0]?.count ?? 0;
@@ -73,10 +73,10 @@ async function syncProfileStats() {
           following,
           updatedAt: new Date(),
         })
-        .where(sql`${schema.profileStats.profileId} = ${user.profileId}`);
+        .where(sql`${schema.profileStats.profileId} = ${profile.id}`);
 
       console.log(
-        `Updated user ${user.id}:`,
+        `Updated profile ${profile.id} for user ${profile.userId}:`,
         `\n- ${regularPosts} posts`,
         `\n- ${friends} friends`,
         `\n- ${followers} followers`,
