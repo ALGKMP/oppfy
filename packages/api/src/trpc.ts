@@ -8,7 +8,6 @@
  */
 import crypto from "crypto";
 import { initTRPC, TRPCError } from "@trpc/server";
-import jwt from "jsonwebtoken";
 import superjson from "superjson";
 import { z, ZodError } from "zod";
 
@@ -18,14 +17,8 @@ import { env } from "@oppfy/env";
 import { mux } from "@oppfy/mux";
 import { s3 } from "@oppfy/s3";
 
+import { auth } from "./auth";
 import { services } from "./services";
-
-interface JWTPayload {
-  uid: string;
-  iat: number; // issued at timestamp
-  exp: number; // expiration timestamp
-  jti?: string; // JWT ID (unique identifier)
-}
 
 /**
  * 1. CONTEXT
@@ -36,7 +29,7 @@ interface JWTPayload {
  */
 
 interface CreateContextOptions {
-  session: JWTPayload | null;
+  session: { user: { id: string } } | null;
 }
 
 /**
@@ -66,40 +59,16 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = (opts: { headers: Headers }) => {
+export const createTRPCContext = async (opts: { headers: Headers }) => {
   const source = opts.headers.get("x-trpc-source") ?? "unknown";
-  const authToken = opts.headers.get("Authorization") ?? null;
-
   console.log(">>> tRPC Request from", source);
 
   opts.headers.set("x-request-id", crypto.randomUUID());
 
-  let session: JWTPayload | null = null;
-
-  if (authToken) {
-    try {
-      const token = authToken.split("Bearer ")[1];
-
-      if (token === undefined) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "No token provided",
-        });
-      }
-
-      // Verify and decode the token
-      session = jwt.verify(token, env.JWT_ACCESS_SECRET) as JWTPayload;
-    } catch (err) {
-      console.log("Error verifying token:", err);
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message:
-          err instanceof Error
-            ? err.message
-            : "Unknown error during token verification",
-      });
-    }
-  }
+  // Get the session from better-auth
+  const session = await auth.api.getSession({
+    headers: opts.headers,
+  });
 
   return createInnerTRPCContext({
     session,
@@ -202,7 +171,7 @@ const enforceCanAccessUserData = t.middleware(async (opts) => {
     console.log("Parsed userId:", userId);
 
     const canAccess = await ctx.services.user.canAccessUserData({
-      currentUserId: ctx.session.uid,
+      currentUserId: ctx.session.user.id,
       targetUserId: userId,
     });
     console.log("canAccess", canAccess);

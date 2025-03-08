@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Constants from "expo-constants";
+import * as SecureStore from "expo-secure-store";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
@@ -7,8 +8,7 @@ import superjson from "superjson";
 
 import type { AppRouter } from "@oppfy/api";
 
-import { storage } from "~/utils/storage";
-import type { AuthTokens } from "./auth";
+import { authClient } from "~/utils/better-auth";
 
 /**
  * A set of typesafe hooks for consuming your API.
@@ -65,15 +65,14 @@ export function TRPCProvider(props: { children: React.ReactNode }) {
         httpBatchLink({
           transformer: superjson,
           url: `${getBaseUrl()}/api/trpc`,
-          headers() {
+          headers: async () => {
             const headers = new Map<string, string>();
             headers.set("x-trpc-source", "expo-react");
 
-            const storedTokens = storage.getString("auth_tokens");
-            if (storedTokens) {
-              const { accessToken } = JSON.parse(storedTokens) as AuthTokens;
-              if (accessToken)
-                headers.set("Authorization", `Bearer ${accessToken}`);
+            // Get the session cookie from SecureStore
+            const cookie = await SecureStore.getItemAsync("better_auth_cookie");
+            if (cookie) {
+              headers.set("Cookie", cookie);
             }
 
             return Object.fromEntries(headers);
