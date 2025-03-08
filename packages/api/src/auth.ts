@@ -1,13 +1,17 @@
+import crypto from "crypto";
 import { expo } from "@better-auth/expo";
 import { betterAuth } from "better-auth";
 // Import the drizzle adapter
 // @ts-ignore - Ignore missing type definitions
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { phoneNumber } from "better-auth/plugins";
+import jwt from "jsonwebtoken";
 import twilio from "twilio";
 
 import { db } from "@oppfy/db";
 import { env } from "@oppfy/env";
+
+import { services } from "./services";
 
 // Admin phone numbers that bypass Twilio verification
 const ADMIN_PHONE_NUMBERS = [
@@ -17,6 +21,21 @@ const ADMIN_PHONE_NUMBERS = [
   "+16475504668",
   "+14107628976",
 ];
+
+// Function to generate JWT tokens
+const generateTokens = (uid: string) => {
+  // Access token expires in 30 minutes
+  const accessToken = jwt.sign({ uid }, env.JWT_ACCESS_SECRET, {
+    expiresIn: "30m",
+  });
+
+  // Refresh token expires in 30 days
+  const refreshToken = jwt.sign({ uid }, env.JWT_REFRESH_SECRET, {
+    expiresIn: "30d",
+  });
+
+  return { accessToken, refreshToken };
+};
 
 // Function to send OTP via SMS with proper types
 const sendOTP = async (
@@ -54,14 +73,12 @@ const sendOTP = async (
   }
 };
 
-// Custom verification function for OTP
-const verifyOTP = async ({
-  phoneNumber,
-  code,
-}: {
-  phoneNumber: string;
-  code: string;
-}): Promise<boolean> => {
+// Custom verification function for OTP - this will be used internally
+// Note: In better-auth, verification is handled internally before callbackOnVerification is called
+const verifyOTPInternal = async (
+  phoneNumber: string,
+  code: string,
+): Promise<boolean> => {
   console.log(`Verifying OTP for ${phoneNumber}`);
 
   // For admin numbers, only accept "123456" as the code
@@ -126,18 +143,32 @@ export const auth = betterAuth({
         // Check if this is an admin number
         const isAdmin = ADMIN_PHONE_NUMBERS.includes(phoneNumber);
 
-        // Here you can add custom logic like updating user status
-        // For example, you might want to set the user as "onApp" like in the previous implementation
         try {
-          // In a real implementation, you would update the user status
-          console.log(
-            `User ${user.id} verified with phone number ${phoneNumber}`,
-          );
+          // Check if user exists in our system
+          let existingUser =
+            await services.user.getUserByPhoneNumberNoThrow(phoneNumber);
+          let isNewUser = false;
 
-          // Set admin status if it's an admin number
-          if (isAdmin) {
-            console.log(`Admin user verified: ${user.id}`);
+          if (existingUser) {
+            // Update user status to onApp if needed
+            const isOnApp = await services.user.isOnApp(existingUser.id);
+            if (!isOnApp) {
+              await services.user.updateUserOnAppStatus(existingUser.id, true);
+              isNewUser = true;
+            }
+          } else {
+            // Create new user in our system
+            const userId = user.id || crypto.randomUUID();
+            await services.user.createUser(userId, phoneNumber, true);
+            isNewUser = true;
           }
+
+          // Generate tokens
+          const tokens = generateTokens(user.id);
+
+          // Store tokens or return them as needed
+          // This depends on how better-auth handles session management
+          console.log(`Generated tokens for user ${user.id}`);
         } catch (error) {
           console.error(
             `Error in callbackOnVerification for ${phoneNumber}:`,
@@ -149,7 +180,27 @@ export const auth = betterAuth({
     // Add Expo plugin for better integration with Expo
     expo(),
   ],
+
+  // Add event handlers for authentication events
+  events: {
+    // This event is triggered after a user is authenticated
+    onAuth: async (context: { user: { id: string }; session: any }) => {
+      // Generate tokens
+      const tokens = generateTokens(context.user.id);
+
+      // You can attach the tokens to the session or return them
+      // This depends on how better-auth handles session management
+      return {
+        ...context.session,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      };
+    },
+  },
 });
 
 // Export the handler for API routes
 export const authHandler = auth.handler;
+
+// Export the token generation function for use in other parts of the app
+export { generateTokens };
