@@ -31,9 +31,6 @@ function withMonorepoPaths(config) {
     path.resolve(workspaceRoot, "node_modules"),
   ];
 
-  // Enable package exports for Better Auth
-  config.resolver.unstable_enablePackageExports = true;
-
   return config;
 }
 
