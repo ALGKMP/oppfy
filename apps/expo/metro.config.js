@@ -7,7 +7,7 @@ const path = require("path");
 const { getSentryExpoConfig } = require("@sentry/react-native/metro");
 
 module.exports = withTurborepoManagedCache(
-  withMonorepoPaths(getSentryExpoConfig(__dirname)),
+  withBetterAuthExports(withMonorepoPaths(getSentryExpoConfig(__dirname))),
 );
 
 /**
@@ -31,6 +31,17 @@ function withMonorepoPaths(config) {
     path.resolve(workspaceRoot, "node_modules"),
   ];
 
+  return config;
+}
+
+/**
+ * Enable package exports resolution for better auth exports handling
+ *
+ * @param {import('expo/metro-config').MetroConfig} config
+ * @returns {import('expo/metro-config').MetroConfig}
+ */
+function withBetterAuthExports(config) {
+  config.resolver.unstable_enablePackageExports = true;
   return config;
 }
 
