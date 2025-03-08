@@ -58,7 +58,6 @@
     "babel-plugin-react-compiler": "19.0.0-beta-37ed2a7-20241206",
     "babel-preset-expo": "~12.0.0",
     "better-auth": "^1.2.3",
-    "better-sqlite3": "^11.8.1",
     "burnt": "^0.12.2",
     "expo": "~52.0.37",
     "expo-av": "~15.0.1",
