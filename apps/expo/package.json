@@ -26,6 +26,7 @@
   },
   "prettier": "@oppfy/prettier-config",
   "dependencies": {
+    "@better-auth/expo": "^1.2.3",
     "@config-plugins/ffmpeg-kit-react-native": "^9.0.0",
     "@expo-google-fonts/inter": "^0.2.3",
     "@expo-google-fonts/modak": "^0.2.3",
@@ -56,6 +57,8 @@
     "@trpc/server": "catalog:",
     "babel-plugin-react-compiler": "19.0.0-beta-37ed2a7-20241206",
     "babel-preset-expo": "~12.0.0",
+    "better-auth": "^1.2.3",
+    "better-sqlite3": "^11.8.1",
     "burnt": "^0.12.2",
     "expo": "~52.0.37",
     "expo-av": "~15.0.1",

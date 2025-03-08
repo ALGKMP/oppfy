@@ -9,11 +9,10 @@ import {
   OnboardingOTPInput,
   OnboardingScreen,
 } from "~/components/ui/Onboarding";
-import { useAuth } from "~/hooks/useAuth";
+import { verifyPhoneNumber } from "~/utils/better-auth";
 
 const PhoneNumberOTP = () => {
   const { phoneNumber } = useLocalSearchParams<{ phoneNumber: string }>();
-  const { verifyPhoneNumber } = useAuth();
 
   const [phoneNumberOTP, setPhoneNumberOTP] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +37,7 @@ const PhoneNumberOTP = () => {
 
     try {
       await verifyPhoneNumber(phoneNumber, phoneNumberOTP);
-      // Navigation is now handled in the SessionContext
+      // Navigation is handled in the verifyPhoneNumber function
     } catch (err: unknown) {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       if (err && typeof err === "object" && "message" in err) {

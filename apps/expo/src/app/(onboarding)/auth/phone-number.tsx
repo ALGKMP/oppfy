@@ -10,11 +10,10 @@ import {
   OnboardingScreen,
 } from "~/components/ui/Onboarding";
 import type { CountryData } from "~/data/groupedCountries";
-import { useAuth } from "~/hooks/useAuth";
+import { sendVerificationCode } from "~/utils/better-auth";
 
 const PhoneNumber = () => {
   const router = useRouter();
-  const { sendVerificationCode } = useAuth();
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [countryData, setCountryData] = useState<CountryData>({
