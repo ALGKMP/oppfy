@@ -21,7 +21,7 @@
     "@oppfy/validators": "workspace:*",
     "@t3-oss/env-core": "^0.10.1",
     "gremlin": "^3.7.2",
-    "zod": "^3.23.8"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@oppfy/eslint-config": "workspace:*",

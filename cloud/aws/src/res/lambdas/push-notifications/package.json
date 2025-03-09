@@ -25,7 +25,7 @@
     "@oppfy/validators": "workspace:*",
     "@t3-oss/env-core": "^0.10.1",
     "expo-server-sdk": "^3.10.0",
-    "zod": "^3.23.8"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@oppfy/eslint-config": "workspace:*",

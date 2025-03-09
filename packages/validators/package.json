@@ -19,7 +19,7 @@
     "@oppfy/tsconfig": "workspace:*",
     "@oppfy/utils": "workspace:*",
     "libphonenumber-js": "^1.10.61",
-    "zod": "^3.23.8"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@oppfy/eslint-config": "workspace:*",
