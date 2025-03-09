@@ -102,14 +102,18 @@ const SpotlightEffect = ({
   mouseX: MotionValue<number>;
   mouseY: MotionValue<number>;
 }) => {
-  const spotlightX = useTransform(
-    mouseX,
-    (value) => `${(value / window.innerWidth) * 100}%`,
-  );
-  const spotlightY = useTransform(
-    mouseY,
-    (value) => `${(value / window.innerHeight) * 100}%`,
-  );
+  // Guard for server-side rendering
+  const isBrowser = typeof window !== "undefined";
+
+  const spotlightX = useTransform(mouseX, (value) => {
+    if (!isBrowser) return "50%"; // Safe fallback for SSR
+    return `${(value / window.innerWidth) * 100}%`;
+  });
+
+  const spotlightY = useTransform(mouseY, (value) => {
+    if (!isBrowser) return "50%"; // Safe fallback for SSR
+    return `${(value / window.innerHeight) * 100}%`;
+  });
 
   return (
     <motion.div
