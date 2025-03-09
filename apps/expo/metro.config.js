@@ -41,7 +41,7 @@ function withMonorepoPaths(config) {
  * @returns {import('expo/metro-config').MetroConfig}
  */
 function withBetterAuthExports(config) {
-  config.resolver.unstable_enablePackageExports = true;
+  // config.resolver.unstable_enablePackageExports = true;
   return config;
 }
 
