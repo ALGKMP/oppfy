@@ -11,11 +11,11 @@ import {
 export const userRouter = createTRPCRouter({
   deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-      await ctx.services.user.deleteUser(ctx.session.uid);
+      await ctx.services.user.deleteUser(ctx.session.user.id);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: `Failed to delete user with ID ${ctx.session.uid}`,
+        message: `Failed to delete user with ID ${ctx.session.user.id}`,
         cause: err,
       });
     }
@@ -23,8 +23,8 @@ export const userRouter = createTRPCRouter({
 
   onboardingComplete: publicProcedure.query(async ({ ctx }) => {
     try {
-      if (!ctx.session?.uid) return false;
-      const user = await ctx.services.user.getUserStatus(ctx.session.uid);
+      if (!ctx.session?.user.id) return false;
+      const user = await ctx.services.user.getUserStatus(ctx.session.user.id);
       return user.hasCompletedOnboarding;
     } catch (err) {
       if (err instanceof DomainError) {
@@ -42,8 +42,9 @@ export const userRouter = createTRPCRouter({
 
   checkOnboardingComplete: publicProcedure.mutation(async ({ ctx }) => {
     try {
-      if (!ctx.session?.uid) return false;
-      const user = await ctx.services.user.getUserStatus(ctx.session.uid);
+      console.log("Onboarding complete $$$$$$$$$$$$$$$$$$$$$$$$$$", ctx.session?.user.id);
+      if (!ctx.session?.user.id) return false;
+      const user = await ctx.services.user.getUserStatus(ctx.session.user.id);
       return user.hasCompletedOnboarding;
     } catch (err) {
       if (err instanceof DomainError) {
@@ -61,8 +62,8 @@ export const userRouter = createTRPCRouter({
 
   completedOnboarding: publicProcedure.mutation(async ({ ctx }) => {
     try {
-      if (!ctx.session?.uid) return false;
-      await ctx.services.user.completedOnboarding(ctx.session.uid);
+      if (!ctx.session?.user.id) return false;
+      await ctx.services.user.completedOnboarding(ctx.session.user.id);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -74,8 +75,8 @@ export const userRouter = createTRPCRouter({
 
   tutorialComplete: publicProcedure.query(async ({ ctx }) => {
     try {
-      if (!ctx.session?.uid) return false;
-      const user = await ctx.services.user.getUserStatus(ctx.session.uid);
+      if (!ctx.session?.user.id) return false;
+      const user = await ctx.services.user.getUserStatus(ctx.session.user.id);
       return user.hasCompletedTutorial;
     } catch (err) {
       if (err instanceof DomainError) {
@@ -93,8 +94,8 @@ export const userRouter = createTRPCRouter({
 
   checkTutorialComplete: publicProcedure.mutation(async ({ ctx }) => {
     try {
-      if (!ctx.session?.uid) return false;
-      const user = await ctx.services.user.getUserStatus(ctx.session.uid);
+      if (!ctx.session?.user.id) return false;
+      const user = await ctx.services.user.getUserStatus(ctx.session.user.id);
       return user.hasCompletedTutorial;
     } catch (err) {
       if (err instanceof DomainError) {
@@ -112,8 +113,8 @@ export const userRouter = createTRPCRouter({
 
   setTutorialComplete: publicProcedure.mutation(async ({ ctx }) => {
     try {
-      if (!ctx.session?.uid) return false;
-      await ctx.services.user.setTutorialComplete(ctx.session.uid);
+      if (!ctx.session?.user.id) return false;
+      await ctx.services.user.setTutorialComplete(ctx.session.user.id);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -125,7 +126,7 @@ export const userRouter = createTRPCRouter({
 
   getPrivacySetting: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.services.privacy.getPrivacySettings(ctx.session.uid);
+      return await ctx.services.privacy.getPrivacySettings(ctx.session.user.id);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -144,7 +145,7 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.privacy.updatePrivacySettings(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.privacy,
         );
       } catch (err) {

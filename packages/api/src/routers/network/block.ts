@@ -13,7 +13,7 @@ export const blockRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.block.blockUser(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.userId,
         );
       } catch (err) {
@@ -30,7 +30,7 @@ export const blockRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.block.unblockUser(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.userId,
         );
       } catch (err) {
@@ -53,7 +53,7 @@ export const blockRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         return await ctx.services.paginate.paginateBlocked(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.cursor,
           input.pageSize,
         );

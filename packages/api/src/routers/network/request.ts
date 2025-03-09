@@ -6,10 +6,10 @@ export const requestRouter = createTRPCRouter({
   countRequests: protectedProcedure.query(async ({ ctx }) => {
     try {
       const followRequestCount = await ctx.services.follow.countFollowRequests(
-        ctx.session.uid,
+        ctx.session.user.id,
       );
       const friendRequestCount = await ctx.services.friend.countFriendRequests(
-        ctx.session.uid,
+        ctx.session.user.id,
       );
 
       return {

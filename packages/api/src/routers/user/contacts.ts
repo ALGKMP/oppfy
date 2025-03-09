@@ -8,7 +8,7 @@ export const contactsRouter = createTRPCRouter({
     .input(z.array(z.string()))
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.contact.syncContacts(ctx.session.uid, input);
+        await ctx.services.contact.syncContacts(ctx.session.user.id, input);
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -17,7 +17,7 @@ export const contactsRouter = createTRPCRouter({
     }),
   deleteContacts: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-      await ctx.services.contact.deleteContacts(ctx.session.uid);
+      await ctx.services.contact.deleteContacts(ctx.session.user.id);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -26,7 +26,9 @@ export const contactsRouter = createTRPCRouter({
   }),
   getRecommendationIds: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.services.contact.getRecommendationsIds(ctx.session.uid);
+      return await ctx.services.contact.getRecommendationsIds(
+        ctx.session.user.id,
+      );
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -37,7 +39,7 @@ export const contactsRouter = createTRPCRouter({
   getRecommendationProfilesSelf: protectedProcedure.query(async ({ ctx }) => {
     try {
       return await ctx.services.contact.getRecommendationProfilesSelf(
-        ctx.session.uid,
+        ctx.session.user.id,
       );
     } catch (err) {
       throw new TRPCError({

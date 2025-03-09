@@ -36,15 +36,19 @@ export function useAuth() {
   const verifyPhoneNumber = async (phoneNumber: string, code: string) => {
     try {
       // Use the fetch method to call the API directly
+      console.log("Verifying phone number $$$$$$$$$$$$$$$$$$$$$$$$$$", phoneNumber, code);
       await authClient.$fetch("/api/auth/verify-code", {
         method: "POST",
         body: { phoneNumber, code },
       });
+      console.log("Phone number verified $$$$$$$$$$$$$$$$$$$$$$$$$$");
 
       // Check if user needs onboarding
       const userOnboardingCompleted =
         await userOnboardingCompletedMutation.mutateAsync();
+      console.log("User onboarding completed $$$$$$$$$$$$$$$$$$$$$$$$$$", userOnboardingCompleted);
       const tutorialComplete = await tutorialCompleteMutation.mutateAsync();
+      console.log("Tutorial complete $$$$$$$$$$$$$$$$$$$$$$$$$$", tutorialComplete);
 
       if (!userOnboardingCompleted) {
         router.replace("/user-info/name");

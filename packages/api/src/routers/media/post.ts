@@ -25,7 +25,7 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         return await ctx.services.post.uploadPostForUserOnAppUrl({
-          author: ctx.session.uid,
+          author: ctx.session.user.id,
           ...input,
         });
       } catch (err) {
@@ -51,14 +51,13 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const { presignedUrl, postId } = await ctx.services.post.uploadPostForUserNotOnAppUrl(
-          {
-            author: ctx.session.uid,
+        const { presignedUrl, postId } =
+          await ctx.services.post.uploadPostForUserNotOnAppUrl({
+            author: ctx.session.user.id,
             recipientNotOnAppPhoneNumber: input.number,
             recipientNotOnAppName: input.name,
             ...input,
-          },
-        );
+          });
 
         return { presignedUrl, postId };
       } catch (err) {
@@ -80,11 +79,12 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const { presignedUrl, postId } = await ctx.services.post.uploadVideoPostForUserOnAppUrl({
-          ...input,
-          author: ctx.session.uid,
-          recipient: input.recipient,
-        });
+        const { presignedUrl, postId } =
+          await ctx.services.post.uploadVideoPostForUserOnAppUrl({
+            ...input,
+            author: ctx.session.user.id,
+            recipient: input.recipient,
+          });
 
         return { presignedUrl, postId };
       } catch (err) {
@@ -108,15 +108,15 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-
-        const { presignedUrl, postId } = await ctx.services.post.uploadVideoPostForUserNotOnAppUrl({
-          author: ctx.session.uid,
-          recipientNotOnAppPhoneNumber: input.number,
-          recipientNotOnAppName: input.name,
-          width: input.width,
-          height: input.height,
-          caption: input.caption,
-        });
+        const { presignedUrl, postId } =
+          await ctx.services.post.uploadVideoPostForUserNotOnAppUrl({
+            author: ctx.session.user.id,
+            recipientNotOnAppPhoneNumber: input.number,
+            recipientNotOnAppName: input.name,
+            width: input.width,
+            height: input.height,
+            caption: input.caption,
+          });
 
         return { presignedUrl, postId };
       } catch (err) {
@@ -137,7 +137,7 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         await ctx.services.post.deletePost({
-          userId: ctx.session.uid,
+          userId: ctx.session.user.id,
           postId: input.postId,
         });
       } catch (err) {
@@ -188,7 +188,7 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         return await ctx.services.post.paginatePostsOfUserSelf(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.cursor,
           input.pageSize,
         );
@@ -223,7 +223,7 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         return await ctx.services.post.paginatePostsForFeed(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.cursor ?? null,
           input.pageSize,
         );
@@ -261,7 +261,7 @@ export const postRouter = createTRPCRouter({
           userId: input.userId,
           cursor: input.cursor ?? null,
           pageSize: input.pageSize,
-          currentUserId: ctx.session.uid,
+          currentUserId: ctx.session.user.id,
         });
 
         return result;
@@ -284,7 +284,10 @@ export const postRouter = createTRPCRouter({
     .input(z.object({ postId: z.string() }))
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.post.getPost(input.postId, ctx.session.uid);
+        return await ctx.services.post.getPost(
+          input.postId,
+          ctx.session.user.id,
+        );
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -302,7 +305,10 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { postId } = input;
       try {
-        await ctx.services.post.likePost({ userId: ctx.session.uid, postId });
+        await ctx.services.post.likePost({
+          userId: ctx.session.user.id,
+          postId,
+        });
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -321,7 +327,7 @@ export const postRouter = createTRPCRouter({
       const { postId } = input;
       try {
         return !!(await ctx.services.post.getLike({
-          userId: ctx.session.uid,
+          userId: ctx.session.user.id,
           postId,
         }));
       } catch (err) {
@@ -341,7 +347,10 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { postId } = input;
       try {
-        await ctx.services.post.unlikePost({ userId: ctx.session.uid, postId });
+        await ctx.services.post.unlikePost({
+          userId: ctx.session.user.id,
+          postId,
+        });
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -361,7 +370,7 @@ export const postRouter = createTRPCRouter({
       const { postId, body } = input;
       try {
         await ctx.services.post.commentOnPost({
-          userId: ctx.session.uid,
+          userId: ctx.session.user.id,
           postId,
           body,
         });
@@ -381,7 +390,7 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.uid;
+      const userId = ctx.session.user.id;
       const { commentId, postId } = input;
 
       try {

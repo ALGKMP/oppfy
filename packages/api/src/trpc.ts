@@ -70,6 +70,8 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
     headers: opts.headers,
   });
 
+  console.log("Session from better-auth:", session);
+
   return createInnerTRPCContext({
     session,
   });

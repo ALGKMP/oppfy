@@ -29,7 +29,7 @@
     "@oppfy/validators": "workspace:*",
     "@trpc/client": "catalog:",
     "@trpc/server": "catalog:",
-    "better-auth": "^1.2.3",
+    "better-auth": "catalog:",
     "crypto": "^1.0.1",
     "drizzle": "link:better-auth/adapters/drizzle",
     "jsonwebtoken": "^9.0.2",

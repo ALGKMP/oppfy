@@ -17,6 +17,7 @@
     "noUncheckedIndexedAccess": true,
     "checkJs": true,
     "disableSizeLimit": true,
+    "declaration": false,
     
     "module": "Preserve",
     "moduleResolution": "Bundler",

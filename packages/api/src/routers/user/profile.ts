@@ -15,7 +15,7 @@ import {
 export const profileRouter = createTRPCRouter({
   getProfileId: protectedProcedure.input(z.void()).mutation(async ({ ctx }) => {
     const possibleUser = await ctx.db.query.user.findFirst({
-      where: eq(schema.user.id, ctx.session.uid),
+      where: eq(schema.user.id, ctx.session.user.id),
       with: {
         profile: true,
       },
@@ -40,7 +40,7 @@ export const profileRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.profile.getUploadProfilePictureUrl({
-          userId: ctx.session.uid,
+          userId: ctx.session.user.id,
           contentLength: input.contentLength,
         });
       } catch (err) {
@@ -62,7 +62,7 @@ export const profileRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        await ctx.services.profile.updateProfile(ctx.session.uid, input);
+        await ctx.services.profile.updateProfile(ctx.session.user.id, input);
       } catch (err) {
         if (err instanceof DomainError) {
           switch (err.code) {
@@ -82,7 +82,7 @@ export const profileRouter = createTRPCRouter({
 
   getFullProfileSelf: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.services.profile.getFullProfileSelf(ctx.session.uid);
+      return await ctx.services.profile.getFullProfileSelf(ctx.session.user.id);
     } catch (err) {
       console.error(err);
       throw new TRPCError({
@@ -116,7 +116,7 @@ export const profileRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       return await ctx.services.profile.getNetworkConnectionStatesBetweenUsers({
-        currentUserId: ctx.session.uid,
+        currentUserId: ctx.session.user.id,
         otherUserId: input.userId,
       });
     }),
@@ -131,7 +131,7 @@ export const profileRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         return await ctx.services.profile.getFullProfileOther({
-          currentUserId: ctx.session.uid,
+          currentUserId: ctx.session.user.id,
           otherUserId: input.userId,
         });
       } catch (err) {
@@ -152,7 +152,7 @@ export const profileRouter = createTRPCRouter({
       try {
         return await ctx.services.profile.searchProfilesByUsername(
           input.username,
-          ctx.session.uid,
+          ctx.session.user.id,
         );
       } catch (err) {
         throw new TRPCError({

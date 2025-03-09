@@ -20,7 +20,7 @@ export const followRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.paginate.paginateFollowersSelf(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.cursor,
           input.pageSize,
         );
@@ -46,7 +46,7 @@ export const followRouter = createTRPCRouter({
       try {
         return await ctx.services.paginate.paginateFollowersOthers(
           input.userId,
-          ctx.session.uid,
+          ctx.session.user.id,
           input.cursor,
           input.pageSize,
         );
@@ -70,7 +70,7 @@ export const followRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.paginate.paginateFollowingSelf(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.cursor,
           input.pageSize,
         );
@@ -96,7 +96,7 @@ export const followRouter = createTRPCRouter({
       try {
         return await ctx.services.paginate.paginateFollowingOthers(
           input.userId,
-          ctx.session.uid,
+          ctx.session.user.id,
           input.cursor,
           input.pageSize,
         );
@@ -121,7 +121,7 @@ export const followRouter = createTRPCRouter({
       try {
         const { items, nextCursor } =
           await ctx.services.paginate.paginateFollowRequests(
-            ctx.session.uid,
+            ctx.session.user.id,
             input.cursor,
             input.pageSize,
           );
@@ -144,7 +144,7 @@ export const followRouter = createTRPCRouter({
       try {
         return await ctx.services.follow.acceptFollowRequest(
           input.senderId,
-          ctx.session.uid,
+          ctx.session.user.id,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
@@ -161,7 +161,7 @@ export const followRouter = createTRPCRouter({
       try {
         return await ctx.services.follow.declineFollowRequest(
           input.senderId,
-          ctx.session.uid,
+          ctx.session.user.id,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
@@ -177,7 +177,7 @@ export const followRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.follow.cancelFollowRequest(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.recipientId,
         );
       } catch (err) {
@@ -194,7 +194,7 @@ export const followRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.follow.followUser(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.userId,
         );
       } catch (err) {
@@ -212,7 +212,7 @@ export const followRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.follow.unfollowUser(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.userId,
         );
       } catch (err) {
@@ -237,7 +237,10 @@ export const followRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.follow.removeFollower(ctx.session.uid, input.userId);
+        await ctx.services.follow.removeFollower(
+          ctx.session.user.id,
+          input.userId,
+        );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }

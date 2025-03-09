@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import Constants from "expo-constants";
-import * as SecureStore from "expo-secure-store";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
@@ -65,17 +64,13 @@ export function TRPCProvider(props: { children: React.ReactNode }) {
         httpBatchLink({
           transformer: superjson,
           url: `${getBaseUrl()}/api/trpc`,
-          headers: async () => {
-            const headers = new Map<string, string>();
-            headers.set("x-trpc-source", "expo-react");
-
-            // Get the session cookie from SecureStore
-            const cookie = await SecureStore.getItemAsync("better_auth_cookie");
-            if (cookie) {
-              headers.set("Cookie", cookie);
-            }
-
-            return Object.fromEntries(headers);
+          headers() {
+            const headers = new Map<string, string>(); 
+            const cookies = authClient.getCookie(); 
+            if (cookies) { 
+              headers.set("Cookie", cookies); 
+            } 
+            return Object.fromEntries(headers); 
           },
         }),
       ],

@@ -19,7 +19,7 @@ export const friendRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.paginate.paginateFriendsSelf(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.cursor,
           input.pageSize,
         );
@@ -47,7 +47,7 @@ export const friendRouter = createTRPCRouter({
           input.userId,
           input.cursor,
           input.pageSize,
-          ctx.session.uid,
+          ctx.session.user.id,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
@@ -70,7 +70,7 @@ export const friendRouter = createTRPCRouter({
       try {
         const { items, nextCursor } =
           await ctx.services.paginate.paginateFriendRequests(
-            ctx.session.uid,
+            ctx.session.user.id,
             input.cursor,
             input.pageSize,
           );
@@ -92,7 +92,7 @@ export const friendRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.friend.sendFriendRequest(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.recipientId,
         );
       } catch (err) {
@@ -110,7 +110,7 @@ export const friendRouter = createTRPCRouter({
       try {
         return await ctx.services.friend.acceptFriendRequest(
           input.senderId,
-          ctx.session.uid,
+          ctx.session.user.id,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
@@ -127,7 +127,7 @@ export const friendRouter = createTRPCRouter({
       try {
         return await ctx.services.friend.declineFriendRequest(
           input.senderId,
-          ctx.session.uid,
+          ctx.session.user.id,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
@@ -143,7 +143,7 @@ export const friendRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.friend.cancelFriendRequest(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.recipientId,
         );
       } catch (err) {
@@ -160,7 +160,7 @@ export const friendRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.friend.removeFriend(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.recipientId,
         );
       } catch (err) {

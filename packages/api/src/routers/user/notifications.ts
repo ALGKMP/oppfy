@@ -13,7 +13,7 @@ export const notificationsRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.notifications.storePushToken(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.pushToken,
         );
       } catch (err) {
@@ -26,7 +26,7 @@ export const notificationsRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.notifications.deletePushToken(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.pushToken,
         );
       } catch (err) {
@@ -37,7 +37,7 @@ export const notificationsRouter = createTRPCRouter({
   getUnreadNotificationsCount: protectedProcedure.query(async ({ ctx }) => {
     try {
       return await ctx.services.notifications.getUnreadNotificationsCount(
-        ctx.session.uid,
+        ctx.session.user.id,
       );
     } catch (err) {
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
@@ -59,7 +59,7 @@ export const notificationsRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         return await ctx.services.notifications.paginateNotifications(
-          ctx.session.uid,
+          ctx.session.user.id,
           input.cursor,
           input.pageSize,
         );
@@ -71,7 +71,7 @@ export const notificationsRouter = createTRPCRouter({
   getNotificationSettings: protectedProcedure.query(async ({ ctx }) => {
     try {
       return await ctx.services.notifications.getNotificationSettings(
-        ctx.session.uid,
+        ctx.session.user.id,
       );
     } catch (err) {
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
@@ -92,7 +92,7 @@ export const notificationsRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.notifications.updateNotificationSettings(
-          ctx.session.uid,
+          ctx.session.user.id,
           input,
         );
       } catch (err) {

@@ -95,75 +95,85 @@ const verifyOTPInternal = async (
   }
 };
 
+// export const auth = betterAuth({
+//   // Use the drizzle adapter with the existing db instance
+//   database: drizzleAdapter(db, {
+//     provider: "pg", // PostgreSQL
+//   }),
+
+//   // Set the secret key for encryption
+//   secret: env.BETTER_AUTH_SECRET || env.JWT_ACCESS_SECRET,
+
+//   // Set the base URL
+//   baseURL: env.BETTER_AUTH_URL || "http://localhost:3000",
+
+//   // Add the phone number plugin
+//   plugins: [
+//     phoneNumber({
+//       sendOTP,
+//       // Allow users to sign up with phone number
+//       signUpOnVerification: {
+//         getTempEmail: (phoneNumber: string) =>
+//           `${phoneNumber.replace(/[^0-9]/g, "")}@oppfy.app`,
+//         getTempName: (phoneNumber: string) => `User ${phoneNumber.slice(-4)}`,
+//       },
+//       // Callback after verification
+//       callbackOnVerification: async (
+//         { phoneNumber, user }: { phoneNumber: string; user: any },
+//         request?: Request,
+//       ) => {
+//         console.log(`Phone number ${phoneNumber} verified for user ${user.id}`);
+
+//         // Check if this is an admin number
+//         const isAdmin = ADMIN_PHONE_NUMBERS.includes(phoneNumber);
+
+//         try {
+//           // Check if user exists in our system
+//           const existingUser =
+//             await services.user.getUserByPhoneNumberNoThrow(phoneNumber);
+//           let isNewUser = false;
+
+//           if (existingUser) {
+//             // Update user status to onApp if needed
+//             const isOnApp = await services.user.isOnApp(existingUser.id);
+//             if (!isOnApp) {
+//               await services.user.updateUserOnAppStatus(existingUser.id, true);
+//               isNewUser = true;
+//             }
+//           } else {
+//             // Create new user in our system
+//             const userId = user.id || crypto.randomUUID();
+//             await services.user.createUser(userId, phoneNumber, true);
+//             isNewUser = true;
+//           }
+
+//           console.log(
+//             `User ${user.id} verified with phone number ${phoneNumber}`,
+//           );
+//           if (isAdmin) {
+//             console.log(`Admin user verified: ${user.id}`);
+//           }
+//         } catch (error) {
+//           console.error(
+//             `Error in callbackOnVerification for ${phoneNumber}:`,
+//             error,
+//           );
+//         }
+//       },
+//     }),
+//     // Add Expo plugin for better integration with Expo
+//     expo(),
+//   ],
+//   debug: true,
+// });
+ 
 export const auth = betterAuth({
-  // Use the drizzle adapter with the existing db instance
   database: drizzleAdapter(db, {
-    provider: "pg", // PostgreSQL
+    provider: "pg", // or "pg" or "mysql"
   }),
-
-  // Set the secret key for encryption
-  secret: env.BETTER_AUTH_SECRET || env.JWT_ACCESS_SECRET,
-
-  // Set the base URL
-  baseURL: env.BETTER_AUTH_URL || "http://localhost:3000",
-
-  // Add the phone number plugin
-  plugins: [
-    phoneNumber({
-      sendOTP,
-      // Allow users to sign up with phone number
-      signUpOnVerification: {
-        getTempEmail: (phoneNumber: string) =>
-          `${phoneNumber.replace(/[^0-9]/g, "")}@oppfy.app`,
-        getTempName: (phoneNumber: string) => `User ${phoneNumber.slice(-4)}`,
-      },
-      // Callback after verification
-      callbackOnVerification: async (
-        { phoneNumber, user }: { phoneNumber: string; user: any },
-        request?: Request,
-      ) => {
-        console.log(`Phone number ${phoneNumber} verified for user ${user.id}`);
-
-        // Check if this is an admin number
-        const isAdmin = ADMIN_PHONE_NUMBERS.includes(phoneNumber);
-
-        try {
-          // Check if user exists in our system
-          const existingUser =
-            await services.user.getUserByPhoneNumberNoThrow(phoneNumber);
-          let isNewUser = false;
-
-          if (existingUser) {
-            // Update user status to onApp if needed
-            const isOnApp = await services.user.isOnApp(existingUser.id);
-            if (!isOnApp) {
-              await services.user.updateUserOnAppStatus(existingUser.id, true);
-              isNewUser = true;
-            }
-          } else {
-            // Create new user in our system
-            const userId = user.id || crypto.randomUUID();
-            await services.user.createUser(userId, phoneNumber, true);
-            isNewUser = true;
-          }
-
-          console.log(
-            `User ${user.id} verified with phone number ${phoneNumber}`,
-          );
-          if (isAdmin) {
-            console.log(`Admin user verified: ${user.id}`);
-          }
-        } catch (error) {
-          console.error(
-            `Error in callbackOnVerification for ${phoneNumber}:`,
-            error,
-          );
-        }
-      },
-    }),
-    // Add Expo plugin for better integration with Expo
-    expo(),
-  ],
+    plugins: [
+        expo()
+    ]
 });
 
 // Export the handler for API routes
