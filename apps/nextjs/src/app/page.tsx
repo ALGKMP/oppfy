@@ -662,6 +662,20 @@ export default function HomePage() {
                   }}
                 />
               </motion.a>
+
+              {/* Android Coming Soon indicator */}
+              <div className="mt-3 flex items-center justify-center gap-2">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4 text-white/70"
+                  fill="currentColor"
+                >
+                  <path d="M17.6,9.48l1.84-3.18c0.16-0.31,0.05-0.69-0.26-0.85c-0.31-0.16-0.69-0.05-0.85,0.26l-1.86,3.22 c-1.56-0.65-3.28-1.01-5.07-1.01c-1.79,0-3.51,0.36-5.07,1.01L4.47,5.72c-0.16-0.31-0.55-0.42-0.85-0.26 c-0.31,0.16-0.42,0.55-0.26,0.85l1.84,3.18C1.74,11.13,0,14.08,0,17.5h24C24,14.08,22.26,11.13,17.6,9.48z M6,13.5 c-0.83,0-1.5-0.67-1.5-1.5s0.67-1.5,1.5-1.5s1.5,0.67,1.5,1.5S6.83,13.5,6,13.5z M18,13.5c-0.83,0-1.5-0.67-1.5-1.5 s0.67-1.5,1.5-1.5s1.5,0.67,1.5,1.5S18.83,13.5,18,13.5z" />
+                </svg>
+                <span className="text-xs text-white/70 sm:text-sm">
+                  Android Coming Soon
+                </span>
+              </div>
             </motion.div>
           </motion.div>
         </div>
