@@ -7,13 +7,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: "oppfy",
   version: "1.0.1",
   orientation: "portrait",
-  icon: "./assets/icon.png",
+  icon: "./assets/icons/icon.png",
   userInterfaceStyle: "dark",
-  splash: {
-    image: "./assets/splash.png",
-    resizeMode: "contain",
-    backgroundColor: "#F214FF",
-  },
   updates: {
     enabled: true,
     fallbackToCacheTimeout: 0,
@@ -31,13 +26,19 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     infoPlist: {
       UIBackgroundModes: ["fetch"],
     },
+    icon: {
+      dark: "./assets/icons/icon.png",
+      light: "./assets/icons/icon.png",
+      tinted: "./assets/icons/icon.png",
+    },
   },
   android: {
     package: "com.oppfy.app",
     googleServicesFile: "./google-services.json",
     adaptiveIcon: {
-      foregroundImage: "./assets/icon.png",
-      backgroundColor: "#1F104A",
+      foregroundImage: "./assets/icons/adaptive-icon.png",
+      monochromeImage: "./assets/icons/adaptive-icon.png",
+      backgroundColor: "#F214FF",
     },
   },
   extra: {
@@ -54,6 +55,18 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     "expo-av",
     "expo-font",
+    "expo-router",
+    "react-native-image-marker",
+    "@config-plugins/ffmpeg-kit-react-native",
+    [
+      "expo-splash-screen",
+      {
+        image: "./assets/splash-icon.png",
+        imageWidth: 200,
+        resizeMode: "contain",
+        backgroundColor: "#F214FF",
+      },
+    ],
     [
       "expo-video",
       {
@@ -61,9 +74,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         supportsPictureInPicture: false,
       },
     ],
-    "expo-router",
-    "react-native-image-marker",
-    "@config-plugins/ffmpeg-kit-react-native",
     [
       "expo-build-properties",
       {
