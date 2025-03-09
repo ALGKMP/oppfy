@@ -144,6 +144,9 @@ export default function HomePage() {
   const gradientAngle = useMotionValue(135);
 
   useEffect(() => {
+    // Ensure we're in browser environment before using window
+    if (typeof window === "undefined") return;
+
     // Animate gradient background
     const interval = setInterval(() => {
       gradientAngle.set(135 + Math.sin(Date.now() / 10000) * 30);
@@ -184,18 +187,22 @@ export default function HomePage() {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
 
-      // Balanced 3D phone effect - more noticeable but still intuitive
+      // Subtler, more intuitive 3D phone effect
       if (phoneRef.current) {
         const rect = phoneRef.current.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
 
-        // Calculate normalized direction vector with balanced movement
-        const maxRotation = 6; // Balanced rotation - not too extreme but noticeable
+        // Calculate normalized direction vector with reduced movement
+        const maxRotation = 6; // Balanced rotation
+
+        // Safe access to window properties
+        const viewportWidth = window.innerWidth || 1024;
+        const viewportHeight = window.innerHeight || 768;
 
         // Calculate distance from center, with balanced divisor
-        const distanceX = (e.clientX - centerX) / (window.innerWidth / 3); // Smaller divisor for more movement
-        const distanceY = (e.clientY - centerY) / (window.innerHeight / 3); // Smaller divisor for more movement
+        const distanceX = (e.clientX - centerX) / (viewportWidth / 3);
+        const distanceY = (e.clientY - centerY) / (viewportHeight / 3);
 
         // Apply spring physics for smooth animation - follows cursor
         rotateY.set(distanceX * maxRotation); // Follow cursor horizontally
@@ -490,15 +497,21 @@ export default function HomePage() {
                               className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20 backdrop-blur-md"
                             >
                               <div className="flex h-[60px] w-[60px] items-center justify-center rounded-full bg-gradient-to-br from-[#F214FF] to-[#FF14F0] shadow-lg">
-                                {/* Properly centered play icon */}
+                                {/* Perfectly centered triangle play icon */}
                                 <svg
-                                  width="24"
-                                  height="24"
                                   viewBox="0 0 24 24"
-                                  fill="white"
-                                  className="ml-1"
+                                  width="26"
+                                  height="26"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
                                 >
-                                  <path d="M8 5L19 12L8 19V5Z" />
+                                  <path
+                                    d="M6.5 4.5L18.5 12L6.5 19.5V4.5Z"
+                                    fill="white"
+                                    stroke="white"
+                                    strokeWidth="1"
+                                    strokeLinejoin="round"
+                                  />
                                 </svg>
                               </div>
                             </motion.div>
