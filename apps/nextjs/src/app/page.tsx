@@ -1,125 +1,667 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import type { MotionValue } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useAnimation,
+  useMotionValue,
+  useSpring,
+  useTransform,
+} from "framer-motion";
+
+// Premium animated particle component
+const Particle = ({ delay = 0 }: { delay?: number }) => {
+  const size = Math.random() * 5 + 2;
+  const xOffset = Math.random() * 100;
+  const yOffset = Math.random() * 100;
+  const duration = Math.random() * 10 + 15;
+
+  return (
+    <motion.div
+      className="absolute rounded-full"
+      style={{
+        width: size,
+        height: size,
+        left: `${xOffset}%`,
+        top: `${yOffset}%`,
+        background: `radial-gradient(circle at center, rgba(242, 20, 255, 0.8), rgba(242, 20, 255, 0))`,
+        boxShadow: "0 0 10px 2px rgba(242, 20, 255, 0.3)",
+      }}
+      initial={{ opacity: 0, scale: 0 }}
+      animate={{
+        opacity: [0, 0.8, 0],
+        scale: [0, 1, 0.5],
+        y: [-50, 50],
+        x: [0, Math.random() * 50 - 25],
+      }}
+      transition={{
+        duration: duration,
+        repeat: Infinity,
+        delay: delay,
+        ease: "easeInOut",
+      }}
+    />
+  );
+};
+
+// Animated blurred light gradient
+const LightSource = ({
+  color1,
+  color2,
+  size,
+  position,
+  animate = true,
+  delay = 0,
+}: {
+  color1: string;
+  color2: string;
+  size: number;
+  position: { x: number | string; y: number | string };
+  animate?: boolean;
+  delay?: number;
+}) => {
+  const animation = animate
+    ? {
+        opacity: [0.3, 0.7, 0.3],
+        scale: [1, 1.2, 1],
+      }
+    : {};
+
+  return (
+    <motion.div
+      className="absolute rounded-full blur-[80px]"
+      style={{
+        left: position.x,
+        top: position.y,
+        width: size,
+        height: size,
+        background: `radial-gradient(circle at center, ${color1}, ${color2})`,
+        zIndex: -1,
+      }}
+      initial={{ opacity: 0.3, scale: 1 }}
+      animate={animation}
+      transition={{
+        duration: 8,
+        repeat: Infinity,
+        repeatType: "reverse",
+        ease: "easeInOut",
+        delay: delay,
+      }}
+    />
+  );
+};
+
+// Dynamic 3D spotlight effect
+const SpotlightEffect = ({
+  mouseX,
+  mouseY,
+}: {
+  mouseX: MotionValue<number>;
+  mouseY: MotionValue<number>;
+}) => {
+  const spotlightX = useTransform(
+    mouseX,
+    (value) => `${(value / window.innerWidth) * 100}%`,
+  );
+  const spotlightY = useTransform(
+    mouseY,
+    (value) => `${(value / window.innerHeight) * 100}%`,
+  );
+
+  return (
+    <motion.div
+      className="pointer-events-none absolute inset-0 opacity-40 mix-blend-soft-light"
+      style={{
+        background: `radial-gradient(circle at ${spotlightX} ${spotlightY}, rgba(255, 255, 255, 0.15), transparent 50%)`,
+      }}
+    />
+  );
+};
 
 export default function HomePage() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-black">
-      {/* Background floating elements */}
-      <motion.div
-        className="absolute left-[20%] top-20 h-4 w-4 rounded-full bg-[#F214FF]/20"
-        animate={{
-          y: [0, 20, 0],
-          opacity: [0.2, 0.5, 0.2],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-      <motion.div
-        className="absolute bottom-40 right-[30%] h-6 w-6 rounded-full bg-[#F214FF]/10"
-        animate={{
-          y: [0, -30, 0],
-          opacity: [0.1, 0.3, 0.1],
-        }}
-        transition={{
-          duration: 7,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-      <motion.div
-        className="absolute right-[20%] top-[40%] h-3 w-3 rounded-full bg-[#F214FF]/15"
-        animate={{
-          y: [0, 15, 0],
-          opacity: [0.15, 0.4, 0.15],
-        }}
-        transition={{
-          duration: 5,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hoverButton, setHoverButton] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const phoneRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const containerControls = useAnimation();
+  const buttonControls = useAnimation();
 
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-        <motion.img
-          src="/icon.png"
-          alt="Oppfy Logo"
-          className="h-40 w-40 rounded-xl shadow-lg"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
+  // Enhanced mouse interaction
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  // Spring physics for smoother phone movement
+  const springConfig = { damping: 25, stiffness: 150 };
+  const rotateX = useSpring(0, springConfig);
+  const rotateY = useSpring(0, springConfig);
+  const phoneScale = useSpring(0.95, springConfig);
+
+  // Animated gradient background angle
+  const gradientAngle = useMotionValue(135);
+
+  useEffect(() => {
+    // Animate gradient background
+    const interval = setInterval(() => {
+      gradientAngle.set(135 + Math.sin(Date.now() / 10000) * 30);
+    }, 50);
+
+    const sequence = async () => {
+      await containerControls.start({ opacity: 1 });
+      setIsLoaded(true);
+      phoneScale.set(1);
+
+      // Auto-play video after staggered animation sequence
+      setTimeout(() => {
+        if (videoRef.current) {
+          try {
+            videoRef.current.muted = true;
+            const playPromise = videoRef.current.play();
+
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  setIsVideoPlaying(true);
+                })
+                .catch((error) => {
+                  console.error("Video autoplay failed:", error);
+                });
+            }
+          } catch (err) {
+            console.error("Error playing video:", err);
+          }
+        }
+      }, 1500);
+    };
+
+    sequence();
+
+    const handleMouseMove = (e: MouseEvent) => {
+      // Update mouse position for effects
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+
+      // Enhanced 3D phone effect with spring physics
+      if (phoneRef.current) {
+        const rect = phoneRef.current.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        // Calculate normalized direction vector (with enhanced 3D feel)
+        const maxRotation = 10;
+        const directionX = (e.clientX - centerX) / (window.innerWidth / 4);
+        const directionY = (e.clientY - centerY) / (window.innerHeight / 4);
+
+        // Apply spring physics for smooth animation
+        rotateY.set(directionX * -maxRotation);
+        rotateX.set(directionY * maxRotation);
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      clearInterval(interval);
+    };
+  }, [
+    containerControls,
+    mouseX,
+    mouseY,
+    phoneScale,
+    rotateX,
+    rotateY,
+    gradientAngle,
+  ]);
+
+  // Advanced hover states for CTA button
+  useEffect(() => {
+    if (hoverButton) {
+      buttonControls.start({
+        scale: 1.05,
+        boxShadow: "0 20px 30px -10px rgba(242, 20, 255, 0.5)",
+        transition: { duration: 0.2 },
+      });
+    } else {
+      buttonControls.start({
+        scale: 1,
+        boxShadow: "0 10px 20px -5px rgba(242, 20, 255, 0.3)",
+        transition: { duration: 0.2 },
+      });
+    }
+  }, [hoverButton, buttonControls]);
+
+  // Restart video
+  const toggleVideoPlayback = () => {
+    if (!videoRef.current) return;
+
+    if (isVideoPlaying) {
+      videoRef.current.pause();
+    } else {
+      videoRef.current.currentTime = 0;
+      videoRef.current
+        .play()
+        .catch((err) => console.error("Error playing video:", err));
+    }
+    setIsVideoPlaying(!isVideoPlaying);
+  };
+
+  // Premium animation variants
+  const phoneVariants = {
+    hidden: {
+      opacity: 0,
+      scale: 0.9,
+      y: 100,
+    },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        damping: 20,
+        stiffness: 100,
+        duration: 1.2,
+        delay: 0.5,
+      },
+    },
+  };
+
+  const contentVariants = {
+    hidden: {
+      opacity: 0,
+    },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.6,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: {
+      opacity: 0,
+      y: 30,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        damping: 25,
+        stiffness: 200,
+      },
+    },
+  };
+
+  return (
+    <main className="relative flex h-screen w-full flex-col items-center justify-center overflow-hidden">
+      {/* Premium animated background */}
+      <motion.div
+        className="absolute inset-0 -z-10"
+        style={{
+          background: useTransform(
+            gradientAngle,
+            (angle) => `linear-gradient(${angle}deg, #090020 0%, #170142 100%)`,
+          ),
+        }}
+      >
+        {/* Animated spotlight that follows cursor */}
+        <SpotlightEffect mouseX={mouseX} mouseY={mouseY} />
+
+        {/* Dynamic light sources */}
+        <LightSource
+          color1="rgba(242, 20, 255, 0.5)"
+          color2="rgba(114, 0, 209, 0)"
+          size={800}
+          position={{ x: "10%", y: "0%" }}
+          delay={0}
+        />
+        <LightSource
+          color1="rgba(137, 0, 250, 0.5)"
+          color2="rgba(67, 24, 255, 0)"
+          size={700}
+          position={{ x: "80%", y: "20%" }}
+          delay={2}
+        />
+        <LightSource
+          color1="rgba(67, 24, 255, 0.4)"
+          color2="rgba(242, 20, 255, 0)"
+          size={600}
+          position={{ x: "40%", y: "80%" }}
+          delay={4}
         />
 
-        <motion.h1
-          className="text-center text-4xl font-extrabold tracking-tight text-white sm:text-[5rem]"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-        >
-          Join the <span className="text-[#F214FF]">Oppfy</span> Beta
-        </motion.h1>
+        {/* Premium animated particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(15)].map((_, i) => (
+            <Particle key={i} delay={i * 0.5} />
+          ))}
+        </div>
 
-        <motion.p
-          className="max-w-md text-center text-xl text-gray-400"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-        >
-          Where your friends capture your most authentic moments. Join our
-          exclusive beta and be part of something special.
-        </motion.p>
+        {/* Subtle grain texture overlay */}
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.05] mix-blend-overlay"></div>
+      </motion.div>
 
+      {/* Main content container with enhanced layout - now truly centered */}
+      <motion.div
+        className="relative z-10 mx-auto flex w-full max-w-[1400px] flex-col items-center justify-center px-4 md:flex-row md:items-center md:gap-8 lg:gap-12"
+        initial={{ opacity: 0 }}
+        animate={containerControls}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {/* LEFT SIDE - Enhanced 3D iPhone with video */}
         <motion.div
-          className="flex flex-col items-center gap-6"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
+          className="relative mb-8 flex w-full max-w-[500px] justify-center md:mb-0 md:w-1/2"
+          variants={phoneVariants}
+          initial="hidden"
+          animate="visible"
         >
-          <motion.a
-            href="https://testflight.apple.com/join/EHMR7AxB"
-            className="rounded-xl bg-[#F214FF] px-8 py-4 font-bold text-white transition-opacity hover:opacity-90"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <motion.div
+            ref={phoneRef}
+            className="relative"
+            style={{
+              rotateX: rotateX,
+              rotateY: rotateY,
+              transformStyle: "preserve-3d",
+              transformPerspective: 1000,
+              scale: phoneScale,
+            }}
           >
-            Download Now
-          </motion.a>
+            {/* Premium light effects around phone */}
+            <motion.div
+              className="absolute -right-[15%] -top-[15%] -z-10 h-[130%] w-[130%] rounded-full opacity-60 blur-[80px]"
+              animate={{
+                background: [
+                  "radial-gradient(circle at center, rgba(242, 20, 255, 0.4), rgba(242, 20, 255, 0))",
+                  "radial-gradient(circle at center, rgba(98, 0, 234, 0.4), rgba(98, 0, 234, 0))",
+                  "radial-gradient(circle at center, rgba(242, 20, 255, 0.4), rgba(242, 20, 255, 0))",
+                ],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
 
-          <p className="text-center text-sm text-gray-500">
-            Currently available for iOS users
-          </p>
+            {/* Ultra-realistic 3D iPhone Pro */}
+            <div className="relative h-[600px] w-[300px] md:h-[600px] md:w-[300px]">
+              {/* 3D phone structure with premium shadow */}
+              <div className="absolute -bottom-6 -left-2 -right-6 -top-2 -z-10 translate-x-2 rotate-[-5deg] scale-[0.95] transform-gpu rounded-[40px] bg-black/20 blur-lg"></div>
+
+              {/* Phone outer frame with realistic metallic finish */}
+              <div className="absolute inset-0 transform-gpu rounded-[44px] bg-[#1a1a1c] shadow-lg">
+                {/* Subtle curved edge highlight */}
+                <div className="absolute inset-0 rounded-[44px] bg-gradient-to-tr from-[#2a2a2f] via-transparent to-[#2a2a2f]/80 opacity-50"></div>
+
+                {/* Metallic rim with subtle reflection */}
+                <div
+                  className="absolute inset-1 transform-gpu rounded-[40px] bg-[#131314]"
+                  style={{
+                    boxShadow: "inset 0 0 0 2px rgba(60, 60, 70, 0.5)",
+                  }}
+                >
+                  {/* Side buttons with realistic rendering */}
+                  <div className="absolute -left-[1px] top-[120px] h-[12px] w-[3px] rounded-l-full bg-[#2a2a2c]"></div>
+                  <div className="absolute -left-[1px] top-[140px] h-[12px] w-[3px] rounded-l-full bg-[#2a2a2c]"></div>
+                  <div className="absolute -left-[1px] top-[160px] h-[40px] w-[3px] rounded-l-full bg-[#2a2a2c]"></div>
+                  <div className="absolute -right-[1px] top-[140px] h-[30px] w-[3px] rounded-r-full bg-[#2a2a2c]"></div>
+
+                  {/* Ultra-realistic screen with iPhone XR notch */}
+                  <div className="absolute inset-2 transform-gpu overflow-hidden rounded-[36px] bg-black">
+                    {/* iPhone XR notch - small version */}
+                    <div className="absolute left-1/2 top-0 z-10 -translate-x-1/2">
+                      {/* Small notch shape */}
+                      <div className="h-[20px] w-[100px] rounded-b-xl bg-black">
+                        {/* Notch internal components - minimalist */}
+                        <div className="relative flex h-full w-full items-center justify-center">
+                          {/* Speaker */}
+                          <div className="absolute top-[6px] h-[2px] w-[8px] rounded-full bg-[#1a1a1a]"></div>
+                          {/* Camera */}
+                          <div className="absolute right-[30px] top-[6px] h-[4px] w-[4px] rounded-full bg-[#0c0c0c]"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Premium video display with enhanced reflections */}
+                    <motion.div
+                      className="h-full w-full overflow-hidden"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.8 }}
+                    >
+                      <div className="relative h-full w-full overflow-hidden">
+                        {/* Ultra-premium video display */}
+                        <video
+                          ref={videoRef}
+                          className="absolute inset-0 h-full w-full object-cover"
+                          playsInline
+                          muted
+                          onClick={toggleVideoPlayback}
+                        >
+                          <source src="/vid.mp4" type="video/mp4" />
+                        </video>
+
+                        {/* Ultra-realistic screen reflections */}
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/10 opacity-60"></div>
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20 opacity-30"></div>
+                        <div className="pointer-events-none absolute inset-0 rounded-[36px] shadow-inner"></div>
+
+                        {/* Premium glass glare effect */}
+                        <motion.div
+                          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-30"
+                          animate={{
+                            backgroundPosition: ["0% 0%", "100% 100%"],
+                          }}
+                          transition={{
+                            duration: 5,
+                            ease: "easeInOut",
+                            repeat: Infinity,
+                            repeatType: "reverse",
+                          }}
+                        ></motion.div>
+
+                        {/* Enhanced play/pause overlay */}
+                        <motion.div
+                          className="absolute inset-0 flex items-center justify-center bg-black/0"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: isVideoPlaying ? 0 : 0.6 }}
+                          transition={{ duration: 0.3 }}
+                          onClick={toggleVideoPlayback}
+                        >
+                          {!isVideoPlaying && (
+                            <motion.div
+                              initial={{ scale: 0.8, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 20,
+                                delay: 0.1,
+                              }}
+                              className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20 backdrop-blur-md"
+                            >
+                              <div className="flex h-[60px] w-[60px] items-center justify-center rounded-full bg-gradient-to-br from-[#F214FF] to-[#FF14F0] shadow-lg">
+                                <svg
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 0 24 24"
+                                  className="ml-1"
+                                >
+                                  <path d="M8 5V19L19 12L8 5Z" fill="white" />
+                                </svg>
+                              </div>
+                            </motion.div>
+                          )}
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
 
-        <motion.div
-          className="mt-12 grid max-w-2xl grid-cols-3 gap-8"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.8, duration: 0.5 }}
-        >
-          <div className="text-center">
-            <span className="mb-2 block text-3xl">🤝</span>
-            <h3 className="mb-1 font-bold text-[#F214FF]">Friend-Powered</h3>
-            <p className="text-sm text-gray-400">
-              Let your friends be your photographers
-            </p>
-          </div>
-          <div className="text-center">
-            <span className="mb-2 block text-3xl">📸</span>
-            <h3 className="mb-1 font-bold text-[#F214FF]">Real Moments</h3>
-            <p className="text-sm text-gray-400">Capture life as it happens</p>
-          </div>
-          <div className="text-center">
-            <span className="mb-2 block text-3xl">✨</span>
-            <h3 className="mb-1 font-bold text-[#F214FF]">Be Yourself</h3>
-            <p className="text-sm text-gray-400">No filters, just fun</p>
-          </div>
-        </motion.div>
-      </div>
+        {/* RIGHT SIDE - Content with premium design */}
+        <div className="w-full max-w-[600px] md:w-1/2 md:pl-4 lg:pl-8">
+          <motion.div
+            className="max-w-lg"
+            variants={contentVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {/* Simplified premium logo */}
+            <motion.div variants={itemVariants}>
+              <div className="mb-8 flex items-center gap-4">
+                <motion.div
+                  className="relative overflow-hidden rounded-xl"
+                  whileHover={{
+                    rotate: [0, -5, 5, 0],
+                    transition: { duration: 0.5 },
+                  }}
+                >
+                  <Image
+                    src="/icon.png"
+                    alt="Oppfy Logo"
+                    className="h-14 w-14 rounded-xl object-cover"
+                    width={56}
+                    height={56}
+                  />
+                </motion.div>
+                <div>
+                  <h2 className="text-3xl font-bold">
+                    <span className="bg-gradient-to-r from-[#F214FF] to-[#FF14F0] bg-clip-text text-transparent">
+                      oppfy
+                    </span>
+                  </h2>
+                  <p className="text-sm text-white/60">BETA • iOS</p>
+                </div>
+              </div>
+            </motion.div>
 
-      {/* Optional: Add a subtle gradient background */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-black via-black to-[#F214FF]/10" />
+            {/* Premium headline with fixed typography spacing */}
+            <motion.h1
+              variants={itemVariants}
+              className="mb-8 pb-1 text-5xl font-extrabold leading-tight tracking-tight text-white md:text-6xl lg:text-7xl"
+            >
+              Friends <br className="hidden md:block" /> capture{" "}
+              <br className="hidden md:block" />
+              <span className=" bg-gradient-to-r from-[#F214FF] to-[#FF14F0] bg-clip-text pb-1 text-transparent">
+                your moments
+              </span>
+            </motion.h1>
+
+            {/* Premium description */}
+            <motion.p
+              variants={itemVariants}
+              className="mb-8 text-xl leading-relaxed text-white/80"
+            >
+              A revolutionary social experience where{" "}
+              <span className="font-bold text-white">
+                friends become your photographers
+              </span>
+              , creating your authentic social timeline. No selfies, no
+              posing—just real life.
+            </motion.p>
+
+            {/* Enhanced feature highlights */}
+            <motion.div
+              variants={itemVariants}
+              className="mb-8 grid grid-cols-2 gap-3"
+            >
+              {[
+                {
+                  icon: "👁️",
+                  text: "See yourself through their eyes",
+                  color: "from-pink-500/40 to-purple-500/40",
+                },
+                {
+                  icon: "✨",
+                  text: "Pure authenticity",
+                  color: "from-violet-500/40 to-indigo-500/40",
+                },
+                {
+                  icon: "🔄",
+                  text: "Return the favor",
+                  color: "from-fuchsia-500/40 to-pink-500/40",
+                },
+                {
+                  icon: "🎭",
+                  text: "The real you",
+                  color: "from-purple-500/40 to-violet-500/40",
+                },
+              ].map((feature, i) => (
+                <motion.div
+                  key={i}
+                  className={`flex items-center gap-3 rounded-xl bg-gradient-to-r ${feature.color} p-0.5 backdrop-blur-sm`}
+                  whileHover={{
+                    y: -5,
+                    transition: { duration: 0.2 },
+                  }}
+                >
+                  <div className="flex h-full w-full items-center gap-3 rounded-[0.7rem] bg-[#0e0024]/90 py-2.5 pl-3 pr-4 backdrop-blur-md">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-lg shadow-inner">
+                      {feature.icon}
+                    </span>
+                    <span className="text-sm font-medium text-white">
+                      {feature.text}
+                    </span>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Elegantly redesigned premium button - full width */}
+            <motion.div variants={itemVariants} className="w-full">
+              <motion.a
+                href="https://testflight.apple.com/join/EHMR7AxB"
+                className="group relative flex w-full"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {/* Elegant button with primary color */}
+                <div className="w-full overflow-hidden rounded-full bg-[#F214FF] px-6 py-4 shadow-lg shadow-[#F214FF]/30">
+                  <div className="flex items-center justify-center gap-3">
+                    {/* Apple icon */}
+                    <svg
+                      viewBox="0 0 384 512"
+                      className="h-5 w-5 text-white"
+                      fill="currentColor"
+                    >
+                      <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
+                    </svg>
+                    <span className="text-lg font-semibold text-white">
+                      Download for iOS
+                    </span>
+                  </div>
+                </div>
+
+                {/* Elegant glow effect */}
+                <motion.div
+                  className="absolute -inset-4 -z-10 rounded-full opacity-0 blur-xl"
+                  style={{
+                    background:
+                      "radial-gradient(circle, rgba(242, 20, 255, 0.8) 0%, rgba(242, 20, 255, 0) 70%)",
+                  }}
+                  animate={{ opacity: [0, 0.5, 0] }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                  }}
+                />
+              </motion.a>
+            </motion.div>
+          </motion.div>
+        </div>
+      </motion.div>
     </main>
   );
 }
