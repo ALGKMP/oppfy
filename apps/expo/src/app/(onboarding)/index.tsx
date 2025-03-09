@@ -19,7 +19,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { SplashScreen, useRouter } from "expo-router";
-import Splash from "@assets/icons/splash-icon.png";
+import Splash from "@assets/icons/logo.png";
 import { getToken } from "tamagui";
 
 import { H2, ScreenView, View } from "~/components/ui";
@@ -383,7 +383,7 @@ export default function Start() {
           contentFit="contain"
           style={[
             {
-              width: "100%",
+              width: "86%",
               aspectRatio: 4,
               resizeMode: "contain",
             },
