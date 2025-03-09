@@ -43,6 +43,9 @@ declare global {
       JWT_ACCESS_SECRET: string;
       JWT_REFRESH_SECRET: string;
 
+      BETTER_AUTH_SECRET: string;
+      BETTER_AUTH_URL: string;
+
       CLOUDFRONT_PUBLIC_KEY: string;
       CLOUDFRONT_PUBLIC_KEY_ID: string;
       CLOUDFRONT_PROFILE_DISTRIBUTION_ID: string;
