@@ -129,7 +129,7 @@ export const auth = betterAuth({
 
         try {
           // Check if user exists in our system
-          let existingUser =
+          const existingUser =
             await services.user.getUserByPhoneNumberNoThrow(phoneNumber);
           let isNewUser = false;
 
