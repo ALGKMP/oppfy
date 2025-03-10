@@ -4,7 +4,7 @@ import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import * as StoreReview from "expo-store-review";
-import Logo from "@assets/icon.png";
+import Logo from "@assets/icons/icon.png";
 import {
   BellRing,
   ChevronRight,

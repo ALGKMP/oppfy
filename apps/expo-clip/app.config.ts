@@ -7,16 +7,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: "oppfy-clip",
   version: "1.0.0",
   orientation: "portrait",
-  icon: "./assets/icon.png",
+  icon: "./assets/icons/icon.png",
   userInterfaceStyle: "dark",
-  splash: {
-    image: "./assets/splash.png",
-    resizeMode: "contain",
-    backgroundColor: "#F214FF",
-  },
   runtimeVersion: "1.0.0",
   assetBundlePatterns: ["**/*"],
-
   ios: {
     supportsTablet: false,
     bundleIdentifier: "com.oppfy.app.Clip",
