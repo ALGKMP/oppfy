@@ -8,11 +8,15 @@ export class BlockRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async getPaginatedBlockedUsers(
-    forUserId: string,
-    cursor: { createdAt: Date; profileId: string } | null = null,
+  async getPaginatedBlockedUsers({
+    forUserId,
+    cursor = null,
     pageSize = 10,
-  ) {
+  }: {
+    forUserId: string;
+    cursor?: { createdAt: Date; profileId: string } | null;
+    pageSize?: number;
+  }) {
     return await this.db
       .select({
         userId: schema.user.id,
@@ -47,7 +51,13 @@ export class BlockRepository {
   }
 
   @handleDatabaseErrors
-  async getBlockedUser(userId: string, blockedUserId: string) {
+  async getBlockedUser({
+    userId,
+    blockedUserId,
+  }: {
+    userId: string;
+    blockedUserId: string;
+  }) {
     return await this.db.query.block.findFirst({
       where: and(
         eq(schema.block.userWhoIsBlockingId, userId),
@@ -57,16 +67,30 @@ export class BlockRepository {
   }
 
   @handleDatabaseErrors
-  async blockUser(userId: string, blockedUserId: string) {
-    const blockedUser = await this.db.insert(schema.block).values({
-      userWhoIsBlockingId: userId,
-      userWhoIsBlockedId: blockedUserId,
-    });
+  async blockUser({
+    userId,
+    blockedUserId,
+  }: {
+    userId: string;
+    blockedUserId: string;
+  }) {
+    const blockedUser = await this.db
+      .insert(schema.block)
+      .values({
+        userWhoIsBlockingId: userId,
+        userWhoIsBlockedId: blockedUserId,
+      });
     return blockedUser[0];
   }
 
   @handleDatabaseErrors
-  async unblockUser(userId: string, blockedUserId: string) {
+  async unblockUser({
+    userId,
+    blockedUserId,
+  }: {
+    userId: string;
+    blockedUserId: string;
+  }) {
     const result = await this.db
       .delete(schema.block)
       .where(

@@ -13,13 +13,19 @@ export class UserRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async createUser(
-    userId: string,
-    phoneNumber: string,
-    username: string,
-    isOnApp: boolean,
-    name?: string,
-  ) {
+  async createUser({
+    userId,
+    phoneNumber,
+    username,
+    isOnApp,
+    name,
+  }: {
+    userId: string;
+    phoneNumber: string;
+    username: string;
+    isOnApp: boolean;
+    name?: string;
+  }) {
     await this.db.transaction(async (tx) => {
       // Create an empty profile for the user
       const [profile] = await tx
@@ -62,43 +68,47 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async getUser(userId: string) {
+  async getUser({ userId }: { userId: string }) {
     return await this.db.query.user.findFirst({
       where: eq(schema.user.id, userId),
     });
   }
 
   @handleDatabaseErrors
-  async getUserWithProfile(userId: string) {
+  async getUserWithProfile({ userId }: { userId: string }) {
     return await this.db.query.user.findFirst({
       where: eq(schema.user.id, userId),
-      with: {
-        profile: true,
-      },
+      with: { profile: true },
     });
   }
 
   @handleDatabaseErrors
-  async getUserStatus(userId: string) {
+  async getUserStatus({ userId }: { userId: string }) {
     return await this.db.query.userStatus.findFirst({
       where: eq(schema.userStatus.userId, userId),
     });
   }
 
   @handleDatabaseErrors
-  async getUserByPhoneNumber(phoneNumber: string) {
+  async getUserByPhoneNumber({ phoneNumber }: { phoneNumber: string }) {
     return await this.db.query.user.findFirst({
       where: eq(schema.user.phoneNumber, phoneNumber),
     });
   }
 
   @handleDatabaseErrors
-  async deleteUser(userId: string) {
+  async deleteUser({ userId }: { userId: string }) {
     await this.db.delete(schema.user).where(eq(schema.user.id, userId));
   }
 
   @handleDatabaseErrors
-  async updatePrivacy(userId: string, newPrivacySetting: PrivacySettings) {
+  async updatePrivacy({
+    userId,
+    newPrivacySetting,
+  }: {
+    userId: string;
+    newPrivacySetting: PrivacySettings;
+  }) {
     return await this.db
       .update(schema.user)
       .set({ privacySetting: newPrivacySetting })
@@ -106,7 +116,13 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async getRandomActiveProfilesForRecs(userId: string, limit: number) {
+  async getRandomActiveProfilesForRecs({
+    userId,
+    limit,
+  }: {
+    userId: string;
+    limit: number;
+  }) {
     return await this.db
       .select({ userId: schema.user.id })
       .from(schema.user)
@@ -115,7 +131,7 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async existingPhoneNumbers(phoneNumbers: string[]) {
+  async existingPhoneNumbers({ phoneNumbers }: { phoneNumbers: string[] }) {
     const existingNumbers = await this.db
       .select({ phoneNumber: schema.user.phoneNumber })
       .from(schema.user)
@@ -134,7 +150,7 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async updateStatsOnUserDelete(userId: string) {
+  async updateStatsOnUserDelete({ userId }: { userId: string }) {
     console.log("running this bitch ass hoe");
     return await this.db.transaction(async (tx) => {
       // Update post stats
@@ -232,7 +248,13 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async updateUserOnAppStatus(userId: string, isOnApp: boolean) {
+  async updateUserOnAppStatus({
+    userId,
+    isOnApp,
+  }: {
+    userId: string;
+    isOnApp: boolean;
+  }) {
     await this.db
       .update(schema.userStatus)
       .set({ isOnApp })
@@ -240,10 +262,13 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async updateUserTutorialComplete(
-    userId: string,
-    hasCompletedTutorial: boolean,
-  ) {
+  async updateUserTutorialComplete({
+    userId,
+    hasCompletedTutorial,
+  }: {
+    userId: string;
+    hasCompletedTutorial: boolean;
+  }) {
     await this.db
       .update(schema.userStatus)
       .set({ hasCompletedTutorial })
@@ -251,10 +276,13 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async updateUserOnboardingComplete(
-    userId: string,
-    hasCompletedOnboarding: boolean,
-  ) {
+  async updateUserOnboardingComplete({
+    userId,
+    hasCompletedOnboarding,
+  }: {
+    userId: string;
+    hasCompletedOnboarding: boolean;
+  }) {
     await this.db
       .update(schema.userStatus)
       .set({ hasCompletedOnboarding })

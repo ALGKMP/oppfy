@@ -8,7 +8,7 @@ export class PostStatsRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async incrementCommentsCount(postId: string) {
+  async incrementCommentsCount({ postId }: { postId: string }) {
     const currentStats = await this.db.query.postStats.findFirst({
       where: eq(schema.postStats.postId, postId),
     });
@@ -22,7 +22,7 @@ export class PostStatsRepository {
   }
 
   @handleDatabaseErrors
-  async decrementCommentsCount(postId: string) {
+  async decrementCommentsCount({ postId }: { postId: string }) {
     const currentStats = await this.db.query.postStats.findFirst({
       where: eq(schema.postStats.postId, postId),
     });
@@ -36,7 +36,7 @@ export class PostStatsRepository {
   }
 
   @handleDatabaseErrors
-  async incrementLikesCount(postId: string) {
+  async incrementLikesCount({ postId }: { postId: string }) {
     const currentStats = await this.db.query.postStats.findFirst({
       where: eq(schema.postStats.postId, postId),
     });
@@ -50,7 +50,7 @@ export class PostStatsRepository {
   }
 
   @handleDatabaseErrors
-  async decrementLikesCount(postId: string) {
+  async decrementLikesCount({ postId }: { postId: string }) {
     const currentStats = await this.db.query.postStats.findFirst({
       where: eq(schema.postStats.postId, postId),
     });

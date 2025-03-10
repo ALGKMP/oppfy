@@ -8,7 +8,13 @@ export class FriendRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async createFriend(senderId: string, recipientId: string) {
+  async createFriend({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
     return await this.db.transaction(async (tx) => {
       // Create friend relationship, ensuring userIdA < userIdB
       const [userIdA, userIdB] =
@@ -23,8 +29,14 @@ export class FriendRepository {
         .delete(schema.friendRequest)
         .where(
           or(
-            eq(schema.friendRequest.senderId, senderId),
-            eq(schema.friendRequest.recipientId, recipientId),
+            and(
+              eq(schema.friendRequest.senderId, senderId),
+              eq(schema.friendRequest.recipientId, recipientId),
+            ),
+            and(
+              eq(schema.friendRequest.senderId, recipientId),
+              eq(schema.friendRequest.recipientId, senderId),
+            ),
           ),
         );
 
@@ -49,21 +61,25 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async removeFriend(userId1: string, userId2: string) {
+  async removeFriend({
+    userIdA,
+    userIdB,
+  }: {
+    userIdA: string;
+    userIdB: string;
+  }) {
     return await this.db.transaction(async (tx) => {
-      // Remove friend relationship
+      // Ensure userIdA < userIdB for the query
+      const [userId1, userId2] =
+        userIdA < userIdB ? [userIdA, userIdB] : [userIdB, userIdA];
+
+      // Delete the friendship
       await tx
         .delete(schema.friend)
         .where(
-          or(
-            and(
-              eq(schema.friend.userIdA, userId1),
-              eq(schema.friend.userIdB, userId2),
-            ),
-            and(
-              eq(schema.friend.userIdA, userId2),
-              eq(schema.friend.userIdB, userId1),
-            ),
+          and(
+            eq(schema.friend.userIdA, userId1),
+            eq(schema.friend.userIdB, userId2),
           ),
         );
 
@@ -82,31 +98,37 @@ export class FriendRepository {
           .where(eq(schema.profileStats.profileId, userProfile.id));
       };
 
-      await updateProfileStats(userId1);
-      await updateProfileStats(userId2);
-
-      return true;
+      await updateProfileStats(userIdA);
+      await updateProfileStats(userIdB);
     });
   }
 
   @handleDatabaseErrors
-  async getFriendship(userId1: string, userId2: string) {
+  async getFriendship({
+    userIdA,
+    userIdB,
+  }: {
+    userIdA: string;
+    userIdB: string;
+  }) {
+    // Ensure userIdA < userIdB for the query
+    const [userId1, userId2] =
+      userIdA < userIdB ? [userIdA, userIdB] : [userIdB, userIdA];
+
     return await this.db.query.friend.findFirst({
-      where: or(
-        and(
-          eq(schema.friend.userIdA, userId1),
-          eq(schema.friend.userIdB, userId2),
-        ),
-        and(
-          eq(schema.friend.userIdA, userId2),
-          eq(schema.friend.userIdB, userId1),
-        ),
+      where: and(
+        eq(schema.friend.userIdA, userId1),
+        eq(schema.friend.userIdB, userId2),
       ),
     });
   }
 
   @handleDatabaseErrors
-  async countFriends(userId: string): Promise<number | undefined> {
+  async countFriends({
+    userId,
+  }: {
+    userId: string;
+  }): Promise<number | undefined> {
     const result = await this.db
       .select({ count: count() })
       .from(schema.friend)
@@ -116,55 +138,77 @@ export class FriendRepository {
           eq(schema.friend.userIdB, userId),
         ),
       );
+
     return result[0]?.count;
   }
 
-  async countFriendRequests(userId: string) {
+  @handleDatabaseErrors
+  async countFriendRequests({ userId }: { userId: string }) {
     const result = await this.db
       .select({ count: count() })
       .from(schema.friendRequest)
       .where(eq(schema.friendRequest.recipientId, userId));
 
-    return result[0]?.count ?? 0;
+    return result[0]?.count;
   }
 
   @handleDatabaseErrors
-  async createFriendRequest(senderId: string, recipientId: string) {
-    const result = await this.db
+  async createFriendRequest({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
+    await this.db
       .insert(schema.friendRequest)
       .values({ senderId, recipientId });
-    return result[0];
   }
 
   @handleDatabaseErrors
-  async deleteFriendRequest(senderId: string, recipientId: string) {
-    const result = await this.db
+  async deleteFriendRequest({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
+    await this.db
       .delete(schema.friendRequest)
       .where(
-        or(
+        and(
           eq(schema.friendRequest.senderId, senderId),
           eq(schema.friendRequest.recipientId, recipientId),
         ),
       );
-    return result[0];
   }
 
   @handleDatabaseErrors
-  async getFriendRequest(senderId: string, targetUserId: string) {
+  async getFriendRequest({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
     return await this.db.query.friendRequest.findFirst({
       where: and(
         eq(schema.friendRequest.senderId, senderId),
-        eq(schema.friendRequest.recipientId, targetUserId),
+        eq(schema.friendRequest.recipientId, recipientId),
       ),
     });
   }
 
   @handleDatabaseErrors
-  async paginateFriendsSelf(
-    forUserId: string,
-    cursor: { createdAt: Date; profileId: string } | null = null,
+  async paginateFriendsSelf({
+    forUserId,
+    cursor = null,
     pageSize = 10,
-  ) {
+  }: {
+    forUserId: string;
+    cursor?: { createdAt: Date; profileId: string } | null;
+    pageSize?: number;
+  }) {
     const friends = await this.db
       .select({
         userId: schema.user.id,
@@ -220,12 +264,17 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async paginateFriendsOther(
-    forUserId: string,
-    currentUserId: string,
-    cursor: { createdAt: Date; profileId: string } | null = null,
+  async paginateFriendsOther({
+    forUserId,
+    currentUserId,
+    cursor = null,
     pageSize = 10,
-  ) {
+  }: {
+    forUserId: string;
+    currentUserId: string;
+    cursor?: { createdAt: Date; profileId: string } | null;
+    pageSize?: number;
+  }) {
     const friends = await this.db
       .select({
         userId: schema.user.id,
@@ -297,11 +346,15 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async paginateFriendRequests(
-    forUserId: string,
-    cursor: { createdAt: Date; profileId: string } | null = null,
+  async paginateFriendRequests({
+    forUserId,
+    cursor = null,
     pageSize = 10,
-  ) {
+  }: {
+    forUserId: string;
+    cursor?: { createdAt: Date; profileId: string } | null;
+    pageSize?: number;
+  }) {
     return await this.db
       .select({
         userId: schema.user.id,
@@ -331,5 +384,16 @@ export class FriendRepository {
       )
       .orderBy(asc(schema.friendRequest.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
+  }
+
+  @handleDatabaseErrors
+  async friendshipExists({
+    userIdA,
+    userIdB,
+  }: {
+    userIdA: string;
+    userIdB: string;
+  }) {
+    return !!(await this.getFriendship({ userIdA, userIdB }));
   }
 }

@@ -3,39 +3,65 @@ import { eq, sql } from "drizzle-orm";
 import { db, schema } from "@oppfy/db";
 
 export class ProfileStatsRepository {
-  async decrementFollowerCount(profileId: string, decrementBy: number) {
+  async decrementFollowerCount({
+    userId,
+    amount,
+  }: {
+    userId: string;
+    amount: number;
+  }) {
     await db
       .update(schema.profileStats)
-      .set({
-        followers: sql`${schema.profileStats.followers} - ${decrementBy}`,
-      })
-      .where(eq(schema.profileStats.profileId, profileId));
+      .set({ followers: sql`${schema.profileStats.followers} - ${amount}` })
+      .where(eq(schema.profileStats.profileId, userId));
   }
 
-  async decrementFollowingCount(profileId: string, decrementBy: number) {
+  async decrementFollowingCount({
+    userId,
+    amount,
+  }: {
+    userId: string;
+    amount: number;
+  }) {
     await db
       .update(schema.profileStats)
-      .set({
-        following: sql`${schema.profileStats.following} - ${decrementBy}`,
-      })
-      .where(eq(schema.profileStats.profileId, profileId));
+      .set({ following: sql`${schema.profileStats.following} - ${amount}` })
+      .where(eq(schema.profileStats.profileId, userId));
   }
 
-  async decrementFriendsCount(profileId: string, decrementBy: number) {
+  async decrementFriendsCount({
+    userId,
+    amount,
+  }: {
+    userId: string;
+    amount: number;
+  }) {
     await db
       .update(schema.profileStats)
-      .set({ friends: sql`${schema.profileStats.friends} - ${decrementBy}` })
-      .where(eq(schema.profileStats.profileId, profileId));
+      .set({ friends: sql`${schema.profileStats.friends} - ${amount}` })
+      .where(eq(schema.profileStats.profileId, userId));
   }
 
-  async decrementPostsCount(profileId: string, decrementBy: number) {
+  async decrementPostsCount({
+    profileId,
+    decrementBy,
+  }: {
+    profileId: string;
+    decrementBy: number;
+  }) {
     await db
       .update(schema.profileStats)
       .set({ posts: sql`${schema.profileStats.posts} - ${decrementBy}` })
       .where(eq(schema.profileStats.profileId, profileId));
   }
 
-  async incrementFollowerCount(profileId: string, incrementBy: number) {
+  async incrementFollowerCount({
+    profileId,
+    incrementBy,
+  }: {
+    profileId: string;
+    incrementBy: number;
+  }) {
     await db
       .update(schema.profileStats)
       .set({
@@ -44,7 +70,13 @@ export class ProfileStatsRepository {
       .where(eq(schema.profileStats.profileId, profileId));
   }
 
-  async incrementFollowingCount(profileId: string, incrementBy: number) {
+  async incrementFollowingCount({
+    profileId,
+    incrementBy,
+  }: {
+    profileId: string;
+    incrementBy: number;
+  }) {
     await db
       .update(schema.profileStats)
       .set({
@@ -53,21 +85,33 @@ export class ProfileStatsRepository {
       .where(eq(schema.profileStats.profileId, profileId));
   }
 
-  async incrementFriendsCount(profileId: string, incrementBy: number) {
+  async incrementFriendsCount({
+    profileId,
+    incrementBy,
+  }: {
+    profileId: string;
+    incrementBy: number;
+  }) {
     await db
       .update(schema.profileStats)
       .set({ friends: sql`${schema.profileStats.friends} + ${incrementBy}` })
       .where(eq(schema.profileStats.profileId, profileId));
   }
 
-  async incrementPostsCount(profileId: string, incrementBy: number) {
+  async incrementPostsCount({
+    profileId,
+    incrementBy,
+  }: {
+    profileId: string;
+    incrementBy: number;
+  }) {
     await db
       .update(schema.profileStats)
       .set({ posts: sql`${schema.profileStats.posts} + ${incrementBy}` })
       .where(eq(schema.profileStats.profileId, profileId));
   }
 
-  async getProfileStats(profileId: string) {
+  async getProfileStats({ profileId }: { profileId: string }) {
     return await db.query.profileStats.findFirst({
       where: eq(schema.profileStats.profileId, profileId),
     });

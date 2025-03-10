@@ -8,10 +8,10 @@ export class LikeRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async addLike(postId: string, userId: string) {
+  async addLike({ postId, userId }: { postId: string; userId: string }) {
     return await this.db.insert(schema.like).values({
-      postId: postId,
-      userId: userId,
+      postId,
+      userId,
       createdAt: new Date(), // Assuming current time is set by default
     });
   }
