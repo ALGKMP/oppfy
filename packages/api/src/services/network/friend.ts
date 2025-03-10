@@ -17,7 +17,10 @@ export class FriendService {
 
   async isFollowing(senderId: string, recipientId: string) {
     if (senderId === recipientId) return true; // Temporary fix
-    return !!(await this.followRepository.getFollower(senderId, recipientId));
+    return !!(await this.followRepository.getFollower({
+      followerId: senderId,
+      followeeId: recipientId,
+    }));
   }
 
   async sendFriendRequest(senderId: string, recipientId: string) {
@@ -56,8 +59,12 @@ export class FriendService {
 
     const isFollowing = await this.isFollowing(senderId, recipientId);
 
-    const sender = await this.userRepository.getUserWithProfile(senderId);
-    const recipient = await this.userRepository.getUserWithProfile(recipientId);
+    const sender = await this.userRepository.getUserWithProfile({
+      userId: senderId,
+    });
+    const recipient = await this.userRepository.getUserWithProfile({
+      userId: recipientId,
+    });
 
     if (!sender || !recipient) {
       throw new DomainError(
@@ -68,21 +75,28 @@ export class FriendService {
 
     if (!isFollowing) {
       if (recipient.privacySetting === "private") {
-        await this.followRepository.createFollowRequest(senderId, recipientId);
+        await this.followRepository.createFollowRequest({
+          senderId,
+          recipientId,
+        });
       } else {
-        await this.followRepository.createFollower(senderId, recipientId);
+        await this.followRepository.createFollower({
+          senderUserId: senderId,
+          recipientUserId: recipientId,
+        });
       }
     }
 
-    await this.friendRepository.createFriendRequest(senderId, recipientId);
+    await this.friendRepository.createFriendRequest({ senderId, recipientId });
 
     const settings = await this.notificationsRepository.getNotificationSettings(
-      recipient.notificationSettingsId,
+      { notificationSettingsId: recipient.notificationSettingsId },
     );
 
     if (settings?.friendRequests) {
-      const pushTokens =
-        await this.notificationsRepository.getPushTokens(recipientId);
+      const pushTokens = await this.notificationsRepository.getPushTokens({
+        userId: recipientId,
+      });
       await sns.sendFriendRequestNotification(
         pushTokens,
         senderId,
@@ -97,10 +111,10 @@ export class FriendService {
       throw new DomainError(ErrorCode.CANNOT_FRIEND_SELF);
     }
 
-    const friendRequest = await this.friendRepository.getFriendRequest(
+    const friendRequest = await this.friendRepository.getFriendRequest({
       senderId,
       recipientId,
-    );
+    });
 
     if (friendRequest === undefined) {
       throw new DomainError(
@@ -109,8 +123,12 @@ export class FriendService {
       );
     }
 
-    const sender = await this.userRepository.getUserWithProfile(senderId);
-    const recipient = await this.userRepository.getUserWithProfile(recipientId);
+    const sender = await this.userRepository.getUserWithProfile({
+      userId: senderId,
+    });
+    const recipient = await this.userRepository.getUserWithProfile({
+      userId: recipientId,
+    });
 
     if (!sender || !recipient) {
       throw new DomainError(
@@ -119,44 +137,51 @@ export class FriendService {
       );
     }
 
-    await this.friendRepository.deleteFriendRequest(senderId, recipientId);
-    await this.friendRepository.createFriend(senderId, recipientId);
+    await this.friendRepository.deleteFriendRequest({ senderId, recipientId });
+    await this.friendRepository.createFriend({ senderId, recipientId });
 
-    const senderFollowsRecipient = await this.followRepository.getFollower(
-      senderId,
-      recipientId,
-    );
-    const recipientFollowsSender = await this.followRepository.getFollower(
-      recipientId,
-      senderId,
-    );
+    const senderFollowsRecipient = await this.followRepository.getFollower({
+      followerId: senderId,
+      followeeId: recipientId,
+    });
+    const recipientFollowsSender = await this.followRepository.getFollower({
+      followerId: recipientId,
+      followeeId: senderId,
+    });
 
     if (!senderFollowsRecipient) {
-      await this.followRepository.createFollower(senderId, recipientId);
+      await this.followRepository.createFollower({
+        senderUserId: senderId,
+        recipientUserId: recipientId,
+      });
     }
 
     if (!recipientFollowsSender) {
-      await this.followRepository.createFollower(recipientId, senderId);
+      await this.followRepository.createFollower({
+        senderUserId: recipientId,
+        recipientUserId: senderId,
+      });
 
       // Store follow notification
-      await this.notificationsRepository.storeNotification(
-        recipientId,
-        senderId,
-        {
+      await this.notificationsRepository.storeNotification({
+        senderId: recipientId,
+        recipientId: senderId,
+        notificationData: {
           eventType: "follow",
           entityType: "profile",
           entityId: recipientId,
         },
-      );
+      });
 
       const settings =
-        await this.notificationsRepository.getNotificationSettings(
-          sender.notificationSettingsId,
-        );
+        await this.notificationsRepository.getNotificationSettings({
+          notificationSettingsId: sender.notificationSettingsId,
+        });
 
       if (settings?.followRequests) {
-        const pushTokens =
-          await this.notificationsRepository.getPushTokens(senderId);
+        const pushTokens = await this.notificationsRepository.getPushTokens({
+          userId: senderId,
+        });
         await sns.sendFollowAcceptedNotification(
           pushTokens,
           recipientId,
@@ -167,33 +192,34 @@ export class FriendService {
     }
 
     // Store friend notifications
-    await this.notificationsRepository.storeNotification(
-      recipientId,
-      senderId,
-      {
+    await this.notificationsRepository.storeNotification({
+      senderId: recipientId,
+      recipientId: senderId,
+      notificationData: {
         eventType: "friend",
         entityType: "profile",
         entityId: recipient.id,
       },
-    );
+    });
 
-    await this.notificationsRepository.storeNotification(
+    await this.notificationsRepository.storeNotification({
       senderId,
       recipientId,
-      {
+      notificationData: {
         eventType: "friend",
         entityType: "profile",
         entityId: recipient.id,
       },
-    );
+    });
 
     const settings = await this.notificationsRepository.getNotificationSettings(
-      sender.notificationSettingsId,
+      { notificationSettingsId: sender.notificationSettingsId },
     );
 
     if (settings?.friendRequests) {
-      const pushTokens =
-        await this.notificationsRepository.getPushTokens(senderId);
+      const pushTokens = await this.notificationsRepository.getPushTokens({
+        userId: senderId,
+      });
       await sns.sendFriendAcceptedNotification(
         pushTokens,
         recipientId,
@@ -204,10 +230,10 @@ export class FriendService {
   }
 
   async declineFriendRequest(senderId: string, recipientId: string) {
-    const friendRequest = await this.friendRepository.getFriendRequest(
+    const friendRequest = await this.friendRepository.getFriendRequest({
       senderId,
       recipientId,
-    );
+    });
 
     if (friendRequest === undefined) {
       throw new DomainError(
@@ -216,14 +242,14 @@ export class FriendService {
       );
     }
 
-    await this.friendRepository.deleteFriendRequest(senderId, recipientId);
+    await this.friendRepository.deleteFriendRequest({ senderId, recipientId });
   }
 
   async cancelFriendRequest(senderId: string, recipientId: string) {
-    const friendRequest = await this.friendRepository.getFriendRequest(
+    const friendRequest = await this.friendRepository.getFriendRequest({
       senderId,
       recipientId,
-    );
+    });
     if (friendRequest === undefined) {
       throw new DomainError(
         ErrorCode.FRIEND_REQUEST_NOT_FOUND,
@@ -231,21 +257,24 @@ export class FriendService {
       );
     }
 
-    return await this.friendRepository.deleteFriendRequest(
+    return await this.friendRepository.deleteFriendRequest({
       senderId,
       recipientId,
-    );
+    });
   }
 
   async getFriendRequest(userId: string, targetUserId: string) {
-    return await this.friendRepository.getFriendRequest(userId, targetUserId);
+    return await this.friendRepository.getFriendRequest({
+      senderId: userId,
+      recipientId: targetUserId,
+    });
   }
 
   async removeFriend(targetUserId: string, otherUserId: string) {
-    const friendship = await this.friendRepository.getFriendship(
-      targetUserId,
-      otherUserId,
-    );
+    const friendship = await this.friendRepository.getFriendship({
+      userIdA: targetUserId,
+      userIdB: otherUserId,
+    });
 
     if (friendship === undefined) {
       throw new DomainError(
@@ -254,15 +283,14 @@ export class FriendService {
       );
     }
 
-    return await this.friendRepository.removeFriend(targetUserId, otherUserId);
+    return await this.friendRepository.removeFriend({
+      userIdA: targetUserId,
+      userIdB: otherUserId,
+    });
   }
 
   public async countFriendRequests(userId: string) {
-    const count = await this.friendRepository.countFriendRequests(userId);
-    if (count === undefined) {
-      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIEND_REQUESTS);
-    }
-    return count;
+    return await this.friendRepository.countFriendRequests(userId);
   }
 
   public async determineFriendState(userId: string, targetUserId: string) {
@@ -279,14 +307,14 @@ export class FriendService {
   }
 
   async friendshipExists(userId1: string, userId2: string) {
-    const friendshipExists = await this.friendRepository.getFriendship(
-      userId1,
-      userId2,
-    );
-    const reverseFriendshipExists = await this.friendRepository.getFriendship(
-      userId2,
-      userId1,
-    );
+    const friendshipExists = await this.friendRepository.getFriendship({
+      userIdA: userId1,
+      userIdB: userId2,
+    });
+    const reverseFriendshipExists = await this.friendRepository.getFriendship({
+      userIdA: userId2,
+      userIdB: userId1,
+    });
     return !!friendshipExists || !!reverseFriendshipExists;
   }
 }

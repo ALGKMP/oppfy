@@ -1,3 +1,5 @@
+import { cloudfront } from "@oppfy/cloudfront";
+
 import { DomainError, ErrorCode } from "../../errors";
 import { NotificationsRepository } from "../../repositories/user/notifications";
 import type {
@@ -7,23 +9,21 @@ import type {
 } from "../../repositories/user/notifications";
 import { UserRepository } from "../../repositories/user/user";
 
-import { cloudfront } from "@oppfy/cloudfront";
-
 export class NotificationsService {
   private notificationsRepository = new NotificationsRepository();
   private userRepository = new UserRepository();
 
   async getNotificationSettings(userId: string) {
-    const user = await this.userRepository.getUser(userId);
+    const user = await this.userRepository.getUser({ userId });
 
     if (!user) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
     const notificationSettings =
-      await this.notificationsRepository.getNotificationSettings(
-        user.notificationSettingsId,
-      );
+      await this.notificationsRepository.getNotificationSettings({
+        notificationSettingsId: user.notificationSettingsId,
+      });
 
     if (notificationSettings === undefined) {
       throw new DomainError(ErrorCode.NOTIFICATION_SETTINGS_NOT_FOUND);
@@ -33,7 +33,7 @@ export class NotificationsService {
   }
 
   async getUnreadNotificationsCount(userId: string) {
-    return this.notificationsRepository.getUnreadNotificationsCount(userId);
+    return this.notificationsRepository.getUnreadNotificationsCount({ userId });
   }
 
   async getRecentNotifications(options: {
@@ -53,11 +53,11 @@ export class NotificationsService {
     cursor: { createdAt: Date; id: string } | null = null,
     pageSize = 10,
   ) {
-    const items = await this.notificationsRepository.paginateNotifications(
+    const items = await this.notificationsRepository.paginateNotifications({
       userId,
       cursor,
       pageSize,
-    );
+    });
 
     const itemsWithProfilePictureUrls = await Promise.all(
       items.map(async (notification) => {
@@ -67,10 +67,7 @@ export class NotificationsService {
           ? await cloudfront.getSignedProfilePictureUrl(profilePictureKey)
           : null;
 
-        return {
-          ...rest,
-          profilePictureUrl,
-        };
+        return { ...rest, profilePictureUrl };
       }),
     );
 
@@ -88,36 +85,36 @@ export class NotificationsService {
     userId: string,
     newNotificationSettings: NotificationSettings,
   ) {
-    const user = await this.userRepository.getUser(userId);
+    const user = await this.userRepository.getUser({ userId });
 
     if (!user) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
     const notificationSettings =
-      await this.notificationsRepository.getNotificationSettings(
-        user.notificationSettingsId,
-      );
+      await this.notificationsRepository.getNotificationSettings({
+        notificationSettingsId: user.notificationSettingsId,
+      });
 
     if (notificationSettings === undefined) {
       throw new DomainError(ErrorCode.NOTIFICATION_SETTINGS_NOT_FOUND);
     }
-    await this.notificationsRepository.updateNotificationSettings(
-      user.notificationSettingsId,
-      newNotificationSettings,
-    );
+    await this.notificationsRepository.updateNotificationSettings({
+      notificationSettingsId: user.notificationSettingsId,
+      notificationSettings: newNotificationSettings,
+    });
   }
 
   async storePushToken(userId: string, pushToken: string) {
-    await this.notificationsRepository.storePushToken(userId, pushToken);
+    await this.notificationsRepository.storePushToken({ userId, pushToken });
   }
 
   async deletePushToken(userId: string, pushToken: string) {
-    await this.notificationsRepository.deletePushToken(userId, pushToken);
+    await this.notificationsRepository.deletePushToken({ userId, pushToken });
   }
 
   async deleteNotification(id: string) {
-    await this.notificationsRepository.deleteNotificationById(id);
+    await this.notificationsRepository.deleteNotificationById({ id });
   }
 
   async deleteNotifications(options: {

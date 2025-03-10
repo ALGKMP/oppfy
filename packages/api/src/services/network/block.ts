@@ -29,8 +29,14 @@ export class BlockService {
 
     // Check if there is already a blocked relationship
     const [isBlocked, isBlockedByOther] = await Promise.all([
-      this.blockRepository.getBlockedUser(userId, userIdBeingBlocked),
-      this.blockRepository.getBlockedUser(userIdBeingBlocked, userId),
+      this.blockRepository.getBlockedUser({
+        userId,
+        blockedUserId: userIdBeingBlocked,
+      }),
+      this.blockRepository.getBlockedUser({
+        userId: userIdBeingBlocked,
+        blockedUserId: userId,
+      }),
     ]);
 
     if (isBlocked) {
@@ -56,12 +62,30 @@ export class BlockService {
       this.followService.isFollowing(userId, userIdBeingBlocked),
       this.followService.isFollowing(userIdBeingBlocked, userId),
       this.friendService.friendshipExists(userId, userIdBeingBlocked),
-      this.friendRepository.getFriendRequest(userId, userIdBeingBlocked),
-      this.followRepository.getFollower(userId, userIdBeingBlocked),
-      this.friendRepository.getFriendRequest(userIdBeingBlocked, userId),
-      this.followRepository.getFollower(userIdBeingBlocked, userId),
-      this.followRepository.getFollowRequest(userId, userIdBeingBlocked),
-      this.followRepository.getFollowRequest(userIdBeingBlocked, userId),
+      this.friendRepository.getFriendRequest({
+        senderId: userId,
+        recipientId: userIdBeingBlocked,
+      }),
+      this.followRepository.getFollower({
+        followerId: userId,
+        followeeId: userIdBeingBlocked,
+      }),
+      this.friendRepository.getFriendRequest({
+        senderId: userIdBeingBlocked,
+        recipientId: userId,
+      }),
+      this.followRepository.getFollower({
+        followerId: userIdBeingBlocked,
+        followeeId: userId,
+      }),
+      this.followRepository.getFollowRequest({
+        senderId: userId,
+        recipientId: userIdBeingBlocked,
+      }),
+      this.followRepository.getFollowRequest({
+        senderId: userIdBeingBlocked,
+        recipientId: userId,
+      }),
     ]);
 
     // Clean up all relationships
@@ -70,40 +94,64 @@ export class BlockService {
     // Remove following relationships and update stats
     if (followingUserBeingBlocked) {
       cleanupPromises.push(
-        this.followRepository.removeFollower(userId, userIdBeingBlocked),
-        this.profileStatsRepository.decrementFollowingCount(userId, 1),
+        this.followRepository.removeFollower({
+          followerId: userId,
+          followeeId: userIdBeingBlocked,
+        }),
+        this.profileStatsRepository.decrementFollowingCount({
+          userId,
+          amount: 1,
+        }),
       );
     }
 
     if (followedByUserBeingBlocked) {
       cleanupPromises.push(
-        this.followRepository.removeFollower(userIdBeingBlocked, userId),
-        this.profileStatsRepository.decrementFollowerCount(userId, 1),
+        this.followRepository.removeFollower({
+          followerId: userIdBeingBlocked,
+          followeeId: userId,
+        }),
+        this.profileStatsRepository.decrementFollowerCount({
+          userId,
+          amount: 1,
+        }),
       );
     }
 
     // Remove friendship and update stats
     if (isFriends) {
       cleanupPromises.push(
-        this.friendRepository.removeFriend(userId, userIdBeingBlocked),
-        this.profileStatsRepository.decrementFriendsCount(userId, 1),
-        this.profileStatsRepository.decrementFriendsCount(
-          userIdBeingBlocked,
-          1,
-        ),
+        this.friendRepository.removeFriend({
+          userIdA: userId,
+          userIdB: userIdBeingBlocked,
+        }),
+        this.profileStatsRepository.decrementFriendsCount({
+          userId,
+          amount: 1,
+        }),
+        this.profileStatsRepository.decrementFriendsCount({
+          userId: userIdBeingBlocked,
+          amount: 1,
+        }),
       );
     }
 
     // Clean up any pending friend requests
     if (userFriendRequest) {
       cleanupPromises.push(
-        this.friendRepository.deleteFriendRequest(userId, userIdBeingBlocked),
+        this.friendRepository.deleteFriendRequest({
+          senderId: userId,
+          recipientId: userIdBeingBlocked,
+        }),
       );
     }
 
     if (blockedUserFriendRequest) {
       cleanupPromises.push(
-        this.friendRepository.deleteFriendRequest(userIdBeingBlocked, userId),
+        this.friendRepository.deleteFriendRequest({
+          senderId: userIdBeingBlocked,
+          recipientId: userId,
+        }),
       );
     }
 
@@ -123,29 +171,38 @@ export class BlockService {
     // Clean up any existing follower relationships
     if (userFollowRequest) {
       cleanupPromises.push(
-        this.followRepository.removeFollower(userId, userIdBeingBlocked),
+        this.followRepository.removeFollower({
+          followerId: userId,
+          followeeId: userIdBeingBlocked,
+        }),
       );
     }
 
     if (blockedUserFollowRequest) {
       cleanupPromises.push(
-        this.followRepository.removeFollower(userIdBeingBlocked, userId),
+        this.followRepository.removeFollower({
+          followerId: userIdBeingBlocked,
+          followeeId: userId,
+        }),
       );
     }
 
     // Clean up notifications between the users
     cleanupPromises.push(
-      this.notificationsRepository.deleteNotificationsBetweenUsers(
-        userId,
-        userIdBeingBlocked,
-      ),
+      this.notificationsRepository.deleteNotificationsBetweenUsers({
+        userIdA: userId,
+        userIdB: userIdBeingBlocked,
+      }),
     );
 
     try {
       // Execute all cleanup operations and create block
       await Promise.all([
         ...cleanupPromises,
-        this.blockRepository.blockUser(userId, userIdBeingBlocked),
+        this.blockRepository.blockUser({
+          userId,
+          blockedUserId: userIdBeingBlocked,
+        }),
       ]);
     } catch (error) {
       throw new DomainError(
@@ -157,10 +214,10 @@ export class BlockService {
   }
 
   async unblockUser(userId: string, blockedUserId: string) {
-    const isBlocked = await this.blockRepository.getBlockedUser(
+    const isBlocked = await this.blockRepository.getBlockedUser({
       userId,
       blockedUserId,
-    );
+    });
 
     if (!isBlocked) {
       throw new DomainError(
@@ -170,7 +227,7 @@ export class BlockService {
     }
 
     try {
-      await this.blockRepository.unblockUser(userId, blockedUserId);
+      await this.blockRepository.unblockUser({ userId, blockedUserId });
     } catch (error) {
       throw new DomainError(
         ErrorCode.FAILED_TO_UNBLOCK_USER,
@@ -182,8 +239,14 @@ export class BlockService {
 
   async areEitherUsersBlocked(userId: string, otherUserId: string) {
     const [userBlocked, otherUserBlocked] = await Promise.all([
-      this.blockRepository.getBlockedUser(userId, otherUserId),
-      this.blockRepository.getBlockedUser(otherUserId, userId),
+      this.blockRepository.getBlockedUser({
+        userId,
+        blockedUserId: otherUserId,
+      }),
+      this.blockRepository.getBlockedUser({
+        userId: otherUserId,
+        blockedUserId: userId,
+      }),
     ]);
     return !!userBlocked || !!otherUserBlocked;
   }

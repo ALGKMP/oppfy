@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
 
-import { sqs } from "@oppfy/sqs";
 import { cloudfront } from "@oppfy/cloudfront";
+import { sqs } from "@oppfy/sqs";
 
 import { DomainError, ErrorCode } from "../../errors";
 import {
@@ -18,7 +18,7 @@ export class ContactService {
   private profileRepository = new ProfileRepository();
 
   async syncContacts(userId: string, contacts: string[]) {
-    const user = await this.userRepository.getUser(userId);
+    const user = await this.userRepository.getUser({ userId });
 
     if (user === undefined) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
@@ -35,7 +35,10 @@ export class ContactService {
     );
 
     // update the contacts in the db
-    await this.contactsRepository.updateUserContacts(userId, filteredContacts);
+    await this.contactsRepository.updateUserContacts({
+      userId,
+      hashedPhoneNumbers: filteredContacts,
+    });
 
     try {
       await sqs.sendContactSyncMessage({
@@ -52,7 +55,7 @@ export class ContactService {
   }
 
   async deleteContacts(userId: string) {
-    const user = await this.userRepository.getUser(userId);
+    const user = await this.userRepository.getUser({ userId });
 
     if (user === undefined) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
@@ -64,7 +67,7 @@ export class ContactService {
       .update(userPhoneNumber)
       .digest("hex");
 
-    await this.contactsRepository.deleteContacts(userId);
+    await this.contactsRepository.deleteContacts({ userId });
 
     try {
       await sqs.sendContactSyncMessage({
@@ -84,8 +87,9 @@ export class ContactService {
     if (phoneNumbers.length === 0) {
       return [];
     }
-    const existingPhoneNumbers =
-      await this.userRepository.existingPhoneNumbers(phoneNumbers);
+    const existingPhoneNumbers = await this.userRepository.existingPhoneNumbers(
+      { phoneNumbers },
+    );
 
     return phoneNumbers.filter(
       (number) => !existingPhoneNumbers.includes(number),
@@ -93,17 +97,17 @@ export class ContactService {
   }
 
   async getRecommendationsIds(userId: string) {
-    const user = await this.userRepository.getUser(userId);
+    const user = await this.userRepository.getUser({ userId });
 
     if (user === undefined) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
-    return await this.contactsRepository.getRecommendationsInternal(userId);
+    return await this.contactsRepository.getRecommendationsInternal({ userId });
   }
 
   async getRecommendationProfilesSelf(userId: string) {
-    const user = await this.userRepository.getUser(userId);
+    const user = await this.userRepository.getUser({ userId });
 
     if (user === undefined) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
@@ -119,15 +123,19 @@ export class ContactService {
 
     if (allRecommendations.length === 0) {
       const randomProfiles =
-        await this.userRepository.getRandomActiveProfilesForRecs(userId, 10);
+        await this.userRepository.getRandomActiveProfilesForRecs({
+          userId,
+          limit: 10,
+        });
       allRecommendations = randomProfiles
         .map((profile) => profile.userId)
         .filter((id) => id !== userId);
     }
 
     // start a transaction to get all the usernames and profilePhotos
-    const profiles =
-      await this.profileRepository.getBatchProfiles(allRecommendations);
+    const profiles = await this.profileRepository.getBatchProfiles({
+      userIds: allRecommendations,
+    });
     // Fetch presigned URLs for profile pictures in parallel
     const profilesWithUrls = await Promise.all(
       profiles.map(async (profile) => {
