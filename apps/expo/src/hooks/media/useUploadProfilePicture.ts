@@ -16,7 +16,7 @@ export default function useUploadProfilePicture({
   const utils = api.useUtils();
 
   const generatePresignedUrl =
-    api.profile.generatePresignedUrlForProfilePicture.useMutation();
+    api.profile.createProfilePicturePresignedUrl.useMutation();
 
   // Pick image mutation
   const pickImage = useMutation({

@@ -1,7 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { eq, schema } from "@oppfy/db";
 import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
@@ -13,25 +12,7 @@ import {
 } from "../../trpc";
 
 export const profileRouter = createTRPCRouter({
-  getProfileId: protectedProcedure.input(z.void()).mutation(async ({ ctx }) => {
-    const possibleUser = await ctx.db.query.user.findFirst({
-      where: eq(schema.user.id, ctx.session.uid),
-      with: {
-        profile: true,
-      },
-    });
-
-    if (possibleUser === undefined) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "User not found",
-      });
-    }
-
-    return possibleUser.profile.id;
-  }),
-
-  generatePresignedUrlForProfilePicture: protectedProcedure
+  createProfilePicturePresignedUrl: protectedProcedure
     .input(
       z.object({
         contentLength: z.number().refine((size) => size < 5 * 1024 * 1024),
@@ -47,6 +28,7 @@ export const profileRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to get profile picture upload URL",
+          cause: err,
         });
       }
     }),
