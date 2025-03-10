@@ -45,7 +45,7 @@ export const useComments = ({ postId, endpoint, userId }: UseCommentsProps) => {
       });
       if (prevData === undefined) return;
 
-      const currentUser = utils.profile.getFullProfileSelf.getData();
+      const currentUser = utils.profile.getProfileSelf.getData();
 
       // Optimistically update the data
       utils.post.paginateComments.setInfiniteData(

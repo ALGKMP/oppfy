@@ -21,7 +21,7 @@ const TextInputWithAvatar = ({ onPostComment }: CommentInputProps) => {
   const insets = useSafeAreaInsets();
 
   const utils = api.useUtils();
-  const profile = utils.profile.getFullProfileSelf.getData();
+  const profile = utils.profile.getProfileSelf.getData();
 
   const [inputValue, setInputValue] = useState("");
 

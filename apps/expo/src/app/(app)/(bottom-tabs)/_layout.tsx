@@ -8,7 +8,7 @@ import { Avatar, Icon, Text, View } from "~/components/ui";
 import { api } from "~/utils/api";
 
 const BottomTabsLayout = () => {
-  const { data: profileData } = api.profile.getFullProfileSelf.useQuery();
+  const { data: profileData } = api.profile.getProfileSelf.useQuery();
   const { data: unreadCount } =
     api.notifications.getUnreadNotificationsCount.useQuery();
 

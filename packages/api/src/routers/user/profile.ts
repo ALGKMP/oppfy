@@ -62,9 +62,9 @@ export const profileRouter = createTRPCRouter({
       }
     }),
 
-  getFullProfileSelf: protectedProcedure.query(async ({ ctx }) => {
+  getProfileSelf: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.services.profile.getFullProfileSelf(ctx.session.uid);
+      return await ctx.services.profile.getProfileSelf(ctx.session.uid);
     } catch (err) {
       console.error(err);
       throw new TRPCError({
@@ -104,7 +104,7 @@ export const profileRouter = createTRPCRouter({
     }),
 
   // TRPC Procedure for getting a full user profile
-  getFullProfileOther: protectedWithUserAccess
+  getProfileOther: protectedWithUserAccess
     .input(
       z.object({
         userId: z.string(),
@@ -112,7 +112,7 @@ export const profileRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.profile.getFullProfileOther({
+        return await ctx.services.profile.getProfileOther({
           currentUserId: ctx.session.uid,
           otherUserId: input.userId,
         });

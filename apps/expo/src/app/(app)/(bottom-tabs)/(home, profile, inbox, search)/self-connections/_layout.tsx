@@ -8,7 +8,7 @@ const ConnectionsLayout = () => {
   const navigation = useNavigation();
 
   const utils = api.useUtils();
-  const profileData = utils.profile.getFullProfileSelf.getData();
+  const profileData = utils.profile.getProfileSelf.getData();
 
   useLayoutEffect(() => {
     navigation.setOptions({

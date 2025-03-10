@@ -48,7 +48,7 @@ const useNotificationObserver = () => {
         const { entityId, entityType } = notification.request.content
           .data as EntityData;
         if (entityType === "profile") {
-          void utils.profile.getFullProfileOther.invalidate({
+          void utils.profile.getProfileOther.invalidate({
             userId: entityId,
           });
         }
@@ -85,7 +85,7 @@ const useNotificationObserver = () => {
     };
   }, [
     router,
-    utils.profile.getFullProfileOther,
+    utils.profile.getProfileOther,
     utils.notifications.paginateNotifications,
     utils.request.countRequests,
     utils.notifications.getUnreadNotificationsCount,
