@@ -151,7 +151,7 @@ const CreatePost = () => {
   const { show, hide } = useBottomSheetController();
   const { sharePostToNewUser } = useShare();
 
-  const completedTutorial = api.user.setTutorialComplete.useMutation();
+  const markTutorialComplete = api.user.markTutorialComplete.useMutation();
 
   const [caption, setCaption] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -225,7 +225,7 @@ const CreatePost = () => {
         });
       }
 
-      await completedTutorial.mutateAsync();
+      await markTutorialComplete.mutateAsync();
       router.dismissTo("/(app)/(bottom-tabs)/(camera)");
     } catch (error) {
       console.error(error);

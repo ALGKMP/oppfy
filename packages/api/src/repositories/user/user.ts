@@ -98,10 +98,7 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async updatePrivacySetting(
-    userId: string,
-    newPrivacySetting: PrivacySettings,
-  ) {
+  async updatePrivacy(userId: string, newPrivacySetting: PrivacySettings) {
     return await this.db
       .update(schema.user)
       .set({ privacySetting: newPrivacySetting })

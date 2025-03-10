@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import * as Haptics from "expo-haptics";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { sharedValidators } from "@oppfy/validators";
 
@@ -10,10 +10,15 @@ import {
   OnboardingScreen,
 } from "~/components/ui/Onboarding";
 import { useAuth } from "~/hooks/useAuth";
+import { api } from "~/utils/api";
 
 const PhoneNumberOTP = () => {
   const { phoneNumber } = useLocalSearchParams<{ phoneNumber: string }>();
+
+  const router = useRouter();
+
   const { verifyPhoneNumber } = useAuth();
+  const userStatusMutation = api.user.userStatus.useMutation();
 
   const [phoneNumberOTP, setPhoneNumberOTP] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -37,8 +42,29 @@ const PhoneNumberOTP = () => {
     setError(null);
 
     try {
-      await verifyPhoneNumber(phoneNumber, phoneNumberOTP);
-      // Navigation is now handled in the SessionContext
+      const { isNewUser } = await verifyPhoneNumber(
+        phoneNumber,
+        phoneNumberOTP,
+      );
+
+      if (isNewUser) {
+        router.replace("/user-info/name");
+        return;
+      }
+
+      const userStatus = await userStatusMutation.mutateAsync();
+
+      if (!userStatus.hasCompletedOnboarding) {
+        router.replace("/user-info/name");
+        return;
+      }
+
+      if (!userStatus.hasCompletedTutorial) {
+        router.replace("/tutorial/intro");
+        return;
+      }
+
+      router.replace("/(app)/(bottom-tabs)/(home)");
     } catch (err: unknown) {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       if (err && typeof err === "object" && "message" in err) {

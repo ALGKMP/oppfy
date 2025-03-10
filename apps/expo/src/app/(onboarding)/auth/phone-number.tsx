@@ -45,22 +45,19 @@ const PhoneNumber = () => {
     const e164PhoneNumber = `${countryData.dialingCode}${phoneNumber}`;
 
     try {
-      const success = await sendVerificationCode(e164PhoneNumber);
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-      if (success) {
-        await Haptics.notificationAsync(
-          Haptics.NotificationFeedbackType.Success,
-        );
-        router.push({
-          params: {
-            phoneNumber: e164PhoneNumber,
-          },
-          pathname: "/auth/otp",
-        });
-      }
+      await sendVerificationCode(e164PhoneNumber);
+
+      router.push({
+        params: {
+          phoneNumber: e164PhoneNumber,
+        },
+        pathname: "/auth/otp",
+      });
     } catch (err: unknown) {
-      console.error("Error sending verification code:", err);
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+
       if (err && typeof err === "object" && "message" in err) {
         setError((err as { message: string }).message);
       } else {

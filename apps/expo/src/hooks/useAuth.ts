@@ -9,9 +9,6 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(true);
 
   const deleteUserMutation = api.user.deleteUser.useMutation();
-  const tutorialCompleteMutation = api.user.checkTutorialComplete.useMutation();
-  const userOnboardingCompletedMutation =
-    api.user.checkOnboardingComplete.useMutation();
 
   // Subscribe to auth state changes
   useEffect(() => {
@@ -24,28 +21,10 @@ export function useAuth() {
 
   const sendVerificationCode = async (phoneNumber: string) => {
     await auth.sendVerificationCode(phoneNumber);
-    return true;
   };
 
   const verifyPhoneNumber = async (phoneNumber: string, code: string) => {
-    await auth.verifyPhoneNumber(phoneNumber, code);
-
-    // Check if user needs onboarding
-    const userOnboardingCompleted =
-      await userOnboardingCompletedMutation.mutateAsync();
-    const tutorialComplete = await tutorialCompleteMutation.mutateAsync();
-
-    if (!userOnboardingCompleted) {
-      router.replace("/user-info/name");
-      return;
-    }
-
-    if (!tutorialComplete) {
-      router.replace("/tutorial/intro");
-      return;
-    }
-
-    router.replace("/(app)/(bottom-tabs)/(home)");
+    return await auth.verifyPhoneNumber(phoneNumber, code);
   };
 
   const signOut = () => {

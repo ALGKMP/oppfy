@@ -24,15 +24,6 @@ export const contactsRouter = createTRPCRouter({
       });
     }
   }),
-  getRecommendationIds: protectedProcedure.query(async ({ ctx }) => {
-    try {
-      return await ctx.services.contact.getRecommendationsIds(ctx.session.uid);
-    } catch (err) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-      });
-    }
-  }),
 
   getRecommendationProfilesSelf: protectedProcedure.query(async ({ ctx }) => {
     try {
