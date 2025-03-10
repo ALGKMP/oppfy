@@ -123,11 +123,11 @@ export class PostService {
       const recipientId = recipient ? recipient.id : randomUUID();
 
       if (!recipient) {
-        await this.userService.createUserWithUsername(
-          recipientId,
-          recipientNotOnAppPhoneNumber,
-          recipientNotOnAppName,
-        );
+        await this.userService.createUserWithUsername({
+          userId: recipientId,
+          name: recipientNotOnAppName,
+          phoneNumber: recipientNotOnAppPhoneNumber,
+        });
       }
 
       const currentDate = Date.now();
@@ -221,11 +221,11 @@ export class PostService {
       const recipientId = recipient ? recipient.id : randomUUID();
 
       if (!recipient) {
-        await this.userService.createUserWithUsername(
-          recipientId,
-          recipientNotOnAppPhoneNumber,
-          recipientNotOnAppName,
-        );
+        await this.userService.createUserWithUsername({
+          userId: recipientId,
+          phoneNumber: recipientNotOnAppPhoneNumber,
+          name: recipientNotOnAppName,
+        });
       }
 
       const postId = randomUUID();
@@ -249,18 +249,25 @@ export class PostService {
     }
   }
 
-  async paginatePostsOfUserSelf(
-    userId: string,
-    cursor: PostCursor | null = null,
-    pageSize: number,
-  ): Promise<PaginatedResponse<Post, PostCursor>> {
+  async paginatePostsOfUserSelf({
+    userId,
+    cursor,
+    pageSize,
+  }: {
+    userId: string;
+    cursor: PostCursor | null;
+    pageSize: number;
+  }): Promise<PaginatedResponse<Post, PostCursor>> {
     try {
       const data = await this.postRepository.paginatePostsOfUser({
         userId,
         cursor,
         pageSize,
       });
-      const updatedData = await this._processPaginatedPostData(data, pageSize);
+      const updatedData = await this._processPaginatedPostData({
+        data,
+        pageSize,
+      });
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for userId: ${userId}: `, error);
@@ -288,7 +295,10 @@ export class PostService {
         cursor,
         pageSize,
       });
-      const updatedData = await this._processPaginatedPostData(data, pageSize);
+      const updatedData = await this._processPaginatedPostData({
+        data,
+        pageSize,
+      });
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for profile: ${userId}: `, error);
@@ -299,18 +309,25 @@ export class PostService {
     }
   }
 
-  async paginatePostsOfRecommended(
-    userId: string,
-    cursor: PostCursor | null = null,
-    pageSize: number,
-  ) {
+  async paginatePostsOfRecommended({
+    userId,
+    cursor,
+    pageSize,
+  }: {
+    userId: string;
+    cursor: PostCursor | null;
+    pageSize: number;
+  }): Promise<PaginatedResponse<Post, PostCursor>> {
     try {
       const data = await this.postRepository.paginatePostsOfRecommended({
         userId,
         cursor,
         pageSize,
       });
-      const updatedData = await this._processPaginatedPostData(data, pageSize);
+      const updatedData = await this._processPaginatedPostData({
+        data,
+        pageSize,
+      });
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for userId: ${userId}: `, error);
@@ -321,21 +338,25 @@ export class PostService {
     }
   }
 
-  async paginatePostsForFeed(
-    userId: string,
-    cursor: FeedCursor | null = null,
-    pageSize: number,
-  ): Promise<PaginatedResponse<Post, FeedCursor>> {
+  async paginatePostsForFeed({
+    userId,
+    cursor,
+    pageSize,
+  }: {
+    userId: string;
+    cursor: FeedCursor | null;
+    pageSize: number;
+  }): Promise<PaginatedResponse<Post, FeedCursor>> {
     const followingResult = await this.postRepository.paginatePostsOfFollowing(
       userId,
       cursor,
       pageSize,
     );
 
-    const parsedFollowingResult = await this._processPaginatedPostDataForFeed(
-      followingResult,
+    const parsedFollowingResult = await this._processPaginatedPostDataForFeed({
+      data: followingResult,
       pageSize,
-    );
+    });
 
     return parsedFollowingResult;
 
@@ -393,7 +414,13 @@ export class PostService {
     // return parsedFollowingResult;
   }
 
-  async getPost(postId: string, userId: string): Promise<Post> {
+  async getPost({
+    postId,
+    userId,
+  }: {
+    postId: string;
+    userId: string;
+  }): Promise<Post> {
     try {
       const post = await this.postRepository.getPost({ postId, userId });
       if (!post) {
@@ -469,7 +496,7 @@ export class PostService {
       await this.likeRepository.addLike({ postId, userId });
       await this.postStatsRepository.incrementLikesCount({ postId });
 
-      const post = await this.getPost(postId, userId);
+      const post = await this.getPost({ postId, userId });
 
       // Only store and send notification if the liker is not the post owner
       if (userId !== post.recipientId) {
@@ -585,7 +612,7 @@ export class PostService {
     await this.commentRepository.addComment({ postId, userId, body });
     await this.postStatsRepository.incrementCommentsCount({ postId });
 
-    const post = await this.getPost(postId, userId);
+    const post = await this.getPost({ postId, userId });
 
     // Only store and send notification if the commenter is not the post owner
     if (userId !== post.recipientId) {
@@ -676,18 +703,25 @@ export class PostService {
     await this.postStatsRepository.decrementCommentsCount({ postId });
   }
 
-  async paginateComments(
-    postId: string,
-    cursor: CommentCursor | null = null,
-    pageSize: number,
-  ): Promise<PaginatedResponse<CommentProfile, CommentCursor>> {
+  async paginateComments({
+    postId,
+    cursor,
+    pageSize,
+  }: {
+    postId: string;
+    cursor: CommentCursor | null;
+    pageSize: number;
+  }): Promise<PaginatedResponse<CommentProfile, CommentCursor>> {
     try {
       const data = await this.commentRepository.paginateComments({
         postId,
         cursor,
         pageSize,
       });
-      const updatedData = await this._updateProfilePictureUrls2(data, pageSize);
+      const updatedData = await this._updateProfilePictureUrls2({
+        data,
+        pageSize,
+      });
       return updatedData;
     } catch (error) {
       console.error(
@@ -701,7 +735,11 @@ export class PostService {
     }
   }
 
-  async getPostForNextJs(postId: string): Promise<Omit<Post, "hasLiked">> {
+  async getPostForNextJs({
+    postId,
+  }: {
+    postId: string;
+  }): Promise<Omit<Post, "hasLiked">> {
     try {
       const post = await this.postRepository.getPostForNextJs({ postId });
       if (!post) {
@@ -720,7 +758,9 @@ export class PostService {
         throw new DomainError(ErrorCode.UNAUTHORIZED, "This post is private");
       }
 
-      const processedPost = await this._processPostDataForNextJs(post);
+      const processedPost = await this._processPostDataForNextJs({
+        data: post,
+      });
       return processedPost;
     } catch (error) {
       console.error(`Error in getPostForNextJs for postId: ${postId}: `, error);
@@ -732,19 +772,21 @@ export class PostService {
     try {
       // Update author profile picture URL
       if (data.authorProfilePicture !== null) {
-        data.authorProfilePicture = await this._getSignedPostUrl(
-          data.authorProfilePicture,
-        );
+        data.authorProfilePicture = await this._getSignedPostUrl({
+          objectKey: data.authorProfilePicture,
+        });
       }
 
       if (data.recipientProfilePicture !== null) {
-        data.recipientProfilePicture = await this._getSignedPostUrl(
-          data.recipientProfilePicture,
-        );
+        data.recipientProfilePicture = await this._getSignedPostUrl({
+          objectKey: data.recipientProfilePicture,
+        });
       }
 
       if (data.mediaType === "image") {
-        const imageUrl = await this._getSignedPostUrl(data.imageUrl);
+        const imageUrl = await this._getSignedPostUrl({
+          objectKey: data.imageUrl,
+        });
         data.imageUrl = imageUrl;
       } else {
         data.imageUrl = mux.getStreamUrl(data.imageUrl);
@@ -762,25 +804,29 @@ export class PostService {
     return data;
   }
 
-  private async _processPostDataForNextJs(
-    data: Omit<Post, "hasLiked">,
-  ): Promise<Omit<Post, "hasLiked">> {
+  private async _processPostDataForNextJs({
+    data,
+  }: {
+    data: Omit<Post, "hasLiked">;
+  }): Promise<Omit<Post, "hasLiked">> {
     try {
       // Update author profile picture URL
       if (data.authorProfilePicture !== null) {
-        data.authorProfilePicture = await this._getSignedPostUrl(
-          data.authorProfilePicture,
-        );
+        data.authorProfilePicture = await this._getSignedPostUrl({
+          objectKey: data.authorProfilePicture,
+        });
       }
 
       if (data.recipientProfilePicture !== null) {
-        data.recipientProfilePicture = await this._getSignedPostUrl(
-          data.recipientProfilePicture,
-        );
+        data.recipientProfilePicture = await this._getSignedPostUrl({
+          objectKey: data.recipientProfilePicture,
+        });
       }
 
       if (data.mediaType === "image") {
-        const imageUrl = await this._getSignedPublicPostUrl(data.imageUrl);
+        const imageUrl = await this._getSignedPublicPostUrl({
+          objectKey: data.imageUrl,
+        });
         data.imageUrl = imageUrl;
       } else {
         data.imageUrl = mux.getThumbnailUrl(data.imageUrl);
@@ -798,26 +844,31 @@ export class PostService {
     return data;
   }
 
-  private async _processPaginatedPostData(
-    data: Post[],
-    pageSize: number,
-  ): Promise<PaginatedResponse<Post, PostCursor>> {
+  private async _processPaginatedPostData({
+    data,
+    pageSize,
+  }: {
+    data: Post[];
+    pageSize: number;
+  }): Promise<PaginatedResponse<Post, PostCursor>> {
     const items = data.map(async (item) => {
       try {
         if (item.authorProfilePicture !== null) {
-          item.authorProfilePicture = await this._getSignedPostUrl(
-            item.authorProfilePicture,
-          );
+          item.authorProfilePicture = await this._getSignedPostUrl({
+            objectKey: item.authorProfilePicture,
+          });
         }
 
         if (item.recipientProfilePicture !== null) {
-          item.recipientProfilePicture = await this._getSignedPostUrl(
-            item.recipientProfilePicture,
-          );
+          item.recipientProfilePicture = await this._getSignedPostUrl({
+            objectKey: item.recipientProfilePicture,
+          });
         }
 
         if (item.mediaType === "image") {
-          const imageUrl = await this._getSignedPostUrl(item.imageUrl);
+          const imageUrl = await this._getSignedPostUrl({
+            objectKey: item.imageUrl,
+          });
           item.imageUrl = imageUrl;
         } else {
           item.imageUrl = mux.getStreamUrl(item.imageUrl);
@@ -849,26 +900,31 @@ export class PostService {
     return { items: await Promise.all(items), nextCursor };
   }
 
-  private async _processPaginatedPostDataForFeed(
-    data: Post[],
-    pageSize: number,
-  ): Promise<PaginatedResponse<Post, FeedCursor>> {
+  private async _processPaginatedPostDataForFeed({
+    data,
+    pageSize,
+  }: {
+    data: Post[];
+    pageSize: number;
+  }): Promise<PaginatedResponse<Post, FeedCursor>> {
     const items = data.map(async (item) => {
       try {
         if (item.authorProfilePicture !== null) {
-          item.authorProfilePicture = await this._getSignedPostUrl(
-            item.authorProfilePicture,
-          );
+          item.authorProfilePicture = await this._getSignedPostUrl({
+            objectKey: item.authorProfilePicture,
+          });
         }
 
         if (item.recipientProfilePicture !== null) {
-          item.recipientProfilePicture = await this._getSignedPostUrl(
-            item.recipientProfilePicture,
-          );
+          item.recipientProfilePicture = await this._getSignedPostUrl({
+            objectKey: item.recipientProfilePicture,
+          });
         }
 
         if (item.mediaType === "image") {
-          const imageUrl = await this._getSignedPostUrl(item.imageUrl);
+          const imageUrl = await this._getSignedPostUrl({
+            objectKey: item.imageUrl,
+          });
           item.imageUrl = imageUrl;
         } else {
           item.imageUrl = mux.getStreamUrl(item.imageUrl);
@@ -904,16 +960,19 @@ export class PostService {
     return { items: await Promise.all(items), nextCursor };
   }
 
-  private async _updateProfilePictureUrls2(
-    data: CommentProfile[],
-    pageSize: number,
-  ): Promise<PaginatedResponse<CommentProfile, CommentCursor>> {
+  private async _updateProfilePictureUrls2({
+    data,
+    pageSize,
+  }: {
+    data: CommentProfile[];
+    pageSize: number;
+  }): Promise<PaginatedResponse<CommentProfile, CommentCursor>> {
     const items = data.map(async (item) => {
       try {
         if (item.profilePictureUrl !== null) {
-          item.profilePictureUrl = await this._getSignedPostUrl(
-            item.profilePictureUrl,
-          );
+          item.profilePictureUrl = await this._getSignedPostUrl({
+            objectKey: item.profilePictureUrl,
+          });
         }
       } catch (error) {
         console.error(
@@ -946,11 +1005,19 @@ export class PostService {
     return { items: await Promise.all(items), nextCursor };
   }
 
-  private async _getSignedPostUrl(objectKey: string): Promise<string> {
+  private async _getSignedPostUrl({
+    objectKey,
+  }: {
+    objectKey: string;
+  }): Promise<string> {
     return await cloudfront.getSignedPrivatePostUrl(objectKey);
   }
 
-  private async _getSignedPublicPostUrl(objectKey: string): Promise<string> {
+  private async _getSignedPublicPostUrl({
+    objectKey,
+  }: {
+    objectKey: string;
+  }): Promise<string> {
     return await cloudfront.getSignedPublicPostUrl(objectKey);
   }
 }

@@ -19,7 +19,13 @@ export class BlockService {
   private followService = new FollowService();
   private friendService = new FriendService();
 
-  async blockUser(userId: string, userIdBeingBlocked: string) {
+  async blockUser({
+    userId,
+    userIdBeingBlocked,
+  }: {
+    userId: string;
+    userIdBeingBlocked: string;
+  }) {
     if (userId === userIdBeingBlocked) {
       throw new DomainError(
         ErrorCode.CANNOT_FOLLOW_SELF,
@@ -59,9 +65,18 @@ export class BlockService {
       outgoingFollowRequest,
       incomingFollowRequest,
     ] = await Promise.all([
-      this.followService.isFollowing(userId, userIdBeingBlocked),
-      this.followService.isFollowing(userIdBeingBlocked, userId),
-      this.friendService.friendshipExists(userId, userIdBeingBlocked),
+      this.followService.isFollowing({
+        senderId: userId,
+        recipientId: userIdBeingBlocked,
+      }),
+      this.followService.isFollowing({
+        senderId: userIdBeingBlocked,
+        recipientId: userId,
+      }),
+      this.friendService.friendshipExists({
+        userIdA: userId,
+        userIdB: userIdBeingBlocked,
+      }),
       this.friendRepository.getFriendRequest({
         senderId: userId,
         recipientId: userIdBeingBlocked,
@@ -213,7 +228,13 @@ export class BlockService {
     }
   }
 
-  async unblockUser(userId: string, blockedUserId: string) {
+  async unblockUser({
+    userId,
+    blockedUserId,
+  }: {
+    userId: string;
+    blockedUserId: string;
+  }) {
     const isBlocked = await this.blockRepository.getBlockedUser({
       userId,
       blockedUserId,
@@ -237,7 +258,13 @@ export class BlockService {
     }
   }
 
-  async areEitherUsersBlocked(userId: string, otherUserId: string) {
+  async areEitherUsersBlocked({
+    userId,
+    otherUserId,
+  }: {
+    userId: string;
+    otherUserId: string;
+  }) {
     const [userBlocked, otherUserBlocked] = await Promise.all([
       this.blockRepository.getBlockedUser({
         userId,

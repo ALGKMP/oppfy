@@ -217,29 +217,29 @@ export class ProfileService {
       );
     }
 
-    const blocked = await this.blockService.areEitherUsersBlocked(
-      currentUserId,
+    const blocked = await this.blockService.areEitherUsersBlocked({
+      userId: currentUserId,
       otherUserId,
-    );
+    });
 
-    const targetUserFollowState = await this.followService.determineFollowState(
-      currentUserId,
-      otherUserId,
-      otherUser.privacySetting,
-    );
-    const otherUserFollowState = await this.followService.determineFollowState(
-      otherUserId,
-      currentUserId,
-      otherUser.privacySetting,
-    );
-    const targetUserFriendState = await this.friendService.determineFriendState(
-      currentUserId,
-      otherUserId,
-    );
-    const otherUserFriendState = await this.friendService.determineFriendState(
-      otherUserId,
-      currentUserId,
-    );
+    const targetUserFollowState = await this.followService.determineFollowState({
+      userId: currentUserId,
+      targetUserId: otherUserId,
+      privacySetting: otherUser.privacySetting,
+    });
+    const otherUserFollowState = await this.followService.determineFollowState({
+      userId: otherUserId,
+      targetUserId: currentUserId,
+      privacySetting: otherUser.privacySetting,
+    });
+    const targetUserFriendState = await this.friendService.determineFriendState({
+      userId: currentUserId,
+      targetUserId: otherUserId,
+    });
+    const otherUserFriendState = await this.friendService.determineFriendState({
+      userId: otherUserId,
+      targetUserId: currentUserId,
+    });
     const isTargetUserBlocked = (await this.blockRepository.getBlockedUser({
       userId: currentUserId,
       blockedUserId: otherUserId,

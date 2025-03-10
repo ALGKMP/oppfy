@@ -15,7 +15,13 @@ export class FollowService {
   private notificationsRepository = new NotificationsRepository();
   private friendRepository = new FriendRepository();
 
-  async isFollowing(senderId: string, recipientId: string) {
+  async isFollowing({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
     if (senderId === recipientId) return true; // Temporary fix
     return !!(await this.followRepository.getFollower({
       followerId: senderId,
@@ -23,12 +29,18 @@ export class FollowService {
     }));
   }
 
-  async followUser(senderId: string, recipientId: string) {
+  async followUser({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
     if (senderId === recipientId) {
       throw new DomainError(ErrorCode.CANNOT_FOLLOW_SELF);
     }
 
-    const isFollowing = await this.isFollowing(senderId, recipientId);
+    const isFollowing = await this.isFollowing({ senderId, recipientId });
 
     if (isFollowing) {
       throw new DomainError(
@@ -108,9 +120,15 @@ export class FollowService {
     }
   }
 
-  async unfollowUser(senderId: string, recipientId: string) {
+  async unfollowUser({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
     if (senderId === recipientId) return true; // Temporary fix
-    const isFollowing = await this.isFollowing(senderId, recipientId);
+    const isFollowing = await this.isFollowing({ senderId, recipientId });
 
     if (!isFollowing) {
       throw new DomainError(
@@ -153,7 +171,13 @@ export class FollowService {
     });
   }
 
-  async acceptFollowRequest(senderId: string, recipientId: string) {
+  async acceptFollowRequest({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
     if (senderId === recipientId) {
       throw new DomainError(ErrorCode.CANNOT_FOLLOW_SELF);
     }
@@ -214,10 +238,13 @@ export class FollowService {
     }
   }
 
-  async declineFollowRequest(
-    requestSenderId: string,
-    requestRecipientId: string,
-  ) {
+  async declineFollowRequest({
+    requestSenderId,
+    requestRecipientId,
+  }: {
+    requestSenderId: string;
+    requestRecipientId: string;
+  }) {
     const followRequestExists = await this.followRepository.getFollowRequest({
       senderId: requestSenderId,
       recipientId: requestRecipientId,
@@ -248,7 +275,13 @@ export class FollowService {
     }
   }
 
-  async cancelFollowRequest(senderId: string, recipientId: string) {
+  async cancelFollowRequest({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
     const followRequestExists = await this.followRepository.getFollowRequest({
       senderId,
       recipientId,
@@ -269,7 +302,13 @@ export class FollowService {
     );
   }
 
-  async removeFollower(userId: string, followerToRemove: string) {
+  async removeFollower({
+    userId,
+    followerToRemove,
+  }: {
+    userId: string;
+    followerToRemove: string;
+  }) {
     const followerExists = await this.followRepository.getFollower({
       followerId: followerToRemove,
       followeeId: userId,
@@ -302,11 +341,15 @@ export class FollowService {
     }
   }
 
-  public async determineFollowState(
-    userId: string,
-    targetUserId: string,
-    privacySetting: "public" | "private",
-  ) {
+  public async determineFollowState({
+    userId,
+    targetUserId,
+    privacySetting,
+  }: {
+    userId: string;
+    targetUserId: string;
+    privacySetting: "public" | "private";
+  }) {
     const isFollowing = await this.followRepository.getFollower({
       followerId: userId,
       followeeId: targetUserId,
@@ -331,7 +374,7 @@ export class FollowService {
     }
   }
 
-  public async countFollowRequests(userId: string) {
+  public async countFollowRequests({ userId }: { userId: string }) {
     const count = await this.followRepository.countFollowRequests({ userId });
     if (count === undefined) {
       throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOW_REQUESTS);
