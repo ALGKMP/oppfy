@@ -252,11 +252,11 @@ export class PostService {
   async paginatePostsOfUserSelf({
     userId,
     cursor,
-    pageSize,
+    pageSize = 10,
   }: {
     userId: string;
     cursor: PostCursor | null;
-    pageSize: number;
+    pageSize?: number;
   }): Promise<PaginatedResponse<Post, PostCursor>> {
     try {
       const data = await this.postRepository.paginatePostsOfUser({
@@ -706,11 +706,11 @@ export class PostService {
   async paginateComments({
     postId,
     cursor,
-    pageSize,
+    pageSize = 10,
   }: {
     postId: string;
     cursor: CommentCursor | null;
-    pageSize: number;
+    pageSize?: number;
   }): Promise<PaginatedResponse<CommentProfile, CommentCursor>> {
     try {
       const data = await this.commentRepository.paginateComments({

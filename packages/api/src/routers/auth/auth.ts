@@ -41,9 +41,9 @@ export const authRouter = createTRPCRouter({
         return { status: "pending" };
       }
 
-      const status = await ctx.services.twilio.sendVerificationCode(
-        input.phoneNumber,
-      );
+      const status = await ctx.services.twilio.sendVerificationCode({
+        phoneNumber: input.phoneNumber,
+      });
       return { status };
     }),
 
@@ -61,19 +61,23 @@ export const authRouter = createTRPCRouter({
         }
 
         // Check if admin user exists
-        let user = await ctx.services.user.getUserByPhoneNumberNoThrow(
-          input.phoneNumber,
-        );
+        let user = await ctx.services.user.getUserByPhoneNumberNoThrow({
+          phoneNumber: input.phoneNumber,
+        });
 
         let isNewUser = false;
 
         if (!user) {
           // Create admin user if they don't exist
           const userId = crypto.randomUUID();
-          await ctx.services.user.createUser(userId, input.phoneNumber, true);
-          user = await ctx.services.user.getUserByPhoneNumber(
-            input.phoneNumber,
-          );
+          await ctx.services.user.createUser({
+            userId,
+            phoneNumber: input.phoneNumber,
+            isOnApp: true,
+          });
+          user = await ctx.services.user.getUserByPhoneNumber({
+            phoneNumber: input.phoneNumber,
+          });
           isNewUser = true;
         }
 
@@ -86,10 +90,10 @@ export const authRouter = createTRPCRouter({
         };
       }
 
-      const isValid = await ctx.services.twilio.verifyCode(
-        input.phoneNumber,
-        input.code,
-      );
+      const isValid = await ctx.services.twilio.verifyCode({
+        phoneNumber: input.phoneNumber,
+        code: input.code,
+      });
 
       if (!isValid) {
         throw new TRPCError({
@@ -99,32 +103,43 @@ export const authRouter = createTRPCRouter({
       }
 
       // Get or create user
-      let user = await ctx.services.user.getUserByPhoneNumberNoThrow(
-        input.phoneNumber,
-      );
+      let user = await ctx.services.user.getUserByPhoneNumberNoThrow({
+        phoneNumber: input.phoneNumber,
+      });
 
       let isNewUser = false;
 
       if (user) {
-        const isOnApp = await ctx.services.user.isUserOnApp(user.id);
+        const isOnApp = await ctx.services.user.isUserOnApp({
+          userId: user.id,
+        });
 
         if (!isOnApp) {
-          await ctx.services.user.updateUserOnAppStatus(user.id, true);
+          await ctx.services.user.updateUserOnAppStatus({
+            userId: user.id,
+            isOnApp: true,
+          });
           isNewUser = true;
 
           // Fetch the updated user
-          user = await ctx.services.user.getUserByPhoneNumber(
-            input.phoneNumber,
-          );
+          user = await ctx.services.user.getUserByPhoneNumber({
+            phoneNumber: input.phoneNumber,
+          });
         }
       } else {
         // Create new user if they don't exist
         const userId = crypto.randomUUID();
-        await ctx.services.user.createUser(userId, input.phoneNumber, true);
+        await ctx.services.user.createUser({
+          userId,
+          phoneNumber: input.phoneNumber,
+          isOnApp: true,
+        });
         isNewUser = true;
 
         // Fetch the newly created user
-        user = await ctx.services.user.getUserByPhoneNumber(input.phoneNumber);
+        user = await ctx.services.user.getUserByPhoneNumber({
+          phoneNumber: input.phoneNumber,
+        });
       }
 
       // Generate tokens

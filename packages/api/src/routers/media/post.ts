@@ -152,7 +152,9 @@ export const postRouter = createTRPCRouter({
     .input(z.object({ postId: z.string() }))
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.post.getPostForNextJs(input.postId);
+        return await ctx.services.post.getPostForNextJs({
+          postId: input.postId,
+        });
       } catch (err) {
         if (err instanceof DomainError) {
           if (err.code === ErrorCode.UNAUTHORIZED) {
@@ -181,17 +183,17 @@ export const postRouter = createTRPCRouter({
             postId: z.string(),
             createdAt: z.date(),
           })
-          .optional(),
+          .nullable(),
         pageSize: z.number().nonnegative().optional().default(10),
       }),
     )
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.post.paginatePostsOfUserSelf(
-          ctx.session.uid,
-          input.cursor,
-          input.pageSize,
-        );
+        return await ctx.services.post.paginatePostsOfUserSelf({
+          userId: ctx.session.uid,
+          cursor: input.cursor,
+          pageSize: input.pageSize,
+        });
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
         if (err instanceof DomainError) {
@@ -222,11 +224,11 @@ export const postRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.post.paginatePostsForFeed(
-          ctx.session.uid,
-          input.cursor ?? null,
-          input.pageSize,
-        );
+        return await ctx.services.post.paginatePostsForFeed({
+          userId: ctx.session.uid,
+          cursor: input.cursor ?? null,
+          pageSize: input.pageSize,
+        });
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
         if (err instanceof DomainError) {
@@ -284,7 +286,10 @@ export const postRouter = createTRPCRouter({
     .input(z.object({ postId: z.string() }))
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.post.getPost(input.postId, ctx.session.uid);
+        return await ctx.services.post.getPost({
+          postId: input.postId,
+          userId: ctx.session.uid,
+        });
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -403,17 +408,17 @@ export const postRouter = createTRPCRouter({
             commentId: z.string(),
             createdAt: z.date(),
           })
-          .optional(),
+          .nullable(),
         pageSize: z.number().nonnegative().optional().default(10),
       }),
     )
     .query(async ({ ctx, input }) => {
       try {
-        const result = await ctx.services.post.paginateComments(
-          input.postId,
-          input.cursor,
-          input.pageSize,
-        );
+        const result = await ctx.services.post.paginateComments({
+          postId: input.postId,
+          cursor: input.cursor,
+          pageSize: input.pageSize,
+        });
         return result;
       } catch (err) {
         console.error("TRPC paginateComments error: ", err);

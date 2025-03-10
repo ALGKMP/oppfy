@@ -138,11 +138,11 @@ export class PaginationService {
   async paginateBlocked({
     userId,
     cursor,
-    pageSize,
+    pageSize = 10,
   }: {
     userId: string;
     cursor: Cursor | null;
-    pageSize: number;
+    pageSize?: number;
   }) {
     const data = await this.blockRepository.getPaginatedBlockedUsers({
       forUserId: userId,

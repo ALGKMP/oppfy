@@ -12,10 +12,10 @@ export const blockRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       try {
-        return await ctx.services.block.blockUser(
-          ctx.session.uid,
-          input.userId,
-        );
+        return await ctx.services.block.blockUser({
+          userId: ctx.session.uid,
+          userIdBeingBlocked: input.userId,
+        });
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
@@ -29,10 +29,10 @@ export const blockRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       try {
-        return await ctx.services.block.unblockUser(
-          ctx.session.uid,
-          input.userId,
-        );
+        return await ctx.services.block.unblockUser({
+          userId: ctx.session.uid,
+          blockedUserId: input.userId,
+        });
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
@@ -46,17 +46,17 @@ export const blockRouter = createTRPCRouter({
             createdAt: z.date(),
             profileId: z.string(),
           })
-          .optional(),
+          .nullable(),
         pageSize: z.number().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.paginate.paginateBlocked(
-          ctx.session.uid,
-          input.cursor,
-          input.pageSize,
-        );
+        return await ctx.services.paginate.paginateBlocked({
+          userId: ctx.session.uid,
+          cursor: input.cursor,
+          pageSize: input.pageSize,
+        });
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
       }
