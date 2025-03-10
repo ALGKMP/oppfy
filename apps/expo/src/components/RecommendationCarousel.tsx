@@ -13,7 +13,7 @@ import { HeaderTitle } from "./ui/Headings";
 import { UserCard } from "./ui/UserCard";
 
 type Recommendation =
-  RouterOutputs["contacts"]["getRecommendationProfilesSelf"][number];
+  RouterOutputs["contacts"]["getProfileSuggestions"][number];
 
 interface RecommendationCarouselProps {
   paddingHorizontal?: SpaceTokens;
@@ -41,7 +41,7 @@ const RecommendationCarousel = ({
   const { routeProfile } = useRouteProfile();
 
   const { data: recommendationsData, isLoading } =
-    api.contacts.getRecommendationProfilesSelf.useQuery(undefined, {
+    api.contacts.getProfileSuggestions.useQuery(undefined, {
       staleTime: 60 * 5000, // 5 minutes
     });
 
@@ -49,11 +49,11 @@ const RecommendationCarousel = ({
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
-      await utils.contacts.getRecommendationProfilesSelf.cancel();
-      const prevData = utils.contacts.getRecommendationProfilesSelf.getData();
+      await utils.contacts.getProfileSuggestions.cancel();
+      const prevData = utils.contacts.getProfileSuggestions.getData();
       if (!prevData) return { prevData: undefined };
 
-      utils.contacts.getRecommendationProfilesSelf.setData(
+      utils.contacts.getProfileSuggestions.setData(
         undefined,
         prevData.filter((item) => item.userId !== newData.userId),
       );
@@ -62,7 +62,7 @@ const RecommendationCarousel = ({
     },
     onError: (_err, _newData, ctx) => {
       if (ctx?.prevData === undefined) return;
-      void utils.contacts.getRecommendationProfilesSelf.invalidate();
+      void utils.contacts.getProfileSuggestions.invalidate();
     },
   });
 

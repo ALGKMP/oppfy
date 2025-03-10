@@ -16,7 +16,7 @@ const Recommendations = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { data, refetch, isLoading } =
-    api.contacts.getRecommendationProfilesSelf.useQuery(undefined, {
+    api.contacts.getProfileSuggestions.useQuery(undefined, {
       staleTime: 60 * 5000,
     });
 
@@ -28,11 +28,11 @@ const Recommendations = () => {
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
-      await utils.contacts.getRecommendationProfilesSelf.cancel();
-      const prevData = utils.contacts.getRecommendationProfilesSelf.getData();
+      await utils.contacts.getProfileSuggestions.cancel();
+      const prevData = utils.contacts.getProfileSuggestions.getData();
       if (!prevData) return { prevData: undefined };
 
-      utils.contacts.getRecommendationProfilesSelf.setData(
+      utils.contacts.getProfileSuggestions.setData(
         undefined,
         prevData.map((item) =>
           item.userId === newData.userId
@@ -49,10 +49,7 @@ const Recommendations = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx?.prevData === undefined) return;
-      utils.contacts.getRecommendationProfilesSelf.setData(
-        undefined,
-        ctx.prevData,
-      );
+      utils.contacts.getProfileSuggestions.setData(undefined, ctx.prevData);
     },
   });
 

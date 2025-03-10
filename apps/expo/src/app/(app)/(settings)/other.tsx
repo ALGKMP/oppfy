@@ -62,7 +62,7 @@ const Other = () => {
           onPress: () => {
             void handleSyncContacts();
             // invalidate query
-            utils.contacts.getRecommendationProfilesSelf.invalidate();
+            utils.contacts.getProfileSuggestions.invalidate();
           },
         },
       ],
@@ -128,7 +128,7 @@ const Other = () => {
             iconAfter={<ChevronRight />}
             onPress={handleShowDeleteContacts}
           />
-{/*           <SettingsGroup.Item
+          {/*           <SettingsGroup.Item
             title="Test button"
             onPress={async () => {
               await getDeviceContactsNotOnApp();

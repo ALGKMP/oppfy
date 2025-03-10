@@ -15,20 +15,17 @@ const GridSuggestions = () => {
   const utils = api.useUtils();
   const { routeProfile } = useRouteProfile();
 
-  const { data } = api.contacts.getRecommendationProfilesSelf.useQuery(
-    undefined,
-    {
-      staleTime: STALE_TIME,
-    },
-  );
+  const { data } = api.contacts.getProfileSuggestions.useQuery(undefined, {
+    staleTime: STALE_TIME,
+  });
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
-      await utils.contacts.getRecommendationProfilesSelf.cancel();
-      const prevData = utils.contacts.getRecommendationProfilesSelf.getData();
+      await utils.contacts.getProfileSuggestions.cancel();
+      const prevData = utils.contacts.getProfileSuggestions.getData();
       if (!prevData) return { prevData: undefined };
 
-      utils.contacts.getRecommendationProfilesSelf.setData(
+      utils.contacts.getProfileSuggestions.setData(
         undefined,
         prevData.filter((item) => item.userId !== newData.userId),
       );
@@ -37,7 +34,7 @@ const GridSuggestions = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx?.prevData === undefined) return;
-      void utils.contacts.getRecommendationProfilesSelf.invalidate();
+      void utils.contacts.getProfileSuggestions.invalidate();
     },
   });
 
