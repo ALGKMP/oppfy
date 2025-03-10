@@ -241,6 +241,16 @@ export class UserService {
     });
   }
 
+  async getUserStatus({ userId }: { userId: string }) {
+    const userStatus = await this.userRepository.getUserStatus({ userId });
+
+    if (userStatus === undefined) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+
+    return userStatus;
+  }
+
   async setTutorialComplete({ userId }: { userId: string }) {
     await this.userRepository.updateUserTutorialComplete({
       userId,
