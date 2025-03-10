@@ -15,7 +15,13 @@ export class FriendService {
   private userRepository = new UserRepository();
   private notificationsRepository = new NotificationsRepository();
 
-  async isFollowing(senderId: string, recipientId: string) {
+  async isFollowing({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
     if (senderId === recipientId) return true; // Temporary fix
     return !!(await this.followRepository.getFollower({
       followerId: senderId,
@@ -23,12 +29,21 @@ export class FriendService {
     }));
   }
 
-  async sendFriendRequest(senderId: string, recipientId: string) {
+  async sendFriendRequest({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
     if (senderId === recipientId) {
       throw new DomainError(ErrorCode.CANNOT_FRIEND_SELF);
     }
 
-    const friendshipExists = await this.friendshipExists(senderId, recipientId);
+    const friendshipExists = await this.friendshipExists({
+      userIdA: senderId,
+      userIdB: recipientId,
+    });
 
     if (friendshipExists) {
       throw new DomainError(
@@ -37,7 +52,10 @@ export class FriendService {
       );
     }
 
-    const friendRequest = await this.getFriendRequest(senderId, recipientId);
+    const friendRequest = await this.getFriendRequest({
+      senderId,
+      recipientId,
+    });
 
     if (friendRequest) {
       throw new DomainError(
@@ -46,18 +64,21 @@ export class FriendService {
       );
     }
 
-    const receivedFriendRequest = await this.getFriendRequest(
-      recipientId,
-      senderId,
-    );
+    const receivedFriendRequest = await this.getFriendRequest({
+      senderId: recipientId,
+      recipientId: senderId,
+    });
 
     // Temporary fix
     if (receivedFriendRequest) {
-      await this.acceptFriendRequest(recipientId, senderId);
+      await this.acceptFriendRequest({
+        senderId: recipientId,
+        recipientId: senderId,
+      });
       return;
     }
 
-    const isFollowing = await this.isFollowing(senderId, recipientId);
+    const isFollowing = await this.isFollowing({ senderId, recipientId });
 
     const sender = await this.userRepository.getUserWithProfile({
       userId: senderId,
@@ -106,7 +127,13 @@ export class FriendService {
     }
   }
 
-  async acceptFriendRequest(senderId: string, recipientId: string) {
+  async acceptFriendRequest({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
     if (senderId === recipientId) {
       throw new DomainError(ErrorCode.CANNOT_FRIEND_SELF);
     }
@@ -229,7 +256,13 @@ export class FriendService {
     }
   }
 
-  async declineFriendRequest(senderId: string, recipientId: string) {
+  async declineFriendRequest({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
     const friendRequest = await this.friendRepository.getFriendRequest({
       senderId,
       recipientId,
@@ -245,7 +278,13 @@ export class FriendService {
     await this.friendRepository.deleteFriendRequest({ senderId, recipientId });
   }
 
-  async cancelFriendRequest(senderId: string, recipientId: string) {
+  async cancelFriendRequest({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
     const friendRequest = await this.friendRepository.getFriendRequest({
       senderId,
       recipientId,
@@ -263,14 +302,26 @@ export class FriendService {
     });
   }
 
-  async getFriendRequest(userId: string, targetUserId: string) {
+  async getFriendRequest({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
     return await this.friendRepository.getFriendRequest({
-      senderId: userId,
-      recipientId: targetUserId,
+      senderId,
+      recipientId,
     });
   }
 
-  async removeFriend(targetUserId: string, otherUserId: string) {
+  async removeFriend({
+    targetUserId,
+    otherUserId,
+  }: {
+    targetUserId: string;
+    otherUserId: string;
+  }) {
     const friendship = await this.friendRepository.getFriendship({
       userIdA: targetUserId,
       userIdB: otherUserId,
@@ -289,7 +340,7 @@ export class FriendService {
     });
   }
 
-  public async countFriendRequests(userId: string) {
+  public async countFriendRequests({ userId }: { userId: string }) {
     const count = await this.friendRepository.countFriendRequests({ userId });
     if (count === undefined) {
       throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIEND_REQUESTS);
@@ -297,9 +348,21 @@ export class FriendService {
     return count;
   }
 
-  public async determineFriendState(userId: string, targetUserId: string) {
-    const friendshipExists = await this.friendshipExists(userId, targetUserId);
-    const friendRequest = await this.getFriendRequest(userId, targetUserId);
+  public async determineFriendState({
+    userId,
+    targetUserId,
+  }: {
+    userId: string;
+    targetUserId: string;
+  }) {
+    const friendshipExists = await this.friendshipExists({
+      userIdA: userId,
+      userIdB: targetUserId,
+    });
+    const friendRequest = await this.getFriendRequest({
+      senderId: userId,
+      recipientId: targetUserId,
+    });
 
     if (friendshipExists) {
       return sharedValidators.user.FriendState.Enum.Friends;
@@ -310,14 +373,21 @@ export class FriendService {
     }
   }
 
-  async friendshipExists(userId1: string, userId2: string) {
+  // async friendshipExists(userId1: string, userId2: string) {
+  async friendshipExists({
+    userIdA,
+    userIdB,
+  }: {
+    userIdA: string;
+    userIdB: string;
+  }) {
     const friendshipExists = await this.friendRepository.getFriendship({
-      userIdA: userId1,
-      userIdB: userId2,
+      userIdA,
+      userIdB,
     });
     const reverseFriendshipExists = await this.friendRepository.getFriendship({
-      userIdA: userId2,
-      userIdB: userId1,
+      userIdA,
+      userIdB,
     });
     return !!friendshipExists || !!reverseFriendshipExists;
   }

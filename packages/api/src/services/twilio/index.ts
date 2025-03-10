@@ -113,7 +113,11 @@ export class TwilioService {
     });
   }
 
-  async sendVerificationCode(phoneNumber: string): Promise<string> {
+  async sendVerificationCode({
+    phoneNumber,
+  }: {
+    phoneNumber: string;
+  }): Promise<string> {
     try {
       const verification = await this.client.verify.v2
         .services(env.TWILIO_SERVICE_SID)
@@ -125,7 +129,13 @@ export class TwilioService {
     }
   }
 
-  async verifyCode(phoneNumber: string, code: string): Promise<boolean> {
+  async verifyCode({
+    phoneNumber,
+    code,
+  }: {
+    phoneNumber: string;
+    code: string;
+  }): Promise<boolean> {
     try {
       const verificationCheck = await this.client.verify.v2
         .services(env.TWILIO_SERVICE_SID)

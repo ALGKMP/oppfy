@@ -17,7 +17,13 @@ export class ContactService {
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
 
-  async syncContacts(userId: string, contacts: string[]) {
+  async syncContacts({
+    userId,
+    contacts,
+  }: {
+    userId: string;
+    contacts: string[];
+  }) {
     const user = await this.userRepository.getUser({ userId });
 
     if (user === undefined) {
@@ -54,7 +60,7 @@ export class ContactService {
     }
   }
 
-  async deleteContacts(userId: string) {
+  async deleteContacts({ userId }: { userId: string }) {
     const user = await this.userRepository.getUser({ userId });
 
     if (user === undefined) {
@@ -83,7 +89,7 @@ export class ContactService {
     }
   }
 
-  async filterPhoneNumbersOnApp(phoneNumbers: string[]) {
+  async filterPhoneNumbersOnApp({ phoneNumbers }: { phoneNumbers: string[] }) {
     if (phoneNumbers.length === 0) {
       return [];
     }
@@ -96,7 +102,7 @@ export class ContactService {
     );
   }
 
-  async getRecommendationsIds(userId: string) {
+  async getRecommendationsIds({ userId }: { userId: string }) {
     const user = await this.userRepository.getUser({ userId });
 
     if (user === undefined) {
@@ -106,14 +112,14 @@ export class ContactService {
     return await this.contactsRepository.getRecommendationsInternal({ userId });
   }
 
-  async getRecommendationProfilesSelf(userId: string) {
+  async getRecommendationProfilesSelf({ userId }: { userId: string }) {
     const user = await this.userRepository.getUser({ userId });
 
     if (user === undefined) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
-    const recommendationsIds = await this.getRecommendationsIds(userId);
+    const recommendationsIds = await this.getRecommendationsIds({ userId });
 
     let allRecommendations = [
       ...recommendationsIds.tier1,
