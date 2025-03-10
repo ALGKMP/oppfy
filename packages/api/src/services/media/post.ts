@@ -9,10 +9,7 @@ import { sns } from "@oppfy/sns";
 import type { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
-import {
-  ProfileRepository,
-  UserRepository,
-} from "../../repositories";
+import { ProfileRepository, UserRepository } from "../../repositories";
 import { CommentRepository } from "../../repositories/media/comment";
 import { LikeRepository } from "../../repositories/media/like";
 import { PostRepository } from "../../repositories/media/post";
@@ -87,14 +84,7 @@ export class PostService {
         Key: objectKey,
         ContentLength: contentLength,
         ContentType: contentType,
-        Metadata: {
-          author,
-          recipient,
-          caption,
-          height,
-          width,
-          postid: postId,
-        },
+        Metadata: { author, recipient, caption, height, width, postid: postId },
       });
 
       return { presignedUrl, postId };
@@ -127,9 +117,9 @@ export class PostService {
     contentType: "image/jpeg" | "image/png" | "image/heic";
   }) {
     try {
-      const recipient = await this.userRepository.getUserByPhoneNumber(
-        recipientNotOnAppPhoneNumber,
-      );
+      const recipient = await this.userRepository.getUserByPhoneNumber({
+        phoneNumber: recipientNotOnAppPhoneNumber,
+      });
       const recipientId = recipient ? recipient.id : randomUUID();
 
       if (!recipient) {
@@ -225,9 +215,9 @@ export class PostService {
     width: string;
   }) {
     try {
-      const recipient = await this.userRepository.getUserByPhoneNumber(
-        recipientNotOnAppPhoneNumber,
-      );
+      const recipient = await this.userRepository.getUserByPhoneNumber({
+        phoneNumber: recipientNotOnAppPhoneNumber,
+      });
       const recipientId = recipient ? recipient.id : randomUUID();
 
       if (!recipient) {
@@ -265,11 +255,11 @@ export class PostService {
     pageSize: number,
   ): Promise<PaginatedResponse<Post, PostCursor>> {
     try {
-      const data = await this.postRepository.paginatePostsOfUser(
+      const data = await this.postRepository.paginatePostsOfUser({
         userId,
         cursor,
         pageSize,
-      );
+      });
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
@@ -293,11 +283,11 @@ export class PostService {
     currentUserId: string;
   }): Promise<PaginatedResponse<Post, PostCursor>> {
     try {
-      const data = await this.postRepository.paginatePostsOfUser(
+      const data = await this.postRepository.paginatePostsOfUser({
         userId,
         cursor,
         pageSize,
-      );
+      });
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
@@ -315,11 +305,11 @@ export class PostService {
     pageSize: number,
   ) {
     try {
-      const data = await this.postRepository.paginatePostsOfRecommended(
+      const data = await this.postRepository.paginatePostsOfRecommended({
         userId,
         cursor,
         pageSize,
-      );
+      });
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
@@ -405,7 +395,7 @@ export class PostService {
 
   async getPost(postId: string, userId: string): Promise<Post> {
     try {
-      const post = await this.postRepository.getPost(postId, userId);
+      const post = await this.postRepository.getPost({ postId, userId });
       if (!post) {
         throw new DomainError(
           ErrorCode.FAILED_TO_GET_POST,
@@ -476,8 +466,8 @@ export class PostService {
           "Tried to like a post that was already liked.",
         );
       }
-      await this.likeRepository.addLike(postId, userId);
-      await this.postStatsRepository.incrementLikesCount(postId);
+      await this.likeRepository.addLike({ postId, userId });
+      await this.postStatsRepository.incrementLikesCount({ postId });
 
       const post = await this.getPost(postId, userId);
 
@@ -495,23 +485,25 @@ export class PostService {
           });
 
         if (recentNotifications.length === 0) {
-          await this.notificationsRepository.storeNotification(
-            userId,
-            post.recipientId,
-            {
+          await this.notificationsRepository.storeNotification({
+            senderId: userId,
+            recipientId: post.recipientId,
+            notificationData: {
               eventType: "like",
               entityId: postId.toString(),
               entityType: "post",
             },
-          );
+          });
 
           const settings =
-            await this.notificationsRepository.getNotificationSettings(
-              post.recipientId,
-            );
+            await this.notificationsRepository.getNotificationSettings({
+              notificationSettingsId: post.recipientId,
+            });
 
           if (settings?.likes) {
-            const user = await this.profileRepository.getUserProfile(userId);
+            const user = await this.profileRepository.getUserProfile({
+              userId,
+            });
 
             if (user === undefined) {
               throw new DomainError(ErrorCode.USER_NOT_FOUND);
@@ -519,7 +511,7 @@ export class PostService {
 
             const { profile } = user;
             const pushTokens = await this.notificationsRepository.getPushTokens(
-              post.recipientId,
+              { userId: post.recipientId },
             );
 
             await sns.sendLikeNotification(
@@ -553,7 +545,7 @@ export class PostService {
         );
       }
       await this.likeRepository.removeLike({ postId, userId });
-      await this.postStatsRepository.decrementLikesCount(postId);
+      await this.postStatsRepository.decrementLikesCount({ postId });
     } catch (error) {
       console.error(
         `Error in unlikePost for userId: ${userId}, postId: ${postId}: `,
@@ -591,7 +583,7 @@ export class PostService {
     body: string;
   }) {
     await this.commentRepository.addComment({ postId, userId, body });
-    await this.postStatsRepository.incrementCommentsCount(postId);
+    await this.postStatsRepository.incrementCommentsCount({ postId });
 
     const post = await this.getPost(postId, userId);
 
@@ -609,32 +601,32 @@ export class PostService {
         });
 
       if (recentNotifications.length === 0) {
-        await this.notificationsRepository.storeNotification(
-          userId,
-          post.recipientId,
-          {
+        await this.notificationsRepository.storeNotification({
+          senderId: userId,
+          recipientId: post.recipientId,
+          notificationData: {
             eventType: "comment",
             entityId: postId.toString(),
             entityType: "post",
           },
-        );
+        });
 
         const settings =
-          await this.notificationsRepository.getNotificationSettings(
-            post.recipientId,
-          );
+          await this.notificationsRepository.getNotificationSettings({
+            notificationSettingsId: post.recipientId,
+          });
 
         if (settings?.comments) {
-          const user = await this.profileRepository.getUserProfile(userId);
+          const user = await this.profileRepository.getUserProfile({ userId });
 
           if (user === undefined) {
             throw new DomainError(ErrorCode.USER_NOT_FOUND);
           }
 
           const { profile } = user;
-          const pushTokens = await this.notificationsRepository.getPushTokens(
-            post.recipientId,
-          );
+          const pushTokens = await this.notificationsRepository.getPushTokens({
+            userId: post.recipientId,
+          });
 
           await sns.sendCommentNotification(
             pushTokens,
@@ -658,7 +650,7 @@ export class PostService {
     postId: string;
   }) {
     // get post data from commentId
-    const post = await this.postRepository.getPostFromCommentId(commentId);
+    const post = await this.postRepository.getPostFromCommentId({ commentId });
     console.log("post", post);
 
     if (post === undefined) {
@@ -666,7 +658,7 @@ export class PostService {
     }
     console.log("post", post);
 
-    const comment = await this.commentRepository.getComment(commentId);
+    const comment = await this.commentRepository.getComment({ commentId });
     console.log("comment", comment);
 
     if (comment === undefined) {
@@ -679,9 +671,9 @@ export class PostService {
     }
     console.log("comment", comment);
 
-    await this.commentRepository.removeComment(commentId);
+    await this.commentRepository.removeComment({ commentId });
     console.log("comment", comment);
-    await this.postStatsRepository.decrementCommentsCount(postId);
+    await this.postStatsRepository.decrementCommentsCount({ postId });
   }
 
   async paginateComments(
@@ -690,11 +682,11 @@ export class PostService {
     pageSize: number,
   ): Promise<PaginatedResponse<CommentProfile, CommentCursor>> {
     try {
-      const data = await this.commentRepository.paginateComments(
+      const data = await this.commentRepository.paginateComments({
         postId,
         cursor,
         pageSize,
-      );
+      });
       const updatedData = await this._updateProfilePictureUrls2(data, pageSize);
       return updatedData;
     } catch (error) {
@@ -711,7 +703,7 @@ export class PostService {
 
   async getPostForNextJs(postId: string): Promise<Omit<Post, "hasLiked">> {
     try {
-      const post = await this.postRepository.getPostForNextJs(postId);
+      const post = await this.postRepository.getPostForNextJs({ postId });
       if (!post) {
         throw new DomainError(
           ErrorCode.FAILED_TO_GET_POST,
@@ -719,7 +711,7 @@ export class PostService {
         );
       }
 
-      const user = await this.userRepository.getUser(post.authorId);
+      const user = await this.userRepository.getUser({ userId: post.authorId });
       if (!user) {
         throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
       }
@@ -852,15 +844,9 @@ export class PostService {
           "Failed to paginate posts.",
         );
       }
-      nextCursor = {
-        createdAt: nextItem.createdAt,
-        postId: nextItem.postId,
-      };
+      nextCursor = { createdAt: nextItem.createdAt, postId: nextItem.postId };
     }
-    return {
-      items: await Promise.all(items),
-      nextCursor,
-    };
+    return { items: await Promise.all(items), nextCursor };
   }
 
   private async _processPaginatedPostDataForFeed(
@@ -915,10 +901,7 @@ export class PostService {
         postId: nextItem.postId,
       };
     }
-    return {
-      items: await Promise.all(items),
-      nextCursor,
-    };
+    return { items: await Promise.all(items), nextCursor };
   }
 
   private async _updateProfilePictureUrls2(
@@ -960,10 +943,7 @@ export class PostService {
         commentId: nextItem.commentId,
       };
     }
-    return {
-      items: await Promise.all(items),
-      nextCursor,
-    };
+    return { items: await Promise.all(items), nextCursor };
   }
 
   private async _getSignedPostUrl(objectKey: string): Promise<string> {

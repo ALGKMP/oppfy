@@ -48,12 +48,7 @@ export const authRouter = createTRPCRouter({
     }),
 
   verifyCode: publicProcedure
-    .input(
-      z.object({
-        phoneNumber: z.string(),
-        code: z.string().length(6),
-      }),
-    )
+    .input(z.object({ phoneNumber: z.string(), code: z.string().length(6) }))
     .mutation(async ({ input, ctx }) => {
       // Check if the phone number is an admin number
       if (ADMIN_PHONE_NUMBERS.includes(input.phoneNumber)) {
@@ -87,10 +82,7 @@ export const authRouter = createTRPCRouter({
         return {
           success: true,
           isNewUser,
-          tokens: {
-            accessToken,
-            refreshToken,
-          },
+          tokens: { accessToken, refreshToken },
         };
       }
 
@@ -114,7 +106,7 @@ export const authRouter = createTRPCRouter({
       let isNewUser = false;
 
       if (user) {
-        const isOnApp = await ctx.services.user.isOnApp(user.id);
+        const isOnApp = await ctx.services.user.isUserOnApp(user.id);
 
         if (!isOnApp) {
           await ctx.services.user.updateUserOnAppStatus(user.id, true);
@@ -141,10 +133,7 @@ export const authRouter = createTRPCRouter({
       return {
         success: true,
         isNewUser,
-        tokens: {
-          accessToken,
-          refreshToken,
-        },
+        tokens: { accessToken, refreshToken },
       };
     }),
 
@@ -157,9 +146,7 @@ export const authRouter = createTRPCRouter({
         const { uid } = jwt.verify(
           input.refreshToken,
           env.JWT_REFRESH_SECRET,
-        ) as {
-          uid: string;
-        };
+        ) as { uid: string };
 
         // Generate new tokens
         const tokens = generateTokens(uid);

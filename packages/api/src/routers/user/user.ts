@@ -30,7 +30,11 @@ export const userRouter = createTRPCRouter({
         });
       }
 
-      return await ctx.services.user.getUserStatus(ctx.session.uid);
+      return {
+        isOnboarded: await ctx.services.user.isUserOnboarded(ctx.session.uid),
+        hasTutorialBeenCompleted:
+          await ctx.services.user.hasTutorialBeenCompleted(ctx.session.uid),
+      };
     } catch (err) {
       if (err instanceof DomainError) {
         throw new TRPCError({
@@ -47,7 +51,7 @@ export const userRouter = createTRPCRouter({
     }
   }),
 
-  userStatus: publicProcedure.mutation(async ({ ctx }) => {
+  userStatus: publicProcedure.query(async ({ ctx }) => {
     try {
       if (!ctx.session?.uid) {
         throw new TRPCError({
@@ -56,7 +60,11 @@ export const userRouter = createTRPCRouter({
         });
       }
 
-      return await ctx.services.user.getUserStatus(ctx.session.uid);
+      return {
+        isOnboarded: await ctx.services.user.isUserOnboarded(ctx.session.uid),
+        hasTutorialBeenCompleted:
+          await ctx.services.user.hasTutorialBeenCompleted(ctx.session.uid),
+      };
     } catch (err) {
       if (err instanceof DomainError) {
         if (err.code === ErrorCode.USER_NOT_FOUND) {
@@ -114,11 +122,7 @@ export const userRouter = createTRPCRouter({
   }),
 
   updatePrivacy: protectedProcedure
-    .input(
-      z.object({
-        privacy: z.enum(["public", "private"]),
-      }),
-    )
+    .input(z.object({ privacy: z.enum(["public", "private"]) }))
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.privacy.updatePrivacySettings(
@@ -133,4 +137,34 @@ export const userRouter = createTRPCRouter({
         });
       }
     }),
+
+  getOnboardingStatus: publicProcedure.query(async ({ ctx }) => {
+    try {
+      if (!ctx.session?.uid) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User not found",
+        });
+      }
+
+      return {
+        isOnboarded: await ctx.services.user.isUserOnboarded(ctx.session.uid),
+        hasTutorialBeenCompleted:
+          await ctx.services.user.hasTutorialBeenCompleted(ctx.session.uid),
+      };
+    } catch (err) {
+      if (err instanceof DomainError) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User not found",
+        });
+      }
+
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to get user status",
+        cause: err,
+      });
+    }
+  }),
 });

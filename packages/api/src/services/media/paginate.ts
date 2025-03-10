@@ -1,3 +1,5 @@
+import { cloudfront } from "@oppfy/cloudfront";
+
 import { DomainError, ErrorCode } from "../../errors";
 import {
   BlockRepository,
@@ -5,8 +7,6 @@ import {
   FriendRepository,
 } from "../../repositories";
 import { UserService } from "../user/user";
-
-import { cloudfront } from "@oppfy/cloudfront";
 
 // TODO: Move these types into a types file and put the paginated functions into their services.
 
@@ -30,11 +30,11 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ) {
-    const data = await this.followRepository.paginateFollowersSelf(
-      userId,
+    const data = await this.followRepository.paginateFollowersSelf({
+      forUserId: userId,
       cursor,
       pageSize,
-    );
+    });
     return await this._processPaginatedData(data, pageSize);
   }
 
@@ -44,12 +44,12 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ) {
-    const data = await this.followRepository.paginateFollowersOthers(
-      userId,
+    const data = await this.followRepository.paginateFollowersOthers({
+      forUserId: userId,
       currentUserId,
       cursor,
       pageSize,
-    );
+    });
     return await this._processPaginatedData(data, pageSize);
   }
 
@@ -58,11 +58,11 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ) {
-    const data = await this.followRepository.paginateFollowingSelf(
+    const data = await this.followRepository.paginateFollowingSelf({
       userId,
       cursor,
       pageSize,
-    );
+    });
     return await this._processPaginatedData(data, pageSize);
   }
 
@@ -72,13 +72,12 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ) {
-
-    const data = await this.followRepository.paginateFollowingOthers(
-      userId,
+    const data = await this.followRepository.paginateFollowingOthers({
+      forUserId: userId,
       currentUserId,
       cursor,
       pageSize,
-    );
+    });
     return await this._processPaginatedData(data, pageSize);
   }
 
@@ -87,11 +86,11 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ) {
-    const data = await this.friendRepository.paginateFriendsSelf(
-      userId,
+    const data = await this.friendRepository.paginateFriendsSelf({
+      forUserId: userId,
       cursor,
       pageSize,
-    );
+    });
 
     return await this._processPaginatedData(data, pageSize);
   }
@@ -102,12 +101,12 @@ export class PaginationService {
     pageSize = 10,
     currentUserId: string,
   ) {
-    const data = await this.friendRepository.paginateFriendsOther(
-      userId,
+    const data = await this.friendRepository.paginateFriendsOther({
+      forUserId: userId,
       currentUserId,
       cursor,
       pageSize,
-    );
+    });
     return await this._processPaginatedData(data, pageSize);
   }
   async paginateBlocked(
@@ -115,11 +114,11 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ) {
-    const data = await this.blockRepository.getPaginatedBlockedUsers(
-      userId,
+    const data = await this.blockRepository.getPaginatedBlockedUsers({
+      forUserId: userId,
       cursor,
       pageSize,
-    );
+    });
     return await this._processPaginatedData(data, pageSize);
   }
 
@@ -128,11 +127,11 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ) {
-    const data = await this.friendRepository.paginateFriendRequests(
-      userId,
+    const data = await this.friendRepository.paginateFriendRequests({
+      forUserId: userId,
       cursor,
       pageSize,
-    );
+    });
     return await this._processPaginatedData(data, pageSize);
   }
 
@@ -141,11 +140,11 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ) {
-    const data = await this.followRepository.paginateFollowRequests(
-      userId,
+    const data = await this.followRepository.paginateFollowRequests({
+      forUserId: userId,
       cursor,
       pageSize,
-    );
+    });
     return await this._processPaginatedData(data, pageSize);
   }
 
@@ -158,16 +157,15 @@ export class PaginationService {
   >(data: T[], pageSize: number) {
     try {
       if (data.length === 0) {
-        return {
-          items: [],
-          nextCursor: undefined,
-        };
+        return { items: [], nextCursor: undefined };
       }
       const items = await Promise.all(
         data.map(async (item) => {
           if (item.profilePictureUrl) {
             const profilePicturePresignedUrl =
-              await cloudfront.getSignedProfilePictureUrl(item.profilePictureUrl);
+              await cloudfront.getSignedProfilePictureUrl(
+                item.profilePictureUrl,
+              );
             item.profilePictureUrl = profilePicturePresignedUrl;
           }
           return item;
@@ -190,10 +188,7 @@ export class PaginationService {
           profileId: nextItem.profileId,
         };
       }
-      return {
-        items,
-        nextCursor,
-      };
+      return { items, nextCursor };
     } catch (err) {
       console.error(`Error updating profile picture URLs: `, err);
       throw new DomainError(

@@ -39,10 +39,7 @@ export class ProfileService {
     userId: string;
     contentLength: number;
   }) {
-    const url = await s3.uploadProfilePicture({
-      userId,
-      contentLength,
-    });
+    const url = await s3.uploadProfilePicture({ userId, contentLength });
 
     await cloudfront.invalidateProfilePicture(userId);
     return url;
@@ -52,7 +49,9 @@ export class ProfileService {
     userId: string,
     newData: z.infer<typeof _updateProfile>,
   ): Promise<void> {
-    const userWithProfile = await this.profileRepository.getUserProfile(userId);
+    const userWithProfile = await this.profileRepository.getUserProfile({
+      userId,
+    });
 
     if (userWithProfile === undefined) {
       throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
@@ -64,16 +63,19 @@ export class ProfileService {
       newData.username !== undefined &&
       newData.username !== profile.username
     ) {
-      const usernameExists = await this.profileRepository.usernameExists(
-        newData.username,
-      );
+      const usernameExists = await this.profileRepository.usernameExists({
+        username: newData.username,
+      });
 
       if (usernameExists) {
         throw new DomainError(ErrorCode.USERNAME_ALREADY_EXISTS);
       }
     }
 
-    await this.profileRepository.updateProfile(profile.id, newData);
+    await this.profileRepository.updateProfile({
+      profileId: profile.id,
+      update: newData,
+    });
     console.log("upserting profile");
     await this._upsertProfileSearch(userWithProfile.id, {
       name: newData.name,
@@ -83,7 +85,9 @@ export class ProfileService {
   }
 
   async getProfileByUsername(username: string) {
-    const profile = await this.profileRepository.getProfileByUsername(username);
+    const profile = await this.profileRepository.getProfileByUsername({
+      username,
+    });
     if (!profile) {
       throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
     }
@@ -94,14 +98,11 @@ export class ProfileService {
       ? await cloudfront.getSignedProfilePictureUrl(profilePictureKey)
       : null;
 
-    return {
-      ...rest,
-      profilePictureUrl,
-    };
+    return { ...rest, profilePictureUrl };
   }
 
   async getProfileSelf(userId: string) {
-    const user = await this.profileRepository.getUserFullProfile(userId);
+    const user = await this.profileRepository.getUserFullProfile({ userId });
 
     if (!user) {
       console.error(`SERVICE ERROR: Profile not found for user ID "${userId}"`);
@@ -142,7 +143,9 @@ export class ProfileService {
     currentUserId: string;
     otherUserId: string;
   }) {
-    const user = await this.profileRepository.getUserFullProfile(otherUserId);
+    const user = await this.profileRepository.getUserFullProfile({
+      userId: otherUserId,
+    });
     if (!user) {
       throw new DomainError(
         ErrorCode.PROFILE_NOT_FOUND,
@@ -187,7 +190,9 @@ export class ProfileService {
     currentUserId: string;
     otherUserId: string;
   }) {
-    const targetUser = await this.userRepository.getUser(currentUserId);
+    const targetUser = await this.userRepository.getUser({
+      userId: currentUserId,
+    });
     if (!targetUser) {
       throw new DomainError(
         ErrorCode.USER_NOT_FOUND,
@@ -195,7 +200,9 @@ export class ProfileService {
         `SERVICE ERROR: User not found for target user ID "${currentUserId}" in getNetworkConnectionStates`,
       );
     }
-    const otherUser = await this.userRepository.getUser(otherUserId);
+    const otherUser = await this.userRepository.getUser({
+      userId: otherUserId,
+    });
     if (!otherUser) {
       throw new DomainError(
         ErrorCode.USER_NOT_FOUND,
@@ -227,16 +234,16 @@ export class ProfileService {
       otherUserId,
       currentUserId,
     );
-    const isTargetUserBlocked = (await this.blockRepository.getBlockedUser(
-      currentUserId,
-      otherUserId,
-    ))
+    const isTargetUserBlocked = (await this.blockRepository.getBlockedUser({
+      userId: currentUserId,
+      blockedUserId: otherUserId,
+    }))
       ? true
       : false;
-    const isOtherUserBlocked = (await this.blockRepository.getBlockedUser(
-      otherUserId,
-      currentUserId,
-    ))
+    const isOtherUserBlocked = (await this.blockRepository.getBlockedUser({
+      userId: otherUserId,
+      blockedUserId: currentUserId,
+    }))
       ? true
       : false;
 
@@ -256,17 +263,16 @@ export class ProfileService {
     userId: string,
     newProfileData: Partial<OpenSearchProfileIndexResult>,
   ) {
-    const userWithProfile = await this.profileRepository.getUserProfile(userId);
+    const userWithProfile = await this.profileRepository.getUserProfile({
+      userId,
+    });
 
     if (userWithProfile === undefined) {
       throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
     }
     const profileData = userWithProfile.profile;
 
-    const documentBody = {
-      ...profileData,
-      ...newProfileData,
-    };
+    const documentBody = { ...profileData, ...newProfileData };
 
     await openSearch.index({
       index: OpenSearchIndex.PROFILE,
@@ -276,10 +282,10 @@ export class ProfileService {
   }
 
   async searchProfilesByUsername(username: string, currentUserId: string) {
-    const profiles = await this.profileRepository.profilesByUsername(
+    const profiles = await this.profileRepository.profilesByUsername({
       username,
       currentUserId,
-    );
+    });
 
     const profilesWithUrls = await Promise.all(
       profiles.map(async (profile) => {

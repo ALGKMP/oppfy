@@ -17,7 +17,10 @@ export class FollowService {
 
   async isFollowing(senderId: string, recipientId: string) {
     if (senderId === recipientId) return true; // Temporary fix
-    return !!(await this.followRepository.getFollower(senderId, recipientId));
+    return !!(await this.followRepository.getFollower({
+      followerId: senderId,
+      followeeId: recipientId,
+    }));
   }
 
   async followUser(senderId: string, recipientId: string) {
@@ -34,8 +37,12 @@ export class FollowService {
       );
     }
 
-    const sender = await this.userRepository.getUser(senderId);
-    const recipient = await this.userRepository.getUser(recipientId);
+    const sender = await this.userRepository.getUserWithProfile({
+      userId: senderId,
+    });
+    const recipient = await this.userRepository.getUserWithProfile({
+      userId: recipientId,
+    });
 
     if (!sender || !recipient) {
       throw new DomainError(
@@ -44,62 +51,59 @@ export class FollowService {
       );
     }
 
-    const senderProfile = await this.profileRepository.getProfile(
-      sender.profileId,
-    );
-
-    if (senderProfile === undefined) {
-      throw new DomainError(
-        ErrorCode.PROFILE_NOT_FOUND,
-        `Profile not found for user ID "${senderId}"`,
-      );
-    }
-
     if (recipient.privacySetting === "private") {
-      await this.followRepository.createFollowRequest(senderId, recipientId);
+      await this.followRepository.createFollowRequest({
+        senderId,
+        recipientId,
+      });
 
       const settings =
-        await this.notificationsRepository.getNotificationSettings(
-          recipient.notificationSettingsId,
-        );
+        await this.notificationsRepository.getNotificationSettings({
+          notificationSettingsId: recipient.notificationSettingsId,
+        });
 
       if (settings?.followRequests) {
-        const pushTokens =
-          await this.notificationsRepository.getPushTokens(recipientId);
+        const pushTokens = await this.notificationsRepository.getPushTokens({
+          userId: recipientId,
+        });
         await sns.sendFollowRequestNotification(
           pushTokens,
           sender.id,
           recipient.id,
-          senderProfile.username,
+          sender.profile.username,
         );
       }
       return;
     }
 
-    await this.followRepository.createFollower(senderId, recipientId);
+    await this.followRepository.createFollower({
+      senderUserId: senderId,
+      recipientUserId: recipientId,
+    });
 
-    await this.notificationsRepository.storeNotification(
-      sender.id,
-      recipient.id,
-      {
+    await this.notificationsRepository.storeNotification({
+      senderId,
+      recipientId,
+      notificationData: {
         eventType: "follow",
         entityType: "profile",
-        entityId: sender.id,
+        entityId: senderId,
       },
-    );
+    });
 
     const settings = await this.notificationsRepository.getNotificationSettings(
-      recipient.notificationSettingsId,
+      { notificationSettingsId: recipient.notificationSettingsId },
     );
 
     if (settings?.followRequests) {
-      const pushTokens =
-        await this.notificationsRepository.getPushTokens(recipientId);
+      const pushTokens = await this.notificationsRepository.getPushTokens({
+        userId: recipientId,
+      });
       await sns.sendFollowAcceptedNotification(
         pushTokens,
         sender.id,
         recipient.id,
-        senderProfile.username,
+        sender.profile.username,
       );
     }
   }
@@ -115,29 +119,38 @@ export class FollowService {
       );
     }
 
-    const friendship = await this.friendRepository.getFriendship(
-      senderId,
-      recipientId,
-    );
+    const friendship = await this.friendRepository.getFriendship({
+      userIdA: senderId,
+      userIdB: recipientId,
+    });
 
-    const outboundFollowRequest = await this.followRepository.getFollowRequest(
+    const outboundFollowRequest = await this.followRepository.getFollowRequest({
       senderId,
       recipientId,
-    );
+    });
 
-    const outboundFriendRequest = await this.friendRepository.getFriendRequest(
+    const outboundFriendRequest = await this.friendRepository.getFriendRequest({
       senderId,
       recipientId,
-    );
+    });
 
     if (outboundFollowRequest) {
       await this.followRepository.removeFollowRequest(senderId, recipientId);
     } else if (friendship) {
-      await this.friendRepository.removeFriend(senderId, recipientId);
+      await this.friendRepository.removeFriend({
+        userIdA: senderId,
+        userIdB: recipientId,
+      });
     } else if (outboundFriendRequest) {
-      await this.friendRepository.deleteFriendRequest(senderId, recipientId);
+      await this.friendRepository.deleteFriendRequest({
+        senderId,
+        recipientId,
+      });
     }
-    await this.followRepository.removeFollower(senderId, recipientId);
+    await this.followRepository.removeFollower({
+      followerId: senderId,
+      followeeId: recipientId,
+    });
   }
 
   async acceptFollowRequest(senderId: string, recipientId: string) {
@@ -145,10 +158,10 @@ export class FollowService {
       throw new DomainError(ErrorCode.CANNOT_FOLLOW_SELF);
     }
 
-    const followRequest = await this.followRepository.getFollowRequest(
+    const followRequest = await this.followRepository.getFollowRequest({
       senderId,
       recipientId,
-    );
+    });
 
     if (followRequest === undefined) {
       throw new DomainError(
@@ -158,49 +171,45 @@ export class FollowService {
     }
 
     await this.followRepository.removeFollowRequest(senderId, recipientId);
-    await this.followRepository.createFollower(senderId, recipientId);
+    await this.followRepository.createFollower({
+      senderUserId: senderId,
+      recipientUserId: recipientId,
+    });
 
-    const recipient = await this.userRepository.getUser(recipientId);
+    const recipient = await this.userRepository.getUserWithProfile({
+      userId: recipientId,
+    });
 
     if (!recipient) {
       throw new DomainError(
         ErrorCode.USER_NOT_FOUND,
-        `User not found: ${recipientId}`,
+        "Recipient user not found",
       );
     }
 
-    const recipientProfile = await this.profileRepository.getProfile(
-      recipient.profileId,
-    );
-
-    if (recipientProfile === undefined) {
-      throw new DomainError(
-        ErrorCode.PROFILE_NOT_FOUND,
-        `Profile not found for user ID "${recipientId}"`,
-      );
-    }
-
-    await this.notificationsRepository.storeNotification(
+    await this.notificationsRepository.storeNotification({
       senderId,
       recipientId,
-      {
+      notificationData: {
         eventType: "follow",
         entityType: "profile",
         entityId: senderId,
       },
+    });
+
+    const settings = await this.notificationsRepository.getNotificationSettings(
+      { notificationSettingsId: senderId },
     );
 
-    const settings =
-      await this.notificationsRepository.getNotificationSettings(senderId);
-
     if (settings?.followRequests) {
-      const pushTokens =
-        await this.notificationsRepository.getPushTokens(senderId);
+      const pushTokens = await this.notificationsRepository.getPushTokens({
+        userId: senderId,
+      });
       await sns.sendFollowAcceptedNotification(
         pushTokens,
         recipientId,
         senderId,
-        recipientProfile.username,
+        recipient.profile.username,
       );
     }
   }
@@ -209,10 +218,10 @@ export class FollowService {
     requestSenderId: string,
     requestRecipientId: string,
   ) {
-    const followRequestExists = await this.followRepository.getFollowRequest(
-      requestSenderId,
-      requestRecipientId,
-    );
+    const followRequestExists = await this.followRepository.getFollowRequest({
+      senderId: requestSenderId,
+      recipientId: requestRecipientId,
+    });
 
     if (!followRequestExists) {
       throw new DomainError(
@@ -226,24 +235,24 @@ export class FollowService {
       requestRecipientId,
     );
 
-    const friendRequestExists = await this.friendRepository.getFriendRequest(
-      requestSenderId,
-      requestRecipientId,
-    );
+    const friendRequestExists = await this.friendRepository.getFriendRequest({
+      senderId: requestSenderId,
+      recipientId: requestRecipientId,
+    });
 
     if (friendRequestExists) {
-      await this.friendRepository.deleteFriendRequest(
-        requestSenderId,
-        requestRecipientId,
-      );
+      await this.friendRepository.deleteFriendRequest({
+        senderId: requestSenderId,
+        recipientId: requestRecipientId,
+      });
     }
   }
 
   async cancelFollowRequest(senderId: string, recipientId: string) {
-    const followRequestExists = await this.followRepository.getFollowRequest(
+    const followRequestExists = await this.followRepository.getFollowRequest({
       senderId,
       recipientId,
-    );
+    });
     if (!followRequestExists) {
       console.error(
         `SERVICE ERROR: Follow request not found from "${senderId}" to "${recipientId}"`,
@@ -261,10 +270,10 @@ export class FollowService {
   }
 
   async removeFollower(userId: string, followerToRemove: string) {
-    const followerExists = await this.followRepository.getFollower(
-      followerToRemove,
-      userId,
-    );
+    const followerExists = await this.followRepository.getFollower({
+      followerId: followerToRemove,
+      followeeId: userId,
+    });
     if (!followerExists) {
       console.error(
         `SERVICE ERROR: Follow relationship not found for follower "${followerToRemove}" and user ID "${userId}"`,
@@ -275,15 +284,21 @@ export class FollowService {
       );
     }
 
-    await this.followRepository.removeFollower(followerToRemove, userId);
+    await this.followRepository.removeFollower({
+      followerId: followerToRemove,
+      followeeId: userId,
+    });
 
     // Check if there's a friendship and remove it if exists
-    const friendship = await this.friendRepository.getFriendship(
-      userId,
-      followerToRemove,
-    );
+    const friendship = await this.friendRepository.getFriendship({
+      userIdA: userId,
+      userIdB: followerToRemove,
+    });
     if (friendship) {
-      await this.friendRepository.removeFriend(userId, followerToRemove);
+      await this.friendRepository.removeFriend({
+        userIdA: userId,
+        userIdB: followerToRemove,
+      });
     }
   }
 
@@ -292,14 +307,14 @@ export class FollowService {
     targetUserId: string,
     privacySetting: "public" | "private",
   ) {
-    const isFollowing = await this.followRepository.getFollower(
-      userId,
-      targetUserId,
-    );
-    const followRequest = await this.followRepository.getFollowRequest(
-      userId,
-      targetUserId,
-    );
+    const isFollowing = await this.followRepository.getFollower({
+      followerId: userId,
+      followeeId: targetUserId,
+    });
+    const followRequest = await this.followRepository.getFollowRequest({
+      senderId: userId,
+      recipientId: targetUserId,
+    });
 
     if (privacySetting === "public") {
       return isFollowing
@@ -317,7 +332,7 @@ export class FollowService {
   }
 
   public async countFollowRequests(userId: string) {
-    const count = await this.followRepository.countFollowRequests(userId);
+    const count = await this.followRepository.countFollowRequests({ userId });
     if (count === undefined) {
       console.error(
         `SERVICE ERROR: Failed to count follow requests for user ID "${userId}"`,
