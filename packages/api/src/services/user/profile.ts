@@ -3,8 +3,8 @@ import { z } from "zod";
 import { cloudfront } from "@oppfy/cloudfront";
 import { openSearch, OpenSearchIndex } from "@oppfy/opensearch";
 import type { OpenSearchProfileIndexResult } from "@oppfy/opensearch";
-import { sharedValidators } from "@oppfy/validators";
 import { s3 } from "@oppfy/s3";
+import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import {
@@ -100,7 +100,7 @@ export class ProfileService {
     };
   }
 
-  async getFullProfileSelf(userId: string) {
+  async getProfileSelf(userId: string) {
     const user = await this.profileRepository.getUserFullProfile(userId);
 
     if (!user) {
@@ -108,7 +108,7 @@ export class ProfileService {
       throw new DomainError(
         ErrorCode.PROFILE_NOT_FOUND,
         "Profile not found for the provided user ID.",
-        `SERVICE ERROR: Profile not found for user ID "${userId}" in getFullProfileSelf`,
+        `SERVICE ERROR: Profile not found for user ID "${userId}" in getProfileSelf`,
       );
     }
 
@@ -135,7 +135,7 @@ export class ProfileService {
     };
   }
 
-  async getFullProfileOther({
+  async getProfileOther({
     currentUserId,
     otherUserId,
   }: {

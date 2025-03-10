@@ -39,7 +39,7 @@ const HomeScreen = () => {
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
   const { data: profile, isLoading: isLoadingProfile } =
-    api.profile.getFullProfileSelf.useQuery();
+    api.profile.getProfileSelf.useQuery();
 
   const {
     data: postData,

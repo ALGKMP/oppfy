@@ -9,17 +9,16 @@ export const reportRouter = createTRPCRouter({
   reportUser: protectedProcedure
     .input(
       z.object({
-        targetUserId: z.string(),
+        userId: z.string(),
         reason: sharedValidators.report.reportUserOptions,
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input: { userId: targetUserId, reason } }) => {
       try {
-        const { targetUserId, reason } = input;
         return await ctx.services.report.reportUser({
+          reporterUserId: ctx.session.uid,
           targetUserId,
           reason,
-          reporterUserId: ctx.session.uid,
         });
       } catch (error) {
         console.error(error);

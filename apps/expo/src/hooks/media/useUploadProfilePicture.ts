@@ -16,7 +16,7 @@ export default function useUploadProfilePicture({
   const utils = api.useUtils();
 
   const generatePresignedUrl =
-    api.profile.generatePresignedUrlForProfilePicture.useMutation();
+    api.profile.createProfilePicturePresignedUrl.useMutation();
 
   // Pick image mutation
   const pickImage = useMutation({
@@ -71,14 +71,14 @@ export default function useUploadProfilePicture({
       if (!optimisticallyUpdate) return;
 
       // Cancel outgoing fetches
-      await utils.profile.getFullProfileSelf.cancel();
+      await utils.profile.getProfileSelf.cancel();
 
       // Get current data
-      const prevData = utils.profile.getFullProfileSelf.getData();
+      const prevData = utils.profile.getProfileSelf.getData();
       if (!prevData) return;
 
       // Optimistically update
-      utils.profile.getFullProfileSelf.setData(undefined, {
+      utils.profile.getProfileSelf.setData(undefined, {
         ...prevData,
         profilePictureUrl: newProfilePictureUrl,
       });
@@ -89,16 +89,13 @@ export default function useUploadProfilePicture({
       if (!optimisticallyUpdate || !ctx) return;
 
       // Revert optimistic update on error
-      utils.profile.getFullProfileSelf.setData(undefined, ctx.prevData);
+      utils.profile.getProfileSelf.setData(undefined, ctx.prevData);
     },
     onSettled: () => {
       if (!optimisticallyUpdate) return;
 
       // Sync with server after delay
-      setTimeout(
-        () => void utils.profile.getFullProfileSelf.invalidate(),
-        10000,
-      );
+      setTimeout(() => void utils.profile.getProfileSelf.invalidate(), 10000);
     },
   });
 

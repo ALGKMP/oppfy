@@ -15,6 +15,7 @@ export const contactsRouter = createTRPCRouter({
         });
       }
     }),
+    
   deleteContacts: protectedProcedure.mutation(async ({ ctx }) => {
     try {
       await ctx.services.contact.deleteContacts(ctx.session.uid);

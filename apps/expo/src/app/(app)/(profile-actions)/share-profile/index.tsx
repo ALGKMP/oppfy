@@ -9,8 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useToastController } from "@tamagui/toast";
 import { Stack, useTheme, View, YStack } from "tamagui";
 
-import { QRCode } from "~/components/ui";
-import { Button, H1 } from "~/components/ui";
+import { Button, H1, QRCode } from "~/components/ui";
 import useShare from "~/hooks/useShare";
 import { api } from "~/utils/api";
 
@@ -20,9 +19,9 @@ const ShareProfile = () => {
   const toast = useToastController();
   const { shareProfile, isSharing } = useShare();
 
-  const username = utils.profile.getFullProfileSelf.getData()?.username ?? "";
+  const username = utils.profile.getProfileSelf.getData()?.username ?? "";
   const profilePictureUrl =
-    utils.profile.getFullProfileSelf.getData()?.profilePictureUrl ?? "";
+    utils.profile.getProfileSelf.getData()?.profilePictureUrl ?? "";
   const profileUrl = `https://www.oppfy.app/profile/${username}`;
 
   const handleShare = async () => {

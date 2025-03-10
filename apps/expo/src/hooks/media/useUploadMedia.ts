@@ -25,14 +25,14 @@ export interface UploadMediaInputNotOnApp extends UploadMediaInputBase {
 export type UploadMediaInput = UploadMediaInputOnApp | UploadMediaInputNotOnApp;
 
 const useUploadMedia = () => {
-  const uploadVideoPostForUserOnApp =
-    api.post.uploadVideoPostForUserOnApp.useMutation();
-  const uploadVideoPostForUserNotOnApp =
-    api.post.uploadVideoPostForUserNotOnApp.useMutation();
-  const uploadPicturePostForUserOnApp =
-    api.post.uploadPicturePostForUserOnApp.useMutation();
-  const uploadPicturePostForUserNotOnApp =
-    api.post.uploadPicturePostForUserNotOnApp.useMutation();
+  const createVideoPresignedUrlForUserOnApp =
+    api.post.createVideoPresignedUrlForUserOnApp.useMutation();
+  const createVideoPresignedUrlForUserNotOnApp =
+    api.post.createVideoPresignedUrlForUserNotOnApp.useMutation();
+  const createImagePresignedUrlForUserOnApp =
+    api.post.createImagePresignedUrlForUserOnApp.useMutation();
+  const createImagePresignedUrlForUserNotOnApp =
+    api.post.createImagePresignedUrlForUserNotOnApp.useMutation();
 
   const getMediaBlob = async (uri: string) => {
     const response = await fetch(uri);
@@ -53,11 +53,11 @@ const useUploadMedia = () => {
 
       const { presignedUrl, postId } =
         input.type === "onApp"
-          ? await uploadVideoPostForUserOnApp.mutateAsync({
+          ? await createVideoPresignedUrlForUserOnApp.mutateAsync({
               ...baseData,
               recipient: input.recipient,
             })
-          : await uploadVideoPostForUserNotOnApp.mutateAsync({
+          : await createVideoPresignedUrlForUserNotOnApp.mutateAsync({
               ...baseData,
               number: input.number,
               name: input.name,
@@ -104,11 +104,11 @@ const useUploadMedia = () => {
 
       const { presignedUrl, postId } =
         input.type === "onApp"
-          ? await uploadPicturePostForUserOnApp.mutateAsync({
+          ? await createImagePresignedUrlForUserOnApp.mutateAsync({
               ...baseData,
               recipient: input.recipient,
             })
-          : await uploadPicturePostForUserNotOnApp.mutateAsync({
+          : await createImagePresignedUrlForUserNotOnApp.mutateAsync({
               ...baseData,
               number: input.number,
               name: input.name,

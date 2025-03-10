@@ -66,7 +66,7 @@ const Requests = () => {
     onMutate: async (newData) => {
       await utils.friend.paginateFriendRequests.cancel();
       await utils.follow.paginateFollowRequests.cancel();
-      await utils.profile.getFullProfileSelf.cancel();
+      await utils.profile.getProfileSelf.cancel();
       await utils.friend.paginateFriendsSelf.cancel();
 
       const prevFriendData =
@@ -122,7 +122,7 @@ const Requests = () => {
     onSettled: async () => {
       await utils.friend.paginateFriendRequests.invalidate();
       await utils.follow.paginateFollowRequests.invalidate();
-      await utils.profile.getFullProfileSelf.invalidate();
+      await utils.profile.getProfileSelf.invalidate();
       await utils.friend.paginateFriendsSelf.invalidate();
     },
   });
@@ -131,7 +131,7 @@ const Requests = () => {
     onMutate: async (newData) => {
       await utils.follow.paginateFollowRequests.cancel();
       await utils.follow.paginateFollowersSelf.cancel();
-      await utils.profile.getFullProfileSelf.cancel();
+      await utils.profile.getProfileSelf.cancel();
 
       const prevData = utils.follow.paginateFollowRequests.getInfiniteData({
         pageSize: PAGE_SIZE,
@@ -160,7 +160,7 @@ const Requests = () => {
     onSettled: async () => {
       await utils.follow.paginateFollowRequests.invalidate();
       await utils.follow.paginateFollowersSelf.invalidate();
-      await utils.profile.getFullProfileSelf.invalidate();
+      await utils.profile.getProfileSelf.invalidate();
     },
   });
 

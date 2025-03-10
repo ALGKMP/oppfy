@@ -5,6 +5,17 @@ import { DomainError } from "../../errors";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const followRouter = createTRPCRouter({
+  getFollowRequestCount: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const followRequestCount = await ctx.services.follow.countFollowRequests(
+        ctx.session.uid,
+      );
+      return followRequestCount;
+    } catch (err) {
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
+    }
+  }),
+
   paginateFollowersSelf: protectedProcedure
     .input(
       z.object({
