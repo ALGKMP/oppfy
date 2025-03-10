@@ -24,11 +24,7 @@ export class UserRepository {
       // Create an empty profile for the user
       const [profile] = await tx
         .insert(schema.profile)
-        .values({
-          userId,
-          username,
-          ...(name && { name }),
-        })
+        .values({ userId, username, ...(name && { name }) })
         .returning({ id: schema.profile.id });
 
       if (!profile) throw new Error("Profile was not created");
@@ -53,16 +49,15 @@ export class UserRepository {
       }
 
       // Create the user
-      await tx.insert(schema.user).values({
-        id: userId,
-        notificationSettingsId: notificationSetting.id,
-        phoneNumber,
-      });
+      await tx
+        .insert(schema.user)
+        .values({
+          id: userId,
+          notificationSettingsId: notificationSetting.id,
+          phoneNumber,
+        });
 
-      await tx.insert(schema.userStatus).values({
-        userId,
-        isOnApp: isOnApp,
-      });
+      await tx.insert(schema.userStatus).values({ userId, isOnApp: isOnApp });
     });
   }
 
@@ -70,6 +65,16 @@ export class UserRepository {
   async getUser(userId: string) {
     return await this.db.query.user.findFirst({
       where: eq(schema.user.id, userId),
+    });
+  }
+
+  @handleDatabaseErrors
+  async getUserWithProfile(userId: string) {
+    return await this.db.query.user.findFirst({
+      where: eq(schema.user.id, userId),
+      with: {
+        profile: true,
+      },
     });
   }
 
@@ -103,9 +108,7 @@ export class UserRepository {
   @handleDatabaseErrors
   async getRandomActiveProfilesForRecs(userId: string, limit: number) {
     return await this.db
-      .select({
-        userId: schema.user.id,
-      })
+      .select({ userId: schema.user.id })
       .from(schema.user)
       .orderBy(sql`RANDOM()`)
       .limit(limit);

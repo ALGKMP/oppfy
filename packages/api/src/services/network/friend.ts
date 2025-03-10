@@ -56,8 +56,8 @@ export class FriendService {
 
     const isFollowing = await this.isFollowing(senderId, recipientId);
 
-    const sender = await this.userRepository.getUser(senderId);
-    const recipient = await this.userRepository.getUser(recipientId);
+    const sender = await this.userRepository.getUserWithProfile(senderId);
+    const recipient = await this.userRepository.getUserWithProfile(recipientId);
 
     if (!sender || !recipient) {
       throw new DomainError(
@@ -76,15 +76,6 @@ export class FriendService {
 
     await this.friendRepository.createFriendRequest(senderId, recipientId);
 
-    const profile = await this.profileRepository.getProfile(sender.profileId);
-
-    if (profile === undefined) {
-      throw new DomainError(
-        ErrorCode.PROFILE_NOT_FOUND,
-        `Profile not found for user ID "${senderId}"`,
-      );
-    }
-
     const settings = await this.notificationsRepository.getNotificationSettings(
       recipient.notificationSettingsId,
     );
@@ -96,7 +87,7 @@ export class FriendService {
         pushTokens,
         senderId,
         recipientId,
-        profile.username,
+        sender.profile.username,
       );
     }
   }
@@ -118,27 +109,13 @@ export class FriendService {
       );
     }
 
-    const sender = await this.userRepository.getUser(senderId);
-    const recipient = await this.userRepository.getUser(recipientId);
+    const sender = await this.userRepository.getUserWithProfile(senderId);
+    const recipient = await this.userRepository.getUserWithProfile(recipientId);
 
     if (!sender || !recipient) {
       throw new DomainError(
         ErrorCode.USER_NOT_FOUND,
         "One or both users not found",
-      );
-    }
-
-    const senderProfile = await this.profileRepository.getProfile(
-      sender.profileId,
-    );
-    const recipientProfile = await this.profileRepository.getProfile(
-      recipient.profileId,
-    );
-
-    if (!senderProfile || !recipientProfile) {
-      throw new DomainError(
-        ErrorCode.PROFILE_NOT_FOUND,
-        "One or both profiles not found",
       );
     }
 
@@ -184,7 +161,7 @@ export class FriendService {
           pushTokens,
           recipientId,
           senderId,
-          recipientProfile.username,
+          recipient.profile.username,
         );
       }
     }
@@ -221,7 +198,7 @@ export class FriendService {
         pushTokens,
         recipientId,
         senderId,
-        recipientProfile.username,
+        recipient.profile.username,
       );
     }
   }
