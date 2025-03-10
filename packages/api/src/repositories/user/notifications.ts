@@ -44,7 +44,13 @@ export class NotificationsRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async storePushToken(userId: string, pushToken: string) {
+  async storePushToken({
+    userId,
+    pushToken,
+  }: {
+    userId: string;
+    pushToken: string;
+  }) {
     await this.db.transaction(async (tx) => {
       const pushTokenData = await tx.query.pushToken.findFirst({
         where: and(
@@ -54,18 +60,13 @@ export class NotificationsRepository {
       });
 
       if (pushTokenData === undefined) {
-        await tx.insert(schema.pushToken).values({
-          userId,
-          token: pushToken,
-        });
+        await tx.insert(schema.pushToken).values({ userId, token: pushToken });
         return;
       }
 
       await tx
         .update(schema.pushToken)
-        .set({
-          updatedAt: sql`CURRENT_TIMESTAMP`,
-        })
+        .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
         .where(
           and(
             eq(schema.pushToken.userId, userId),
@@ -76,7 +77,13 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
-  async deletePushToken(userId: string, pushToken: string) {
+  async deletePushToken({
+    userId,
+    pushToken,
+  }: {
+    userId: string;
+    pushToken: string;
+  }) {
     await this.db
       .delete(schema.pushToken)
       .where(
@@ -88,10 +95,14 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
-  async getNotificationSettings(notificationSettingId: string) {
+  async getNotificationSettings({
+    notificationSettingsId,
+  }: {
+    notificationSettingsId: string;
+  }) {
     const possibleNotificationSettings =
       await this.db.query.notificationSettings.findFirst({
-        where: eq(schema.notificationSettings.id, notificationSettingId),
+        where: eq(schema.notificationSettings.id, notificationSettingsId),
         columns: {
           posts: true,
           likes: true,
@@ -106,11 +117,9 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
-  async getUnreadNotificationsCount(userId: string) {
+  async getUnreadNotificationsCount({ userId }: { userId: string }) {
     const result = await this.db
-      .select({
-        count: count(),
-      })
+      .select({ count: count() })
       .from(schema.notifications)
       .where(
         and(
@@ -169,11 +178,15 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
-  async paginateNotifications(
-    userId: string,
-    cursor: { createdAt: Date; id: string } | null = null,
+  async paginateNotifications({
+    userId,
+    cursor = null,
     pageSize = 10,
-  ) {
+  }: {
+    userId: string;
+    cursor?: { createdAt: Date; id: string } | null;
+    pageSize?: number;
+  }) {
     const notifications = await this.db.transaction(async (tx) => {
       const fetchedNotifications = await tx
         .select({
@@ -210,7 +223,7 @@ export class NotificationsRepository {
           schema.user,
           eq(schema.notifications.senderId, schema.user.id),
         )
-        .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
+        .innerJoin(schema.profile, eq(schema.user.id, schema.profile.userId))
         .where(
           and(
             eq(schema.notifications.recipientId, userId),
@@ -248,44 +261,46 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
-  async updateNotificationSettings(
-    notificationSettingsId: string,
-    notificationSettings: NotificationSettings,
-  ) {
+  async updateNotificationSettings({
+    notificationSettingsId,
+    notificationSettings,
+  }: {
+    notificationSettingsId: string;
+    notificationSettings: NotificationSettings;
+  }) {
     await this.db
       .update(schema.notificationSettings)
-      .set({
-        ...notificationSettings,
-      })
+      .set({ ...notificationSettings })
       .where(eq(schema.notificationSettings.id, notificationSettingsId));
   }
 
   @handleDatabaseErrors
-  async storeNotification(
-    senderId: string,
-    recipientId: string,
-    notificationData: StoreNotificationData,
-  ) {
-    await this.db.insert(schema.notifications).values({
-      senderId,
-      recipientId,
-      ...notificationData,
-    });
+  async storeNotification({
+    senderId,
+    recipientId,
+    notificationData,
+  }: {
+    senderId: string;
+    recipientId: string;
+    notificationData: StoreNotificationData;
+  }) {
+    await this.db
+      .insert(schema.notifications)
+      .values({ senderId, recipientId, ...notificationData });
   }
 
   @handleDatabaseErrors
-  async getPushTokens(userId: string) {
-    const possiblePushTokens = await this.db.query.pushToken.findMany({
+  async getPushTokens({ userId }: { userId: string }) {
+    const pushTokens = await this.db.query.pushToken.findMany({
       where: eq(schema.pushToken.userId, userId),
-      columns: {
-        token: true,
-      },
+      columns: { token: true },
     });
 
-    return possiblePushTokens.map((pushToken) => pushToken.token);
+    return pushTokens.map((pushToken) => pushToken.token);
   }
 
-  async deleteNotificationById(id: string) {
+  @handleDatabaseErrors
+  async deleteNotificationById({ id }: { id: string }) {
     await this.db
       .delete(schema.notifications)
       .where(eq(schema.notifications.id, id));
@@ -334,18 +349,24 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
-  async deleteNotificationsBetweenUsers(userId1: string, userId2: string) {
+  async deleteNotificationsBetweenUsers({
+    userIdA,
+    userIdB,
+  }: {
+    userIdA: string;
+    userIdB: string;
+  }) {
     await this.db
       .delete(schema.notifications)
       .where(
         or(
           and(
-            eq(schema.notifications.senderId, userId1),
-            eq(schema.notifications.recipientId, userId2),
+            eq(schema.notifications.senderId, userIdA),
+            eq(schema.notifications.recipientId, userIdB),
           ),
           and(
-            eq(schema.notifications.senderId, userId2),
-            eq(schema.notifications.recipientId, userId1),
+            eq(schema.notifications.senderId, userIdB),
+            eq(schema.notifications.recipientId, userIdA),
           ),
         ),
       );

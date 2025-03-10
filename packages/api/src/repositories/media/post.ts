@@ -1,15 +1,8 @@
 import { aliasedTable, and, asc, desc, eq, gt, lt, or, sql } from "drizzle-orm";
 
 import { db, inArray, schema } from "@oppfy/db";
-import { env } from "@oppfy/env";
-import { mux } from "@oppfy/mux";
 
-import {
-  DomainError,
-  ErrorCode,
-  handleDatabaseErrors,
-  handleMuxErrors,
-} from "../../errors";
+import { handleDatabaseErrors } from "../../errors";
 import { ContactsRepository } from "../user/contacts";
 
 export class PostRepository {
@@ -17,7 +10,7 @@ export class PostRepository {
   private contactsRepository = new ContactsRepository();
 
   @handleDatabaseErrors
-  async getPost(postId: string, userId: string) {
+  async getPost({ postId, userId }: { postId: string; userId: string }) {
     const author = aliasedTable(schema.user, "author");
     const recipient = aliasedTable(schema.user, "recipient");
     const authorProfile = aliasedTable(schema.profile, "authorProfile");
@@ -68,7 +61,7 @@ export class PostRepository {
     return result[0];
   }
 
-  async getPostForNextJs(postId: string) {
+  async getPostForNextJs({ postId }: { postId: string }) {
     const author = aliasedTable(schema.user, "author");
     const recipient = aliasedTable(schema.user, "recipient");
     const authorProfile = aliasedTable(schema.profile, "authorProfile");
@@ -109,7 +102,7 @@ export class PostRepository {
   }
 
   @handleDatabaseErrors
-  async getPostFromCommentId(commentId: string) {
+  async getPostFromCommentId({ commentId }: { commentId: string }) {
     const author = aliasedTable(schema.user, "author");
     const recipient = aliasedTable(schema.user, "recipient");
     const authorProfile = aliasedTable(schema.profile, "authorProfile");
@@ -231,11 +224,15 @@ export class PostRepository {
   }
 
   @handleDatabaseErrors
-  async paginatePostsOfRecommended(
-    userId: string,
-    cursor: { createdAt: Date; postId: string } | null = null,
-    pageSize: number,
-  ) {
+  async paginatePostsOfRecommended({
+    userId,
+    cursor = null,
+    pageSize = 10,
+  }: {
+    userId: string;
+    cursor?: { createdAt: Date; postId: string } | null;
+    pageSize?: number;
+  }) {
     const author = aliasedTable(schema.user, "author");
     const recipient = aliasedTable(schema.user, "recipient");
     const authorProfile = aliasedTable(schema.profile, "authorProfile");
@@ -243,7 +240,7 @@ export class PostRepository {
 
     // get recc ids
     const recommendedUserIds = await this.contactsRepository
-      .getRecommendationsInternal(userId)
+      .getRecommendationsInternal({ userId })
       .then((res) => {
         return [...res.tier1, ...res.tier2, ...res.tier3];
       });
@@ -320,11 +317,15 @@ export class PostRepository {
   }
 
   @handleDatabaseErrors
-  async paginatePostsOfUser(
-    userId: string,
-    cursor: { createdAt: Date; postId: string } | null = null,
-    pageSize: number,
-  ) {
+  async paginatePostsOfUser({
+    userId,
+    cursor = null,
+    pageSize = 10,
+  }: {
+    userId: string;
+    cursor?: { createdAt: Date; postId: string } | null;
+    pageSize?: number;
+  }) {
     const author = aliasedTable(schema.user, "author");
     const recipient = aliasedTable(schema.user, "recipient");
     const authorProfile = aliasedTable(schema.profile, "authorProfile");
@@ -388,11 +389,15 @@ export class PostRepository {
   }
 
   @handleDatabaseErrors
-  async paginatePostsByUser(
-    userId: string,
-    cursor: { createdAt: Date; postId: string } | null = null,
-    pageSize: number,
-  ) {
+  async paginatePostsByUser({
+    userId,
+    cursor = null,
+    pageSize = 10,
+  }: {
+    userId: string;
+    cursor?: { createdAt: Date; postId: string } | null;
+    pageSize?: number;
+  }) {
     const author = aliasedTable(schema.user, "author");
     const recipient = aliasedTable(schema.user, "recipient");
     const authorProfile = aliasedTable(schema.profile, "authorProfile");
@@ -461,7 +466,7 @@ export class PostRepository {
   }
 
   @handleDatabaseErrors
-  async createPostStats(postId: string) {
+  async createPostStats({ postId }: { postId: string }) {
     return await this.db.insert(schema.postStats).values({ postId });
   }
 

@@ -8,7 +8,13 @@ export class FollowRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async createFollower(senderUserId: string, recipientUserId: string) {
+  async createFollower({
+    senderUserId,
+    recipientUserId,
+  }: {
+    senderUserId: string;
+    recipientUserId: string;
+  }) {
     return await this.db.transaction(async (tx) => {
       await tx
         .insert(schema.follow)
@@ -39,31 +45,36 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async removeFollower(senderId: string, recipientId: string) {
+  async removeFollower({
+    followerId,
+    followeeId,
+  }: {
+    followerId: string;
+    followeeId: string;
+  }) {
     return await this.db.transaction(async (tx) => {
       await tx
         .delete(schema.follow)
         .where(
           and(
-            eq(schema.follow.senderId, senderId),
-            eq(schema.follow.recipientId, recipientId),
+            eq(schema.follow.senderId, followerId),
+            eq(schema.follow.recipientId, followeeId),
           ),
         );
 
       const senderProfile = await tx.query.profile.findFirst({
-        where: eq(schema.profile.userId, senderId),
+        where: eq(schema.profile.userId, followerId),
       });
 
       if (!senderProfile) throw new Error("Sender profile not found");
 
-      // Update sender's following count
       await tx
         .update(schema.profileStats)
         .set({ following: sql`${schema.profileStats.following} - 1` })
         .where(eq(schema.profileStats.profileId, senderProfile.id));
 
       const recipientProfile = await tx.query.profile.findFirst({
-        where: eq(schema.profile.userId, recipientId),
+        where: eq(schema.profile.userId, followeeId),
       });
 
       if (!recipientProfile) throw new Error("Recipient profile not found");
@@ -89,17 +100,27 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async getFollower(senderId: string, recipientId: string) {
+  async getFollower({
+    followerId,
+    followeeId,
+  }: {
+    followerId: string;
+    followeeId: string;
+  }) {
     return await this.db.query.follow.findFirst({
       where: and(
-        eq(schema.follow.senderId, senderId),
-        eq(schema.follow.recipientId, recipientId),
+        eq(schema.follow.senderId, followerId),
+        eq(schema.follow.recipientId, followeeId),
       ),
     });
   }
 
   @handleDatabaseErrors
-  async countFollowers(userId: string): Promise<number | undefined> {
+  async countFollowers({
+    userId,
+  }: {
+    userId: string;
+  }): Promise<number | undefined> {
     const result = await this.db
       .select({ count: count() })
       .from(schema.follow)
@@ -109,33 +130,72 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async countFollowing(userId: string): Promise<number | undefined> {
+  async countFollowing({
+    userId,
+  }: {
+    userId: string;
+  }): Promise<number | undefined> {
     const result = await this.db
       .select({ count: count() })
       .from(schema.follow)
       .where(eq(schema.follow.senderId, userId));
+
     return result[0]?.count;
   }
 
   @handleDatabaseErrors
-  async countFollowRequests(userId: string): Promise<number | undefined> {
+  async countFollowRequests({
+    userId,
+  }: {
+    userId: string;
+  }): Promise<number | undefined> {
     const result = await this.db
       .select({ count: count() })
       .from(schema.followRequest)
       .where(eq(schema.followRequest.recipientId, userId));
-    return result[0]?.count ?? 0;
+
+    return result[0]?.count;
   }
 
   @handleDatabaseErrors
-  async createFollowRequest(senderId: string, recipientId: string) {
-    const result = await this.db
+  async deleteFollowRequest({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
+    await this.db
+      .delete(schema.followRequest)
+      .where(
+        and(
+          eq(schema.followRequest.senderId, senderId),
+          eq(schema.followRequest.recipientId, recipientId),
+        ),
+      );
+  }
+
+  @handleDatabaseErrors
+  async createFollowRequest({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
+    await this.db
       .insert(schema.followRequest)
       .values({ senderId, recipientId });
-    return result[0];
   }
 
   @handleDatabaseErrors
-  async getFollowRequest(senderId: string, recipientId: string) {
+  async getFollowRequest({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
     return await this.db.query.followRequest.findFirst({
       where: and(
         eq(schema.followRequest.senderId, senderId),
@@ -145,12 +205,15 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async acceptFollowRequest(senderId: string, recipientId: string) {
+  async acceptFollowRequest({
+    senderId,
+    recipientId,
+  }: {
+    senderId: string;
+    recipientId: string;
+  }) {
     return await this.db.transaction(async (tx) => {
-      // Make sender follow recipient
-      await tx.insert(schema.follow).values({ senderId, recipientId });
-
-      // Delete the follow request from sender to recipient
+      // Delete the follow request
       await tx
         .delete(schema.followRequest)
         .where(
@@ -160,7 +223,10 @@ export class FollowRepository {
           ),
         );
 
-      // Update profileStats for both sender and recipient
+      // Create the follow relationship
+      await tx.insert(schema.follow).values({ senderId, recipientId });
+
+      // Update the sender's following count
       const senderProfile = await tx.query.profile.findFirst({
         where: eq(schema.profile.userId, senderId),
       });
@@ -172,6 +238,7 @@ export class FollowRepository {
         .set({ following: sql`${schema.profileStats.following} + 1` })
         .where(eq(schema.profileStats.profileId, senderProfile.id));
 
+      // Update the recipient's followers count
       const recipientProfile = await tx.query.profile.findFirst({
         where: eq(schema.profile.userId, recipientId),
       });
@@ -182,17 +249,19 @@ export class FollowRepository {
         .update(schema.profileStats)
         .set({ followers: sql`${schema.profileStats.followers} + 1` })
         .where(eq(schema.profileStats.profileId, recipientProfile.id));
-
-      return true;
     });
   }
 
   @handleDatabaseErrors
-  async paginateFollowersSelf(
-    forUserId: string,
-    cursor: { createdAt: Date; profileId: string } | null = null,
+  async paginateFollowersSelf({
+    forUserId,
+    cursor = null,
     pageSize = 10,
-  ) {
+  }: {
+    forUserId: string;
+    cursor?: { createdAt: Date; profileId: string } | null;
+    pageSize?: number;
+  }) {
     const data = await this.db
       .select({
         userId: schema.user.id,
@@ -238,12 +307,17 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async paginateFollowersOthers(
-    forUserId: string,
-    currentUserId: string,
-    cursor: { createdAt: Date; profileId: string } | null = null,
+  async paginateFollowersOthers({
+    forUserId,
+    currentUserId,
+    cursor = null,
     pageSize = 10,
-  ) {
+  }: {
+    forUserId: string;
+    currentUserId: string;
+    cursor?: { createdAt: Date; profileId: string } | null;
+    pageSize?: number;
+  }) {
     const followers = await this.db
       .select({
         userId: schema.user.id,
@@ -305,21 +379,25 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async getAllFollowingIds(forUserId: string) {
-    const following = await this.db
-      .select({ userId: schema.follow.recipientId })
+  async getAllFollowingIds({ forUserId }: { forUserId: string }) {
+    const followingUsers = await this.db
+      .select({ followingId: schema.follow.recipientId })
       .from(schema.follow)
       .where(eq(schema.follow.senderId, forUserId));
 
-    return following.map((f) => f.userId);
+    return followingUsers.map((user) => user.followingId);
   }
 
   @handleDatabaseErrors
-  async paginateFollowingSelf(
-    userId: string,
-    cursor: { createdAt: Date; profileId: string } | null = null,
+  async paginateFollowingSelf({
+    userId,
+    cursor = null,
     pageSize = 10,
-  ) {
+  }: {
+    userId: string;
+    cursor?: { createdAt: Date; profileId: string } | null;
+    pageSize?: number;
+  }) {
     const following = await this.db
       .select({
         userId: schema.user.id,
@@ -381,12 +459,17 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async paginateFollowingOthers(
-    forUserId: string,
-    currentUserId: string,
-    cursor: { createdAt: Date; profileId: string } | null = null,
+  async paginateFollowingOthers({
+    forUserId,
+    currentUserId,
+    cursor = null,
     pageSize = 10,
-  ) {
+  }: {
+    forUserId: string;
+    currentUserId: string;
+    cursor?: { createdAt: Date; profileId: string } | null;
+    pageSize?: number;
+  }) {
     const followers = await this.db
       .select({
         userId: schema.user.id,
@@ -448,11 +531,15 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async paginateFollowRequests(
-    forUserId: string,
-    cursor: { createdAt: Date; profileId: string } | null = null,
+  async paginateFollowRequests({
+    forUserId,
+    cursor = null,
     pageSize = 10,
-  ) {
+  }: {
+    forUserId: string;
+    cursor?: { createdAt: Date; profileId: string } | null;
+    pageSize?: number;
+  }) {
     return await this.db
       .select({
         userId: schema.user.id,

@@ -7,7 +7,13 @@ export class ContactsRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async updateUserContacts(userId: string, hashedPhoneNumbers: string[]) {
+  async updateUserContacts({
+    userId,
+    hashedPhoneNumbers,
+  }: {
+    userId: string;
+    hashedPhoneNumbers: string[];
+  }) {
     return await this.db.transaction(async (tx) => {
       const oldContacts = await tx.query.userContact.findMany({
         where: eq(schema.userContact.userId, userId),
@@ -72,21 +78,21 @@ export class ContactsRepository {
   }
 
   @handleDatabaseErrors
-  async deleteContacts(userId: string) {
+  async deleteContacts({ userId }: { userId: string }) {
     return await this.db
       .delete(schema.userContact)
       .where(eq(schema.userContact.userId, userId));
   }
 
   @handleDatabaseErrors
-  async getContacts(userId: string) {
+  async getContacts({ userId }: { userId: string }) {
     return await this.db.query.userContact.findMany({
       where: eq(schema.userContact.userId, userId),
     });
   }
 
   @handleDatabaseErrors
-  async getRecommendationsInternal(userId: string) {
+  async getRecommendationsInternal({ userId }: { userId: string }) {
     const lambdaUrl = env.CONTACT_REC_LAMBDA_URL;
 
     // Construct the full URL with the query parameter
@@ -102,11 +108,7 @@ export class ContactsRepository {
         await response.text(),
         response.status,
       );
-      return {
-        tier1: [],
-        tier2: [],
-        tier3: [],
-      };
+      return { tier1: [], tier2: [], tier3: [] };
     }
 
     return (await response.json()) as {
