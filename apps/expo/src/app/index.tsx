@@ -7,19 +7,16 @@ import { api } from "~/utils/api";
 
 const Index = () => {
   const { isLoading: isLoadingAuth, isSignedIn } = useAuth();
-  const { isLoading: isLoadingOnboardingComplete, data: onboardingComplete } =
-    api.user.onboardingComplete.useQuery();
-  const { isLoading: isLoadingTutorialComplete, data: tutorialComplete } =
-    api.user.tutorialComplete.useQuery();
+  const { isLoading: isLoadingUserStatus, data: userStatus } =
+    api.user.getUserStatus.useQuery(undefined, {
+      enabled: isSignedIn,
+    });
 
   const { isLoading: isLoadingPermissions, permissions } = usePermissions();
   const requiredPermissions = permissions.camera && permissions.contacts;
 
   const isLoading =
-    isLoadingAuth ||
-    isLoadingPermissions ||
-    isLoadingTutorialComplete ||
-    isLoadingOnboardingComplete;
+    isLoadingAuth || isLoadingPermissions || isLoadingUserStatus;
 
   if (isLoading) {
     return null;
@@ -29,12 +26,14 @@ const Index = () => {
     return <Redirect href="/(onboarding)" />;
   }
 
-  if (!onboardingComplete) {
-    return <Redirect href="/(onboarding)/user-info/name" />;
-  }
+  if (userStatus !== undefined) {
+    if (!userStatus.hasCompletedOnboarding) {
+      return <Redirect href="/(onboarding)/user-info/name" />;
+    }
 
-  if (!tutorialComplete) {
-    return <Redirect href="/(onboarding)/tutorial/intro" />;
+    if (!userStatus.hasCompletedTutorial) {
+      return <Redirect href="/(onboarding)/tutorial/intro" />;
+    }
   }
 
   return <Redirect href="/(app)/(bottom-tabs)/(home)" />;

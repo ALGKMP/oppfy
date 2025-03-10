@@ -6,40 +6,34 @@ export const usePrivacySettings = () => {
   const utils = api.useUtils();
 
   // Get privacy setting
-  const { data: privacySetting } = api.user.getPrivacySetting.useQuery(
-    undefined,
-    {
-      initialData: "public",
-    },
-  );
+  const { data: privacySetting } = api.user.getPrivacy.useQuery(undefined, {
+    initialData: "public",
+  });
 
   // Mutation for privacy setting
-  const updatePrivacySetting = api.user.updatePrivacySetting.useMutation({
+  const updatePrivacy = api.user.updatePrivacy.useMutation({
     onMutate: async (newPrivacySettings) => {
-      await utils.user.getPrivacySetting.cancel();
-      const prevData = utils.user.getPrivacySetting.getData();
+      await utils.user.getPrivacy.cancel();
+      const prevData = utils.user.getPrivacy.getData();
       if (prevData === undefined) return;
 
-      utils.user.getPrivacySetting.setData(
-        undefined,
-        newPrivacySettings.privacy,
-      );
+      utils.user.getPrivacy.setData(undefined, newPrivacySettings.privacy);
 
       return { prevData };
     },
     onError: (_err, _newPrivacySettings, ctx) => {
       if (ctx === undefined) return;
-      utils.user.getPrivacySetting.setData(undefined, ctx.prevData);
+      utils.user.getPrivacy.setData(undefined, ctx.prevData);
     },
     onSettled: async () => {
-      await utils.user.getPrivacySetting.invalidate();
+      await utils.user.getPrivacy.invalidate();
     },
   });
 
   const handlePrivacySettingUpdate = async (
     newPrivacySetting: "private" | "public",
   ) => {
-    await updatePrivacySetting.mutateAsync({
+    await updatePrivacy.mutateAsync({
       privacy: newPrivacySetting,
     });
   };

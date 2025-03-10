@@ -17,7 +17,7 @@ enum Error {
 
 const ProfilePicture = () => {
   const router = useRouter();
-  const completedOnboarding = api.user.completedOnboarding.useMutation();
+  const markOnboardingComplete = api.user.markOnboardingComplete.useMutation();
   const [error, setError] = useState<Error | null>(null);
 
   const {
@@ -41,12 +41,12 @@ const ProfilePicture = () => {
     if (!selectedImageUri) {
       // Skip flow
       try {
-        await completedOnboarding.mutateAsync();
+        await markOnboardingComplete.mutateAsync();
         await Haptics.notificationAsync(
           Haptics.NotificationFeedbackType.Success,
         );
         router.replace("/tutorial/intro");
-      } catch (err) {
+      } catch {
         setError(Error.UNKNOWN);
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
@@ -56,7 +56,7 @@ const ProfilePicture = () => {
     // Upload flow
     try {
       await uploadImage(selectedImageUri);
-      await completedOnboarding.mutateAsync();
+      await markOnboardingComplete.mutateAsync();
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace("/tutorial/intro");
     } catch (err) {

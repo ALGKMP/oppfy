@@ -1,6 +1,6 @@
+import { cloudfront } from "@oppfy/cloudfront";
 import type { schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
-import { cloudfront } from "@oppfy/cloudfront";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { UserRepository } from "../../repositories/user/user";
@@ -28,7 +28,7 @@ export class PrivacyService {
     if (!userExists) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
-    await this.userRepository.updatePrivacySetting(userId, newPrivacySetting);
+    await this.userRepository.updatePrivacy(userId, newPrivacySetting);
     await cloudfront.invalidateUserPosts(userId);
   }
 }

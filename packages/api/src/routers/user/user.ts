@@ -21,45 +21,61 @@ export const userRouter = createTRPCRouter({
     }
   }),
 
-  onboardingComplete: publicProcedure.query(async ({ ctx }) => {
+  getUserStatus: publicProcedure.query(async ({ ctx }) => {
     try {
-      if (!ctx.session?.uid) return false;
-      const user = await ctx.services.user.getUserStatus(ctx.session.uid);
-      return user.hasCompletedOnboarding;
+      if (!ctx.session?.uid) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User not found",
+        });
+      }
+
+      return await ctx.services.user.getUserStatus(ctx.session.uid);
     } catch (err) {
       if (err instanceof DomainError) {
-        if (err.code === ErrorCode.USER_NOT_FOUND) {
-          return false;
-        }
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User not found",
+        });
       }
+
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to check if user has completed the onboarding process",
+        message: "Failed to get user status",
         cause: err,
       });
     }
   }),
 
-  checkOnboardingComplete: publicProcedure.mutation(async ({ ctx }) => {
+  userStatus: publicProcedure.mutation(async ({ ctx }) => {
     try {
-      if (!ctx.session?.uid) return false;
-      const user = await ctx.services.user.getUserStatus(ctx.session.uid);
-      return user.hasCompletedOnboarding;
+      if (!ctx.session?.uid) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User not found",
+        });
+      }
+
+      return await ctx.services.user.getUserStatus(ctx.session.uid);
     } catch (err) {
       if (err instanceof DomainError) {
         if (err.code === ErrorCode.USER_NOT_FOUND) {
-          return false;
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "User not found",
+          });
         }
       }
+
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to check if user has completed the onboarding process",
+        message: "Failed to get user status",
         cause: err,
       });
     }
   }),
 
-  completedOnboarding: publicProcedure.mutation(async ({ ctx }) => {
+  markOnboardingComplete: publicProcedure.mutation(async ({ ctx }) => {
     try {
       if (!ctx.session?.uid) return false;
       await ctx.services.user.completedOnboarding(ctx.session.uid);
@@ -72,45 +88,7 @@ export const userRouter = createTRPCRouter({
     }
   }),
 
-  tutorialComplete: publicProcedure.query(async ({ ctx }) => {
-    try {
-      if (!ctx.session?.uid) return false;
-      const user = await ctx.services.user.getUserStatus(ctx.session.uid);
-      return user.hasCompletedTutorial;
-    } catch (err) {
-      if (err instanceof DomainError) {
-        if (err.code === ErrorCode.USER_NOT_FOUND) {
-          return false;
-        }
-      }
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to check if user has completed the onboarding process",
-        cause: err,
-      });
-    }
-  }),
-
-  checkTutorialComplete: publicProcedure.mutation(async ({ ctx }) => {
-    try {
-      if (!ctx.session?.uid) return false;
-      const user = await ctx.services.user.getUserStatus(ctx.session.uid);
-      return user.hasCompletedTutorial;
-    } catch (err) {
-      if (err instanceof DomainError) {
-        if (err.code === ErrorCode.USER_NOT_FOUND) {
-          return false;
-        }
-      }
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to check if user has completed the onboarding process",
-        cause: err,
-      });
-    }
-  }),
-
-  setTutorialComplete: publicProcedure.mutation(async ({ ctx }) => {
+  markTutorialComplete: publicProcedure.mutation(async ({ ctx }) => {
     try {
       if (!ctx.session?.uid) return false;
       await ctx.services.user.setTutorialComplete(ctx.session.uid);
@@ -123,7 +101,7 @@ export const userRouter = createTRPCRouter({
     }
   }),
 
-  getPrivacySetting: protectedProcedure.query(async ({ ctx }) => {
+  getPrivacy: protectedProcedure.query(async ({ ctx }) => {
     try {
       return await ctx.services.privacy.getPrivacySettings(ctx.session.uid);
     } catch (err) {
@@ -135,7 +113,7 @@ export const userRouter = createTRPCRouter({
     }
   }),
 
-  updatePrivacySetting: protectedProcedure
+  updatePrivacy: protectedProcedure
     .input(
       z.object({
         privacy: z.enum(["public", "private"]),
@@ -151,26 +129,6 @@ export const userRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to update privacy settings",
-          cause: err,
-        });
-      }
-    }),
-
-  getUserByPhoneNumber: publicProcedure
-    .input(
-      z.object({
-        phoneNumber: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      try {
-        return await ctx.services.user.getUserByPhoneNumberNoThrow(
-          input.phoneNumber,
-        );
-      } catch (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get user by phone number",
           cause: err,
         });
       }
