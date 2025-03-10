@@ -12,10 +12,10 @@ export const notificationsRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.notifications.storePushToken(
-          ctx.session.uid,
-          input.pushToken,
-        );
+        await ctx.services.notifications.storePushToken({
+          userId: ctx.session.uid,
+          pushToken: input.pushToken,
+        });
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
@@ -25,10 +25,10 @@ export const notificationsRouter = createTRPCRouter({
     .input(z.object({ pushToken: z.string() }))
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.notifications.deletePushToken(
-          ctx.session.uid,
-          input.pushToken,
-        );
+        await ctx.services.notifications.deletePushToken({
+          userId: ctx.session.uid,
+          pushToken: input.pushToken,
+        });
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
@@ -36,9 +36,9 @@ export const notificationsRouter = createTRPCRouter({
 
   getUnreadNotificationsCount: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.services.notifications.getUnreadNotificationsCount(
-        ctx.session.uid,
-      );
+      return await ctx.services.notifications.getUnreadNotificationsCount({
+        userId: ctx.session.uid,
+      });
     } catch (err) {
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
     }
@@ -58,11 +58,11 @@ export const notificationsRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.notifications.paginateNotifications(
-          ctx.session.uid,
-          input.cursor,
-          input.pageSize,
-        );
+        return await ctx.services.notifications.paginateNotifications({
+          userId: ctx.session.uid,
+          cursor: input.cursor,
+          pageSize: input.pageSize,
+        });
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
@@ -70,9 +70,9 @@ export const notificationsRouter = createTRPCRouter({
 
   getNotificationSettings: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.services.notifications.getNotificationSettings(
-        ctx.session.uid,
-      );
+      return await ctx.services.notifications.getNotificationSettings({
+        userId: ctx.session.uid,
+      });
     } catch (err) {
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
     }
@@ -91,10 +91,10 @@ export const notificationsRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.notifications.updateNotificationSettings(
-          ctx.session.uid,
-          input,
-        );
+        await ctx.services.notifications.updateNotificationSettings({
+          userId: ctx.session.uid,
+          newNotificationSettings: input,
+        });
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }

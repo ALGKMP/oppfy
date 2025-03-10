@@ -206,7 +206,7 @@ export class FriendRepository {
     pageSize = 10,
   }: {
     forUserId: string;
-    cursor?: { createdAt: Date; profileId: string } | null;
+    cursor: { createdAt: Date; profileId: string } | null;
     pageSize?: number;
   }) {
     const friends = await this.db

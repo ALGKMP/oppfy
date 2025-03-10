@@ -28,11 +28,11 @@ export class PaginationService {
   async paginateFollowersSelf({
     userId,
     cursor,
-    pageSize,
+    pageSize = 10,
   }: {
     userId: string;
     cursor: Cursor | null;
-    pageSize: number;
+    pageSize?: number;
   }) {
     const data = await this.followRepository.paginateFollowersSelf({
       forUserId: userId,
@@ -46,12 +46,12 @@ export class PaginationService {
     userId,
     currentUserId,
     cursor,
-    pageSize,
+    pageSize = 10,
   }: {
     userId: string;
     currentUserId: string;
     cursor: Cursor | null;
-    pageSize: number;
+    pageSize?: number;
   }) {
     const data = await this.followRepository.paginateFollowersOthers({
       forUserId: userId,
@@ -65,11 +65,11 @@ export class PaginationService {
   async paginateFollowingSelf({
     userId,
     cursor,
-    pageSize,
+    pageSize = 10,
   }: {
     userId: string;
     cursor: Cursor | null;
-    pageSize: number;
+    pageSize?: number;
   }) {
     const data = await this.followRepository.paginateFollowingSelf({
       userId,
@@ -83,12 +83,12 @@ export class PaginationService {
     userId,
     currentUserId,
     cursor,
-    pageSize,
+    pageSize = 10,
   }: {
     userId: string;
     currentUserId: string;
     cursor: Cursor | null;
-    pageSize: number;
+    pageSize?: number;
   }) {
     const data = await this.followRepository.paginateFollowingOthers({
       forUserId: userId,
@@ -102,11 +102,11 @@ export class PaginationService {
   async paginateFriendsSelf({
     userId,
     cursor,
-    pageSize,
+    pageSize = 10,
   }: {
     userId: string;
     cursor: Cursor | null;
-    pageSize: number;
+    pageSize?: number;
   }) {
     const data = await this.friendRepository.paginateFriendsSelf({
       forUserId: userId,
@@ -120,12 +120,12 @@ export class PaginationService {
   async paginateFriendsOthers({
     userId,
     cursor,
-    pageSize,
+    pageSize = 10,
     currentUserId,
   }: {
     userId: string;
     cursor: Cursor | null;
-    pageSize: number;
+    pageSize?: number;
     currentUserId: string;
   }) {
     const data = await this.friendRepository.paginateFriendsOther({
@@ -156,11 +156,11 @@ export class PaginationService {
   async paginateFriendRequests({
     userId,
     cursor,
-    pageSize,
+    pageSize = 10,
   }: {
     userId: string;
     cursor: Cursor | null;
-    pageSize: number;
+    pageSize?: number;
   }) {
     const data = await this.friendRepository.paginateFriendRequests({
       forUserId: userId,
@@ -173,11 +173,11 @@ export class PaginationService {
   async paginateFollowRequests({
     userId,
     cursor,
-    pageSize,
+    pageSize = 10,
   }: {
     userId: string;
     cursor: Cursor | null;
-    pageSize: number;
+    pageSize?: number;
   }) {
     const data = await this.followRepository.paginateFollowRequests({
       forUserId: userId,
@@ -193,7 +193,11 @@ export class PaginationService {
       profileId: string;
       createdAt: Date;
     },
-  >(data: T[], pageSize: number) {
+  >(data: T[], pageSize: number | null) {
+    if (pageSize === null) {
+      pageSize = 10;
+    }
+
     try {
       if (data.length === 0) {
         return { items: [], nextCursor: undefined };
