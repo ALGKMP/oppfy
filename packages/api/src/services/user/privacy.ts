@@ -12,7 +12,7 @@ export type PrivacySettings = NonNullable<
 export class PrivacyService {
   private userRepository = new UserRepository();
 
-  async getPrivacySettings(userId: string) {
+  async getPrivacySettings({ userId }: { userId: string }) {
     const user = await this.userRepository.getUser({ userId });
     if (!user) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
@@ -20,10 +20,13 @@ export class PrivacyService {
     return user.privacySetting;
   }
 
-  async updatePrivacySettings(
-    userId: string,
-    newPrivacySetting: PrivacySettings,
-  ) {
+  async updatePrivacySettings({
+    userId,
+    newPrivacySetting,
+  }: {
+    userId: string;
+    newPrivacySetting: PrivacySettings;
+  }) {
     const userExists = await this.userRepository.getUser({ userId });
     if (!userExists) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");

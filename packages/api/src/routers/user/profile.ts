@@ -44,7 +44,10 @@ export const profileRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        await ctx.services.profile.updateProfile(ctx.session.uid, input);
+        await ctx.services.profile.updateProfile({
+          userId: ctx.session.uid,
+          newData: input,
+        });
       } catch (err) {
         if (err instanceof DomainError) {
           switch (err.code) {
@@ -64,7 +67,9 @@ export const profileRouter = createTRPCRouter({
 
   getProfileSelf: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.services.profile.getProfileSelf(ctx.session.uid);
+      return await ctx.services.profile.getProfileSelf({
+        userId: ctx.session.uid,
+      });
     } catch (err) {
       console.error(err);
       throw new TRPCError({
@@ -81,7 +86,9 @@ export const profileRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.profile.getProfileByUsername(input.username);
+        return await ctx.services.profile.getProfileByUsername({
+          username: input.username,
+        });
       } catch (err) {
         console.error(err);
         throw new TRPCError({
@@ -132,10 +139,10 @@ export const profileRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        return await ctx.services.profile.searchProfilesByUsername(
-          input.username,
-          ctx.session.uid,
-        );
+        return await ctx.services.profile.searchProfilesByUsername({
+          username: input.username,
+          currentUserId: ctx.session.uid,
+        });
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

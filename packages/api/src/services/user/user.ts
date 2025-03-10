@@ -29,12 +29,17 @@ export class UserService {
   private contactsRepository = new ContactsRepository();
   private notificationsRepository = new NotificationsRepository();
 
-  async createUserWithUsername(
-    userId: string,
-    phoneNumber: string,
-    name: string,
+  async createUserWithUsername({
+    userId,
+    phoneNumber,
+    name,
     isOnApp = true,
-  ) {
+  }: {
+    userId: string;
+    phoneNumber: string;
+    name: string;
+    isOnApp?: boolean;
+  }) {
     let username;
     let usernameExists;
 
@@ -118,7 +123,15 @@ export class UserService {
     await fetchAndSendNotifications(userId);
   }
 
-  async createUser(userId: string, phoneNumber: string, isOnApp = true) {
+  async createUser({
+    userId,
+    phoneNumber,
+    isOnApp = true,
+  }: {
+    userId: string;
+    phoneNumber: string;
+    isOnApp?: boolean;
+  }) {
     let username;
     let usernameExists;
     do {
@@ -141,7 +154,7 @@ export class UserService {
     });
   }
 
-  async getUser(userId: string) {
+  async getUser({ userId }: { userId: string }) {
     const user = await this.userRepository.getUser({ userId });
     if (!user) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
@@ -149,7 +162,7 @@ export class UserService {
     return user;
   }
 
-  async getUserByPhoneNumber(phoneNumber: string) {
+  async getUserByPhoneNumber({ phoneNumber }: { phoneNumber: string }) {
     const user = await this.userRepository.getUserByPhoneNumber({
       phoneNumber,
     });
@@ -159,11 +172,11 @@ export class UserService {
     return user;
   }
 
-  async getUserByPhoneNumberNoThrow(phoneNumber: string) {
+  async getUserByPhoneNumberNoThrow({ phoneNumber }: { phoneNumber: string }) {
     return await this.userRepository.getUserByPhoneNumber({ phoneNumber });
   }
 
-  async deleteUser(userId: string) {
+  async deleteUser({ userId }: { userId: string }) {
     const user = await this.userRepository.getUser({ userId });
     if (!user) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
@@ -171,7 +184,7 @@ export class UserService {
 
     await this.userRepository.updateStatsOnUserDelete({ userId });
 
-    await this.deleteProfileFromOpenSearch(userId);
+    await this.deleteProfileFromOpenSearch({ userId });
 
     await this.userRepository.deleteUser({ userId });
     await this.contactsRepository.deleteContacts({ userId });
@@ -216,53 +229,65 @@ export class UserService {
   //   return userStatus.hasCompletedTutorial;
   // }
 
-  async isUserOnApp(userId: string) {
+  async isUserOnApp({ userId }: { userId: string }) {
     const userStatus = await this.userRepository.getUserStatus({ userId });
     return userStatus?.isOnApp ?? false;
   }
 
-  async completedOnboarding(userId: string) {
+  async completedOnboarding({ userId }: { userId: string }) {
     await this.userRepository.updateUserOnboardingComplete({
       userId,
       hasCompletedOnboarding: true,
     });
   }
 
-  async setTutorialComplete(userId: string) {
+  async setTutorialComplete({ userId }: { userId: string }) {
     await this.userRepository.updateUserTutorialComplete({
       userId,
       hasCompletedTutorial: true,
     });
   }
 
-  async isUserOnboarded(userId: string) {
+  async isUserOnboarded({ userId }: { userId: string }) {
     const userStatus = await this.userRepository.getUserStatus({ userId });
     return userStatus?.hasCompletedOnboarding ?? false;
   }
 
-  async hasTutorialBeenCompleted(userId: string) {
+  async hasTutorialBeenCompleted({ userId }: { userId: string }) {
     const userStatus = await this.userRepository.getUserStatus({ userId });
     return userStatus?.hasCompletedTutorial ?? false;
   }
 
-  async updateUserOnAppStatus(userId: string, isOnApp: boolean) {
+  async updateUserOnAppStatus({
+    userId,
+    isOnApp,
+  }: {
+    userId: string;
+    isOnApp: boolean;
+  }) {
     await this.userRepository.updateUserOnAppStatus({ userId, isOnApp });
   }
 
-  async updateUserTutorialComplete(
-    userId: string,
-    hasCompletedTutorial: boolean,
-  ) {
+  async updateUserTutorialComplete({
+    userId,
+    hasCompletedTutorial,
+  }: {
+    userId: string;
+    hasCompletedTutorial: boolean;
+  }) {
     await this.userRepository.updateUserTutorialComplete({
       userId,
       hasCompletedTutorial,
     });
   }
 
-  async updateUserOnboardingComplete(
-    userId: string,
-    hasCompletedOnboarding: boolean,
-  ) {
+  async updateUserOnboardingComplete({
+    userId,
+    hasCompletedOnboarding,
+  }: {
+    userId: string;
+    hasCompletedOnboarding: boolean;
+  }) {
     await this.userRepository.updateUserOnboardingComplete({
       userId,
       hasCompletedOnboarding,
@@ -308,7 +333,7 @@ export class UserService {
     return false;
   }
 
-  async deleteProfileFromOpenSearch(userId: string) {
+  async deleteProfileFromOpenSearch({ userId }: { userId: string }) {
     await openSearch.delete({ index: OpenSearchIndex.PROFILE, id: userId });
   }
 }

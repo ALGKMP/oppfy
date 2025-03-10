@@ -45,10 +45,13 @@ export class ProfileService {
     return url;
   }
 
-  async updateProfile(
-    userId: string,
-    newData: z.infer<typeof _updateProfile>,
-  ): Promise<void> {
+  async updateProfile({
+    userId,
+    newData,
+  }: {
+    userId: string;
+    newData: z.infer<typeof _updateProfile>;
+  }): Promise<void> {
     const userWithProfile = await this.profileRepository.getUserProfile({
       userId,
     });
@@ -77,14 +80,17 @@ export class ProfileService {
       update: newData,
     });
     console.log("upserting profile");
-    await this._upsertProfileSearch(userWithProfile.id, {
-      name: newData.name,
-      username: newData.username,
-      bio: newData.bio,
+    await this._upsertProfileSearch({
+      userId: userWithProfile.id,
+      newProfileData: {
+        name: newData.name,
+        username: newData.username,
+        bio: newData.bio,
+      },
     });
   }
 
-  async getProfileByUsername(username: string) {
+  async getProfileByUsername({ username }: { username: string }) {
     const profile = await this.profileRepository.getProfileByUsername({
       username,
     });
@@ -101,7 +107,7 @@ export class ProfileService {
     return { ...rest, profilePictureUrl };
   }
 
-  async getProfileSelf(userId: string) {
+  async getProfileSelf({ userId }: { userId: string }) {
     const user = await this.profileRepository.getUserFullProfile({ userId });
 
     if (!user) {
@@ -259,10 +265,13 @@ export class ProfileService {
     };
   }
 
-  private async _upsertProfileSearch(
-    userId: string,
-    newProfileData: Partial<OpenSearchProfileIndexResult>,
-  ) {
+  private async _upsertProfileSearch({
+    userId,
+    newProfileData,
+  }: {
+    userId: string;
+    newProfileData: Partial<OpenSearchProfileIndexResult>;
+  }) {
     const userWithProfile = await this.profileRepository.getUserProfile({
       userId,
     });
@@ -281,7 +290,13 @@ export class ProfileService {
     });
   }
 
-  async searchProfilesByUsername(username: string, currentUserId: string) {
+  async searchProfilesByUsername({
+    username,
+    currentUserId,
+  }: {
+    username: string;
+    currentUserId: string;
+  }) {
     const profiles = await this.profileRepository.profilesByUsername({
       username,
       currentUserId,

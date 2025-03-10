@@ -13,7 +13,7 @@ export class NotificationsService {
   private notificationsRepository = new NotificationsRepository();
   private userRepository = new UserRepository();
 
-  async getNotificationSettings(userId: string) {
+  async getNotificationSettings({ userId }: { userId: string }) {
     const user = await this.userRepository.getUser({ userId });
 
     if (!user) {
@@ -32,7 +32,7 @@ export class NotificationsService {
     return notificationSettings;
   }
 
-  async getUnreadNotificationsCount(userId: string) {
+  async getUnreadNotificationsCount({ userId }: { userId: string }) {
     return this.notificationsRepository.getUnreadNotificationsCount({ userId });
   }
 
@@ -48,11 +48,15 @@ export class NotificationsService {
     return this.notificationsRepository.getRecentNotifications(options);
   }
 
-  async paginateNotifications(
-    userId: string,
-    cursor: { createdAt: Date; id: string } | null = null,
+  async paginateNotifications({
+    userId,
+    cursor = null,
     pageSize = 10,
-  ) {
+  }: {
+    userId: string;
+    cursor?: { createdAt: Date; id: string } | null;
+    pageSize?: number;
+  }) {
     const items = await this.notificationsRepository.paginateNotifications({
       userId,
       cursor,
@@ -81,10 +85,13 @@ export class NotificationsService {
     };
   }
 
-  async updateNotificationSettings(
-    userId: string,
-    newNotificationSettings: NotificationSettings,
-  ) {
+  async updateNotificationSettings({
+    userId,
+    newNotificationSettings,
+  }: {
+    userId: string;
+    newNotificationSettings: NotificationSettings;
+  }) {
     const user = await this.userRepository.getUser({ userId });
 
     if (!user) {
@@ -105,52 +112,23 @@ export class NotificationsService {
     });
   }
 
-  async storePushToken(userId: string, pushToken: string) {
+  async storePushToken({
+    userId,
+    pushToken,
+  }: {
+    userId: string;
+    pushToken: string;
+  }) {
     await this.notificationsRepository.storePushToken({ userId, pushToken });
   }
 
-  async deletePushToken(userId: string, pushToken: string) {
-    await this.notificationsRepository.deletePushToken({ userId, pushToken });
-  }
-
-  async deleteNotification(id: string) {
-    await this.notificationsRepository.deleteNotificationById({ id });
-  }
-
-  async deleteNotifications(options: {
-    senderId?: string;
-    recipientId?: string;
-    eventType?: EventType | EventType[];
-    entityType?: EntityType;
-    entityId?: string;
+  async deletePushToken({
+    userId,
+    pushToken,
+  }: {
+    userId: string;
+    pushToken: string;
   }) {
-    await this.notificationsRepository.deleteNotifications(options);
-  }
-
-  async deleteNotificationFromSenderToRecipient(
-    senderId: string,
-    recipientId: string,
-    options: {
-      eventType?: EventType | EventType[];
-      entityType?: EntityType;
-      entityId?: string;
-    },
-  ) {
-    await this.notificationsRepository.deleteNotifications({
-      senderId,
-      recipientId,
-      ...options,
-    });
-  }
-
-  async deleteAllNotificationsForUser(userId: string) {
-    await this.deleteNotifications({ recipientId: userId });
-  }
-
-  async deleteAllNotificationsForEntity(
-    entityId: string,
-    entityType: EntityType,
-  ) {
-    await this.deleteNotifications({ entityId, entityType });
+    await this.notificationsRepository.deletePushToken({ userId, pushToken });
   }
 }
