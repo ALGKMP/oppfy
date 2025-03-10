@@ -11,7 +11,7 @@ import {
 } from "../../trpc";
 
 export const postRouter = createTRPCRouter({
-  uploadPicturePostForUserOnApp: protectedProcedure
+  createImagePresignedUrlForUserOnApp: protectedProcedure
     .input(
       z.object({
         recipient: z.string(),
@@ -37,7 +37,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  uploadPicturePostForUserNotOnApp: protectedProcedure
+  createImagePresignedUrlForUserNotOnApp: protectedProcedure
     .input(
       z.object({
         number: z.string(),
@@ -51,14 +51,13 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const { presignedUrl, postId } = await ctx.services.post.uploadPostForUserNotOnAppUrl(
-          {
+        const { presignedUrl, postId } =
+          await ctx.services.post.uploadPostForUserNotOnAppUrl({
             author: ctx.session.uid,
             recipientNotOnAppPhoneNumber: input.number,
             recipientNotOnAppName: input.name,
             ...input,
-          },
-        );
+          });
 
         return { presignedUrl, postId };
       } catch (err) {
@@ -69,7 +68,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  uploadVideoPostForUserOnApp: protectedProcedure
+  createVideoPresignedUrlForUserOnApp: protectedProcedure
     .input(
       z.object({
         recipient: z.string(),
@@ -80,11 +79,12 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const { presignedUrl, postId } = await ctx.services.post.uploadVideoPostForUserOnAppUrl({
-          ...input,
-          author: ctx.session.uid,
-          recipient: input.recipient,
-        });
+        const { presignedUrl, postId } =
+          await ctx.services.post.uploadVideoPostForUserOnAppUrl({
+            ...input,
+            author: ctx.session.uid,
+            recipient: input.recipient,
+          });
 
         return { presignedUrl, postId };
       } catch (err) {
@@ -96,7 +96,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  uploadVideoPostForUserNotOnApp: protectedProcedure
+  createVideoPresignedUrlForUserNotOnApp: protectedProcedure
     .input(
       z.object({
         number: z.string(),
@@ -108,15 +108,15 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-
-        const { presignedUrl, postId } = await ctx.services.post.uploadVideoPostForUserNotOnAppUrl({
-          author: ctx.session.uid,
-          recipientNotOnAppPhoneNumber: input.number,
-          recipientNotOnAppName: input.name,
-          width: input.width,
-          height: input.height,
-          caption: input.caption,
-        });
+        const { presignedUrl, postId } =
+          await ctx.services.post.uploadVideoPostForUserNotOnAppUrl({
+            author: ctx.session.uid,
+            recipientNotOnAppPhoneNumber: input.number,
+            recipientNotOnAppName: input.name,
+            width: input.width,
+            height: input.height,
+            caption: input.caption,
+          });
 
         return { presignedUrl, postId };
       } catch (err) {
