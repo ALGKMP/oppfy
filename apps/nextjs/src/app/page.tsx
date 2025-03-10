@@ -165,7 +165,8 @@ export default function HomePage() {
       setTimeout(() => {
         if (videoRef.current) {
           try {
-            videoRef.current.muted = true;
+            videoRef.current.muted = false;
+            videoRef.current.volume = 0.2;
             const playPromise = videoRef.current.play();
 
             if (playPromise !== undefined) {
