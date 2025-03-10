@@ -10,7 +10,8 @@
     "clean": "rm -rf .turbo node_modules",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:eslint-rules": "node --loader ts-node/esm eslint-rules/propagate-throws.test.ts"
   },
   "prettier": "@oppfy/prettier-config",
   "dependencies": {
@@ -41,8 +42,12 @@
     "@oppfy/prettier-config": "workspace:*",
     "@oppfy/tsconfig": "workspace:*",
     "@types/jsonwebtoken": "^9.0.7",
+    "@typescript-eslint/parser": "^8.26.1",
+    "@typescript-eslint/rule-tester": "^8.26.1",
+    "@typescript-eslint/utils": "^8.26.1",
     "eslint": "catalog:",
     "prettier": "^3.2.5",
+    "ts-node": "^10.9.2",
     "typescript": "^5.4"
   }
 }
