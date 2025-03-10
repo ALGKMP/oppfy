@@ -18,9 +18,7 @@ const PhoneNumberOTP = () => {
   const router = useRouter();
 
   const { verifyPhoneNumber } = useAuth();
-  const userStatusQuery = api.user.userStatus.useQuery(undefined, {
-    enabled: false,
-  });
+  const userStatusMutation = api.user.userStatus.useMutation();
 
   const [phoneNumberOTP, setPhoneNumberOTP] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -54,15 +52,14 @@ const PhoneNumberOTP = () => {
         return;
       }
 
-      const userStatus = await userStatusQuery.refetch();
-      const userStatusData = userStatus.data;
+      const userStatus = await userStatusMutation.mutateAsync();
 
-      if (!userStatusData?.isOnboarded) {
+      if (!userStatus.hasCompletedOnboarding) {
         router.replace("/user-info/name");
         return;
       }
 
-      if (!userStatusData.hasTutorialBeenCompleted) {
+      if (!userStatus.hasCompletedTutorial) {
         router.replace("/tutorial/intro");
         return;
       }

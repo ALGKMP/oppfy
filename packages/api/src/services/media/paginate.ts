@@ -6,7 +6,6 @@ import {
   FollowRepository,
   FriendRepository,
 } from "../../repositories";
-import { UserService } from "../user/user";
 
 // TODO: Move these types into a types file and put the paginated functions into their services.
 
