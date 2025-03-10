@@ -12,7 +12,6 @@ import {
   postRouter,
   profileRouter,
   reportRouter,
-  requestRouter,
   userRouter,
 } from "./routers";
 import { createCallerFactory, createTRPCRouter } from "./trpc";
@@ -24,7 +23,6 @@ export const appRouter = createTRPCRouter({
   post: postRouter,
   follow: followRouter,
   friend: friendRouter,
-  request: requestRouter,
   block: blockRouter,
   notifications: notificationsRouter,
   contacts: contactsRouter,
