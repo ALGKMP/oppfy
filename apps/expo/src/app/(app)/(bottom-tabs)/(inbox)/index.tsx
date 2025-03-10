@@ -43,11 +43,21 @@ const Inbox = () => {
 
   utils.notifications.getUnreadNotificationsCount.setData(undefined, 0);
 
-  const { data: requestsCount, refetch: refetchRequestCount } =
-    api.request.countRequests.useQuery(undefined, {
+  const { data: followRequestCount, refetch: refetchFollowRequestCount } =
+    api.follow.getFollowRequestCount.useQuery(undefined, {
+      initialData: 0,
       refetchInterval: REFETCH_INTERVAL,
       refetchOnWindowFocus: true,
     });
+
+  const { data: friendRequestCount, refetch: refetchFriendRequestCount } =
+    api.friend.getFriendRequestCount.useQuery(undefined, {
+      initialData: 0,
+      refetchInterval: REFETCH_INTERVAL,
+      refetchOnWindowFocus: true,
+    });
+
+  const pendingRequests = followRequestCount + friendRequestCount;
 
   const {
     data: notificationsData,
@@ -119,7 +129,11 @@ const Inbox = () => {
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([refetchNotifications(), refetchRequestCount()]);
+    await Promise.all([
+      refetchNotifications(),
+      refetchFollowRequestCount(),
+      refetchFriendRequestCount(),
+    ]);
     setRefreshing(false);
   };
 
@@ -189,10 +203,6 @@ const Inbox = () => {
   );
 
   const ListHeaderComponent = () => {
-    const pendingRequests =
-      (requestsCount?.followRequestCount ?? 0) +
-      (requestsCount?.friendRequestCount ?? 0);
-
     if (pendingRequests > 0) {
       return (
         <TouchableOpacity

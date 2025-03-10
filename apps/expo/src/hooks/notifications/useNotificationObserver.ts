@@ -87,7 +87,6 @@ const useNotificationObserver = () => {
     router,
     utils.profile.getProfileOther,
     utils.notifications.paginateNotifications,
-    utils.request.countRequests,
     utils.notifications.getUnreadNotificationsCount,
   ]);
 };

@@ -4,6 +4,17 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const friendRouter = createTRPCRouter({
+  getFriendRequestCount: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const friendRequestCount = await ctx.services.friend.countFriendRequests(
+        ctx.session.uid,
+      );
+      return friendRequestCount;
+    } catch (err) {
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
+    }
+  }),
+
   paginateFriendsSelf: protectedProcedure
     .input(
       z.object({
