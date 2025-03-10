@@ -319,13 +319,7 @@ export class FollowService {
   public async countFollowRequests(userId: string) {
     const count = await this.followRepository.countFollowRequests(userId);
     if (count === undefined) {
-      console.error(
-        `SERVICE ERROR: Failed to count follow requests for user ID "${userId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_COUNT_FOLLOW_REQUESTS,
-        "Failed to count follow requests.",
-      );
+      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOW_REQUESTS);
     }
     return count;
   }

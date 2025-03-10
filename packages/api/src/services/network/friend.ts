@@ -258,7 +258,11 @@ export class FriendService {
   }
 
   public async countFriendRequests(userId: string) {
-    return await this.friendRepository.countFriendRequests(userId);
+    const count = await this.friendRepository.countFriendRequests(userId);
+    if (count === undefined) {
+      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIEND_REQUESTS);
+    }
+    return count;
   }
 
   public async determineFriendState(userId: string, targetUserId: string) {
