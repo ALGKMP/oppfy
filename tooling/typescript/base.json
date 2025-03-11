@@ -23,6 +23,7 @@
     "noEmit": true,
 
     "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
   },
   "exclude": ["node_modules", "build", "dist", ".next", ".expo"]
 }

@@ -4,23 +4,23 @@ import { z } from "zod";
 import { sharedValidators } from "@oppfy/validators";
 
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
-import { ReportService } from "../services/report.service";
+import { container, TYPES } from "../container";
+import { IReportService } from "../interfaces/services/i-report-service";
 
-const reportService = new ReportService();
+const reportService = container.get<IReportService>(TYPES.ReportService);
 
 export const reportRouter = createTRPCRouter({
   reportUser: protectedProcedure
     .input(
       z.object({
-        userId: z.string(),
+        reportedUserId: z.string(),
         reason: sharedValidators.report.reportUserOptions,
       }),
     )
-    .mutation(async ({ ctx, input: { userId, reason } }) => {
+    .mutation(async ({ ctx, input }) => {
       await reportService.reportUser({
         reporterUserId: ctx.session.uid,
-        reportedUserId: userId,
-        reason,
+        ...input,
       });
     }),
 
@@ -32,20 +32,10 @@ export const reportRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      try {
-        const { postId, reason } = input;
-        return await ctx.services.report.reportPost({
-          postId,
-          reason,
-          reporterUserId: ctx.session.uid,
-        });
-      } catch (error) {
-        console.error(error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to report post",
-        });
-      }
+      await reportService.reportPost({
+        ...input,
+        reporterUserId: ctx.session.uid,
+      });
     }),
 
   reportComment: protectedProcedure
@@ -56,18 +46,9 @@ export const reportRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      try {
-        const { commentId, reason } = input;
-        return await ctx.services.report.reportComment({
-          commentId,
-          reason,
-          reporterUserId: ctx.session.uid,
-        });
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to report comment",
-        });
-      }
+      await reportService.reportComment({
+        ...input,
+        reporterUserId: ctx.session.uid,
+      });
     }),
 });
