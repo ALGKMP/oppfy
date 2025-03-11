@@ -54,7 +54,16 @@ export const postTypeEnum = pgEnum("post_type", [
 
 export const mediaTypeEnum = pgEnum("media_type", ["image", "video"]);
 
-export const reportReasonEnum = pgEnum("report_reason", [
+export const reportPostReasonEnum = pgEnum("report_post_reason", [
+  "Violent or abusive",
+  "Sexually explicit or predatory",
+  "Hate, harassment or bullying",
+  "Suicide and self-harm",
+  "Spam or scam",
+  "Other",
+]);
+
+export const reportCommentReasonEnum = pgEnum("report_comment_reason", [
   "Violent or abusive",
   "Sexually explicit or predatory",
   "Hate, harassment or bullying",
@@ -637,19 +646,17 @@ export const reportComment = pgTable(
     commentId: uuid("comment_id")
       .notNull()
       .references(() => comment.id, { onDelete: "cascade" }),
-    submittedByUserId: uuid("submitted_by_user_id")
+    reporterUserId: uuid("reporter_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    reason: reportReasonEnum("reason").notNull(),
+    reason: reportCommentReasonEnum("reason").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
   },
   (table) => ({
     commentIdx: index("report_comment_comment_idx").on(table.commentId),
-    submitterIdx: index("report_comment_submitter_idx").on(
-      table.submittedByUserId,
-    ),
+    reporterIdx: index("report_comment_reporter_idx").on(table.reporterUserId),
   }),
 );
 
@@ -660,19 +667,17 @@ export const reportPost = pgTable(
     postId: uuid("post_id")
       .notNull()
       .references(() => post.id, { onDelete: "cascade" }),
-    submittedByUserId: uuid("submitted_by_user_id")
+    reporterUserId: uuid("reporter_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    reason: reportReasonEnum("reason").notNull(),
+    reason: reportPostReasonEnum("reason").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
   },
   (table) => ({
     postIdx: index("report_post_post_idx").on(table.postId),
-    submitterIdx: index("report_post_submitter_idx").on(
-      table.submittedByUserId,
-    ),
+    reporterIdx: index("report_post_reporter_idx").on(table.reporterUserId),
   }),
 );
 
@@ -682,7 +687,7 @@ export const reportPostRelations = relations(reportPost, ({ one }) => ({
     references: [post.id],
   }),
   reporter: one(user, {
-    fields: [reportPost.submittedByUserId],
+    fields: [reportPost.reporterUserId],
     references: [user.id],
   }),
 }));
@@ -694,7 +699,7 @@ export const reportUser = pgTable(
     reportedUserId: uuid("reported_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    submittedByUserId: uuid("submitted_by_user_id")
+    reporterUserId: uuid("reporter_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     reason: reportUserReasonEnum("reason").notNull(),
@@ -704,9 +709,7 @@ export const reportUser = pgTable(
   },
   (table) => ({
     reportedUserIdx: index("report_user_reported_idx").on(table.reportedUserId),
-    submitterIdx: index("report_user_submitter_idx").on(
-      table.submittedByUserId,
-    ),
+    reporterIdx: index("report_user_reporter_idx").on(table.reporterUserId),
   }),
 );
 
@@ -716,7 +719,7 @@ export const reportCommentRelations = relations(reportComment, ({ one }) => ({
     references: [comment.id],
   }),
   reporter: one(user, {
-    fields: [reportComment.submittedByUserId],
+    fields: [reportComment.reporterUserId],
     references: [user.id],
   }),
 }));
@@ -727,12 +730,7 @@ export const reportUserRelations = relations(reportUser, ({ one }) => ({
     references: [user.id],
   }),
   reporter: one(user, {
-    fields: [reportUser.submittedByUserId],
+    fields: [reportUser.reporterUserId],
     references: [user.id],
   }),
 }));
-
-// export const test = pgTable("test", {
-//   id: uuid("id").primaryKey().defaultRandom(),
-//   name: text("name").notNull(),
-// });
