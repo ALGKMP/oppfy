@@ -16,7 +16,6 @@ import { CloudFrontDistribution } from "./constructs/cloudfront";
 import { Database } from "./constructs/database";
 import { LambdaFunction } from "./constructs/lambda";
 import { Neptune } from "./constructs/neptune";
-import { OpenSearch } from "./constructs/opensearch";
 import { Queue } from "./constructs/queue";
 import { NeptuneNotebook } from "./constructs/sagemaker";
 import { SNSTopic } from "./constructs/sns";
@@ -37,8 +36,6 @@ const environment = {
   DATABASE_NAME: env.DATABASE_NAME,
   DATABASE_PASSWORD: env.DATABASE_PASSWORD,
   DATABASE_URL: env.DATABASE_URL,
-
-  OPENSEARCH_URL: env.OPENSEARCH_URL,
 
   SQS_CONTACT_QUEUE: env.SQS_CONTACT_QUEUE,
 
@@ -95,7 +92,6 @@ export class AwsStack extends cdk.Stack {
     });
 
     const _database = new Database(this, "Database", vpc);
-    const _openSearch = new OpenSearch(this, "OpenSearch", vpc);
     const neptune = new Neptune(this, "Neptune", vpc);
     /*     const neptuneNotebook = new NeptuneNotebook(this, "NeptuneNotebook", {
       vpc,
