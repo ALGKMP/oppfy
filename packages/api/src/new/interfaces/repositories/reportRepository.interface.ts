@@ -1,3 +1,5 @@
+import { Transaction } from "@oppfy/db";
+
 import type {
   ReportCommentReason,
   ReportPostReason,
@@ -23,7 +25,16 @@ export interface CreateCommentReportParams {
 }
 
 export interface IReportRepository {
-  createUserReport(params: CreateUserReportParams): Promise<void>;
-  createPostReport(params: CreatePostReportParams): Promise<void>;
-  createCommentReport(params: CreateCommentReportParams): Promise<void>;
+  createUserReport(
+    params: CreateUserReportParams,
+    tx?: Transaction,
+  ): Promise<void>;
+  createPostReport(
+    params: CreatePostReportParams,
+    tx?: Transaction,
+  ): Promise<void>;
+  createCommentReport(
+    params: CreateCommentReportParams,
+    tx?: Transaction,
+  ): Promise<void>;
 }

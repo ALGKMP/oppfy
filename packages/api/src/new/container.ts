@@ -14,6 +14,7 @@ export const TYPES = {
   // DB Dependencies
   Database: Symbol.for("Database"),
   Schema: Symbol.for("Schema"),
+  Transaction: Symbol.for("Transaction"),
 
   // Repositories
   ReportRepository: Symbol.for("ReportRepository"),
@@ -28,6 +29,7 @@ const container = new Container();
 // Bind DB dependencies
 container.bind(TYPES.Database).toConstantValue(db);
 container.bind(TYPES.Schema).toConstantValue(schema);
+container.bind(TYPES.Transaction).toConstantValue(db.transaction);
 
 // Bind repositories
 container.bind<IReportRepository>(TYPES.ReportRepository).to(ReportRepository);
