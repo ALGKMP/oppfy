@@ -1,11 +1,9 @@
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { inject, injectable } from "inversify";
 
 import type {
   Database,
   DatabaseOrTransaction,
   Schema,
-  Transaction,
 } from "@oppfy/db";
 
 import { TYPES } from "../container";
