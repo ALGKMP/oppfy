@@ -1,4 +1,7 @@
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { inject, injectable } from "inversify";
+
+import type { Database, Schema } from "@oppfy/db";
 
 import { TYPES } from "../container";
 import {
@@ -10,12 +13,12 @@ import {
 
 @injectable()
 export class ReportRepository implements IReportRepository {
-  private db: any; // Database instance
-  private schema: any; // Schema object
+  private db: Database; // Database instance
+  private schema: Schema; // Schema object
 
   constructor(
-    @inject(TYPES.Database) db: any,
-    @inject(TYPES.Schema) schema: any,
+    @inject(TYPES.Database) db: Database,
+    @inject(TYPES.Schema) schema: Schema,
   ) {
     this.db = db;
     this.schema = schema;
