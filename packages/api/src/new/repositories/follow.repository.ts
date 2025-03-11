@@ -1,0 +1,583 @@
+import { and, asc, count, eq, gt, or, sql } from "drizzle-orm";
+import { inject, injectable } from "inversify";
+
+import type {
+  Database,
+  DatabaseOrTransaction,
+  Schema,
+  Transaction,
+} from "@oppfy/db";
+import { isNotNull } from "@oppfy/db";
+
+import { TYPES } from "../container";
+import {
+  AcceptFollowRequestParams,
+  CountFollowersParams,
+  CountFollowingParams,
+  CountFollowRequestsParams,
+  CreateFollowerParams,
+  CreateFollowRequestParams,
+  DeleteFollowRequestParams,
+  FollowerResult,
+  FollowRequestResult,
+  GetAllFollowingIdsParams,
+  GetFollowerParams,
+  GetFollowRequestParams,
+  IFollowRepository,
+  PaginateFollowersOthersParams,
+  PaginateFollowersSelfParams,
+  PaginateFollowingOthersParams,
+  PaginateFollowingSelfParams,
+  PaginateFollowRequestsParams,
+  RemoveFollowerParams,
+} from "../interfaces/repositories/followRepository.interface";
+
+@injectable()
+export class FollowRepository implements IFollowRepository {
+  private db: Database;
+  private schema: Schema;
+
+  constructor(
+    @inject(TYPES.Database) db: Database,
+    @inject(TYPES.Schema) schema: Schema,
+  ) {
+    this.db = db;
+    this.schema = schema;
+  }
+
+  async createFollower(
+    params: CreateFollowerParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { senderUserId, recipientUserId } = params;
+
+    await tx
+      .insert(this.schema.follow)
+      .values({ recipientId: recipientUserId, senderId: senderUserId });
+
+    const senderProfile = await tx.query.profile.findFirst({
+      where: eq(this.schema.profile.userId, senderUserId),
+    });
+
+    if (!senderProfile) throw new Error("Sender profile not found");
+
+    await tx
+      .update(this.schema.profileStats)
+      .set({ following: sql`${this.schema.profileStats.following} + 1` })
+      .where(eq(this.schema.profileStats.profileId, senderProfile.id));
+
+    const recipientProfile = await tx.query.profile.findFirst({
+      where: eq(this.schema.profile.userId, recipientUserId),
+    });
+
+    if (!recipientProfile) throw new Error("Recipient profile not found");
+
+    await tx
+      .update(this.schema.profileStats)
+      .set({ followers: sql`${this.schema.profileStats.followers} + 1` })
+      .where(eq(this.schema.profileStats.profileId, recipientProfile.id));
+  }
+
+  async removeFollower(
+    params: RemoveFollowerParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { followerId, followeeId } = params;
+
+    await tx
+      .delete(this.schema.follow)
+      .where(
+        and(
+          eq(this.schema.follow.senderId, followerId),
+          eq(this.schema.follow.recipientId, followeeId),
+        ),
+      );
+
+    const followerProfile = await tx.query.profile.findFirst({
+      where: eq(this.schema.profile.userId, followerId),
+    });
+
+    if (!followerProfile) throw new Error("Follower profile not found");
+
+    await tx
+      .update(this.schema.profileStats)
+      .set({ following: sql`${this.schema.profileStats.following} - 1` })
+      .where(eq(this.schema.profileStats.profileId, followerProfile.id));
+
+    const followeeProfile = await tx.query.profile.findFirst({
+      where: eq(this.schema.profile.userId, followeeId),
+    });
+
+    if (!followeeProfile) throw new Error("Followee profile not found");
+
+    await tx
+      .update(this.schema.profileStats)
+      .set({ followers: sql`${this.schema.profileStats.followers} - 1` })
+      .where(eq(this.schema.profileStats.profileId, followeeProfile.id));
+  }
+
+  async removeFollowRequest(
+    senderId: string,
+    recipientId: string,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    await tx
+      .delete(this.schema.followRequest)
+      .where(
+        and(
+          eq(this.schema.followRequest.senderId, senderId),
+          eq(this.schema.followRequest.recipientId, recipientId),
+        ),
+      );
+  }
+
+  async getFollower(
+    params: GetFollowerParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<{ id: string } | undefined> {
+    const { followerId, followeeId } = params;
+
+    const result = await tx
+      .select({ id: this.schema.follow.id })
+      .from(this.schema.follow)
+      .where(
+        and(
+          eq(this.schema.follow.senderId, followerId),
+          eq(this.schema.follow.recipientId, followeeId),
+        ),
+      )
+      .limit(1);
+
+    return result[0];
+  }
+
+  async countFollowers(
+    params: CountFollowersParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<number | undefined> {
+    const { userId } = params;
+
+    const result = await tx
+      .select({ count: count() })
+      .from(this.schema.follow)
+      .where(eq(this.schema.follow.recipientId, userId));
+
+    return result[0]?.count;
+  }
+
+  async countFollowing(
+    params: CountFollowingParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<number | undefined> {
+    const { userId } = params;
+
+    const result = await tx
+      .select({ count: count() })
+      .from(this.schema.follow)
+      .where(eq(this.schema.follow.senderId, userId));
+
+    return result[0]?.count;
+  }
+
+  async countFollowRequests(
+    params: CountFollowRequestsParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<number | undefined> {
+    const { userId } = params;
+
+    const result = await tx
+      .select({ count: count() })
+      .from(this.schema.followRequest)
+      .where(eq(this.schema.followRequest.recipientId, userId));
+
+    return result[0]?.count;
+  }
+
+  async deleteFollowRequest(
+    params: DeleteFollowRequestParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { senderId, recipientId } = params;
+
+    await tx
+      .delete(this.schema.followRequest)
+      .where(
+        and(
+          eq(this.schema.followRequest.senderId, senderId),
+          eq(this.schema.followRequest.recipientId, recipientId),
+        ),
+      );
+  }
+
+  async createFollowRequest(
+    params: CreateFollowRequestParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { senderId, recipientId } = params;
+
+    await tx
+      .insert(this.schema.followRequest)
+      .values({ senderId, recipientId });
+  }
+
+  async getFollowRequest(
+    params: GetFollowRequestParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<{ id: string } | undefined> {
+    const { senderId, recipientId } = params;
+
+    const result = await tx
+      .select({ id: this.schema.followRequest.id })
+      .from(this.schema.followRequest)
+      .where(
+        and(
+          eq(this.schema.followRequest.senderId, senderId),
+          eq(this.schema.followRequest.recipientId, recipientId),
+        ),
+      )
+      .limit(1);
+
+    return result[0];
+  }
+
+  async acceptFollowRequest(
+    params: AcceptFollowRequestParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { senderId, recipientId } = params;
+
+    await tx
+      .delete(this.schema.followRequest)
+      .where(
+        and(
+          eq(this.schema.followRequest.senderId, senderId),
+          eq(this.schema.followRequest.recipientId, recipientId),
+        ),
+      );
+
+    await tx.insert(this.schema.follow).values({ senderId, recipientId });
+
+    const senderProfile = await tx.query.profile.findFirst({
+      where: eq(this.schema.profile.userId, senderId),
+    });
+
+    if (!senderProfile) throw new Error("Sender profile not found");
+
+    await tx
+      .update(this.schema.profileStats)
+      .set({ following: sql`${this.schema.profileStats.following} + 1` })
+      .where(eq(this.schema.profileStats.profileId, senderProfile.id));
+
+    const recipientProfile = await tx.query.profile.findFirst({
+      where: eq(this.schema.profile.userId, recipientId),
+    });
+
+    if (!recipientProfile) throw new Error("Recipient profile not found");
+
+    await tx
+      .update(this.schema.profileStats)
+      .set({ followers: sql`${this.schema.profileStats.followers} + 1` })
+      .where(eq(this.schema.profileStats.profileId, recipientProfile.id));
+  }
+
+  async paginateFollowersSelf(
+    params: PaginateFollowersSelfParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<FollowerResult[]> {
+    const { forUserId, cursor = null, pageSize = 10 } = params;
+
+    return await tx
+      .select({
+        userId: this.schema.user.id,
+        username: this.schema.profile.username,
+        name: this.schema.profile.name,
+        profilePictureUrl: this.schema.profile.profilePictureKey,
+        createdAt: this.schema.follow.createdAt,
+        profileId: this.schema.profile.id,
+      })
+      .from(this.schema.user)
+      .innerJoin(
+        this.schema.follow,
+        eq(this.schema.user.id, this.schema.follow.senderId),
+      )
+      .innerJoin(
+        this.schema.profile,
+        eq(this.schema.user.id, this.schema.profile.userId),
+      )
+      .where(
+        and(
+          eq(this.schema.follow.recipientId, forUserId),
+          cursor
+            ? or(
+                gt(this.schema.follow.createdAt, cursor.createdAt),
+                and(
+                  eq(this.schema.follow.createdAt, cursor.createdAt),
+                  gt(this.schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(asc(this.schema.follow.createdAt), asc(this.schema.profile.id))
+      .limit(pageSize + 1);
+  }
+
+  async paginateFollowersOthers(
+    params: PaginateFollowersOthersParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<FollowerResult[]> {
+    const { forUserId, currentUserId, cursor = null, pageSize = 10 } = params;
+
+    const followers = await tx
+      .select({
+        userId: this.schema.user.id,
+        username: this.schema.profile.username,
+        name: this.schema.profile.name,
+        profilePictureUrl: this.schema.profile.profilePictureKey,
+        createdAt: this.schema.follow.createdAt,
+        profileId: this.schema.profile.id,
+      })
+      .from(this.schema.user)
+      .innerJoin(
+        this.schema.follow,
+        eq(this.schema.user.id, this.schema.follow.senderId),
+      )
+      .innerJoin(
+        this.schema.profile,
+        eq(this.schema.user.id, this.schema.profile.userId),
+      )
+      .where(
+        and(
+          eq(this.schema.follow.recipientId, forUserId),
+          cursor
+            ? or(
+                gt(this.schema.follow.createdAt, cursor.createdAt),
+                and(
+                  eq(this.schema.follow.createdAt, cursor.createdAt),
+                  gt(this.schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(asc(this.schema.follow.createdAt), asc(this.schema.profile.id))
+      .limit(pageSize + 1);
+
+    if (followers.length === 0) return [];
+
+    const userIds = followers.map((follower) => follower.userId);
+
+    const followingStatus = await tx
+      .select({ followingId: this.schema.follow.recipientId })
+      .from(this.schema.follow)
+      .where(
+        and(
+          eq(this.schema.follow.senderId, currentUserId),
+          isNotNull(this.schema.follow.recipientId),
+        ),
+      );
+
+    const followRequestStatus = await tx
+      .select({ requestedId: this.schema.followRequest.recipientId })
+      .from(this.schema.followRequest)
+      .where(
+        and(
+          eq(this.schema.followRequest.senderId, currentUserId),
+          isNotNull(this.schema.followRequest.recipientId),
+        ),
+      );
+
+    const followingIds = new Set(
+      followingStatus.map((status) => status.followingId),
+    );
+    const requestedIds = new Set(
+      followRequestStatus.map((status) => status.requestedId),
+    );
+
+    return followers.map((follower) => ({
+      ...follower,
+      isFollowing: followingIds.has(follower.userId),
+      isFollowRequested: requestedIds.has(follower.userId),
+    }));
+  }
+
+  async getAllFollowingIds(
+    params: GetAllFollowingIdsParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<string[]> {
+    const { forUserId } = params;
+
+    const result = await tx
+      .select({ recipientId: this.schema.follow.recipientId })
+      .from(this.schema.follow)
+      .where(eq(this.schema.follow.senderId, forUserId));
+
+    return result.map((r) => r.recipientId);
+  }
+
+  async paginateFollowingSelf(
+    params: PaginateFollowingSelfParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<FollowerResult[]> {
+    const { userId, cursor = null, pageSize = 10 } = params;
+
+    return await tx
+      .select({
+        userId: this.schema.user.id,
+        username: this.schema.profile.username,
+        name: this.schema.profile.name,
+        profilePictureUrl: this.schema.profile.profilePictureKey,
+        createdAt: this.schema.follow.createdAt,
+        profileId: this.schema.profile.id,
+      })
+      .from(this.schema.user)
+      .innerJoin(
+        this.schema.follow,
+        eq(this.schema.user.id, this.schema.follow.recipientId),
+      )
+      .innerJoin(
+        this.schema.profile,
+        eq(this.schema.user.id, this.schema.profile.userId),
+      )
+      .where(
+        and(
+          eq(this.schema.follow.senderId, userId),
+          cursor
+            ? or(
+                gt(this.schema.follow.createdAt, cursor.createdAt),
+                and(
+                  eq(this.schema.follow.createdAt, cursor.createdAt),
+                  gt(this.schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(asc(this.schema.follow.createdAt), asc(this.schema.profile.id))
+      .limit(pageSize + 1);
+  }
+
+  async paginateFollowingOthers(
+    params: PaginateFollowingOthersParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<FollowerResult[]> {
+    const { forUserId, currentUserId, cursor = null, pageSize = 10 } = params;
+
+    const following = await tx
+      .select({
+        userId: this.schema.user.id,
+        username: this.schema.profile.username,
+        name: this.schema.profile.name,
+        profilePictureUrl: this.schema.profile.profilePictureKey,
+        createdAt: this.schema.follow.createdAt,
+        profileId: this.schema.profile.id,
+      })
+      .from(this.schema.user)
+      .innerJoin(
+        this.schema.follow,
+        eq(this.schema.user.id, this.schema.follow.recipientId),
+      )
+      .innerJoin(
+        this.schema.profile,
+        eq(this.schema.user.id, this.schema.profile.userId),
+      )
+      .where(
+        and(
+          eq(this.schema.follow.senderId, forUserId),
+          cursor
+            ? or(
+                gt(this.schema.follow.createdAt, cursor.createdAt),
+                and(
+                  eq(this.schema.follow.createdAt, cursor.createdAt),
+                  gt(this.schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(asc(this.schema.follow.createdAt), asc(this.schema.profile.id))
+      .limit(pageSize + 1);
+
+    if (following.length === 0) return [];
+
+    const userIds = following.map((follow) => follow.userId);
+
+    const followingStatus = await tx
+      .select({ followingId: this.schema.follow.recipientId })
+      .from(this.schema.follow)
+      .where(
+        and(
+          eq(this.schema.follow.senderId, currentUserId),
+          isNotNull(this.schema.follow.recipientId),
+        ),
+      );
+
+    const followRequestStatus = await tx
+      .select({ requestedId: this.schema.followRequest.recipientId })
+      .from(this.schema.followRequest)
+      .where(
+        and(
+          eq(this.schema.followRequest.senderId, currentUserId),
+          isNotNull(this.schema.followRequest.recipientId),
+        ),
+      );
+
+    const followingIds = new Set(
+      followingStatus.map((status) => status.followingId),
+    );
+    const requestedIds = new Set(
+      followRequestStatus.map((status) => status.requestedId),
+    );
+
+    return following.map((follow) => ({
+      ...follow,
+      isFollowing: followingIds.has(follow.userId),
+      isFollowRequested: requestedIds.has(follow.userId),
+    }));
+  }
+
+  async paginateFollowRequests(
+    params: PaginateFollowRequestsParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<FollowRequestResult[]> {
+    const { forUserId, cursor = null, pageSize = 10 } = params;
+
+    return await tx
+      .select({
+        userId: this.schema.user.id,
+        username: this.schema.profile.username,
+        name: this.schema.profile.name,
+        profilePictureUrl: this.schema.profile.profilePictureKey,
+        createdAt: this.schema.followRequest.createdAt,
+        profileId: this.schema.profile.id,
+      })
+      .from(this.schema.user)
+      .innerJoin(
+        this.schema.followRequest,
+        eq(this.schema.user.id, this.schema.followRequest.senderId),
+      )
+      .innerJoin(
+        this.schema.profile,
+        eq(this.schema.user.id, this.schema.profile.userId),
+      )
+      .where(
+        and(
+          eq(this.schema.followRequest.recipientId, forUserId),
+          cursor
+            ? or(
+                gt(this.schema.followRequest.createdAt, cursor.createdAt),
+                and(
+                  eq(this.schema.followRequest.createdAt, cursor.createdAt),
+                  gt(this.schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(
+        asc(this.schema.followRequest.createdAt),
+        asc(this.schema.profile.id),
+      )
+      .limit(pageSize + 1);
+  }
+}
