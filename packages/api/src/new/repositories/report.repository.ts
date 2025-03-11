@@ -1,7 +1,12 @@
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { inject, injectable } from "inversify";
 
-import type { Database, Schema } from "@oppfy/db";
+import type {
+  Database,
+  DatabaseOrTransaction,
+  Schema,
+  Transaction,
+} from "@oppfy/db";
 
 import { TYPES } from "../container";
 import {
@@ -13,8 +18,8 @@ import {
 
 @injectable()
 export class ReportRepository implements IReportRepository {
-  private db: Database; // Database instance
-  private schema: Schema; // Schema object
+  private db: Database;
+  private schema: Schema;
 
   constructor(
     @inject(TYPES.Database) db: Database,
@@ -24,15 +29,24 @@ export class ReportRepository implements IReportRepository {
     this.schema = schema;
   }
 
-  async createUserReport(params: CreateUserReportParams): Promise<void> {
-    await this.db.insert(this.schema.reportUser).values(params);
+  async createUserReport(
+    params: CreateUserReportParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    await tx.insert(this.schema.reportUser).values(params);
   }
 
-  async createPostReport(params: CreatePostReportParams): Promise<void> {
-    await this.db.insert(this.schema.reportPost).values(params);
+  async createPostReport(
+    params: CreatePostReportParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    await tx.insert(this.schema.reportPost).values(params);
   }
 
-  async createCommentReport(params: CreateCommentReportParams): Promise<void> {
-    await this.db.insert(this.schema.reportComment).values(params);
+  async createCommentReport(
+    params: CreateCommentReportParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    await tx.insert(this.schema.reportComment).values(params);
   }
 }
