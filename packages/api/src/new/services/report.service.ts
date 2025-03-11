@@ -1,5 +1,7 @@
 import { inject, injectable } from "inversify";
 
+import type { Transaction } from "@oppfy/db";
+
 import { TYPES } from "../container";
 import type { IReportRepository } from "../interfaces/repositories/reportRepository.interface";
 import {
@@ -11,11 +13,15 @@ import {
 
 @injectable()
 export class ReportService implements IReportService {
+  private tx: Transaction;
+
   private reportRepository: IReportRepository;
 
   constructor(
+    @inject(TYPES.Transaction) tx: Transaction,
     @inject(TYPES.ReportRepository) reportRepository: IReportRepository,
   ) {
+    this.tx = tx;
     this.reportRepository = reportRepository;
   }
 
