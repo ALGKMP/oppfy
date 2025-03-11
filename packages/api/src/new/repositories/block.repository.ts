@@ -1,0 +1,125 @@
+import { and, asc, eq, gt, or } from "drizzle-orm";
+import { inject, injectable } from "inversify";
+
+import type {
+  Database,
+  DatabaseOrTransaction,
+  Schema,
+  Transaction,
+} from "@oppfy/db";
+
+import { TYPES } from "../container";
+import {
+  BlockUserParams,
+  GetBlockedUserParams,
+  GetPaginatedBlockedUsersParams,
+  GetPaginatedBlockedUsersResult,
+  IBlockRepository,
+  UnblockUserParams,
+} from "../interfaces/repositories/blockRepository.interface";
+
+@injectable()
+export class BlockRepository implements IBlockRepository {
+  private db: Database;
+  private schema: Schema;
+
+  constructor(
+    @inject(TYPES.Database) db: Database,
+    @inject(TYPES.Schema) schema: Schema,
+  ) {
+    this.db = db;
+    this.schema = schema;
+  }
+
+  async getPaginatedBlockedUsers(
+    params: GetPaginatedBlockedUsersParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<GetPaginatedBlockedUsersResult[]> {
+    const { forUserId, cursor = null, pageSize = 10 } = params;
+
+    return await tx
+      .select({
+        userId: this.schema.user.id,
+        username: this.schema.profile.username,
+        name: this.schema.profile.name,
+        profilePictureUrl: this.schema.profile.profilePictureKey,
+        createdAt: this.schema.block.createdAt,
+        profileId: this.schema.profile.id,
+      })
+      .from(this.schema.user)
+      .innerJoin(
+        this.schema.block,
+        eq(this.schema.user.id, this.schema.block.userWhoIsBlockedId),
+      )
+      .innerJoin(
+        this.schema.profile,
+        eq(this.schema.user.id, this.schema.profile.userId),
+      )
+      .where(
+        and(
+          eq(this.schema.block.userWhoIsBlockingId, forUserId),
+          cursor
+            ? or(
+                gt(this.schema.block.createdAt, cursor.createdAt),
+                and(
+                  eq(this.schema.block.createdAt, cursor.createdAt),
+                  gt(this.schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(asc(this.schema.block.createdAt), asc(this.schema.profile.id))
+      .limit(pageSize + 1);
+  }
+
+  async getBlockedUser(
+    params: GetBlockedUserParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<{ id: string } | undefined> {
+    const { userId, blockedUserId } = params;
+
+    const result = await tx
+      .select({ id: this.schema.block.id })
+      .from(this.schema.block)
+      .where(
+        and(
+          eq(this.schema.block.userWhoIsBlockingId, userId),
+          eq(this.schema.block.userWhoIsBlockedId, blockedUserId),
+        ),
+      )
+      .limit(1);
+
+    return result[0];
+  }
+
+  async blockUser(
+    params: BlockUserParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { userId, blockedUserId } = params;
+
+    await tx
+      .insert(this.schema.block)
+      .values({
+        userWhoIsBlockingId: userId,
+        userWhoIsBlockedId: blockedUserId,
+      });
+  }
+
+  async unblockUser(
+    params: UnblockUserParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { userId, blockedUserId } = params;
+
+    await tx
+      .delete(this.schema.block)
+      .where(
+        and(
+          eq(this.schema.block.userWhoIsBlockingId, userId),
+          eq(this.schema.block.userWhoIsBlockedId, blockedUserId),
+        ),
+      );
+  }
+}
