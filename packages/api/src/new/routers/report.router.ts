@@ -5,7 +5,7 @@ import { sharedValidators } from "@oppfy/validators";
 
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import { container, TYPES } from "../container";
-import { IReportService } from "../interfaces/services/report-service.interface";
+import { IReportService } from "../interfaces/services/reportService.interface";
 
 const reportService = container.get<IReportService>(TYPES.ReportService);
 

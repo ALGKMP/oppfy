@@ -6,7 +6,7 @@ import {
   CreatePostReportParams,
   CreateUserReportParams,
   IReportRepository,
-} from "../interfaces/repositories/report-repository.interface";
+} from "../interfaces/repositories/reportRepository.interface";
 
 @injectable()
 export class ReportRepository implements IReportRepository {
