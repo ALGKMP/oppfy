@@ -4,8 +4,8 @@ import { Container } from "inversify";
 
 import { db, schema } from "@oppfy/db";
 
-import { IReportRepository } from "./interfaces/repositories/i-report-repository";
-import { IReportService } from "./interfaces/services/i-report-service";
+import { IReportRepository } from "./interfaces/repositories/report-repository.interface";
+import { IReportService } from "./interfaces/services/report-service.interface";
 import { ReportRepository } from "./repositories/report.repository";
 import { ReportService } from "./services/report.service";
 
