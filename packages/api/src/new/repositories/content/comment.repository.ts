@@ -3,7 +3,7 @@ import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 
-import { TYPES } from "../container";
+import { TYPES } from "../../container";
 import {
   AddCommentParams,
   Comment,
@@ -13,7 +13,7 @@ import {
   PaginateCommentsParams,
   PaginatedComment,
   RemoveCommentParams,
-} from "../interfaces/repositories/commentRepository.interface";
+} from "../../interfaces/repositories/content/commentRepository.interface";
 
 @injectable()
 export class CommentRepository implements ICommentRepository {
@@ -30,18 +30,18 @@ export class CommentRepository implements ICommentRepository {
 
   async getComment(
     { commentId }: GetCommentParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<Comment | undefined> {
-    return await tx.query.comment.findFirst({
+    return await db.query.comment.findFirst({
       where: eq(this.schema.comment.id, commentId),
     });
   }
 
   async addComment(
     { postId, userId, body }: AddCommentParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    await tx.insert(this.schema.comment).values({
+    await db.insert(this.schema.comment).values({
       postId,
       userId,
       body,
@@ -50,18 +50,18 @@ export class CommentRepository implements ICommentRepository {
 
   async removeComment(
     { commentId }: RemoveCommentParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    await tx
+    await db
       .delete(this.schema.comment)
       .where(eq(this.schema.comment.id, commentId));
   }
 
   async countComments(
     { postId }: CountCommentsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<number> {
-    const result = await tx
+    const result = await db
       .select({ count: count() })
       .from(this.schema.comment)
       .where(eq(this.schema.comment.postId, postId));
@@ -70,9 +70,9 @@ export class CommentRepository implements ICommentRepository {
 
   async paginateComments(
     { postId, cursor, pageSize = 10 }: PaginateCommentsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<PaginatedComment[]> {
-    const results = await tx
+    const results = await db
       .select({
         commentId: this.schema.comment.id,
         userId: this.schema.comment.userId,

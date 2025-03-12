@@ -117,10 +117,8 @@ export class UserRepository {
 
   @handleDatabaseErrors
   async getRandomActiveProfilesForRecs({
-    userId,
     limit,
   }: {
-    userId: string;
     limit: number;
   }) {
     return await this.db

@@ -1,14 +1,9 @@
 import { eq, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
-import type {
-  Database,
-  DatabaseOrTransaction,
-  Schema,
-  Transaction,
-} from "@oppfy/db";
+import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 
-import { TYPES } from "../container";
+import { TYPES } from "../../container";
 import {
   DecrementFollowerCountParams,
   DecrementFollowingCountParams,
@@ -20,7 +15,8 @@ import {
   IncrementFriendsCountParams,
   IncrementPostsCountParams,
   IProfileStatsRepository,
-} from "../interfaces/repositories/profileStatsRepository.interface";
+} from "../../interfaces/repositories/user/profileStatsRepository.interface";
+import { ProfileStats } from "../../models";
 
 @injectable()
 export class ProfileStatsRepository implements IProfileStatsRepository {
@@ -37,11 +33,11 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
 
   async decrementFollowerCount(
     params: DecrementFollowerCountParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { userId, amount } = params;
 
-    await tx
+    await db
       .update(this.schema.profileStats)
       .set({
         followers: sql`${this.schema.profileStats.followers} - ${amount}`,
@@ -51,11 +47,11 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
 
   async decrementFollowingCount(
     params: DecrementFollowingCountParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { userId, amount } = params;
 
-    await tx
+    await db
       .update(this.schema.profileStats)
       .set({
         following: sql`${this.schema.profileStats.following} - ${amount}`,
@@ -65,11 +61,11 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
 
   async decrementFriendsCount(
     params: DecrementFriendsCountParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { userId, amount } = params;
 
-    await tx
+    await db
       .update(this.schema.profileStats)
       .set({ friends: sql`${this.schema.profileStats.friends} - ${amount}` })
       .where(eq(this.schema.profileStats.profileId, userId));
@@ -77,11 +73,11 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
 
   async decrementPostsCount(
     params: DecrementPostsCountParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { profileId, decrementBy } = params;
 
-    await tx
+    await db
       .update(this.schema.profileStats)
       .set({ posts: sql`${this.schema.profileStats.posts} - ${decrementBy}` })
       .where(eq(this.schema.profileStats.profileId, profileId));
@@ -89,11 +85,11 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
 
   async incrementFollowerCount(
     params: IncrementFollowerCountParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { profileId, incrementBy } = params;
 
-    await tx
+    await db
       .update(this.schema.profileStats)
       .set({
         followers: sql`${this.schema.profileStats.followers} + ${incrementBy}`,
@@ -103,11 +99,11 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
 
   async incrementFollowingCount(
     params: IncrementFollowingCountParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { profileId, incrementBy } = params;
 
-    await tx
+    await db
       .update(this.schema.profileStats)
       .set({
         following: sql`${this.schema.profileStats.following} + ${incrementBy}`,
@@ -117,11 +113,11 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
 
   async incrementFriendsCount(
     params: IncrementFriendsCountParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { profileId, incrementBy } = params;
 
-    await tx
+    await db
       .update(this.schema.profileStats)
       .set({
         friends: sql`${this.schema.profileStats.friends} + ${incrementBy}`,
@@ -131,11 +127,11 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
 
   async incrementPostsCount(
     params: IncrementPostsCountParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { profileId, incrementBy } = params;
 
-    await tx
+    await db
       .update(this.schema.profileStats)
       .set({ posts: sql`${this.schema.profileStats.posts} + ${incrementBy}` })
       .where(eq(this.schema.profileStats.profileId, profileId));
@@ -143,11 +139,11 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
 
   async getProfileStats(
     params: GetProfileStatsParams,
-    tx: DatabaseOrTransaction = this.db,
-  ): Promise<any> {
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<ProfileStats | undefined> {
     const { profileId } = params;
 
-    return await tx.query.profileStats.findFirst({
+    return await db.query.profileStats.findFirst({
       where: eq(this.schema.profileStats.profileId, profileId),
     });
   }

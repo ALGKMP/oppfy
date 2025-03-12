@@ -3,7 +3,7 @@ import { inject, injectable } from "inversify";
 import type { Transaction } from "@oppfy/db";
 
 import { TYPES } from "../container";
-import type { IReportRepository } from "../interfaces/repositories/reportRepository.interface";
+import type { IReportRepository } from "../interfaces/repositories/user/reportRepository.interface";
 import {
   CreateCommentReportParams,
   CreatePostReportParams,

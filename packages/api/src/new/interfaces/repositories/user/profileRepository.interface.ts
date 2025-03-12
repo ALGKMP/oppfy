@@ -1,5 +1,6 @@
-import { Transaction } from "@oppfy/db";
-import type { Schema } from "@oppfy/db";
+import type { Schema, Transaction } from "@oppfy/db";
+
+import type { Profile, UserWithProfile } from "../../../models";
 
 export interface GetProfileParams {
   profileId: string;
@@ -66,27 +67,24 @@ export interface IProfileRepository {
   getProfile(
     params: GetProfileParams,
     tx?: Transaction,
-  ): Promise<any>;
+  ): Promise<Profile | undefined>;
 
   getUserProfile(
     params: GetUserProfileParams,
     tx?: Transaction,
-  ): Promise<any>;
+  ): Promise<UserWithProfile | undefined>;
 
   getUserFullProfile(
     params: GetUserFullProfileParams,
     tx?: Transaction,
-  ): Promise<any>;
+  ): Promise<UserWithProfile | undefined>;
 
   getProfileByUsername(
     params: GetProfileByUsernameParams,
     tx?: Transaction,
-  ): Promise<any>;
+  ): Promise<Profile | undefined>;
 
-  updateProfile(
-    params: UpdateProfileParams,
-    tx?: Transaction,
-  ): Promise<void>;
+  updateProfile(params: UpdateProfileParams, tx?: Transaction): Promise<void>;
 
   updateProfilePicture(
     params: UpdateProfilePictureParams,
@@ -96,20 +94,17 @@ export interface IProfileRepository {
   usernameExists(
     params: UsernameExistsParams,
     tx?: Transaction,
-  ): Promise<any>;
+  ): Promise<boolean>;
 
   getBatchProfiles(
     params: GetBatchProfilesParams,
     tx?: Transaction,
   ): Promise<BatchProfileResult[]>;
 
-  deleteProfile(
-    params: DeleteProfileParams,
-    tx?: Transaction,
-  ): Promise<void>;
+  deleteProfile(params: DeleteProfileParams, tx?: Transaction): Promise<void>;
 
   profilesByUsername(
     params: ProfilesByUsernameParams,
     tx?: Transaction,
   ): Promise<ProfileResult[]>;
-} 
+}
