@@ -1,4 +1,4 @@
-import { Transaction } from "@oppfy/db";
+import type { Transaction } from "@oppfy/db";
 
 export interface CreateFollowerParams {
   senderUserId: string;
