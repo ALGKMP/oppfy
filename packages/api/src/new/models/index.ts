@@ -12,8 +12,11 @@ export type ReportCommentReason =
   (typeof reportCommentReasonEnum.enumValues)[number];
 
 export type User = InferSelectModel<typeof schema.user>;
-export type UserStatus = InferSelectModel<typeof schema.userStatus>;
 export type Profile = InferSelectModel<typeof schema.profile>;
+export type UserWithProfile = User & {
+  profile: Profile;
+};
+export type UserStatus = InferSelectModel<typeof schema.userStatus>;
 export type ProfileStats = InferSelectModel<typeof schema.profileStats>;
 export type Post = InferSelectModel<typeof schema.post>;
 export type PostStats = InferSelectModel<typeof schema.postStats>;
