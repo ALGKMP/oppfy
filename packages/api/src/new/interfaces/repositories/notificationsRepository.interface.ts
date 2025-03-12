@@ -1,7 +1,6 @@
 import type { z } from "zod";
 
-import { Transaction } from "@oppfy/db";
-import type { entityTypeEnum } from "@oppfy/db";
+import type { entityTypeEnum, Transaction } from "@oppfy/db";
 import type { sharedValidators } from "@oppfy/validators";
 
 export type EventType = z.infer<
@@ -97,8 +96,8 @@ export interface NotificationResult {
   senderId: string;
   recipientId: string;
   eventType: EventType;
-  entityId: string;
-  entityType: EntityType;
+  entityId: string | null;
+  entityType: EntityType | null;
   read: boolean;
   createdAt: Date;
   senderUsername?: string;
