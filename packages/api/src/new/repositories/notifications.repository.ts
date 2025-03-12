@@ -43,11 +43,11 @@ export class NotificationsRepository implements INotificationsRepository {
 
   async storePushToken(
     params: StorePushTokenParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { userId, pushToken } = params;
 
-    const pushTokenData = await tx.query.pushToken.findFirst({
+    const pushTokenData = await db.query.pushToken.findFirst({
       where: and(
         eq(this.schema.pushToken.userId, userId),
         eq(this.schema.pushToken.token, pushToken),
@@ -55,13 +55,13 @@ export class NotificationsRepository implements INotificationsRepository {
     });
 
     if (pushTokenData === undefined) {
-      await tx
+      await db
         .insert(this.schema.pushToken)
         .values({ userId, token: pushToken });
       return;
     }
 
-    await tx
+    await db
       .update(this.schema.pushToken)
       .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
       .where(
@@ -74,11 +74,11 @@ export class NotificationsRepository implements INotificationsRepository {
 
   async deletePushToken(
     params: DeletePushTokenParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { userId, pushToken } = params;
 
-    await tx
+    await db
       .delete(this.schema.pushToken)
       .where(
         and(
@@ -90,12 +90,12 @@ export class NotificationsRepository implements INotificationsRepository {
 
   async getNotificationSettings(
     params: GetNotificationSettingsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<any> {
     const { notificationSettingsId } = params;
 
     const possibleNotificationSettings =
-      await tx.query.notificationSettings.findFirst({
+      await db.query.notificationSettings.findFirst({
         where: eq(this.schema.notificationSettings.id, notificationSettingsId),
         columns: {
           posts: true,
@@ -112,11 +112,11 @@ export class NotificationsRepository implements INotificationsRepository {
 
   async getUnreadNotificationsCount(
     params: GetUnreadNotificationsCountParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<number> {
     const { userId } = params;
 
-    const result = await tx
+    const result = await db
       .select({ count: count() })
       .from(this.schema.notifications)
       .where(
@@ -132,7 +132,7 @@ export class NotificationsRepository implements INotificationsRepository {
 
   async getRecentNotifications(
     params: GetRecentNotificationsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<any[]> {
     const {
       senderId,
@@ -144,7 +144,7 @@ export class NotificationsRepository implements INotificationsRepository {
       limit,
     } = params;
 
-    let query = tx.select().from(this.schema.notifications).$dynamic();
+    let query = db.select().from(this.schema.notifications).$dynamic();
 
     query = query.where(
       gt(
@@ -175,12 +175,12 @@ export class NotificationsRepository implements INotificationsRepository {
 
   async paginateNotifications(
     params: PaginateNotificationsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<NotificationResult[]> {
-  const { userId, cursor = null, pageSize = 10 } = params;
+    const { userId, cursor = null, pageSize = 10 } = params;
 
-    const notifications = await this.db.transaction(async (tx) => {
-      const fetchedNotifications = await tx
+    const notifications = await this.db.transaction(async (db) => {
+      const fetchedNotifications = await db
         .select({
           id: this.schema.notifications.id,
           senderId: this.schema.notifications.senderId,
@@ -246,7 +246,7 @@ export class NotificationsRepository implements INotificationsRepository {
       }
 
       // Mark all notifications as read for this user
-      await tx
+      await db
         .update(this.schema.notifications)
         .set({ read: true })
         .where(eq(this.schema.notifications.recipientId, userId));
@@ -261,9 +261,9 @@ export class NotificationsRepository implements INotificationsRepository {
     userId: string,
     cursor: { createdAt: Date; id: string } | null,
     pageSize: number,
-    tx: DatabaseOrTransaction,
+    db: DatabaseOrTransaction,
   ): Promise<NotificationResult[]> {
-    const fetchedNotifications = await tx
+    const fetchedNotifications = await db
       .select({
         id: this.schema.notifications.id,
         senderId: this.schema.notifications.senderId,
@@ -311,7 +311,7 @@ export class NotificationsRepository implements INotificationsRepository {
     }
 
     // Mark all notifications as read for this user
-    await tx
+    await db
       .update(this.schema.notifications)
       .set({ read: true })
       .where(eq(this.schema.notifications.recipientId, userId));
@@ -323,11 +323,11 @@ export class NotificationsRepository implements INotificationsRepository {
 
   async updateNotificationSettings(
     params: UpdateNotificationSettingsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { notificationSettingsId, notificationSettings } = params;
 
-    await tx
+    await db
       .update(this.schema.notificationSettings)
       .set({ ...notificationSettings })
       .where(eq(this.schema.notificationSettings.id, notificationSettingsId));
@@ -335,22 +335,22 @@ export class NotificationsRepository implements INotificationsRepository {
 
   async storeNotification(
     params: StoreNotificationParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { senderId, recipientId, notificationData } = params;
 
-    await tx
+    await db
       .insert(this.schema.notifications)
       .values({ senderId, recipientId, ...notificationData });
   }
 
   async getPushTokens(
     params: GetPushTokensParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<string[]> {
     const { userId } = params;
 
-    const pushTokens = await tx.query.pushToken.findMany({
+    const pushTokens = await db.query.pushToken.findMany({
       where: eq(this.schema.pushToken.userId, userId),
       columns: { token: true },
     });
@@ -360,22 +360,22 @@ export class NotificationsRepository implements INotificationsRepository {
 
   async deleteNotificationById(
     params: DeleteNotificationByIdParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { id } = params;
 
-    await tx
+    await db
       .delete(this.schema.notifications)
       .where(eq(this.schema.notifications.id, id));
   }
 
   async deleteNotifications(
     params: DeleteNotificationsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { senderId, recipientId, eventType, entityType, entityId } = params;
 
-    let query = tx.delete(this.schema.notifications).$dynamic();
+    let query = db.delete(this.schema.notifications).$dynamic();
 
     const conditions = [];
 
@@ -410,11 +410,11 @@ export class NotificationsRepository implements INotificationsRepository {
 
   async deleteNotificationsBetweenUsers(
     params: DeleteNotificationsBetweenUsersParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { userIdA, userIdB } = params;
 
-    await tx
+    await db
       .delete(this.schema.notifications)
       .where(
         or(

@@ -34,11 +34,11 @@ export class ContactsRepository implements IContactsRepository {
 
   async updateUserContacts(
     params: UpdateUserContactsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { userId, hashedPhoneNumbers } = params;
 
-    const oldContacts = await tx.query.userContact.findMany({
+    const oldContacts = await db.query.userContact.findMany({
       where: eq(this.schema.userContact.userId, userId),
     });
 
@@ -55,7 +55,7 @@ export class ContactsRepository implements IContactsRepository {
 
     // Batch delete contacts
     if (contactsToDelete.length > 0) {
-      await tx
+      await db
         .delete(this.schema.userContact)
         .where(
           and(
@@ -67,7 +67,7 @@ export class ContactsRepository implements IContactsRepository {
 
     // Batch insert contacts into `contact` table if they don't exist
     if (contactsToAdd.length > 0) {
-      const existingContacts = await tx.query.contact.findMany({
+      const existingContacts = await db.query.contact.findMany({
         where: inArray(this.schema.contact.id, contactsToAdd),
       });
 
@@ -79,7 +79,7 @@ export class ContactsRepository implements IContactsRepository {
       );
 
       if (newContactsToInsert.size > 0) {
-        await tx
+        await db
           .insert(this.schema.contact)
           .values(Array.from(newContactsToInsert).map((id) => ({ id })));
       }
@@ -90,7 +90,7 @@ export class ContactsRepository implements IContactsRepository {
         contactId: contact,
       }));
 
-      await tx
+      await db
         .insert(this.schema.userContact)
         .values(userContactsToInsert)
         .onConflictDoNothing();
@@ -99,22 +99,22 @@ export class ContactsRepository implements IContactsRepository {
 
   async deleteContacts(
     params: DeleteContactsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { userId } = params;
 
-    await tx
+    await db
       .delete(this.schema.userContact)
       .where(eq(this.schema.userContact.userId, userId));
   }
 
   async getContacts(
     params: GetContactsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<string[]> {
     const { userId } = params;
 
-    const contacts = await tx.query.userContact.findMany({
+    const contacts = await db.query.userContact.findMany({
       where: eq(this.schema.userContact.userId, userId),
     });
 
@@ -123,7 +123,7 @@ export class ContactsRepository implements IContactsRepository {
 
   async getRecommendations(
     params: GetRecommendationsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<ContactRecommendation[]> {
     const { userId } = params;
 
@@ -142,7 +142,7 @@ export class ContactsRepository implements IContactsRepository {
     }
 
     // Get user profiles for recommendations
-    const userProfiles = await tx
+    const userProfiles = await db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,
@@ -160,7 +160,7 @@ export class ContactsRepository implements IContactsRepository {
     const userContactsMap = new Map<string, string[]>();
 
     // Get user's contacts
-    const userContacts = await tx.query.userContact.findMany({
+    const userContacts = await db.query.userContact.findMany({
       where: eq(this.schema.userContact.userId, userId),
     });
 
@@ -171,7 +171,7 @@ export class ContactsRepository implements IContactsRepository {
 
     // Get contacts for each recommended user
     for (const recommendedUserId of allRecommendedUserIds) {
-      const contacts = await tx.query.userContact.findMany({
+      const contacts = await db.query.userContact.findMany({
         where: eq(this.schema.userContact.userId, recommendedUserId),
       });
 

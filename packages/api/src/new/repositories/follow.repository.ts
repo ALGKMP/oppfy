@@ -47,32 +47,32 @@ export class FollowRepository implements IFollowRepository {
 
   async createFollower(
     params: CreateFollowerParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { senderUserId, recipientUserId } = params;
 
-    await tx
+    await db
       .insert(this.schema.follow)
       .values({ recipientId: recipientUserId, senderId: senderUserId });
 
-    const senderProfile = await tx.query.profile.findFirst({
+    const senderProfile = await db.query.profile.findFirst({
       where: eq(this.schema.profile.userId, senderUserId),
     });
 
     if (!senderProfile) throw new Error("Sender profile not found");
 
-    await tx
+    await db
       .update(this.schema.profileStats)
       .set({ following: sql`${this.schema.profileStats.following} + 1` })
       .where(eq(this.schema.profileStats.profileId, senderProfile.id));
 
-    const recipientProfile = await tx.query.profile.findFirst({
+    const recipientProfile = await db.query.profile.findFirst({
       where: eq(this.schema.profile.userId, recipientUserId),
     });
 
     if (!recipientProfile) throw new Error("Recipient profile not found");
 
-    await tx
+    await db
       .update(this.schema.profileStats)
       .set({ followers: sql`${this.schema.profileStats.followers} + 1` })
       .where(eq(this.schema.profileStats.profileId, recipientProfile.id));
@@ -80,11 +80,11 @@ export class FollowRepository implements IFollowRepository {
 
   async removeFollower(
     params: RemoveFollowerParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { followerId, followeeId } = params;
 
-    await tx
+    await db
       .delete(this.schema.follow)
       .where(
         and(
@@ -93,24 +93,24 @@ export class FollowRepository implements IFollowRepository {
         ),
       );
 
-    const followerProfile = await tx.query.profile.findFirst({
+    const followerProfile = await db.query.profile.findFirst({
       where: eq(this.schema.profile.userId, followerId),
     });
 
     if (!followerProfile) throw new Error("Follower profile not found");
 
-    await tx
+    await db
       .update(this.schema.profileStats)
       .set({ following: sql`${this.schema.profileStats.following} - 1` })
       .where(eq(this.schema.profileStats.profileId, followerProfile.id));
 
-    const followeeProfile = await tx.query.profile.findFirst({
+    const followeeProfile = await db.query.profile.findFirst({
       where: eq(this.schema.profile.userId, followeeId),
     });
 
     if (!followeeProfile) throw new Error("Followee profile not found");
 
-    await tx
+    await db
       .update(this.schema.profileStats)
       .set({ followers: sql`${this.schema.profileStats.followers} - 1` })
       .where(eq(this.schema.profileStats.profileId, followeeProfile.id));
@@ -119,9 +119,9 @@ export class FollowRepository implements IFollowRepository {
   async removeFollowRequest(
     senderId: string,
     recipientId: string,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    await tx
+    await db
       .delete(this.schema.followRequest)
       .where(
         and(
@@ -133,11 +133,11 @@ export class FollowRepository implements IFollowRepository {
 
   async getFollower(
     params: GetFollowerParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<{ id: string } | undefined> {
     const { followerId, followeeId } = params;
 
-    const result = await tx
+    const result = await db
       .select({ id: this.schema.follow.id })
       .from(this.schema.follow)
       .where(
@@ -153,11 +153,11 @@ export class FollowRepository implements IFollowRepository {
 
   async countFollowers(
     params: CountFollowersParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<number | undefined> {
     const { userId } = params;
 
-    const result = await tx
+    const result = await db
       .select({ count: count() })
       .from(this.schema.follow)
       .where(eq(this.schema.follow.recipientId, userId));
@@ -167,11 +167,11 @@ export class FollowRepository implements IFollowRepository {
 
   async countFollowing(
     params: CountFollowingParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<number | undefined> {
     const { userId } = params;
 
-    const result = await tx
+    const result = await db
       .select({ count: count() })
       .from(this.schema.follow)
       .where(eq(this.schema.follow.senderId, userId));
@@ -181,11 +181,11 @@ export class FollowRepository implements IFollowRepository {
 
   async countFollowRequests(
     params: CountFollowRequestsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<number | undefined> {
     const { userId } = params;
 
-    const result = await tx
+    const result = await db
       .select({ count: count() })
       .from(this.schema.followRequest)
       .where(eq(this.schema.followRequest.recipientId, userId));
@@ -195,11 +195,11 @@ export class FollowRepository implements IFollowRepository {
 
   async deleteFollowRequest(
     params: DeleteFollowRequestParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { senderId, recipientId } = params;
 
-    await tx
+    await db
       .delete(this.schema.followRequest)
       .where(
         and(
@@ -211,22 +211,22 @@ export class FollowRepository implements IFollowRepository {
 
   async createFollowRequest(
     params: CreateFollowRequestParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { senderId, recipientId } = params;
 
-    await tx
+    await db
       .insert(this.schema.followRequest)
       .values({ senderId, recipientId });
   }
 
   async getFollowRequest(
     params: GetFollowRequestParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<{ id: string } | undefined> {
     const { senderId, recipientId } = params;
 
-    const result = await tx
+    const result = await db
       .select({ id: this.schema.followRequest.id })
       .from(this.schema.followRequest)
       .where(
@@ -242,11 +242,11 @@ export class FollowRepository implements IFollowRepository {
 
   async acceptFollowRequest(
     params: AcceptFollowRequestParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { senderId, recipientId } = params;
 
-    await tx
+    await db
       .delete(this.schema.followRequest)
       .where(
         and(
@@ -255,26 +255,26 @@ export class FollowRepository implements IFollowRepository {
         ),
       );
 
-    await tx.insert(this.schema.follow).values({ senderId, recipientId });
+    await db.insert(this.schema.follow).values({ senderId, recipientId });
 
-    const senderProfile = await tx.query.profile.findFirst({
+    const senderProfile = await db.query.profile.findFirst({
       where: eq(this.schema.profile.userId, senderId),
     });
 
     if (!senderProfile) throw new Error("Sender profile not found");
 
-    await tx
+    await db
       .update(this.schema.profileStats)
       .set({ following: sql`${this.schema.profileStats.following} + 1` })
       .where(eq(this.schema.profileStats.profileId, senderProfile.id));
 
-    const recipientProfile = await tx.query.profile.findFirst({
+    const recipientProfile = await db.query.profile.findFirst({
       where: eq(this.schema.profile.userId, recipientId),
     });
 
     if (!recipientProfile) throw new Error("Recipient profile not found");
 
-    await tx
+    await db
       .update(this.schema.profileStats)
       .set({ followers: sql`${this.schema.profileStats.followers} + 1` })
       .where(eq(this.schema.profileStats.profileId, recipientProfile.id));
@@ -282,11 +282,11 @@ export class FollowRepository implements IFollowRepository {
 
   async paginateFollowersSelf(
     params: PaginateFollowersSelfParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<FollowerResult[]> {
     const { forUserId, cursor = null, pageSize = 10 } = params;
 
-    return await tx
+    return await db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,
@@ -324,11 +324,11 @@ export class FollowRepository implements IFollowRepository {
 
   async paginateFollowersOthers(
     params: PaginateFollowersOthersParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<FollowerResult[]> {
     const { forUserId, currentUserId, cursor = null, pageSize = 10 } = params;
 
-    const followers = await tx
+    const followers = await db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,
@@ -367,7 +367,7 @@ export class FollowRepository implements IFollowRepository {
 
     const userIds = followers.map((follower) => follower.userId);
 
-    const followingStatus = await tx
+    const followingStatus = await db
       .select({ followingId: this.schema.follow.recipientId })
       .from(this.schema.follow)
       .where(
@@ -377,7 +377,7 @@ export class FollowRepository implements IFollowRepository {
         ),
       );
 
-    const followRequestStatus = await tx
+    const followRequestStatus = await db
       .select({ requestedId: this.schema.followRequest.recipientId })
       .from(this.schema.followRequest)
       .where(
@@ -403,11 +403,11 @@ export class FollowRepository implements IFollowRepository {
 
   async getAllFollowingIds(
     params: GetAllFollowingIdsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<string[]> {
     const { forUserId } = params;
 
-    const result = await tx
+    const result = await db
       .select({ recipientId: this.schema.follow.recipientId })
       .from(this.schema.follow)
       .where(eq(this.schema.follow.senderId, forUserId));
@@ -417,11 +417,11 @@ export class FollowRepository implements IFollowRepository {
 
   async paginateFollowingSelf(
     params: PaginateFollowingSelfParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<FollowerResult[]> {
     const { userId, cursor = null, pageSize = 10 } = params;
 
-    return await tx
+    return await db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,
@@ -459,11 +459,11 @@ export class FollowRepository implements IFollowRepository {
 
   async paginateFollowingOthers(
     params: PaginateFollowingOthersParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<FollowerResult[]> {
     const { forUserId, currentUserId, cursor = null, pageSize = 10 } = params;
 
-    const following = await tx
+    const following = await db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,
@@ -502,7 +502,7 @@ export class FollowRepository implements IFollowRepository {
 
     const userIds = following.map((follow) => follow.userId);
 
-    const followingStatus = await tx
+    const followingStatus = await db
       .select({ followingId: this.schema.follow.recipientId })
       .from(this.schema.follow)
       .where(
@@ -512,7 +512,7 @@ export class FollowRepository implements IFollowRepository {
         ),
       );
 
-    const followRequestStatus = await tx
+    const followRequestStatus = await db
       .select({ requestedId: this.schema.followRequest.recipientId })
       .from(this.schema.followRequest)
       .where(
@@ -538,11 +538,11 @@ export class FollowRepository implements IFollowRepository {
 
   async paginateFollowRequests(
     params: PaginateFollowRequestsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<FollowRequestResult[]> {
     const { forUserId, cursor = null, pageSize = 10 } = params;
 
-    return await tx
+    return await db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,

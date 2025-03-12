@@ -49,22 +49,22 @@ export class ProfileRepository implements IProfileRepository {
 
   async getProfile(
     params: GetProfileParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<any> {
     const { profileId } = params;
 
-    return await tx.query.profile.findFirst({
+    return await db.query.profile.findFirst({
       where: eq(this.schema.profile.id, profileId),
     });
   }
 
   async getUserProfile(
     params: GetUserProfileParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<any> {
     const { userId } = params;
 
-    return await tx.query.user.findFirst({
+    return await db.query.user.findFirst({
       where: eq(this.schema.user.id, userId),
       with: { profile: true },
     });
@@ -72,11 +72,11 @@ export class ProfileRepository implements IProfileRepository {
 
   async getUserFullProfile(
     params: GetUserFullProfileParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<any> {
     const { userId } = params;
 
-    return await tx.query.user.findFirst({
+    return await db.query.user.findFirst({
       where: eq(this.schema.user.id, userId),
       with: { profile: { with: { user: true, profileStats: true } } },
     });
@@ -84,22 +84,22 @@ export class ProfileRepository implements IProfileRepository {
 
   async getProfileByUsername(
     params: GetProfileByUsernameParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<any> {
     const { username } = params;
 
-    return await tx.query.profile.findFirst({
+    return await db.query.profile.findFirst({
       where: eq(this.schema.profile.username, username),
     });
   }
 
   async updateProfile(
     params: UpdateProfileParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { profileId, update } = params;
 
-    await tx
+    await db
       .update(this.schema.profile)
       .set(update)
       .where(eq(this.schema.profile.id, profileId));
@@ -107,11 +107,11 @@ export class ProfileRepository implements IProfileRepository {
 
   async updateProfilePicture(
     params: UpdateProfilePictureParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { profileId, newKey } = params;
 
-    await tx
+    await db
       .update(this.schema.profile)
       .set({ profilePictureKey: newKey })
       .where(eq(this.schema.profile.id, profileId));
@@ -119,25 +119,25 @@ export class ProfileRepository implements IProfileRepository {
 
   async usernameExists(
     params: UsernameExistsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<any> {
     const { username } = params;
 
-    return await tx.query.profile.findFirst({
+    return await db.query.profile.findFirst({
       where: eq(this.schema.profile.username, username),
     });
   }
 
   async getBatchProfiles(
     params: GetBatchProfilesParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<BatchProfileResult[]> {
     const { userIds } = params;
 
     const user = this.schema.user;
     const profile = this.schema.profile;
 
-    const fullProfiles = await tx
+    const fullProfiles = await db
       .select({
         userId: user.id,
         profileId: profile.id,
@@ -155,22 +155,22 @@ export class ProfileRepository implements IProfileRepository {
 
   async deleteProfile(
     params: DeleteProfileParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { profileId } = params;
 
-    await tx
+    await db
       .delete(this.schema.profile)
       .where(eq(this.schema.profile.id, profileId));
   }
 
   async profilesByUsername(
     params: ProfilesByUsernameParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<ProfileResult[]> {
     const { username, currentUserId, limit = 15 } = params;
 
-    const results = await tx
+    const results = await db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,

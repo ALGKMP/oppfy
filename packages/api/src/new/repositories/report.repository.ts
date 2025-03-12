@@ -1,10 +1,6 @@
 import { inject, injectable } from "inversify";
 
-import type {
-  Database,
-  DatabaseOrTransaction,
-  Schema,
-} from "@oppfy/db";
+import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 
 import { TYPES } from "../container";
 import {
@@ -29,22 +25,22 @@ export class ReportRepository implements IReportRepository {
 
   async createUserReport(
     params: CreateUserReportParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    await tx.insert(this.schema.reportUser).values(params);
+    await db.insert(this.schema.reportUser).values(params);
   }
 
   async createPostReport(
     params: CreatePostReportParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    await tx.insert(this.schema.reportPost).values(params);
+    await db.insert(this.schema.reportPost).values(params);
   }
 
   async createCommentReport(
     params: CreateCommentReportParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    await tx.insert(this.schema.reportComment).values(params);
+    await db.insert(this.schema.reportComment).values(params);
   }
 }

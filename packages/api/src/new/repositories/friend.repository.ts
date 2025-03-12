@@ -43,7 +43,7 @@ export class FriendRepository implements IFriendRepository {
 
   async createFriend(
     params: CreateFriendParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { senderId, recipientId } = params;
 
@@ -53,10 +53,10 @@ export class FriendRepository implements IFriendRepository {
         ? [senderId, recipientId]
         : [recipientId, senderId];
 
-    await tx.insert(this.schema.friend).values([{ userIdA, userIdB }]);
+    await db.insert(this.schema.friend).values([{ userIdA, userIdB }]);
 
     // Delete the friend request
-    await tx
+    await db
       .delete(this.schema.friendRequest)
       .where(
         or(
@@ -73,13 +73,13 @@ export class FriendRepository implements IFriendRepository {
 
     // Update profileStats for both users
     const updateProfileStats = async (userId: string) => {
-      const userProfile = await tx.query.profile.findFirst({
+      const userProfile = await db.query.profile.findFirst({
         where: eq(this.schema.profile.userId, userId),
       });
 
       if (!userProfile) throw new Error(`Profile not found for user ${userId}`);
 
-      await tx
+      await db
         .update(this.schema.profileStats)
         .set({ friends: sql`${this.schema.profileStats.friends} + 1` })
         .where(eq(this.schema.profileStats.profileId, userProfile.id));
@@ -91,7 +91,7 @@ export class FriendRepository implements IFriendRepository {
 
   async removeFriend(
     params: RemoveFriendParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { userIdA, userIdB } = params;
 
@@ -99,7 +99,7 @@ export class FriendRepository implements IFriendRepository {
     const [sortedUserIdA, sortedUserIdB] =
       userIdA < userIdB ? [userIdA, userIdB] : [userIdB, userIdA];
 
-    await tx
+    await db
       .delete(this.schema.friend)
       .where(
         and(
@@ -110,13 +110,13 @@ export class FriendRepository implements IFriendRepository {
 
     // Update profileStats for both users
     const updateProfileStats = async (userId: string) => {
-      const userProfile = await tx.query.profile.findFirst({
+      const userProfile = await db.query.profile.findFirst({
         where: eq(this.schema.profile.userId, userId),
       });
 
       if (!userProfile) throw new Error(`Profile not found for user ${userId}`);
 
-      await tx
+      await db
         .update(this.schema.profileStats)
         .set({ friends: sql`${this.schema.profileStats.friends} - 1` })
         .where(eq(this.schema.profileStats.profileId, userProfile.id));
@@ -128,7 +128,7 @@ export class FriendRepository implements IFriendRepository {
 
   async getFriendship(
     params: GetFriendshipParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<{ id: string } | undefined> {
     const { userIdA, userIdB } = params;
 
@@ -136,7 +136,7 @@ export class FriendRepository implements IFriendRepository {
     const [sortedUserIdA, sortedUserIdB] =
       userIdA < userIdB ? [userIdA, userIdB] : [userIdB, userIdA];
 
-    const result = await tx
+    const result = await db
       .select({ id: this.schema.friend.id })
       .from(this.schema.friend)
       .where(
@@ -152,11 +152,11 @@ export class FriendRepository implements IFriendRepository {
 
   async countFriends(
     params: CountFriendsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<number | undefined> {
     const { userId } = params;
 
-    const result = await tx
+    const result = await db
       .select({ count: count() })
       .from(this.schema.friend)
       .where(
@@ -171,11 +171,11 @@ export class FriendRepository implements IFriendRepository {
 
   async countFriendRequests(
     params: CountFriendRequestsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<number | undefined> {
     const { userId } = params;
 
-    const result = await tx
+    const result = await db
       .select({ count: count() })
       .from(this.schema.friendRequest)
       .where(eq(this.schema.friendRequest.recipientId, userId));
@@ -185,22 +185,22 @@ export class FriendRepository implements IFriendRepository {
 
   async createFriendRequest(
     params: CreateFriendRequestParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { senderId, recipientId } = params;
 
-    await tx
+    await db
       .insert(this.schema.friendRequest)
       .values({ senderId, recipientId });
   }
 
   async deleteFriendRequest(
     params: DeleteFriendRequestParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { senderId, recipientId } = params;
 
-    await tx
+    await db
       .delete(this.schema.friendRequest)
       .where(
         and(
@@ -212,11 +212,11 @@ export class FriendRepository implements IFriendRepository {
 
   async getFriendRequest(
     params: GetFriendRequestParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<{ id: string } | undefined> {
     const { senderId, recipientId } = params;
 
-    const result = await tx
+    const result = await db
       .select({ id: this.schema.friendRequest.id })
       .from(this.schema.friendRequest)
       .where(
@@ -232,12 +232,12 @@ export class FriendRepository implements IFriendRepository {
 
   async paginateFriendsSelf(
     params: PaginateFriendsSelfParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<FriendResult[]> {
     const { forUserId, cursor = null, pageSize = 10 } = params;
 
     // Get all friends of the user
-    const friendsQuery = tx
+    const friendsQuery = db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,
@@ -289,12 +289,12 @@ export class FriendRepository implements IFriendRepository {
 
   async paginateFriendsOther(
     params: PaginateFriendsOtherParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<FriendResult[]> {
     const { forUserId, currentUserId, cursor = null, pageSize = 10 } = params;
 
     // Get all friends of the user
-    const friends = await tx
+    const friends = await db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,
@@ -346,7 +346,7 @@ export class FriendRepository implements IFriendRepository {
     const userIds = friends.map((friend) => friend.userId);
 
     // Check if the current user is friends with any of the users
-    const friendStatus = await tx
+    const friendStatus = await db
       .select({ friendId: this.schema.user.id })
       .from(this.schema.user)
       .innerJoin(
@@ -372,7 +372,7 @@ export class FriendRepository implements IFriendRepository {
       );
 
     // Check if the current user has sent friend requests to any of the users
-    const friendRequestStatus = await tx
+    const friendRequestStatus = await db
       .select({ requestedId: this.schema.friendRequest.recipientId })
       .from(this.schema.friendRequest)
       .where(
@@ -396,11 +396,11 @@ export class FriendRepository implements IFriendRepository {
 
   async paginateFriendRequests(
     params: PaginateFriendRequestsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<FriendRequestResult[]> {
     const { forUserId, cursor = null, pageSize = 10 } = params;
 
-    return await tx
+    return await db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,
@@ -441,7 +441,7 @@ export class FriendRepository implements IFriendRepository {
 
   async friendshipExists(
     params: FriendshipExistsParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<boolean> {
     const { userIdA, userIdB } = params;
 
@@ -449,7 +449,7 @@ export class FriendRepository implements IFriendRepository {
     const [sortedUserIdA, sortedUserIdB] =
       userIdA < userIdB ? [userIdA, userIdB] : [userIdB, userIdA];
 
-    const result = await tx
+    const result = await db
       .select({ id: this.schema.friend.id })
       .from(this.schema.friend)
       .where(

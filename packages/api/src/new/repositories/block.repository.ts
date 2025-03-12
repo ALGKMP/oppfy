@@ -33,11 +33,11 @@ export class BlockRepository implements IBlockRepository {
 
   async getPaginatedBlockedUsers(
     params: GetPaginatedBlockedUsersParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<GetPaginatedBlockedUsersResult[]> {
     const { forUserId, cursor = null, pageSize = 10 } = params;
 
-    return await tx
+    return await db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,
@@ -75,11 +75,11 @@ export class BlockRepository implements IBlockRepository {
 
   async getBlockedUser(
     params: GetBlockedUserParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<{ id: string } | undefined> {
     const { userId, blockedUserId } = params;
 
-    const result = await tx
+    const result = await db
       .select({ id: this.schema.block.id })
       .from(this.schema.block)
       .where(
@@ -95,25 +95,23 @@ export class BlockRepository implements IBlockRepository {
 
   async blockUser(
     params: BlockUserParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { userId, blockedUserId } = params;
 
-    await tx
-      .insert(this.schema.block)
-      .values({
-        userWhoIsBlockingId: userId,
-        userWhoIsBlockedId: blockedUserId,
-      });
+    await db.insert(this.schema.block).values({
+      userWhoIsBlockingId: userId,
+      userWhoIsBlockedId: blockedUserId,
+    });
   }
 
   async unblockUser(
     params: UnblockUserParams,
-    tx: DatabaseOrTransaction = this.db,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { userId, blockedUserId } = params;
 
-    await tx
+    await db
       .delete(this.schema.block)
       .where(
         and(
