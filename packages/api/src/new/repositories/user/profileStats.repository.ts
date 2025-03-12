@@ -3,7 +3,7 @@ import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 
-import { TYPES } from "../container";
+import { TYPES } from "../../container";
 import {
   DecrementFollowerCountParams,
   DecrementFollowingCountParams,
@@ -15,8 +15,8 @@ import {
   IncrementFriendsCountParams,
   IncrementPostsCountParams,
   IProfileStatsRepository,
-} from "../interfaces/repositories/profileStatsRepository.interface";
-import { ProfileStats } from "../models";
+} from "../../interfaces/repositories/user/profileStatsRepository.interface";
+import { ProfileStats } from "../../models";
 
 @injectable()
 export class ProfileStatsRepository implements IProfileStatsRepository {

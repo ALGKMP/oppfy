@@ -9,7 +9,7 @@ import type {
 } from "@oppfy/db";
 import { isNotNull } from "@oppfy/db";
 
-import { TYPES } from "../container";
+import { TYPES } from "../../container";
 import {
   CountFriendRequestsParams,
   CountFriendsParams,
@@ -26,7 +26,7 @@ import {
   PaginateFriendsOtherParams,
   PaginateFriendsSelfParams,
   RemoveFriendParams,
-} from "../interfaces/repositories/friendRepository.interface";
+} from "../../interfaces/repositories/social/friendRepository.interface";
 
 @injectable()
 export class FriendRepository implements IFriendRepository {

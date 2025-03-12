@@ -10,13 +10,9 @@ import {
 } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
-import type {
-  Database,
-  DatabaseOrTransaction,
-  Schema,
-} from "@oppfy/db";
+import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 
-import { TYPES } from "../container";
+import { TYPES } from "../../container";
 import {
   BatchProfileResult,
   DeleteProfileParams,
@@ -31,8 +27,8 @@ import {
   UpdateProfileParams,
   UpdateProfilePictureParams,
   UsernameExistsParams,
-} from "../interfaces/repositories/profileRepository.interface";
-import { Profile, UserWithProfile } from "../models";
+} from "../../interfaces/repositories/user/profileRepository.interface";
+import { Profile, UserWithProfile } from "../../models";
 
 @injectable()
 export class ProfileRepository implements IProfileRepository {

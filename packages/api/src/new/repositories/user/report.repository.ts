@@ -2,13 +2,13 @@ import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 
-import { TYPES } from "../container";
+import { TYPES } from "../../container";
 import {
   CreateCommentReportParams,
   CreatePostReportParams,
   CreateUserReportParams,
   IReportRepository,
-} from "../interfaces/repositories/reportRepository.interface";
+} from "../../interfaces/repositories/user/reportRepository.interface";
 
 @injectable()
 export class ReportRepository implements IReportRepository {

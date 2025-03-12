@@ -3,7 +3,7 @@ import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 
-import { TYPES } from "../container";
+import { TYPES } from "../../container";
 import {
   AddCommentParams,
   Comment,
@@ -13,7 +13,7 @@ import {
   PaginateCommentsParams,
   PaginatedComment,
   RemoveCommentParams,
-} from "../interfaces/repositories/commentRepository.interface";
+} from "../../interfaces/repositories/content/commentRepository.interface";
 
 @injectable()
 export class CommentRepository implements ICommentRepository {

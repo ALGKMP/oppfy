@@ -1,7 +1,7 @@
 // interfaces/repositories/likeRepository.interface.ts
 import type { Transaction } from "@oppfy/db";
 
-import type { Like } from "../../models";
+import type { Like } from "../../../models";
 
 export interface AddLikeParams {
   postId: string;

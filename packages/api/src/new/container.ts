@@ -4,25 +4,25 @@ import { Container } from "inversify";
 
 import { db, schema } from "@oppfy/db";
 
-import { IBlockRepository } from "./interfaces/repositories/blockRepository.interface";
-import { IContactsRepository } from "./interfaces/repositories/contactsRepository.interface";
-import { IFollowRepository } from "./interfaces/repositories/followRepository.interface";
-import { IFriendRepository } from "./interfaces/repositories/friendRepository.interface";
-import { INotificationsRepository } from "./interfaces/repositories/notificationsRepository.interface";
-import { IProfileRepository } from "./interfaces/repositories/profileRepository.interface";
-import { IProfileStatsRepository } from "./interfaces/repositories/profileStatsRepository.interface";
-import { IReportRepository } from "./interfaces/repositories/reportRepository.interface";
-import { IUserRepository } from "./interfaces/repositories/userRepository.interface";
+import { IBlockRepository } from "./interfaces/repositories/social/blockRepository.interface";
+import { IFollowRepository } from "./interfaces/repositories/social/followRepository.interface";
+import { IFriendRepository } from "./interfaces/repositories/social/friendRepository.interface";
+import { IContactsRepository } from "./interfaces/repositories/user/contactsRepository.interface";
+import { INotificationsRepository } from "./interfaces/repositories/user/notificationsRepository.interface";
+import { IProfileRepository } from "./interfaces/repositories/user/profileRepository.interface";
+import { IProfileStatsRepository } from "./interfaces/repositories/user/profileStatsRepository.interface";
+import { IReportRepository } from "./interfaces/repositories/user/reportRepository.interface";
+import { IUserRepository } from "./interfaces/repositories/user/userRepository.interface";
 import { IReportService } from "./interfaces/services/reportService.interface";
-import { BlockRepository } from "./repositories/block.repository";
-import { ContactsRepository } from "./repositories/contacts.repository";
+import { ContactsRepository } from "./repositories/user/contacts.repository";
 import { FollowRepository } from "./repositories/follow.repository";
-import { FriendRepository } from "./repositories/friend.repository";
-import { NotificationsRepository } from "./repositories/notifications.repository";
-import { ProfileRepository } from "./repositories/profile.repository";
-import { ProfileStatsRepository } from "./repositories/profileStats.repository";
-import { ReportRepository } from "./repositories/report.repository";
-import { UserRepository } from "./repositories/user.repository";
+import { FriendRepository } from "./repositories/social/follow.repository";
+import { NotificationsRepository }./repositories/social/friend.repositoryons.repository";
+import { ProfileRepository } from "./repositories/user/profile.repository";
+import { ProfileStatsRepository } from "./repositories/user/profileStats.repository";
+import { ReportRepository } from "./repositories/user/report.repository";
+import { BlockRepository } from "./repositories/social/block.repository";
+import { UserRepository } from "./repositories/user/user.repository";
 import { ReportService } from "./services/report.service";
 
 // Define symbol constants for our interfaces

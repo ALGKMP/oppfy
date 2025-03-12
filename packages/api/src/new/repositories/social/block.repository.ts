@@ -8,7 +8,7 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
-import { TYPES } from "../container";
+import { TYPES } from "../../container";
 import {
   BlockUserParams,
   GetBlockedUserParams,
@@ -16,7 +16,7 @@ import {
   GetPaginatedBlockedUsersResult,
   IBlockRepository,
   UnblockUserParams,
-} from "../interfaces/repositories/blockRepository.interface";
+} from "../../interfaces/repositories/social/blockRepository.interface";
 
 @injectable()
 export class BlockRepository implements IBlockRepository {

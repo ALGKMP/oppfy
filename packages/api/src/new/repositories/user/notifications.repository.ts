@@ -1,13 +1,9 @@
 import { and, count, desc, eq, gt, inArray, lt, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
-import type {
-  Database,
-  DatabaseOrTransaction,
-  Schema,
-} from "@oppfy/db";
+import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 
-import { TYPES } from "../container";
+import { TYPES } from "../../container";
 import {
   DeleteNotificationByIdParams,
   DeleteNotificationsBetweenUsersParams,
@@ -24,7 +20,7 @@ import {
   StoreNotificationParams,
   StorePushTokenParams,
   UpdateNotificationSettingsParams,
-} from "../interfaces/repositories/notificationsRepository.interface";
+} from "../../interfaces/repositories/user/notificationsRepository.interface";
 
 @injectable()
 export class NotificationsRepository implements INotificationsRepository {

@@ -8,7 +8,7 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
-import { TYPES } from "../container";
+import { TYPES } from "../../container";
 import type {
   CreateUserParams,
   DeleteUserParams,
@@ -25,8 +25,8 @@ import type {
   UpdateUserOnAppStatusParams,
   UpdateUserOnboardingCompleteParams,
   UpdateUserTutorialCompleteParams,
-} from "../interfaces/repositories/userRepository.interface";
-import type { User, UserStatus, UserWithProfile } from "../models";
+} from "../../interfaces/repositories/user/userRepository.interface";
+import type { User, UserStatus, UserWithProfile } from "../../models";
 
 @injectable()
 export class UserRepository implements IUserRepository {

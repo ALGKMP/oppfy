@@ -1,6 +1,6 @@
 import type { Transaction } from "@oppfy/db";
 
-import type { ProfileStats } from "../../models";
+import type { ProfileStats } from "../../../models";
 
 export interface DecrementFollowerCountParams {
   userId: string;

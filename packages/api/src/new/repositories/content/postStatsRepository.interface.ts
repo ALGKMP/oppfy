@@ -7,7 +7,7 @@ import { TYPES } from "../container";
 import {
   IPostStatsRepository,
   UpdatePostStatsParams,
-} from "../interfaces/repositories/postStatsRepository.interface";
+} from "../interfaces/repositories/content/postStatsRepository.interface";
 
 @injectable()
 export class PostStatsRepository implements IPostStatsRepository {

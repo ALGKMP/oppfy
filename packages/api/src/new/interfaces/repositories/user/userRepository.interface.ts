@@ -1,6 +1,6 @@
 import type { InferInsertModel, Transaction } from "@oppfy/db";
 
-import type { User, UserStatus, UserWithProfile } from "../../models";
+import type { User, UserStatus, UserWithProfile } from "../../../models";
 
 export type PrivacySettings = NonNullable<
   InferInsertModel<typeof import("@oppfy/db").schema.user>["privacySetting"]

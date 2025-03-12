@@ -1,5 +1,6 @@
 import type { Schema, Transaction } from "@oppfy/db";
-import type { Profile, UserWithProfile } from "../../models";
+
+import type { Profile, UserWithProfile } from "../../../models";
 
 export interface GetProfileParams {
   profileId: string;
@@ -63,9 +64,15 @@ export interface BatchProfileResult {
 }
 
 export interface IProfileRepository {
-  getProfile(params: GetProfileParams, tx?: Transaction): Promise<Profile | undefined>;
+  getProfile(
+    params: GetProfileParams,
+    tx?: Transaction,
+  ): Promise<Profile | undefined>;
 
-  getUserProfile(params: GetUserProfileParams, tx?: Transaction): Promise<UserWithProfile | undefined>;
+  getUserProfile(
+    params: GetUserProfileParams,
+    tx?: Transaction,
+  ): Promise<UserWithProfile | undefined>;
 
   getUserFullProfile(
     params: GetUserFullProfileParams,
@@ -84,7 +91,10 @@ export interface IProfileRepository {
     tx?: Transaction,
   ): Promise<void>;
 
-  usernameExists(params: UsernameExistsParams, tx?: Transaction): Promise<boolean>;
+  usernameExists(
+    params: UsernameExistsParams,
+    tx?: Transaction,
+  ): Promise<boolean>;
 
   getBatchProfiles(
     params: GetBatchProfilesParams,

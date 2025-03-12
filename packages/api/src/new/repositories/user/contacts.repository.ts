@@ -9,7 +9,7 @@ import type {
 } from "@oppfy/db";
 import { env } from "@oppfy/env";
 
-import { TYPES } from "../container";
+import { TYPES } from "../../container";
 import type {
   ContactRecommendation,
   DeleteContactsParams,
@@ -17,7 +17,7 @@ import type {
   GetRecommendationsParams,
   IContactsRepository,
   UpdateUserContactsParams,
-} from "../interfaces/repositories/contactsRepository.interface";
+} from "../../interfaces/repositories/user/contactsRepository.interface";
 
 @injectable()
 export class ContactsRepository implements IContactsRepository {

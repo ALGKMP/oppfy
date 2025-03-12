@@ -4,14 +4,14 @@ import { inject, injectable } from "inversify";
 
 import type { Database, Schema, Transaction } from "@oppfy/db";
 
-import { TYPES } from "../container";
+import { TYPES } from "../../container";
 import {
   AddLikeParams,
   FindLikeParams,
   ILikeRepository,
   RemoveLikeParams,
-} from "../interfaces/repositories/likeRepository.interface";
-import { Like } from "../models";
+} from "../../interfaces/repositories/content/likeRepository.interface";
+import { Like } from "../../models";
 
 @injectable()
 export class LikeRepository implements ILikeRepository {

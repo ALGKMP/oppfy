@@ -9,7 +9,7 @@ import type {
 } from "@oppfy/db";
 import { isNotNull } from "@oppfy/db";
 
-import { TYPES } from "../container";
+import { TYPES } from "../../container";
 import {
   AcceptFollowRequestParams,
   CountFollowersParams,
@@ -30,7 +30,7 @@ import {
   PaginateFollowingSelfParams,
   PaginateFollowRequestsParams,
   RemoveFollowerParams,
-} from "../interfaces/repositories/followRepository.interface";
+} from "../../interfaces/repositories/social/followRepository.interface";
 
 @injectable()
 export class FollowRepository implements IFollowRepository {
