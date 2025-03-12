@@ -328,6 +328,7 @@ export class FriendRepository implements IFriendRepository {
     return ok(friends);
   }
 
+  // TODO: This changed
   async paginateFriendsOther(
     params: PaginateFriendsOtherParams,
     db: DatabaseOrTransaction = this.db,
