@@ -1,14 +1,15 @@
 import { and, asc, eq, gt, or } from "drizzle-orm";
 import { inject, injectable } from "inversify";
+import { err, ok, Result } from "neverthrow";
 
 import type {
   Database,
   DatabaseOrTransaction,
   Schema,
-  Transaction,
 } from "@oppfy/db";
 
 import { TYPES } from "../../container";
+import { BlockNotFoundError } from "../../errors/social.errors";
 import {
   BlockUserParams,
   GetBlockedUserParams,
@@ -34,10 +35,10 @@ export class BlockRepository implements IBlockRepository {
   async getPaginatedBlockedUsers(
     params: GetPaginatedBlockedUsersParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<GetPaginatedBlockedUsersResult[]> {
+  ): Promise<Result<GetPaginatedBlockedUsersResult[], never>> {
     const { forUserId, cursor = null, pageSize = 10 } = params;
 
-    return await db
+    const results = await db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,
@@ -71,12 +72,14 @@ export class BlockRepository implements IBlockRepository {
       )
       .orderBy(asc(this.schema.block.createdAt), asc(this.schema.profile.id))
       .limit(pageSize + 1);
+
+    return ok(results);
   }
 
   async getBlockedUser(
     params: GetBlockedUserParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<{ id: string } | undefined> {
+  ): Promise<Result<{ id: string } | undefined, never>> {
     const { userId, blockedUserId } = params;
 
     const result = await db
@@ -90,34 +93,43 @@ export class BlockRepository implements IBlockRepository {
       )
       .limit(1);
 
-    return result[0];
+    return ok(result[0]);
   }
 
   async blockUser(
     params: BlockUserParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<void> {
+  ): Promise<Result<void, never>> {
     const { userId, blockedUserId } = params;
 
     await db.insert(this.schema.block).values({
       userWhoIsBlockingId: userId,
       userWhoIsBlockedId: blockedUserId,
     });
+
+    return ok(undefined);
   }
 
   async unblockUser(
     params: UnblockUserParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<void> {
+  ): Promise<Result<void, BlockNotFoundError>> {
     const { userId, blockedUserId } = params;
 
-    await db
+    const result = await db
       .delete(this.schema.block)
       .where(
         and(
           eq(this.schema.block.userWhoIsBlockingId, userId),
           eq(this.schema.block.userWhoIsBlockedId, blockedUserId),
         ),
-      );
+      )
+      .returning({ id: this.schema.block.id });
+
+    if (result.length === 0) {
+      return err(new BlockNotFoundError());
+    }
+
+    return ok(undefined);
   }
 }

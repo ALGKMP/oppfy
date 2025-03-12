@@ -1,4 +1,8 @@
+import type { Result } from "neverthrow";
+
 import type { Transaction } from "@oppfy/db";
+
+import type { BlockNotFoundError } from "../../../errors/social.errors";
 
 export interface GetPaginatedBlockedUsersParams {
   forUserId: string;
@@ -34,14 +38,20 @@ export interface IBlockRepository {
   getPaginatedBlockedUsers(
     params: GetPaginatedBlockedUsersParams,
     tx?: Transaction,
-  ): Promise<GetPaginatedBlockedUsersResult[]>;
+  ): Promise<Result<GetPaginatedBlockedUsersResult[], never>>;
 
   getBlockedUser(
     params: GetBlockedUserParams,
     tx?: Transaction,
-  ): Promise<{ id: string } | undefined>;
+  ): Promise<Result<{ id: string } | undefined, never>>;
 
-  blockUser(params: BlockUserParams, tx?: Transaction): Promise<void>;
+  blockUser(
+    params: BlockUserParams,
+    tx?: Transaction,
+  ): Promise<Result<void, never>>;
 
-  unblockUser(params: UnblockUserParams, tx?: Transaction): Promise<void>;
+  unblockUser(
+    params: UnblockUserParams,
+    tx?: Transaction,
+  ): Promise<Result<void, BlockNotFoundError>>;
 }
