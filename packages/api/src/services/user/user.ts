@@ -1,7 +1,6 @@
 import { createHash } from "crypto";
 
 import { env } from "@oppfy/env";
-import { openSearch, OpenSearchIndex } from "@oppfy/opensearch";
 import type { NotificationMessage } from "@oppfy/sns";
 import { sns } from "@oppfy/sns";
 import { sqs } from "@oppfy/sqs";

@@ -7,8 +7,7 @@ import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
 
 import { db, eq, schema } from "@oppfy/db";
 import { env } from "@oppfy/env";
-import type { OpenSearchProfileIndexResult } from "@oppfy/opensearch";
-import { openSearch, OpenSearchIndex } from "@oppfy/opensearch";
+
 import { sharedValidators } from "@oppfy/validators";
 
 const s3Client = new S3Client({ region: "us-east-1" });

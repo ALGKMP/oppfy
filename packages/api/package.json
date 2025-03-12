@@ -22,7 +22,6 @@
     "@oppfy/db": "workspace:*",
     "@oppfy/env": "workspace:*",
     "@oppfy/mux": "workspace:*",
-    "@oppfy/opensearch": "workspace:*",
     "@oppfy/s3": "workspace:*",
     "@oppfy/sns": "workspace:*",
     "@oppfy/sqs": "workspace:*",
