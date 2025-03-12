@@ -4,6 +4,18 @@ import type { schema, Transaction } from "@oppfy/db";
 
 export type Comment = InferSelectModel<typeof schema.comment>;
 
+export interface GetCommentParams {
+  commentId: string;
+}
+
+export interface RemoveCommentParams {
+  commentId: string;
+}
+
+export interface CountCommentsParams {
+  postId: string;
+}
+
 export interface AddCommentParams {
   postId: string;
   userId: string;
@@ -27,10 +39,13 @@ export interface PaginatedComment {
 }
 
 export interface ICommentRepository {
-  getComment(commentId: string, tx?: Transaction): Promise<Comment | undefined>;
+  getComment(
+    params: GetCommentParams,
+    tx?: Transaction,
+  ): Promise<Comment | undefined>;
   addComment(params: AddCommentParams, tx?: Transaction): Promise<void>;
-  removeComment(commentId: string, tx?: Transaction): Promise<void>;
-  countComments(postId: string, tx?: Transaction): Promise<number>;
+  removeComment(params: RemoveCommentParams, tx?: Transaction): Promise<void>;
+  countComments(params: CountCommentsParams, tx?: Transaction): Promise<number>;
   paginateComments(
     params: PaginateCommentsParams,
     tx?: Transaction,
