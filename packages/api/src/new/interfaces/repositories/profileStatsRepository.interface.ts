@@ -1,4 +1,6 @@
-import { Transaction } from "@oppfy/db";
+import type { Transaction } from "@oppfy/db";
+
+import type { ProfileStats } from "../../models";
 
 export interface DecrementFollowerCountParams {
   userId: string;
@@ -88,5 +90,5 @@ export interface IProfileStatsRepository {
   getProfileStats(
     params: GetProfileStatsParams,
     tx?: Transaction,
-  ): Promise<any>;
+  ): Promise<ProfileStats | undefined>;
 }
