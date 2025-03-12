@@ -1,15 +1,18 @@
-import { and, count, desc, eq, lte } from "drizzle-orm";
+import { and, count, desc, eq, lt, or } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
-import type { Database, Schema, Transaction } from "@oppfy/db";
+import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 
-import { TYPES } from "../container"; // Adjust based on your DI setup
+import { TYPES } from "../container";
 import {
   AddCommentParams,
   Comment,
+  CountCommentsParams,
+  GetCommentParams,
   ICommentRepository,
   PaginateCommentsParams,
   PaginatedComment,
+  RemoveCommentParams,
 } from "../interfaces/repositories/commentRepository.interface";
 
 @injectable()
@@ -26,8 +29,8 @@ export class CommentRepository implements ICommentRepository {
   }
 
   async getComment(
-    commentId: string,
-    tx: Database | Transaction = this.db,
+    { commentId }: GetCommentParams,
+    tx: DatabaseOrTransaction = this.db,
   ): Promise<Comment | undefined> {
     return await tx.query.comment.findFirst({
       where: eq(this.schema.comment.id, commentId),
@@ -35,19 +38,19 @@ export class CommentRepository implements ICommentRepository {
   }
 
   async addComment(
-    params: AddCommentParams,
-    tx: Database | Transaction = this.db,
+    { postId, userId, body }: AddCommentParams,
+    tx: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     await tx.insert(this.schema.comment).values({
-      postId: params.postId,
-      userId: params.userId,
-      body: params.body,
+      postId,
+      userId,
+      body,
     });
   }
 
   async removeComment(
-    commentId: string,
-    tx: Database | Transaction = this.db,
+    { commentId }: RemoveCommentParams,
+    tx: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     await tx
       .delete(this.schema.comment)
@@ -55,20 +58,19 @@ export class CommentRepository implements ICommentRepository {
   }
 
   async countComments(
-    postId: string,
-    tx: Database | Transaction = this.db,
+    { postId }: CountCommentsParams,
+    tx: DatabaseOrTransaction = this.db,
   ): Promise<number> {
     const result = await tx
       .select({ count: count() })
       .from(this.schema.comment)
       .where(eq(this.schema.comment.postId, postId));
-
     return result[0]?.count ?? 0;
   }
 
   async paginateComments(
     { postId, cursor, pageSize = 10 }: PaginateCommentsParams,
-    tx: Database | Transaction = this.db,
+    tx: DatabaseOrTransaction = this.db,
   ): Promise<PaginatedComment[]> {
     const results = await tx
       .select({
@@ -93,7 +95,13 @@ export class CommentRepository implements ICommentRepository {
         and(
           eq(this.schema.comment.postId, postId),
           cursor
-            ? lte(this.schema.comment.createdAt, cursor.createdAt)
+            ? or(
+                lt(this.schema.comment.createdAt, cursor.createdAt),
+                and(
+                  eq(this.schema.comment.createdAt, cursor.createdAt),
+                  lt(this.schema.comment.id, cursor.commentId),
+                ),
+              )
             : undefined,
         ),
       )
