@@ -1,0 +1,375 @@
+import { and, count, desc, eq, gt, inArray, lt, or, sql } from "drizzle-orm";
+import { inject, injectable } from "inversify";
+
+import type {
+  Database,
+  DatabaseOrTransaction,
+  Schema,
+  Transaction,
+} from "@oppfy/db";
+
+import { TYPES } from "../container";
+import {
+  DeleteNotificationByIdParams,
+  DeleteNotificationsBetweenUsersParams,
+  DeleteNotificationsParams,
+  DeletePushTokenParams,
+  EntityType,
+  EventType,
+  GetNotificationSettingsParams,
+  GetPushTokensParams,
+  GetRecentNotificationsParams,
+  GetUnreadNotificationsCountParams,
+  INotificationsRepository,
+  NotificationResult,
+  PaginateNotificationsParams,
+  StoreNotificationParams,
+  StorePushTokenParams,
+  UpdateNotificationSettingsParams,
+} from "../interfaces/repositories/notificationsRepository.interface";
+
+@injectable()
+export class NotificationsRepository implements INotificationsRepository {
+  private db: Database;
+  private schema: Schema;
+
+  constructor(
+    @inject(TYPES.Database) db: Database,
+    @inject(TYPES.Schema) schema: Schema,
+  ) {
+    this.db = db;
+    this.schema = schema;
+  }
+
+  async storePushToken(
+    params: StorePushTokenParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { userId, pushToken } = params;
+
+    const pushTokenData = await tx.query.pushToken.findFirst({
+      where: and(
+        eq(this.schema.pushToken.userId, userId),
+        eq(this.schema.pushToken.token, pushToken),
+      ),
+    });
+
+    if (pushTokenData === undefined) {
+      await tx
+        .insert(this.schema.pushToken)
+        .values({ userId, token: pushToken });
+      return;
+    }
+
+    await tx
+      .update(this.schema.pushToken)
+      .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
+      .where(
+        and(
+          eq(this.schema.pushToken.userId, userId),
+          eq(this.schema.pushToken.token, pushToken),
+        ),
+      );
+  }
+
+  async deletePushToken(
+    params: DeletePushTokenParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { userId, pushToken } = params;
+
+    await tx
+      .delete(this.schema.pushToken)
+      .where(
+        and(
+          eq(this.schema.pushToken.userId, userId),
+          eq(this.schema.pushToken.token, pushToken),
+        ),
+      );
+  }
+
+  async getNotificationSettings(
+    params: GetNotificationSettingsParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<any> {
+    const { notificationSettingsId } = params;
+
+    const possibleNotificationSettings =
+      await tx.query.notificationSettings.findFirst({
+        where: eq(this.schema.notificationSettings.id, notificationSettingsId),
+        columns: {
+          posts: true,
+          likes: true,
+          comments: true,
+          mentions: true,
+          friendRequests: true,
+          followRequests: true,
+        },
+      });
+
+    return possibleNotificationSettings;
+  }
+
+  async getUnreadNotificationsCount(
+    params: GetUnreadNotificationsCountParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<number> {
+    const { userId } = params;
+
+    const result = await tx
+      .select({ count: count() })
+      .from(this.schema.notifications)
+      .where(
+        and(
+          eq(this.schema.notifications.recipientId, userId),
+          eq(this.schema.notifications.read, false),
+        ),
+      );
+
+    const unreadNotificationsCount = result[0]?.count ?? 0;
+    return unreadNotificationsCount;
+  }
+
+  async getRecentNotifications(
+    params: GetRecentNotificationsParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<any[]> {
+    const {
+      senderId,
+      recipientId,
+      eventType,
+      entityId,
+      entityType,
+      minutesThreshold,
+      limit,
+    } = params;
+
+    let query = tx.select().from(this.schema.notifications).$dynamic();
+
+    query = query.where(
+      gt(
+        this.schema.notifications.createdAt,
+        sql`NOW() - INTERVAL '${minutesThreshold} minutes'`,
+      ),
+    );
+
+    if (senderId)
+      query = query.where(eq(this.schema.notifications.senderId, senderId));
+    if (recipientId)
+      query = query.where(
+        eq(this.schema.notifications.recipientId, recipientId),
+      );
+    if (eventType)
+      query = query.where(eq(this.schema.notifications.eventType, eventType));
+    if (entityId)
+      query = query.where(eq(this.schema.notifications.entityId, entityId));
+    if (entityType)
+      query = query.where(eq(this.schema.notifications.entityType, entityType));
+
+    query = query
+      .orderBy(desc(this.schema.notifications.createdAt))
+      .limit(limit);
+
+    return await query;
+  }
+
+  async paginateNotifications(
+    params: PaginateNotificationsParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<NotificationResult[]> {
+    const { userId, cursor = null, pageSize = 10 } = params;
+
+    // If we're using the default database connection, wrap in a transaction
+    if (tx === this.db) {
+      return await this.db.transaction(async (trx) => {
+        return await this.paginateNotificationsInternal(
+          userId,
+          cursor,
+          pageSize,
+          trx,
+        );
+      });
+    }
+
+    // Otherwise, use the provided transaction
+    return await this.paginateNotificationsInternal(
+      userId,
+      cursor,
+      pageSize,
+      tx,
+    );
+  }
+
+  private async paginateNotificationsInternal(
+    userId: string,
+    cursor: { createdAt: Date; id: string } | null,
+    pageSize: number,
+    tx: DatabaseOrTransaction,
+  ): Promise<NotificationResult[]> {
+    const fetchedNotifications = await tx
+      .select({
+        id: this.schema.notifications.id,
+        senderId: this.schema.notifications.senderId,
+        recipientId: this.schema.notifications.recipientId,
+        eventType: this.schema.notifications.eventType,
+        entityId: this.schema.notifications.entityId,
+        entityType: this.schema.notifications.entityType,
+        read: this.schema.notifications.read,
+        createdAt: this.schema.notifications.createdAt,
+        senderUsername: this.schema.profile.username,
+        senderName: this.schema.profile.name,
+        senderProfilePictureUrl: this.schema.profile.profilePictureKey,
+      })
+      .from(this.schema.notifications)
+      .innerJoin(
+        this.schema.user,
+        eq(this.schema.notifications.senderId, this.schema.user.id),
+      )
+      .innerJoin(
+        this.schema.profile,
+        eq(this.schema.user.id, this.schema.profile.userId),
+      )
+      .where(
+        and(
+          eq(this.schema.notifications.recipientId, userId),
+          cursor
+            ? or(
+                lt(this.schema.notifications.createdAt, cursor.createdAt),
+                and(
+                  eq(this.schema.notifications.createdAt, cursor.createdAt),
+                  lt(this.schema.notifications.id, cursor.id),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(
+        desc(this.schema.notifications.createdAt),
+        desc(this.schema.notifications.id),
+      )
+      .limit(pageSize + 1);
+
+    if (fetchedNotifications.length === 0) {
+      return [];
+    }
+
+    // Mark all notifications as read for this user
+    await tx
+      .update(this.schema.notifications)
+      .set({ read: true })
+      .where(eq(this.schema.notifications.recipientId, userId));
+
+    return fetchedNotifications.filter(
+      (notification) => notification.senderName !== null,
+    );
+  }
+
+  async updateNotificationSettings(
+    params: UpdateNotificationSettingsParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { notificationSettingsId, notificationSettings } = params;
+
+    await tx
+      .update(this.schema.notificationSettings)
+      .set({ ...notificationSettings })
+      .where(eq(this.schema.notificationSettings.id, notificationSettingsId));
+  }
+
+  async storeNotification(
+    params: StoreNotificationParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { senderId, recipientId, notificationData } = params;
+
+    await tx
+      .insert(this.schema.notifications)
+      .values({ senderId, recipientId, ...notificationData });
+  }
+
+  async getPushTokens(
+    params: GetPushTokensParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<string[]> {
+    const { userId } = params;
+
+    const pushTokens = await tx.query.pushToken.findMany({
+      where: eq(this.schema.pushToken.userId, userId),
+      columns: { token: true },
+    });
+
+    return pushTokens.map((pushToken) => pushToken.token);
+  }
+
+  async deleteNotificationById(
+    params: DeleteNotificationByIdParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { id } = params;
+
+    await tx
+      .delete(this.schema.notifications)
+      .where(eq(this.schema.notifications.id, id));
+  }
+
+  async deleteNotifications(
+    params: DeleteNotificationsParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { senderId, recipientId, eventType, entityType, entityId } = params;
+
+    let query = tx.delete(this.schema.notifications).$dynamic();
+
+    const conditions = [];
+
+    if (senderId) {
+      conditions.push(eq(this.schema.notifications.senderId, senderId));
+    }
+    if (recipientId) {
+      conditions.push(eq(this.schema.notifications.recipientId, recipientId));
+    }
+    if (eventType) {
+      if (Array.isArray(eventType)) {
+        conditions.push(
+          inArray(this.schema.notifications.eventType, eventType),
+        );
+      } else {
+        conditions.push(eq(this.schema.notifications.eventType, eventType));
+      }
+    }
+    if (entityType) {
+      conditions.push(eq(this.schema.notifications.entityType, entityType));
+    }
+    if (entityId) {
+      conditions.push(eq(this.schema.notifications.entityId, entityId));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    await query;
+  }
+
+  async deleteNotificationsBetweenUsers(
+    params: DeleteNotificationsBetweenUsersParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { userIdA, userIdB } = params;
+
+    await tx
+      .delete(this.schema.notifications)
+      .where(
+        or(
+          and(
+            eq(this.schema.notifications.senderId, userIdA),
+            eq(this.schema.notifications.recipientId, userIdB),
+          ),
+          and(
+            eq(this.schema.notifications.senderId, userIdB),
+            eq(this.schema.notifications.recipientId, userIdA),
+          ),
+        ),
+      );
+  }
+}
