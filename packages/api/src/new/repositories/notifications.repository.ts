@@ -5,7 +5,6 @@ import type {
   Database,
   DatabaseOrTransaction,
   Schema,
-  Transaction,
 } from "@oppfy/db";
 
 import { TYPES } from "../container";
@@ -14,14 +13,13 @@ import {
   DeleteNotificationsBetweenUsersParams,
   DeleteNotificationsParams,
   DeletePushTokenParams,
-  EntityType,
-  EventType,
   GetNotificationSettingsParams,
   GetPushTokensParams,
   GetRecentNotificationsParams,
   GetUnreadNotificationsCountParams,
   INotificationsRepository,
   NotificationResult,
+  NotificationSettings,
   PaginateNotificationsParams,
   StoreNotificationParams,
   StorePushTokenParams,
@@ -91,7 +89,7 @@ export class NotificationsRepository implements INotificationsRepository {
   async getNotificationSettings(
     params: GetNotificationSettingsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<any> {
+  ): Promise<NotificationSettings | undefined> {
     const { notificationSettingsId } = params;
 
     const possibleNotificationSettings =
@@ -133,7 +131,7 @@ export class NotificationsRepository implements INotificationsRepository {
   async getRecentNotifications(
     params: GetRecentNotificationsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<any[]> {
+  ): Promise<NotificationResult[]> {
     const {
       senderId,
       recipientId,
@@ -179,7 +177,7 @@ export class NotificationsRepository implements INotificationsRepository {
   ): Promise<NotificationResult[]> {
     const { userId, cursor = null, pageSize = 10 } = params;
 
-    const notifications = await this.db.transaction(async (db) => {
+    const notifications = await db.transaction(async (db) => {
       const fetchedNotifications = await db
         .select({
           id: this.schema.notifications.id,
@@ -255,70 +253,6 @@ export class NotificationsRepository implements INotificationsRepository {
     });
 
     return notifications.filter((notification) => notification.name !== null);
-  }
-
-  private async paginateNotificationsInternal(
-    userId: string,
-    cursor: { createdAt: Date; id: string } | null,
-    pageSize: number,
-    db: DatabaseOrTransaction,
-  ): Promise<NotificationResult[]> {
-    const fetchedNotifications = await db
-      .select({
-        id: this.schema.notifications.id,
-        senderId: this.schema.notifications.senderId,
-        recipientId: this.schema.notifications.recipientId,
-        eventType: this.schema.notifications.eventType,
-        entityId: this.schema.notifications.entityId,
-        entityType: this.schema.notifications.entityType,
-        read: this.schema.notifications.read,
-        createdAt: this.schema.notifications.createdAt,
-        senderUsername: this.schema.profile.username,
-        senderName: this.schema.profile.name,
-        senderProfilePictureUrl: this.schema.profile.profilePictureKey,
-      })
-      .from(this.schema.notifications)
-      .innerJoin(
-        this.schema.user,
-        eq(this.schema.notifications.senderId, this.schema.user.id),
-      )
-      .innerJoin(
-        this.schema.profile,
-        eq(this.schema.user.id, this.schema.profile.userId),
-      )
-      .where(
-        and(
-          eq(this.schema.notifications.recipientId, userId),
-          cursor
-            ? or(
-                lt(this.schema.notifications.createdAt, cursor.createdAt),
-                and(
-                  eq(this.schema.notifications.createdAt, cursor.createdAt),
-                  lt(this.schema.notifications.id, cursor.id),
-                ),
-              )
-            : undefined,
-        ),
-      )
-      .orderBy(
-        desc(this.schema.notifications.createdAt),
-        desc(this.schema.notifications.id),
-      )
-      .limit(pageSize + 1);
-
-    if (fetchedNotifications.length === 0) {
-      return [];
-    }
-
-    // Mark all notifications as read for this user
-    await db
-      .update(this.schema.notifications)
-      .set({ read: true })
-      .where(eq(this.schema.notifications.recipientId, userId));
-
-    return fetchedNotifications.filter(
-      (notification) => notification.senderName !== null,
-    );
   }
 
   async updateNotificationSettings(

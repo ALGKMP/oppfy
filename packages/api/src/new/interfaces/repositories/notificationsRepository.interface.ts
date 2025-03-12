@@ -117,7 +117,7 @@ export interface INotificationsRepository {
   getNotificationSettings(
     params: GetNotificationSettingsParams,
     tx?: Transaction,
-  ): Promise<any>;
+  ): Promise<NotificationSettings | undefined>;
 
   getUnreadNotificationsCount(
     params: GetUnreadNotificationsCountParams,
@@ -127,7 +127,7 @@ export interface INotificationsRepository {
   getRecentNotifications(
     params: GetRecentNotificationsParams,
     tx?: Transaction,
-  ): Promise<any[]>;
+  ): Promise<NotificationResult[]>;
 
   paginateNotifications(
     params: PaginateNotificationsParams,
