@@ -17,7 +17,6 @@
   "dependencies": {
     "@aws-sdk/cloudfront-signer": "^3.609.0",
     "@aws-sdk/s3-request-presigner": "^3.564.0",
-    "@opensearch-project/opensearch": "^2.8.0",
     "@oppfy/cloudfront": "workspace:*",
     "@oppfy/db": "workspace:*",
     "@oppfy/env": "workspace:*",
@@ -32,6 +31,7 @@
     "crypto": "^1.0.1",
     "inversify": "7.0.0-alpha.5",
     "jsonwebtoken": "^9.0.2",
+    "neverthrow": "^8.2.0",
     "reflect-metadata": "^0.2.2",
     "superjson": "2.2.1",
     "trpc-openapi": "^1.2.0",
