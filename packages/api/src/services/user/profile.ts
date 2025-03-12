@@ -1,8 +1,6 @@
 import { z } from "zod";
 
 import { cloudfront } from "@oppfy/cloudfront";
-import { openSearch, OpenSearchIndex } from "@oppfy/opensearch";
-import type { OpenSearchProfileIndexResult } from "@oppfy/opensearch";
 import { s3 } from "@oppfy/s3";
 import { sharedValidators } from "@oppfy/validators";
 
