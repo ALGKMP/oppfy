@@ -1,21 +1,9 @@
-import {
-  aliasedTable,
-  and,
-  asc,
-  desc,
-  eq,
-  gt,
-  inArray,
-  lt,
-  or,
-  sql,
-} from "drizzle-orm";
+import { aliasedTable, and, desc, eq, lt, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type { Database, Schema, Transaction } from "@oppfy/db";
 
-import { TYPES } from "../container"; // Adjust path as needed
-
+import { TYPES } from "../../container";
 import {
   CreatePostStatsParams,
   DeletePostParams,
@@ -27,7 +15,7 @@ import {
   Post,
   PostForNextJs,
   UpdatePostParams,
-} from "../interfaces/repositories/postRepository.interface";
+} from "../../interfaces/repositories/content/postRepository.interface";
 
 @injectable()
 export class PostRepository implements IPostRepository {
