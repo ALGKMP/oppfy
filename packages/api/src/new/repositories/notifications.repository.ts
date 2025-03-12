@@ -177,27 +177,84 @@ export class NotificationsRepository implements INotificationsRepository {
     params: PaginateNotificationsParams,
     tx: DatabaseOrTransaction = this.db,
   ): Promise<NotificationResult[]> {
-    const { userId, cursor = null, pageSize = 10 } = params;
+  const { userId, cursor = null, pageSize = 10 } = params;
 
-    // If we're using the default database connection, wrap in a transaction
-    if (tx === this.db) {
-      return await this.db.transaction(async (trx) => {
-        return await this.paginateNotificationsInternal(
-          userId,
-          cursor,
-          pageSize,
-          trx,
-        );
-      });
-    }
+    const notifications = await this.db.transaction(async (tx) => {
+      const fetchedNotifications = await tx
+        .select({
+          id: this.schema.notifications.id,
+          senderId: this.schema.notifications.senderId,
+          recipientId: this.schema.notifications.recipientId,
+          userId: this.schema.user.id,
+          profileId: this.schema.profile.id,
+          name: this.schema.profile.name,
+          username: this.schema.profile.username,
+          profilePictureKey: this.schema.profile.profilePictureKey,
+          eventType: this.schema.notifications.eventType,
+          entityId: this.schema.notifications.entityId,
+          entityType: this.schema.notifications.entityType,
+          createdAt: this.schema.notifications.createdAt,
+          read: this.schema.notifications.read,
+          privacySetting: this.schema.user.privacySetting,
+          relationshipState: sql<
+            "following" | "followRequestSent" | "notFollowing"
+          >`
+      CASE
+        WHEN EXISTS (
+          SELECT 1 FROM ${this.schema.follow}
+          WHERE ${this.schema.follow.senderId} = ${userId} AND ${this.schema.follow.recipientId} = ${this.schema.user.id}
+        ) THEN 'following'
+        WHEN EXISTS (
+          SELECT 1 FROM ${this.schema.followRequest}
+          WHERE ${this.schema.followRequest.senderId} = ${userId} AND ${this.schema.followRequest.recipientId} = ${this.schema.user.id}
+        ) THEN 'followRequestSent'
+        ELSE 'notFollowing'
+      END
+    `,
+        })
+        .from(this.schema.notifications)
+        .innerJoin(
+          this.schema.user,
+          eq(this.schema.notifications.senderId, this.schema.user.id),
+        )
+        .innerJoin(
+          this.schema.profile,
+          eq(this.schema.user.id, this.schema.profile.userId),
+        )
+        .where(
+          and(
+            eq(this.schema.notifications.recipientId, userId),
+            cursor
+              ? or(
+                  lt(this.schema.notifications.createdAt, cursor.createdAt),
+                  and(
+                    eq(this.schema.notifications.createdAt, cursor.createdAt),
+                    lt(this.schema.notifications.id, cursor.id),
+                  ),
+                )
+              : undefined,
+          ),
+        )
+        .orderBy(
+          desc(this.schema.notifications.createdAt),
+          desc(this.schema.notifications.id),
+        )
+        .limit(pageSize + 1);
 
-    // Otherwise, use the provided transaction
-    return await this.paginateNotificationsInternal(
-      userId,
-      cursor,
-      pageSize,
-      tx,
-    );
+      if (fetchedNotifications.length === 0) {
+        return [];
+      }
+
+      // Mark all notifications as read for this user
+      await tx
+        .update(this.schema.notifications)
+        .set({ read: true })
+        .where(eq(this.schema.notifications.recipientId, userId));
+
+      return fetchedNotifications;
+    });
+
+    return notifications.filter((notification) => notification.name !== null);
   }
 
   private async paginateNotificationsInternal(
