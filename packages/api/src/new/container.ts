@@ -12,6 +12,7 @@ import { INotificationsRepository } from "./interfaces/repositories/notification
 import { IProfileRepository } from "./interfaces/repositories/profileRepository.interface";
 import { IProfileStatsRepository } from "./interfaces/repositories/profileStatsRepository.interface";
 import { IReportRepository } from "./interfaces/repositories/reportRepository.interface";
+import { IUserRepository } from "./interfaces/repositories/userRepository.interface";
 import { IReportService } from "./interfaces/services/reportService.interface";
 import { BlockRepository } from "./repositories/block.repository";
 import { ContactsRepository } from "./repositories/contacts.repository";
@@ -21,6 +22,7 @@ import { NotificationsRepository } from "./repositories/notifications.repository
 import { ProfileRepository } from "./repositories/profile.repository";
 import { ProfileStatsRepository } from "./repositories/profileStats.repository";
 import { ReportRepository } from "./repositories/report.repository";
+import { UserRepository } from "./repositories/user.repository";
 import { ReportService } from "./services/report.service";
 
 // Define symbol constants for our interfaces
@@ -39,6 +41,7 @@ export const TYPES = {
   NotificationsRepository: Symbol.for("NotificationsRepository"),
   ProfileRepository: Symbol.for("ProfileRepository"),
   ProfileStatsRepository: Symbol.for("ProfileStatsRepository"),
+  UserRepository: Symbol.for("UserRepository"),
 
   // Services
   ReportService: Symbol.for("ReportService"),
@@ -69,6 +72,7 @@ container
 container
   .bind<IProfileStatsRepository>(TYPES.ProfileStatsRepository)
   .to(ProfileStatsRepository);
+container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
 
 // Bind services
 container.bind<IReportService>(TYPES.ReportService).to(ReportService);
