@@ -1,15 +1,16 @@
 import { and, asc, count, eq, gt, not, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
+import { err, ok, Result } from "neverthrow";
 
-import type {
-  Database,
-  DatabaseOrTransaction,
-  Schema,
-  Transaction,
-} from "@oppfy/db";
+import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 import { isNotNull } from "@oppfy/db";
 
 import { TYPES } from "../../container";
+import {
+  FriendRequestNotFoundError,
+  FriendshipNotFoundError,
+  ProfileNotFoundError,
+} from "../../errors/social.errors";
 import {
   CountFriendRequestsParams,
   CountFriendsParams,
@@ -44,7 +45,7 @@ export class FriendRepository implements IFriendRepository {
   async createFriend(
     params: CreateFriendParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<void> {
+  ): Promise<Result<void, ProfileNotFoundError>> {
     const { senderId, recipientId } = params;
 
     // Create friend relationship, ensuring userIdA < userIdB
@@ -77,36 +78,54 @@ export class FriendRepository implements IFriendRepository {
         where: eq(this.schema.profile.userId, userId),
       });
 
-      if (!userProfile) throw new Error(`Profile not found for user ${userId}`);
+      if (!userProfile) {
+        return err(new ProfileNotFoundError(userId));
+      }
 
       await db
         .update(this.schema.profileStats)
         .set({ friends: sql`${this.schema.profileStats.friends} + 1` })
         .where(eq(this.schema.profileStats.profileId, userProfile.id));
+
+      return ok(undefined);
     };
 
-    await updateProfileStats(senderId);
-    await updateProfileStats(recipientId);
+    const senderResult = await updateProfileStats(senderId);
+    if (senderResult.isErr()) {
+      return senderResult;
+    }
+
+    const recipientResult = await updateProfileStats(recipientId);
+    if (recipientResult.isErr()) {
+      return recipientResult;
+    }
+
+    return ok(undefined);
   }
 
   async removeFriend(
     params: RemoveFriendParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<void> {
+  ): Promise<Result<void, FriendshipNotFoundError | ProfileNotFoundError>> {
     const { userIdA, userIdB } = params;
 
     // Ensure userIdA < userIdB for the query
     const [sortedUserIdA, sortedUserIdB] =
       userIdA < userIdB ? [userIdA, userIdB] : [userIdB, userIdA];
 
-    await db
+    const result = await db
       .delete(this.schema.friend)
       .where(
         and(
           eq(this.schema.friend.userIdA, sortedUserIdA),
           eq(this.schema.friend.userIdB, sortedUserIdB),
         ),
-      );
+      )
+      .returning({ id: this.schema.friend.id });
+
+    if (result.length === 0) {
+      return err(new FriendshipNotFoundError());
+    }
 
     // Update profileStats for both users
     const updateProfileStats = async (userId: string) => {
@@ -114,22 +133,35 @@ export class FriendRepository implements IFriendRepository {
         where: eq(this.schema.profile.userId, userId),
       });
 
-      if (!userProfile) throw new Error(`Profile not found for user ${userId}`);
+      if (!userProfile) {
+        return err(new ProfileNotFoundError(userId));
+      }
 
       await db
         .update(this.schema.profileStats)
         .set({ friends: sql`${this.schema.profileStats.friends} - 1` })
         .where(eq(this.schema.profileStats.profileId, userProfile.id));
+
+      return ok(undefined);
     };
 
-    await updateProfileStats(userIdA);
-    await updateProfileStats(userIdB);
+    const userAResult = await updateProfileStats(userIdA);
+    if (userAResult.isErr()) {
+      return userAResult;
+    }
+
+    const userBResult = await updateProfileStats(userIdB);
+    if (userBResult.isErr()) {
+      return userBResult;
+    }
+
+    return ok(undefined);
   }
 
   async getFriendship(
     params: GetFriendshipParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<{ id: string } | undefined> {
+  ): Promise<Result<{ id: string } | undefined, never>> {
     const { userIdA, userIdB } = params;
 
     // Ensure userIdA < userIdB for the query
@@ -147,13 +179,13 @@ export class FriendRepository implements IFriendRepository {
       )
       .limit(1);
 
-    return result[0];
+    return ok(result[0]);
   }
 
   async countFriends(
     params: CountFriendsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<number | undefined> {
+  ): Promise<Result<number | undefined, never>> {
     const { userId } = params;
 
     const result = await db
@@ -166,13 +198,13 @@ export class FriendRepository implements IFriendRepository {
         ),
       );
 
-    return result[0]?.count;
+    return ok(result[0]?.count);
   }
 
   async countFriendRequests(
     params: CountFriendRequestsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<number | undefined> {
+  ): Promise<Result<number | undefined, never>> {
     const { userId } = params;
 
     const result = await db
@@ -180,40 +212,49 @@ export class FriendRepository implements IFriendRepository {
       .from(this.schema.friendRequest)
       .where(eq(this.schema.friendRequest.recipientId, userId));
 
-    return result[0]?.count;
+    return ok(result[0]?.count);
   }
 
   async createFriendRequest(
     params: CreateFriendRequestParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<void> {
+  ): Promise<Result<void, never>> {
     const { senderId, recipientId } = params;
 
     await db
       .insert(this.schema.friendRequest)
       .values({ senderId, recipientId });
+
+    return ok(undefined);
   }
 
   async deleteFriendRequest(
     params: DeleteFriendRequestParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<void> {
+  ): Promise<Result<void, FriendRequestNotFoundError>> {
     const { senderId, recipientId } = params;
 
-    await db
+    const result = await db
       .delete(this.schema.friendRequest)
       .where(
         and(
           eq(this.schema.friendRequest.senderId, senderId),
           eq(this.schema.friendRequest.recipientId, recipientId),
         ),
-      );
+      )
+      .returning({ id: this.schema.friendRequest.id });
+
+    if (result.length === 0) {
+      return err(new FriendRequestNotFoundError());
+    }
+
+    return ok(undefined);
   }
 
   async getFriendRequest(
     params: GetFriendRequestParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<{ id: string } | undefined> {
+  ): Promise<Result<{ id: string } | undefined, never>> {
     const { senderId, recipientId } = params;
 
     const result = await db
@@ -227,17 +268,17 @@ export class FriendRepository implements IFriendRepository {
       )
       .limit(1);
 
-    return result[0];
+    return ok(result[0]);
   }
 
   async paginateFriendsSelf(
     params: PaginateFriendsSelfParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<FriendResult[]> {
+  ): Promise<Result<FriendResult[], never>> {
     const { forUserId, cursor = null, pageSize = 10 } = params;
 
     // Get all friends of the user
-    const friendsQuery = db
+    const friends = await db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,
@@ -284,13 +325,13 @@ export class FriendRepository implements IFriendRepository {
       .orderBy(asc(this.schema.friend.createdAt), asc(this.schema.profile.id))
       .limit(pageSize + 1);
 
-    return await friendsQuery;
+    return ok(friends);
   }
 
   async paginateFriendsOther(
     params: PaginateFriendsOtherParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<FriendResult[]> {
+  ): Promise<Result<FriendResult[], never>> {
     const { forUserId, currentUserId, cursor = null, pageSize = 10 } = params;
 
     // Get all friends of the user
@@ -341,7 +382,7 @@ export class FriendRepository implements IFriendRepository {
       .orderBy(asc(this.schema.friend.createdAt), asc(this.schema.profile.id))
       .limit(pageSize + 1);
 
-    if (friends.length === 0) return [];
+    if (friends.length === 0) return ok([]);
 
     const userIds = friends.map((friend) => friend.userId);
 
@@ -387,20 +428,22 @@ export class FriendRepository implements IFriendRepository {
       friendRequestStatus.map((status) => status.requestedId),
     );
 
-    return friends.map((friend) => ({
+    const result = friends.map((friend) => ({
       ...friend,
       isFriend: friendIds.has(friend.userId),
       isFriendRequested: requestedIds.has(friend.userId),
     }));
+
+    return ok(result);
   }
 
   async paginateFriendRequests(
     params: PaginateFriendRequestsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<FriendRequestResult[]> {
+  ): Promise<Result<FriendRequestResult[], never>> {
     const { forUserId, cursor = null, pageSize = 10 } = params;
 
-    return await db
+    const results = await db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,
@@ -437,12 +480,14 @@ export class FriendRepository implements IFriendRepository {
         asc(this.schema.profile.id),
       )
       .limit(pageSize + 1);
+
+    return ok(results);
   }
 
   async friendshipExists(
     params: FriendshipExistsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<boolean> {
+  ): Promise<Result<boolean, never>> {
     const { userIdA, userIdB } = params;
 
     // Ensure userIdA < userIdB for the query
@@ -460,6 +505,6 @@ export class FriendRepository implements IFriendRepository {
       )
       .limit(1);
 
-    return result.length > 0;
+    return ok(result.length > 0);
   }
 }
