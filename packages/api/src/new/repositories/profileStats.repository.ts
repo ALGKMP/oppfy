@@ -5,7 +5,6 @@ import type {
   Database,
   DatabaseOrTransaction,
   Schema,
-  Transaction,
 } from "@oppfy/db";
 
 import { TYPES } from "../container";
@@ -21,6 +20,7 @@ import {
   IncrementPostsCountParams,
   IProfileStatsRepository,
 } from "../interfaces/repositories/profileStatsRepository.interface";
+import { ProfileStats } from "../models";
 
 @injectable()
 export class ProfileStatsRepository implements IProfileStatsRepository {
@@ -144,7 +144,7 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
   async getProfileStats(
     params: GetProfileStatsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<any> {
+  ): Promise<ProfileStats | undefined> {
     const { profileId } = params;
 
     return await db.query.profileStats.findFirst({
