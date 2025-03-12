@@ -48,7 +48,7 @@ export class PostRepository implements IPostRepository {
       "recipientProfile",
     );
 
-    const result = await this.db
+    const result = await tx
       .selectDistinct({
         postId: this.schema.post.id,
         authorId: this.schema.post.authorId,
@@ -108,7 +108,7 @@ export class PostRepository implements IPostRepository {
       "recipientProfile",
     );
 
-    const result = await this.db
+    const result = await tx
       .selectDistinct({
         postId: this.schema.post.id,
         authorId: this.schema.post.authorId,
@@ -157,7 +157,7 @@ export class PostRepository implements IPostRepository {
       "recipientProfile",
     );
 
-    return await this.db
+    return await tx
       .selectDistinct({
         postId: this.schema.post.id,
         authorId: this.schema.post.authorId,
@@ -241,7 +241,7 @@ export class PostRepository implements IPostRepository {
       "recipientProfile",
     );
 
-    return await this.db
+    return await tx
       .select({
         postId: this.schema.post.id,
         authorId: this.schema.post.authorId,
