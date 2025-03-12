@@ -49,46 +49,46 @@ export interface GetProfileStatsParams {
 export interface IProfileStatsRepository {
   decrementFollowerCount(
     params: DecrementFollowerCountParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   decrementFollowingCount(
     params: DecrementFollowingCountParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   decrementFriendsCount(
     params: DecrementFriendsCountParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   decrementPostsCount(
     params: DecrementPostsCountParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   incrementFollowerCount(
     params: IncrementFollowerCountParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   incrementFollowingCount(
     params: IncrementFollowingCountParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   incrementFriendsCount(
     params: IncrementFriendsCountParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   incrementPostsCount(
     params: IncrementPostsCountParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   getProfileStats(
     params: GetProfileStatsParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<ProfileStats | undefined>;
 }

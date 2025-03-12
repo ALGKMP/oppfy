@@ -1,5 +1,4 @@
-import { Transaction } from "@oppfy/db";
-import type { Schema } from "@oppfy/db";
+import type { Schema, Transaction } from "@oppfy/db";
 
 export interface GetProfileParams {
   profileId: string;
@@ -63,53 +62,38 @@ export interface BatchProfileResult {
 }
 
 export interface IProfileRepository {
-  getProfile(
-    params: GetProfileParams,
-    tx?: Transaction,
-  ): Promise<any>;
+  getProfile(params: GetProfileParams, db?: Transaction): Promise<any>;
 
-  getUserProfile(
-    params: GetUserProfileParams,
-    tx?: Transaction,
-  ): Promise<any>;
+  getUserProfile(params: GetUserProfileParams, db?: Transaction): Promise<any>;
 
   getUserFullProfile(
     params: GetUserFullProfileParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<any>;
 
   getProfileByUsername(
     params: GetProfileByUsernameParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<any>;
 
-  updateProfile(
-    params: UpdateProfileParams,
-    tx?: Transaction,
-  ): Promise<void>;
+  updateProfile(params: UpdateProfileParams, db?: Transaction): Promise<void>;
 
   updateProfilePicture(
     params: UpdateProfilePictureParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
-  usernameExists(
-    params: UsernameExistsParams,
-    tx?: Transaction,
-  ): Promise<any>;
+  usernameExists(params: UsernameExistsParams, db?: Transaction): Promise<any>;
 
   getBatchProfiles(
     params: GetBatchProfilesParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<BatchProfileResult[]>;
 
-  deleteProfile(
-    params: DeleteProfileParams,
-    tx?: Transaction,
-  ): Promise<void>;
+  deleteProfile(params: DeleteProfileParams, db?: Transaction): Promise<void>;
 
   profilesByUsername(
     params: ProfilesByUsernameParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<ProfileResult[]>;
-} 
+}

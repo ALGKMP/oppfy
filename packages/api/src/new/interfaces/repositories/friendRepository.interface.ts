@@ -83,57 +83,57 @@ export interface FriendRequestResult {
 }
 
 export interface IFriendRepository {
-  createFriend(params: CreateFriendParams, tx?: Transaction): Promise<void>;
+  createFriend(params: CreateFriendParams, db?: Transaction): Promise<void>;
 
-  removeFriend(params: RemoveFriendParams, tx?: Transaction): Promise<void>;
+  removeFriend(params: RemoveFriendParams, db?: Transaction): Promise<void>;
 
   getFriendship(
     params: GetFriendshipParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<{ id: string } | undefined>;
 
   countFriends(
     params: CountFriendsParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<number | undefined>;
 
   countFriendRequests(
     params: CountFriendRequestsParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<number | undefined>;
 
   createFriendRequest(
     params: CreateFriendRequestParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   deleteFriendRequest(
     params: DeleteFriendRequestParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   getFriendRequest(
     params: GetFriendRequestParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<{ id: string } | undefined>;
 
   paginateFriendsSelf(
     params: PaginateFriendsSelfParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<FriendResult[]>;
 
   paginateFriendsOther(
     params: PaginateFriendsOtherParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<FriendResult[]>;
 
   paginateFriendRequests(
     params: PaginateFriendRequestsParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<FriendRequestResult[]>;
 
   friendshipExists(
     params: FriendshipExistsParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<boolean>;
 }

@@ -104,83 +104,83 @@ export interface FollowRequestResult {
 }
 
 export interface IFollowRepository {
-  createFollower(params: CreateFollowerParams, tx?: Transaction): Promise<void>;
+  createFollower(params: CreateFollowerParams, db?: Transaction): Promise<void>;
 
-  removeFollower(params: RemoveFollowerParams, tx?: Transaction): Promise<void>;
+  removeFollower(params: RemoveFollowerParams, db?: Transaction): Promise<void>;
 
   removeFollowRequest(
     senderId: string,
     recipientId: string,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   getFollower(
     params: GetFollowerParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<{ id: string } | undefined>;
 
   countFollowers(
     params: CountFollowersParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<number | undefined>;
 
   countFollowing(
     params: CountFollowingParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<number | undefined>;
 
   countFollowRequests(
     params: CountFollowRequestsParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<number | undefined>;
 
   deleteFollowRequest(
     params: DeleteFollowRequestParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   createFollowRequest(
     params: CreateFollowRequestParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   getFollowRequest(
     params: GetFollowRequestParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<{ id: string } | undefined>;
 
   acceptFollowRequest(
     params: AcceptFollowRequestParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   paginateFollowersSelf(
     params: PaginateFollowersSelfParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<FollowerResult[]>;
 
   paginateFollowersOthers(
     params: PaginateFollowersOthersParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<FollowerResult[]>;
 
   getAllFollowingIds(
     params: GetAllFollowingIdsParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<string[]>;
 
   paginateFollowingSelf(
     params: PaginateFollowingSelfParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<FollowerResult[]>;
 
   paginateFollowingOthers(
     params: PaginateFollowingOthersParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<FollowerResult[]>;
 
   paginateFollowRequests(
     params: PaginateFollowRequestsParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<FollowRequestResult[]>;
 }

@@ -28,15 +28,15 @@ export interface ContactRecommendation {
 export interface IContactsRepository {
   updateUserContacts(
     params: UpdateUserContactsParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
-  deleteContacts(params: DeleteContactsParams, tx?: Transaction): Promise<void>;
+  deleteContacts(params: DeleteContactsParams, db?: Transaction): Promise<void>;
 
-  getContacts(params: GetContactsParams, tx?: Transaction): Promise<string[]>;
+  getContacts(params: GetContactsParams, db?: Transaction): Promise<string[]>;
 
   getRecommendations(
     params: GetRecommendationsParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<ContactRecommendation[]>;
 }
