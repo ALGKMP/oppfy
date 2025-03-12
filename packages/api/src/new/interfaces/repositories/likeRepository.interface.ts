@@ -19,7 +19,7 @@ export interface FindLikeParams {
 }
 
 export interface ILikeRepository {
-  addLike(params: AddLikeParams, db?: Transaction): Promise<void>;
-  removeLike(params: RemoveLikeParams, db?: Transaction): Promise<void>;
-  findLike(params: FindLikeParams, db?: Transaction): Promise<Like | undefined>;
+  addLike(params: AddLikeParams, tx?: Transaction): Promise<void>;
+  removeLike(params: RemoveLikeParams, tx?: Transaction): Promise<void>;
+  findLike(params: FindLikeParams, tx?: Transaction): Promise<Like | undefined>;
 }

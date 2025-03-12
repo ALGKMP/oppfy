@@ -62,38 +62,38 @@ export interface BatchProfileResult {
 }
 
 export interface IProfileRepository {
-  getProfile(params: GetProfileParams, db?: Transaction): Promise<any>;
+  getProfile(params: GetProfileParams, tx?: Transaction): Promise<any>;
 
-  getUserProfile(params: GetUserProfileParams, db?: Transaction): Promise<any>;
+  getUserProfile(params: GetUserProfileParams, tx?: Transaction): Promise<any>;
 
   getUserFullProfile(
     params: GetUserFullProfileParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<any>;
 
   getProfileByUsername(
     params: GetProfileByUsernameParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<any>;
 
-  updateProfile(params: UpdateProfileParams, db?: Transaction): Promise<void>;
+  updateProfile(params: UpdateProfileParams, tx?: Transaction): Promise<void>;
 
   updateProfilePicture(
     params: UpdateProfilePictureParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<void>;
 
-  usernameExists(params: UsernameExistsParams, db?: Transaction): Promise<any>;
+  usernameExists(params: UsernameExistsParams, tx?: Transaction): Promise<any>;
 
   getBatchProfiles(
     params: GetBatchProfilesParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<BatchProfileResult[]>;
 
-  deleteProfile(params: DeleteProfileParams, db?: Transaction): Promise<void>;
+  deleteProfile(params: DeleteProfileParams, tx?: Transaction): Promise<void>;
 
   profilesByUsername(
     params: ProfilesByUsernameParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<ProfileResult[]>;
 }

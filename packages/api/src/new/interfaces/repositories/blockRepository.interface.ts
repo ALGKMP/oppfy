@@ -33,15 +33,15 @@ export interface UnblockUserParams {
 export interface IBlockRepository {
   getPaginatedBlockedUsers(
     params: GetPaginatedBlockedUsersParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<GetPaginatedBlockedUsersResult[]>;
 
   getBlockedUser(
     params: GetBlockedUserParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<{ id: string } | undefined>;
 
-  blockUser(params: BlockUserParams, db?: Transaction): Promise<void>;
+  blockUser(params: BlockUserParams, tx?: Transaction): Promise<void>;
 
-  unblockUser(params: UnblockUserParams, db?: Transaction): Promise<void>;
+  unblockUser(params: UnblockUserParams, tx?: Transaction): Promise<void>;
 }

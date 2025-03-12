@@ -67,56 +67,56 @@ export interface UpdateUserOnboardingCompleteParams {
 }
 
 export interface IUserRepository {
-  createUser(params: CreateUserParams, db?: Transaction): Promise<void>;
+  createUser(params: CreateUserParams, tx?: Transaction): Promise<void>;
 
-  getUser(params: GetUserParams, db?: Transaction): Promise<User | undefined>;
+  getUser(params: GetUserParams, tx?: Transaction): Promise<User | undefined>;
 
   getUserWithProfile(
     params: GetUserWithProfileParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<UserWithProfile | undefined>;
 
   getUserStatus(
     params: GetUserStatusParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<UserStatus | undefined>;
 
   getUserByPhoneNumber(
     params: GetUserByPhoneNumberParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<User | undefined>;
 
-  deleteUser(params: DeleteUserParams, db?: Transaction): Promise<void>;
+  deleteUser(params: DeleteUserParams, tx?: Transaction): Promise<void>;
 
-  updatePrivacy(params: UpdatePrivacyParams, db?: Transaction): Promise<void>;
+  updatePrivacy(params: UpdatePrivacyParams, tx?: Transaction): Promise<void>;
 
   getRandomActiveProfilesForRecs(
     params: GetRandomActiveProfilesForRecsParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<{ userId: string }[]>;
 
   existingPhoneNumbers(
     params: ExistingPhoneNumbersParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<string[]>;
 
   updateStatsOnUserDelete(
     params: UpdateStatsOnUserDeleteParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<void>;
 
   updateUserOnAppStatus(
     params: UpdateUserOnAppStatusParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<void>;
 
   updateUserTutorialComplete(
     params: UpdateUserTutorialCompleteParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<void>;
 
   updateUserOnboardingComplete(
     params: UpdateUserOnboardingCompleteParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<void>;
 }

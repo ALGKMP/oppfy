@@ -41,13 +41,13 @@ export interface PaginatedComment {
 export interface ICommentRepository {
   getComment(
     params: GetCommentParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<Comment | undefined>;
-  addComment(params: AddCommentParams, db?: Transaction): Promise<void>;
-  removeComment(params: RemoveCommentParams, db?: Transaction): Promise<void>;
-  countComments(params: CountCommentsParams, db?: Transaction): Promise<number>;
+  addComment(params: AddCommentParams, tx?: Transaction): Promise<void>;
+  removeComment(params: RemoveCommentParams, tx?: Transaction): Promise<void>;
+  countComments(params: CountCommentsParams, tx?: Transaction): Promise<number>;
   paginateComments(
     params: PaginateCommentsParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<PaginatedComment[]>;
 }

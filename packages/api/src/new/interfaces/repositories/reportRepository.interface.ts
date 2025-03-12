@@ -27,14 +27,14 @@ export interface CreateCommentReportParams {
 export interface IReportRepository {
   createUserReport(
     params: CreateUserReportParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<void>;
   createPostReport(
     params: CreatePostReportParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<void>;
   createCommentReport(
     params: CreateCommentReportParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<void>;
 }

@@ -107,60 +107,60 @@ export interface NotificationResult {
 }
 
 export interface INotificationsRepository {
-  storePushToken(params: StorePushTokenParams, db?: Transaction): Promise<void>;
+  storePushToken(params: StorePushTokenParams, tx?: Transaction): Promise<void>;
 
   deletePushToken(
     params: DeletePushTokenParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<void>;
 
   getNotificationSettings(
     params: GetNotificationSettingsParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<any>;
 
   getUnreadNotificationsCount(
     params: GetUnreadNotificationsCountParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<number>;
 
   getRecentNotifications(
     params: GetRecentNotificationsParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<any[]>;
 
   paginateNotifications(
     params: PaginateNotificationsParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<NotificationResult[]>;
 
   updateNotificationSettings(
     params: UpdateNotificationSettingsParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<void>;
 
   storeNotification(
     params: StoreNotificationParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<void>;
 
   getPushTokens(
     params: GetPushTokensParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<string[]>;
 
   deleteNotificationById(
     params: DeleteNotificationByIdParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<void>;
 
   deleteNotifications(
     params: DeleteNotificationsParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<void>;
 
   deleteNotificationsBetweenUsers(
     params: DeleteNotificationsBetweenUsersParams,
-    db?: Transaction,
+    tx?: Transaction,
   ): Promise<void>;
 }
