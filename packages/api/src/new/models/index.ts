@@ -1,6 +1,6 @@
-import { InferSelectModel, schema } from "@oppfy/db";
+import type { InferSelectModel, schema } from "@oppfy/db";
 
-import {
+import type {
   reportCommentReasonEnum,
   reportPostReasonEnum,
   reportUserReasonEnum,
