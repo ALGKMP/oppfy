@@ -14,7 +14,6 @@ import type {
   Database,
   DatabaseOrTransaction,
   Schema,
-  Transaction,
 } from "@oppfy/db";
 
 import { TYPES } from "../container";
@@ -33,6 +32,7 @@ import {
   UpdateProfilePictureParams,
   UsernameExistsParams,
 } from "../interfaces/repositories/profileRepository.interface";
+import { Profile, UserWithProfile } from "../models";
 
 @injectable()
 export class ProfileRepository implements IProfileRepository {
@@ -50,7 +50,7 @@ export class ProfileRepository implements IProfileRepository {
   async getProfile(
     params: GetProfileParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<any> {
+  ): Promise<Profile | undefined> {
     const { profileId } = params;
 
     return await db.query.profile.findFirst({
@@ -61,7 +61,7 @@ export class ProfileRepository implements IProfileRepository {
   async getUserProfile(
     params: GetUserProfileParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<any> {
+  ): Promise<UserWithProfile | undefined> {
     const { userId } = params;
 
     return await db.query.user.findFirst({
@@ -73,7 +73,7 @@ export class ProfileRepository implements IProfileRepository {
   async getUserFullProfile(
     params: GetUserFullProfileParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<any> {
+  ): Promise<UserWithProfile | undefined> {
     const { userId } = params;
 
     return await db.query.user.findFirst({
@@ -85,7 +85,7 @@ export class ProfileRepository implements IProfileRepository {
   async getProfileByUsername(
     params: GetProfileByUsernameParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<any> {
+  ): Promise<Profile | undefined> {
     const { username } = params;
 
     return await db.query.profile.findFirst({
@@ -120,12 +120,12 @@ export class ProfileRepository implements IProfileRepository {
   async usernameExists(
     params: UsernameExistsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<any> {
+  ): Promise<boolean> {
     const { username } = params;
 
-    return await db.query.profile.findFirst({
+    return !!(await db.query.profile.findFirst({
       where: eq(this.schema.profile.username, username),
-    });
+    }));
   }
 
   async getBatchProfiles(
