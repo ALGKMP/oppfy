@@ -1,5 +1,7 @@
 import type { InferInsertModel, Transaction } from "@oppfy/db";
 
+import type { User, UserStatus, UserWithProfile } from "../../models";
+
 export type PrivacySettings = NonNullable<
   InferInsertModel<typeof import("@oppfy/db").schema.user>["privacySetting"]
 >;
@@ -38,7 +40,6 @@ export interface UpdatePrivacyParams {
 }
 
 export interface GetRandomActiveProfilesForRecsParams {
-  userId: string;
   limit: number;
 }
 
@@ -66,53 +67,56 @@ export interface UpdateUserOnboardingCompleteParams {
 }
 
 export interface IUserRepository {
-  createUser(params: CreateUserParams, tx?: Transaction): Promise<void>;
+  createUser(params: CreateUserParams, db?: Transaction): Promise<void>;
 
-  getUser(params: GetUserParams, tx?: Transaction): Promise<any>;
+  getUser(params: GetUserParams, db?: Transaction): Promise<User | undefined>;
 
   getUserWithProfile(
     params: GetUserWithProfileParams,
-    tx?: Transaction,
-  ): Promise<any>;
+    db?: Transaction,
+  ): Promise<UserWithProfile | undefined>;
 
-  getUserStatus(params: GetUserStatusParams, tx?: Transaction): Promise<any>;
+  getUserStatus(
+    params: GetUserStatusParams,
+    db?: Transaction,
+  ): Promise<UserStatus | undefined>;
 
   getUserByPhoneNumber(
     params: GetUserByPhoneNumberParams,
-    tx?: Transaction,
-  ): Promise<any>;
+    db?: Transaction,
+  ): Promise<User | undefined>;
 
-  deleteUser(params: DeleteUserParams, tx?: Transaction): Promise<void>;
+  deleteUser(params: DeleteUserParams, db?: Transaction): Promise<void>;
 
-  updatePrivacy(params: UpdatePrivacyParams, tx?: Transaction): Promise<any>;
+  updatePrivacy(params: UpdatePrivacyParams, db?: Transaction): Promise<void>;
 
   getRandomActiveProfilesForRecs(
     params: GetRandomActiveProfilesForRecsParams,
-    tx?: Transaction,
-  ): Promise<any[]>;
+    db?: Transaction,
+  ): Promise<{ userId: string }[]>;
 
   existingPhoneNumbers(
     params: ExistingPhoneNumbersParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<string[]>;
 
   updateStatsOnUserDelete(
     params: UpdateStatsOnUserDeleteParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   updateUserOnAppStatus(
     params: UpdateUserOnAppStatusParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   updateUserTutorialComplete(
     params: UpdateUserTutorialCompleteParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 
   updateUserOnboardingComplete(
     params: UpdateUserOnboardingCompleteParams,
-    tx?: Transaction,
+    db?: Transaction,
   ): Promise<void>;
 }
