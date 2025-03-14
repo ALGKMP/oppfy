@@ -310,28 +310,25 @@ export class PostRepository implements IPostRepository {
     { userId, postId }: DeletePostParams,
     tx: Transaction,
   ): Promise<void> {
-    await tx.transaction(async (transaction) => {
-      const post = await transaction.query.post.findFirst({
-        where: eq(this.schema.post.id, postId),
-        columns: { authorId: true, recipientId: true },
-      });
-
-      if (!post) throw new Error("Post not found");
-      if (post.recipientId !== userId)
-        throw new Error("Unauthorized: User does not own this post");
-
-      await transaction
-        .delete(this.schema.post)
-        .where(eq(this.schema.post.id, postId));
-      await transaction
-        .update(this.schema.profileStats)
-        .set({ posts: sql`${this.schema.profileStats.posts} - 1` })
-        .where(
-          eq(
-            this.schema.profileStats.profileId,
-            sql`(SELECT profile_id FROM "user" WHERE id = ${post.recipientId})`,
-          ),
-        );
+    // Get the post and verify ownership before deleting
+    const post = await tx.query.post.findFirst({
+      where: eq(this.schema.post.id, postId),
+      columns: { authorId: true, recipientId: true },
     });
+
+    if (!post) throw new Error("Post not found");
+    if (post.recipientId !== userId)
+      throw new Error("Unauthorized: User does not own this post");
+
+    await tx.delete(this.schema.post).where(eq(this.schema.post.id, postId));
+    await tx
+      .update(this.schema.profileStats)
+      .set({ posts: sql`${this.schema.profileStats.posts} - 1` })
+      .where(
+        eq(
+          this.schema.profileStats.profileId,
+          sql`(SELECT profile_id FROM "user" WHERE id = ${post.recipientId})`,
+        ),
+      );
   }
 }

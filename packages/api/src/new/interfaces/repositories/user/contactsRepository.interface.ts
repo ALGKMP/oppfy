@@ -28,7 +28,7 @@ export interface ContactRecommendation {
 export interface IContactsRepository {
   updateUserContacts(
     params: UpdateUserContactsParams,
-    tx?: Transaction,
+    tx: Transaction,
   ): Promise<void>;
 
   deleteContacts(params: DeleteContactsParams, tx?: Transaction): Promise<void>;
