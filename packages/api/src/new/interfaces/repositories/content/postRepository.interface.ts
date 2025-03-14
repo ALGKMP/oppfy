@@ -52,7 +52,7 @@ export interface IPostRepository {
     params: CreatePostStatsParams,
     tx?: Transaction,
   ): Promise<void>;
-  deletePost(params: DeletePostParams, tx?: Transaction): Promise<void>;
+  deletePost(params: DeletePostParams, tx: Transaction): Promise<void>;
 }
 
 // Return types

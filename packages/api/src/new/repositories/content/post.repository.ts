@@ -308,7 +308,7 @@ export class PostRepository implements IPostRepository {
 
   async deletePost(
     { userId, postId }: DeletePostParams,
-    tx: Database | Transaction = this.db,
+    tx: Transaction,
   ): Promise<void> {
     await tx.transaction(async (transaction) => {
       const post = await transaction.query.post.findFirst({
