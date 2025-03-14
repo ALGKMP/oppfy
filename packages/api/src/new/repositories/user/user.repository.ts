@@ -1,12 +1,7 @@
 import { and, eq, inArray, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
-import type {
-  Database,
-  DatabaseOrTransaction,
-  Schema,
-  Transaction,
-} from "@oppfy/db";
+import type { Database, Schema, Transaction } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import type {
@@ -43,33 +38,23 @@ export class UserRepository implements IUserRepository {
 
   async createUser(
     { userId, phoneNumber, username, isOnApp, name }: CreateUserParams,
-    db: DatabaseOrTransaction = this.db,
+    tx: Transaction,
   ): Promise<void> {
-    if (db === this.db) {
-      await this.db.transaction(async (trx) => {
-        await this.createUser(
-          { userId, phoneNumber, username, isOnApp, name },
-          trx,
-        );
-      });
-      return;
-    }
-
     // Create an empty profile for the user
-    const [profile] = await db
+    const [profile] = await tx
       .insert(this.schema.profile)
       .values({ userId, username, ...(name && { name }) })
       .returning({ id: this.schema.profile.id });
 
     if (!profile) throw new Error("Profile was not created");
 
-    const [profileStats] = await db
+    const [profileStats] = await tx
       .insert(this.schema.profileStats)
       .values({ profileId: profile.id })
       .returning({ id: this.schema.profileStats.id });
 
     // Create default notification settings for the user
-    const [notificationSetting] = await db
+    const [notificationSetting] = await tx
       .insert(this.schema.notificationSettings)
       .values({})
       .returning({ id: this.schema.notificationSettings.id });
@@ -83,21 +68,22 @@ export class UserRepository implements IUserRepository {
     }
 
     // Create the user
-    await db.insert(this.schema.user).values({
+    await tx.insert(this.schema.user).values({
       id: userId,
       notificationSettingsId: notificationSetting.id,
       phoneNumber,
     });
 
-    await db
+    await tx
       .insert(this.schema.userStatus)
       .values({ userId, isOnApp: isOnApp });
   }
 
   async getUser(
     { userId }: GetUserParams,
-    db: DatabaseOrTransaction = this.db,
+    tx?: Transaction,
   ): Promise<User | undefined> {
+    const db = tx || this.db;
     return await db.query.user.findFirst({
       where: eq(this.schema.user.id, userId),
     });
@@ -105,8 +91,9 @@ export class UserRepository implements IUserRepository {
 
   async getUserWithProfile(
     { userId }: GetUserWithProfileParams,
-    db: DatabaseOrTransaction = this.db,
+    tx?: Transaction,
   ): Promise<UserWithProfile | undefined> {
+    const db = tx || this.db;
     return await db.query.user.findFirst({
       where: eq(this.schema.user.id, userId),
       with: { profile: true },
@@ -115,8 +102,9 @@ export class UserRepository implements IUserRepository {
 
   async getUserStatus(
     { userId }: GetUserStatusParams,
-    db: DatabaseOrTransaction = this.db,
+    tx?: Transaction,
   ): Promise<UserStatus | undefined> {
+    const db = tx || this.db;
     return await db.query.userStatus.findFirst({
       where: eq(this.schema.userStatus.userId, userId),
     });
@@ -124,8 +112,9 @@ export class UserRepository implements IUserRepository {
 
   async getUserByPhoneNumber(
     { phoneNumber }: GetUserByPhoneNumberParams,
-    db: DatabaseOrTransaction = this.db,
+    tx?: Transaction,
   ): Promise<User | undefined> {
+    const db = tx || this.db;
     return await db.query.user.findFirst({
       where: eq(this.schema.user.phoneNumber, phoneNumber),
     });
@@ -133,15 +122,17 @@ export class UserRepository implements IUserRepository {
 
   async deleteUser(
     { userId }: DeleteUserParams,
-    db: DatabaseOrTransaction = this.db,
+    tx?: Transaction,
   ): Promise<void> {
+    const db = tx || this.db;
     await db.delete(this.schema.user).where(eq(this.schema.user.id, userId));
   }
 
   async updatePrivacy(
     { userId, newPrivacySetting }: UpdatePrivacyParams,
-    db: DatabaseOrTransaction = this.db,
+    tx?: Transaction,
   ): Promise<void> {
+    const db = tx || this.db;
     await db
       .update(this.schema.user)
       .set({ privacySetting: newPrivacySetting })
@@ -150,8 +141,9 @@ export class UserRepository implements IUserRepository {
 
   async getRandomActiveProfilesForRecs(
     { limit }: GetRandomActiveProfilesForRecsParams,
-    db: DatabaseOrTransaction = this.db,
+    tx?: Transaction,
   ): Promise<{ userId: string }[]> {
+    const db = tx || this.db;
     return await db
       .select({ userId: this.schema.user.id })
       .from(this.schema.user)
@@ -161,8 +153,9 @@ export class UserRepository implements IUserRepository {
 
   async existingPhoneNumbers(
     { phoneNumbers }: ExistingPhoneNumbersParams,
-    db: DatabaseOrTransaction = this.db,
+    tx?: Transaction,
   ): Promise<string[]> {
+    const db = tx || this.db;
     const existingNumbers = await db
       .select({ phoneNumber: this.schema.user.phoneNumber })
       .from(this.schema.user)
@@ -182,24 +175,17 @@ export class UserRepository implements IUserRepository {
 
   async updateStatsOnUserDelete(
     { userId }: UpdateStatsOnUserDeleteParams,
-    db: DatabaseOrTransaction = this.db,
+    tx: Transaction,
   ): Promise<void> {
-    if (db === this.db) {
-      await this.db.transaction(async (trx) => {
-        await this.updateStatsOnUserDelete({ userId }, trx);
-      });
-      return;
-    }
-
     // Update post stats
     // Decrement likes count
-    await db
+    await tx
       .update(this.schema.postStats)
       .set({ likes: sql`${this.schema.postStats.likes} - 1` })
       .where(
         inArray(
           this.schema.postStats.postId,
-          db
+          tx
             .select({ postId: this.schema.like.postId })
             .from(this.schema.like)
             .where(eq(this.schema.like.userId, userId)),
@@ -207,13 +193,13 @@ export class UserRepository implements IUserRepository {
       );
 
     // Decrement comments count
-    await db
+    await tx
       .update(this.schema.postStats)
       .set({ comments: sql`${this.schema.postStats.comments} - 1` })
       .where(
         inArray(
           this.schema.postStats.postId,
-          db
+          tx
             .select({ postId: this.schema.comment.postId })
             .from(this.schema.comment)
             .where(eq(this.schema.comment.userId, userId)),
@@ -222,13 +208,13 @@ export class UserRepository implements IUserRepository {
 
     // Update profile stats
     // Decrement followers count for users that the deleted user was following
-    await db
+    await tx
       .update(this.schema.profileStats)
       .set({ followers: sql`${this.schema.profileStats.followers} - 1` })
       .where(
         inArray(
           this.schema.profileStats.profileId,
-          db
+          tx
             .select({ profileId: this.schema.profile.id })
             .from(this.schema.follow)
             .innerJoin(
@@ -240,13 +226,13 @@ export class UserRepository implements IUserRepository {
       );
 
     // Decrement following count for users that were following the deleted user
-    await db
+    await tx
       .update(this.schema.profileStats)
       .set({ following: sql`${this.schema.profileStats.following} - 1` })
       .where(
         inArray(
           this.schema.profileStats.profileId,
-          db
+          tx
             .select({ profileId: this.schema.profile.id })
             .from(this.schema.follow)
             .innerJoin(
@@ -258,13 +244,13 @@ export class UserRepository implements IUserRepository {
       );
 
     // Decrement friends count for users that were friends with the deleted user
-    await db
+    await tx
       .update(this.schema.profileStats)
       .set({ friends: sql`${this.schema.profileStats.friends} - 1` })
       .where(
         inArray(
           this.schema.profileStats.profileId,
-          db
+          tx
             .select({ profileId: this.schema.profile.id })
             .from(this.schema.friend)
             .innerJoin(
@@ -286,8 +272,9 @@ export class UserRepository implements IUserRepository {
 
   async updateUserOnAppStatus(
     { userId, isOnApp }: UpdateUserOnAppStatusParams,
-    db: DatabaseOrTransaction = this.db,
+    tx?: Transaction,
   ): Promise<void> {
+    const db = tx || this.db;
     await db
       .update(this.schema.userStatus)
       .set({ isOnApp })
@@ -296,8 +283,9 @@ export class UserRepository implements IUserRepository {
 
   async updateUserTutorialComplete(
     { userId, hasCompletedTutorial }: UpdateUserTutorialCompleteParams,
-    db: DatabaseOrTransaction = this.db,
+    tx?: Transaction,
   ): Promise<void> {
+    const db = tx || this.db;
     await db
       .update(this.schema.userStatus)
       .set({ hasCompletedTutorial })
@@ -306,8 +294,9 @@ export class UserRepository implements IUserRepository {
 
   async updateUserOnboardingComplete(
     { userId, hasCompletedOnboarding }: UpdateUserOnboardingCompleteParams,
-    db: DatabaseOrTransaction = this.db,
+    tx?: Transaction,
   ): Promise<void> {
+    const db = tx || this.db;
     await db
       .update(this.schema.userStatus)
       .set({ hasCompletedOnboarding })

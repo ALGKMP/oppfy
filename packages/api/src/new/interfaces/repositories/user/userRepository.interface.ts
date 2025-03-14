@@ -67,7 +67,7 @@ export interface UpdateUserOnboardingCompleteParams {
 }
 
 export interface IUserRepository {
-  createUser(params: CreateUserParams, tx?: Transaction): Promise<void>;
+  createUser(params: CreateUserParams, tx: Transaction): Promise<void>;
 
   getUser(params: GetUserParams, tx?: Transaction): Promise<User | undefined>;
 
@@ -102,7 +102,7 @@ export interface IUserRepository {
 
   updateStatsOnUserDelete(
     params: UpdateStatsOnUserDeleteParams,
-    tx?: Transaction,
+    tx: Transaction,
   ): Promise<void>;
 
   updateUserOnAppStatus(
