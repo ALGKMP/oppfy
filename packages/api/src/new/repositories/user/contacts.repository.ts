@@ -38,67 +38,63 @@ export class ContactsRepository implements IContactsRepository {
   ): Promise<void> {
     const { userId, hashedPhoneNumbers } = params;
 
-    await tx.transaction(async (trx) => {
-      const oldContacts = await trx.query.userContact.findMany({
-        where: eq(this.schema.userContact.userId, userId),
-      });
+    const oldContacts = await tx.query.userContact.findMany({
+      where: eq(this.schema.userContact.userId, userId),
+    });
 
-      // Find contacts to delete
-      const contactsToDelete = oldContacts
-        .filter((contact) => !hashedPhoneNumbers.includes(contact.contactId))
-        .map((contact) => contact.contactId);
+    // Find contacts to delete
+    const contactsToDelete = oldContacts
+      .filter((contact) => !hashedPhoneNumbers.includes(contact.contactId))
+      .map((contact) => contact.contactId);
 
-      // Find contacts to add
-      const contactsToAdd = hashedPhoneNumbers.filter(
-        (hashedPhoneNumber) =>
-          !oldContacts.some(
-            (contact) => contact.contactId === hashedPhoneNumber,
-          ),
-      );
+    // Find contacts to add
+    const contactsToAdd = hashedPhoneNumbers.filter(
+      (hashedPhoneNumber) =>
+        !oldContacts.some((contact) => contact.contactId === hashedPhoneNumber),
+    );
 
-      // Batch delete contacts
-      if (contactsToDelete.length > 0) {
-        await trx
-          .delete(this.schema.userContact)
-          .where(
-            and(
-              eq(this.schema.userContact.userId, userId),
-              inArray(this.schema.userContact.contactId, contactsToDelete),
-            ),
-          );
-      }
-
-      // Batch insert contacts into `contact` table if they don't exist
-      if (contactsToAdd.length > 0) {
-        const existingContacts = await trx.query.contact.findMany({
-          where: inArray(this.schema.contact.id, contactsToAdd),
-        });
-
-        const newContactsToInsert = new Set(
-          contactsToAdd.filter(
-            (contact) =>
-              !existingContacts.some((existing) => existing.id === contact),
+    // Batch delete contacts
+    if (contactsToDelete.length > 0) {
+      await tx
+        .delete(this.schema.userContact)
+        .where(
+          and(
+            eq(this.schema.userContact.userId, userId),
+            inArray(this.schema.userContact.contactId, contactsToDelete),
           ),
         );
+    }
 
-        if (newContactsToInsert.size > 0) {
-          await trx
-            .insert(this.schema.contact)
-            .values(Array.from(newContactsToInsert).map((id) => ({ id })));
-        }
+    // Batch insert contacts into `contact` table if they don't exist
+    if (contactsToAdd.length > 0) {
+      const existingContacts = await tx.query.contact.findMany({
+        where: inArray(this.schema.contact.id, contactsToAdd),
+      });
 
-        // Batch insert into `userContact` table
-        const userContactsToInsert = contactsToAdd.map((contact) => ({
-          userId,
-          contactId: contact,
-        }));
+      const newContactsToInsert = new Set(
+        contactsToAdd.filter(
+          (contact) =>
+            !existingContacts.some((existing) => existing.id === contact),
+        ),
+      );
 
-        await trx
-          .insert(this.schema.userContact)
-          .values(userContactsToInsert)
-          .onConflictDoNothing();
+      if (newContactsToInsert.size > 0) {
+        await tx
+          .insert(this.schema.contact)
+          .values(Array.from(newContactsToInsert).map((id) => ({ id })));
       }
-    });
+
+      // Batch insert into `userContact` table
+      const userContactsToInsert = contactsToAdd.map((contact) => ({
+        userId,
+        contactId: contact,
+      }));
+
+      await tx
+        .insert(this.schema.userContact)
+        .values(userContactsToInsert)
+        .onConflictDoNothing();
+    }
   }
 
   async deleteContacts(
