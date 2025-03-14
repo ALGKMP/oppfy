@@ -1,6 +1,10 @@
 import type { z } from "zod";
 
-import type { entityTypeEnum, Transaction } from "@oppfy/db";
+import type {
+  DatabaseOrTransaction,
+  entityTypeEnum,
+  Transaction,
+} from "@oppfy/db";
 import type { sharedValidators } from "@oppfy/validators";
 
 export type EventType = z.infer<
@@ -107,60 +111,60 @@ export interface NotificationResult {
 }
 
 export interface INotificationsRepository {
-  storePushToken(params: StorePushTokenParams, tx?: Transaction): Promise<void>;
+  storePushToken(params: StorePushTokenParams, tx: Transaction): Promise<void>;
 
   deletePushToken(
     params: DeletePushTokenParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction,
   ): Promise<void>;
 
   getNotificationSettings(
     params: GetNotificationSettingsParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction,
   ): Promise<NotificationSettings | undefined>;
 
   getUnreadNotificationsCount(
     params: GetUnreadNotificationsCountParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction,
   ): Promise<number>;
 
   getRecentNotifications(
     params: GetRecentNotificationsParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction,
   ): Promise<NotificationResult[]>;
 
   paginateNotifications(
     params: PaginateNotificationsParams,
-    tx?: Transaction,
+    tx: Transaction,
   ): Promise<NotificationResult[]>;
 
   updateNotificationSettings(
     params: UpdateNotificationSettingsParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction,
   ): Promise<void>;
 
   storeNotification(
     params: StoreNotificationParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction,
   ): Promise<void>;
 
   getPushTokens(
     params: GetPushTokensParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction,
   ): Promise<string[]>;
 
   deleteNotificationById(
     params: DeleteNotificationByIdParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction,
   ): Promise<void>;
 
   deleteNotifications(
     params: DeleteNotificationsParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction,
   ): Promise<void>;
 
   deleteNotificationsBetweenUsers(
     params: DeleteNotificationsBetweenUsersParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction,
   ): Promise<void>;
 }

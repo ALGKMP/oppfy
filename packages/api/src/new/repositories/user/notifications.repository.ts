@@ -1,7 +1,12 @@
 import { and, count, desc, eq, gt, inArray, lt, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
-import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
+import type {
+  Database,
+  DatabaseOrTransaction,
+  Schema,
+  Transaction,
+} from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import {
@@ -37,11 +42,11 @@ export class NotificationsRepository implements INotificationsRepository {
 
   async storePushToken(
     params: StorePushTokenParams,
-    db: DatabaseOrTransaction = this.db,
+    tx: Transaction,
   ): Promise<void> {
     const { userId, pushToken } = params;
 
-    const pushTokenData = await db.query.pushToken.findFirst({
+    const pushTokenData = await tx.query.pushToken.findFirst({
       where: and(
         eq(this.schema.pushToken.userId, userId),
         eq(this.schema.pushToken.token, pushToken),
@@ -49,13 +54,13 @@ export class NotificationsRepository implements INotificationsRepository {
     });
 
     if (pushTokenData === undefined) {
-      await db
+      await tx
         .insert(this.schema.pushToken)
         .values({ userId, token: pushToken });
       return;
     }
 
-    await db
+    await tx
       .update(this.schema.pushToken)
       .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
       .where(
@@ -169,12 +174,12 @@ export class NotificationsRepository implements INotificationsRepository {
 
   async paginateNotifications(
     params: PaginateNotificationsParams,
-    db: DatabaseOrTransaction = this.db,
+    tx: Transaction,
   ): Promise<NotificationResult[]> {
     const { userId, cursor = null, pageSize = 10 } = params;
 
-    const notifications = await db.transaction(async (db) => {
-      const fetchedNotifications = await db
+    const notifications = await tx.transaction(async (trx) => {
+      const fetchedNotifications = await trx
         .select({
           id: this.schema.notifications.id,
           senderId: this.schema.notifications.senderId,
@@ -240,7 +245,7 @@ export class NotificationsRepository implements INotificationsRepository {
       }
 
       // Mark all notifications as read for this user
-      await db
+      await trx
         .update(this.schema.notifications)
         .set({ read: true })
         .where(eq(this.schema.notifications.recipientId, userId));
