@@ -1,5 +1,14 @@
+import type { Result } from "neverthrow";
+
 import type { InferInsertModel, Transaction } from "@oppfy/db";
 
+import type {
+  PhoneNumberNotFoundError,
+  UserCreationError,
+  UserNotFoundError,
+  UserProfileNotFoundError,
+  UserStatusNotFoundError,
+} from "../../../errors/user.errors";
 import type { User, UserStatus, UserWithProfile } from "../../../models";
 
 export type PrivacySettings = NonNullable<
@@ -67,56 +76,70 @@ export interface UpdateUserOnboardingCompleteParams {
 }
 
 export interface IUserRepository {
-  createUser(params: CreateUserParams, tx?: Transaction): Promise<void>;
+  createUser(
+    params: CreateUserParams,
+    tx?: Transaction,
+  ): Promise<Result<void, UserCreationError>>;
 
-  getUser(params: GetUserParams, tx?: Transaction): Promise<User | undefined>;
+  getUser(
+    params: GetUserParams,
+    tx?: Transaction,
+  ): Promise<Result<User, UserNotFoundError>>;
 
   getUserWithProfile(
     params: GetUserWithProfileParams,
     tx?: Transaction,
-  ): Promise<UserWithProfile | undefined>;
+  ): Promise<
+    Result<UserWithProfile, UserProfileNotFoundError>
+  >;
 
   getUserStatus(
     params: GetUserStatusParams,
     tx?: Transaction,
-  ): Promise<UserStatus | undefined>;
+  ): Promise<Result<UserStatus, UserStatusNotFoundError>>;
 
   getUserByPhoneNumber(
     params: GetUserByPhoneNumberParams,
     tx?: Transaction,
-  ): Promise<User | undefined>;
+  ): Promise<Result<User, PhoneNumberNotFoundError>>;
 
-  deleteUser(params: DeleteUserParams, tx?: Transaction): Promise<void>;
+  deleteUser(
+    params: DeleteUserParams,
+    tx?: Transaction,
+  ): Promise<Result<void, UserNotFoundError>>;
 
-  updatePrivacy(params: UpdatePrivacyParams, tx?: Transaction): Promise<void>;
+  updatePrivacy(
+    params: UpdatePrivacyParams,
+    tx?: Transaction,
+  ): Promise<Result<void, UserNotFoundError>>;
 
   getRandomActiveProfilesForRecs(
     params: GetRandomActiveProfilesForRecsParams,
     tx?: Transaction,
-  ): Promise<{ userId: string }[]>;
+  ): Promise<Result<{ userId: string }[], never>>;
 
   existingPhoneNumbers(
     params: ExistingPhoneNumbersParams,
     tx?: Transaction,
-  ): Promise<string[]>;
+  ): Promise<Result<string[], never>>;
 
   updateStatsOnUserDelete(
     params: UpdateStatsOnUserDeleteParams,
     tx?: Transaction,
-  ): Promise<void>;
+  ): Promise<Result<void, UserNotFoundError>>;
 
   updateUserOnAppStatus(
     params: UpdateUserOnAppStatusParams,
     tx?: Transaction,
-  ): Promise<void>;
+  ): Promise<Result<void, UserNotFoundError>>;
 
   updateUserTutorialComplete(
     params: UpdateUserTutorialCompleteParams,
     tx?: Transaction,
-  ): Promise<void>;
+  ): Promise<Result<void, UserNotFoundError>>;
 
   updateUserOnboardingComplete(
     params: UpdateUserOnboardingCompleteParams,
     tx?: Transaction,
-  ): Promise<void>;
+  ): Promise<Result<void, UserNotFoundError>>;
 }
