@@ -1,20 +1,15 @@
 import { and, asc, count, eq, gt, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
-import { err, ok, Result } from "neverthrow";
 
 import type {
   Database,
   DatabaseOrTransaction,
   Schema,
+  Transaction,
 } from "@oppfy/db";
 import { isNotNull } from "@oppfy/db";
 
 import { TYPES } from "../../container";
-import {
-  FollowNotFoundError,
-  FollowRequestNotFoundError,
-  ProfileNotFoundError,
-} from "../../errors/social.errors";
 import {
   AcceptFollowRequestParams,
   CountFollowersParams,
@@ -37,8 +32,6 @@ import {
   RemoveFollowerParams,
 } from "../../interfaces/repositories/social/followRepository.interface";
 
-// TODO: Pagination functions changed when moved to new DP
-
 @injectable()
 export class FollowRepository implements IFollowRepository {
   private db: Database;
@@ -55,7 +48,7 @@ export class FollowRepository implements IFollowRepository {
   async createFollower(
     params: CreateFollowerParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<void, ProfileNotFoundError>> {
+  ): Promise<void> {
     const { senderUserId, recipientUserId } = params;
 
     await db
@@ -66,9 +59,7 @@ export class FollowRepository implements IFollowRepository {
       where: eq(this.schema.profile.userId, senderUserId),
     });
 
-    if (!senderProfile) {
-      return err(new ProfileNotFoundError(senderUserId));
-    }
+    if (!senderProfile) throw new Error("Sender profile not found");
 
     await db
       .update(this.schema.profileStats)
@@ -79,45 +70,34 @@ export class FollowRepository implements IFollowRepository {
       where: eq(this.schema.profile.userId, recipientUserId),
     });
 
-    if (!recipientProfile) {
-      return err(new ProfileNotFoundError(recipientUserId));
-    }
+    if (!recipientProfile) throw new Error("Recipient profile not found");
 
     await db
       .update(this.schema.profileStats)
       .set({ followers: sql`${this.schema.profileStats.followers} + 1` })
       .where(eq(this.schema.profileStats.profileId, recipientProfile.id));
-
-    return ok(undefined);
   }
 
   async removeFollower(
     params: RemoveFollowerParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<void, FollowNotFoundError | ProfileNotFoundError>> {
+  ): Promise<void> {
     const { followerId, followeeId } = params;
 
-    const result = await db
+    await db
       .delete(this.schema.follow)
       .where(
         and(
           eq(this.schema.follow.senderId, followerId),
           eq(this.schema.follow.recipientId, followeeId),
         ),
-      )
-      .returning({ id: this.schema.follow.id });
-
-    if (result.length === 0) {
-      return err(new FollowNotFoundError());
-    }
+      );
 
     const followerProfile = await db.query.profile.findFirst({
       where: eq(this.schema.profile.userId, followerId),
     });
 
-    if (!followerProfile) {
-      return err(new ProfileNotFoundError(followerId));
-    }
+    if (!followerProfile) throw new Error("Follower profile not found");
 
     await db
       .update(this.schema.profileStats)
@@ -128,44 +108,33 @@ export class FollowRepository implements IFollowRepository {
       where: eq(this.schema.profile.userId, followeeId),
     });
 
-    if (!followeeProfile) {
-      return err(new ProfileNotFoundError(followeeId));
-    }
+    if (!followeeProfile) throw new Error("Followee profile not found");
 
     await db
       .update(this.schema.profileStats)
       .set({ followers: sql`${this.schema.profileStats.followers} - 1` })
       .where(eq(this.schema.profileStats.profileId, followeeProfile.id));
-
-    return ok(undefined);
   }
 
   async removeFollowRequest(
     senderId: string,
     recipientId: string,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<void, FollowRequestNotFoundError>> {
-    const result = await db
+  ): Promise<void> {
+    await db
       .delete(this.schema.followRequest)
       .where(
         and(
           eq(this.schema.followRequest.senderId, senderId),
           eq(this.schema.followRequest.recipientId, recipientId),
         ),
-      )
-      .returning({ id: this.schema.followRequest.id });
-
-    if (result.length === 0) {
-      return err(new FollowRequestNotFoundError());
-    }
-
-    return ok(undefined);
+      );
   }
 
   async getFollower(
     params: GetFollowerParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<{ id: string } | undefined, never>> {
+  ): Promise<{ id: string } | undefined> {
     const { followerId, followeeId } = params;
 
     const result = await db
@@ -179,13 +148,13 @@ export class FollowRepository implements IFollowRepository {
       )
       .limit(1);
 
-    return ok(result[0]);
+    return result[0];
   }
 
   async countFollowers(
     params: CountFollowersParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<number | undefined, never>> {
+  ): Promise<number | undefined> {
     const { userId } = params;
 
     const result = await db
@@ -193,13 +162,13 @@ export class FollowRepository implements IFollowRepository {
       .from(this.schema.follow)
       .where(eq(this.schema.follow.recipientId, userId));
 
-    return ok(result[0]?.count);
+    return result[0]?.count;
   }
 
   async countFollowing(
     params: CountFollowingParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<number | undefined, never>> {
+  ): Promise<number | undefined> {
     const { userId } = params;
 
     const result = await db
@@ -207,13 +176,13 @@ export class FollowRepository implements IFollowRepository {
       .from(this.schema.follow)
       .where(eq(this.schema.follow.senderId, userId));
 
-    return ok(result[0]?.count);
+    return result[0]?.count;
   }
 
   async countFollowRequests(
     params: CountFollowRequestsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<number | undefined, never>> {
+  ): Promise<number | undefined> {
     const { userId } = params;
 
     const result = await db
@@ -221,49 +190,40 @@ export class FollowRepository implements IFollowRepository {
       .from(this.schema.followRequest)
       .where(eq(this.schema.followRequest.recipientId, userId));
 
-    return ok(result[0]?.count);
+    return result[0]?.count;
   }
 
   async deleteFollowRequest(
     params: DeleteFollowRequestParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<void, FollowRequestNotFoundError>> {
+  ): Promise<void> {
     const { senderId, recipientId } = params;
 
-    const result = await db
+    await db
       .delete(this.schema.followRequest)
       .where(
         and(
           eq(this.schema.followRequest.senderId, senderId),
           eq(this.schema.followRequest.recipientId, recipientId),
         ),
-      )
-      .returning({ id: this.schema.followRequest.id });
-
-    if (result.length === 0) {
-      return err(new FollowRequestNotFoundError());
-    }
-
-    return ok(undefined);
+      );
   }
 
   async createFollowRequest(
     params: CreateFollowRequestParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<void, never>> {
+  ): Promise<void> {
     const { senderId, recipientId } = params;
 
     await db
       .insert(this.schema.followRequest)
       .values({ senderId, recipientId });
-
-    return ok(undefined);
   }
 
   async getFollowRequest(
     params: GetFollowRequestParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<{ id: string } | undefined, never>> {
+  ): Promise<{ id: string } | undefined> {
     const { senderId, recipientId } = params;
 
     const result = await db
@@ -277,28 +237,23 @@ export class FollowRepository implements IFollowRepository {
       )
       .limit(1);
 
-    return ok(result[0]);
+    return result[0];
   }
 
   async acceptFollowRequest(
     params: AcceptFollowRequestParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<void, FollowRequestNotFoundError | ProfileNotFoundError>> {
+  ): Promise<void> {
     const { senderId, recipientId } = params;
 
-    const requestResult = await db
+    await db
       .delete(this.schema.followRequest)
       .where(
         and(
           eq(this.schema.followRequest.senderId, senderId),
           eq(this.schema.followRequest.recipientId, recipientId),
         ),
-      )
-      .returning({ id: this.schema.followRequest.id });
-
-    if (requestResult.length === 0) {
-      return err(new FollowRequestNotFoundError());
-    }
+      );
 
     await db.insert(this.schema.follow).values({ senderId, recipientId });
 
@@ -306,9 +261,7 @@ export class FollowRepository implements IFollowRepository {
       where: eq(this.schema.profile.userId, senderId),
     });
 
-    if (!senderProfile) {
-      return err(new ProfileNotFoundError(senderId));
-    }
+    if (!senderProfile) throw new Error("Sender profile not found");
 
     await db
       .update(this.schema.profileStats)
@@ -319,25 +272,21 @@ export class FollowRepository implements IFollowRepository {
       where: eq(this.schema.profile.userId, recipientId),
     });
 
-    if (!recipientProfile) {
-      return err(new ProfileNotFoundError(recipientId));
-    }
+    if (!recipientProfile) throw new Error("Recipient profile not found");
 
     await db
       .update(this.schema.profileStats)
       .set({ followers: sql`${this.schema.profileStats.followers} + 1` })
       .where(eq(this.schema.profileStats.profileId, recipientProfile.id));
-
-    return ok(undefined);
   }
 
   async paginateFollowersSelf(
     params: PaginateFollowersSelfParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<FollowerResult[], never>> {
+  ): Promise<FollowerResult[]> {
     const { forUserId, cursor = null, pageSize = 10 } = params;
 
-    const results = await db
+    return await db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,
@@ -371,14 +320,12 @@ export class FollowRepository implements IFollowRepository {
       )
       .orderBy(asc(this.schema.follow.createdAt), asc(this.schema.profile.id))
       .limit(pageSize + 1);
-
-    return ok(results);
   }
 
   async paginateFollowersOthers(
     params: PaginateFollowersOthersParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<FollowerResult[], never>> {
+  ): Promise<FollowerResult[]> {
     const { forUserId, currentUserId, cursor = null, pageSize = 10 } = params;
 
     const followers = await db
@@ -416,7 +363,7 @@ export class FollowRepository implements IFollowRepository {
       .orderBy(asc(this.schema.follow.createdAt), asc(this.schema.profile.id))
       .limit(pageSize + 1);
 
-    if (followers.length === 0) return ok([]);
+    if (followers.length === 0) return [];
 
     const userIds = followers.map((follower) => follower.userId);
 
@@ -447,19 +394,17 @@ export class FollowRepository implements IFollowRepository {
       followRequestStatus.map((status) => status.requestedId),
     );
 
-    const result = followers.map((follower) => ({
+    return followers.map((follower) => ({
       ...follower,
       isFollowing: followingIds.has(follower.userId),
       isFollowRequested: requestedIds.has(follower.userId),
     }));
-
-    return ok(result);
   }
 
   async getAllFollowingIds(
     params: GetAllFollowingIdsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<string[], never>> {
+  ): Promise<string[]> {
     const { forUserId } = params;
 
     const result = await db
@@ -467,16 +412,16 @@ export class FollowRepository implements IFollowRepository {
       .from(this.schema.follow)
       .where(eq(this.schema.follow.senderId, forUserId));
 
-    return ok(result.map((r) => r.recipientId));
+    return result.map((r) => r.recipientId);
   }
 
   async paginateFollowingSelf(
     params: PaginateFollowingSelfParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<FollowerResult[], never>> {
+  ): Promise<FollowerResult[]> {
     const { userId, cursor = null, pageSize = 10 } = params;
 
-    const results = await db
+    return await db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,
@@ -510,14 +455,12 @@ export class FollowRepository implements IFollowRepository {
       )
       .orderBy(asc(this.schema.follow.createdAt), asc(this.schema.profile.id))
       .limit(pageSize + 1);
-
-    return ok(results);
   }
 
   async paginateFollowingOthers(
     params: PaginateFollowingOthersParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<FollowerResult[], never>> {
+  ): Promise<FollowerResult[]> {
     const { forUserId, currentUserId, cursor = null, pageSize = 10 } = params;
 
     const following = await db
@@ -555,7 +498,7 @@ export class FollowRepository implements IFollowRepository {
       .orderBy(asc(this.schema.follow.createdAt), asc(this.schema.profile.id))
       .limit(pageSize + 1);
 
-    if (following.length === 0) return ok([]);
+    if (following.length === 0) return [];
 
     const userIds = following.map((follow) => follow.userId);
 
@@ -586,22 +529,20 @@ export class FollowRepository implements IFollowRepository {
       followRequestStatus.map((status) => status.requestedId),
     );
 
-    const result = following.map((follow) => ({
+    return following.map((follow) => ({
       ...follow,
       isFollowing: followingIds.has(follow.userId),
       isFollowRequested: requestedIds.has(follow.userId),
     }));
-
-    return ok(result);
   }
 
   async paginateFollowRequests(
     params: PaginateFollowRequestsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<FollowRequestResult[], never>> {
+  ): Promise<FollowRequestResult[]> {
     const { forUserId, cursor = null, pageSize = 10 } = params;
 
-    const results = await db
+    return await db
       .select({
         userId: this.schema.user.id,
         username: this.schema.profile.username,
@@ -638,7 +579,5 @@ export class FollowRepository implements IFollowRepository {
         asc(this.schema.profile.id),
       )
       .limit(pageSize + 1);
-
-    return ok(results);
   }
 }

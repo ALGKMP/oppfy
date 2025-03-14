@@ -1,12 +1,4 @@
-import type { Result } from "neverthrow";
-
 import type { Transaction } from "@oppfy/db";
-
-import type {
-  FollowNotFoundError,
-  FollowRequestNotFoundError,
-  ProfileNotFoundError,
-} from "../../../errors/social.errors";
 
 export interface CreateFollowerParams {
   senderUserId: string;
@@ -112,89 +104,83 @@ export interface FollowRequestResult {
 }
 
 export interface IFollowRepository {
-  createFollower(
-    params: CreateFollowerParams,
-    tx?: Transaction,
-  ): Promise<Result<void, ProfileNotFoundError>>;
+  createFollower(params: CreateFollowerParams, tx?: Transaction): Promise<void>;
 
-  removeFollower(
-    params: RemoveFollowerParams,
-    tx?: Transaction,
-  ): Promise<Result<void, FollowNotFoundError | ProfileNotFoundError>>;
+  removeFollower(params: RemoveFollowerParams, tx?: Transaction): Promise<void>;
 
   removeFollowRequest(
     senderId: string,
     recipientId: string,
     tx?: Transaction,
-  ): Promise<Result<void, FollowRequestNotFoundError>>;
+  ): Promise<void>;
 
   getFollower(
     params: GetFollowerParams,
     tx?: Transaction,
-  ): Promise<Result<{ id: string } | undefined, never>>;
+  ): Promise<{ id: string } | undefined>;
 
   countFollowers(
     params: CountFollowersParams,
     tx?: Transaction,
-  ): Promise<Result<number | undefined, never>>;
+  ): Promise<number | undefined>;
 
   countFollowing(
     params: CountFollowingParams,
     tx?: Transaction,
-  ): Promise<Result<number | undefined, never>>;
+  ): Promise<number | undefined>;
 
   countFollowRequests(
     params: CountFollowRequestsParams,
     tx?: Transaction,
-  ): Promise<Result<number | undefined, never>>;
+  ): Promise<number | undefined>;
 
   deleteFollowRequest(
     params: DeleteFollowRequestParams,
     tx?: Transaction,
-  ): Promise<Result<void, FollowRequestNotFoundError>>;
+  ): Promise<void>;
 
   createFollowRequest(
     params: CreateFollowRequestParams,
     tx?: Transaction,
-  ): Promise<Result<void, never>>;
+  ): Promise<void>;
 
   getFollowRequest(
     params: GetFollowRequestParams,
     tx?: Transaction,
-  ): Promise<Result<{ id: string } | undefined, never>>;
+  ): Promise<{ id: string } | undefined>;
 
   acceptFollowRequest(
     params: AcceptFollowRequestParams,
     tx?: Transaction,
-  ): Promise<Result<void, FollowRequestNotFoundError | ProfileNotFoundError>>;
+  ): Promise<void>;
 
   paginateFollowersSelf(
     params: PaginateFollowersSelfParams,
     tx?: Transaction,
-  ): Promise<Result<FollowerResult[], never>>;
+  ): Promise<FollowerResult[]>;
 
   paginateFollowersOthers(
     params: PaginateFollowersOthersParams,
     tx?: Transaction,
-  ): Promise<Result<FollowerResult[], never>>;
+  ): Promise<FollowerResult[]>;
 
   getAllFollowingIds(
     params: GetAllFollowingIdsParams,
     tx?: Transaction,
-  ): Promise<Result<string[], never>>;
+  ): Promise<string[]>;
 
   paginateFollowingSelf(
     params: PaginateFollowingSelfParams,
     tx?: Transaction,
-  ): Promise<Result<FollowerResult[], never>>;
+  ): Promise<FollowerResult[]>;
 
   paginateFollowingOthers(
     params: PaginateFollowingOthersParams,
     tx?: Transaction,
-  ): Promise<Result<FollowerResult[], never>>;
+  ): Promise<FollowerResult[]>;
 
   paginateFollowRequests(
     params: PaginateFollowRequestsParams,
     tx?: Transaction,
-  ): Promise<Result<FollowRequestResult[], never>>;
+  ): Promise<FollowRequestResult[]>;
 }

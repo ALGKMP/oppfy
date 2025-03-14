@@ -1,6 +1,5 @@
 import { and, eq, inArray, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
-import { err, ok, Result } from "neverthrow";
 
 import type {
   Database,
@@ -10,13 +9,6 @@ import type {
 } from "@oppfy/db";
 
 import { TYPES } from "../../container";
-import {
-  PhoneNumberNotFoundError,
-  UserCreationError,
-  UserNotFoundError,
-  UserProfileNotFoundError,
-  UserStatusNotFoundError,
-} from "../../errors/user.errors";
 import type {
   CreateUserParams,
   DeleteUserParams,
@@ -52,30 +44,15 @@ export class UserRepository implements IUserRepository {
   async createUser(
     { userId, phoneNumber, username, isOnApp, name }: CreateUserParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<void, UserCreationError>> {
+  ): Promise<void> {
     if (db === this.db) {
-      try {
-        await this.db.transaction(async (trx) => {
-          const result = await this.createUser(
-            { userId, phoneNumber, username, isOnApp, name },
-            trx,
-          );
-
-          if (result.isErr()) {
-            throw result.error;
-          }
-        });
-        return ok(undefined);
-      } catch (error) {
-        if (error instanceof UserCreationError) {
-          return err(error);
-        }
-        return err(
-          new UserCreationError(
-            error instanceof Error ? error.message : "Unknown error",
-          ),
+      await this.db.transaction(async (trx) => {
+        await this.createUser(
+          { userId, phoneNumber, username, isOnApp, name },
+          trx,
         );
-      }
+      });
+      return;
     }
 
     // Create an empty profile for the user
@@ -84,9 +61,7 @@ export class UserRepository implements IUserRepository {
       .values({ userId, username, ...(name && { name }) })
       .returning({ id: this.schema.profile.id });
 
-    if (!profile) {
-      return err(new UserCreationError("Profile was not created"));
-    }
+    if (!profile) throw new Error("Profile was not created");
 
     const [profileStats] = await db
       .insert(this.schema.profileStats)
@@ -100,11 +75,11 @@ export class UserRepository implements IUserRepository {
       .returning({ id: this.schema.notificationSettings.id });
 
     if (profileStats === undefined) {
-      return err(new UserCreationError("Profile stats was not created"));
+      throw new Error("Profile stats was not created");
     }
 
     if (notificationSetting === undefined) {
-      return err(new UserCreationError("Notification setting was not created"));
+      throw new Error("Notification setting was not created");
     }
 
     // Create the user
@@ -117,123 +92,77 @@ export class UserRepository implements IUserRepository {
     await db
       .insert(this.schema.userStatus)
       .values({ userId, isOnApp: isOnApp });
-
-    return ok(undefined);
   }
 
   async getUser(
     { userId }: GetUserParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<User, UserNotFoundError>> {
-    const user = await db.query.user.findFirst({
+  ): Promise<User | undefined> {
+    return await db.query.user.findFirst({
       where: eq(this.schema.user.id, userId),
     });
-
-    if (!user) {
-      return err(new UserNotFoundError(userId));
-    }
-
-    return ok(user);
   }
 
   async getUserWithProfile(
     { userId }: GetUserWithProfileParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<
-    Result<UserWithProfile, UserProfileNotFoundError>
-  > {
-    const userWithProfile = await db.query.user.findFirst({
+  ): Promise<UserWithProfile | undefined> {
+    return await db.query.user.findFirst({
       where: eq(this.schema.user.id, userId),
       with: { profile: true },
     });
-
-    if (!userWithProfile) {
-      return err(new UserProfileNotFoundError(userId));
-    }
-
-    return ok(userWithProfile);
   }
 
   async getUserStatus(
     { userId }: GetUserStatusParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<UserStatus, UserStatusNotFoundError>> {
-    const userStatus = await db.query.userStatus.findFirst({
+  ): Promise<UserStatus | undefined> {
+    return await db.query.userStatus.findFirst({
       where: eq(this.schema.userStatus.userId, userId),
     });
-
-    if (!userStatus) {
-      return err(new UserStatusNotFoundError(userId));
-    }
-
-    return ok(userStatus);
   }
 
   async getUserByPhoneNumber(
     { phoneNumber }: GetUserByPhoneNumberParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<User, PhoneNumberNotFoundError>> {
-    const user = await db.query.user.findFirst({
+  ): Promise<User | undefined> {
+    return await db.query.user.findFirst({
       where: eq(this.schema.user.phoneNumber, phoneNumber),
     });
-
-    if (!user) {
-      return err(new PhoneNumberNotFoundError(phoneNumber));
-    }
-
-    return ok(user);
   }
 
   async deleteUser(
     { userId }: DeleteUserParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<void, UserNotFoundError>> {
-    const result = await db
-      .delete(this.schema.user)
-      .where(eq(this.schema.user.id, userId))
-      .returning({ id: this.schema.user.id });
-
-    if (result.length === 0) {
-      return err(new UserNotFoundError(userId));
-    }
-
-    return ok(undefined);
+  ): Promise<void> {
+    await db.delete(this.schema.user).where(eq(this.schema.user.id, userId));
   }
 
   async updatePrivacy(
     { userId, newPrivacySetting }: UpdatePrivacyParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<void, UserNotFoundError>> {
-    const result = await db
+  ): Promise<void> {
+    await db
       .update(this.schema.user)
       .set({ privacySetting: newPrivacySetting })
-      .where(eq(this.schema.user.id, userId))
-      .returning({ id: this.schema.user.id });
-
-    if (result.length === 0) {
-      return err(new UserNotFoundError(userId));
-    }
-
-    return ok(undefined);
+      .where(eq(this.schema.user.id, userId));
   }
 
   async getRandomActiveProfilesForRecs(
     { limit }: GetRandomActiveProfilesForRecsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<{ userId: string }[], never>> {
-    const results = await db
+  ): Promise<{ userId: string }[]> {
+    return await db
       .select({ userId: this.schema.user.id })
       .from(this.schema.user)
       .orderBy(sql`RANDOM()`)
       .limit(limit);
-
-    return ok(results);
   }
 
   async existingPhoneNumbers(
     { phoneNumbers }: ExistingPhoneNumbersParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<string[], never>> {
+  ): Promise<string[]> {
     const existingNumbers = await db
       .select({ phoneNumber: this.schema.user.phoneNumber })
       .from(this.schema.user)
@@ -248,38 +177,18 @@ export class UserRepository implements IUserRepository {
         ),
       );
 
-    return ok(existingNumbers.map((user) => user.phoneNumber));
+    return existingNumbers.map((user) => user.phoneNumber);
   }
 
   async updateStatsOnUserDelete(
     { userId }: UpdateStatsOnUserDeleteParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<void, UserNotFoundError>> {
+  ): Promise<void> {
     if (db === this.db) {
-      try {
-        await this.db.transaction(async (trx) => {
-          const result = await this.updateStatsOnUserDelete({ userId }, trx);
-
-          if (result.isErr()) {
-            throw result.error;
-          }
-        });
-        return ok(undefined);
-      } catch (error) {
-        if (error instanceof UserNotFoundError) {
-          return err(error);
-        }
-        return err(new UserNotFoundError(userId));
-      }
-    }
-
-    // First check if user exists
-    const user = await db.query.user.findFirst({
-      where: eq(this.schema.user.id, userId),
-    });
-
-    if (!user) {
-      return err(new UserNotFoundError(userId));
+      await this.db.transaction(async (trx) => {
+        await this.updateStatsOnUserDelete({ userId }, trx);
+      });
+      return;
     }
 
     // Update post stats
@@ -361,70 +270,47 @@ export class UserRepository implements IUserRepository {
             .innerJoin(
               this.schema.user,
               or(
-                eq(this.schema.friend.userIdA, this.schema.user.id),
-                eq(this.schema.friend.userIdB, this.schema.user.id),
-              ),
-            )
-            .where(
-              or(
-                eq(this.schema.friend.userIdA, userId),
-                eq(this.schema.friend.userIdB, userId),
+                and(
+                  eq(this.schema.friend.userIdA, userId),
+                  eq(this.schema.friend.userIdB, this.schema.user.id),
+                ),
+                and(
+                  eq(this.schema.friend.userIdB, userId),
+                  eq(this.schema.friend.userIdA, this.schema.user.id),
+                ),
               ),
             ),
         ),
       );
-
-    return ok(undefined);
   }
 
   async updateUserOnAppStatus(
     { userId, isOnApp }: UpdateUserOnAppStatusParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<void, UserNotFoundError>> {
-    const result = await db
+  ): Promise<void> {
+    await db
       .update(this.schema.userStatus)
       .set({ isOnApp })
-      .where(eq(this.schema.userStatus.userId, userId))
-      .returning({ id: this.schema.userStatus.id });
-
-    if (result.length === 0) {
-      return err(new UserNotFoundError(userId));
-    }
-
-    return ok(undefined);
+      .where(eq(this.schema.userStatus.userId, userId));
   }
 
   async updateUserTutorialComplete(
     { userId, hasCompletedTutorial }: UpdateUserTutorialCompleteParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<void, UserNotFoundError>> {
-    const result = await db
+  ): Promise<void> {
+    await db
       .update(this.schema.userStatus)
       .set({ hasCompletedTutorial })
-      .where(eq(this.schema.userStatus.userId, userId))
-      .returning({ id: this.schema.userStatus.id });
-
-    if (result.length === 0) {
-      return err(new UserNotFoundError(userId));
-    }
-
-    return ok(undefined);
+      .where(eq(this.schema.userStatus.userId, userId));
   }
 
   async updateUserOnboardingComplete(
     { userId, hasCompletedOnboarding }: UpdateUserOnboardingCompleteParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<void, UserNotFoundError>> {
-    const result = await db
+  ): Promise<void> {
+    await db
       .update(this.schema.userStatus)
       .set({ hasCompletedOnboarding })
-      .where(eq(this.schema.userStatus.userId, userId))
-      .returning({ id: this.schema.userStatus.id });
-
-    if (result.length === 0) {
-      return err(new UserNotFoundError(userId));
-    }
-
-    return ok(undefined);
+      .where(eq(this.schema.userStatus.userId, userId));
   }
 }

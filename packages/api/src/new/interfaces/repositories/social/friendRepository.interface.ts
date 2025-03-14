@@ -1,12 +1,4 @@
-import type { Result } from "neverthrow";
-
 import type { Transaction } from "@oppfy/db";
-
-import type {
-  FriendRequestNotFoundError,
-  FriendshipNotFoundError,
-  ProfileNotFoundError,
-} from "../../../errors/social.errors";
 
 export interface CreateFriendParams {
   senderId: string;
@@ -91,63 +83,57 @@ export interface FriendRequestResult {
 }
 
 export interface IFriendRepository {
-  createFriend(
-    params: CreateFriendParams,
-    tx?: Transaction,
-  ): Promise<Result<void, ProfileNotFoundError>>;
+  createFriend(params: CreateFriendParams, tx?: Transaction): Promise<void>;
 
-  removeFriend(
-    params: RemoveFriendParams,
-    tx?: Transaction,
-  ): Promise<Result<void, FriendshipNotFoundError | ProfileNotFoundError>>;
+  removeFriend(params: RemoveFriendParams, tx?: Transaction): Promise<void>;
 
   getFriendship(
     params: GetFriendshipParams,
     tx?: Transaction,
-  ): Promise<Result<{ id: string } | undefined, never>>;
+  ): Promise<{ id: string } | undefined>;
 
   countFriends(
     params: CountFriendsParams,
     tx?: Transaction,
-  ): Promise<Result<number | undefined, never>>;
+  ): Promise<number | undefined>;
 
   countFriendRequests(
     params: CountFriendRequestsParams,
     tx?: Transaction,
-  ): Promise<Result<number | undefined, never>>;
+  ): Promise<number | undefined>;
 
   createFriendRequest(
     params: CreateFriendRequestParams,
     tx?: Transaction,
-  ): Promise<Result<void, never>>;
+  ): Promise<void>;
 
   deleteFriendRequest(
     params: DeleteFriendRequestParams,
     tx?: Transaction,
-  ): Promise<Result<void, FriendRequestNotFoundError>>;
+  ): Promise<void>;
 
   getFriendRequest(
     params: GetFriendRequestParams,
     tx?: Transaction,
-  ): Promise<Result<{ id: string } | undefined, never>>;
+  ): Promise<{ id: string } | undefined>;
 
   paginateFriendsSelf(
     params: PaginateFriendsSelfParams,
     tx?: Transaction,
-  ): Promise<Result<FriendResult[], never>>;
+  ): Promise<FriendResult[]>;
 
   paginateFriendsOther(
     params: PaginateFriendsOtherParams,
     tx?: Transaction,
-  ): Promise<Result<FriendResult[], never>>;
+  ): Promise<FriendResult[]>;
 
   paginateFriendRequests(
     params: PaginateFriendRequestsParams,
     tx?: Transaction,
-  ): Promise<Result<FriendRequestResult[], never>>;
+  ): Promise<FriendRequestResult[]>;
 
   friendshipExists(
     params: FriendshipExistsParams,
     tx?: Transaction,
-  ): Promise<Result<boolean, never>>;
+  ): Promise<boolean>;
 }
