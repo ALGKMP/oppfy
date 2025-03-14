@@ -37,6 +37,8 @@ import {
   RemoveFollowerParams,
 } from "../../interfaces/repositories/social/followRepository.interface";
 
+// TODO: Pagination functions changed when moved to new DP
+
 @injectable()
 export class FollowRepository implements IFollowRepository {
   private db: Database;

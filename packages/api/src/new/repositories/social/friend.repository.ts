@@ -29,6 +29,8 @@ import {
   RemoveFriendParams,
 } from "../../interfaces/repositories/social/friendRepository.interface";
 
+// TODO: Pagination functions changed when moved to new DP
+
 @injectable()
 export class FriendRepository implements IFriendRepository {
   private db: Database;
@@ -328,7 +330,6 @@ export class FriendRepository implements IFriendRepository {
     return ok(friends);
   }
 
-  // TODO: This changed
   async paginateFriendsOther(
     params: PaginateFriendsOtherParams,
     db: DatabaseOrTransaction = this.db,
