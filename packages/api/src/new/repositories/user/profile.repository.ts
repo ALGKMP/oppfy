@@ -29,7 +29,6 @@ import {
   UsernameExistsParams,
 } from "../../interfaces/repositories/user/profileRepository.interface";
 import { Profile, UserWithProfile } from "../../models";
-import { ProfileError } from "../../errors/user/profile.error";
 import { err, ok, Result } from "neverthrow";
 
 @injectable()
@@ -48,18 +47,13 @@ export class ProfileRepository implements IProfileRepository {
   async getProfile(
     params: GetProfileParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Result<Profile, ProfileError.ProfileNotFound>> {
+  ): Promise<Profile | undefined> {
     const { profileId } = params;
 
-    const profile =  await db.query.profile.findFirst({
+   return await db.query.profile.findFirst({
       where: eq(this.schema.profile.id, profileId),
     });
 
-    if (!profile) {
-      return err(new ProfileError.ProfileNotFound());
-    }
-
-    return ok(profile);
   }
 
   async getUserProfile(

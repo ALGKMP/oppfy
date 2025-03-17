@@ -2,14 +2,18 @@ import { inject, injectable } from "inversify";
 
 import type { Transaction } from "@oppfy/db";
 
-import { TYPES } from "../container";
-import type { IReportRepository } from "../interfaces/repositories/user/reportRepository.interface";
+import { TYPES } from "../../container";
+import type { IReportRepository } from "../../interfaces/repositories/user/reportRepository.interface";
 import {
   CreateCommentReportParams,
   CreatePostReportParams,
   CreateUserReportParams,
   IReportService,
-} from "../interfaces/services/reportService.interface";
+} from "../../interfaces/services/user/reportService.interface";
+
+/* import {
+
+} from "../interfaces/services/reportService.interface"; */
 
 @injectable()
 export class ReportService implements IReportService {
