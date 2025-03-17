@@ -2,7 +2,7 @@ import type {
   ReportCommentReason,
   ReportPostReason,
   ReportUserReason,
-} from "../../models";
+} from "../../../models";
 
 export interface CreatePostReportParams {
   reason: ReportPostReason;

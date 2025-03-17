@@ -1,24 +1,15 @@
-class ProfileRepositoryError extends Error {
-    constructor(message: string) {
-      super(message);
-      this.name = "ProfileRepositoryError";
-    }
-  }
+/* import { createDomainErrors } from '../errorFactory';
 
-  
-class ProfileServiceError extends Error {
-    constructor(message: string) {
-      super(message);
-      this.name = "ProfileServiceError";
-    }
-}
+const ProfileDomain = createDomainErrors('User');
 
-// export in namespace
 export namespace ProfileError {
-    export class ProfileNotFound extends ProfileRepositoryError {
+    const RepositoryError = ProfileDomain.Repository;
+    const ServiceError = ProfileDomain.Service;
+
+    export class ProfileNotFound extends RepositoryError {
         constructor() {
-            super("Profile not found");
-            this.name = "ProfileNotFoundError";
+            super('Profile not found');
+            this.name = 'ProfileNotFoundError';
         }
     }
-}
+} */
