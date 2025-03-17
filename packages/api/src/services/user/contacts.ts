@@ -130,7 +130,6 @@ export class ContactService {
     if (allRecommendations.length === 0) {
       const randomProfiles =
         await this.userRepository.getRandomActiveProfilesForRecs({
-          userId,
           limit: 10,
         });
       allRecommendations = randomProfiles

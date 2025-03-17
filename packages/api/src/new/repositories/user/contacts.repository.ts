@@ -128,7 +128,7 @@ export class ContactsRepository implements IContactsRepository {
     const { userId } = params;
 
     // Get recommendations from Lambda function
-    const recommendations = await this.getRecommendationsFromLambda(userId);
+    const recommendations = await this.getRecommendationIds(userId);
 
     // Combine all tiers
     const allRecommendedUserIds = [
@@ -228,7 +228,7 @@ export class ContactsRepository implements IContactsRepository {
     }
   }
 
-  private async getRecommendationsFromLambda(
+  async getRecommendationIds(
     userId: string,
   ): Promise<{ tier1: string[]; tier2: string[]; tier3: string[] }> {
     const lambdaUrl = env.CONTACT_REC_LAMBDA_URL;
