@@ -78,3 +78,16 @@ export enum ErrorCode {
   MUX_ERROR = "MUX_ERROR",
   OPENSEARCH_ERROR = "OPENSEARCH_ERROR",
 }
+
+
+type ErrorCodes = keyof typeof ErrorCode;
+
+export class DomainError extends Error {
+  constructor(
+    public code: ErrorCodes,
+    message?: string,
+    public error?: unknown,
+  ) {
+    super(message);
+  }
+}

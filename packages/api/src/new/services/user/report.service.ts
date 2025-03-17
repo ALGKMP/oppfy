@@ -11,10 +11,6 @@ import {
   IReportService,
 } from "../../interfaces/services/user/reportService.interface";
 
-/* import {
-
-} from "../interfaces/services/reportService.interface"; */
-
 @injectable()
 export class ReportService implements IReportService {
   private tx: Transaction;

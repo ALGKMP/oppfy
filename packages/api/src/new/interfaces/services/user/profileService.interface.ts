@@ -1,110 +1,114 @@
-import type { Schema, Transaction } from "@oppfy/db";
+import { z } from "zod";
 
-import type { Profile, UserWithProfile } from "../../../models";
+import { sharedValidators } from "@oppfy/validators";
 
-export interface GetProfileParams {
-  profileId: string;
+export interface GetUploadProfilePictureUrlParams {
+  userId: string;
+  contentLength: number;
 }
 
-export interface GetUserProfileParams {
+export interface UpdateProfileParams {
   userId: string;
-}
-
-export interface GetUserFullProfileParams {
-  userId: string;
+  newData: {
+    name?: string;
+    username?: string;
+    bio?: string;
+    dateOfBirth?: Date;
+  }
 }
 
 export interface GetProfileByUsernameParams {
   username: string;
 }
 
-export interface UpdateProfileParams {
-  profileId: string;
-  update: Partial<Schema["profile"]["$inferInsert"]>;
+export interface GetProfileSelfParams {
+  userId: string;
 }
 
-export interface UpdateProfilePictureParams {
-  profileId: string;
-  newKey: string;
+export interface GetProfileOtherParams {
+  currentUserId: string;
+  otherUserId: string;
 }
 
-export interface UsernameExistsParams {
-  username: string;
-}
-
-export interface GetBatchProfilesParams {
-  userIds: string[];
-}
-
-export interface DeleteProfileParams {
-  profileId: string;
-}
-
-export interface ProfilesByUsernameParams {
+export interface SearchProfilesByUsernameParams {
   username: string;
   currentUserId: string;
-  limit?: number;
 }
 
-export interface ProfileResult {
-  userId: string;
-  username: string;
+export interface ProfileStats {
+  followers: number;
+  following: number;
+  friends: number;
+  posts: number;
+}
+
+export interface NetworkStatus {
+  privacy: string;
+  blocked: boolean;
+  targetUserFollowState: string;
+  otherUserFollowState: string;
+  targetUserFriendState: string;
+  otherUserFriendState: string;
+  isTargetUserBlocked: boolean;
+  isOtherUserBlocked: boolean;
+}
+
+export interface ProfileByUsernameResult {
+  id: string;
   name: string | null;
-  bio?: string | null;
-  profilePictureKey: string | null;
+  bio: string | null;
+  profilePictureUrl: string | null;
+  createdAt: Date;
 }
 
-export interface BatchProfileResult {
+export interface ProfileSelfResult {
   userId: string;
   profileId: string;
   privacy: string;
   username: string;
   name: string | null;
-  profilePictureKey: string | null;
+  bio: string | null;
+  followerCount: number;
+  followingCount: number;
+  friendCount: number;
+  postCount: number;
+  profilePictureUrl: string | null;
+  profileStats: ProfileStats;
+  createdAt: Date;
 }
 
-export interface IProfileRepository {
-  getProfile(
-    params: GetProfileParams,
-    tx?: Transaction,
-  ): Promise<Profile | undefined>;
+export interface ProfileOtherResult {
+  userId: string;
+  profileId: string;
+  privacy: string;
+  username: string;
+  name: string | null;
+  bio: string | null;
+  followerCount: number;
+  followingCount: number;
+  friendCount: number;
+  postCount: number;
+  profilePictureUrl: string | null;
+  networkStatus: NetworkStatus;
+  createdAt: Date;
+}
 
-  getUserProfile(
-    params: GetUserProfileParams,
-    tx?: Transaction,
-  ): Promise<UserWithProfile | undefined>;
+export interface IProfileService {
+  getUploadProfilePictureUrl(
+    params: GetUploadProfilePictureUrlParams,
+  ): Promise<string>;
 
-  getUserFullProfile(
-    params: GetUserFullProfileParams,
-    tx?: Transaction,
-  ): Promise<UserWithProfile | undefined>;
+  updateProfile(params: UpdateProfileParams): Promise<void>;
 
   getProfileByUsername(
     params: GetProfileByUsernameParams,
-    tx?: Transaction,
-  ): Promise<Profile | undefined>;
+  ): Promise<ProfileByUsernameResult>;
 
-  updateProfile(params: UpdateProfileParams, tx?: Transaction): Promise<void>;
+  getProfileSelf(params: GetProfileSelfParams): Promise<ProfileSelfResult>;
 
-  updateProfilePicture(
-    params: UpdateProfilePictureParams,
-    tx?: Transaction,
-  ): Promise<void>;
+  getProfileOther(params: GetProfileOtherParams): Promise<ProfileOtherResult>;
 
-  usernameExists(
-    params: UsernameExistsParams,
-    tx?: Transaction,
-  ): Promise<boolean>;
-
-  getBatchProfiles(
-    params: GetBatchProfilesParams,
-    tx?: Transaction,
-  ): Promise<BatchProfileResult[]>;
-
-  deleteProfile(params: DeleteProfileParams, tx?: Transaction): Promise<void>;
-
-  profilesByUsername(
-    params: ProfilesByUsernameParams,
-    tx?: Transaction,
-  ): Promise<ProfileResult[]>;
+  searchProfilesByUsername(
+    params: SearchProfilesByUsernameParams,
+  ): Promise<ProfileByUsernameResult[]>;
 }

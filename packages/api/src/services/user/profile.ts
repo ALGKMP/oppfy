@@ -77,15 +77,6 @@ export class ProfileService {
       profileId: profile.id,
       update: newData,
     });
-    console.log("upserting profile");
-    await this._upsertProfileSearch({
-      userId: userWithProfile.id,
-      newProfileData: {
-        name: newData.name,
-        username: newData.username,
-        bio: newData.bio,
-      },
-    });
   }
 
   async getProfileByUsername({ username }: { username: string }) {
@@ -263,30 +254,6 @@ export class ProfileService {
     };
   }
 
-  private async _upsertProfileSearch({
-    userId,
-    newProfileData,
-  }: {
-    userId: string;
-    newProfileData: Partial<OpenSearchProfileIndexResult>;
-  }) {
-    const userWithProfile = await this.profileRepository.getUserProfile({
-      userId,
-    });
-
-    if (userWithProfile === undefined) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
-    }
-    const profileData = userWithProfile.profile;
-
-    const documentBody = { ...profileData, ...newProfileData };
-
-    await openSearch.index({
-      index: OpenSearchIndex.PROFILE,
-      id: userId,
-      body: documentBody,
-    });
-  }
 
   async searchProfilesByUsername({
     username,
