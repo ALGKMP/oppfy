@@ -78,3 +78,4 @@ export enum ErrorCode {
   MUX_ERROR = "MUX_ERROR",
   OPENSEARCH_ERROR = "OPENSEARCH_ERROR",
 }
+

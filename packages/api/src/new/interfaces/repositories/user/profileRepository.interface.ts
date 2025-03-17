@@ -2,6 +2,10 @@ import type { Schema, Transaction } from "@oppfy/db";
 
 import type { Profile, UserWithProfile } from "../../../models";
 
+import { ProfileError } from "../../../errors/user/profile.error";
+import { Result } from "neverthrow";
+
+
 export interface GetProfileParams {
   profileId: string;
 }
@@ -67,7 +71,7 @@ export interface IProfileRepository {
   getProfile(
     params: GetProfileParams,
     tx?: Transaction,
-  ): Promise<Profile | undefined>;
+  ): Promise<Result<Profile, ProfileError.ProfileNotFound>>;
 
   getUserProfile(
     params: GetUserProfileParams,
