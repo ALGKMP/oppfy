@@ -31,8 +31,8 @@ export class RelationshipRepository implements IRelationshipRepository {
     userIdA: string;
     userIdB: string;
     db?: DatabaseOrTransaction;
-  }): Promise<Relationship | undefined> {
-    return await db.query.userRelationship.findFirst({
+  }): Promise<Relationship> {
+    const relationship = await db.query.userRelationship.findFirst({
       where: or(
         and(
           eq(this.schema.userRelationship.userIdA, userIdA),
@@ -44,6 +44,18 @@ export class RelationshipRepository implements IRelationshipRepository {
         ),
       ),
     });
+
+    if (!relationship) {
+      return {
+        userIdA,
+        userIdB,
+        friendshipStatus: "notFriends",
+        followStatus: "notFollowing",
+        blockStatus: false,
+      };
+    }
+
+    return relationship;
   }
 
   async upsert({

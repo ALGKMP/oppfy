@@ -25,7 +25,7 @@ export interface IRelationshipRepository {
     userIdA: string;
     userIdB: string;
     db?: DatabaseOrTransaction;
-  }): Promise<Relationship | undefined>;
+  }): Promise<Relationship>;
 
   upsert({
     userIdA,
