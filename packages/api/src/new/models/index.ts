@@ -1,4 +1,4 @@
-import type { InferInsertModel, InferSelectModel, schema } from "@oppfy/db";
+import type { InferSelectModel, NotificationSettings, schema } from "@oppfy/db";
 
 import type {
   reportCommentReasonEnum,
@@ -13,6 +13,12 @@ export type ReportCommentReason =
 
 export type User = InferSelectModel<typeof schema.user>;
 export type Profile = InferSelectModel<typeof schema.profile>;
+export type UserWithProfile = User & {
+  profile: Profile;
+};
+export type UserWithNotificationSettings = User & {
+  notificationSettings: NotificationSettings;
+};
 export type UserStatus = InferSelectModel<typeof schema.userStatus>;
 export type ProfileStats = InferSelectModel<typeof schema.profileStats>;
 export type Post = InferSelectModel<typeof schema.post>;

@@ -46,7 +46,7 @@ export class FriendRepository implements IFriendRepository {
 
   async createFriend(
     params: CreateFriendParams,
-    db: DatabaseOrTransaction = this.db,
+    tx: Transaction,
   ): Promise<void> {
     const { senderId, recipientId } = params;
 
@@ -56,10 +56,10 @@ export class FriendRepository implements IFriendRepository {
         ? [senderId, recipientId]
         : [recipientId, senderId];
 
-    await db.insert(this.schema.friend).values([{ userIdA, userIdB }]);
+    await tx.insert(this.schema.friend).values([{ userIdA, userIdB }]);
 
     // Delete the friend request
-    await db
+    await tx
       .delete(this.schema.friendRequest)
       .where(
         or(
@@ -75,21 +75,21 @@ export class FriendRepository implements IFriendRepository {
       );
 
     // Update profileStats for both users
-    const updateProfileStats = async (userId: string) => {
-      const userProfile = await db.query.profile.findFirst({
+    const updateProfileStats = async (userId: string, tx: Transaction) => {
+      const userProfile = await tx.query.profile.findFirst({
         where: eq(this.schema.profile.userId, userId),
       });
 
       if (!userProfile) throw new Error(`Profile not found for user ${userId}`);
 
-      await db
+      await tx
         .update(this.schema.profileStats)
         .set({ friends: sql`${this.schema.profileStats.friends} + 1` })
         .where(eq(this.schema.profileStats.profileId, userProfile.id));
     };
 
-    await updateProfileStats(senderId);
-    await updateProfileStats(recipientId);
+    await updateProfileStats(senderId, tx);
+    await updateProfileStats(recipientId, tx);
 
     // Update relationship status for both sides
     await this.relationshipRepository.upsert({
@@ -98,21 +98,20 @@ export class FriendRepository implements IFriendRepository {
       updates: {
         friendshipStatus: "friends",
       },
-      db,
-    });
+    }, tx);
     await this.relationshipRepository.upsert({
       userIdA: recipientId,
       userIdB: senderId,
       updates: {
         friendshipStatus: "friends",
-      },
-      db,
-    });
+      }},
+      tx
+    );
   }
 
   async removeFriend(
     params: RemoveFriendParams,
-    db: DatabaseOrTransaction = this.db,
+    tx: Transaction,
   ): Promise<void> {
     const { userIdA, userIdB } = params;
 
@@ -120,7 +119,7 @@ export class FriendRepository implements IFriendRepository {
     const [sortedUserIdA, sortedUserIdB] =
       userIdA < userIdB ? [userIdA, userIdB] : [userIdB, userIdA];
 
-    await db
+    await tx
       .delete(this.schema.friend)
       .where(
         and(
@@ -131,13 +130,13 @@ export class FriendRepository implements IFriendRepository {
 
     // Update profileStats for both users
     const updateProfileStats = async (userId: string) => {
-      const userProfile = await db.query.profile.findFirst({
+      const userProfile = await tx.query.profile.findFirst({
         where: eq(this.schema.profile.userId, userId),
       });
 
       if (!userProfile) throw new Error(`Profile not found for user ${userId}`);
 
-      await db
+      await tx
         .update(this.schema.profileStats)
         .set({ friends: sql`${this.schema.profileStats.friends} - 1` })
         .where(eq(this.schema.profileStats.profileId, userProfile.id));
@@ -147,22 +146,26 @@ export class FriendRepository implements IFriendRepository {
     await updateProfileStats(userIdB);
 
     // Update relationship status for both sides
-    await this.relationshipRepository.upsert({
-      userIdA: userIdA,
-      userIdB: userIdB,
-      updates: {
-        friendshipStatus: "notFriends",
+    await this.relationshipRepository.upsert(
+      {
+        userIdA: userIdA,
+        userIdB: userIdB,
+        updates: {
+          friendshipStatus: "notFriends",
+        },
       },
-      db,
-    });
-    await this.relationshipRepository.upsert({
-      userIdA: userIdB,
-      userIdB: userIdA,
-      updates: {
-        friendshipStatus: "notFriends",
+      tx,
+    );
+    await this.relationshipRepository.upsert(
+      {
+        userIdA: userIdB,
+        userIdB: userIdA,
+        updates: {
+          friendshipStatus: "notFriends",
+        },
       },
-      db,
-    });
+      tx,
+    );
   }
 
   async getFriendship(
@@ -224,40 +227,44 @@ export class FriendRepository implements IFriendRepository {
 
   async createFriendRequest(
     params: CreateFriendRequestParams,
-    db: DatabaseOrTransaction = this.db,
+    tx: Transaction,
   ): Promise<void> {
     const { senderId, recipientId } = params;
 
-    await db
+    await tx
       .insert(this.schema.friendRequest)
       .values({ senderId, recipientId });
 
     // Update relationship status for both sides
-    await this.relationshipRepository.upsert({
-      userIdA: senderId,
-      userIdB: recipientId,
-      updates: {
-        friendshipStatus: "outboundRequest",
+    await this.relationshipRepository.upsert(
+      {
+        userIdA: senderId,
+        userIdB: recipientId,
+        updates: {
+          friendshipStatus: "outboundRequest",
+        },
       },
-      db,
-    });
-    await this.relationshipRepository.upsert({
-      userIdA: recipientId,
-      userIdB: senderId,
-      updates: {
-        friendshipStatus: "inboundRequest",
+      tx,
+    );
+    await this.relationshipRepository.upsert(
+      {
+        userIdA: recipientId,
+        userIdB: senderId,
+        updates: {
+          friendshipStatus: "inboundRequest",
+        },
       },
-      db,
-    });
+      tx,
+    );
   }
 
   async deleteFriendRequest(
     params: DeleteFriendRequestParams,
-    db: DatabaseOrTransaction = this.db,
+    tx: Transaction,
   ): Promise<void> {
     const { senderId, recipientId } = params;
 
-    await db
+    await tx
       .delete(this.schema.friendRequest)
       .where(
         and(
@@ -267,22 +274,26 @@ export class FriendRepository implements IFriendRepository {
       );
 
     // Update relationship status for both sides
-    await this.relationshipRepository.upsert({
-      userIdA: senderId,
-      userIdB: recipientId,
-      updates: {
-        friendshipStatus: "notFriends",
+    await this.relationshipRepository.upsert(
+      {
+        userIdA: senderId,
+        userIdB: recipientId,
+        updates: {
+          friendshipStatus: "notFriends",
+        },
       },
-      db,
-    });
-    await this.relationshipRepository.upsert({
-      userIdA: recipientId,
-      userIdB: senderId,
-      updates: {
-        friendshipStatus: "notFriends",
+      tx,
+    );
+    await this.relationshipRepository.upsert(
+      {
+        userIdA: recipientId,
+        userIdB: senderId,
+        updates: {
+          friendshipStatus: "notFriends",
+        },
       },
-      db,
-    });
+      tx,
+    );
   }
 
   async getFriendRequest(

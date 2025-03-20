@@ -6,6 +6,7 @@ import type { Database, FriendStatus } from "@oppfy/db";
 import { TYPES } from "../../container";
 import { FriendErrors } from "../../errors/social/friend.error";
 import { ProfileErrors } from "../../errors/user/profile.error";
+import { UserErrors } from "../../errors/user/user.error";
 import type { IFollowRepository } from "../../interfaces/repositories/social/followRepository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friendRepository.interface";
 import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
@@ -77,7 +78,7 @@ export class FriendService implements IFriendService {
       },
     );
 
-    if (existingRelationship?.friendshipStatus === "friends") {
+    if (existingRelationship.friendshipStatus === "friends") {
       return err(new FriendErrors.AlreadyFriends(senderId, recipientId));
     }
 
@@ -141,14 +142,8 @@ export class FriendService implements IFriendService {
       userIdB: recipientId,
     });
 
-    if (!relationship) {
+    if (relationship.friendshipStatus !== "inboundRequest") {
       return err(new FriendErrors.RequestNotFound(senderId, recipientId));
-    }
-
-    // Get notification settings
-    const sender = await this.userRepository.getUser({ userId: senderId });
-    if (!sender) {
-      return err(new FriendErrors.FailedToAcceptRequest(senderId, recipientId));
     }
 
     await this.db.transaction(async (tx) => {
@@ -177,24 +172,32 @@ export class FriendService implements IFriendService {
         },
         tx,
       );
-
-      const notificationSettings =
-        await this.notificationsRepository.getNotificationSettings({
-          notificationSettingsId: sender.notificationSettingsId,
-        });
-
-      if (notificationSettings?.friendRequests) {
-        await this.notificationsRepository.storeNotification({
-          senderId: recipientId,
-          recipientId: senderId,
-          notificationData: {
-            eventType: "friend",
-            entityType: "profile",
-            entityId: recipientId,
-          },
-        });
-      }
     });
+
+    // Get notification settings
+    const sender = await this.userRepository.getUserWithNotificationSettings({
+      userId: senderId,
+    });
+    if (!sender) {
+      return err(new UserErrors.UserNotFound(senderId));
+    }
+
+    const notificationSettings =
+      await this.notificationsRepository.getNotificationSettings({
+        notificationSettingsId: sender.notificationSettingsId,
+      });
+
+    if (notificationSettings?.friendRequests) {
+      await this.notificationsRepository.storeNotification({
+        senderId: recipientId,
+        recipientId: senderId,
+        notificationData: {
+          eventType: "friend",
+          entityType: "profile",
+          entityId: recipientId,
+        },
+      });
+    }
 
     return ok(undefined);
   }

@@ -16,36 +16,26 @@ export type UpdateRelationship = Partial<
   Omit<Relationship, "userIdA" | "userIdB">
 >;
 
+export interface GetByUserIdsParams {
+  userIdA: string;
+  userIdB: string;
+}
+
+export interface UpsertParams {
+  userIdA: string;
+  userIdB: string;
+  updates: UpdateRelationship;
+}
+
+export interface DeleteParams {
+  userIdA: string;
+  userIdB: string;
+}
+
 export interface IRelationshipRepository {
-  getByUserIds({
-    userIdA ,
-    userIdB,
-    db,
-  }: {
-    userIdA: string;
-    userIdB: string;
-    db?: DatabaseOrTransaction;
-  }): Promise<Relationship | undefined>;
+  getByUserIds(params: GetByUserIdsParams, db? : DatabaseOrTransaction): Promise<Relationship>;
 
-  upsert({
-    userIdA,
-    userIdB,
-    updates,
-    db,
-  }: {
-    userIdA: string;
-    userIdB: string;
-    updates: UpdateRelationship;
-    db?: DatabaseOrTransaction;
-  }): Promise<void>;
+  upsert(params: UpsertParams, db? :DatabaseOrTransaction): Promise<void>;
 
-  delete({
-    userIdA,
-    userIdB,
-    db,
-  }: {
-    userIdA: string;
-    userIdB: string;
-    db?: DatabaseOrTransaction;
-  }): Promise<void>;
+  delete(params: DeleteParams, db?:DatabaseOrTransaction): Promise<void>;
 }

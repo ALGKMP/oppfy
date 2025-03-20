@@ -6,8 +6,8 @@ const UserError = createBaseErrorClass("User");
 
 export namespace UserErrors {
   export class UserNotFound extends UserError {
-    constructor() {
-      super("User not found");
+    constructor(userId: string) {
+      super(`User with id "${userId}" not found`);
       this.name = "UserNotFoundError";
     }
   }
