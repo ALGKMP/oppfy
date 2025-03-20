@@ -1,6 +1,13 @@
+import type { Result } from "neverthrow";
+
 import type { Schema } from "@oppfy/db";
 
-import type { PaginatedResponse } from "./postInteractionService.interface";
+import type { PostErrors } from "../../../errors/content/post.error";
+
+export interface PaginatedResponse<TItem, TCursor> {
+  items: TItem[];
+  nextCursor: TCursor | null;
+}
 
 export type Post = Schema["post"]["$inferSelect"];
 
@@ -8,7 +15,6 @@ export type PostStats = Schema["postStats"]["$inferSelect"];
 
 export interface BaseCursor {
   createdAt: Date;
-  id: string;
 }
 
 export interface PostCursor extends BaseCursor {
@@ -58,42 +64,19 @@ export interface UploadVideoPostForUserNotOnAppUrlParams {
   width: string;
 }
 
-export interface PaginatePostsOfUserSelfParams {
+export interface UpdatePostParams {
   userId: string;
-  cursor: PostCursor | null;
-  pageSize?: number;
-}
-
-export interface PaginatePostsOfUserOtherParams {
-  userId: string;
-  cursor: PostCursor | null;
-  pageSize: number;
-  currentUserId: string;
-}
-
-export interface PaginatePostsOfRecommendedParams {
-  userId: string;
-  cursor: PostCursor | null;
-  pageSize: number;
-}
-
-export interface PaginatePostsForFeedParams {
-  userId: string;
-  cursor: FeedCursor | null;
-  pageSize: number;
-}
-
-export interface GetPostParams {
   postId: string;
-  userId: string;
-}
-
-export interface EditPostParams {
-  postId: string;
-  caption: string;
+  content: string;
+  mediaUrls?: string[];
 }
 
 export interface DeletePostParams {
+  userId: string;
+  postId: string;
+}
+
+export interface GetPostParams {
   postId: string;
   userId: string;
 }
@@ -102,40 +85,82 @@ export interface GetPostForNextJsParams {
   postId: string;
 }
 
+export interface PaginatePostsParams {
+  userId: string;
+  cursor: PostCursor | null;
+  pageSize?: number;
+}
+
+export interface PaginatePostsForFeedParams {
+  userId: string;
+  cursor: FeedCursor | null;
+  pageSize: number;
+}
+
 export interface IPostService {
   uploadPostForUserOnAppUrl(
     params: UploadPostForUserOnAppUrlParams,
-  ): Promise<{ presignedUrl: string; postId: string }>;
+  ): Promise<
+    Result<
+      { presignedUrl: string; postId: string },
+      PostErrors.FailedToCreatePost
+    >
+  >;
 
   uploadPostForUserNotOnAppUrl(
     params: UploadPostForUserNotOnAppUrlParams,
-  ): Promise<{ presignedUrl: string; postId: string }>;
+  ): Promise<
+    Result<
+      { presignedUrl: string; postId: string },
+      PostErrors.FailedToCreatePost
+    >
+  >;
 
   uploadVideoPostForUserOnAppUrl(
     params: UploadVideoPostForUserOnAppUrlParams,
-  ): Promise<{ presignedUrl: string; postId: string }>;
+  ): Promise<
+    Result<
+      { presignedUrl: string; postId: string },
+      PostErrors.FailedToCreatePost
+    >
+  >;
 
   uploadVideoPostForUserNotOnAppUrl(
     params: UploadVideoPostForUserNotOnAppUrlParams,
-  ): Promise<{ presignedUrl: string; postId: string }>;
+  ): Promise<
+    Result<
+      { presignedUrl: string; postId: string },
+      PostErrors.FailedToCreatePost
+    >
+  >;
 
-  paginatePostsOfUserSelf(
-    params: PaginatePostsOfUserSelfParams,
-  ): Promise<PaginatedResponse<Post, PostCursor>>;
+  deletePost(
+    params: DeletePostParams,
+  ): Promise<
+    Result<
+      void,
+      | PostErrors.FailedToDeletePost
+      | PostErrors.PostNotFound
+      | PostErrors.NotPostOwner
+      | PostErrors.PostDeleted
+    >
+  >;
 
-  paginatePostsOfUserOther(
-    params: PaginatePostsOfUserOtherParams,
-  ): Promise<PaginatedResponse<Post, PostCursor>>;
+  getPost(
+    params: GetPostParams,
+  ): Promise<Result<Post, PostErrors.PostNotFound | PostErrors.PostDeleted>>;
+
+  paginatePosts(
+    params: PaginatePostsParams,
+  ): Promise<Result<PaginatedResponse<Post, PostCursor>, never>>;
 
   paginatePostsForFeed(
     params: PaginatePostsForFeedParams,
-  ): Promise<PaginatedResponse<Post, FeedCursor>>;
+  ): Promise<
+    Result<PaginatedResponse<Post, FeedCursor>, PostErrors.PostNotFound>
+  >;
 
   getPostForNextJs(
     params: GetPostForNextJsParams,
-  ): Promise<Omit<Post, "hasLiked">>;
-
-  getPost(params: GetPostParams): Promise<Post>;
-
-  deletePost(params: DeletePostParams): Promise<void>;
+  ): Promise<Result<Omit<Post, "hasLiked">, PostErrors.PostNotFound>>;
 }
