@@ -1,12 +1,10 @@
-import type { Schema } from "@oppfy/db";
+import type { Result } from "neverthrow";
 
-export type Post = Schema["post"]["$inferSelect"];
-export type Like = Schema["like"]["$inferSelect"];
-export type Comment = Schema["comment"]["$inferSelect"];
+import type { PostInteractionErrors } from "../../../errors/content/postInteraction.error";
+import type { PaginatedComment } from "../../../interfaces/repositories/content/commentRepository.interface";
 
 export interface BaseCursor {
   createdAt: Date;
-  id: string;
 }
 
 export interface CommentCursor extends BaseCursor {
@@ -47,17 +45,64 @@ export interface DeleteCommentParams {
 
 export interface PaginateCommentsParams {
   postId: string;
+  userId: string;
   cursor: CommentCursor | null;
   pageSize?: number;
 }
 
 export interface IPostInteractionService {
-  likePost(params: LikePostParams): Promise<void>;
-  unlikePost(params: UnlikePostParams): Promise<void>;
-  getLike(params: GetLikeParams): Promise<boolean>;
-  commentOnPost(params: CommentOnPostParams): Promise<void>;
-  deleteComment(params: DeleteCommentParams): Promise<void>;
+  likePost(
+    params: LikePostParams,
+  ): Promise<
+    Result<
+      void,
+      | PostInteractionErrors.FailedToLikePost
+      | PostInteractionErrors.AlreadyLiked
+      | PostInteractionErrors.PostNotFound
+    >
+  >;
+
+  unlikePost(
+    params: UnlikePostParams,
+  ): Promise<
+    Result<
+      void,
+      | PostInteractionErrors.FailedToUnlikePost
+      | PostInteractionErrors.NotLiked
+      | PostInteractionErrors.PostNotFound
+    >
+  >;
+
+  getLike(
+    params: GetLikeParams,
+  ): Promise<Result<boolean, PostInteractionErrors.PostNotFound>>;
+
+  commentOnPost(
+    params: CommentOnPostParams,
+  ): Promise<
+    Result<
+      void,
+      PostInteractionErrors.FailedToComment | PostInteractionErrors.PostNotFound
+    >
+  >;
+
+  deleteComment(
+    params: DeleteCommentParams,
+  ): Promise<
+    Result<
+      void,
+      | PostInteractionErrors.FailedToDeleteComment
+      | PostInteractionErrors.CommentNotFound
+      | PostInteractionErrors.NotCommentOwner
+    >
+  >;
+
   paginateComments(
     params: PaginateCommentsParams,
-  ): Promise<PaginatedResponse<Comment, CommentCursor>>;
+  ): Promise<
+    Result<
+      PaginatedResponse<PaginatedComment, CommentCursor>,
+      PostInteractionErrors.PostNotFound
+    >
+  >;
 }

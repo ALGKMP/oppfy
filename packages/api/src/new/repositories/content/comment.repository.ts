@@ -1,4 +1,4 @@
-import { and, count, desc, eq, lt, or } from "drizzle-orm";
+import { and, count, desc, eq, lt, lte, or } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
@@ -72,7 +72,7 @@ export class CommentRepository implements ICommentRepository {
     { postId, cursor, pageSize = 10 }: PaginateCommentsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<PaginatedComment[]> {
-    const results = await db
+    return await this.db
       .select({
         commentId: this.schema.comment.id,
         userId: this.schema.comment.userId,
@@ -96,10 +96,10 @@ export class CommentRepository implements ICommentRepository {
           eq(this.schema.comment.postId, postId),
           cursor
             ? or(
-                lt(this.schema.comment.createdAt, cursor.createdAt),
+                lte(this.schema.comment.createdAt, cursor.createdAt),
                 and(
                   eq(this.schema.comment.createdAt, cursor.createdAt),
-                  lt(this.schema.comment.id, cursor.commentId),
+                  lte(this.schema.comment.id, cursor.commentId),
                 ),
               )
             : undefined,
@@ -110,7 +110,5 @@ export class CommentRepository implements ICommentRepository {
         desc(this.schema.comment.id),
       )
       .limit(pageSize + 1);
-
-    return results;
   }
 }

@@ -1,7 +1,6 @@
 import type { Schema } from "@oppfy/db";
 
 import type { PaginatedResponse } from "./postInteractionService.interface";
-import { Comment, CommentCursor } from "./postInteractionService.interface";
 
 export type Post = Schema["post"]["$inferSelect"];
 
