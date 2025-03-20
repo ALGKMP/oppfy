@@ -132,8 +132,4 @@ export interface IUserService {
     currentUserId: string;
     targetUserId: string;
   }): Promise<Result<boolean, UserErrors.UserNotFound>>;
-
-  deleteProfileFromOpenSearch(options: {
-    userId: string;
-  }): Promise<Result<void, UserErrors.UserNotFound>>;
 }

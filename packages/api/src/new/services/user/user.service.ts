@@ -405,15 +405,4 @@ export class UserService implements IUserService {
       }
     } while (cursor !== null);
   }
-
-  async deleteProfileFromOpenSearch(options: {
-    userId: string;
-  }): Promise<Result<void, UserErrors.UserNotFound>> {
-    const { userId } = options;
-    const user = await this.userRepository.getUser({ userId });
-    if (!user) {
-      return err(new UserErrors.UserNotFound(userId));
-    }
-    return ok(undefined);
-  }
 }
