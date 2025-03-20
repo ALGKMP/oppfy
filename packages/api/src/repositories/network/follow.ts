@@ -27,9 +27,9 @@ export class FollowRepository {
       if (!senderProfile) throw new Error("Sender profile not found");
 
       await tx
-        .update(schema.profileStats)
-        .set({ following: sql`${schema.profileStats.following} + 1` })
-        .where(eq(schema.profileStats.profileId, senderProfile.id));
+        .update(schema.userStats)
+        .set({ following: sql`${schema.userStats.following} + 1` })
+        .where(eq(schema.userStats.profileId, senderProfile.id));
 
       const recipientProfile = await tx.query.profile.findFirst({
         where: eq(schema.profile.userId, recipientUserId),
@@ -38,9 +38,9 @@ export class FollowRepository {
       if (!recipientProfile) throw new Error("Recipient profile not found");
 
       await tx
-        .update(schema.profileStats)
-        .set({ followers: sql`${schema.profileStats.followers} + 1` })
-        .where(eq(schema.profileStats.profileId, recipientProfile.id));
+        .update(schema.userStats)
+        .set({ followers: sql`${schema.userStats.followers} + 1` })
+        .where(eq(schema.userStats.profileId, recipientProfile.id));
     });
   }
 
@@ -69,9 +69,9 @@ export class FollowRepository {
       if (!senderProfile) throw new Error("Sender profile not found");
 
       await tx
-        .update(schema.profileStats)
-        .set({ following: sql`${schema.profileStats.following} - 1` })
-        .where(eq(schema.profileStats.profileId, senderProfile.id));
+        .update(schema.userStats)
+        .set({ following: sql`${schema.userStats.following} - 1` })
+        .where(eq(schema.userStats.profileId, senderProfile.id));
 
       const recipientProfile = await tx.query.profile.findFirst({
         where: eq(schema.profile.userId, followeeId),
@@ -80,9 +80,9 @@ export class FollowRepository {
       if (!recipientProfile) throw new Error("Recipient profile not found");
 
       await tx
-        .update(schema.profileStats)
-        .set({ followers: sql`${schema.profileStats.followers} - 1` })
-        .where(eq(schema.profileStats.profileId, recipientProfile.id));
+        .update(schema.userStats)
+        .set({ followers: sql`${schema.userStats.followers} - 1` })
+        .where(eq(schema.userStats.profileId, recipientProfile.id));
     });
   }
 
@@ -234,9 +234,9 @@ export class FollowRepository {
       if (!senderProfile) throw new Error("Sender profile not found");
 
       await tx
-        .update(schema.profileStats)
-        .set({ following: sql`${schema.profileStats.following} + 1` })
-        .where(eq(schema.profileStats.profileId, senderProfile.id));
+        .update(schema.userStats)
+        .set({ following: sql`${schema.userStats.following} + 1` })
+        .where(eq(schema.userStats.profileId, senderProfile.id));
 
       // Update the recipient's followers count
       const recipientProfile = await tx.query.profile.findFirst({
@@ -246,9 +246,9 @@ export class FollowRepository {
       if (!recipientProfile) throw new Error("Recipient profile not found");
 
       await tx
-        .update(schema.profileStats)
-        .set({ followers: sql`${schema.profileStats.followers} + 1` })
-        .where(eq(schema.profileStats.profileId, recipientProfile.id));
+        .update(schema.userStats)
+        .set({ followers: sql`${schema.userStats.followers} + 1` })
+        .where(eq(schema.userStats.profileId, recipientProfile.id));
     });
   }
 

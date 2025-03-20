@@ -65,7 +65,7 @@ async function syncProfileStats() {
 
       // Update profile stats
       await db
-        .update(schema.profileStats)
+        .update(schema.userStats)
         .set({
           posts: regularPosts,
           friends,
@@ -73,7 +73,7 @@ async function syncProfileStats() {
           following,
           updatedAt: new Date(),
         })
-        .where(sql`${schema.profileStats.profileId} = ${profile.id}`);
+        .where(sql`${schema.userStats.profileId} = ${profile.id}`);
 
       console.log(
         `Updated profile ${profile.id} for user ${profile.userId}:`,

@@ -11,9 +11,9 @@ export class ProfileStatsRepository {
     amount: number;
   }) {
     await db
-      .update(schema.profileStats)
-      .set({ followers: sql`${schema.profileStats.followers} - ${amount}` })
-      .where(eq(schema.profileStats.profileId, userId));
+      .update(schema.userStats)
+      .set({ followers: sql`${schema.userStats.followers} - ${amount}` })
+      .where(eq(schema.userStats.profileId, userId));
   }
 
   async decrementFollowingCount({
@@ -24,9 +24,9 @@ export class ProfileStatsRepository {
     amount: number;
   }) {
     await db
-      .update(schema.profileStats)
-      .set({ following: sql`${schema.profileStats.following} - ${amount}` })
-      .where(eq(schema.profileStats.profileId, userId));
+      .update(schema.userStats)
+      .set({ following: sql`${schema.userStats.following} - ${amount}` })
+      .where(eq(schema.userStats.profileId, userId));
   }
 
   async decrementFriendsCount({
@@ -37,9 +37,9 @@ export class ProfileStatsRepository {
     amount: number;
   }) {
     await db
-      .update(schema.profileStats)
-      .set({ friends: sql`${schema.profileStats.friends} - ${amount}` })
-      .where(eq(schema.profileStats.profileId, userId));
+      .update(schema.userStats)
+      .set({ friends: sql`${schema.userStats.friends} - ${amount}` })
+      .where(eq(schema.userStats.profileId, userId));
   }
 
   async decrementPostsCount({
@@ -50,9 +50,9 @@ export class ProfileStatsRepository {
     decrementBy: number;
   }) {
     await db
-      .update(schema.profileStats)
-      .set({ posts: sql`${schema.profileStats.posts} - ${decrementBy}` })
-      .where(eq(schema.profileStats.profileId, profileId));
+      .update(schema.userStats)
+      .set({ posts: sql`${schema.userStats.posts} - ${decrementBy}` })
+      .where(eq(schema.userStats.profileId, profileId));
   }
 
   async incrementFollowerCount({
@@ -63,11 +63,11 @@ export class ProfileStatsRepository {
     incrementBy: number;
   }) {
     await db
-      .update(schema.profileStats)
+      .update(schema.userStats)
       .set({
-        followers: sql`${schema.profileStats.followers} + ${incrementBy}`,
+        followers: sql`${schema.userStats.followers} + ${incrementBy}`,
       })
-      .where(eq(schema.profileStats.profileId, profileId));
+      .where(eq(schema.userStats.profileId, profileId));
   }
 
   async incrementFollowingCount({
@@ -78,11 +78,11 @@ export class ProfileStatsRepository {
     incrementBy: number;
   }) {
     await db
-      .update(schema.profileStats)
+      .update(schema.userStats)
       .set({
-        following: sql`${schema.profileStats.following} + ${incrementBy}`,
+        following: sql`${schema.userStats.following} + ${incrementBy}`,
       })
-      .where(eq(schema.profileStats.profileId, profileId));
+      .where(eq(schema.userStats.profileId, profileId));
   }
 
   async incrementFriendsCount({
@@ -93,9 +93,9 @@ export class ProfileStatsRepository {
     incrementBy: number;
   }) {
     await db
-      .update(schema.profileStats)
-      .set({ friends: sql`${schema.profileStats.friends} + ${incrementBy}` })
-      .where(eq(schema.profileStats.profileId, profileId));
+      .update(schema.userStats)
+      .set({ friends: sql`${schema.userStats.friends} + ${incrementBy}` })
+      .where(eq(schema.userStats.profileId, profileId));
   }
 
   async incrementPostsCount({
@@ -106,14 +106,14 @@ export class ProfileStatsRepository {
     incrementBy: number;
   }) {
     await db
-      .update(schema.profileStats)
-      .set({ posts: sql`${schema.profileStats.posts} + ${incrementBy}` })
-      .where(eq(schema.profileStats.profileId, profileId));
+      .update(schema.userStats)
+      .set({ posts: sql`${schema.userStats.posts} + ${incrementBy}` })
+      .where(eq(schema.userStats.profileId, profileId));
   }
 
   async getProfileStats({ profileId }: { profileId: string }) {
-    return await db.query.profileStats.findFirst({
-      where: eq(schema.profileStats.profileId, profileId),
+    return await db.query.userStats.findFirst({
+      where: eq(schema.userStats.profileId, profileId),
     });
   }
 }

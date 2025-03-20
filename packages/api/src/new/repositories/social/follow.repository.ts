@@ -65,9 +65,9 @@ export class FollowRepository implements IFollowRepository {
     if (!senderProfile) throw new Error("Sender profile not found");
 
     await tx
-      .update(this.schema.profileStats)
-      .set({ following: sql`${this.schema.profileStats.following} + 1` })
-      .where(eq(this.schema.profileStats.profileId, senderProfile.id));
+      .update(this.schema.userStats)
+      .set({ following: sql`${this.schema.userStats.following} + 1` })
+      .where(eq(this.schema.userStats.profileId, senderProfile.id));
 
     const recipientProfile = await tx.query.profile.findFirst({
       where: eq(this.schema.profile.userId, recipientUserId),
@@ -76,9 +76,9 @@ export class FollowRepository implements IFollowRepository {
     if (!recipientProfile) throw new Error("Recipient profile not found");
 
     await tx
-      .update(this.schema.profileStats)
-      .set({ followers: sql`${this.schema.profileStats.followers} + 1` })
-      .where(eq(this.schema.profileStats.profileId, recipientProfile.id));
+      .update(this.schema.userStats)
+      .set({ followers: sql`${this.schema.userStats.followers} + 1` })
+      .where(eq(this.schema.userStats.profileId, recipientProfile.id));
 
     // Update relationship status for both sides
     await this.relationshipRepository.upsert(
@@ -115,9 +115,9 @@ export class FollowRepository implements IFollowRepository {
     if (!followerProfile) throw new Error("Follower profile not found");
 
     await tx
-      .update(this.schema.profileStats)
-      .set({ following: sql`${this.schema.profileStats.following} - 1` })
-      .where(eq(this.schema.profileStats.profileId, followerProfile.id));
+      .update(this.schema.userStats)
+      .set({ following: sql`${this.schema.userStats.following} - 1` })
+      .where(eq(this.schema.userStats.profileId, followerProfile.id));
 
     const followeeProfile = await tx.query.profile.findFirst({
       where: eq(this.schema.profile.userId, followeeId),
@@ -126,9 +126,9 @@ export class FollowRepository implements IFollowRepository {
     if (!followeeProfile) throw new Error("Followee profile not found");
 
     await tx
-      .update(this.schema.profileStats)
-      .set({ followers: sql`${this.schema.profileStats.followers} - 1` })
-      .where(eq(this.schema.profileStats.profileId, followeeProfile.id));
+      .update(this.schema.userStats)
+      .set({ followers: sql`${this.schema.userStats.followers} - 1` })
+      .where(eq(this.schema.userStats.profileId, followeeProfile.id));
 
     // Update relationship status for both sides
     await this.relationshipRepository.upsert(
@@ -157,13 +157,11 @@ export class FollowRepository implements IFollowRepository {
         ),
       );
 
-    await this.relationshipRepository.upsert(
-      {
-        userIdA: senderId,
-        userIdB: recipientId,
-        updates: { followStatus: "notFollowing" },
-      },
-    );
+    await this.relationshipRepository.upsert({
+      userIdA: senderId,
+      userIdB: recipientId,
+      updates: { followStatus: "notFollowing" },
+    });
   }
 
   async getFollower(
@@ -343,9 +341,9 @@ export class FollowRepository implements IFollowRepository {
     if (!senderProfile) throw new Error("Sender profile not found");
 
     await tx
-      .update(this.schema.profileStats)
-      .set({ following: sql`${this.schema.profileStats.following} + 1` })
-      .where(eq(this.schema.profileStats.profileId, senderProfile.id));
+      .update(this.schema.userStats)
+      .set({ following: sql`${this.schema.userStats.following} + 1` })
+      .where(eq(this.schema.userStats.profileId, senderProfile.id));
 
     const recipientProfile = await tx.query.profile.findFirst({
       where: eq(this.schema.profile.userId, recipientId),
@@ -354,9 +352,9 @@ export class FollowRepository implements IFollowRepository {
     if (!recipientProfile) throw new Error("Recipient profile not found");
 
     await tx
-      .update(this.schema.profileStats)
-      .set({ followers: sql`${this.schema.profileStats.followers} + 1` })
-      .where(eq(this.schema.profileStats.profileId, recipientProfile.id));
+      .update(this.schema.userStats)
+      .set({ followers: sql`${this.schema.userStats.followers} + 1` })
+      .where(eq(this.schema.userStats.profileId, recipientProfile.id));
 
     // Update relationship status for both sides
     await this.relationshipRepository.upsert(

@@ -60,9 +60,9 @@ export class UserRepository implements IUserRepository {
     if (!profile) throw new Error("Profile was not created");
 
     const [profileStats] = await tx
-      .insert(this.schema.profileStats)
+      .insert(this.schema.userStats)
       .values({ profileId: profile.id })
-      .returning({ id: this.schema.profileStats.id });
+      .returning({ id: this.schema.userStats.id });
 
     // Create default notification settings for the user
     const [notificationSetting] = await tx
@@ -222,11 +222,11 @@ export class UserRepository implements IUserRepository {
     // Update profile stats
     // Decrement followers count for users that the deleted user was following
     await tx
-      .update(this.schema.profileStats)
-      .set({ followers: sql`${this.schema.profileStats.followers} - 1` })
+      .update(this.schema.userStats)
+      .set({ followers: sql`${this.schema.userStats.followers} - 1` })
       .where(
         inArray(
-          this.schema.profileStats.profileId,
+          this.schema.userStats.profileId,
           tx
             .select({ profileId: this.schema.profile.id })
             .from(this.schema.follow)
@@ -240,11 +240,11 @@ export class UserRepository implements IUserRepository {
 
     // Decrement following count for users that were following the deleted user
     await tx
-      .update(this.schema.profileStats)
-      .set({ following: sql`${this.schema.profileStats.following} - 1` })
+      .update(this.schema.userStats)
+      .set({ following: sql`${this.schema.userStats.following} - 1` })
       .where(
         inArray(
-          this.schema.profileStats.profileId,
+          this.schema.userStats.profileId,
           tx
             .select({ profileId: this.schema.profile.id })
             .from(this.schema.follow)
@@ -258,11 +258,11 @@ export class UserRepository implements IUserRepository {
 
     // Decrement friends count for users that were friends with the deleted user
     await tx
-      .update(this.schema.profileStats)
-      .set({ friends: sql`${this.schema.profileStats.friends} - 1` })
+      .update(this.schema.userStats)
+      .set({ friends: sql`${this.schema.userStats.friends} - 1` })
       .where(
         inArray(
-          this.schema.profileStats.profileId,
+          this.schema.userStats.profileId,
           tx
             .select({ profileId: this.schema.profile.id })
             .from(this.schema.friend)

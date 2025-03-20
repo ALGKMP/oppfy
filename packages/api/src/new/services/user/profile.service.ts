@@ -6,17 +6,16 @@ import type { Database } from "@oppfy/db";
 import { TYPES } from "../../container";
 import { ProfileErrors } from "../../errors/user/profile.error";
 import type { IBlockRepository } from "../../interfaces/repositories/social/blockRepository.interface";
+import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profileRepository.interface";
 import type {
-  GetProfileByUsernameParams,
   GetProfileParams,
-  GetUploadProfilePictureUrlParams,
+  GetStatsParams,
   IProfileService,
-  ProfileByUsernameResult,
-  ProfileResult,
   SearchProfilesByUsernameParams,
   UpdateProfileParams,
 } from "../../interfaces/services/user/profileService.interface";
+import { Profile, ProfileStats } from "../../models";
 
 @injectable()
 export class ProfileService implements IProfileService {
@@ -29,66 +28,10 @@ export class ProfileService implements IProfileService {
     private readonly blockRepository: IBlockRepository,
   ) {}
 
-  async getUploadProfilePictureUrl(
-    params: GetUploadProfilePictureUrlParams,
-  ): Promise<string> {
-    // TODO: Implement S3 presigned URL generation
-    return "https://example.com/upload";
-  }
-
-  async updateProfile(params: UpdateProfileParams): Promise<void> {
-    const { userId, newData } = params;
-
-    // Check if username is being updated and if it already exists
-    if (newData.username) {
-      const exists = await this.profileRepository.usernameTaken(
-        newData.username,
-      );
-      if (exists) {
-        throw new Error(`Username "${newData.username}" already exists`);
-      }
-    }
-
-    await this.profileRepository.updateProfile({
-      userId,
-      update: newData,
-    });
-  }
-
-  async getProfileByUsername(
-    params: GetProfileByUsernameParams,
-  ): Promise<ProfileByUsernameResult> {
-    const { username } = params;
-
-    const profile = await this.profileRepository.getProfileByUsername({
-      username,
-    });
-
-    if (!profile) {
-      throw new Error(`Profile not found with username "${username}"`);
-    }
-
-    return {
-      userId: profile.userId,
-      name: profile.name,
-      username: profile.username,
-      bio: profile.bio,
-      profilePictureUrl: profile.profilePictureKey,
-      createdAt: profile.createdAt,
-      updatedAt: profile.updatedAt,
-    };
-  }
-
-  async getProfile(params: GetProfileParams): Promise<ProfileResult> {
+  async profile(
+    params: GetProfileParams,
+  ): Promise<Result<Profile, ProfileErrors.ProfileNotFound>> {
     const { selfUserId, otherUserId } = params;
-
-    const profile = await this.profileRepository.getProfile({
-      userId: otherUserId,
-    });
-
-    if (!profile) {
-      throw new Error(`Profile not found for user "${otherUserId}"`);
-    }
 
     // Check if blocked
     const [isBlocked, isBlockedBy] = await Promise.all([
@@ -103,24 +46,60 @@ export class ProfileService implements IProfileService {
     ]);
 
     if (isBlocked || isBlockedBy) {
-      throw new Error("Cannot view profile of blocked user");
+      return err(new ProfileErrors.ProfileBlocked(otherUserId));
     }
 
-    return {
-      userId: profile.userId,
-      privacy: profile.privacy,
-      username: profile.username,
-      name: profile.name,
-      bio: profile.bio,
-      profilePictureUrl: profile.profilePictureKey,
-      createdAt: profile.createdAt,
-      updatedAt: profile.updatedAt,
-    };
+    const profile = await this.profileRepository.getProfile({
+      userId: otherUserId,
+    });
+
+    if (profile === undefined)
+      return err(new ProfileErrors.ProfileNotFound(otherUserId));
+
+    return ok(profile);
+  }
+
+  async stats(
+    params: GetStatsParams,
+  ): Promise<Result<ProfileStats, ProfileErrors.ProfileNotFound>> {
+    const { userId } = params;
+
+    const stats = await this.profileRepository.getStats({
+      userId,
+    });
+
+    if (stats === undefined)
+      return err(new ProfileErrors.ProfileNotFound(userId));
+
+    return ok(stats);
+  }
+
+  async updateProfile(
+    params: UpdateProfileParams,
+  ): Promise<Result<void, ProfileErrors.UsernameTaken>> {
+    const { userId, newData } = params;
+
+    if (newData.username) {
+      const usernameTaken = await this.profileRepository.usernameTaken({
+        username: newData.username,
+      });
+
+      if (usernameTaken) {
+        return err(new ProfileErrors.UsernameTaken(newData.username));
+      }
+    }
+
+    await this.profileRepository.updateProfile({
+      userId,
+      update: newData,
+    });
+
+    return ok();
   }
 
   async searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,
-  ): Promise<ProfileByUsernameResult[]> {
+  ): Promise<Result<Profile[], never>> {
     const { username, selfUserId } = params;
 
     const profiles = await this.profileRepository.getProfilesByUsername({
@@ -129,14 +108,6 @@ export class ProfileService implements IProfileService {
       limit: 15,
     });
 
-    return profiles.map((profile) => ({
-      userId: profile.userId,
-      name: profile.name,
-      username: profile.username,
-      bio: profile.bio,
-      profilePictureUrl: profile.profilePictureKey,
-      createdAt: profile.createdAt,
-      updatedAt: profile.updatedAt,
-    }));
+    return ok(profiles);
   }
 }

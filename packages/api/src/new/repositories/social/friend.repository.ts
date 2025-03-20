@@ -83,29 +83,34 @@ export class FriendRepository implements IFriendRepository {
       if (!userProfile) throw new Error(`Profile not found for user ${userId}`);
 
       await tx
-        .update(this.schema.profileStats)
-        .set({ friends: sql`${this.schema.profileStats.friends} + 1` })
-        .where(eq(this.schema.profileStats.profileId, userProfile.id));
+        .update(this.schema.userStats)
+        .set({ friends: sql`${this.schema.userStats.friends} + 1` })
+        .where(eq(this.schema.userStats.profileId, userProfile.id));
     };
 
     await updateProfileStats(senderId, tx);
     await updateProfileStats(recipientId, tx);
 
     // Update relationship status for both sides
-    await this.relationshipRepository.upsert({
-      userIdA: senderId,
-      userIdB: recipientId,
-      updates: {
-        friendshipStatus: "friends",
+    await this.relationshipRepository.upsert(
+      {
+        userIdA: senderId,
+        userIdB: recipientId,
+        updates: {
+          friendshipStatus: "friends",
+        },
       },
-    }, tx);
-    await this.relationshipRepository.upsert({
-      userIdA: recipientId,
-      userIdB: senderId,
-      updates: {
-        friendshipStatus: "friends",
-      }},
-      tx
+      tx,
+    );
+    await this.relationshipRepository.upsert(
+      {
+        userIdA: recipientId,
+        userIdB: senderId,
+        updates: {
+          friendshipStatus: "friends",
+        },
+      },
+      tx,
     );
   }
 
@@ -137,9 +142,9 @@ export class FriendRepository implements IFriendRepository {
       if (!userProfile) throw new Error(`Profile not found for user ${userId}`);
 
       await tx
-        .update(this.schema.profileStats)
-        .set({ friends: sql`${this.schema.profileStats.friends} - 1` })
-        .where(eq(this.schema.profileStats.profileId, userProfile.id));
+        .update(this.schema.userStats)
+        .set({ friends: sql`${this.schema.userStats.friends} - 1` })
+        .where(eq(this.schema.userStats.profileId, userProfile.id));
     };
 
     await updateProfileStats(userIdA);

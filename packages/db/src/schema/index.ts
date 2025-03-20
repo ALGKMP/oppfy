@@ -136,9 +136,9 @@ export const userRelations = relations(user, ({ one, many }) => ({
     fields: [user.id],
     references: [profile.userId],
   }),
-  profileStats: one(profileStats, {
+  profileStats: one(userStats, {
     fields: [user.id],
-    references: [profileStats.userId],
+    references: [userStats.userId],
   }),
   notificationSettings: one(notificationSettings, {
     fields: [user.notificationSettingsId],
@@ -216,7 +216,7 @@ export const profileRelations = relations(profile, ({ one }) => ({
   }),
 }));
 
-export const profileStats = pgTable("profile_stats", {
+export const userStats = pgTable("profile_stats", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id")
     .notNull()
@@ -233,9 +233,9 @@ export const profileStats = pgTable("profile_stats", {
     .notNull(),
 });
 
-export const profileStatsRelations = relations(profileStats, ({ one }) => ({
+export const profileStatsRelations = relations(userStats, ({ one }) => ({
   user: one(user, {
-    fields: [profileStats.userId],
+    fields: [userStats.userId],
     references: [user.id],
   }),
 }));

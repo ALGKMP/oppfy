@@ -8,4 +8,16 @@ export namespace ProfileErrors {
       super(`Profile not found for user ${userId}`);
     }
   }
+
+  export class ProfileBlocked extends ProfileError {
+    constructor(userId: string) {
+      super(`Profile is blocked for user ${userId}`);
+    }
+  }
+
+  export class UsernameTaken extends ProfileError {
+    constructor(username: string) {
+      super(`Username "${username}" is already taken`);
+    }
+  }
 }

@@ -322,11 +322,11 @@ export class PostRepository implements IPostRepository {
 
     await tx.delete(this.schema.post).where(eq(this.schema.post.id, postId));
     await tx
-      .update(this.schema.profileStats)
-      .set({ posts: sql`${this.schema.profileStats.posts} - 1` })
+      .update(this.schema.userStats)
+      .set({ posts: sql`${this.schema.userStats.posts} - 1` })
       .where(
         eq(
-          this.schema.profileStats.profileId,
+          this.schema.userStats.profileId,
           sql`(SELECT profile_id FROM "user" WHERE id = ${post.recipientId})`,
         ),
       );

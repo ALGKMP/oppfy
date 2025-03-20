@@ -9,13 +9,14 @@ import {
 
 import { TYPES } from "../../container";
 import type {
+  GetStatsParams,
   IProfileRepository,
   ProfilesByUsernameParams,
   UpdateProfileParams,
   UserIdParams,
   UsernameParams,
 } from "../../interfaces/repositories/user/profileRepository.interface";
-import type { Profile } from "../../models";
+import type { Profile, ProfileStats } from "../../models";
 
 @injectable()
 export class ProfileRepository implements IProfileRepository {
@@ -62,6 +63,19 @@ export class ProfileRepository implements IProfileRepository {
       .limit(limit);
 
     return results.map((result) => result.profile);
+  }
+
+  async getStats(
+    params: GetStatsParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<ProfileStats> {
+    const { userId } = params;
+
+    const stats = await db.query.userStats.findFirst({
+      where: eq(this.schema.userStats.userId, userId),
+    });
+
+    return stats;
   }
 
   async usernameTaken(

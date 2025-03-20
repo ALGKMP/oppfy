@@ -50,9 +50,9 @@ export class FriendRepository {
           throw new Error(`Profile not found for user ${userId}`);
 
         await tx
-          .update(schema.profileStats)
-          .set({ friends: sql`${schema.profileStats.friends} + 1` })
-          .where(eq(schema.profileStats.profileId, userProfile.id));
+          .update(schema.userStats)
+          .set({ friends: sql`${schema.userStats.friends} + 1` })
+          .where(eq(schema.userStats.profileId, userProfile.id));
       };
 
       await updateProfileStats(senderId);
@@ -93,9 +93,9 @@ export class FriendRepository {
           throw new Error(`Profile not found for user ${userId}`);
 
         await tx
-          .update(schema.profileStats)
-          .set({ friends: sql`${schema.profileStats.friends} - 1` })
-          .where(eq(schema.profileStats.profileId, userProfile.id));
+          .update(schema.userStats)
+          .set({ friends: sql`${schema.userStats.friends} - 1` })
+          .where(eq(schema.userStats.profileId, userProfile.id));
       };
 
       await updateProfileStats(userIdA);

@@ -493,11 +493,11 @@ export class PostRepository {
 
       // Decrement author's profile stats post count
       await tx
-        .update(schema.profileStats)
-        .set({ posts: sql`${schema.profileStats.posts} - 1` })
+        .update(schema.userStats)
+        .set({ posts: sql`${schema.userStats.posts} - 1` })
         .where(
           eq(
-            schema.profileStats.profileId,
+            schema.userStats.profileId,
             sql`(SELECT profile_id FROM "user" WHERE id = ${post.recipientId})`,
           ),
         );

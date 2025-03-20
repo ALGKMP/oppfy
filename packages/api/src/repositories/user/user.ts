@@ -36,9 +36,9 @@ export class UserRepository {
       if (!profile) throw new Error("Profile was not created");
 
       const [profileStats] = await tx
-        .insert(schema.profileStats)
+        .insert(schema.userStats)
         .values({ profileId: profile.id })
-        .returning({ id: schema.profileStats.id });
+        .returning({ id: schema.userStats.id });
 
       // Create default notification settings for the user
       const [notificationSetting] = await tx
@@ -55,13 +55,11 @@ export class UserRepository {
       }
 
       // Create the user
-      await tx
-        .insert(schema.user)
-        .values({
-          id: userId,
-          notificationSettingsId: notificationSetting.id,
-          phoneNumber,
-        });
+      await tx.insert(schema.user).values({
+        id: userId,
+        notificationSettingsId: notificationSetting.id,
+        phoneNumber,
+      });
 
       await tx.insert(schema.userStatus).values({ userId, isOnApp: isOnApp });
     });
@@ -116,11 +114,7 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async getRandomActiveProfilesForRecs({
-    limit,
-  }: {
-    limit: number;
-  }) {
+  async getRandomActiveProfilesForRecs({ limit }: { limit: number }) {
     return await this.db
       .select({ userId: schema.user.id })
       .from(schema.user)
@@ -183,11 +177,11 @@ export class UserRepository {
       // Update profile stats
       // Decrement followers count for users that the deleted user was following
       await tx
-        .update(schema.profileStats)
-        .set({ followers: sql`${schema.profileStats.followers} - 1` })
+        .update(schema.userStats)
+        .set({ followers: sql`${schema.userStats.followers} - 1` })
         .where(
           inArray(
-            schema.profileStats.profileId,
+            schema.userStats.profileId,
             tx
               .select({ profileId: schema.profile.id })
               .from(schema.follow)
@@ -201,11 +195,11 @@ export class UserRepository {
 
       // Decrement following count for users that were following the deleted user
       await tx
-        .update(schema.profileStats)
-        .set({ following: sql`${schema.profileStats.following} - 1` })
+        .update(schema.userStats)
+        .set({ following: sql`${schema.userStats.following} - 1` })
         .where(
           inArray(
-            schema.profileStats.profileId,
+            schema.userStats.profileId,
             tx
               .select({ profileId: schema.profile.id })
               .from(schema.follow)
@@ -219,11 +213,11 @@ export class UserRepository {
 
       // Decrement friends count for users that were friends with the deleted user
       await tx
-        .update(schema.profileStats)
-        .set({ friends: sql`${schema.profileStats.friends} - 1` })
+        .update(schema.userStats)
+        .set({ friends: sql`${schema.userStats.friends} - 1` })
         .where(
           inArray(
-            schema.profileStats.profileId,
+            schema.userStats.profileId,
             tx
               .select({ profileId: schema.profile.id })
               .from(schema.friend)

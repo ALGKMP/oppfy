@@ -38,11 +38,11 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
     const { userId, amount } = params;
 
     await db
-      .update(this.schema.profileStats)
+      .update(this.schema.userStats)
       .set({
-        followers: sql`${this.schema.profileStats.followers} - ${amount}`,
+        followers: sql`${this.schema.userStats.followers} - ${amount}`,
       })
-      .where(eq(this.schema.profileStats.profileId, userId));
+      .where(eq(this.schema.userStats.profileId, userId));
   }
 
   async decrementFollowingCount(
@@ -52,11 +52,11 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
     const { userId, amount } = params;
 
     await db
-      .update(this.schema.profileStats)
+      .update(this.schema.userStats)
       .set({
-        following: sql`${this.schema.profileStats.following} - ${amount}`,
+        following: sql`${this.schema.userStats.following} - ${amount}`,
       })
-      .where(eq(this.schema.profileStats.profileId, userId));
+      .where(eq(this.schema.userStats.profileId, userId));
   }
 
   async decrementFriendsCount(
@@ -66,9 +66,9 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
     const { userId, amount } = params;
 
     await db
-      .update(this.schema.profileStats)
-      .set({ friends: sql`${this.schema.profileStats.friends} - ${amount}` })
-      .where(eq(this.schema.profileStats.profileId, userId));
+      .update(this.schema.userStats)
+      .set({ friends: sql`${this.schema.userStats.friends} - ${amount}` })
+      .where(eq(this.schema.userStats.profileId, userId));
   }
 
   async decrementPostsCount(
@@ -78,9 +78,9 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
     const { profileId, decrementBy } = params;
 
     await db
-      .update(this.schema.profileStats)
-      .set({ posts: sql`${this.schema.profileStats.posts} - ${decrementBy}` })
-      .where(eq(this.schema.profileStats.profileId, profileId));
+      .update(this.schema.userStats)
+      .set({ posts: sql`${this.schema.userStats.posts} - ${decrementBy}` })
+      .where(eq(this.schema.userStats.profileId, profileId));
   }
 
   async incrementFollowerCount(
@@ -90,11 +90,11 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
     const { profileId, incrementBy } = params;
 
     await db
-      .update(this.schema.profileStats)
+      .update(this.schema.userStats)
       .set({
-        followers: sql`${this.schema.profileStats.followers} + ${incrementBy}`,
+        followers: sql`${this.schema.userStats.followers} + ${incrementBy}`,
       })
-      .where(eq(this.schema.profileStats.profileId, profileId));
+      .where(eq(this.schema.userStats.profileId, profileId));
   }
 
   async incrementFollowingCount(
@@ -104,11 +104,11 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
     const { profileId, incrementBy } = params;
 
     await db
-      .update(this.schema.profileStats)
+      .update(this.schema.userStats)
       .set({
-        following: sql`${this.schema.profileStats.following} + ${incrementBy}`,
+        following: sql`${this.schema.userStats.following} + ${incrementBy}`,
       })
-      .where(eq(this.schema.profileStats.profileId, profileId));
+      .where(eq(this.schema.userStats.profileId, profileId));
   }
 
   async incrementFriendsCount(
@@ -118,11 +118,11 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
     const { profileId, incrementBy } = params;
 
     await db
-      .update(this.schema.profileStats)
+      .update(this.schema.userStats)
       .set({
-        friends: sql`${this.schema.profileStats.friends} + ${incrementBy}`,
+        friends: sql`${this.schema.userStats.friends} + ${incrementBy}`,
       })
-      .where(eq(this.schema.profileStats.profileId, profileId));
+      .where(eq(this.schema.userStats.profileId, profileId));
   }
 
   async incrementPostsCount(
@@ -132,9 +132,9 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
     const { profileId, incrementBy } = params;
 
     await db
-      .update(this.schema.profileStats)
-      .set({ posts: sql`${this.schema.profileStats.posts} + ${incrementBy}` })
-      .where(eq(this.schema.profileStats.profileId, profileId));
+      .update(this.schema.userStats)
+      .set({ posts: sql`${this.schema.userStats.posts} + ${incrementBy}` })
+      .where(eq(this.schema.userStats.profileId, profileId));
   }
 
   async getProfileStats(
@@ -143,8 +143,8 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
   ): Promise<ProfileStats | undefined> {
     const { profileId } = params;
 
-    return await db.query.profileStats.findFirst({
-      where: eq(this.schema.profileStats.profileId, profileId),
+    return await db.query.userStats.findFirst({
+      where: eq(this.schema.userStats.profileId, profileId),
     });
   }
 }
