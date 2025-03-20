@@ -1,19 +1,44 @@
-export interface Cursor {
-  createdAt: Date;
-  profileId: string;
-}
+import type { Cursor } from "@oppfy/db";
 
 export interface PaginatedResponse<T> {
   items: T[];
   nextCursor: Cursor | null;
 }
 
+export interface PaginateFollowersSelfParams {
+  userId: string;
+  cursor: Cursor | null;
+  pageSize?: number;
+}
+
+export interface PaginateFollowersOthersParams {
+  userId: string;
+  currentUserId: string;
+  cursor: Cursor | null;
+  pageSize?: number;
+}
+
+export interface PaginateFollowingSelfParams {
+  userId: string;
+  cursor: Cursor | null;
+  pageSize?: number;
+}
+
+export interface PaginateFollowingOthersParams {
+  userId: string;
+  currentUserId: string;
+  cursor: Cursor | null;
+  pageSize?: number;
+}
+
+export interface PaginateFriendsSelfParams {
+  userId: string;
+  cursor: Cursor | null;
+  pageSize?: number;
+}
+
 export interface IPaginationService {
-  paginateFollowersSelf(options: {
-    userId: string;
-    cursor: Cursor | null;
-    pageSize?: number;
-  }): Promise<
+  paginateFollowersSelf(params: PaginateFollowersSelfParams): Promise<
     PaginatedResponse<{
       userId: string;
       username: string;
@@ -24,12 +49,7 @@ export interface IPaginationService {
     }>
   >;
 
-  paginateFollowersOthers(options: {
-    userId: string;
-    currentUserId: string;
-    cursor: Cursor | null;
-    pageSize?: number;
-  }): Promise<
+  paginateFollowersOthers(params: PaginateFollowersOthersParams): Promise<
     PaginatedResponse<{
       userId: string;
       username: string;
@@ -40,11 +60,7 @@ export interface IPaginationService {
     }>
   >;
 
-  paginateFollowingSelf(options: {
-    userId: string;
-    cursor: Cursor | null;
-    pageSize?: number;
-  }): Promise<
+  paginateFollowingSelf(params: PaginateFollowingSelfParams): Promise<
     PaginatedResponse<{
       userId: string;
       username: string;
@@ -55,12 +71,7 @@ export interface IPaginationService {
     }>
   >;
 
-  paginateFollowingOthers(options: {
-    userId: string;
-    currentUserId: string;
-    cursor: Cursor | null;
-    pageSize?: number;
-  }): Promise<
+  paginateFollowingOthers(params: PaginateFollowingOthersParams): Promise<
     PaginatedResponse<{
       userId: string;
       username: string;
@@ -71,11 +82,7 @@ export interface IPaginationService {
     }>
   >;
 
-  paginateFriendsSelf(options: {
-    userId: string;
-    cursor: Cursor | null;
-    pageSize?: number;
-  }): Promise<
+  paginateFriendsSelf(params: PaginateFriendsSelfParams): Promise<
     PaginatedResponse<{
       userId: string;
       username: string;

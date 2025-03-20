@@ -1,21 +1,54 @@
 import type { EntityType, EventType, NotificationSettings } from "@oppfy/db";
 
+export interface GetNotificationSettingsParams {
+  userId: string;
+}
+
+export interface GetUnreadNotificationsCountParams {
+  userId: string;
+}
+
+export interface GetRecentNotificationsParams {
+  senderId?: string;
+  recipientId?: string;
+  eventType?: EventType;
+  entityId?: string;
+  entityType?: EntityType;
+  minutesThreshold: number;
+  limit: number;
+}
+
+export interface PaginateNotificationsParams {
+  userId: string;
+  cursor?: { createdAt: Date; id: string } | null;
+  pageSize?: number;
+}
+
+export interface UpdateNotificationSettingsParams {
+  userId: string;
+  newNotificationSettings: NotificationSettings;
+}
+
+export interface StorePushTokenParams {
+  userId: string;
+  pushToken: string;
+}
+
+export interface DeletePushTokenParams {
+  userId: string;
+  pushToken: string;
+}
+
 export interface INotificationService {
-  getNotificationSettings(options: {
-    userId: string;
-  }): Promise<NotificationSettings>;
+  getNotificationSettings(
+    params: GetNotificationSettingsParams,
+  ): Promise<NotificationSettings>;
 
-  getUnreadNotificationsCount(options: { userId: string }): Promise<number>;
+  getUnreadNotificationsCount(
+    params: GetUnreadNotificationsCountParams,
+  ): Promise<number>;
 
-  getRecentNotifications(options: {
-    senderId?: string;
-    recipientId?: string;
-    eventType?: EventType;
-    entityId?: string;
-    entityType?: EntityType;
-    minutesThreshold: number;
-    limit: number;
-  }): Promise<
+  getRecentNotifications(params: GetRecentNotificationsParams): Promise<
     {
       id: string;
       createdAt: Date;
@@ -29,11 +62,7 @@ export interface INotificationService {
     }[]
   >;
 
-  paginateNotifications(options: {
-    userId: string;
-    cursor?: { createdAt: Date; id: string } | null;
-    pageSize?: number;
-  }): Promise<{
+  paginateNotifications(params: PaginateNotificationsParams): Promise<{
     items: {
       id: string;
       createdAt: Date;
@@ -48,15 +77,11 @@ export interface INotificationService {
     nextCursor: { createdAt: Date; id: string } | null;
   }>;
 
-  updateNotificationSettings(options: {
-    userId: string;
-    newNotificationSettings: NotificationSettings;
-  }): Promise<void>;
+  updateNotificationSettings(
+    params: UpdateNotificationSettingsParams,
+  ): Promise<void>;
 
-  storePushToken(options: { userId: string; pushToken: string }): Promise<void>;
+  storePushToken(params: StorePushTokenParams): Promise<void>;
 
-  deletePushToken(options: {
-    userId: string;
-    pushToken: string;
-  }): Promise<void>;
+  deletePushToken(params: DeletePushTokenParams): Promise<void>;
 }
