@@ -1,4 +1,5 @@
 import type { Result } from "neverthrow";
+import type { User } from "../../../models";
 
 import type { UserErrors } from "../../../errors/user/user.error";
 
@@ -70,48 +71,15 @@ export interface IUserService {
     params: CreateUserParams,
   ): Promise<Result<void, UserErrors.UserNotFound>>;
 
-  getUser(params: GetUserParams): Promise<
-    Result<
-      {
-        id: string;
-        phoneNumber: string;
-        username: string;
-        isOnApp: boolean;
-        privacySetting: "public" | "private";
-        notificationSettingsId: string;
-      },
-      UserErrors.UserNotFound
-    >
-  >;
+  getUser(params: GetUserParams): Promise<Result<User, UserErrors.UserNotFound>>;
 
-  getUserByPhoneNumber(params: GetUserByPhoneNumberParams): Promise<
-    Result<
-      {
-        id: string;
-        phoneNumber: string;
-        username: string;
-        isOnApp: boolean;
-        privacySetting: "public" | "private";
-        notificationSettingsId: string;
-      },
-      UserErrors.UserNotFound
-    >
-  >;
+  getUserByPhoneNumber(
+    params: GetUserByPhoneNumberParams,
+  ): Promise<Result<User, UserErrors.UserNotFound>>;
 
-  getUserByPhoneNumberNoThrow(params: GetUserByPhoneNumberParams): Promise<
-    Result<
-      | {
-          id: string;
-          phoneNumber: string;
-          username: string;
-          isOnApp: boolean;
-          privacySetting: "public" | "private";
-          notificationSettingsId: string;
-        }
-      | undefined,
-      never
-    >
-  >;
+  getUserByPhoneNumberNoThrow(
+    params: GetUserByPhoneNumberParams,
+  ): Promise<Result<User | undefined, never>>;
 
   deleteUser(
     params: DeleteUserParams,

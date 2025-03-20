@@ -9,6 +9,7 @@ import { sns } from "@oppfy/sns";
 import { sqs } from "@oppfy/sqs";
 
 import { TYPES } from "../../container";
+import { AwsErrors } from "../../errors/aws.error";
 import { UserErrors } from "../../errors/user/user.error";
 import type { IPostRepository } from "../../interfaces/repositories/content/postRepository.interface";
 import type { IBlockRepository } from "../../interfaces/repositories/social/blockRepository.interface";
@@ -18,6 +19,7 @@ import type { INotificationsRepository } from "../../interfaces/repositories/use
 import type { IProfileRepository } from "../../interfaces/repositories/user/profileRepository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/userRepository.interface";
 import type { IUserService } from "../../interfaces/services/user/userService.interface";
+import type { User } from "../../models";
 
 @injectable()
 export class UserService implements IUserService {
@@ -118,7 +120,7 @@ export class UserService implements IUserService {
 
   async getUser(options: {
     userId: string;
-  }): Promise<Result<any, UserErrors.UserNotFound>> {
+  }): Promise<Result<User, UserErrors.UserNotFound>> {
     const { userId } = options;
     const user = await this.userRepository.getUser({ userId });
     if (!user) {
@@ -129,7 +131,7 @@ export class UserService implements IUserService {
 
   async getUserByPhoneNumber(options: {
     phoneNumber: string;
-  }): Promise<Result<any, UserErrors.UserNotFound>> {
+  }): Promise<Result<User, UserErrors.UserNotFound>> {
     const { phoneNumber } = options;
     const user = await this.userRepository.getUserByPhoneNumber({
       phoneNumber,
@@ -142,7 +144,7 @@ export class UserService implements IUserService {
 
   async getUserByPhoneNumberNoThrow(options: {
     phoneNumber: string;
-  }): Promise<Result<any, never>> {
+  }): Promise<Result<User | undefined, never>> {
     const { phoneNumber } = options;
     const user = await this.userRepository.getUserByPhoneNumber({
       phoneNumber,
@@ -175,8 +177,10 @@ export class UserService implements IUserService {
         userPhoneNumberHash,
         contacts: [],
       });
-    } catch (err) {
-      return err(new UserErrors.FailedToSendContactSyncMessage());
+    } catch (error) {
+      return err(
+        new AwsErrors.SQSFailedToSend("Failed to send contact sync message"),
+      );
     }
 
     return ok(undefined);
@@ -327,7 +331,14 @@ export class UserService implements IUserService {
       return ok(false);
     }
 
-    if (targetUser.privacySetting === "public") {
+    const targetProfile = await this.profileRepository.getProfile({
+      userId: targetUserId,
+    });
+    if (!targetProfile) {
+      return err(new UserErrors.UserNotFound(targetUserId));
+    }
+
+    if (targetProfile.privacy === "public") {
       return ok(true);
     }
 
