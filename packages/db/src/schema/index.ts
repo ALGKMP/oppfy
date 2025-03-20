@@ -55,15 +55,17 @@ export const postTypeEnum = pgEnum("post_type", [
 export const mediaTypeEnum = pgEnum("media_type", ["image", "video"]);
 
 export const friendStatusEnum = pgEnum("friend_status", [
+  "notFriends",
   "friends",
-  "outbound_request",
-  "inbound_request",
+  "outboundRequest",
+  "inboundRequest",
 ]);
 
 export const followStatusEnum = pgEnum("follow_status", [
+  "notFollowing",
   "following",
-  "outbound_request",
-  "inbound_request",
+  "outboundRequest",
+  "inboundRequest",
 ]);
 
 export const reportPostReasonEnum = pgEnum("report_post_reason", [
@@ -757,9 +759,9 @@ export const userRelationship = pgTable(
     userIdB: uuid("user_id_b")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    friendshipStatus: friendStatusEnum("friendship_status").notNull(),
-    followStatus: followStatusEnum("follow_status").notNull(),
-    blockStatus: boolean("block_status").notNull(),
+    friendshipStatus: friendStatusEnum("friendship_status").default("notFriends").notNull(),
+    followStatus: followStatusEnum("follow_status").default("notFollowing").notNull(),
+    blockStatus: boolean("block_status").default(false).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
