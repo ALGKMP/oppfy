@@ -1,4 +1,4 @@
-import { eq, ilike, ne } from "drizzle-orm";
+import { eq, ilike, inArray, ne } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
@@ -11,6 +11,7 @@ import { TYPES } from "../../container";
 import type {
   GetStatsParams,
   IProfileRepository,
+  ProfilesByIdsParams,
   ProfilesByUsernameParams,
   UpdateProfileParams,
   UserIdParams,
@@ -38,6 +39,19 @@ export class ProfileRepository implements IProfileRepository {
     });
 
     return profile;
+  }
+
+  async getProfilesByIds(
+    params: ProfilesByIdsParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<Profile[]> {
+    const { userIds } = params;
+
+    const profiles = await db.query.profile.findMany({
+      where: inArray(this.schema.profile.userId, userIds),
+    });
+
+    return profiles;
   }
 
   async getProfilesByUsername(

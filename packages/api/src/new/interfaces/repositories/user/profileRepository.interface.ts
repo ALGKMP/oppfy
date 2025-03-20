@@ -10,6 +10,10 @@ export interface UsernameParams {
   username: string;
 }
 
+export interface ProfilesByIdsParams {
+  userIds: string[];
+}
+
 export interface GetStatsParams {
   userId: string;
 }
@@ -30,6 +34,11 @@ export interface IProfileRepository {
     params: UserIdParams,
     db?: DatabaseOrTransaction,
   ): Promise<Profile | undefined>;
+
+  getProfilesByIds(
+    params: ProfilesByIdsParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<Profile[]>;
 
   getProfilesByUsername(
     params: ProfilesByUsernameParams,
