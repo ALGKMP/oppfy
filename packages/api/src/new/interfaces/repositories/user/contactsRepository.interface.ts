@@ -19,7 +19,7 @@ export interface GetRecommendationsParams {
 
 export interface ContactRecommendation {
   userId: string;
-  username: string;
+  username: string | null;
   name: string | null;
   profilePictureUrl: string | null;
   mutualContactsCount: number;

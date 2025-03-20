@@ -1,7 +1,7 @@
 import type { Result } from "neverthrow";
 
 import type { ProfileErrors } from "../../../errors/user/profile.error";
-import type { Profile } from "../../../models";
+import type { HydratedProfile } from "../../../models";
 
 export interface GetProfileParams {
   selfUserId: string;
@@ -37,11 +37,11 @@ export interface ProfileStats {
 export interface IProfileService {
   profile(
     params: GetProfileParams,
-  ): Promise<Result<Profile, ProfileErrors.ProfileNotFound>>;
+  ): Promise<Result<HydratedProfile, ProfileErrors.ProfileNotFound>>;
 
   searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,
-  ): Promise<Result<Profile[], never>>;
+  ): Promise<Result<HydratedProfile[], never>>;
 
   stats(
     params: GetStatsParams,

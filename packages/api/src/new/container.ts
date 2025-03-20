@@ -2,6 +2,7 @@ import "reflect-metadata";
 
 import { Container } from "inversify";
 
+import { CloudFront } from "@oppfy/cloudfront";
 import { db, schema } from "@oppfy/db";
 
 import type { IBlockRepository } from "./interfaces/repositories/social/blockRepository.interface";
@@ -10,7 +11,7 @@ import type { IFriendRepository } from "./interfaces/repositories/social/friendR
 import type { IContactsRepository } from "./interfaces/repositories/user/contactsRepository.interface";
 import type { INotificationsRepository } from "./interfaces/repositories/user/notificationRepository.interface";
 import type { IProfileRepository } from "./interfaces/repositories/user/profileRepository.interface";
-import type { IProfileStatsRepository } from "./interfaces/repositories/user/profileStatsRepository.interface";
+import type { IUserStatsRepository } from "./interfaces/repositories/user/profileStatsRepository.interface";
 import type { IReportRepository } from "./interfaces/repositories/user/reportRepository.interface";
 import type { IUserRepository } from "./interfaces/repositories/user/userRepository.interface";
 import type { IReportService } from "./interfaces/services/user/reportService.interface";
@@ -20,9 +21,9 @@ import { FriendRepository } from "./repositories/social/friend.repository";
 import { ContactsRepository } from "./repositories/user/contacts.repository";
 import { NotificationsRepository } from "./repositories/user/notifications.repository";
 import { ProfileRepository } from "./repositories/user/profile.repository";
-import { ProfileStatsRepository } from "./repositories/user/profileStats.repository";
 import { ReportRepository } from "./repositories/user/report.repository";
 import { UserRepository } from "./repositories/user/user.repository";
+import { UserStatsRepository } from "./repositories/user/userStats.repository";
 import { ReportService } from "./services/user/report.service";
 
 // Define symbol constants for our interfaces
@@ -32,6 +33,9 @@ export const TYPES = {
   Schema: Symbol.for("Schema"),
   Transaction: Symbol.for("Transaction"),
 
+  // SDKs
+  CloudFront: Symbol.for("CloudFront"),
+
   // Repositories
   ReportRepository: Symbol.for("ReportRepository"),
   BlockRepository: Symbol.for("BlockRepository"),
@@ -40,7 +44,7 @@ export const TYPES = {
   ContactsRepository: Symbol.for("ContactsRepository"),
   NotificationsRepository: Symbol.for("NotificationsRepository"),
   ProfileRepository: Symbol.for("ProfileRepository"),
-  ProfileStatsRepository: Symbol.for("ProfileStatsRepository"),
+  UserStatsRepository: Symbol.for("UserStatsRepository"),
   UserRepository: Symbol.for("UserRepository"),
   RelationshipRepository: Symbol.for("RelationshipRepository"),
   PostRepository: Symbol.for("PostRepository"),
@@ -49,7 +53,6 @@ export const TYPES = {
   PostStatsRepository: Symbol.for("PostStatsRepository"),
   PostInteractionRepository: Symbol.for("PostInteractionRepository"),
   
-
 
   // Services
   ReportService: Symbol.for("ReportService"),
@@ -61,7 +64,9 @@ const container = new Container();
 // Bind DB dependencies
 container.bind(TYPES.Database).toConstantValue(db);
 container.bind(TYPES.Schema).toConstantValue(schema);
-container.bind(TYPES.Transaction).toConstantValue(db.transaction);
+
+// Bind sdk's
+container.bind<CloudFront>(TYPES.CloudFront).to(CloudFront);
 
 // Bind repositories
 container.bind<IReportRepository>(TYPES.ReportRepository).to(ReportRepository);
@@ -78,8 +83,8 @@ container
   .bind<IProfileRepository>(TYPES.ProfileRepository)
   .to(ProfileRepository);
 container
-  .bind<IProfileStatsRepository>(TYPES.ProfileStatsRepository)
-  .to(ProfileStatsRepository);
+  .bind<IUserStatsRepository>(TYPES.UserStatsRepository)
+  .to(UserStatsRepository);
 container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
 
 // Bind services

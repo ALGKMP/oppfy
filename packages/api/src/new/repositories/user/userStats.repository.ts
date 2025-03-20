@@ -9,17 +9,17 @@ import {
   DecrementFollowingCountParams,
   DecrementFriendsCountParams,
   DecrementPostsCountParams,
-  GetProfileStatsParams,
+  GetUserStatsParams,
   IncrementFollowerCountParams,
   IncrementFollowingCountParams,
   IncrementFriendsCountParams,
   IncrementPostsCountParams,
-  IProfileStatsRepository,
+  IUserStatsRepository,
 } from "../../interfaces/repositories/user/profileStatsRepository.interface";
 import { UserStats } from "../../models";
 
 @injectable()
-export class ProfileStatsRepository implements IProfileStatsRepository {
+export class UserStatsRepository implements IUserStatsRepository {
   private db: Database;
   private schema: Schema;
 
@@ -42,7 +42,7 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
       .set({
         followers: sql`${this.schema.userStats.followers} - ${amount}`,
       })
-      .where(eq(this.schema.userStats.profileId, userId));
+      .where(eq(this.schema.userStats.userId, userId));
   }
 
   async decrementFollowingCount(
@@ -56,7 +56,7 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
       .set({
         following: sql`${this.schema.userStats.following} - ${amount}`,
       })
-      .where(eq(this.schema.userStats.profileId, userId));
+      .where(eq(this.schema.userStats.userId, userId));
   }
 
   async decrementFriendsCount(
@@ -68,83 +68,83 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
     await db
       .update(this.schema.userStats)
       .set({ friends: sql`${this.schema.userStats.friends} - ${amount}` })
-      .where(eq(this.schema.userStats.profileId, userId));
+      .where(eq(this.schema.userStats.userId, userId));
   }
 
   async decrementPostsCount(
     params: DecrementPostsCountParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const { profileId, decrementBy } = params;
+    const { userId, decrementBy } = params;
 
     await db
       .update(this.schema.userStats)
       .set({ posts: sql`${this.schema.userStats.posts} - ${decrementBy}` })
-      .where(eq(this.schema.userStats.profileId, profileId));
+      .where(eq(this.schema.userStats.userId, userId));
   }
 
   async incrementFollowerCount(
     params: IncrementFollowerCountParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const { profileId, incrementBy } = params;
+    const { userId, incrementBy } = params;
 
     await db
       .update(this.schema.userStats)
       .set({
         followers: sql`${this.schema.userStats.followers} + ${incrementBy}`,
       })
-      .where(eq(this.schema.userStats.profileId, profileId));
+      .where(eq(this.schema.userStats.userId, userId));
   }
 
   async incrementFollowingCount(
     params: IncrementFollowingCountParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const { profileId, incrementBy } = params;
+    const { userId, incrementBy } = params;
 
     await db
       .update(this.schema.userStats)
       .set({
         following: sql`${this.schema.userStats.following} + ${incrementBy}`,
       })
-      .where(eq(this.schema.userStats.profileId, profileId));
+      .where(eq(this.schema.userStats.userId, userId));
   }
 
   async incrementFriendsCount(
     params: IncrementFriendsCountParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const { profileId, incrementBy } = params;
+    const { userId, incrementBy } = params;
 
     await db
       .update(this.schema.userStats)
       .set({
         friends: sql`${this.schema.userStats.friends} + ${incrementBy}`,
       })
-      .where(eq(this.schema.userStats.profileId, profileId));
+      .where(eq(this.schema.userStats.userId, userId));
   }
 
   async incrementPostsCount(
     params: IncrementPostsCountParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const { profileId, incrementBy } = params;
+    const { userId, incrementBy } = params;
 
     await db
       .update(this.schema.userStats)
       .set({ posts: sql`${this.schema.userStats.posts} + ${incrementBy}` })
-      .where(eq(this.schema.userStats.profileId, profileId));
+      .where(eq(this.schema.userStats.userId, userId));
   }
 
-  async getProfileStats(
-    params: GetProfileStatsParams,
+  async getUserStats(
+    params: GetUserStatsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<UserStats | undefined> {
-    const { profileId } = params;
+    const { userId } = params;
 
     return await db.query.userStats.findFirst({
-      where: eq(this.schema.userStats.profileId, profileId),
+      where: eq(this.schema.userStats.userId, userId),
     });
   }
 }

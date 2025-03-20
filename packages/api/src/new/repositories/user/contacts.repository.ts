@@ -1,4 +1,4 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type {
@@ -185,9 +185,9 @@ export class ContactsRepository implements IContactsRepository {
     const result: ContactRecommendation[] = [];
 
     for (const profile of userProfiles) {
-      const userContactIds = userContactsMap.get(userId) || [];
+      const userContactIds = userContactsMap.get(userId) ?? [];
       const recommendedUserContactIds =
-        userContactsMap.get(profile.userId) || [];
+        userContactsMap.get(profile.userId) ?? [];
 
       const mutualContacts = userContactIds.filter((contactId) =>
         recommendedUserContactIds.includes(contactId),

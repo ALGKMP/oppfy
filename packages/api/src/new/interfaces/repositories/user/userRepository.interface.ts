@@ -112,11 +112,6 @@ export interface IUserRepository {
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
-  updatePrivacy(
-    params: UpdatePrivacyParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<void>;
-
   getRandomActiveProfilesForRecs(
     params: GetRandomActiveProfilesForRecsParams,
     db?: DatabaseOrTransaction,

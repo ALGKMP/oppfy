@@ -92,9 +92,6 @@ export const reportUserReasonEnum = pgEnum("report_user_reason", [
 
 export const user = pgTable("user", {
   id: uuid("id").primaryKey().defaultRandom(),
-  notificationSettingsId: uuid("notification_settings_id")
-    .notNull()
-    .references(() => notificationSettings.id, { onDelete: "cascade" }),
   phoneNumber: text("phone_number").notNull().unique(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
@@ -141,8 +138,8 @@ export const userRelations = relations(user, ({ one, many }) => ({
     references: [userStats.userId],
   }),
   notificationSettings: one(notificationSettings, {
-    fields: [user.notificationSettingsId],
-    references: [notificationSettings.id],
+    fields: [user.id],
+    references: [notificationSettings.userId],
   }),
   userStatus: one(userStatus, {
     fields: [user.id],
@@ -192,7 +189,7 @@ export const profile = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     privacy: privacyEnum("privacy").default("public").notNull(),
-    username: varchar("username", { length: 30 }).unique().notNull(),
+    username: varchar("username", { length: 30 }).unique(),
     name: varchar("name", { length: 30 }),
     dateOfBirth: dateType("date_of_birth"),
     bio: varchar("bio", { length: 100 }),
@@ -308,6 +305,9 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
 
 export const notificationSettings = pgTable("notification_settings", {
   id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
   posts: boolean("posts").default(true).notNull(),
   likes: boolean("likes").default(true).notNull(),
   mentions: boolean("mentions").default(true).notNull(),

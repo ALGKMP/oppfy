@@ -2,7 +2,7 @@ import { createHash } from "crypto";
 import { inject, injectable } from "inversify";
 import { err, ok } from "neverthrow";
 
-import { cloudfront } from "@oppfy/cloudfront";
+import { CloudFront, cloudfront } from "@oppfy/cloudfront";
 import type { Transaction } from "@oppfy/db";
 import { sqs } from "@oppfy/sqs";
 
@@ -27,22 +27,18 @@ import { UserRepository } from "../../repositories/user/user.repository";
 
 @injectable()
 export class ContactService implements IContactService {
-  private contactsRepository: ContactsRepository;
-  private userRepository: UserRepository;
-  private profileRepository: ProfileRepository;
-  private tx: Transaction;
-
   constructor(
-    @inject(TYPES.Transaction) tx: Transaction,
-    @inject(TYPES.UserRepository) userRepository: UserRepository,
-    @inject(TYPES.ProfileRepository) profileRepository: ProfileRepository,
-    @inject(TYPES.ContactsRepository) contactsRepository: ContactsRepository,
-  ) {
-    this.tx = tx;
-    this.userRepository = userRepository;
-    this.profileRepository = profileRepository;
-    this.contactsRepository = contactsRepository;
-  }
+    @inject(TYPES.Transaction)
+    private readonly tx: Transaction,
+    @inject(TYPES.UserRepository)
+    private readonly userRepository: UserRepository,
+    @inject(TYPES.ProfileRepository)
+    private readonly profileRepository: ProfileRepository,
+    @inject(TYPES.ContactsRepository)
+    private readonly contactsRepository: ContactsRepository,
+    @inject(TYPES.CloudFront)
+    private readonly cloudfront: CloudFront,
+  ) {}
 
   async syncContacts({
     userId,
@@ -189,26 +185,16 @@ export class ContactService implements IContactService {
         .filter((id) => id !== userId);
     }
 
-    // TODO: ADD BACK
-    // start a transaction to get all the usernames and profilePhotos
-    const profiles = await this.profileRepository.getBatchProfiles({
+    const profiles = await this.profileRepository.getProfilesByIds({
       userIds: allRecommendations,
     });
-    // Fetch presigned URLs for profile pictures in parallel
-    const profilesWithUrls = await Promise.all(
-      profiles.map(async (profile) => {
-        const { profilePictureKey, ...profileWithoutKey } = profile;
-        return {
-          ...profileWithoutKey,
-          relationshipStatus: "notFollowing" as const,
-          profilePictureUrl: profilePictureKey
-            ? await cloudfront.getSignedProfilePictureUrl(profilePictureKey)
-            : null,
-        };
-      }),
-    );
 
-    // Filter out any rejected promises and return the successful ones
-    return ok(profilesWithUrls);
+    const profilesWithUrls = this.cloudfront.hydrateProfiles(profiles);
+    const profilesWithRelationshipStatus = profilesWithUrls.map((profile) => ({
+      ...profile,
+      relationshipStatus: "notFollowing" as const,
+    }));
+
+    return ok(profilesWithRelationshipStatus);
   }
 }

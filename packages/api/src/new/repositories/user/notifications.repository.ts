@@ -193,7 +193,7 @@ export class NotificationsRepository implements INotificationsRepository {
         entityType: this.schema.notifications.entityType,
         createdAt: this.schema.notifications.createdAt,
         read: this.schema.notifications.read,
-        privacySetting: this.schema.user.privacySetting,
+        privacy: this.schema.profile.privacy,
         relationshipState: sql<
           "following" | "followRequestSent" | "notFollowing"
         >`

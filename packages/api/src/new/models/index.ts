@@ -21,12 +21,18 @@ export type Profile = InferSelectModel<typeof schema.profile>;
 export type UserWithProfile = User & {
   profile: Profile;
 };
+export type HydratedProfile = Profile & {
+  profilePictureUrl: string | null;
+};
 export type UserWithNotificationSettings = User & {
   notificationSettings: NotificationSettings;
 };
 export type UserStatus = InferSelectModel<typeof schema.userStatus>;
 export type UserStats = InferSelectModel<typeof schema.userStats>;
 export type Post = InferSelectModel<typeof schema.post>;
+export type HydratedPost = Post & {
+  postUrl: string | null;
+};
 export type PostStats = InferSelectModel<typeof schema.postStats>;
 export type Comment = InferSelectModel<typeof schema.comment>;
 export type Like = InferSelectModel<typeof schema.like>;

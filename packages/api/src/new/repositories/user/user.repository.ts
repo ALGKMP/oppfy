@@ -47,47 +47,24 @@ export class UserRepository implements IUserRepository {
     this.schema = schema;
   }
 
-  async createUser(
-    { userId, phoneNumber, username, isOnApp, name }: CreateUserParams,
-    tx: Transaction,
-  ): Promise<void> {
-    // Create an empty profile for the user
-    const [profile] = await tx
-      .insert(this.schema.profile)
-      .values({ userId, username, ...(name && { name }) })
-      .returning({ id: this.schema.profile.id });
+  async createUser(params: CreateUserParams, tx: Transaction): Promise<void> {
+    const { userId, phoneNumber, username, isOnApp, name } = params;
 
-    if (!profile) throw new Error("Profile was not created");
-
-    const [profileStats] = await tx
-      .insert(this.schema.userStats)
-      .values({ profileId: profile.id })
-      .returning({ id: this.schema.userStats.id });
-
-    // Create default notification settings for the user
-    const [notificationSetting] = await tx
-      .insert(this.schema.notificationSettings)
-      .values({})
-      .returning({ id: this.schema.notificationSettings.id });
-
-    if (profileStats === undefined) {
-      throw new Error("Profile stats was not created");
-    }
-
-    if (notificationSetting === undefined) {
-      throw new Error("Notification setting was not created");
-    }
-
-    // Create the user
     await tx.insert(this.schema.user).values({
       id: userId,
-      notificationSettingsId: notificationSetting.id,
       phoneNumber,
     });
 
     await tx
-      .insert(this.schema.userStatus)
-      .values({ userId, isOnApp: isOnApp });
+      .insert(this.schema.profile)
+      .values({ userId, username, name })
+      .returning({ id: this.schema.profile.id });
+
+    await tx.insert(this.schema.userStats).values({ userId });
+
+    await tx.insert(this.schema.notificationSettings).values({ userId });
+
+    await tx.insert(this.schema.userStatus).values({ userId, isOnApp });
   }
 
   async getUser(
@@ -142,16 +119,6 @@ export class UserRepository implements IUserRepository {
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     await db.delete(this.schema.user).where(eq(this.schema.user.id, userId));
-  }
-
-  async updatePrivacy(
-    { userId, newPrivacySetting }: UpdatePrivacyParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<void> {
-    await db
-      .update(this.schema.user)
-      .set({ privacySetting: newPrivacySetting })
-      .where(eq(this.schema.user.id, userId));
   }
 
   async getRandomActiveProfilesForRecs(
@@ -226,9 +193,9 @@ export class UserRepository implements IUserRepository {
       .set({ followers: sql`${this.schema.userStats.followers} - 1` })
       .where(
         inArray(
-          this.schema.userStats.profileId,
+          this.schema.userStats.userId,
           tx
-            .select({ profileId: this.schema.profile.id })
+            .select({ userId: this.schema.user.id })
             .from(this.schema.follow)
             .innerJoin(
               this.schema.user,
@@ -244,9 +211,9 @@ export class UserRepository implements IUserRepository {
       .set({ following: sql`${this.schema.userStats.following} - 1` })
       .where(
         inArray(
-          this.schema.userStats.profileId,
+          this.schema.userStats.userId,
           tx
-            .select({ profileId: this.schema.profile.id })
+            .select({ userId: this.schema.user.id })
             .from(this.schema.follow)
             .innerJoin(
               this.schema.user,
@@ -262,9 +229,9 @@ export class UserRepository implements IUserRepository {
       .set({ friends: sql`${this.schema.userStats.friends} - 1` })
       .where(
         inArray(
-          this.schema.userStats.profileId,
+          this.schema.userStats.userId,
           tx
-            .select({ profileId: this.schema.profile.id })
+            .select({ userId: this.schema.user.id })
             .from(this.schema.friend)
             .innerJoin(
               this.schema.user,
