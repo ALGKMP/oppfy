@@ -104,6 +104,7 @@ export const profileRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+
       return await ctx.services.profile.getNetworkConnectionStatesBetweenUsers({
         currentUserId: ctx.session.uid,
         otherUserId: input.userId,

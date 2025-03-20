@@ -5,12 +5,10 @@ import { DomainError, ErrorCode } from "../../errors";
 import { FollowRepository } from "../../repositories";
 import { FriendRepository } from "../../repositories/network/friend";
 import { NotificationsRepository } from "../../repositories/user/notifications";
-import { ProfileRepository } from "../../repositories/user/profile";
 import { UserRepository } from "../../repositories/user/user";
 
 export class FriendService {
   private friendRepository = new FriendRepository();
-  private profileRepository = new ProfileRepository();
   private followRepository = new FollowRepository();
   private userRepository = new UserRepository();
   private notificationsRepository = new NotificationsRepository();

@@ -6,13 +6,10 @@ import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import {
-  BlockRepository,
   ProfileRepository,
   UserRepository,
 } from "../../repositories";
-import { BlockService } from "../network/block";
-import { FollowService } from "../network/follow";
-import { FriendService } from "../network/friend";
+import { UserRelationshipRepository } from "../../repositories/network/userRelationship";
 
 const _updateProfile = z.object({
   name: sharedValidators.user.name.optional(),
@@ -24,11 +21,7 @@ const _updateProfile = z.object({
 export class ProfileService {
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
-  private blockRepository = new BlockRepository();
-
-  private friendService = new FriendService();
-  private followService = new FollowService();
-  private blockService = new BlockService();
+  private userRelationshipRepository = new UserRelationshipRepository();
 
   async getUploadProfilePictureUrl({
     userId,
@@ -155,9 +148,14 @@ export class ProfileService {
         )
       : null;
 
-    const networkStatus = await this.getNetworkConnectionStatesBetweenUsers({
-      currentUserId,
-      otherUserId,
+    const relationshipCurrentUserToOtherUser = await this.userRelationshipRepository.getRelationship({
+      userIdA: currentUserId,
+      userIdB: otherUserId,
+    });
+
+    const relationshipOtherUserToCurrentUser = await this.userRelationshipRepository.getRelationship({
+      userIdA: otherUserId,
+      userIdB: currentUserId,
     });
 
     return {
@@ -172,7 +170,8 @@ export class ProfileService {
       friendCount: user.profile.profileStats.friends,
       postCount: user.profile.profileStats.posts,
       profilePictureUrl,
-      networkStatus,
+      relationshipCurrentUserToOtherUser,
+      relationshipOtherUserToCurrentUser,
       createdAt: user.profile.createdAt,
     };
   }
@@ -206,54 +205,21 @@ export class ProfileService {
       );
     }
 
-    const blocked = await this.blockService.areEitherUsersBlocked({
-      userId: currentUserId,
-      otherUserId,
+    const relationshipCurrentUserToOtherUser = await this.userRelationshipRepository.getRelationship({
+      userIdA: currentUserId,
+      userIdB: otherUserId,
     });
 
-    const targetUserFollowState = await this.followService.determineFollowState({
-      userId: currentUserId,
-      targetUserId: otherUserId,
-      privacySetting: otherUser.privacySetting,
+    const relationshipOtherUserToCurrentUser = await this.userRelationshipRepository.getRelationship({
+      userIdA: otherUserId,
+      userIdB: currentUserId,
     });
-    const otherUserFollowState = await this.followService.determineFollowState({
-      userId: otherUserId,
-      targetUserId: currentUserId,
-      privacySetting: otherUser.privacySetting,
-    });
-    const targetUserFriendState = await this.friendService.determineFriendState({
-      userId: currentUserId,
-      targetUserId: otherUserId,
-    });
-    const otherUserFriendState = await this.friendService.determineFriendState({
-      userId: otherUserId,
-      targetUserId: currentUserId,
-    });
-    const isTargetUserBlocked = (await this.blockRepository.getBlockedUser({
-      userId: currentUserId,
-      blockedUserId: otherUserId,
-    }))
-      ? true
-      : false;
-    const isOtherUserBlocked = (await this.blockRepository.getBlockedUser({
-      userId: otherUserId,
-      blockedUserId: currentUserId,
-    }))
-      ? true
-      : false;
 
     return {
-      privacy: otherUser.privacySetting,
-      blocked,
-      targetUserFollowState,
-      otherUserFollowState,
-      targetUserFriendState,
-      otherUserFriendState,
-      isTargetUserBlocked,
-      isOtherUserBlocked,
+      relationshipCurrentUserToOtherUser,
+      relationshipOtherUserToCurrentUser,
     };
   }
-
 
   async searchProfilesByUsername({
     username,
