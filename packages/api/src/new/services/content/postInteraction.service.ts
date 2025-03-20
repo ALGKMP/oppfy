@@ -42,8 +42,8 @@ export class PostInteractionService implements IPostInteractionService {
     private postStatsRepository: IPostStatsRepository,
     @inject(TYPES.NotificationsRepository)
     private notificationsRepository: INotificationsRepository,
-    @inject(TYPES.ProfileStatsRepository)
-    private profileStatsRepository: IUserStatsRepository,
+    @inject(TYPES.UserStatsRepository)
+    private userStatsRepository: IUserStatsRepository,
     @inject(TYPES.RelationshipRepository)
     private relationshipRepository: IRelationshipRepository,
   ) {}
