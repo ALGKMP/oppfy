@@ -77,7 +77,7 @@ export const handler = async (
 
 const createCloudFrontInvalidation = async (objectKey: string) => {
   const params = {
-    DistributionId: env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID,
+    DistributionId: env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
     InvalidationBatch: {
       CallerReference: Date.now().toString(),
       Paths: {
