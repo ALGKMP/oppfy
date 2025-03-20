@@ -1,7 +1,12 @@
 import { and, eq, inArray, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
-import type { Database, DatabaseOrTransaction, Schema, Transaction } from "@oppfy/db";
+import type {
+  Database,
+  DatabaseOrTransaction,
+  Schema,
+  Transaction,
+} from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import type {
@@ -22,7 +27,12 @@ import type {
   UpdateUserOnboardingCompleteParams,
   UpdateUserTutorialCompleteParams,
 } from "../../interfaces/repositories/user/userRepository.interface";
-import type { User, UserStatus, UserWithNotificationSettings, UserWithProfile } from "../../models";
+import type {
+  User,
+  UserStatus,
+  UserWithNotificationSettings,
+  UserWithProfile,
+} from "../../models";
 
 @injectable()
 export class UserRepository implements IUserRepository {
@@ -82,9 +92,8 @@ export class UserRepository implements IUserRepository {
 
   async getUser(
     { userId }: GetUserParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<User | undefined> {
-    const db = tx || this.db;
     return await db.query.user.findFirst({
       where: eq(this.schema.user.id, userId),
     });
@@ -92,9 +101,8 @@ export class UserRepository implements IUserRepository {
 
   async getUserWithNotificationSettings(
     { userId }: GetUserWithNotificationSettingsParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<UserWithNotificationSettings | undefined> {
-    const db = tx || this.db;
     return await db.query.user.findFirst({
       where: eq(this.schema.user.id, userId),
       with: { notificationSettings: true },
@@ -103,9 +111,8 @@ export class UserRepository implements IUserRepository {
 
   async getUserWithProfile(
     { userId }: GetUserWithProfileParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<UserWithProfile | undefined> {
-    const db = tx || this.db;
     return await db.query.user.findFirst({
       where: eq(this.schema.user.id, userId),
       with: { profile: true },
@@ -114,9 +121,8 @@ export class UserRepository implements IUserRepository {
 
   async getUserStatus(
     { userId }: GetUserStatusParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<UserStatus | undefined> {
-    const db = tx || this.db;
     return await db.query.userStatus.findFirst({
       where: eq(this.schema.userStatus.userId, userId),
     });
@@ -124,9 +130,8 @@ export class UserRepository implements IUserRepository {
 
   async getUserByPhoneNumber(
     { phoneNumber }: GetUserByPhoneNumberParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<User | undefined> {
-    const db = tx || this.db;
     return await db.query.user.findFirst({
       where: eq(this.schema.user.phoneNumber, phoneNumber),
     });
@@ -134,17 +139,15 @@ export class UserRepository implements IUserRepository {
 
   async deleteUser(
     { userId }: DeleteUserParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const db = tx || this.db;
     await db.delete(this.schema.user).where(eq(this.schema.user.id, userId));
   }
 
   async updatePrivacy(
     { userId, newPrivacySetting }: UpdatePrivacyParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const db = tx || this.db;
     await db
       .update(this.schema.user)
       .set({ privacySetting: newPrivacySetting })
@@ -153,9 +156,8 @@ export class UserRepository implements IUserRepository {
 
   async getRandomActiveProfilesForRecs(
     { limit }: GetRandomActiveProfilesForRecsParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<{ userId: string }[]> {
-    const db = tx || this.db;
     return await db
       .select({ userId: this.schema.user.id })
       .from(this.schema.user)
@@ -165,9 +167,8 @@ export class UserRepository implements IUserRepository {
 
   async existingPhoneNumbers(
     { phoneNumbers }: ExistingPhoneNumbersParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<string[]> {
-    const db = tx || this.db;
     const existingNumbers = await db
       .select({ phoneNumber: this.schema.user.phoneNumber })
       .from(this.schema.user)
@@ -284,9 +285,8 @@ export class UserRepository implements IUserRepository {
 
   async updateUserOnAppStatus(
     { userId, isOnApp }: UpdateUserOnAppStatusParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const db = tx || this.db;
     await db
       .update(this.schema.userStatus)
       .set({ isOnApp })
@@ -295,9 +295,8 @@ export class UserRepository implements IUserRepository {
 
   async updateUserTutorialComplete(
     { userId, hasCompletedTutorial }: UpdateUserTutorialCompleteParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const db = tx || this.db;
     await db
       .update(this.schema.userStatus)
       .set({ hasCompletedTutorial })
@@ -306,9 +305,8 @@ export class UserRepository implements IUserRepository {
 
   async updateUserOnboardingComplete(
     { userId, hasCompletedOnboarding }: UpdateUserOnboardingCompleteParams,
-    tx?: Transaction,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const db = tx || this.db;
     await db
       .update(this.schema.userStatus)
       .set({ hasCompletedOnboarding })

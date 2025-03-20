@@ -1,6 +1,15 @@
-import type { DatabaseOrTransaction, InferInsertModel, Transaction } from "@oppfy/db";
+import type {
+  DatabaseOrTransaction,
+  InferInsertModel,
+  Transaction,
+} from "@oppfy/db";
 
-import type { User, UserStatus, UserWithNotificationSettings, UserWithProfile } from "../../../models";
+import type {
+  User,
+  UserStatus,
+  UserWithNotificationSettings,
+  UserWithProfile,
+} from "../../../models";
 
 export type PrivacySettings = NonNullable<
   InferInsertModel<typeof import("@oppfy/db").schema.user>["privacySetting"]
@@ -73,11 +82,14 @@ export interface GetUserWithNotificationSettingsParams {
 export interface IUserRepository {
   createUser(params: CreateUserParams, tx: Transaction): Promise<void>;
 
-  getUser(params: GetUserParams, tx?: Transaction): Promise<User | undefined>;
+  getUser(
+    params: GetUserParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<User | undefined>;
 
   getUserWithProfile(
     params: GetUserWithProfileParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<UserWithProfile | undefined>;
 
   getUserWithNotificationSettings(
@@ -87,26 +99,32 @@ export interface IUserRepository {
 
   getUserStatus(
     params: GetUserStatusParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<UserStatus | undefined>;
 
   getUserByPhoneNumber(
     params: GetUserByPhoneNumberParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<User | undefined>;
 
-  deleteUser(params: DeleteUserParams, tx?: Transaction): Promise<void>;
+  deleteUser(
+    params: DeleteUserParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<void>;
 
-  updatePrivacy(params: UpdatePrivacyParams, tx?: Transaction): Promise<void>;
+  updatePrivacy(
+    params: UpdatePrivacyParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<void>;
 
   getRandomActiveProfilesForRecs(
     params: GetRandomActiveProfilesForRecsParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<{ userId: string }[]>;
 
   existingPhoneNumbers(
     params: ExistingPhoneNumbersParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<string[]>;
 
   updateStatsOnUserDelete(
@@ -116,16 +134,16 @@ export interface IUserRepository {
 
   updateUserOnAppStatus(
     params: UpdateUserOnAppStatusParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   updateUserTutorialComplete(
     params: UpdateUserTutorialCompleteParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   updateUserOnboardingComplete(
     params: UpdateUserOnboardingCompleteParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 }
