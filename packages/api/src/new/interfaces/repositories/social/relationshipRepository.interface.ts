@@ -1,14 +1,10 @@
-import type {
-  DatabaseOrTransaction,
-  followStatusEnum,
-  friendStatusEnum,
-} from "@oppfy/db";
+import type { DatabaseOrTransaction, FriendStatus, FollowStatus } from "@oppfy/db";
 
 export interface Relationship {
   userIdA: string;
   userIdB: string;
-  friendshipStatus: (typeof friendStatusEnum.enumValues)[number];
-  followStatus: (typeof followStatusEnum.enumValues)[number];
+  friendshipStatus: FriendStatus;
+  followStatus: FollowStatus;
   blockStatus: boolean;
 }
 

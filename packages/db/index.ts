@@ -28,11 +28,11 @@ const db = drizzle(queryClient, {
 
 type Schema = typeof schema;
 type Database = PostgresJsDatabase<Schema>;
+
 type EntityType = (typeof entityTypeEnum.enumValues)[number];
 type FriendStatus = (typeof friendStatusEnum.enumValues)[number];
 type FollowStatus = (typeof followStatusEnum.enumValues)[number];
 type EventType = (typeof eventTypeEnum.enumValues)[number];
-
 export type NotificationSettings =
   typeof schema.notificationSettings.$inferSelect;
 
