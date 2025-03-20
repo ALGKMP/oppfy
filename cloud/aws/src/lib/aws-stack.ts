@@ -148,24 +148,13 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
-    const publicProfilePictureDistribution = new CloudFrontDistribution(
+    const profilePictureDistribution = new CloudFrontDistribution(
       this,
-      "PublicProfilePictureDistribution",
+      "profilePictureDistribution",
       {
         isPrivate: false,
         bucket: profileBucket.bucket,
         oai,
-      },
-    );
-
-    const profileDistribution = new CloudFrontDistribution(
-      this,
-      "ProfileDistribution",
-      {
-        isPrivate: true,
-        bucket: profileBucket.bucket,
-        oai,
-        keyGroup,
       },
     );
 
@@ -178,15 +167,6 @@ export class AwsStack extends cdk.Stack {
       entry: "src/res/lambdas/profile-picture/index.ts",
       environment,
     });
-
-    profileLambda.function.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["cloudfront:CreateInvalidation"],
-        resources: [
-          `arn:aws:cloudfront::${env.AWS_ACCOUNT_ID}:distribution/${profileDistribution.distribution.distributionId}`,
-        ],
-      }),
-    );
 
     this.setupBucketLambdaIntegration(
       postBucket.bucket,
@@ -314,11 +294,7 @@ export class AwsStack extends cdk.Stack {
     });
 
     new cdk.CfnOutput(this, "PublicProfilePictureDistributionUrl", {
-      value: `https://${publicProfilePictureDistribution.distribution.distributionDomainName}`,
-    });
-
-    new cdk.CfnOutput(this, "ProfileDistributionUrl", {
-      value: `https://${profileDistribution.distribution.distributionDomainName}`,
+      value: `https://${profilePictureDistribution.distribution.distributionDomainName}`,
     });
 
     new cdk.CfnOutput(this, "MuxWebhookUrl", {
