@@ -1,4 +1,8 @@
-import type { DatabaseOrTransaction, FriendStatus, FollowStatus } from "@oppfy/db";
+import type {
+  DatabaseOrTransaction,
+  FollowStatus,
+  FriendStatus,
+} from "@oppfy/db";
 
 export interface Relationship {
   userIdA: string;
