@@ -612,10 +612,10 @@ export const block = pgTable(
   "block",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userWhoIsBlockingId: uuid("user_who_is_blocking_id")
+    userWhoBlockedUserId: uuid("user_who_is_blocking_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    userWhoIsBlockedId: uuid("user_who_is_blocked_id")
+    userWhoIsBlockedUserId: uuid("user_who_is_blocked_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -624,14 +624,14 @@ export const block = pgTable(
   },
   (table) => ({
     blockingUserIdx: index("block_blocking_user_idx").on(
-      table.userWhoIsBlockingId,
+      table.userWhoBlockedUserId,
     ),
     blockedUserIdx: index("block_blocked_user_idx").on(
-      table.userWhoIsBlockedId,
+      table.userWhoIsBlockedUserId,
     ),
     uniqueBlockPair: uniqueIndex("block_unique_pair").on(
-      table.userWhoIsBlockingId,
-      table.userWhoIsBlockedId,
+      table.userWhoBlockedUserId,
+      table.userWhoIsBlockedUserId,
     ),
   }),
 );
@@ -639,12 +639,12 @@ export const block = pgTable(
 export const blockRelations = relations(block, ({ one }) => ({
   userWhoIsBlocking: one(user, {
     relationName: "userWhoIsBlocking",
-    fields: [block.userWhoIsBlockingId],
+    fields: [block.userWhoBlockedUserId],
     references: [user.id],
   }),
   userWhoIsBlocked: one(user, {
     relationName: "userWhoIsBlocked",
-    fields: [block.userWhoIsBlockedId],
+    fields: [block.userWhoIsBlockedUserId],
     references: [user.id],
   }),
 }));

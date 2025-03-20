@@ -29,12 +29,12 @@ export class BlockRepository {
       .from(schema.user)
       .innerJoin(
         schema.block,
-        eq(schema.user.id, schema.block.userWhoIsBlockedId),
+        eq(schema.user.id, schema.block.userWhoIsBlockedUserId),
       )
       .innerJoin(schema.profile, eq(schema.user.id, schema.profile.userId))
       .where(
         and(
-          eq(schema.block.userWhoIsBlockingId, forUserId),
+          eq(schema.block.userWhoBlockedUserId, forUserId),
           cursor
             ? or(
                 gt(schema.block.createdAt, cursor.createdAt),
@@ -61,12 +61,12 @@ export class BlockRepository {
     return await this.db.query.block.findFirst({
       where: or(
         and(
-          eq(schema.block.userWhoIsBlockingId, userId),
-          eq(schema.block.userWhoIsBlockedId, blockedUserId),
+          eq(schema.block.userWhoBlockedUserId, userId),
+          eq(schema.block.userWhoIsBlockedUserId, blockedUserId),
         ),
         and(
-          eq(schema.block.userWhoIsBlockingId, blockedUserId),
-          eq(schema.block.userWhoIsBlockedId, userId),
+          eq(schema.block.userWhoBlockedUserId, blockedUserId),
+          eq(schema.block.userWhoIsBlockedUserId, userId),
         ),
       ),
     });
@@ -81,8 +81,8 @@ export class BlockRepository {
     blockedUserId: string;
   }) {
     const blockedUser = await this.db.insert(schema.block).values({
-      userWhoIsBlockingId: userId,
-      userWhoIsBlockedId: blockedUserId,
+      userWhoBlockedUserId: userId,
+      userWhoIsBlockedUserId: blockedUserId,
     });
     return blockedUser[0];
   }
@@ -99,8 +99,8 @@ export class BlockRepository {
       .delete(schema.block)
       .where(
         and(
-          eq(schema.block.userWhoIsBlockingId, userId),
-          eq(schema.block.userWhoIsBlockedId, blockedUserId),
+          eq(schema.block.userWhoBlockedUserId, userId),
+          eq(schema.block.userWhoIsBlockedUserId, blockedUserId),
         ),
       );
     return result[0];

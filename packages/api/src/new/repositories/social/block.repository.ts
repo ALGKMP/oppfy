@@ -49,7 +49,7 @@ export class BlockRepository implements IBlockRepository {
       .from(this.schema.user)
       .innerJoin(
         this.schema.block,
-        eq(this.schema.user.id, this.schema.block.userWhoIsBlockedId),
+        eq(this.schema.user.id, this.schema.block.userWhoIsBlockedUserId),
       )
       .innerJoin(
         this.schema.profile,
@@ -57,7 +57,7 @@ export class BlockRepository implements IBlockRepository {
       )
       .where(
         and(
-          eq(this.schema.block.userWhoIsBlockingId, forUserId),
+          eq(this.schema.block.userWhoBlockedUserId, forUserId),
           cursor
             ? or(
                 gt(this.schema.block.createdAt, cursor.createdAt),
@@ -83,15 +83,9 @@ export class BlockRepository implements IBlockRepository {
       .select({ id: this.schema.block.id })
       .from(this.schema.block)
       .where(
-        or(
-          and(
-            eq(this.schema.block.userWhoIsBlockingId, userId),
-            eq(this.schema.block.userWhoIsBlockedId, blockedUserId),
-          ),
-          and(
-            eq(this.schema.block.userWhoIsBlockingId, blockedUserId),
-            eq(this.schema.block.userWhoIsBlockedId, userId),
-          ),
+        and(
+          eq(this.schema.block.userWhoBlockedUserId, userId),
+          eq(this.schema.block.userWhoIsBlockedUserId, blockedUserId),
         ),
       )
       .limit(1);
@@ -106,8 +100,8 @@ export class BlockRepository implements IBlockRepository {
     const { userId, blockedUserId } = params;
 
     await db.insert(this.schema.block).values({
-      userWhoIsBlockingId: userId,
-      userWhoIsBlockedId: blockedUserId,
+      userWhoBlockedUserId: userId,
+      userWhoIsBlockedUserId: blockedUserId,
     });
   }
 
@@ -121,8 +115,8 @@ export class BlockRepository implements IBlockRepository {
       .delete(this.schema.block)
       .where(
         and(
-          eq(this.schema.block.userWhoIsBlockingId, userId),
-          eq(this.schema.block.userWhoIsBlockedId, blockedUserId),
+          eq(this.schema.block.userWhoBlockedUserId, userId),
+          eq(this.schema.block.userWhoIsBlockedUserId, blockedUserId),
         ),
       );
   }

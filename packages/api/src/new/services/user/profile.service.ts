@@ -6,7 +6,6 @@ import type { Database } from "@oppfy/db";
 import { TYPES } from "../../container";
 import { ProfileErrors } from "../../errors/user/profile.error";
 import type { IBlockRepository } from "../../interfaces/repositories/social/blockRepository.interface";
-import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profileRepository.interface";
 import type {
   GetProfileParams,
@@ -26,6 +25,7 @@ export class ProfileService implements IProfileService {
     private readonly profileRepository: IProfileRepository,
     @inject(TYPES.BlockRepository)
     private readonly blockRepository: IBlockRepository,
+    @inject(TYPES.)
   ) {}
 
   async profile(
