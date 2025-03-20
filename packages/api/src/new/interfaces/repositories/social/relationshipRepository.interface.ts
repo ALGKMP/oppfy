@@ -13,22 +13,35 @@ export type UpdateRelationship = Partial<
 >;
 
 export interface IRelationshipRepository {
-  getByUserIds(
-    userIdA: string,
-    userIdB: string,
-    tx?: DatabaseOrTransaction,
-  ): Promise<Relationship | undefined>;
+  getByUserIds({
+    userIdA ,
+    userIdB,
+    db,
+  }: {
+    userIdA: string;
+    userIdB: string;
+    db?: DatabaseOrTransaction;
+  }): Promise<Relationship | undefined>;
 
-  upsert(
-    userIdA: string,
-    userIdB: string,
-    updates: UpdateRelationship,
-    tx?: DatabaseOrTransaction,
-  ): Promise<void>;
+  upsert({
+    userIdA,
+    userIdB,
+    updates,
+    db,
+  }: {
+    userIdA: string;
+    userIdB: string;
+    updates: UpdateRelationship;
+    db?: DatabaseOrTransaction;
+  }): Promise<void>;
 
-  delete(
-    userIdA: string,
-    userIdB: string,
-    tx?: DatabaseOrTransaction,
-  ): Promise<void>;
+  delete({
+    userIdA,
+    userIdB,
+    db,
+  }: {
+    userIdA: string;
+    userIdB: string;
+    db?: DatabaseOrTransaction;
+  }): Promise<void>;
 }
