@@ -1,9 +1,10 @@
 import { inject, injectable } from "inversify";
+import { err, ok, Result } from "neverthrow";
 
 import type { Database, FriendStatus } from "@oppfy/db";
 
-import { DomainError, ErrorCode } from "../../../errors";
 import { TYPES } from "../../container";
+import { FriendErrors } from "../../errors/social/friend.error";
 import type { IFollowRepository } from "../../interfaces/repositories/social/followRepository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friendRepository.interface";
 import type { INotificationsRepository } from "../../interfaces/repositories/user/notificationRepository.interface";
@@ -24,138 +25,157 @@ export class FriendService implements IFriendService {
   async isFollowing(options: {
     senderId: string;
     recipientId: string;
-  }): Promise<boolean> {
+  }): Promise<Result<boolean, never>> {
     const { senderId, recipientId } = options;
-    const follower = await this.followRepository.getFollower(
-      { followerId: senderId, followeeId: recipientId },
-    );
-    return !!follower;
+    const follower = await this.followRepository.getFollower({
+      followerId: senderId,
+      followeeId: recipientId,
+    });
+    return ok(!!follower);
   }
 
   async sendFriendRequest(options: {
     senderId: string;
     recipientId: string;
-  }): Promise<void> {
+  }): Promise<
+    Result<
+      void,
+      | FriendErrors.RequestAlreadySent
+      | FriendErrors.AlreadyFriends
+      | FriendErrors.CannotFriendSelf
+      | FriendErrors.FailedToSendRequest
+    >
+  > {
     const { senderId, recipientId } = options;
+
+    if (senderId === recipientId) {
+      return err(new FriendErrors.CannotFriendSelf(senderId));
+    }
 
     // Check if users exist
     const [sender, recipient] = await Promise.all([
       this.userRepository.getUserWithProfile({ userId: senderId }),
-      this.userRepository.getUserWithProfile(
-        { userId: recipientId },
-      ),
+      this.userRepository.getUserWithProfile({ userId: recipientId }),
     ]);
 
     if (!sender || !recipient) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+      return err(new FriendErrors.FailedToSendRequest(senderId, recipientId));
     }
 
     // Check if friend request already exists
-    const existingRequest = await this.friendRepository.getFriendRequest(
-      { senderId, recipientId }
-    );
+    const existingRequest = await this.friendRepository.getFriendRequest({
+      senderId,
+      recipientId,
+    });
 
     if (existingRequest) {
-      throw new DomainError(
-        ErrorCode.FRIEND_REQUEST_ALREADY_SENT,
-        "Friend request already exists",
-      );
+      return err(new FriendErrors.RequestAlreadySent(senderId, recipientId));
     }
 
     // Check if they are already friends
-    const existingFriendship = await this.friendRepository.getFriendship(
-      { userIdA: senderId, userIdB: recipientId },
-    );
+    const existingFriendship = await this.friendRepository.getFriendship({
+      userIdA: senderId,
+      userIdB: recipientId,
+    });
 
     if (existingFriendship) {
-      throw new DomainError(
-        ErrorCode.USER_ALREADY_FRIENDS,
-        "Users are already friends",
-      );
+      return err(new FriendErrors.AlreadyFriends(senderId, recipientId));
     }
 
-    // Create friend request
-    await this.friendRepository.createFriendRequest(
-      { senderId, recipientId },
-    );
+    try {
+      // Create friend request
+      await this.friendRepository.createFriendRequest({
+        senderId,
+        recipientId,
+      });
 
-    // Create follow request
-    await this.followRepository.createFollowRequest(
-      { senderId, recipientId },
-    );
+      // Create follow request
+      await this.followRepository.createFollowRequest({
+        senderId,
+        recipientId,
+      });
 
-    // Get notification settings
-    const notificationSettings =
-      await this.notificationsRepository.getNotificationSettings(
-        { notificationSettingsId: recipient.notificationSettingsId },
-      );
+      // Get notification settings
+      const notificationSettings =
+        await this.notificationsRepository.getNotificationSettings({
+          notificationSettingsId: recipient.notificationSettingsId,
+        });
 
-    if (notificationSettings?.friendRequests) {
-      await this.notificationsRepository.storeNotification(
-        {
-          senderId,
-          recipientId,
-          notificationData: {
-            eventType: "friend",
-            entityType: "profile",
-            entityId: senderId,
+      if (notificationSettings?.friendRequests) {
+        await this.notificationsRepository.storeNotification(
+          {
+            senderId,
+            recipientId,
+            notificationData: {
+              eventType: "friend",
+              entityType: "profile",
+              entityId: senderId,
+            },
           },
-        },
-        undefined,
-      );
+          undefined,
+        );
+      }
+
+      return ok(undefined);
+    } catch (error) {
+      return err(new FriendErrors.FailedToSendRequest(senderId, recipientId));
     }
   }
 
   async acceptFriendRequest(options: {
     senderId: string;
     recipientId: string;
-  }): Promise<void> {
+  }): Promise<
+    Result<
+      void,
+      FriendErrors.RequestNotFound | FriendErrors.FailedToAcceptRequest
+    >
+  > {
     const { senderId, recipientId } = options;
 
     // Check if friend request exists
-    const existingRequest = await this.friendRepository.getFriendRequest(
-      { senderId, recipientId },
-    );
+    const existingRequest = await this.friendRepository.getFriendRequest({
+      senderId,
+      recipientId,
+    });
 
     if (!existingRequest) {
-      throw new DomainError(
-        ErrorCode.FRIEND_REQUEST_NOT_FOUND,
-        "Friend request not found",
-      );
+      return err(new FriendErrors.RequestNotFound(senderId, recipientId));
     }
 
-    // Delete friend request and create friendship
-    await this.friendRepository.deleteFriendRequest(
-      { senderId, recipientId },
-    );
-    await this.friendRepository.createFriend(
-      { senderId, recipientId },
-    );
+    try {
+      // Delete friend request and create friendship
+      await this.friendRepository.deleteFriendRequest({
+        senderId,
+        recipientId,
+      });
+      await this.friendRepository.createFriend({ senderId, recipientId });
 
-    // Accept follow request
-    await this.followRepository.createFollower(
-      { senderUserId: senderId, recipientUserId: recipientId },
-    );
-    await this.followRepository.createFollower(
-      { senderUserId: recipientId, recipientUserId: senderId },
-    );
+      // Accept follow request
+      await this.followRepository.createFollower({
+        senderUserId: senderId,
+        recipientUserId: recipientId,
+      });
+      await this.followRepository.createFollower({
+        senderUserId: recipientId,
+        recipientUserId: senderId,
+      });
 
-    // Get notification settings
-    const sender = await this.userRepository.getUser(
-      { userId: senderId },
-    );
-    if (!sender) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
-    }
+      // Get notification settings
+      const sender = await this.userRepository.getUser({ userId: senderId });
+      if (!sender) {
+        return err(
+          new FriendErrors.FailedToAcceptRequest(senderId, recipientId),
+        );
+      }
 
-    const notificationSettings =
-      await this.notificationsRepository.getNotificationSettings(
-        { notificationSettingsId: sender.notificationSettingsId },
-      );
+      const notificationSettings =
+        await this.notificationsRepository.getNotificationSettings({
+          notificationSettingsId: sender.notificationSettingsId,
+        });
 
-    if (notificationSettings?.friendRequests) {
-      await this.notificationsRepository.storeNotification(
-        {
+      if (notificationSettings?.friendRequests) {
+        await this.notificationsRepository.storeNotification({
           senderId: recipientId,
           recipientId: senderId,
           notificationData: {
@@ -163,168 +183,210 @@ export class FriendService implements IFriendService {
             entityType: "profile",
             entityId: recipientId,
           },
-        },
-      );
+        });
+      }
+
+      return ok(undefined);
+    } catch (error) {
+      return err(new FriendErrors.FailedToAcceptRequest(senderId, recipientId));
     }
   }
 
   async declineFriendRequest(options: {
     senderId: string;
     recipientId: string;
-  }): Promise<void> {
+  }): Promise<
+    Result<
+      void,
+      FriendErrors.RequestNotFound | FriendErrors.FailedToDeclineRequest
+    >
+  > {
     const { senderId, recipientId } = options;
 
     // Check if friend request exists
-    const existingRequest = await this.friendRepository.getFriendRequest(
-      { senderId, recipientId },
-    );
-
-    if (!existingRequest) {
-      throw new DomainError(
-        ErrorCode.FRIEND_REQUEST_NOT_FOUND,
-        "Friend request not found",
-      );
-    }
-
-    // Delete friend request
-    await this.friendRepository.deleteFriendRequest(
-      { senderId, recipientId },
-    );
-
-    // Delete follow request
-    await this.followRepository.removeFollowRequest(
+    const existingRequest = await this.friendRepository.getFriendRequest({
       senderId,
       recipientId,
-    );
+    });
+
+    if (!existingRequest) {
+      return err(new FriendErrors.RequestNotFound(senderId, recipientId));
+    }
+
+    try {
+      // Delete friend request
+      await this.friendRepository.deleteFriendRequest({
+        senderId,
+        recipientId,
+      });
+
+      // Delete follow request
+      await this.followRepository.removeFollowRequest(senderId, recipientId);
+
+      return ok(undefined);
+    } catch (error) {
+      return err(
+        new FriendErrors.FailedToDeclineRequest(senderId, recipientId),
+      );
+    }
   }
 
   async cancelFriendRequest(options: {
     senderId: string;
     recipientId: string;
-  }): Promise<void> {
+  }): Promise<
+    Result<
+      void,
+      FriendErrors.RequestNotFound | FriendErrors.FailedToCancelRequest
+    >
+  > {
     const { senderId, recipientId } = options;
 
     // Check if friend request exists
-    const existingRequest = await this.friendRepository.getFriendRequest(
-      { senderId, recipientId },
-    );
-
-    if (!existingRequest) {
-      throw new DomainError(
-        ErrorCode.FRIEND_REQUEST_NOT_FOUND,
-        "Friend request not found",
-      );
-    }
-
-    // Delete friend request
-    await this.friendRepository.deleteFriendRequest(
-      { senderId, recipientId },
-    );
-
-    // Delete follow request
-    await this.followRepository.removeFollowRequest(
+    const existingRequest = await this.friendRepository.getFriendRequest({
       senderId,
       recipientId,
-    );
+    });
+
+    if (!existingRequest) {
+      return err(new FriendErrors.RequestNotFound(senderId, recipientId));
+    }
+
+    try {
+      // Delete friend request
+      await this.friendRepository.deleteFriendRequest({
+        senderId,
+        recipientId,
+      });
+
+      // Delete follow request
+      await this.followRepository.removeFollowRequest(senderId, recipientId);
+
+      return ok(undefined);
+    } catch (error) {
+      return err(new FriendErrors.FailedToCancelRequest(senderId, recipientId));
+    }
   }
 
   async getFriendRequest(options: {
     senderId: string;
     recipientId: string;
   }): Promise<
-    { senderId: string; recipientId: string; createdAt: Date } | undefined
+    Result<
+      { senderId: string; recipientId: string; createdAt: Date } | undefined,
+      never
+    >
   > {
     const { senderId, recipientId } = options;
-    const request = await this.friendRepository.getFriendRequest(
-      { senderId, recipientId },
+    const request = await this.friendRepository.getFriendRequest({
+      senderId,
+      recipientId,
+    });
+    return ok(
+      request ? { senderId, recipientId, createdAt: new Date() } : undefined,
     );
-    return request
-      ? { senderId, recipientId, createdAt: new Date() }
-      : undefined;
   }
 
   async removeFriend(options: {
     targetUserId: string;
     otherUserId: string;
-  }): Promise<void> {
+  }): Promise<
+    Result<void, FriendErrors.NotFound | FriendErrors.FailedToRemove>
+  > {
     const { targetUserId, otherUserId } = options;
 
     // Check if friendship exists
-    const existingFriendship = await this.friendRepository.getFriendship(
-      { userIdA: targetUserId, userIdB: otherUserId },
-    );
+    const existingFriendship = await this.friendRepository.getFriendship({
+      userIdA: targetUserId,
+      userIdB: otherUserId,
+    });
 
     if (!existingFriendship) {
-      throw new DomainError(
-        ErrorCode.FRIENDSHIP_NOT_FOUND,
-        "Users are not friends",
-      );
+      return err(new FriendErrors.NotFound(targetUserId, otherUserId));
     }
 
-    // Remove friendship
-    await this.friendRepository.removeFriend(
-      { userIdA: targetUserId, userIdB: otherUserId },
-    );
+    try {
+      // Remove friendship
+      await this.friendRepository.removeFriend({
+        userIdA: targetUserId,
+        userIdB: otherUserId,
+      });
 
-    // Remove follow relationship in both directions
-    await this.followRepository.removeFollower(
-      { followerId: targetUserId, followeeId: otherUserId },
-    );
-    await this.followRepository.removeFollower(
-      { followerId: otherUserId, followeeId: targetUserId },
-    );
+      // Remove follow relationship in both directions
+      await this.followRepository.removeFollower({
+        followerId: targetUserId,
+        followeeId: otherUserId,
+      });
+      await this.followRepository.removeFollower({
+        followerId: otherUserId,
+        followeeId: targetUserId,
+      });
+
+      return ok(undefined);
+    } catch (error) {
+      return err(new FriendErrors.FailedToRemove(targetUserId, otherUserId));
+    }
   }
 
-  async countFriendRequests(options: { userId: string }): Promise<number> {
+  async countFriendRequests(options: {
+    userId: string;
+  }): Promise<Result<number, FriendErrors.FailedToCountRequests>> {
     const { userId } = options;
-    const count = await this.friendRepository.countFriendRequests(
-      { userId },
-    );
-    return count ?? 0;
+    try {
+      const count = await this.friendRepository.countFriendRequests({ userId });
+      return ok(count ?? 0);
+    } catch (error) {
+      return err(new FriendErrors.FailedToCountRequests());
+    }
   }
 
   async determineFriendState(options: {
     userId: string;
     targetUserId: string;
-  }): Promise<FriendStatus> {
+  }): Promise<Result<FriendStatus, never>> {
     const { userId, targetUserId } = options;
 
     // Check if they are friends
-    const areFriends = await this.friendRepository.friendshipExists(
-      { userIdA: userId, userIdB: targetUserId },
-    );
+    const areFriends = await this.friendRepository.friendshipExists({
+      userIdA: userId,
+      userIdB: targetUserId,
+    });
 
     if (areFriends) {
-      return "friends";
+      return ok("friends");
     }
 
     // Check if there's a pending friend request
-    const friendRequest = await this.friendRepository.getFriendRequest(
-      { senderId: targetUserId, recipientId: userId },
-    );
+    const friendRequest = await this.friendRepository.getFriendRequest({
+      senderId: targetUserId,
+      recipientId: userId,
+    });
 
     if (friendRequest) {
-      return "inboundRequest";
+      return ok("inboundRequest");
     }
 
-    const sentFriendRequest = await this.friendRepository.getFriendRequest(
-      { senderId: userId, recipientId: targetUserId },
-    );
+    const sentFriendRequest = await this.friendRepository.getFriendRequest({
+      senderId: userId,
+      recipientId: targetUserId,
+    });
 
     if (sentFriendRequest) {
-      return "outboundRequest";
+      return ok("outboundRequest");
     }
 
-    return "notFriends";
+    return ok("notFriends");
   }
 
   async friendshipExists(options: {
     userIdA: string;
     userIdB: string;
-  }): Promise<boolean> {
+  }): Promise<Result<boolean, never>> {
     const { userIdA, userIdB } = options;
-    return await this.friendRepository.friendshipExists(
-      { userIdA, userIdB }
-    );
+    const exists = await this.friendRepository.friendshipExists({
+      userIdA,
+      userIdB,
+    });
+    return ok(exists);
   }
 }
