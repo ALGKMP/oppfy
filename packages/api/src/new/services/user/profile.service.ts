@@ -6,7 +6,6 @@ import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import { ProfileErrors } from "../../errors/user/profile.error";
-import type { IBlockRepository } from "../../interfaces/repositories/social/blockRepository.interface";
 import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profileRepository.interface";
 import type {
@@ -25,8 +24,6 @@ export class ProfileService implements IProfileService {
     private readonly db: Database,
     @inject(TYPES.ProfileRepository)
     private readonly profileRepository: IProfileRepository,
-    @inject(TYPES.BlockRepository)
-    private readonly blockRepository: IBlockRepository,
     @inject(TYPES.RelationshipRepository)
     private readonly relationshipRepository: IRelationshipRepository,
     @inject(TYPES.CloudFront)
@@ -38,15 +35,16 @@ export class ProfileService implements IProfileService {
   ): Promise<Result<HydratedProfile, ProfileErrors.ProfileNotFound>> {
     const { selfUserId, otherUserId } = params;
 
-    const relationshipA = await this.relationshipRepository.getByUserIds({
-      userIdA: selfUserId,
-      userIdB: otherUserId,
-    });
-
-    const relationshipB = await this.relationshipRepository.getByUserIds({
-      userIdA: otherUserId,
-      userIdB: selfUserId,
-    });
+    const [relationshipA, relationshipB] = await Promise.all([
+      this.relationshipRepository.getByUserIds({
+        userIdA: selfUserId,
+        userIdB: otherUserId,
+      }),
+      this.relationshipRepository.getByUserIds({
+        userIdA: otherUserId,
+        userIdB: selfUserId,
+      }),
+    ]);
 
     if (relationshipA.blocked || relationshipB.blocked) {
       return err(new ProfileErrors.ProfileBlocked(otherUserId));
