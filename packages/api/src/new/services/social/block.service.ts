@@ -60,14 +60,13 @@ export class BlockService implements IBlockService {
     }
 
     await this.db.transaction(async (tx) => {
-      // Update relationship status
       await this.relationshipRepository.upsert(
-        blockerId,
-        blockedId,
         {
-          friendshipStatus: "notFriends",
-          followStatus: "notFollowing",
-          blockStatus: true,
+          userIdA: blockerId,
+          userIdB: blockedId,
+          updates: {
+            blockStatus: true,
+          },
         },
         tx,
       );
@@ -235,10 +234,12 @@ export class BlockService implements IBlockService {
           tx,
         ),
         this.relationshipRepository.upsert(
-          blockerId,
-          blockedId,
           {
-            blockStatus: false,
+            userIdA: blockerId,
+            userIdB: blockedId,
+            updates: {
+              blockStatus: false,
+            },
           },
           tx,
         ),
