@@ -7,7 +7,6 @@ import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
 
 import { db, eq, schema } from "@oppfy/db";
 import { env } from "@oppfy/env";
-
 import { sharedValidators } from "@oppfy/validators";
 
 const s3Client = new S3Client({ region: "us-east-1" });
@@ -37,23 +36,18 @@ export const handler = async (
   });
 
   try {
-    const s3Response = await s3Client.send(command).catch((err) => {
-      console.error("Failed to retrieve S3 object metadata:", err);
-      throw err; // Rethrow to handle it in the outer try-catch block
-    });
+    const s3Response = await s3Client.send(command);
 
     const metadata =
       sharedValidators.aws.s3ObjectMetadataForProfilePicturesSchema.parse(
         s3Response.Metadata,
       );
 
-    console.log(metadata);
-
     const user = await db.query.user.findFirst({
       where: eq(schema.user.id, metadata.user),
     });
 
-    if (!user) {
+    if (user === undefined) {
       throw new Error("User not found");
     }
 
@@ -62,13 +56,7 @@ export const handler = async (
       .set({
         profilePictureKey: objectKey,
       })
-      .where(eq(schema.profile.id, user.profileId));
-
-    console.log("USER ID: ", user.id);
-
-    await upsertProfile(user.id, {
-      profilePictureKey: objectKey,
-    });
+      .where(eq(schema.profile.userId, user.id));
 
     await createCloudFrontInvalidation(objectKey);
 
@@ -77,11 +65,11 @@ export const handler = async (
       body: JSON.stringify({ message: "Post processed successfully" }),
     };
   } catch (error) {
-    console.error(error);
     return {
       statusCode: 500,
       body: JSON.stringify({
         message: "Error uploading profile picture.",
+        error,
       }),
     };
   }
@@ -89,7 +77,7 @@ export const handler = async (
 
 const createCloudFrontInvalidation = async (objectKey: string) => {
   const params = {
-    DistributionId: env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID,
+    DistributionId: env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
     InvalidationBatch: {
       CallerReference: Date.now().toString(),
       Paths: {
@@ -101,40 +89,4 @@ const createCloudFrontInvalidation = async (objectKey: string) => {
 
   const command = new CreateInvalidationCommand(params);
   return cloudFrontClient.send(command);
-};
-
-const upsertProfile = async (
-  userId: string,
-  newProfileData: Partial<OpenSearchProfileIndexResult>,
-) => {
-  const userWithProfile = await db.query.user.findFirst({
-    where: eq(schema.user.id, userId),
-    with: {
-      profile: {
-        columns: {
-          username: true,
-          name: true,
-          bio: true,
-          dateOfBirth: true,
-          profilePictureKey: true,
-        },
-      },
-    },
-  });
-
-  if (userWithProfile === undefined) {
-    throw new Error("Profile not found");
-  }
-  const profileData = userWithProfile.profile;
-
-  const documentBody = {
-    ...profileData,
-    ...newProfileData,
-  };
-
-  await openSearch.index({
-    index: OpenSearchIndex.PROFILE,
-    id: userId,
-    body: documentBody,
-  });
 };

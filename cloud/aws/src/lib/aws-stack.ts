@@ -44,7 +44,8 @@ const environment = {
   CONTACT_REC_LAMBDA_URL: env.CONTACT_REC_LAMBDA_URL,
 
   EXPO_ACCESS_TOKEN: env.EXPO_ACCESS_TOKEN,
-  CLOUDFRONT_PROFILE_DISTRIBUTION_ID: env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID,
+  CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID:
+    env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
 };
 
 export class AwsStack extends cdk.Stack {
@@ -148,24 +149,13 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
-    const publicProfilePictureDistribution = new CloudFrontDistribution(
+    const profilePictureDistribution = new CloudFrontDistribution(
       this,
-      "PublicProfilePictureDistribution",
+      "profilePictureDistribution",
       {
         isPrivate: false,
         bucket: profileBucket.bucket,
         oai,
-      },
-    );
-
-    const profileDistribution = new CloudFrontDistribution(
-      this,
-      "ProfileDistribution",
-      {
-        isPrivate: true,
-        bucket: profileBucket.bucket,
-        oai,
-        keyGroup,
       },
     );
 
@@ -178,15 +168,6 @@ export class AwsStack extends cdk.Stack {
       entry: "src/res/lambdas/profile-picture/index.ts",
       environment,
     });
-
-    profileLambda.function.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["cloudfront:CreateInvalidation"],
-        resources: [
-          `arn:aws:cloudfront::${env.AWS_ACCOUNT_ID}:distribution/${profileDistribution.distribution.distributionId}`,
-        ],
-      }),
-    );
 
     this.setupBucketLambdaIntegration(
       postBucket.bucket,
@@ -314,11 +295,7 @@ export class AwsStack extends cdk.Stack {
     });
 
     new cdk.CfnOutput(this, "PublicProfilePictureDistributionUrl", {
-      value: `https://${publicProfilePictureDistribution.distribution.distributionDomainName}`,
-    });
-
-    new cdk.CfnOutput(this, "ProfileDistributionUrl", {
-      value: `https://${profileDistribution.distribution.distributionDomainName}`,
+      value: `https://${profilePictureDistribution.distribution.distributionDomainName}`,
     });
 
     new cdk.CfnOutput(this, "MuxWebhookUrl", {

@@ -1018,6 +1018,6 @@ export class PostService {
   }: {
     objectKey: string;
   }): Promise<string> {
-    return await cloudfront.getSignedPublicPostUrl(objectKey);
+    return await cloudfront.getPublicPostUrl(objectKey);
   }
 }
