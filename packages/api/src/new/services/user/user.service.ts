@@ -19,7 +19,7 @@ import type { INotificationsRepository } from "../../interfaces/repositories/use
 import type { IProfileRepository } from "../../interfaces/repositories/user/profileRepository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/userRepository.interface";
 import type { IUserService } from "../../interfaces/services/user/userService.interface";
-import type { User } from "../../models";
+import type { User, UserStatus } from "../../models";
 
 @injectable()
 export class UserService implements IUserService {
@@ -212,7 +212,7 @@ export class UserService implements IUserService {
 
   async getUserStatus(options: {
     userId: string;
-  }): Promise<Result<any, UserErrors.UserNotFound>> {
+  }): Promise<Result<UserStatus, UserErrors.UserNotFound>> {
     const { userId } = options;
     const userStatus = await this.userRepository.getUserStatus({ userId });
     if (!userStatus) {
