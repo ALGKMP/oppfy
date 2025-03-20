@@ -91,16 +91,6 @@ export class FollowRepository implements IFollowRepository {
       },
       tx,
     );
-    await this.relationshipRepository.upsert(
-      {
-        userIdA: recipientUserId,
-        userIdB: senderUserId,
-        updates: {
-          followStatus: "following",
-        },
-      },
-      tx,
-    );
   }
 
   async removeFollower(
@@ -143,16 +133,6 @@ export class FollowRepository implements IFollowRepository {
     // Update relationship status for both sides
     await this.relationshipRepository.upsert(
       {
-        userIdA: followerId,
-        userIdB: followeeId,
-        updates: {
-          followStatus: "notFollowing",
-        },
-      },
-      tx,
-    );
-    await this.relationshipRepository.upsert(
-      {
         userIdA: followeeId,
         userIdB: followerId,
         updates: {
@@ -166,9 +146,9 @@ export class FollowRepository implements IFollowRepository {
   async removeFollowRequest(
     senderId: string,
     recipientId: string,
-    db: DatabaseOrTransaction = this.db,
+    tx: Transaction,
   ): Promise<void> {
-    await db
+    await tx
       .delete(this.schema.followRequest)
       .where(
         and(
@@ -176,6 +156,14 @@ export class FollowRepository implements IFollowRepository {
           eq(this.schema.followRequest.recipientId, recipientId),
         ),
       );
+
+    await this.relationshipRepository.upsert(
+      {
+        userIdA: senderId,
+        userIdB: recipientId,
+        updates: { followStatus: "notFollowing" },
+      },
+    );
   }
 
   async getFollower(
@@ -375,16 +363,6 @@ export class FollowRepository implements IFollowRepository {
       {
         userIdA: senderId,
         userIdB: recipientId,
-        updates: {
-          followStatus: "following",
-        },
-      },
-      tx,
-    );
-    await this.relationshipRepository.upsert(
-      {
-        userIdA: recipientId,
-        userIdB: senderId,
         updates: {
           followStatus: "following",
         },
