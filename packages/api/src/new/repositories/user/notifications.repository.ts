@@ -25,7 +25,7 @@ import {
   StoreNotificationParams,
   StorePushTokenParams,
   UpdateNotificationSettingsParams,
-} from "../../interfaces/repositories/user/notificationsRepository.interface";
+} from "../../interfaces/repositories/user/notificationRepository.interface";
 
 @injectable()
 export class NotificationsRepository implements INotificationsRepository {

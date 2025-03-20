@@ -7,10 +7,14 @@ import type {
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
-import { entityTypeEnum, friendStatusEnum, followStatusEnum } from "./src/schema";
-
 import { env } from "@oppfy/env";
 
+import {
+  entityTypeEnum,
+  eventTypeEnum,
+  followStatusEnum,
+  friendStatusEnum,
+} from "./src/schema";
 import * as schema from "./src/schema";
 
 export * from "drizzle-orm";
@@ -24,6 +28,14 @@ const db = drizzle(queryClient, {
 
 type Schema = typeof schema;
 type Database = PostgresJsDatabase<Schema>;
+type EntityType = (typeof entityTypeEnum.enumValues)[number];
+type FriendStatus = (typeof friendStatusEnum.enumValues)[number];
+type FollowStatus = (typeof followStatusEnum.enumValues)[number];
+type EventType = (typeof eventTypeEnum.enumValues)[number];
+
+export type NotificationSettings =
+  typeof schema.notificationSettings.$inferSelect;
+
 type Transaction = PgTransaction<
   PostgresJsQueryResultHKT,
   Schema,
@@ -31,5 +43,21 @@ type Transaction = PgTransaction<
 >;
 type DatabaseOrTransaction = Database | Transaction;
 
-export { db, schema, entityTypeEnum, friendStatusEnum, followStatusEnum };
-export type { Schema, Database, Transaction, DatabaseOrTransaction };
+export {
+  db,
+  schema,
+  entityTypeEnum,
+  friendStatusEnum,
+  followStatusEnum,
+  eventTypeEnum,
+};
+export type {
+  Schema,
+  Database,
+  Transaction,
+  DatabaseOrTransaction,
+  EntityType,
+  FriendStatus,
+  FollowStatus,
+  EventType,
+};

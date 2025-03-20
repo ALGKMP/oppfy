@@ -8,22 +8,22 @@ import { IBlockRepository } from "./interfaces/repositories/social/blockReposito
 import { IFollowRepository } from "./interfaces/repositories/social/followRepository.interface";
 import { IFriendRepository } from "./interfaces/repositories/social/friendRepository.interface";
 import { IContactsRepository } from "./interfaces/repositories/user/contactsRepository.interface";
-import { INotificationsRepository } from "./interfaces/repositories/user/notificationsRepository.interface";
+import { INotificationsRepository } from "./interfaces/repositories/user/notificationRepository.interface";
 import { IProfileRepository } from "./interfaces/repositories/user/profileRepository.interface";
 import { IProfileStatsRepository } from "./interfaces/repositories/user/profileStatsRepository.interface";
 import { IReportRepository } from "./interfaces/repositories/user/reportRepository.interface";
 import { IUserRepository } from "./interfaces/repositories/user/userRepository.interface";
+import { IReportService } from "./interfaces/services/user/reportService.interface";
+import { BlockRepository } from "./repositories/social/block.repository";
+import { FollowRepository } from "./repositories/social/follow.repository";
+import { FriendRepository } from "./repositories/social/friend.repository";
 import { ContactsRepository } from "./repositories/user/contacts.repository";
+import { NotificationsRepository } from "./repositories/user/notifications.repository";
 import { ProfileRepository } from "./repositories/user/profile.repository";
 import { ProfileStatsRepository } from "./repositories/user/profileStats.repository";
 import { ReportRepository } from "./repositories/user/report.repository";
-import { BlockRepository } from "./repositories/social/block.repository";
 import { UserRepository } from "./repositories/user/user.repository";
 import { ReportService } from "./services/user/report.service";
-import { FollowRepository } from "./repositories/social/follow.repository";
-import { FriendRepository } from "./repositories/social/friend.repository";
-import { NotificationsRepository } from "./repositories/user/notifications.repository";
-import { IReportService } from "./interfaces/services/user/reportService.interface";
 
 // Define symbol constants for our interfaces
 export const TYPES = {
