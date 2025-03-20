@@ -136,12 +136,12 @@ export class FriendService implements IFriendService {
     const { senderId, recipientId } = options;
 
     // Check if friend request exists
-    const existingRequest = await this.friendRepository.getFriendRequest({
-      senderId,
-      recipientId,
+    const relationship = await this.relationshipRepository.getByUserIds({
+      userIdA: senderId,
+      userIdB: recipientId,
     });
 
-    if (!existingRequest) {
+    if (!relationship) {
       return err(new FriendErrors.RequestNotFound(senderId, recipientId));
     }
 
