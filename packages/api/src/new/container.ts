@@ -2,6 +2,7 @@ import "reflect-metadata";
 
 import { Container } from "inversify";
 
+import { CloudFront } from "@oppfy/cloudfront";
 import { db, schema } from "@oppfy/db";
 
 import type { IBlockRepository } from "./interfaces/repositories/social/blockRepository.interface";
@@ -32,6 +33,9 @@ export const TYPES = {
   Schema: Symbol.for("Schema"),
   Transaction: Symbol.for("Transaction"),
 
+  // SDKs
+  CloudFront: Symbol.for("CloudFront"),
+
   // Repositories
   ReportRepository: Symbol.for("ReportRepository"),
   BlockRepository: Symbol.for("BlockRepository"),
@@ -48,7 +52,6 @@ export const TYPES = {
   CommentRepository: Symbol.for("CommentRepository"),
   PostStatsRepository: Symbol.for("PostStatsRepository"),
 
-
   // Services
   ReportService: Symbol.for("ReportService"),
 };
@@ -59,7 +62,9 @@ const container = new Container();
 // Bind DB dependencies
 container.bind(TYPES.Database).toConstantValue(db);
 container.bind(TYPES.Schema).toConstantValue(schema);
-container.bind(TYPES.Transaction).toConstantValue(db.transaction);
+
+// Bind sdk's
+container.bind<CloudFront>(TYPES.CloudFront).to(CloudFront);
 
 // Bind repositories
 container.bind<IReportRepository>(TYPES.ReportRepository).to(ReportRepository);

@@ -1,6 +1,7 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
@@ -15,7 +16,7 @@ import type {
   SearchProfilesByUsernameParams,
   UpdateProfileParams,
 } from "../../interfaces/services/user/profileService.interface";
-import { Profile, UserStats } from "../../models";
+import { HydratedProfile, UserStats } from "../../models";
 
 @injectable()
 export class ProfileService implements IProfileService {
@@ -28,11 +29,13 @@ export class ProfileService implements IProfileService {
     private readonly blockRepository: IBlockRepository,
     @inject(TYPES.RelationshipRepository)
     private readonly relationshipRepository: IRelationshipRepository,
+    @inject(TYPES.CloudFront)
+    private readonly cloudfront: CloudFront,
   ) {}
 
   async profile(
     params: GetProfileParams,
-  ): Promise<Result<Profile, ProfileErrors.ProfileNotFound>> {
+  ): Promise<Result<HydratedProfile, ProfileErrors.ProfileNotFound>> {
     const { selfUserId, otherUserId } = params;
 
     const relationshipA = await this.relationshipRepository.getByUserIds({
@@ -56,7 +59,7 @@ export class ProfileService implements IProfileService {
     if (profile === undefined)
       return err(new ProfileErrors.ProfileNotFound(otherUserId));
 
-    return ok(profile);
+    return ok(this.cloudfront.hydrateProfile(profile));
   }
 
   async stats(
@@ -99,7 +102,7 @@ export class ProfileService implements IProfileService {
 
   async searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,
-  ): Promise<Result<Profile[], never>> {
+  ): Promise<Result<HydratedProfile[], never>> {
     const { username, selfUserId } = params;
 
     const profiles = await this.profileRepository.getProfilesByUsername({
@@ -108,6 +111,6 @@ export class ProfileService implements IProfileService {
       limit: 15,
     });
 
-    return ok(profiles);
+    return ok(this.cloudfront.hydrateProfiles(profiles));
   }
 }
