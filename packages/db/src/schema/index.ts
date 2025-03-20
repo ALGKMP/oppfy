@@ -54,6 +54,18 @@ export const postTypeEnum = pgEnum("post_type", [
 
 export const mediaTypeEnum = pgEnum("media_type", ["image", "video"]);
 
+export const friendStatusEnum = pgEnum("friend_status", [
+  "friends",
+  "outbound_request",
+  "inbound_request",
+]);
+
+export const followStatusEnum = pgEnum("follow_status", [
+  "following",
+  "outbound_request",
+  "inbound_request",
+]);
+
 export const reportPostReasonEnum = pgEnum("report_post_reason", [
   "Violent or abusive",
   "Sexually explicit or predatory",
@@ -734,3 +746,50 @@ export const reportUserRelations = relations(reportUser, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const userRelationship = pgTable(
+  "user_relationship",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userIdA: uuid("user_id_a")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    userIdB: uuid("user_id_b")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    friendshipStatus: friendStatusEnum("friendship_status").notNull(),
+    followStatus: followStatusEnum("follow_status").notNull(),
+    blockStatus: boolean("block_status").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    selfCheck: check(
+      "user_relationship_self_check",
+      sql`user_id_a != user_id_b`,
+    ),
+    userAIdx: index("user_relationship_user_a_idx").on(table.userIdA),
+    userBIdx: index("user_relationship_user_b_idx").on(table.userIdB),
+    uniqueUserPair: uniqueIndex("user_relationship_user_pair_unique").on(
+      table.userIdA,
+      table.userIdB,
+    ),
+  }),
+);
+
+export const userRelationshipRelations = relations(
+  userRelationship,
+  ({ one }) => ({
+    userA: one(user, {
+      relationName: "userA",
+      fields: [userRelationship.userIdA],
+      references: [user.id],
+    }),
+    userB: one(user, {
+      relationName: "userB",
+      fields: [userRelationship.userIdB],
+      references: [user.id],
+    }),
+  }),
+);
