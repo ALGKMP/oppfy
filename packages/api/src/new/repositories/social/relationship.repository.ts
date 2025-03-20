@@ -31,6 +31,7 @@ export class RelationshipRepository implements IRelationshipRepository {
     db: DatabaseOrTransaction = this.db,
   ): Promise<Relationship> {
     const { userIdA, userIdB } = params;
+
     const relationship = await db.query.userRelationship.findFirst({
       where: or(
         and(
@@ -44,13 +45,13 @@ export class RelationshipRepository implements IRelationshipRepository {
       ),
     });
 
-    if (!relationship) {
+    if (relationship === undefined) {
       return {
         userIdA,
         userIdB,
         friendshipStatus: "notFriends",
         followStatus: "notFollowing",
-        blockStatus: false,
+        blocked: false,
       };
     }
 

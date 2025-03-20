@@ -612,10 +612,10 @@ export const block = pgTable(
   "block",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userWhoBlockedUserId: uuid("user_who_is_blocking_id")
+    blockedByUserId: uuid("blocked_by_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    userWhoIsBlockedUserId: uuid("user_who_is_blocked_id")
+    blockedUserId: uuid("blocked_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -623,15 +623,11 @@ export const block = pgTable(
       .notNull(),
   },
   (table) => ({
-    blockingUserIdx: index("block_blocking_user_idx").on(
-      table.userWhoBlockedUserId,
-    ),
-    blockedUserIdx: index("block_blocked_user_idx").on(
-      table.userWhoIsBlockedUserId,
-    ),
+    blockedUserIdx: index("block_blocking_user_idx").on(table.blockedByUserId),
+    blockedByUserIdx: index("block_blocked_user_idx").on(table.blockedUserId),
     uniqueBlockPair: uniqueIndex("block_unique_pair").on(
-      table.userWhoBlockedUserId,
-      table.userWhoIsBlockedUserId,
+      table.blockedByUserId,
+      table.blockedUserId,
     ),
   }),
 );
@@ -639,12 +635,12 @@ export const block = pgTable(
 export const blockRelations = relations(block, ({ one }) => ({
   userWhoIsBlocking: one(user, {
     relationName: "userWhoIsBlocking",
-    fields: [block.userWhoBlockedUserId],
+    fields: [block.blockedByUserId],
     references: [user.id],
   }),
   userWhoIsBlocked: one(user, {
     relationName: "userWhoIsBlocked",
-    fields: [block.userWhoIsBlockedUserId],
+    fields: [block.blockedUserId],
     references: [user.id],
   }),
 }));
@@ -761,7 +757,7 @@ export const userRelationship = pgTable(
     followStatus: followStatusEnum("follow_status")
       .default("notFollowing")
       .notNull(),
-    blockStatus: boolean("block_status").default(false).notNull(),
+    blocked: boolean("block_status").default(false).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

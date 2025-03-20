@@ -76,15 +76,15 @@ export const handler = async (
       .then((res) => res.map((r) => r.userId));
 
     const blocked = await db
-      .select({ userId: schema.block.userWhoIsBlockedUserId })
+      .select({ userId: schema.block.blockedUserId })
       .from(schema.block)
-      .where(eq(schema.block.userWhoBlockedUserId, userId))
+      .where(eq(schema.block.blockedByUserId, userId))
       .then((res) => res.map((r) => r.userId));
 
     const blockedBy = await db
-      .select({ userId: schema.block.userWhoBlockedUserId })
+      .select({ userId: schema.block.blockedByUserId })
       .from(schema.block)
-      .where(eq(schema.block.userWhoIsBlockedUserId, userId))
+      .where(eq(schema.block.blockedUserId, userId))
       .then((res) => res.map((r) => r.userId));
 
     const friend1s = await db

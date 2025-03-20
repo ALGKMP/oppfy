@@ -51,7 +51,7 @@ export class ContactService implements IContactService {
     const user = await this.userRepository.getUser({ userId });
 
     if (user === undefined) {
-      return err(new UserErrors.UserNotFound());
+      return err(new UserErrors.UserNotFound(userId));
     }
 
     // hash the users own phone number and remove from contacts if its in there
@@ -96,7 +96,7 @@ export class ContactService implements IContactService {
     const user = await this.userRepository.getUser({ userId });
 
     if (user === undefined) {
-      return err(new UserErrors.UserNotFound());
+      return err(new UserErrors.UserNotFound(userId));
     }
 
     // hash the users own phone number and remove from contacts if its in there
@@ -148,7 +148,7 @@ export class ContactService implements IContactService {
     const user = await this.userRepository.getUser({ userId });
 
     if (user === undefined) {
-      return err(new UserErrors.UserNotFound());
+      return err(new UserErrors.UserNotFound(userId));
     }
 
     //TODO: look at
@@ -162,7 +162,7 @@ export class ContactService implements IContactService {
     const user = await this.userRepository.getUser({ userId });
 
     if (user === undefined) {
-      return err(new UserErrors.UserNotFound());
+      return err(new UserErrors.UserNotFound(userId));
     }
 
     const recommendationsIds = (
@@ -189,6 +189,7 @@ export class ContactService implements IContactService {
         .filter((id) => id !== userId);
     }
 
+    // TODO: ADD BACK
     // start a transaction to get all the usernames and profilePhotos
     const profiles = await this.profileRepository.getBatchProfiles({
       userIds: allRecommendations,

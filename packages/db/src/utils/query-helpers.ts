@@ -34,5 +34,5 @@ export function withoutBlocked<T extends PgSelect>(
         eq(schema.userRelationship.userIdB, schema.profile.userId),
       ),
     )
-    .where(eq(schema.userRelationship.blockStatus, false));
+    .where(eq(schema.userRelationship.blocked, false));
 }

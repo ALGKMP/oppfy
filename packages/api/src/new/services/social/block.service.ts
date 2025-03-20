@@ -65,7 +65,7 @@ export class BlockService implements IBlockService {
           userIdA: blockerId,
           userIdB: blockedId,
           updates: {
-            blockStatus: true,
+            blocked: true,
           },
         },
         tx,
@@ -238,7 +238,7 @@ export class BlockService implements IBlockService {
             userIdA: blockerId,
             userIdB: blockedId,
             updates: {
-              blockStatus: false,
+              blocked: false,
             },
           },
           tx,

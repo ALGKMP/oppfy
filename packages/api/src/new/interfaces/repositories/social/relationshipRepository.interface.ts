@@ -9,7 +9,7 @@ export interface Relationship {
   userIdB: string;
   friendshipStatus: FriendStatus;
   followStatus: FollowStatus;
-  blockStatus: boolean;
+  blocked: boolean;
 }
 
 export type UpdateRelationship = Partial<
@@ -33,9 +33,12 @@ export interface DeleteParams {
 }
 
 export interface IRelationshipRepository {
-  getByUserIds(params: GetByUserIdsParams, db? : DatabaseOrTransaction): Promise<Relationship>;
+  getByUserIds(
+    params: GetByUserIdsParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<Relationship>;
 
-  upsert(params: UpsertParams, db? :DatabaseOrTransaction): Promise<void>;
+  upsert(params: UpsertParams, db?: DatabaseOrTransaction): Promise<void>;
 
-  delete(params: DeleteParams, db?:DatabaseOrTransaction): Promise<void>;
+  delete(params: DeleteParams, db?: DatabaseOrTransaction): Promise<void>;
 }

@@ -49,7 +49,7 @@ export class BlockRepository implements IBlockRepository {
       .from(this.schema.user)
       .innerJoin(
         this.schema.block,
-        eq(this.schema.user.id, this.schema.block.userWhoIsBlockedUserId),
+        eq(this.schema.user.id, this.schema.block.blockedUserId),
       )
       .innerJoin(
         this.schema.profile,
@@ -57,7 +57,7 @@ export class BlockRepository implements IBlockRepository {
       )
       .where(
         and(
-          eq(this.schema.block.userWhoBlockedUserId, forUserId),
+          eq(this.schema.block.blockedByUserId, forUserId),
           cursor
             ? or(
                 gt(this.schema.block.createdAt, cursor.createdAt),
@@ -84,8 +84,8 @@ export class BlockRepository implements IBlockRepository {
       .from(this.schema.block)
       .where(
         and(
-          eq(this.schema.block.userWhoBlockedUserId, userId),
-          eq(this.schema.block.userWhoIsBlockedUserId, blockedUserId),
+          eq(this.schema.block.blockedByUserId, userId),
+          eq(this.schema.block.blockedUserId, blockedUserId),
         ),
       )
       .limit(1);
@@ -100,8 +100,8 @@ export class BlockRepository implements IBlockRepository {
     const { userId, blockedUserId } = params;
 
     await db.insert(this.schema.block).values({
-      userWhoBlockedUserId: userId,
-      userWhoIsBlockedUserId: blockedUserId,
+      blockedByUserId: userId,
+      blockedUserId: blockedUserId,
     });
   }
 
@@ -115,8 +115,8 @@ export class BlockRepository implements IBlockRepository {
       .delete(this.schema.block)
       .where(
         and(
-          eq(this.schema.block.userWhoBlockedUserId, userId),
-          eq(this.schema.block.userWhoIsBlockedUserId, blockedUserId),
+          eq(this.schema.block.blockedByUserId, userId),
+          eq(this.schema.block.blockedUserId, blockedUserId),
         ),
       );
   }

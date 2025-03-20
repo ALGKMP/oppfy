@@ -1,6 +1,7 @@
 import { inject, injectable } from "inversify";
+import { ok, Result } from "neverthrow";
 
-import type { Transaction } from "@oppfy/db";
+import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import type { IReportRepository } from "../../interfaces/repositories/user/reportRepository.interface";
@@ -13,27 +14,31 @@ import {
 
 @injectable()
 export class ReportService implements IReportService {
-  private tx: Transaction;
-
-  private reportRepository: IReportRepository;
-
   constructor(
-    @inject(TYPES.Transaction) tx: Transaction,
-    @inject(TYPES.ReportRepository) reportRepository: IReportRepository,
-  ) {
-    this.tx = tx;
-    this.reportRepository = reportRepository;
-  }
+    @inject(TYPES.Database)
+    private readonly db: Database,
+    @inject(TYPES.ReportRepository)
+    private readonly reportRepository: IReportRepository,
+  ) {}
 
-  async reportUser(params: CreateUserReportParams): Promise<void> {
+  async reportUser(
+    params: CreateUserReportParams,
+  ): Promise<Result<void, never>> {
     await this.reportRepository.createUserReport(params);
+    return ok();
   }
 
-  async reportPost(params: CreatePostReportParams): Promise<void> {
+  async reportPost(
+    params: CreatePostReportParams,
+  ): Promise<Result<void, never>> {
     await this.reportRepository.createPostReport(params);
+    return ok();
   }
 
-  async reportComment(params: CreateCommentReportParams): Promise<void> {
+  async reportComment(
+    params: CreateCommentReportParams,
+  ): Promise<Result<void, never>> {
     await this.reportRepository.createCommentReport(params);
+    return ok();
   }
 }

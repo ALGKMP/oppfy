@@ -9,20 +9,20 @@ export class UserRelationshipRepository {
     userIdB,
     friendshipStatus,
     followStatus,
-    blockStatus,
+    blocked,
   }: {
     userIdA: string;
     userIdB: string;
     friendshipStatus: (typeof friendStatusEnum.enumValues)[number];
     followStatus: (typeof followStatusEnum.enumValues)[number];
-    blockStatus: boolean;
+    blocked: boolean;
   }) {
     return await db.insert(schema.userRelationship).values({
       userIdA,
       userIdB,
       friendshipStatus,
       followStatus,
-      blockStatus,
+      blocked,
     });
   }
 
@@ -52,24 +52,24 @@ export class UserRelationshipRepository {
     userIdB,
     friendshipStatus,
     followStatus,
-    blockStatus,
+    blocked,
   }: {
     userIdA: string;
     userIdB: string;
     friendshipStatus?: (typeof friendStatusEnum.enumValues)[number];
     followStatus?: (typeof followStatusEnum.enumValues)[number];
-    blockStatus?: boolean;
+    blocked?: boolean;
   }) {
     const updateData: Partial<{
       friendshipStatus: (typeof friendStatusEnum.enumValues)[number];
       followStatus: (typeof followStatusEnum.enumValues)[number];
-      blockStatus: boolean;
+      blocked: boolean;
     }> = {};
 
     if (friendshipStatus !== undefined)
       updateData.friendshipStatus = friendshipStatus;
     if (followStatus !== undefined) updateData.followStatus = followStatus;
-    if (blockStatus !== undefined) updateData.blockStatus = blockStatus;
+    if (blocked !== undefined) updateData.blocked = blocked;
 
     return await db
       .update(schema.userRelationship)

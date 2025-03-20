@@ -324,7 +324,7 @@ export class UserService implements IUserService {
       userIdB: targetUserId,
     });
 
-    if (relationship.blockStatus) {
+    if (relationship.blocked) {
       return ok(false);
     }
 

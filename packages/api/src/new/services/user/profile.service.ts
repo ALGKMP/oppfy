@@ -6,6 +6,7 @@ import type { Database } from "@oppfy/db";
 import { TYPES } from "../../container";
 import { ProfileErrors } from "../../errors/user/profile.error";
 import type { IBlockRepository } from "../../interfaces/repositories/social/blockRepository.interface";
+import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profileRepository.interface";
 import type {
   GetProfileParams,
@@ -25,7 +26,8 @@ export class ProfileService implements IProfileService {
     private readonly profileRepository: IProfileRepository,
     @inject(TYPES.BlockRepository)
     private readonly blockRepository: IBlockRepository,
-    @inject(TYPES.)
+    @inject(TYPES.RelationshipRepository)
+    private readonly relationshipRepository: IRelationshipRepository,
   ) {}
 
   async profile(
@@ -33,19 +35,17 @@ export class ProfileService implements IProfileService {
   ): Promise<Result<Profile, ProfileErrors.ProfileNotFound>> {
     const { selfUserId, otherUserId } = params;
 
-    // Check if blocked
-    const [isBlocked, isBlockedBy] = await Promise.all([
-      this.blockRepository.getBlockedUser({
-        userId: selfUserId,
-        blockedUserId: otherUserId,
-      }),
-      this.blockRepository.getBlockedUser({
-        userId: otherUserId,
-        blockedUserId: selfUserId,
-      }),
-    ]);
+    const relationshipA = await this.relationshipRepository.getByUserIds({
+      userIdA: selfUserId,
+      userIdB: otherUserId,
+    });
 
-    if (isBlocked || isBlockedBy) {
+    const relationshipB = await this.relationshipRepository.getByUserIds({
+      userIdA: otherUserId,
+      userIdB: selfUserId,
+    });
+
+    if (relationshipA.blocked || relationshipB.blocked) {
       return err(new ProfileErrors.ProfileBlocked(otherUserId));
     }
 

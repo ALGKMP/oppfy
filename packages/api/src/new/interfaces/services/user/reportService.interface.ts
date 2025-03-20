@@ -1,3 +1,5 @@
+import type { Result } from "neverthrow";
+
 import type {
   ReportCommentReason,
   ReportPostReason,
@@ -23,7 +25,9 @@ export interface CreateCommentReportParams {
 }
 
 export interface IReportService {
-  reportUser(params: CreateUserReportParams): Promise<void>;
-  reportPost(params: CreatePostReportParams): Promise<void>;
-  reportComment(params: CreateCommentReportParams): Promise<void>;
+  reportUser(params: CreateUserReportParams): Promise<Result<void, never>>;
+  reportPost(params: CreatePostReportParams): Promise<Result<void, never>>;
+  reportComment(
+    params: CreateCommentReportParams,
+  ): Promise<Result<void, never>>;
 }
