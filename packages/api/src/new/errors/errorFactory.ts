@@ -1,4 +1,14 @@
-type ErrorDomain = "User" | "Profile" | "Comment" | "Social" | "Post" | "Aws" | "Friend" | "Block" | "Follow";
+type ErrorDomain =
+  | "User"
+  | "Profile"
+  | "Comment"
+  | "Social"
+  | "Post"
+  | "Aws"
+  | "Friend"
+  | "Block"
+  | "Follow"
+  | "PostInteraction";
 
 // Type to ensure error names follow the pattern
 type ErrorClassName<D extends ErrorDomain> = `${D}Error`;
