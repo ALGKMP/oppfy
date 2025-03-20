@@ -4,7 +4,11 @@ import {
 } from "@aws-sdk/client-cloudfront";
 import { getSignedUrl } from "@aws-sdk/cloudfront-signer";
 
+import type { InferSelectModel, schema } from "@oppfy/db";
 import { env } from "@oppfy/env";
+
+type Profile = InferSelectModel<typeof schema.profile>;
+type Post = InferSelectModel<typeof schema.post>;
 
 const ONE_HOUR = 60 * 60 * 1000;
 
@@ -19,6 +23,33 @@ export class CloudFrontService {
         secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
       },
     });
+  }
+
+  hydrateProfile(
+    profile: Profile,
+  ): Profile & { profilePictureUrl: string | null } {
+    const profilePictureUrl = profile.profilePictureKey
+      ? this.getProfilePictureUrl(profile.profilePictureKey)
+      : null;
+
+    return {
+      ...profile,
+      profilePictureUrl,
+    };
+  }
+
+  hydrateProfiles(profiles: Profile[]): Profile[] {
+    return profiles.map((profile) => this.hydrateProfile(profile));
+  }
+
+  hydratePost(post: Post): Post & { postUrl: string | null } {
+    const postUrl = post.key ? this.getPublicPostUrl(post.key) : null;
+
+    return { ...post, postUrl };
+  }
+
+  hydratePosts(posts: Post[]): Post[] {
+    return posts.map((post) => this.hydratePost(post));
   }
 
   getProfilePictureUrl(objectKey: string): string {
