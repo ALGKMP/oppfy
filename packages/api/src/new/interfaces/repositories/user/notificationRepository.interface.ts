@@ -115,22 +115,22 @@ export interface INotificationsRepository {
 
   deletePushToken(
     params: DeletePushTokenParams,
-    db: DatabaseOrTransaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   getNotificationSettings(
     params: GetNotificationSettingsParams,
-    db: DatabaseOrTransaction,
+    db?: DatabaseOrTransaction,
   ): Promise<NotificationSettings | undefined>;
 
   getUnreadNotificationsCount(
     params: GetUnreadNotificationsCountParams,
-    db: DatabaseOrTransaction,
+    db?: DatabaseOrTransaction,
   ): Promise<number>;
 
   getRecentNotifications(
     params: GetRecentNotificationsParams,
-    db: DatabaseOrTransaction,
+    db?: DatabaseOrTransaction,
   ): Promise<NotificationResult[]>;
 
   paginateNotifications(
@@ -140,31 +140,31 @@ export interface INotificationsRepository {
 
   updateNotificationSettings(
     params: UpdateNotificationSettingsParams,
-    db: DatabaseOrTransaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   storeNotification(
     params: StoreNotificationParams,
-    db: DatabaseOrTransaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   getPushTokens(
     params: GetPushTokensParams,
-    db: DatabaseOrTransaction,
+    db?: DatabaseOrTransaction,
   ): Promise<string[]>;
 
   deleteNotificationById(
     params: DeleteNotificationByIdParams,
-    db: DatabaseOrTransaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   deleteNotifications(
     params: DeleteNotificationsParams,
-    db: DatabaseOrTransaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   deleteNotificationsBetweenUsers(
     params: DeleteNotificationsBetweenUsersParams,
-    db: DatabaseOrTransaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 }
