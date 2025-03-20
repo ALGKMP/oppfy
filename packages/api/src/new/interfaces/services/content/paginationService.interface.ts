@@ -1,4 +1,7 @@
-import type { Cursor } from "@oppfy/db";
+export interface Cursor {
+  createdAt: Date;
+  profileId: string;
+}
 
 export interface PaginatedResponse<T> {
   items: T[];
