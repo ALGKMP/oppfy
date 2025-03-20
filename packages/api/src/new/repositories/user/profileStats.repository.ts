@@ -16,7 +16,7 @@ import {
   IncrementPostsCountParams,
   IProfileStatsRepository,
 } from "../../interfaces/repositories/user/profileStatsRepository.interface";
-import { ProfileStats } from "../../models";
+import { UserStats } from "../../models";
 
 @injectable()
 export class ProfileStatsRepository implements IProfileStatsRepository {
@@ -140,7 +140,7 @@ export class ProfileStatsRepository implements IProfileStatsRepository {
   async getProfileStats(
     params: GetProfileStatsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<ProfileStats | undefined> {
+  ): Promise<UserStats | undefined> {
     const { profileId } = params;
 
     return await db.query.userStats.findFirst({

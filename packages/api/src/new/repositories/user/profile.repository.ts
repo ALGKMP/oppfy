@@ -16,7 +16,7 @@ import type {
   UserIdParams,
   UsernameParams,
 } from "../../interfaces/repositories/user/profileRepository.interface";
-import type { Profile, ProfileStats } from "../../models";
+import type { Profile, UserStats } from "../../models";
 
 @injectable()
 export class ProfileRepository implements IProfileRepository {
@@ -68,7 +68,7 @@ export class ProfileRepository implements IProfileRepository {
   async getStats(
     params: GetStatsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<ProfileStats> {
+  ): Promise<UserStats | undefined> {
     const { userId } = params;
 
     const stats = await db.query.userStats.findFirst({

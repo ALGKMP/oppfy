@@ -9,6 +9,12 @@ export namespace ProfileErrors {
     }
   }
 
+  export class StatsNotFound extends ProfileError {
+    constructor(userId: string) {
+      super(`Stats not found for user ${userId}`);
+    }
+  }
+
   export class ProfileBlocked extends ProfileError {
     constructor(userId: string) {
       super(`Profile is blocked for user ${userId}`);

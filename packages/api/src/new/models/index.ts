@@ -25,7 +25,7 @@ export type UserWithNotificationSettings = User & {
   notificationSettings: NotificationSettings;
 };
 export type UserStatus = InferSelectModel<typeof schema.userStatus>;
-export type ProfileStats = InferSelectModel<typeof schema.userStats>;
+export type UserStats = InferSelectModel<typeof schema.userStats>;
 export type Post = InferSelectModel<typeof schema.post>;
 export type PostStats = InferSelectModel<typeof schema.postStats>;
 export type Comment = InferSelectModel<typeof schema.comment>;

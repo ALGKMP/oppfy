@@ -1,6 +1,6 @@
 import type { DatabaseOrTransaction } from "@oppfy/db";
 
-import type { Profile, ProfileInsert, ProfileStats } from "../../../models";
+import type { Profile, ProfileInsert, UserStats } from "../../../models";
 
 export interface UserIdParams {
   userId: string;
@@ -39,7 +39,7 @@ export interface IProfileRepository {
   getStats(
     params: GetStatsParams,
     db?: DatabaseOrTransaction,
-  ): Promise<ProfileStats>;
+  ): Promise<UserStats | undefined>;
 
   usernameTaken(
     params: UsernameParams,

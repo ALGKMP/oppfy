@@ -15,7 +15,7 @@ import type {
   SearchProfilesByUsernameParams,
   UpdateProfileParams,
 } from "../../interfaces/services/user/profileService.interface";
-import { Profile, ProfileStats } from "../../models";
+import { Profile, UserStats } from "../../models";
 
 @injectable()
 export class ProfileService implements IProfileService {
@@ -61,7 +61,7 @@ export class ProfileService implements IProfileService {
 
   async stats(
     params: GetStatsParams,
-  ): Promise<Result<ProfileStats, ProfileErrors.ProfileNotFound>> {
+  ): Promise<Result<UserStats, ProfileErrors.ProfileNotFound>> {
     const { userId } = params;
 
     const stats = await this.profileRepository.getStats({
@@ -69,7 +69,7 @@ export class ProfileService implements IProfileService {
     });
 
     if (stats === undefined)
-      return err(new ProfileErrors.ProfileNotFound(userId));
+      return err(new ProfileErrors.StatsNotFound(userId));
 
     return ok(stats);
   }
