@@ -1,52 +1,23 @@
-import { DomainError, ErrorCode } from "../../../../errors";
+import { createBaseErrorClass } from "../errorFactory";
+
+const BlockError = createBaseErrorClass("Block");
 
 export namespace BlockErrors {
-  export class CannotBlockSelf extends DomainError {
+  export class CannotBlockSelf extends BlockError {
     constructor() {
-      super(ErrorCode.CANNOT_FOLLOW_SELF, "Cannot block yourself");
+      super("Cannot block yourself");
     }
   }
 
-  export class AlreadyBlocked extends DomainError {
+  export class AlreadyBlocked extends BlockError {
     constructor() {
-      super(ErrorCode.RELATIONSHIP_ALREADY_EXISTS, "User is already blocked");
+      super("User is already blocked");
     }
   }
 
-  export class BlockNotFound extends DomainError {
+  export class BlockNotFound extends BlockError {
     constructor() {
-      super(
-        ErrorCode.FAILED_TO_CHECK_RELATIONSHIP,
-        "Block relationship not found",
-      );
-    }
-  }
-
-  export class FailedToBlock extends DomainError {
-    constructor(error: unknown) {
-      super(ErrorCode.FAILED_TO_BLOCK_USER, "Failed to block user", error);
-    }
-  }
-
-  export class FailedToUnblock extends DomainError {
-    constructor(error: unknown) {
-      super(ErrorCode.FAILED_TO_UNBLOCK_USER, "Failed to unblock user", error);
-    }
-  }
-
-  export class FailedToCheckBlock extends DomainError {
-    constructor(error: unknown) {
-      super(
-        ErrorCode.FAILED_TO_CHECK_RELATIONSHIP,
-        "Failed to check block relationship",
-        error,
-      );
-    }
-  }
-
-  export class FailedToGetBlockedUsers extends DomainError {
-    constructor(error: unknown) {
-      super(ErrorCode.DATABASE_ERROR, "Failed to get blocked users", error);
+      super("Block relationship not found");
     }
   }
 }
