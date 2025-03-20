@@ -85,7 +85,7 @@ export class FriendRepository implements IFriendRepository {
       await tx
         .update(this.schema.userStats)
         .set({ friends: sql`${this.schema.userStats.friends} + 1` })
-        .where(eq(this.schema.userStats.profileId, userProfile.id));
+        .where(eq(this.schema.userStats.userId, userId));
     };
 
     await updateProfileStats(senderId, tx);
@@ -144,7 +144,7 @@ export class FriendRepository implements IFriendRepository {
       await tx
         .update(this.schema.userStats)
         .set({ friends: sql`${this.schema.userStats.friends} - 1` })
-        .where(eq(this.schema.userStats.profileId, userProfile.id));
+        .where(eq(this.schema.userStats.userId, userId));
     };
 
     await updateProfileStats(userIdA);
