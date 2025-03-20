@@ -765,6 +765,9 @@ export const userRelationship = pgTable(
     friendshipStatus: friendStatusEnum("friendship_status").default("notFriends").notNull(),
     followStatus: followStatusEnum("follow_status").default("notFollowing").notNull(),
     blockStatus: boolean("block_status").default(false).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
