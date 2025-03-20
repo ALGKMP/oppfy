@@ -18,6 +18,9 @@ export type ReportCommentReason =
 
 export type User = InferSelectModel<typeof schema.user>;
 export type Profile = InferSelectModel<typeof schema.profile>;
+export type UserWithProfile = User & {
+  profile: Profile;
+};
 export type HydratedProfile = Profile & {
   profilePictureUrl: string | null;
 };
