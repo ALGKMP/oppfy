@@ -343,6 +343,9 @@ export const post = pgTable(
     height: integer("height").notNull().default(500),
     mediaType: mediaTypeEnum("media_type").notNull(),
     postType: postTypeEnum("post_type").notNull().default("public"),
+    privacy: privacySettingEnum("privacy_setting")
+      .default("public")
+      .notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
