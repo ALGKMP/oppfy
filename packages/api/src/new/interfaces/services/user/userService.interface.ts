@@ -1,18 +1,68 @@
+export interface CreateUserWithUsernameParams {
+  userId: string;
+  phoneNumber: string;
+  name: string;
+  isOnApp?: boolean;
+}
+
+export interface CreateUserParams {
+  userId: string;
+  phoneNumber: string;
+  isOnApp?: boolean;
+}
+
+export interface GetUserParams {
+  userId: string;
+}
+
+export interface GetUserByPhoneNumberParams {
+  phoneNumber: string;
+}
+
+export interface DeleteUserParams {
+  userId: string;
+}
+
+export interface IsUserOnAppParams {
+  userId: string;
+}
+
+export interface CompletedOnboardingParams {
+  userId: string;
+}
+
+export interface GetUserStatusParams {
+  userId: string;
+}
+
+export interface SetTutorialCompleteParams {
+  userId: string;
+}
+
+export interface IsUserOnboardedParams {
+  userId: string;
+}
+
+export interface HasTutorialBeenCompletedParams {
+  userId: string;
+}
+
+export interface UpdateUserOnAppStatusParams {
+  userId: string;
+  isOnApp: boolean;
+}
+
+export interface UpdateUserTutorialCompleteParams {
+  userId: string;
+  hasCompletedTutorial: boolean;
+}
+
 export interface IUserService {
-  createUserWithUsername(options: {
-    userId: string;
-    phoneNumber: string;
-    name: string;
-    isOnApp?: boolean;
-  }): Promise<void>;
+  createUserWithUsername(params: CreateUserWithUsernameParams): Promise<void>;
 
-  createUser(options: {
-    userId: string;
-    phoneNumber: string;
-    isOnApp?: boolean;
-  }): Promise<void>;
+  createUser(params: CreateUserParams): Promise<void>;
 
-  getUser(options: { userId: string }): Promise<{
+  getUser(params: GetUserParams): Promise<{
     id: string;
     phoneNumber: string;
     username: string;
@@ -21,7 +71,7 @@ export interface IUserService {
     notificationSettingsId: string;
   }>;
 
-  getUserByPhoneNumber(options: { phoneNumber: string }): Promise<{
+  getUserByPhoneNumber(params: GetUserByPhoneNumberParams): Promise<{
     id: string;
     phoneNumber: string;
     username: string;
@@ -30,7 +80,7 @@ export interface IUserService {
     notificationSettingsId: string;
   }>;
 
-  getUserByPhoneNumberNoThrow(options: { phoneNumber: string }): Promise<
+  getUserByPhoneNumberNoThrow(params: GetUserByPhoneNumberParams): Promise<
     | {
         id: string;
         phoneNumber: string;
@@ -42,34 +92,32 @@ export interface IUserService {
     | undefined
   >;
 
-  deleteUser(options: { userId: string }): Promise<void>;
+  deleteUser(params: DeleteUserParams): Promise<void>;
 
-  isUserOnApp(options: { userId: string }): Promise<boolean>;
+  isUserOnApp(params: IsUserOnAppParams): Promise<boolean>;
 
-  completedOnboarding(options: { userId: string }): Promise<void>;
+  completedOnboarding(params: CompletedOnboardingParams): Promise<void>;
 
-  getUserStatus(options: { userId: string }): Promise<{
+  getUserStatus(params: GetUserStatusParams): Promise<{
     userId: string;
     isOnApp: boolean;
     hasCompletedOnboarding: boolean;
     hasCompletedTutorial: boolean;
   }>;
 
-  setTutorialComplete(options: { userId: string }): Promise<void>;
+  setTutorialComplete(params: SetTutorialCompleteParams): Promise<void>;
 
-  isUserOnboarded(options: { userId: string }): Promise<boolean>;
+  isUserOnboarded(params: IsUserOnboardedParams): Promise<boolean>;
 
-  hasTutorialBeenCompleted(options: { userId: string }): Promise<boolean>;
+  hasTutorialBeenCompleted(
+    params: HasTutorialBeenCompletedParams,
+  ): Promise<boolean>;
 
-  updateUserOnAppStatus(options: {
-    userId: string;
-    isOnApp: boolean;
-  }): Promise<void>;
+  updateUserOnAppStatus(params: UpdateUserOnAppStatusParams): Promise<void>;
 
-  updateUserTutorialComplete(options: {
-    userId: string;
-    hasCompletedTutorial: boolean;
-  }): Promise<void>;
+  updateUserTutorialComplete(
+    params: UpdateUserTutorialCompleteParams,
+  ): Promise<void>;
 
   updateUserOnboardingComplete(options: {
     userId: string;

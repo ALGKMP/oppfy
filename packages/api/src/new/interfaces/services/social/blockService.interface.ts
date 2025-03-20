@@ -20,27 +20,41 @@ export interface PaginatedResponse<T> {
   nextCursor: PaginationCursor | null;
 }
 
+export interface BlockUserParams {
+  blockerId: string;
+  blockedId: string;
+}
+
+export interface UnblockUserParams {
+  blockerId: string;
+  blockedId: string;
+}
+
+export interface IsBlockedParams {
+  blockerId: string;
+  blockedId: string;
+}
+
+export interface GetBlockedUsersParams {
+  userId: string;
+  cursor?: PaginationCursor | null;
+  pageSize?: number;
+}
+
 export interface IBlockService {
-  blockUser(options: {
-    blockerId: string;
-    blockedId: string;
-  }): Promise<
+  blockUser(
+    params: BlockUserParams,
+  ): Promise<
     Result<void, BlockErrors.CannotBlockSelf | BlockErrors.AlreadyBlocked>
   >;
 
-  unblockUser(options: {
-    blockerId: string;
-    blockedId: string;
-  }): Promise<Result<void, BlockErrors.BlockNotFound>>;
+  unblockUser(
+    params: UnblockUserParams,
+  ): Promise<Result<void, BlockErrors.BlockNotFound>>;
 
-  isBlocked(options: {
-    blockerId: string;
-    blockedId: string;
-  }): Promise<Result<boolean, never>>;
+  isBlocked(params: IsBlockedParams): Promise<Result<boolean, never>>;
 
-  getBlockedUsers(options: {
-    userId: string;
-    cursor?: PaginationCursor | null;
-    pageSize?: number;
-  }): Promise<Result<PaginatedResponse<BlockedUser>, never>>;
+  getBlockedUsers(
+    params: GetBlockedUsersParams,
+  ): Promise<Result<PaginatedResponse<BlockedUser>, never>>;
 }

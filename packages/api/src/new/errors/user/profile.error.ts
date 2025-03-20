@@ -1,15 +1,11 @@
-/* import { createDomainErrors } from '../errorFactory';
+import { createBaseErrorClass } from "../errorFactory";
 
-const ProfileDomain = createDomainErrors('User');
+const ProfileError = createBaseErrorClass("Profile");
 
-export namespace ProfileError {
-    const RepositoryError = ProfileDomain.Repository;
-    const ServiceError = ProfileDomain.Service;
-
-    export class ProfileNotFound extends RepositoryError {
-        constructor() {
-            super('Profile not found');
-            this.name = 'ProfileNotFoundError';
-        }
+export namespace ProfileErrors {
+  export class ProfileNotFound extends ProfileError {
+    constructor(userId: string) {
+      super(`Profile not found for user ${userId}`);
     }
-} */
+  }
+}

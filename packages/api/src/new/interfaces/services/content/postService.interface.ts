@@ -10,6 +10,7 @@ export type Like = Schema["like"]["$inferSelect"];
 
 export interface BaseCursor {
   createdAt: Date;
+  id: string;
 }
 
 export interface PostCursor extends BaseCursor {
@@ -30,101 +31,175 @@ export interface PaginatedResponse<TItem, TCursor extends BaseCursor> {
   nextCursor: TCursor | null;
 }
 
+export interface UploadPostForUserOnAppUrlParams {
+  author: string;
+  recipient: string;
+  caption: string;
+  height: string;
+  width: string;
+  contentLength: number;
+  contentType: "image/jpeg" | "image/png" | "image/heic";
+}
+
+export interface UploadPostForUserNotOnAppUrlParams {
+  author: string;
+  recipientNotOnAppPhoneNumber: string;
+  recipientNotOnAppName: string;
+  caption: string;
+  height: string;
+  width: string;
+  contentLength: number;
+  contentType: "image/jpeg" | "image/png" | "image/heic";
+}
+
+export interface UploadVideoPostForUserOnAppUrlParams {
+  author: string;
+  recipient: string;
+  caption: string;
+  height: string;
+  width: string;
+}
+
+export interface UploadVideoPostForUserNotOnAppUrlParams {
+  author: string;
+  recipientNotOnAppPhoneNumber: string;
+  recipientNotOnAppName: string;
+  caption: string;
+  height: string;
+  width: string;
+}
+
+export interface PaginatePostsOfUserSelfParams {
+  userId: string;
+  cursor: PostCursor | null;
+  pageSize?: number;
+}
+
+export interface PaginatePostsOfUserOtherParams {
+  userId: string;
+  cursor: PostCursor | null;
+  pageSize: number;
+  currentUserId: string;
+}
+
+export interface PaginatePostsOfRecommendedParams {
+  userId: string;
+  cursor: PostCursor | null;
+  pageSize: number;
+}
+
+export interface PaginatePostsForFeedParams {
+  userId: string;
+  cursor: FeedCursor | null;
+  pageSize: number;
+}
+
+export interface GetPostParams {
+  postId: string;
+  userId: string;
+}
+
+export interface EditPostParams {
+  postId: string;
+  caption: string;
+}
+
+export interface DeletePostParams {
+  postId: string;
+  userId: string;
+}
+
+export interface LikePostParams {
+  userId: string;
+  postId: string;
+}
+
+export interface UnlikePostParams {
+  userId: string;
+  postId: string;
+}
+
+export interface GetLikeParams {
+  userId: string;
+  postId: string;
+}
+
+export interface CommentOnPostParams {
+  userId: string;
+  postId: string;
+  body: string;
+}
+
+export interface DeleteCommentParams {
+  userId: string;
+  commentId: string;
+  postId: string;
+}
+
+export interface PaginateCommentsParams {
+  postId: string;
+  cursor: CommentCursor | null;
+  pageSize?: number;
+}
+
+export interface GetPostForNextJsParams {
+  postId: string;
+}
+
 export interface IPostService {
-  uploadPostForUserOnAppUrl(options: {
-    author: string;
-    recipient: string;
-    caption: string;
-    height: string;
-    width: string;
-    contentLength: number;
-    contentType: "image/jpeg" | "image/png" | "image/heic";
-  }): Promise<{ presignedUrl: string; postId: string }>;
+  uploadPostForUserOnAppUrl(
+    params: UploadPostForUserOnAppUrlParams,
+  ): Promise<{ presignedUrl: string; postId: string }>;
 
-  uploadPostForUserNotOnAppUrl(options: {
-    author: string;
-    recipientNotOnAppPhoneNumber: string;
-    recipientNotOnAppName: string;
-    caption: string;
-    height: string;
-    width: string;
-    contentLength: number;
-    contentType: "image/jpeg" | "image/png" | "image/heic";
-  }): Promise<{ presignedUrl: string; postId: string }>;
+  uploadPostForUserNotOnAppUrl(
+    params: UploadPostForUserNotOnAppUrlParams,
+  ): Promise<{ presignedUrl: string; postId: string }>;
 
-  uploadVideoPostForUserOnAppUrl(options: {
-    author: string;
-    recipient: string;
-    caption: string;
-    height: string;
-    width: string;
-  }): Promise<{ presignedUrl: string; postId: string }>;
+  uploadVideoPostForUserOnAppUrl(
+    params: UploadVideoPostForUserOnAppUrlParams,
+  ): Promise<{ presignedUrl: string; postId: string }>;
 
-  uploadVideoPostForUserNotOnAppUrl(options: {
-    author: string;
-    recipientNotOnAppPhoneNumber: string;
-    recipientNotOnAppName: string;
-    caption: string;
-    height: string;
-    width: string;
-  }): Promise<{ presignedUrl: string; postId: string }>;
+  uploadVideoPostForUserNotOnAppUrl(
+    params: UploadVideoPostForUserNotOnAppUrlParams,
+  ): Promise<{ presignedUrl: string; postId: string }>;
 
-  paginatePostsOfUserSelf(options: {
-    userId: string;
-    cursor: PostCursor | null;
-    pageSize?: number;
-  }): Promise<PaginatedResponse<Post, PostCursor>>;
+  paginatePostsOfUserSelf(
+    params: PaginatePostsOfUserSelfParams,
+  ): Promise<PaginatedResponse<Post, PostCursor>>;
 
-  paginatePostsOfUserOther(options: {
-    userId: string;
-    cursor: PostCursor | null;
-    pageSize: number;
-    currentUserId: string;
-  }): Promise<PaginatedResponse<Post, PostCursor>>;
+  paginatePostsOfUserOther(
+    params: PaginatePostsOfUserOtherParams,
+  ): Promise<PaginatedResponse<Post, PostCursor>>;
 
-  paginatePostsOfRecommended(options: {
-    userId: string;
-    cursor: PostCursor | null;
-    pageSize: number;
-  }): Promise<PaginatedResponse<Post, PostCursor>>;
+  paginatePostsOfRecommended(
+    params: PaginatePostsOfRecommendedParams,
+  ): Promise<PaginatedResponse<Post, PostCursor>>;
 
-  paginatePostsForFeed(options: {
-    userId: string;
-    cursor: FeedCursor | null;
-    pageSize: number;
-  }): Promise<PaginatedResponse<Post, FeedCursor>>;
+  paginatePostsForFeed(
+    params: PaginatePostsForFeedParams,
+  ): Promise<PaginatedResponse<Post, FeedCursor>>;
 
-  getPost(options: { postId: string; userId: string }): Promise<Post>;
+  getPost(params: GetPostParams): Promise<Post>;
 
-  editPost(options: { postId: string; caption: string }): Promise<void>;
+  editPost(params: EditPostParams): Promise<void>;
 
-  deletePost(options: { postId: string; userId: string }): Promise<void>;
+  deletePost(params: DeletePostParams): Promise<void>;
 
-  likePost(options: { userId: string; postId: string }): Promise<void>;
+  likePost(params: LikePostParams): Promise<void>;
 
-  unlikePost(options: { userId: string; postId: string }): Promise<void>;
+  unlikePost(params: UnlikePostParams): Promise<void>;
 
-  getLike(options: { userId: string; postId: string }): Promise<boolean>;
+  getLike(params: GetLikeParams): Promise<boolean>;
 
-  commentOnPost(options: {
-    userId: string;
-    postId: string;
-    body: string;
-  }): Promise<void>;
+  commentOnPost(params: CommentOnPostParams): Promise<void>;
 
-  deleteComment(options: {
-    userId: string;
-    commentId: string;
-    postId: string;
-  }): Promise<void>;
+  deleteComment(params: DeleteCommentParams): Promise<void>;
 
-  paginateComments(options: {
-    postId: string;
-    cursor: CommentCursor | null;
-    pageSize?: number;
-  }): Promise<PaginatedResponse<Comment, CommentCursor>>;
+  paginateComments(
+    params: PaginateCommentsParams,
+  ): Promise<PaginatedResponse<Comment, CommentCursor>>;
 
-  getPostForNextJs(options: {
-    postId: string;
-  }): Promise<Omit<Post, "hasLiked">>;
+  getPostForNextJs(
+    params: GetPostForNextJsParams,
+  ): Promise<Omit<Post, "hasLiked">>;
 }

@@ -1,30 +1,25 @@
-import type { FollowStatus, FriendStatus } from "@oppfy/db";
+import type { Relations } from "@oppfy/db";
 
-export interface Relationship {
+export interface GetByUserIdsParams {
   userIdA: string;
   userIdB: string;
-  friendshipStatus: FriendStatus;
-  followStatus: FollowStatus;
-  blockStatus: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-};
+}
 
-export type UpdateRelationship = Partial<
-  Omit<Relationship, "userIdA" | "userIdB" | "createdAt">
->;
+export interface UpsertParams {
+  userIdA: string;
+  userIdB: string;
+  updates: Partial<Omit<Relations, "userIdA" | "userIdB" | "createdAt">>;
+}
+
+export interface DeleteParams {
+  userIdA: string;
+  userIdB: string;
+}
 
 export interface IRelationshipService {
-  getByUserIds(options: {
-    userIdA: string;
-    userIdB: string;
-  }): Promise<Relationship | undefined>;
+  getByUserIds(params: GetByUserIdsParams): Promise<Relations | undefined>;
 
-  upsert(options: {
-    userIdA: string;
-    userIdB: string;
-    updates: UpdateRelationship;
-  }): Promise<void>;
+  upsert(params: UpsertParams): Promise<void>;
 
-  delete(options: { userIdA: string; userIdB: string }): Promise<void>;
+  delete(params: DeleteParams): Promise<void>;
 }

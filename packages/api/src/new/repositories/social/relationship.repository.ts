@@ -23,11 +23,15 @@ export class RelationshipRepository implements IRelationshipRepository {
     this.schema = schema;
   }
 
-  async getByUserIds(
-    userIdA: string,
-    userIdB: string,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<Relationship | undefined> {
+  async getByUserIds({
+    userIdA,
+    userIdB,
+    db = this.db,
+  }: {
+    userIdA: string;
+    userIdB: string;
+    db?: DatabaseOrTransaction;
+  }): Promise<Relationship | undefined> {
     return await db.query.userRelationship.findFirst({
       where: or(
         and(
@@ -42,12 +46,17 @@ export class RelationshipRepository implements IRelationshipRepository {
     });
   }
 
-  async upsert(
-    userIdA: string,
-    userIdB: string,
-    updates: UpdateRelationship,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<void> {
+  async upsert({
+    userIdA,
+    userIdB,
+    updates,
+    db = this.db,
+  }: {
+    userIdA: string;
+    userIdB: string;
+    updates: UpdateRelationship;
+    db?: DatabaseOrTransaction;
+  }): Promise<void> {
     const relationship = {
       userIdA,
       userIdB,
@@ -76,11 +85,15 @@ export class RelationshipRepository implements IRelationshipRepository {
       });
   }
 
-  async delete(
-    userIdA: string,
-    userIdB: string,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<void> {
+  async delete({
+    userIdA,
+    userIdB,
+    db = this.db,
+  }: {
+    userIdA: string;
+    userIdB: string;
+    db?: DatabaseOrTransaction;
+  }): Promise<void> {
     await db
       .delete(this.schema.userRelationship)
       .where(
