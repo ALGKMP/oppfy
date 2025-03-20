@@ -1,4 +1,9 @@
-import type { InferSelectModel, NotificationSettings, schema } from "@oppfy/db";
+import type {
+  InferInsertModel,
+  InferSelectModel,
+  NotificationSettings,
+  schema,
+} from "@oppfy/db";
 
 import type {
   reportCommentReasonEnum,
