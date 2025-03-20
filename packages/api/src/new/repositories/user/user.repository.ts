@@ -1,7 +1,7 @@
 import { and, eq, inArray, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
-import type { Database, Schema, Transaction } from "@oppfy/db";
+import type { Database, DatabaseOrTransaction, Schema, Transaction } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import type {
@@ -12,6 +12,7 @@ import type {
   GetUserByPhoneNumberParams,
   GetUserParams,
   GetUserStatusParams,
+  GetUserWithNotificationSettingsParams,
   GetUserWithProfileParams,
   IUserRepository,
   PrivacySettings,
@@ -21,7 +22,7 @@ import type {
   UpdateUserOnboardingCompleteParams,
   UpdateUserTutorialCompleteParams,
 } from "../../interfaces/repositories/user/userRepository.interface";
-import type { User, UserStatus, UserWithProfile } from "../../models";
+import type { User, UserStatus, UserWithNotificationSettings, UserWithProfile } from "../../models";
 
 @injectable()
 export class UserRepository implements IUserRepository {
@@ -86,6 +87,17 @@ export class UserRepository implements IUserRepository {
     const db = tx || this.db;
     return await db.query.user.findFirst({
       where: eq(this.schema.user.id, userId),
+    });
+  }
+
+  async getUserWithNotificationSettings(
+    { userId }: GetUserWithNotificationSettingsParams,
+    tx?: Transaction,
+  ): Promise<UserWithNotificationSettings | undefined> {
+    const db = tx || this.db;
+    return await db.query.user.findFirst({
+      where: eq(this.schema.user.id, userId),
+      with: { notificationSettings: true },
     });
   }
 
