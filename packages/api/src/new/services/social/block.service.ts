@@ -1,18 +1,28 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
+import type { Database } from "@oppfy/db";
+
 import { TYPES } from "../../container";
 import { BlockErrors } from "../../errors/social/block.error";
 import type { IBlockRepository } from "../../interfaces/repositories/social/blockRepository.interface";
 import type { IFollowRepository } from "../../interfaces/repositories/social/followRepository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friendRepository.interface";
+import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
 import type { INotificationsRepository } from "../../interfaces/repositories/user/notificationRepository.interface";
 import type { IProfileStatsRepository } from "../../interfaces/repositories/user/profileStatsRepository.interface";
-import type { IBlockService } from "../../interfaces/services/social/blockService.interface";
+import type {
+  BlockedUser,
+  IBlockService,
+  PaginatedResponse,
+  PaginationCursor,
+} from "../../interfaces/services/social/blockService.interface";
 
 @injectable()
 export class BlockService implements IBlockService {
   constructor(
+    @inject(TYPES.Database)
+    private db: Database,
     @inject(TYPES.BlockRepository)
     private blockRepository: IBlockRepository,
     @inject(TYPES.FollowRepository)
@@ -23,6 +33,8 @@ export class BlockService implements IBlockService {
     private notificationsRepository: INotificationsRepository,
     @inject(TYPES.ProfileStatsRepository)
     private profileStatsRepository: IProfileStatsRepository,
+    @inject(TYPES.RelationshipRepository)
+    private relationshipRepository: IRelationshipRepository,
   ) {}
 
   async blockUser(options: {
@@ -47,150 +59,154 @@ export class BlockService implements IBlockService {
       return err(new BlockErrors.AlreadyBlocked());
     }
 
-    // Get all current relationships
-    const [
-      followingUserBeingBlocked,
-      followedByUserBeingBlocked,
-      friendship,
-      outgoingFriendRequest,
-      incomingFriendRequest,
-      outgoingFollowRequest,
-      incomingFollowRequest,
-    ] = await Promise.all([
-      this.followRepository.getFollower({
-        followerId: blockerId,
-        followeeId: blockedId,
-      }),
-      this.followRepository.getFollower({
-        followerId: blockedId,
-        followeeId: blockerId,
-      }),
-      this.friendRepository.getFriendship({
-        userIdA: blockerId,
-        userIdB: blockedId,
-      }),
-      this.friendRepository.getFriendRequest({
-        senderId: blockerId,
-        recipientId: blockedId,
-      }),
-      this.friendRepository.getFriendRequest({
-        senderId: blockedId,
-        recipientId: blockerId,
-      }),
-      this.followRepository.getFollowRequest({
-        senderId: blockerId,
-        recipientId: blockedId,
-      }),
-      this.followRepository.getFollowRequest({
-        senderId: blockedId,
-        recipientId: blockerId,
-      }),
-    ]);
-
-    // Clean up all relationships
-    const cleanupPromises: Promise<unknown>[] = [];
-
-    // Remove following relationships and update stats
-    if (followingUserBeingBlocked) {
-      cleanupPromises.push(
-        this.followRepository.removeFollower({
-          followerId: blockerId,
-          followeeId: blockedId,
-        }),
-        this.profileStatsRepository.decrementFollowingCount({
-          userId: blockerId,
-          amount: 1,
-        }),
+    await this.db.transaction(async (tx) => {
+      // Update relationship status
+      await this.relationshipRepository.upsert(
+        blockerId,
+        blockedId,
+        {
+          friendshipStatus: "notFriends",
+          followStatus: "notFollowing",
+          blockStatus: true,
+        },
+        tx,
       );
-    }
 
-    if (followedByUserBeingBlocked) {
-      cleanupPromises.push(
-        this.followRepository.removeFollower({
-          followerId: blockedId,
-          followeeId: blockerId,
-        }),
-        this.profileStatsRepository.decrementFollowerCount({
-          userId: blockerId,
-          amount: 1,
-        }),
-      );
-    }
-
-    // Remove friendship and update stats
-    if (friendship) {
-      cleanupPromises.push(
-        this.friendRepository.removeFriend({
-          userIdA: blockerId,
-          userIdB: blockedId,
-        }),
-        this.profileStatsRepository.decrementFriendsCount({
-          userId: blockerId,
-          amount: 1,
-        }),
-        this.profileStatsRepository.decrementFriendsCount({
-          userId: blockedId,
-          amount: 1,
-        }),
-      );
-    }
-
-    // Clean up any pending friend requests
-    if (outgoingFriendRequest) {
-      cleanupPromises.push(
-        this.friendRepository.deleteFriendRequest({
-          senderId: blockerId,
-          recipientId: blockedId,
-        }),
-      );
-    }
-
-    if (incomingFriendRequest) {
-      cleanupPromises.push(
-        this.friendRepository.deleteFriendRequest({
-          senderId: blockedId,
-          recipientId: blockerId,
-        }),
-      );
-    }
-
-    // Clean up any pending follow requests
-    if (outgoingFollowRequest) {
-      cleanupPromises.push(
-        this.followRepository.removeFollowRequest(
-          blockerId,
-          blockedId,
-          undefined,
+      // Get current relationships to update stats
+      const [following, follower, friendship] = await Promise.all([
+        this.followRepository.getFollower(
+          {
+            followerId: blockerId,
+            followeeId: blockedId,
+          },
+          tx,
         ),
-      );
-    }
-
-    if (incomingFollowRequest) {
-      cleanupPromises.push(
-        this.followRepository.removeFollowRequest(
-          blockedId,
-          blockerId,
-          undefined,
+        this.followRepository.getFollower(
+          {
+            followerId: blockedId,
+            followeeId: blockerId,
+          },
+          tx,
         ),
-      );
-    }
+        this.friendRepository.getFriendship(
+          {
+            userIdA: blockerId,
+            userIdB: blockedId,
+          },
+          tx,
+        ),
+      ]);
 
-    // Clean up notifications between the users
-    cleanupPromises.push(
-      this.notificationsRepository.deleteNotificationsBetweenUsers({
-        userIdA: blockerId,
-        userIdB: blockedId,
-      }),
-    );
+      // Clean up relationships and update stats
+      const cleanupPromises = [
+        // Create block
+        this.blockRepository.blockUser(
+          {
+            userId: blockerId,
+            blockedUserId: blockedId,
+          },
+          tx,
+        ),
 
-    // Execute all cleanup operations and create block
-    await Promise.all([
-      ...cleanupPromises,
-      this.blockRepository.blockUser({
-        userId: blockerId,
-        blockedUserId: blockedId,
-      }),
-    ]);
+        // Delete follow relationships
+        this.followRepository.removeFollower(
+          {
+            followerId: blockerId,
+            followeeId: blockedId,
+          },
+          tx,
+        ),
+        this.followRepository.removeFollower(
+          {
+            followerId: blockedId,
+            followeeId: blockerId,
+          },
+          tx,
+        ),
+
+        // Delete follow requests
+        this.followRepository.removeFollowRequest(blockerId, blockedId, tx),
+        this.followRepository.removeFollowRequest(blockedId, blockerId, tx),
+
+        // Delete friend relationship and requests
+        this.friendRepository.removeFriend(
+          {
+            userIdA: blockerId,
+            userIdB: blockedId,
+          },
+          tx,
+        ),
+        this.friendRepository.deleteFriendRequest(
+          {
+            senderId: blockerId,
+            recipientId: blockedId,
+          },
+          tx,
+        ),
+        this.friendRepository.deleteFriendRequest(
+          {
+            senderId: blockedId,
+            recipientId: blockerId,
+          },
+          tx,
+        ),
+
+        // Delete notifications
+        this.notificationsRepository.deleteNotificationsBetweenUsers(
+          {
+            userIdA: blockerId,
+            userIdB: blockedId,
+          },
+          tx,
+        ),
+      ];
+
+      // Add stat updates if needed
+      if (following) {
+        cleanupPromises.push(
+          this.profileStatsRepository.decrementFollowingCount(
+            {
+              userId: blockerId,
+              amount: 1,
+            },
+            tx,
+          ),
+        );
+      }
+
+      if (follower) {
+        cleanupPromises.push(
+          this.profileStatsRepository.decrementFollowerCount(
+            {
+              userId: blockerId,
+              amount: 1,
+            },
+            tx,
+          ),
+        );
+      }
+
+      if (friendship) {
+        cleanupPromises.push(
+          this.profileStatsRepository.decrementFriendsCount(
+            {
+              userId: blockerId,
+              amount: 1,
+            },
+            tx,
+          ),
+          this.profileStatsRepository.decrementFriendsCount(
+            {
+              userId: blockedId,
+              amount: 1,
+            },
+            tx,
+          ),
+        );
+      }
+
+      await Promise.all(cleanupPromises);
+    });
 
     return ok();
   }
@@ -209,11 +225,27 @@ export class BlockService implements IBlockService {
       return err(new BlockErrors.BlockNotFound());
     }
 
-    await this.blockRepository.unblockUser({
-      userId: blockerId,
-      blockedUserId: blockedId,
+    await this.db.transaction(async (tx) => {
+      await Promise.all([
+        this.blockRepository.unblockUser(
+          {
+            userId: blockerId,
+            blockedUserId: blockedId,
+          },
+          tx,
+        ),
+        this.relationshipRepository.upsert(
+          blockerId,
+          blockedId,
+          {
+            blockStatus: false,
+          },
+          tx,
+        ),
+      ]);
     });
-    return ok(undefined);
+
+    return ok();
   }
 
   async isBlocked(options: {
@@ -231,23 +263,9 @@ export class BlockService implements IBlockService {
 
   async getBlockedUsers(options: {
     userId: string;
-    cursor?: { createdAt: Date; userId: string } | null;
+    cursor?: PaginationCursor | null;
     pageSize?: number;
-  }): Promise<
-    Result<
-      {
-        items: {
-          userId: string;
-          username: string;
-          name: string;
-          profilePictureUrl: string | null;
-          createdAt: Date;
-        }[];
-        nextCursor: { createdAt: Date; userId: string } | null;
-      },
-      never
-    >
-  > {
+  }): Promise<Result<PaginatedResponse<BlockedUser>, never>> {
     const { userId, cursor = null, pageSize = 10 } = options;
 
     const results = await this.blockRepository.getPaginatedBlockedUsers({
