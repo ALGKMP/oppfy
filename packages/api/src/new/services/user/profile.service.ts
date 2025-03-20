@@ -10,38 +10,37 @@ import {
   GetUploadProfilePictureUrlParams,
   IProfileService,
   ProfileByUsernameResult,
-  ProfileOtherResult,
+  ProfileResult,
   ProfileSelfResult,
   SearchProfilesByUsernameParams,
   UpdateProfileParams,
 } from "../../interfaces/services/user/profileService.interface";
-import { UserRepository } from "../../repositories/user/user.repository";
-import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { BlockRepository } from "../../repositories/social/block.repository";
+import { ProfileRepository } from "../../repositories/user/profile.repository";
+import { UserRepository } from "../../repositories/user/user.repository";
 
 @injectable()
 export class ProfileService implements IProfileService {
-    private tx: Transaction;
-    private userRepository: UserRepository;
-    private profileRepository: ProfileRepository;
-    private blockRepository: BlockRepository;
-  
-/*     private friendService = new FriendService();
+  private tx: Transaction;
+  private userRepository: UserRepository;
+  private profileRepository: ProfileRepository;
+  private blockRepository: BlockRepository;
+
+  /*     private friendService = new FriendService();
     private followService = new FollowService();
     private blockService = new BlockService(); */
-  
-    constructor(
-      @inject(TYPES.Transaction) tx: Transaction,
-      @inject(TYPES.UserRepository) userRepository: UserRepository,
-      @inject(TYPES.ProfileRepository) profileRepository: ProfileRepository,
-      @inject(TYPES.BlockRepository) blockRepository: BlockRepository,
-    ) {
-      this.tx = tx;
-      this.userRepository = userRepository;
-      this.profileRepository = profileRepository;
-      this.blockRepository = blockRepository;
-    }
-  
+
+  constructor(
+    @inject(TYPES.Transaction) tx: Transaction,
+    @inject(TYPES.UserRepository) userRepository: UserRepository,
+    @inject(TYPES.ProfileRepository) profileRepository: ProfileRepository,
+    @inject(TYPES.BlockRepository) blockRepository: BlockRepository,
+  ) {
+    this.tx = tx;
+    this.userRepository = userRepository;
+    this.profileRepository = profileRepository;
+    this.blockRepository = blockRepository;
+  }
 
   getUploadProfilePictureUrl(
     params: GetUploadProfilePictureUrlParams,
@@ -58,11 +57,11 @@ export class ProfileService implements IProfileService {
   ): Promise<ProfileByUsernameResult> {
     throw new Error("Method not implemented.");
   }
-  
+
   getProfileSelf(params: GetProfileSelfParams): Promise<ProfileSelfResult> {
     throw new Error("Method not implemented.");
   }
-  getProfileOther(params: GetProfileOtherParams): Promise<ProfileOtherResult> {
+  getProfile(params: GetProfileOtherParams): Promise<ProfileResult> {
     throw new Error("Method not implemented.");
   }
   searchProfilesByUsername(

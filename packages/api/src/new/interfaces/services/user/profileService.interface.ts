@@ -1,7 +1,3 @@
-import { z } from "zod";
-
-import { sharedValidators } from "@oppfy/validators";
-
 export interface GetUploadProfilePictureUrlParams {
   userId: string;
   contentLength: number;
@@ -9,88 +5,54 @@ export interface GetUploadProfilePictureUrlParams {
 
 export interface UpdateProfileParams {
   userId: string;
-  newData: {
-    name?: string;
-    username?: string;
-    bio?: string;
-    dateOfBirth?: Date;
-  }
+  newData: Partial<{
+    name: string;
+    username: string;
+    bio: string;
+    dateOfBirth: Date;
+  }>;
 }
 
 export interface GetProfileByUsernameParams {
   username: string;
 }
 
-export interface GetProfileSelfParams {
-  userId: string;
-}
-
-export interface GetProfileOtherParams {
-  currentUserId: string;
+export interface GetProfileParams {
+  selfUserId: string;
   otherUserId: string;
 }
 
 export interface SearchProfilesByUsernameParams {
   username: string;
-  currentUserId: string;
+  selfUserId: string;
 }
 
 export interface ProfileStats {
-  followers: number;
-  following: number;
-  friends: number;
-  posts: number;
-}
-
-export interface NetworkStatus {
-  privacy: string;
-  blocked: boolean;
-  targetUserFollowState: string;
-  otherUserFollowState: string;
-  targetUserFriendState: string;
-  otherUserFriendState: string;
-  isTargetUserBlocked: boolean;
-  isOtherUserBlocked: boolean;
+  followersCount: number;
+  followingCount: number;
+  friendsCount: number;
+  postsCount: number;
 }
 
 export interface ProfileByUsernameResult {
-  id: string;
-  name: string | null;
+  userId: string;
+  name: string;
+  username: string;
   bio: string | null;
   profilePictureUrl: string | null;
   createdAt: Date;
+  updatedAt: Date;
 }
 
-export interface ProfileSelfResult {
+export interface ProfileResult {
   userId: string;
-  profileId: string;
   privacy: string;
   username: string;
-  name: string | null;
+  name: string;
   bio: string | null;
-  followerCount: number;
-  followingCount: number;
-  friendCount: number;
-  postCount: number;
   profilePictureUrl: string | null;
-  profileStats: ProfileStats;
   createdAt: Date;
-}
-
-export interface ProfileOtherResult {
-  userId: string;
-  profileId: string;
-  privacy: string;
-  username: string;
-  name: string | null;
-  bio: string | null;
-  followerCount: number;
-  followingCount: number;
-  friendCount: number;
-  postCount: number;
-  profilePictureUrl: string | null;
-  networkStatus: NetworkStatus;
-  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface IProfileService {
@@ -104,9 +66,7 @@ export interface IProfileService {
     params: GetProfileByUsernameParams,
   ): Promise<ProfileByUsernameResult>;
 
-  getProfileSelf(params: GetProfileSelfParams): Promise<ProfileSelfResult>;
-
-  getProfileOther(params: GetProfileOtherParams): Promise<ProfileOtherResult>;
+  getProfile(params: GetProfileParams): Promise<ProfileResult>;
 
   searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,

@@ -1,13 +1,12 @@
 import { createHash } from "crypto";
 import { inject, injectable } from "inversify";
-import { err, ok, Result, safeTry } from "neverthrow";
+import { err, ok } from "neverthrow";
 
 import { cloudfront } from "@oppfy/cloudfront";
 import type { Transaction } from "@oppfy/db";
 import { sqs } from "@oppfy/sqs";
 
 import { TYPES } from "../../container";
-import { ErrorCode } from "../../errors";
 import { AwsErrors } from "../../errors/aws.error";
 import { UserErrors } from "../../errors/user/user.error";
 import type {
@@ -19,7 +18,6 @@ import type {
   GetRecommendationProfilesSelfResult,
   GetRecommendationsIdsParams,
   IContactService,
-  RecommendationProfile,
   SyncContactsParams,
   SyncContactsResult,
 } from "../../interfaces/services/user/contactService.interface";
@@ -81,7 +79,7 @@ export class ContactService implements IContactService {
         userPhoneNumberHash,
         contacts: filteredContacts,
       });
-    } catch (e) {
+    } catch {
       return err(
         new AwsErrors.SQSFailedToSend(
           "SQS failed while trying to send contact sync message",
@@ -115,7 +113,7 @@ export class ContactService implements IContactService {
         userPhoneNumberHash,
         contacts: [],
       });
-    } catch (e) {
+    } catch {
       return err(
         new AwsErrors.SQSFailedToSend(
           "SQS failed while trying to send contact delete message",
