@@ -136,6 +136,10 @@ export const userRelations = relations(user, ({ one, many }) => ({
     fields: [user.id],
     references: [profile.userId],
   }),
+  profileStats: one(profileStats, {
+    fields: [user.id],
+    references: [profileStats.userId],
+  }),
   notificationSettings: one(notificationSettings, {
     fields: [user.notificationSettingsId],
     references: [notificationSettings.id],
@@ -210,17 +214,13 @@ export const profileRelations = relations(profile, ({ one }) => ({
     fields: [profile.id],
     references: [user.id],
   }),
-  profileStats: one(profileStats, {
-    fields: [profile.id],
-    references: [profileStats.profileId],
-  }),
 }));
 
 export const profileStats = pgTable("profile_stats", {
   id: uuid("id").primaryKey().defaultRandom(),
-  profileId: uuid("profile_id")
+  userId: uuid("user_id")
     .notNull()
-    .references(() => profile.id, { onDelete: "cascade" }),
+    .references(() => user.id, { onDelete: "cascade" }),
   followers: integer("followers").notNull().default(0),
   following: integer("following").notNull().default(0),
   friends: integer("friends").notNull().default(0),
@@ -234,9 +234,9 @@ export const profileStats = pgTable("profile_stats", {
 });
 
 export const profileStatsRelations = relations(profileStats, ({ one }) => ({
-  profile: one(profile, {
-    fields: [profileStats.profileId],
-    references: [profile.id],
+  user: one(user, {
+    fields: [profileStats.userId],
+    references: [user.id],
   }),
 }));
 
