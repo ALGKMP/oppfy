@@ -4,16 +4,16 @@ import { Container } from "inversify";
 
 import { db, schema } from "@oppfy/db";
 
-import { IBlockRepository } from "./interfaces/repositories/social/blockRepository.interface";
-import { IFollowRepository } from "./interfaces/repositories/social/followRepository.interface";
-import { IFriendRepository } from "./interfaces/repositories/social/friendRepository.interface";
-import { IContactsRepository } from "./interfaces/repositories/user/contactsRepository.interface";
-import { INotificationsRepository } from "./interfaces/repositories/user/notificationRepository.interface";
-import { IProfileRepository } from "./interfaces/repositories/user/profileRepository.interface";
-import { IProfileStatsRepository } from "./interfaces/repositories/user/profileStatsRepository.interface";
-import { IReportRepository } from "./interfaces/repositories/user/reportRepository.interface";
-import { IUserRepository } from "./interfaces/repositories/user/userRepository.interface";
-import { IReportService } from "./interfaces/services/user/reportService.interface";
+import type { IBlockRepository } from "./interfaces/repositories/social/blockRepository.interface";
+import type { IFollowRepository } from "./interfaces/repositories/social/followRepository.interface";
+import type { IFriendRepository } from "./interfaces/repositories/social/friendRepository.interface";
+import type { IContactsRepository } from "./interfaces/repositories/user/contactsRepository.interface";
+import type { INotificationsRepository } from "./interfaces/repositories/user/notificationRepository.interface";
+import type { IProfileRepository } from "./interfaces/repositories/user/profileRepository.interface";
+import type { IProfileStatsRepository } from "./interfaces/repositories/user/profileStatsRepository.interface";
+import type { IReportRepository } from "./interfaces/repositories/user/reportRepository.interface";
+import type { IUserRepository } from "./interfaces/repositories/user/userRepository.interface";
+import type { IReportService } from "./interfaces/services/user/reportService.interface";
 import { BlockRepository } from "./repositories/social/block.repository";
 import { FollowRepository } from "./repositories/social/follow.repository";
 import { FriendRepository } from "./repositories/social/friend.repository";
