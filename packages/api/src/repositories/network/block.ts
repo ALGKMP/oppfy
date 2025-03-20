@@ -59,9 +59,15 @@ export class BlockRepository {
     blockedUserId: string;
   }) {
     return await this.db.query.block.findFirst({
-      where: and(
-        eq(schema.block.userWhoIsBlockingId, userId),
-        eq(schema.block.userWhoIsBlockedId, blockedUserId),
+      where: or(
+        and(
+          eq(schema.block.userWhoIsBlockingId, userId),
+          eq(schema.block.userWhoIsBlockedId, blockedUserId),
+        ),
+        and(
+          eq(schema.block.userWhoIsBlockingId, blockedUserId),
+          eq(schema.block.userWhoIsBlockedId, userId),
+        ),
       ),
     });
   }
@@ -74,12 +80,10 @@ export class BlockRepository {
     userId: string;
     blockedUserId: string;
   }) {
-    const blockedUser = await this.db
-      .insert(schema.block)
-      .values({
-        userWhoIsBlockingId: userId,
-        userWhoIsBlockedId: blockedUserId,
-      });
+    const blockedUser = await this.db.insert(schema.block).values({
+      userWhoIsBlockingId: userId,
+      userWhoIsBlockedId: blockedUserId,
+    });
     return blockedUser[0];
   }
 
