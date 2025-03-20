@@ -65,41 +65,26 @@ export class FollowService implements IFollowService {
       return err(new UserErrors.UserNotFound(!sender ? senderId : recipientId));
     }
 
-    // // Check if already following
-    // const existingFollow = await this.followRepository.getFollower({
-    //   followerId: senderId,
-    //   followeeId: recipientId,
-    // });
-
-    // if (existingFollow) {
-    //   return err(new FollowErrors.AlreadyFollowing(senderId, recipientId));
-    // }
-
-    // // Check if follow request already exists
-    // const existingRequest = await this.followRepository.getFollowRequest({
-    //   senderId,
-    //   recipientId,
-    // });
-
-    // if (existingRequest) {
-    //   return err(new FollowErrors.RequestAlreadySent(senderId, recipientId));
-    // }
-
     const relationship = await this.relationshipRepository.getByUserIds({
       userIdA: senderId,
       userIdB: recipientId,
     });
 
-    if (relationship?.followStatus === "following") {
+    if (relationship.followStatus === "following") {
       return err(new FollowErrors.AlreadyFollowing(senderId, recipientId));
+    } else if (relationship.followStatus === "outboundRequest") {
+      return err(new FollowErrors.RequestAlreadySent(senderId, recipientId));
     }
 
-    try {
+    await this.db.transaction(async (tx) => {
       // Create follow request
-      await this.followRepository.createFollowRequest({
-        senderId,
-        recipientId,
-      });
+      await this.followRepository.createFollowRequest(
+        {
+          senderId,
+          recipientId,
+        },
+        tx,
+      );
 
       // Get notification settings
       const notificationSettings =
@@ -118,14 +103,12 @@ export class FollowService implements IFollowService {
               entityId: senderId,
             },
           },
-          undefined,
+          tx,
         );
       }
+    });
 
-      return ok(undefined);
-    } catch (error) {
-      return err(new FollowErrors.FailedToSendRequest(senderId, recipientId));
-    }
+    return ok(undefined);
   }
 
   async acceptFollowRequest(options: {
@@ -149,16 +132,22 @@ export class FollowService implements IFollowService {
       return err(new FollowErrors.RequestNotFound(senderId, recipientId));
     }
 
-    try {
+    await this.db.transaction(async (tx) => {
       // Delete follow request and create follower
-      await this.followRepository.deleteFollowRequest({
-        senderId,
-        recipientId,
-      });
-      await this.followRepository.createFollower({
-        senderUserId: senderId,
-        recipientUserId: recipientId,
-      });
+      await this.followRepository.deleteFollowRequest(
+        {
+          senderId,
+          recipientId,
+        },
+        tx,
+      );
+      await this.followRepository.createFollower(
+        {
+          senderUserId: senderId,
+          recipientUserId: recipientId,
+        },
+        tx,
+      );
 
       // Get notification settings
       const sender = await this.userRepository.getUser({ userId: senderId });
@@ -174,21 +163,22 @@ export class FollowService implements IFollowService {
         });
 
       if (notificationSettings?.followRequests) {
-        await this.notificationsRepository.storeNotification({
-          senderId: recipientId,
-          recipientId: senderId,
-          notificationData: {
-            eventType: "follow",
-            entityType: "profile",
-            entityId: recipientId,
+        await this.notificationsRepository.storeNotification(
+          {
+            senderId: recipientId,
+            recipientId: senderId,
+            notificationData: {
+              eventType: "follow",
+              entityType: "profile",
+              entityId: recipientId,
+            },
           },
-        });
+          tx,
+        );
       }
+    });
 
-      return ok(undefined);
-    } catch (error) {
-      return err(new FollowErrors.FailedToAcceptRequest(senderId, recipientId));
-    }
+    return ok(undefined);
   }
 
   async declineFollowRequest(options: {
@@ -212,19 +202,18 @@ export class FollowService implements IFollowService {
       return err(new FollowErrors.RequestNotFound(senderId, recipientId));
     }
 
-    try {
+    await this.db.transaction(async (tx) => {
       // Delete follow request
-      await this.followRepository.deleteFollowRequest({
-        senderId,
-        recipientId,
-      });
-
-      return ok(undefined);
-    } catch (error) {
-      return err(
-        new FollowErrors.FailedToDeclineRequest(senderId, recipientId),
+      await this.followRepository.deleteFollowRequest(
+        {
+          senderId,
+          recipientId,
+        },
+        tx,
       );
-    }
+    });
+
+    return ok(undefined);
   }
 
   async removeFollow(options: {
@@ -245,17 +234,18 @@ export class FollowService implements IFollowService {
       return err(new FollowErrors.NotFollowing(followerId, followeeId));
     }
 
-    try {
+    await this.db.transaction(async (tx) => {
       // Remove follower
-      await this.followRepository.removeFollower({
-        followerId,
-        followeeId,
-      });
+      await this.followRepository.removeFollower(
+        {
+          followerId,
+          followeeId,
+        },
+        tx,
+      );
+    });
 
-      return ok(undefined);
-    } catch (error) {
-      return err(new FollowErrors.FailedToRemove(followerId, followeeId));
-    }
+    return ok(undefined);
   }
 
   async getFollowRequest(options: {
@@ -281,36 +271,24 @@ export class FollowService implements IFollowService {
     userId: string;
   }): Promise<Result<number, FollowErrors.FailedToCountFollowers>> {
     const { userId } = options;
-    try {
-      const count = await this.followRepository.countFollowers({ userId });
-      return ok(count ?? 0);
-    } catch (error) {
-      return err(new FollowErrors.FailedToCountFollowers());
-    }
+    const count = await this.followRepository.countFollowers({ userId });
+    return ok(count ?? 0);
   }
 
   async countFollowing(options: {
     userId: string;
   }): Promise<Result<number, FollowErrors.FailedToCountFollowing>> {
     const { userId } = options;
-    try {
-      const count = await this.followRepository.countFollowing({ userId });
-      return ok(count ?? 0);
-    } catch (error) {
-      return err(new FollowErrors.FailedToCountFollowing());
-    }
+    const count = await this.followRepository.countFollowing({ userId });
+    return ok(count ?? 0);
   }
 
   async countFollowRequests(options: {
     userId: string;
   }): Promise<Result<number, FollowErrors.FailedToCountRequests>> {
     const { userId } = options;
-    try {
-      const count = await this.followRepository.countFollowRequests({ userId });
-      return ok(count ?? 0);
-    } catch (error) {
-      return err(new FollowErrors.FailedToCountRequests());
-    }
+    const count = await this.followRepository.countFollowRequests({ userId });
+    return ok(count ?? 0);
   }
 
   async getFollowers(options: {
@@ -454,17 +432,18 @@ export class FollowService implements IFollowService {
       return err(new FollowErrors.NotFollowing(followerToRemove, userId));
     }
 
-    try {
+    await this.db.transaction(async (tx) => {
       // Remove follower
-      await this.followRepository.removeFollower({
-        followerId: followerToRemove,
-        followeeId: userId,
-      });
+      await this.followRepository.removeFollower(
+        {
+          followerId: followerToRemove,
+          followeeId: userId,
+        },
+        tx,
+      );
+    });
 
-      return ok(undefined);
-    } catch (error) {
-      return err(new FollowErrors.FailedToRemove(followerToRemove, userId));
-    }
+    return ok(undefined);
   }
 
   async cancelFollowRequest(options: {
@@ -488,18 +467,17 @@ export class FollowService implements IFollowService {
       return err(new FollowErrors.RequestNotFound(senderId, recipientId));
     }
 
-    try {
+    await this.db.transaction(async (tx) => {
       // Delete follow request
-      await this.followRepository.deleteFollowRequest({
-        senderId,
-        recipientId,
-      });
-
-      return ok(undefined);
-    } catch (error) {
-      return err(
-        new FollowErrors.FailedToDeclineRequest(senderId, recipientId),
+      await this.followRepository.deleteFollowRequest(
+        {
+          senderId,
+          recipientId,
+        },
+        tx,
       );
-    }
+    });
+
+    return ok(undefined);
   }
 }

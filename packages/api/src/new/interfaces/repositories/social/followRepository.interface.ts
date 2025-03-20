@@ -111,7 +111,7 @@ export interface IFollowRepository {
   removeFollowRequest(
     senderId: string,
     recipientId: string,
-    tx?: Transaction,
+    tx: Transaction,
   ): Promise<void>;
 
   getFollower(
@@ -136,12 +136,12 @@ export interface IFollowRepository {
 
   deleteFollowRequest(
     params: DeleteFollowRequestParams,
-    tx?: Transaction,
+    tx: Transaction,
   ): Promise<void>;
 
   createFollowRequest(
     params: CreateFollowRequestParams,
-    tx?: Transaction,
+    tx: Transaction,
   ): Promise<void>;
 
   getFollowRequest(
@@ -151,7 +151,7 @@ export interface IFollowRepository {
 
   acceptFollowRequest(
     params: AcceptFollowRequestParams,
-    tx?: Transaction,
+    tx: Transaction,
   ): Promise<void>;
 
   paginateFollowersSelf(
