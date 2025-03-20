@@ -14,6 +14,7 @@ import { UserErrors } from "../../errors/user/user.error";
 import type { IPostRepository } from "../../interfaces/repositories/content/postRepository.interface";
 import type { IBlockRepository } from "../../interfaces/repositories/social/blockRepository.interface";
 import type { IFollowRepository } from "../../interfaces/repositories/social/followRepository.interface";
+import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
 import type { IContactsRepository } from "../../interfaces/repositories/user/contactsRepository.interface";
 import type { INotificationsRepository } from "../../interfaces/repositories/user/notificationRepository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profileRepository.interface";
@@ -35,6 +36,8 @@ export class UserService implements IUserService {
     private contactsRepository: IContactsRepository,
     @inject(TYPES.NotificationsRepository)
     private notificationsRepository: INotificationsRepository,
+    @inject(TYPES.RelationshipRepository)
+    private relationshipRepository: IRelationshipRepository,
   ) {}
 
   async createUserWithUsername(options: {
@@ -315,19 +318,13 @@ export class UserService implements IUserService {
       return err(new UserErrors.UserNotFound(targetUserId));
     }
 
-    // Check if the current user is blocked by the target user
-    const [isBlocked, isBlockedByTargetUser] = await Promise.all([
-      this.blockRepository.getBlockedUser({
-        userId: targetUserId,
-        blockedUserId: currentUserId,
-      }),
-      this.blockRepository.getBlockedUser({
-        userId: currentUserId,
-        blockedUserId: targetUserId,
-      }),
-    ]);
+    // Get relationship status
+    const relationship = await this.relationshipRepository.getByUserIds({
+      userIdA: currentUserId,
+      userIdB: targetUserId,
+    });
 
-    if (isBlocked || isBlockedByTargetUser) {
+    if (relationship.blockStatus) {
       return ok(false);
     }
 
@@ -342,12 +339,7 @@ export class UserService implements IUserService {
       return ok(true);
     }
 
-    const isFollowing = await this.followRepository.getFollower({
-      followerId: currentUserId,
-      followeeId: targetUserId,
-    });
-
-    return ok(!!isFollowing);
+    return ok(relationship.followStatus === "following");
   }
 
   private async fetchAndSendNotifications(userId: string): Promise<void> {
