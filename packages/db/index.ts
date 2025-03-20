@@ -7,7 +7,7 @@ import type {
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
-import { entityTypeEnum } from "./src/schema";
+import { entityTypeEnum, friendStatusEnum, followStatusEnum } from "./src/schema";
 
 import { env } from "@oppfy/env";
 
@@ -31,5 +31,5 @@ type Transaction = PgTransaction<
 >;
 type DatabaseOrTransaction = Database | Transaction;
 
-export { db, schema, entityTypeEnum };
+export { db, schema, entityTypeEnum, friendStatusEnum, followStatusEnum };
 export type { Schema, Database, Transaction, DatabaseOrTransaction };
