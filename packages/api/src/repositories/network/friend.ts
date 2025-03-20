@@ -104,13 +104,7 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async getFriendship({
-    userIdA,
-    userIdB,
-  }: {
-    userIdA: string;
-    userIdB: string;
-  }) {
+  async getFriend({ userIdA, userIdB }: { userIdA: string; userIdB: string }) {
     // Ensure userIdA < userIdB for the query
     const [userId1, userId2] =
       userIdA < userIdB ? [userIdA, userIdB] : [userIdB, userIdA];
@@ -394,6 +388,6 @@ export class FriendRepository {
     userIdA: string;
     userIdB: string;
   }) {
-    return !!(await this.getFriendship({ userIdA, userIdB }));
+    return !!(await this.getFriend({ userIdA, userIdB }));
   }
 }

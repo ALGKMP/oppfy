@@ -322,7 +322,7 @@ export class FriendService {
     targetUserId: string;
     otherUserId: string;
   }) {
-    const friendship = await this.friendRepository.getFriendship({
+    const friendship = await this.friendRepository.getFriend({
       userIdA: targetUserId,
       userIdB: otherUserId,
     });
@@ -381,11 +381,11 @@ export class FriendService {
     userIdA: string;
     userIdB: string;
   }) {
-    const friendshipExists = await this.friendRepository.getFriendship({
+    const friendshipExists = await this.friendRepository.getFriend({
       userIdA,
       userIdB,
     });
-    const reverseFriendshipExists = await this.friendRepository.getFriendship({
+    const reverseFriendshipExists = await this.friendRepository.getFriend({
       userIdA,
       userIdB,
     });

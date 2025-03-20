@@ -5,13 +5,11 @@ import { DomainError, ErrorCode } from "../../errors";
 import { FollowRepository } from "../../repositories/network/follow";
 import { FriendRepository } from "../../repositories/network/friend";
 import { NotificationsRepository } from "../../repositories/user/notifications";
-import { ProfileRepository } from "../../repositories/user/profile";
 import { UserRepository } from "../../repositories/user/user";
 
 export class FollowService {
   private followRepository = new FollowRepository();
   private userRepository = new UserRepository();
-  private profileRepository = new ProfileRepository();
   private notificationsRepository = new NotificationsRepository();
   private friendRepository = new FriendRepository();
 
@@ -137,7 +135,7 @@ export class FollowService {
       );
     }
 
-    const friendship = await this.friendRepository.getFriendship({
+    const friendship = await this.friendRepository.getFriend({
       userIdA: senderId,
       userIdB: recipientId,
     });
@@ -329,7 +327,7 @@ export class FollowService {
     });
 
     // Check if there's a friendship and remove it if exists
-    const friendship = await this.friendRepository.getFriendship({
+    const friendship = await this.friendRepository.getFriend({
       userIdA: userId,
       userIdB: followerToRemove,
     });

@@ -6,8 +6,6 @@ import {
   NotificationsRepository,
   ProfileStatsRepository,
 } from "../../repositories";
-import { FollowService } from "./follow";
-import { FriendService } from "./friend";
 
 export class BlockService {
   private followRepository = new FollowRepository();
@@ -15,9 +13,6 @@ export class BlockService {
   private blockRepository = new BlockRepository();
   private profileStatsRepository = new ProfileStatsRepository();
   private notificationsRepository = new NotificationsRepository();
-
-  private followService = new FollowService();
-  private friendService = new FriendService();
 
   async blockUser({
     userId,
@@ -65,15 +60,15 @@ export class BlockService {
       outgoingFollowRequest,
       incomingFollowRequest,
     ] = await Promise.all([
-      this.followService.isFollowing({
-        senderId: userId,
-        recipientId: userIdBeingBlocked,
+      this.followRepository.getFollower({
+        followerId: userId,
+        followeeId: userIdBeingBlocked,
       }),
-      this.followService.isFollowing({
-        senderId: userIdBeingBlocked,
-        recipientId: userId,
+      this.followRepository.getFollower({
+        followerId: userIdBeingBlocked,
+        followeeId: userId,
       }),
-      this.friendService.friendshipExists({
+      this.friendRepository.getFriend({
         userIdA: userId,
         userIdB: userIdBeingBlocked,
       }),
