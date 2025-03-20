@@ -89,17 +89,17 @@ export interface IFriendRepository {
 
   getFriendship(
     params: GetFriendshipParams,
-    db?: DatabaseOrTransaction,
+    tx?: Transaction,
   ): Promise<{ id: string } | undefined>;
 
   countFriends(
     params: CountFriendsParams,
-    db?: DatabaseOrTransaction,
+    tx?: Transaction,
   ): Promise<number | undefined>;
 
   countFriendRequests(
     params: CountFriendRequestsParams,
-    db?: DatabaseOrTransaction,
+    tx?: Transaction,
   ): Promise<number | undefined>;
 
   createFriendRequest(
@@ -114,26 +114,26 @@ export interface IFriendRepository {
 
   getFriendRequest(
     params: GetFriendRequestParams,
-    db?: DatabaseOrTransaction,
+    tx?: Transaction,
   ): Promise<{ id: string } | undefined>;
 
   paginateFriendsSelf(
     params: PaginateFriendsSelfParams,
-    db?: DatabaseOrTransaction,
+    tx?: Transaction,
   ): Promise<FriendResult[]>;
 
   paginateFriendsOther(
     params: PaginateFriendsOtherParams,
-    db?: DatabaseOrTransaction,
+    tx?: Transaction,
   ): Promise<FriendResult[]>;
 
   paginateFriendRequests(
     params: PaginateFriendRequestsParams,
-    db?: DatabaseOrTransaction,
+    tx?: Transaction,
   ): Promise<FriendRequestResult[]>;
 
   friendshipExists(
     params: FriendshipExistsParams,
-    db?: DatabaseOrTransaction,
+    tx?: Transaction,
   ): Promise<boolean>;
 }
