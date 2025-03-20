@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./index.ts"
+    ".": "./index.ts",
+    "./utils/query-helpers": "./src/utils/query-helpers.ts"
   },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",

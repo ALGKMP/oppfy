@@ -1,209 +1,91 @@
-import {
-  and,
-  eq,
-  ilike,
-  inArray,
-  isNotNull,
-  isNull,
-  ne,
-  or,
-} from "drizzle-orm";
+import { eq, ilike, ne } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
+import {
+  withOnboardingCompleted,
+  withoutBlocked,
+} from "@oppfy/db/utils/query-helpers";
 
 import { TYPES } from "../../container";
-import {
-  BatchProfileResult,
-  DeleteProfileParams,
-  GetBatchProfilesParams,
-  GetProfileByUsernameParams,
-  GetProfileParams,
-  GetUserFullProfileParams,
-  GetUserProfileParams,
+import type {
   IProfileRepository,
-  ProfileResult,
   ProfilesByUsernameParams,
   UpdateProfileParams,
-  UpdateProfilePictureParams,
-  UsernameExistsParams,
+  UserIdParams,
+  UsernameParams,
 } from "../../interfaces/repositories/user/profileRepository.interface";
-import { Profile, UserWithProfile } from "../../models";
-import { err, ok, Result } from "neverthrow";
+import type { Profile } from "../../models";
 
 @injectable()
 export class ProfileRepository implements IProfileRepository {
-  private db: Database;
-  private schema: Schema;
-
   constructor(
-    @inject(TYPES.Database) db: Database,
-    @inject(TYPES.Schema) schema: Schema,
-  ) {
-    this.db = db;
-    this.schema = schema;
-  }
+    @inject(TYPES.Database)
+    private readonly db: Database,
+    @inject(TYPES.Schema)
+    private readonly schema: Schema,
+  ) {}
 
   async getProfile(
-    params: GetProfileParams,
+    params: UserIdParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile | undefined> {
-    const { profileId } = params;
-
-   return await db.query.profile.findFirst({
-      where: eq(this.schema.profile.id, profileId),
-    });
-
-  }
-
-  async getUserProfile(
-    params: GetUserProfileParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<UserWithProfile | undefined> {
     const { userId } = params;
 
-    return await db.query.user.findFirst({
-      where: eq(this.schema.user.id, userId),
-      with: { profile: true },
+    const profile = await db.query.profile.findFirst({
+      where: eq(this.schema.profile.userId, userId),
     });
+
+    return profile;
   }
 
-  async getUserFullProfile(
-    params: GetUserFullProfileParams,
+  async getProfilesByUsername(
+    params: ProfilesByUsernameParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<UserWithProfile | undefined> {
-    const { userId } = params;
+  ): Promise<Profile[]> {
+    const { username, selfUserId, limit = 15 } = params;
 
-    return await db.query.user.findFirst({
-      where: eq(this.schema.user.id, userId),
-      with: { profile: { with: { user: true, profileStats: true } } },
-    });
+    let query = db
+      .select({
+        profile: this.schema.profile,
+      })
+      .from(this.schema.profile)
+      .where(ilike(this.schema.profile.username, `%${username}%`))
+      .$dynamic();
+
+    query = withOnboardingCompleted(query, this.schema);
+    query = withoutBlocked(query, this.schema, selfUserId);
+
+    // Add final conditions and execute
+    const results = await query
+      .where(ne(this.schema.profile.userId, selfUserId))
+      .limit(limit);
+
+    return results.map((result) => result.profile);
   }
 
-  async getProfileByUsername(
-    params: GetProfileByUsernameParams,
+  async usernameTaken(
+    params: UsernameParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Profile | undefined> {
+  ): Promise<boolean> {
     const { username } = params;
 
-    return await db.query.profile.findFirst({
+    const profile = await db.query.profile.findFirst({
       where: eq(this.schema.profile.username, username),
     });
+
+    return !!profile;
   }
 
   async updateProfile(
     params: UpdateProfileParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const { profileId, update } = params;
+    const { userId, update } = params;
 
     await db
       .update(this.schema.profile)
       .set(update)
-      .where(eq(this.schema.profile.id, profileId));
-  }
-
-  async updateProfilePicture(
-    params: UpdateProfilePictureParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<void> {
-    const { profileId, newKey } = params;
-
-    await db
-      .update(this.schema.profile)
-      .set({ profilePictureKey: newKey })
-      .where(eq(this.schema.profile.id, profileId));
-  }
-
-  async usernameExists(
-    params: UsernameExistsParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<boolean> {
-    const { username } = params;
-
-    return !!(await db.query.profile.findFirst({
-      where: eq(this.schema.profile.username, username),
-    }));
-  }
-
-  async getBatchProfiles(
-    params: GetBatchProfilesParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<BatchProfileResult[]> {
-    const { userIds } = params;
-
-    const user = this.schema.user;
-    const profile = this.schema.profile;
-
-    const fullProfiles = await db
-      .select({
-        userId: user.id,
-        profileId: profile.id,
-        privacy: user.privacySetting,
-        username: profile.username,
-        name: profile.name,
-        profilePictureKey: profile.profilePictureKey,
-      })
-      .from(this.schema.user)
-      .innerJoin(profile, eq(profile.userId, user.id))
-      .where(inArray(user.id, userIds));
-
-    return fullProfiles;
-  }
-
-  async deleteProfile(
-    params: DeleteProfileParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<void> {
-    const { profileId } = params;
-
-    await db
-      .delete(this.schema.profile)
-      .where(eq(this.schema.profile.id, profileId));
-  }
-
-  async profilesByUsername(
-    params: ProfilesByUsernameParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<ProfileResult[]> {
-    const { username, currentUserId, limit = 15 } = params;
-
-    const results = await db
-      .select({
-        userId: this.schema.user.id,
-        username: this.schema.profile.username,
-        name: this.schema.profile.name,
-        bio: this.schema.profile.bio,
-        profilePictureKey: this.schema.profile.profilePictureKey,
-      })
-      .from(this.schema.user)
-      .innerJoin(
-        this.schema.profile,
-        eq(this.schema.profile.userId, this.schema.user.id),
-      )
-      .leftJoin(
-        this.schema.block,
-        or(
-          and(
-            eq(this.schema.block.userWhoIsBlockingId, currentUserId),
-            eq(this.schema.block.userWhoIsBlockedId, this.schema.user.id),
-          ),
-          and(
-            eq(this.schema.block.userWhoIsBlockingId, this.schema.user.id),
-            eq(this.schema.block.userWhoIsBlockedId, currentUserId),
-          ),
-        ),
-      )
-      .where(
-        and(
-          ilike(this.schema.profile.username, `%${username}%`),
-          ne(this.schema.user.id, currentUserId),
-          isNotNull(this.schema.profile.userId),
-          isNull(this.schema.block.id),
-        ),
-      )
-      .limit(limit);
-
-    return results;
+      .where(eq(this.schema.profile.userId, userId));
   }
 }

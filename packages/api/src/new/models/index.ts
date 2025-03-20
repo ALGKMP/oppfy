@@ -1,4 +1,4 @@
-import type { InferSelectModel, schema } from "@oppfy/db";
+import type { InferInsertModel, InferSelectModel, schema } from "@oppfy/db";
 
 import type {
   reportCommentReasonEnum,
@@ -13,9 +13,6 @@ export type ReportCommentReason =
 
 export type User = InferSelectModel<typeof schema.user>;
 export type Profile = InferSelectModel<typeof schema.profile>;
-export type UserWithProfile = User & {
-  profile: Profile;
-};
 export type UserStatus = InferSelectModel<typeof schema.userStatus>;
 export type ProfileStats = InferSelectModel<typeof schema.profileStats>;
 export type Post = InferSelectModel<typeof schema.post>;
@@ -25,3 +22,10 @@ export type Like = InferSelectModel<typeof schema.like>;
 export type ReportUser = InferSelectModel<typeof schema.reportUser>;
 export type ReportPost = InferSelectModel<typeof schema.reportPost>;
 export type ReportComment = InferSelectModel<typeof schema.reportComment>;
+
+export type UserInsert = InferInsertModel<typeof schema.user>;
+export type ProfileInsert = InferInsertModel<typeof schema.profile>;
+export type UserStatusInsert = InferInsertModel<typeof schema.userStatus>;
+export type ProfileStatsInsert = InferInsertModel<typeof schema.profileStats>;
+export type PostInsert = InferInsertModel<typeof schema.post>;
+export type PostStatsInsert = InferInsertModel<typeof schema.postStats>;
