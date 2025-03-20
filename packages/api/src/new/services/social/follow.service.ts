@@ -316,7 +316,7 @@ export class FollowService implements IFollowService {
       })),
       nextCursor:
         followers.length === limit && followers[followers.length - 1]?.profileId
-          ? followers[followers.length - 1].profileId
+          ? followers[followers.length - 1]!.profileId
           : undefined,
     });
   }
@@ -346,7 +346,7 @@ export class FollowService implements IFollowService {
       })),
       nextCursor:
         following.length === limit && following[following.length - 1]?.profileId
-          ? following[following.length - 1].profileId
+          ? following[following.length - 1]!.profileId
           : undefined,
     });
   }
@@ -380,7 +380,7 @@ export class FollowService implements IFollowService {
       })),
       nextCursor:
         requests.length === limit && requests[requests.length - 1]?.profileId
-          ? requests[requests.length - 1].profileId
+          ? requests[requests.length - 1]!.profileId
           : undefined,
     });
   }
