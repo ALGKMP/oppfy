@@ -199,14 +199,6 @@ export class PostInteractionService implements IPostInteractionService {
         },
         tx,
       );
-
-      // Update user stats
-      await this.profileStatsRepository.incrementCommentsCount(
-        {
-          userId: post.recipientId,
-        },
-        tx,
-      );
     });
 
     return ok(undefined);
