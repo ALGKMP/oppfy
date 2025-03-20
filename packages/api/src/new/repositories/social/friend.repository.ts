@@ -91,10 +91,18 @@ export class FriendRepository implements IFriendRepository {
     await updateProfileStats(senderId);
     await updateProfileStats(recipientId);
 
-    // Update relationship status
+    // Update relationship status for both sides
     await this.relationshipRepository.upsert({
       userIdA: senderId,
       userIdB: recipientId,
+      updates: {
+        friendshipStatus: "friends",
+      },
+      db,
+    });
+    await this.relationshipRepository.upsert({
+      userIdA: recipientId,
+      userIdB: senderId,
       updates: {
         friendshipStatus: "friends",
       },
@@ -138,10 +146,18 @@ export class FriendRepository implements IFriendRepository {
     await updateProfileStats(userIdA);
     await updateProfileStats(userIdB);
 
-    // Update relationship status
+    // Update relationship status for both sides
     await this.relationshipRepository.upsert({
       userIdA: userIdA,
       userIdB: userIdB,
+      updates: {
+        friendshipStatus: "notFriends",
+      },
+      db,
+    });
+    await this.relationshipRepository.upsert({
+      userIdA: userIdB,
+      userIdB: userIdA,
       updates: {
         friendshipStatus: "notFriends",
       },
@@ -216,12 +232,20 @@ export class FriendRepository implements IFriendRepository {
       .insert(this.schema.friendRequest)
       .values({ senderId, recipientId });
 
-    // Update relationship status
+    // Update relationship status for both sides
     await this.relationshipRepository.upsert({
       userIdA: senderId,
       userIdB: recipientId,
       updates: {
         friendshipStatus: "outboundRequest",
+      },
+      db,
+    });
+    await this.relationshipRepository.upsert({
+      userIdA: recipientId,
+      userIdB: senderId,
+      updates: {
+        friendshipStatus: "inboundRequest",
       },
       db,
     });
@@ -242,10 +266,18 @@ export class FriendRepository implements IFriendRepository {
         ),
       );
 
-    // Update relationship status
+    // Update relationship status for both sides
     await this.relationshipRepository.upsert({
       userIdA: senderId,
       userIdB: recipientId,
+      updates: {
+        friendshipStatus: "notFriends",
+      },
+      db,
+    });
+    await this.relationshipRepository.upsert({
+      userIdA: recipientId,
+      userIdB: senderId,
       updates: {
         friendshipStatus: "notFriends",
       },

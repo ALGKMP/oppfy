@@ -31,6 +31,7 @@ import {
   PaginateFollowRequestsParams,
   RemoveFollowerParams,
 } from "../../interfaces/repositories/social/followRepository.interface";
+import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
 
 @injectable()
 export class FollowRepository implements IFollowRepository {
@@ -40,6 +41,8 @@ export class FollowRepository implements IFollowRepository {
   constructor(
     @inject(TYPES.Database) db: Database,
     @inject(TYPES.Schema) schema: Schema,
+    @inject(TYPES.RelationshipRepository)
+    private relationshipRepository: IRelationshipRepository,
   ) {
     this.db = db;
     this.schema = schema;
@@ -76,6 +79,24 @@ export class FollowRepository implements IFollowRepository {
       .update(this.schema.profileStats)
       .set({ followers: sql`${this.schema.profileStats.followers} + 1` })
       .where(eq(this.schema.profileStats.profileId, recipientProfile.id));
+
+    // Update relationship status for both sides
+    await this.relationshipRepository.upsert({
+      userIdA: senderUserId,
+      userIdB: recipientUserId,
+      updates: {
+        followStatus: "following",
+      },
+      db,
+    });
+    await this.relationshipRepository.upsert({
+      userIdA: recipientUserId,
+      userIdB: senderUserId,
+      updates: {
+        followStatus: "following",
+      },
+      db,
+    });
   }
 
   async removeFollower(
@@ -114,6 +135,24 @@ export class FollowRepository implements IFollowRepository {
       .update(this.schema.profileStats)
       .set({ followers: sql`${this.schema.profileStats.followers} - 1` })
       .where(eq(this.schema.profileStats.profileId, followeeProfile.id));
+
+    // Update relationship status for both sides
+    await this.relationshipRepository.upsert({
+      userIdA: followerId,
+      userIdB: followeeId,
+      updates: {
+        followStatus: "notFollowing",
+      },
+      db,
+    });
+    await this.relationshipRepository.upsert({
+      userIdA: followeeId,
+      userIdB: followerId,
+      updates: {
+        followStatus: "notFollowing",
+      },
+      db,
+    });
   }
 
   async removeFollowRequest(
@@ -207,6 +246,24 @@ export class FollowRepository implements IFollowRepository {
           eq(this.schema.followRequest.recipientId, recipientId),
         ),
       );
+
+    // Update relationship status for both sides
+    await this.relationshipRepository.upsert({
+      userIdA: senderId,
+      userIdB: recipientId,
+      updates: {
+        followStatus: "notFollowing",
+      },
+      db,
+    });
+    await this.relationshipRepository.upsert({
+      userIdA: recipientId,
+      userIdB: senderId,
+      updates: {
+        followStatus: "notFollowing",
+      },
+      db,
+    });
   }
 
   async createFollowRequest(
@@ -218,6 +275,24 @@ export class FollowRepository implements IFollowRepository {
     await db
       .insert(this.schema.followRequest)
       .values({ senderId, recipientId });
+
+    // Update relationship status for both sides
+    await this.relationshipRepository.upsert({
+      userIdA: senderId,
+      userIdB: recipientId,
+      updates: {
+        followStatus: "outboundRequest",
+      },
+      db,
+    });
+    await this.relationshipRepository.upsert({
+      userIdA: recipientId,
+      userIdB: senderId,
+      updates: {
+        followStatus: "inboundRequest",
+      },
+      db,
+    });
   }
 
   async getFollowRequest(
@@ -278,6 +353,24 @@ export class FollowRepository implements IFollowRepository {
       .update(this.schema.profileStats)
       .set({ followers: sql`${this.schema.profileStats.followers} + 1` })
       .where(eq(this.schema.profileStats.profileId, recipientProfile.id));
+
+    // Update relationship status for both sides
+    await this.relationshipRepository.upsert({
+      userIdA: senderId,
+      userIdB: recipientId,
+      updates: {
+        followStatus: "following",
+      },
+      db,
+    });
+    await this.relationshipRepository.upsert({
+      userIdA: recipientId,
+      userIdB: senderId,
+      updates: {
+        followStatus: "following",
+      },
+      db,
+    });
   }
 
   async paginateFollowersSelf(
