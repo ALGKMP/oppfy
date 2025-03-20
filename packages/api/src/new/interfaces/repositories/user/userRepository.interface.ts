@@ -1,6 +1,6 @@
-import type { InferInsertModel, Transaction } from "@oppfy/db";
+import type { DatabaseOrTransaction, InferInsertModel, Transaction } from "@oppfy/db";
 
-import type { User, UserStatus, UserWithProfile } from "../../../models";
+import type { User, UserStatus, UserWithNotificationSettings, UserWithProfile } from "../../../models";
 
 export type PrivacySettings = NonNullable<
   InferInsertModel<typeof import("@oppfy/db").schema.user>["privacySetting"]
@@ -66,6 +66,10 @@ export interface UpdateUserOnboardingCompleteParams {
   hasCompletedOnboarding: boolean;
 }
 
+export interface GetUserWithNotificationSettingsParams {
+  userId: string;
+}
+
 export interface IUserRepository {
   createUser(params: CreateUserParams, tx: Transaction): Promise<void>;
 
@@ -75,6 +79,11 @@ export interface IUserRepository {
     params: GetUserWithProfileParams,
     tx?: Transaction,
   ): Promise<UserWithProfile | undefined>;
+
+  getUserWithNotificationSettings(
+    params: GetUserWithNotificationSettingsParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<UserWithNotificationSettings | undefined>;
 
   getUserStatus(
     params: GetUserStatusParams,
