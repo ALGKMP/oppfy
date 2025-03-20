@@ -27,6 +27,7 @@ import {
   PaginateFriendsSelfParams,
   RemoveFriendParams,
 } from "../../interfaces/repositories/social/friendRepository.interface";
+import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
 
 @injectable()
 export class FriendRepository implements IFriendRepository {
@@ -36,6 +37,8 @@ export class FriendRepository implements IFriendRepository {
   constructor(
     @inject(TYPES.Database) db: Database,
     @inject(TYPES.Schema) schema: Schema,
+    @inject(TYPES.RelationshipRepository)
+    private relationshipRepository: IRelationshipRepository,
   ) {
     this.db = db;
     this.schema = schema;
@@ -87,6 +90,16 @@ export class FriendRepository implements IFriendRepository {
 
     await updateProfileStats(senderId);
     await updateProfileStats(recipientId);
+
+    // Update relationship status
+    await this.relationshipRepository.upsert({
+      userIdA: senderId,
+      userIdB: recipientId,
+      updates: {
+        friendshipStatus: "friends",
+      },
+      db,
+    });
   }
 
   async removeFriend(
@@ -124,6 +137,16 @@ export class FriendRepository implements IFriendRepository {
 
     await updateProfileStats(userIdA);
     await updateProfileStats(userIdB);
+
+    // Update relationship status
+    await this.relationshipRepository.upsert({
+      userIdA: userIdA,
+      userIdB: userIdB,
+      updates: {
+        friendshipStatus: "notFriends",
+      },
+      db,
+    });
   }
 
   async getFriendship(
@@ -192,6 +215,16 @@ export class FriendRepository implements IFriendRepository {
     await db
       .insert(this.schema.friendRequest)
       .values({ senderId, recipientId });
+
+    // Update relationship status
+    await this.relationshipRepository.upsert({
+      userIdA: senderId,
+      userIdB: recipientId,
+      updates: {
+        friendshipStatus: "outboundRequest",
+      },
+      db,
+    });
   }
 
   async deleteFriendRequest(
@@ -208,6 +241,16 @@ export class FriendRepository implements IFriendRepository {
           eq(this.schema.friendRequest.recipientId, recipientId),
         ),
       );
+
+    // Update relationship status
+    await this.relationshipRepository.upsert({
+      userIdA: senderId,
+      userIdB: recipientId,
+      updates: {
+        friendshipStatus: "notFriends",
+      },
+      db,
+    });
   }
 
   async getFriendRequest(
