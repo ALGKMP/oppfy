@@ -43,6 +43,7 @@ export const TYPES = {
   ProfileStatsRepository: Symbol.for("ProfileStatsRepository"),
   UserRepository: Symbol.for("UserRepository"),
   RelationshipRepository: Symbol.for("RelationshipRepository"),
+  PostRepository: Symbol.for("PostRepository"),
 
   // Services
   ReportService: Symbol.for("ReportService"),

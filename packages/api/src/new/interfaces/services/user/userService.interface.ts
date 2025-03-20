@@ -1,3 +1,7 @@
+import type { Result } from "neverthrow";
+
+import type { UserErrors } from "../../../errors/user/user.error";
+
 export interface CreateUserWithUsernameParams {
   userId: string;
   phoneNumber: string;
@@ -58,76 +62,110 @@ export interface UpdateUserTutorialCompleteParams {
 }
 
 export interface IUserService {
-  createUserWithUsername(params: CreateUserWithUsernameParams): Promise<void>;
+  createUserWithUsername(
+    params: CreateUserWithUsernameParams,
+  ): Promise<Result<void, UserErrors.UserNotFound>>;
 
-  createUser(params: CreateUserParams): Promise<void>;
+  createUser(
+    params: CreateUserParams,
+  ): Promise<Result<void, UserErrors.UserNotFound>>;
 
-  getUser(params: GetUserParams): Promise<{
-    id: string;
-    phoneNumber: string;
-    username: string;
-    isOnApp: boolean;
-    privacySetting: "public" | "private";
-    notificationSettingsId: string;
-  }>;
-
-  getUserByPhoneNumber(params: GetUserByPhoneNumberParams): Promise<{
-    id: string;
-    phoneNumber: string;
-    username: string;
-    isOnApp: boolean;
-    privacySetting: "public" | "private";
-    notificationSettingsId: string;
-  }>;
-
-  getUserByPhoneNumberNoThrow(params: GetUserByPhoneNumberParams): Promise<
-    | {
+  getUser(params: GetUserParams): Promise<
+    Result<
+      {
         id: string;
         phoneNumber: string;
         username: string;
         isOnApp: boolean;
         privacySetting: "public" | "private";
         notificationSettingsId: string;
-      }
-    | undefined
+      },
+      UserErrors.UserNotFound
+    >
   >;
 
-  deleteUser(params: DeleteUserParams): Promise<void>;
+  getUserByPhoneNumber(params: GetUserByPhoneNumberParams): Promise<
+    Result<
+      {
+        id: string;
+        phoneNumber: string;
+        username: string;
+        isOnApp: boolean;
+        privacySetting: "public" | "private";
+        notificationSettingsId: string;
+      },
+      UserErrors.UserNotFound
+    >
+  >;
 
-  isUserOnApp(params: IsUserOnAppParams): Promise<boolean>;
+  getUserByPhoneNumberNoThrow(params: GetUserByPhoneNumberParams): Promise<
+    Result<
+      | {
+          id: string;
+          phoneNumber: string;
+          username: string;
+          isOnApp: boolean;
+          privacySetting: "public" | "private";
+          notificationSettingsId: string;
+        }
+      | undefined,
+      never
+    >
+  >;
 
-  completedOnboarding(params: CompletedOnboardingParams): Promise<void>;
+  deleteUser(
+    params: DeleteUserParams,
+  ): Promise<Result<void, UserErrors.UserNotFound>>;
 
-  getUserStatus(params: GetUserStatusParams): Promise<{
-    userId: string;
-    isOnApp: boolean;
-    hasCompletedOnboarding: boolean;
-    hasCompletedTutorial: boolean;
-  }>;
+  isUserOnApp(params: IsUserOnAppParams): Promise<Result<boolean, never>>;
 
-  setTutorialComplete(params: SetTutorialCompleteParams): Promise<void>;
+  completedOnboarding(
+    params: CompletedOnboardingParams,
+  ): Promise<Result<void, UserErrors.UserNotFound>>;
 
-  isUserOnboarded(params: IsUserOnboardedParams): Promise<boolean>;
+  getUserStatus(params: GetUserStatusParams): Promise<
+    Result<
+      {
+        userId: string;
+        isOnApp: boolean;
+        hasCompletedOnboarding: boolean;
+        hasCompletedTutorial: boolean;
+      },
+      UserErrors.UserNotFound
+    >
+  >;
+
+  setTutorialComplete(
+    params: SetTutorialCompleteParams,
+  ): Promise<Result<void, UserErrors.UserNotFound>>;
+
+  isUserOnboarded(
+    params: IsUserOnboardedParams,
+  ): Promise<Result<boolean, never>>;
 
   hasTutorialBeenCompleted(
     params: HasTutorialBeenCompletedParams,
-  ): Promise<boolean>;
+  ): Promise<Result<boolean, never>>;
 
-  updateUserOnAppStatus(params: UpdateUserOnAppStatusParams): Promise<void>;
+  updateUserOnAppStatus(
+    params: UpdateUserOnAppStatusParams,
+  ): Promise<Result<void, UserErrors.UserNotFound>>;
 
   updateUserTutorialComplete(
     params: UpdateUserTutorialCompleteParams,
-  ): Promise<void>;
+  ): Promise<Result<void, UserErrors.UserNotFound>>;
 
   updateUserOnboardingComplete(options: {
     userId: string;
     hasCompletedOnboarding: boolean;
-  }): Promise<void>;
+  }): Promise<Result<void, UserErrors.UserNotFound>>;
 
   canAccessUserData(options: {
     currentUserId: string;
     targetUserId: string;
-  }): Promise<boolean>;
+  }): Promise<Result<boolean, UserErrors.UserNotFound>>;
 
-  deleteProfileFromOpenSearch(options: { userId: string }): Promise<void>;
+  deleteProfileFromOpenSearch(options: {
+    userId: string;
+  }): Promise<Result<void, UserErrors.UserNotFound>>;
 }
