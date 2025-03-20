@@ -9,12 +9,11 @@ import postgres from "postgres";
 
 import { env } from "@oppfy/env";
 
-import {
+import type {
   entityTypeEnum,
   eventTypeEnum,
   followStatusEnum,
   friendStatusEnum,
-  privacySettingEnum,
 } from "./src/schema";
 import * as schema from "./src/schema";
 
@@ -33,7 +32,6 @@ type Database = PostgresJsDatabase<Schema>;
 type EntityType = (typeof entityTypeEnum.enumValues)[number];
 type FriendStatus = (typeof friendStatusEnum.enumValues)[number];
 type FollowStatus = (typeof followStatusEnum.enumValues)[number];
-type PrivacySetting = (typeof privacySettingEnum.enumValues)[number];
 
 type EventType = (typeof eventTypeEnum.enumValues)[number];
 export type NotificationSettings =
