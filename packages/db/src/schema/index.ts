@@ -27,10 +27,7 @@ const dateType = customType<{ data: Date | null; driverData: string | null }>({
   },
 });
 
-export const privacySettingEnum = pgEnum("privacy_setting", [
-  "public",
-  "private",
-]);
+export const privacyEnum = pgEnum("privacy", ["public", "private"]);
 
 export const eventTypeEnum = pgEnum("event_type", [
   "like",
@@ -98,9 +95,6 @@ export const user = pgTable("user", {
   notificationSettingsId: uuid("notification_settings_id")
     .notNull()
     .references(() => notificationSettings.id, { onDelete: "cascade" }),
-  privacySetting: privacySettingEnum("privacy_setting")
-    .default("public")
-    .notNull(),
   phoneNumber: text("phone_number").notNull().unique(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
@@ -193,6 +187,7 @@ export const profile = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    privacy: privacyEnum("privacy").default("public").notNull(),
     username: varchar("username", { length: 30 }).unique().notNull(),
     name: varchar("name", { length: 30 }),
     dateOfBirth: dateType("date_of_birth"),
@@ -343,9 +338,7 @@ export const post = pgTable(
     height: integer("height").notNull().default(500),
     mediaType: mediaTypeEnum("media_type").notNull(),
     postType: postTypeEnum("post_type").notNull().default("public"),
-    privacy: privacySettingEnum("privacy_setting")
-      .default("public")
-      .notNull(),
+    privacy: privacyEnum("privacy_setting").default("public").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -762,8 +755,12 @@ export const userRelationship = pgTable(
     userIdB: uuid("user_id_b")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    friendshipStatus: friendStatusEnum("friendship_status").default("notFriends").notNull(),
-    followStatus: followStatusEnum("follow_status").default("notFollowing").notNull(),
+    friendshipStatus: friendStatusEnum("friendship_status")
+      .default("notFriends")
+      .notNull(),
+    followStatus: followStatusEnum("follow_status")
+      .default("notFollowing")
+      .notNull(),
     blockStatus: boolean("block_status").default(false).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
