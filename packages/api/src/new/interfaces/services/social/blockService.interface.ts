@@ -1,49 +1,49 @@
-import type { Result, ResultAsync } from "neverthrow";
+import type { Result } from "neverthrow";
 
-import type { DomainError } from "../../../../errors";
-
-export type BlockUserError = DomainError & {
-  code:
-    | "CANNOT_FOLLOW_SELF"
-    | "RELATIONSHIP_ALREADY_EXISTS"
-    | "FAILED_TO_BLOCK_USER";
-};
-
-export type UnblockUserError = DomainError & {
-  code: "FAILED_TO_CHECK_RELATIONSHIP" | "FAILED_TO_UNBLOCK_USER";
-};
+import type { BlockErrors } from "../../../errors/social/block.error";
 
 export interface IBlockService {
   blockUser(options: {
     blockerId: string;
     blockedId: string;
-  }): ResultAsync<void, BlockUserError>;
+  }): Promise<
+    Result<
+      void,
+      | BlockErrors.CannotBlockSelf
+      | BlockErrors.AlreadyBlocked
+      | BlockErrors.FailedToBlock
+    >
+  >;
 
   unblockUser(options: {
     blockerId: string;
     blockedId: string;
-  }): ResultAsync<void, UnblockUserError>;
+  }): Promise<
+    Result<void, BlockErrors.BlockNotFound | BlockErrors.FailedToUnblock>
+  >;
 
   isBlocked(options: {
     blockerId: string;
     blockedId: string;
-  }): ResultAsync<boolean, DomainError>;
+  }): Promise<Result<boolean, BlockErrors.FailedToCheckBlock>>;
 
   getBlockedUsers(options: {
     userId: string;
     cursor?: { createdAt: Date; userId: string } | null;
     pageSize?: number;
-  }): ResultAsync<
-    {
-      items: {
-        userId: string;
-        username: string;
-        name: string;
-        profilePictureUrl: string | null;
-        createdAt: Date;
-      }[];
-      nextCursor: { createdAt: Date; userId: string } | null;
-    },
-    DomainError
+  }): Promise<
+    Result<
+      {
+        items: {
+          userId: string;
+          username: string;
+          name: string;
+          profilePictureUrl: string | null;
+          createdAt: Date;
+        }[];
+        nextCursor: { createdAt: Date; userId: string } | null;
+      },
+      BlockErrors.FailedToGetBlockedUsers
+    >
   >;
 }
