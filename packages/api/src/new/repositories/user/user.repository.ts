@@ -47,11 +47,16 @@ export class UserRepository implements IUserRepository {
     this.schema = schema;
   }
 
-  async createUser(
-    { userId, phoneNumber, username, isOnApp, name }: CreateUserParams,
-    tx: Transaction,
-  ): Promise<void> {
-    // Create an empty profile for the user
+  async createUser(params: CreateUserParams, tx: Transaction): Promise<void> {
+    const { userId, phoneNumber, username, isOnApp, name } = params;
+
+    // Create the user first
+    await tx.insert(this.schema.user).values({
+      id: userId,
+      phoneNumber,
+    });
+
+    // Create profile
     const [profile] = await tx
       .insert(this.schema.profile)
       .values({ userId, username, ...(name && { name }) })
@@ -59,35 +64,14 @@ export class UserRepository implements IUserRepository {
 
     if (!profile) throw new Error("Profile was not created");
 
-    const [profileStats] = await tx
-      .insert(this.schema.userStats)
-      .values({ profileId: profile.id })
-      .returning({ id: this.schema.userStats.id });
+    // Create user stats
+    await tx.insert(this.schema.userStats).values({ userId });
 
-    // Create default notification settings for the user
-    const [notificationSetting] = await tx
-      .insert(this.schema.notificationSettings)
-      .values({})
-      .returning({ id: this.schema.notificationSettings.id });
+    // Create notification settings
+    await tx.insert(this.schema.notificationSettings).values({ userId });
 
-    if (profileStats === undefined) {
-      throw new Error("Profile stats was not created");
-    }
-
-    if (notificationSetting === undefined) {
-      throw new Error("Notification setting was not created");
-    }
-
-    // Create the user
-    await tx.insert(this.schema.user).values({
-      id: userId,
-      notificationSettingsId: notificationSetting.id,
-      phoneNumber,
-    });
-
-    await tx
-      .insert(this.schema.userStatus)
-      .values({ userId, isOnApp: isOnApp });
+    // Create user status
+    await tx.insert(this.schema.userStatus).values({ userId, isOnApp });
   }
 
   async getUser(
