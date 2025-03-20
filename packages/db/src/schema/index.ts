@@ -192,7 +192,7 @@ export const profile = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     privacy: privacyEnum("privacy").default("public").notNull(),
-    username: varchar("username", { length: 30 }).unique().notNull(),
+    username: varchar("username", { length: 30 }).unique(),
     name: varchar("name", { length: 30 }),
     dateOfBirth: dateType("date_of_birth"),
     bio: varchar("bio", { length: 100 }),
