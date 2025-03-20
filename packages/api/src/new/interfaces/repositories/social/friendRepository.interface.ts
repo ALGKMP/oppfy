@@ -1,4 +1,4 @@
-import type { Transaction } from "@oppfy/db";
+import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
 export interface CreateFriendParams {
   senderId: string;
@@ -83,57 +83,57 @@ export interface FriendRequestResult {
 }
 
 export interface IFriendRepository {
-  createFriend(params: CreateFriendParams, tx?: Transaction): Promise<void>;
+  createFriend(params: CreateFriendParams, tx: Transaction): Promise<void>;
 
-  removeFriend(params: RemoveFriendParams, tx?: Transaction): Promise<void>;
+  removeFriend(params: RemoveFriendParams, tx: Transaction): Promise<void>;
 
   getFriendship(
     params: GetFriendshipParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<{ id: string } | undefined>;
 
   countFriends(
     params: CountFriendsParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<number | undefined>;
 
   countFriendRequests(
     params: CountFriendRequestsParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<number | undefined>;
 
   createFriendRequest(
     params: CreateFriendRequestParams,
-    tx?: Transaction,
+    tx: Transaction,
   ): Promise<void>;
 
   deleteFriendRequest(
     params: DeleteFriendRequestParams,
-    tx?: Transaction,
+    tx: Transaction,
   ): Promise<void>;
 
   getFriendRequest(
     params: GetFriendRequestParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<{ id: string } | undefined>;
 
   paginateFriendsSelf(
     params: PaginateFriendsSelfParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<FriendResult[]>;
 
   paginateFriendsOther(
     params: PaginateFriendsOtherParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<FriendResult[]>;
 
   paginateFriendRequests(
     params: PaginateFriendRequestsParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<FriendRequestResult[]>;
 
   friendshipExists(
     params: FriendshipExistsParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<boolean>;
 }
