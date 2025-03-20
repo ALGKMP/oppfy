@@ -1,6 +1,7 @@
 import type { InferSelectModel } from "drizzle-orm";
 
 import type { schema, Transaction } from "@oppfy/db";
+import type { CommentCursor } from "../../services/content/postInteractionService.interface";
 
 export type Comment = InferSelectModel<typeof schema.comment>;
 
@@ -24,7 +25,7 @@ export interface AddCommentParams {
 
 export interface PaginateCommentsParams {
   postId: string;
-  cursor?: { createdAt: Date; commentId: string };
+  cursor: CommentCursor | null;
   pageSize?: number;
 }
 
