@@ -5,9 +5,12 @@ import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import {
+  DeleteParams,
+  GetByUserIdsParams,
   IRelationshipRepository,
   Relationship,
   UpdateRelationship,
+  UpsertParams,
 } from "../../interfaces/repositories/social/relationshipRepository.interface";
 
 @injectable()
@@ -23,15 +26,11 @@ export class RelationshipRepository implements IRelationshipRepository {
     this.schema = schema;
   }
 
-  async getByUserIds({
-    userIdA,
-    userIdB,
-    db = this.db,
-  }: {
-    userIdA: string;
-    userIdB: string;
-    db?: DatabaseOrTransaction;
-  }): Promise<Relationship> {
+  async getByUserIds(
+    params: GetByUserIdsParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<Relationship> {
+    const { userIdA, userIdB } = params;
     const relationship = await db.query.userRelationship.findFirst({
       where: or(
         and(
@@ -58,17 +57,11 @@ export class RelationshipRepository implements IRelationshipRepository {
     return relationship;
   }
 
-  async upsert({
-    userIdA,
-    userIdB,
-    updates,
-    db = this.db,
-  }: {
-    userIdA: string;
-    userIdB: string;
-    updates: UpdateRelationship;
-    db?: DatabaseOrTransaction;
-  }): Promise<void> {
+  async upsert(
+    params: UpsertParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { userIdA, userIdB, updates } = params;
     const relationship = {
       userIdA,
       userIdB,
@@ -97,15 +90,11 @@ export class RelationshipRepository implements IRelationshipRepository {
       });
   }
 
-  async delete({
-    userIdA,
-    userIdB,
-    db = this.db,
-  }: {
-    userIdA: string;
-    userIdB: string;
-    db?: DatabaseOrTransaction;
-  }): Promise<void> {
+  async delete(
+    params: DeleteParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { userIdA, userIdB } = params;
     await db
       .delete(this.schema.userRelationship)
       .where(
