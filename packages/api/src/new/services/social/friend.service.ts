@@ -145,12 +145,6 @@ export class FriendService implements IFriendService {
       return err(new FriendErrors.RequestNotFound(senderId, recipientId));
     }
 
-    // Get notification settings
-    const sender = await this.userRepository.getUser({ userId: senderId });
-    if (!sender) {
-      return err(new FriendErrors.FailedToAcceptRequest(senderId, recipientId));
-    }
-
     await this.db.transaction(async (tx) => {
       // Delete friend request and create friendship
       await this.friendRepository.deleteFriendRequest(
@@ -177,6 +171,14 @@ export class FriendService implements IFriendService {
         },
         tx,
       );
+
+      // Get notification settings
+      const sender = await this.userRepository.getUserWithNotificationSettings({ userId: senderId });
+      if (!sender) {
+        return err(
+          new FriendErrors.FailedToAcceptRequest(senderId, recipientId),
+        );
+      }
 
       const notificationSettings =
         await this.notificationsRepository.getNotificationSettings({
