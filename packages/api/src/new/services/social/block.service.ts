@@ -10,7 +10,7 @@ import type { IFollowRepository } from "../../interfaces/repositories/social/fol
 import type { IFriendRepository } from "../../interfaces/repositories/social/friendRepository.interface";
 import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
 import type { INotificationsRepository } from "../../interfaces/repositories/user/notificationRepository.interface";
-import type { IProfileStatsRepository } from "../../interfaces/repositories/user/profileStatsRepository.interface";
+import type { IUserStatsRepository } from "../../interfaces/repositories/user/profileStatsRepository.interface";
 import type {
   BlockedUser,
   IBlockService,
@@ -32,7 +32,7 @@ export class BlockService implements IBlockService {
     @inject(TYPES.NotificationsRepository)
     private notificationsRepository: INotificationsRepository,
     @inject(TYPES.ProfileStatsRepository)
-    private profileStatsRepository: IProfileStatsRepository,
+    private profileStatsRepository: IUserStatsRepository,
     @inject(TYPES.RelationshipRepository)
     private relationshipRepository: IRelationshipRepository,
   ) {}

@@ -5,13 +5,16 @@ import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import { PostInteractionErrors } from "../../errors/content/postInteraction.error";
-import type { ICommentRepository } from "../../interfaces/repositories/content/commentRepository.interface";
+import type {
+  ICommentRepository,
+  PaginatedComment,
+} from "../../interfaces/repositories/content/commentRepository.interface";
 import type { ILikeRepository } from "../../interfaces/repositories/content/likeRepository.interface";
 import type { IPostRepository } from "../../interfaces/repositories/content/postRepository.interface";
 import type { IPostStatsRepository } from "../../interfaces/repositories/content/postStatsRepository.interface";
 import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
 import type { INotificationsRepository } from "../../interfaces/repositories/user/notificationRepository.interface";
-import type { IProfileStatsRepository } from "../../interfaces/repositories/user/profileStatsRepository.interface";
+import type { IUserStatsRepository } from "../../interfaces/repositories/user/profileStatsRepository.interface";
 import type {
   CommentCursor,
   CommentOnPostParams,
@@ -23,7 +26,6 @@ import type {
   PaginatedResponse,
   UnlikePostParams,
 } from "../../interfaces/services/content/postInteractionService.interface";
-import type { PaginatedComment } from "../../interfaces/repositories/content/commentRepository.interface";
 
 @injectable()
 export class PostInteractionService implements IPostInteractionService {
@@ -41,7 +43,7 @@ export class PostInteractionService implements IPostInteractionService {
     @inject(TYPES.NotificationsRepository)
     private notificationsRepository: INotificationsRepository,
     @inject(TYPES.ProfileStatsRepository)
-    private profileStatsRepository: IProfileStatsRepository,
+    private profileStatsRepository: IUserStatsRepository,
     @inject(TYPES.RelationshipRepository)
     private relationshipRepository: IRelationshipRepository,
   ) {}

@@ -18,35 +18,35 @@ export interface DecrementFriendsCountParams {
 }
 
 export interface DecrementPostsCountParams {
-  profileId: string;
+  userId: string;
   decrementBy: number;
 }
 
 export interface IncrementFollowerCountParams {
-  profileId: string;
+  userId: string;
   incrementBy: number;
 }
 
 export interface IncrementFollowingCountParams {
-  profileId: string;
+  userId: string;
   incrementBy: number;
 }
 
 export interface IncrementFriendsCountParams {
-  profileId: string;
+  userId: string;
   incrementBy: number;
 }
 
 export interface IncrementPostsCountParams {
-  profileId: string;
+  userId: string;
   incrementBy: number;
 }
 
-export interface GetProfileStatsParams {
-  profileId: string;
+export interface GetUserStatsParams {
+  userId: string;
 }
 
-export interface IProfileStatsRepository {
+export interface IUserStatsRepository {
   decrementFollowerCount(
     params: DecrementFollowerCountParams,
     tx?: Transaction,
@@ -87,8 +87,8 @@ export interface IProfileStatsRepository {
     tx?: Transaction,
   ): Promise<void>;
 
-  getProfileStats(
-    params: GetProfileStatsParams,
+  getUserStats(
+    params: GetUserStatsParams,
     tx?: Transaction,
   ): Promise<UserStats | undefined>;
 }
