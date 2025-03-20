@@ -3,7 +3,7 @@ import type { Result } from "neverthrow";
 import type { followStatusEnum } from "@oppfy/db";
 
 import type { FollowErrors } from "../../../errors/social/follow.error";
-
+import type { UserErrors } from "../../../errors/user/user.error";
 export type FollowStatus = (typeof followStatusEnum.enumValues)[number];
 
 export interface IsFollowingParams {
@@ -93,6 +93,7 @@ export interface IFollowService {
       | FollowErrors.RequestAlreadySent
       | FollowErrors.CannotFollowSelf
       | FollowErrors.FailedToSendRequest
+      | UserErrors.UserNotFound
     >
   >;
 

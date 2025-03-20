@@ -5,7 +5,9 @@ import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import { FollowErrors } from "../../errors/social/follow.error";
+import { UserErrors } from "../../errors/user/user.error";
 import type { IFollowRepository } from "../../interfaces/repositories/social/followRepository.interface";
+import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
 import type { INotificationsRepository } from "../../interfaces/repositories/user/notificationRepository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/userRepository.interface";
 import type { IFollowService } from "../../interfaces/services/social/followService.interface";
@@ -18,6 +20,8 @@ export class FollowService implements IFollowService {
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
     @inject(TYPES.NotificationsRepository)
     private notificationsRepository: INotificationsRepository,
+    @inject(TYPES.RelationshipRepository)
+    private relationshipRepository: IRelationshipRepository,
   ) {}
 
   async isFollowing(options: {
@@ -42,6 +46,7 @@ export class FollowService implements IFollowService {
       | FollowErrors.RequestAlreadySent
       | FollowErrors.CannotFollowSelf
       | FollowErrors.FailedToSendRequest
+      | UserErrors.UserNotFound
     >
   > {
     const { senderId, recipientId } = options;
@@ -57,27 +62,36 @@ export class FollowService implements IFollowService {
     ]);
 
     if (!sender || !recipient) {
-      return err(new FollowErrors.FailedToSendRequest(senderId, recipientId));
+      return err(new UserErrors.UserNotFound(!sender ? senderId : recipientId));
     }
 
-    // Check if already following
-    const existingFollow = await this.followRepository.getFollower({
-      followerId: senderId,
-      followeeId: recipientId,
+    // // Check if already following
+    // const existingFollow = await this.followRepository.getFollower({
+    //   followerId: senderId,
+    //   followeeId: recipientId,
+    // });
+
+    // if (existingFollow) {
+    //   return err(new FollowErrors.AlreadyFollowing(senderId, recipientId));
+    // }
+
+    // // Check if follow request already exists
+    // const existingRequest = await this.followRepository.getFollowRequest({
+    //   senderId,
+    //   recipientId,
+    // });
+
+    // if (existingRequest) {
+    //   return err(new FollowErrors.RequestAlreadySent(senderId, recipientId));
+    // }
+
+    const relationship = await this.relationshipRepository.getByUserIds({
+      userIdA: senderId,
+      userIdB: recipientId,
     });
 
-    if (existingFollow) {
+    if (relationship?.followStatus === "following") {
       return err(new FollowErrors.AlreadyFollowing(senderId, recipientId));
-    }
-
-    // Check if follow request already exists
-    const existingRequest = await this.followRepository.getFollowRequest({
-      senderId,
-      recipientId,
-    });
-
-    if (existingRequest) {
-      return err(new FollowErrors.RequestAlreadySent(senderId, recipientId));
     }
 
     try {
