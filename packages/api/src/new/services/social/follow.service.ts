@@ -315,7 +315,7 @@ export class FollowService implements IFollowService {
         username: follower.username,
       })),
       nextCursor:
-        followers.length === limit && followers[followers.length - 1]
+        followers.length === limit && followers[followers.length - 1]?.profileId
           ? followers[followers.length - 1].profileId
           : undefined,
     });
@@ -345,7 +345,7 @@ export class FollowService implements IFollowService {
         username: followee.username,
       })),
       nextCursor:
-        following.length === limit && following[following.length - 1]
+        following.length === limit && following[following.length - 1]?.profileId
           ? following[following.length - 1].profileId
           : undefined,
     });
@@ -379,7 +379,7 @@ export class FollowService implements IFollowService {
         createdAt: request.createdAt,
       })),
       nextCursor:
-        requests.length === limit && requests[requests.length - 1]
+        requests.length === limit && requests[requests.length - 1]?.profileId
           ? requests[requests.length - 1].profileId
           : undefined,
     });
