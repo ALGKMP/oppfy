@@ -83,9 +83,15 @@ export class BlockRepository implements IBlockRepository {
       .select({ id: this.schema.block.id })
       .from(this.schema.block)
       .where(
-        and(
-          eq(this.schema.block.userWhoIsBlockingId, userId),
-          eq(this.schema.block.userWhoIsBlockedId, blockedUserId),
+        or(
+          and(
+            eq(this.schema.block.userWhoIsBlockingId, userId),
+            eq(this.schema.block.userWhoIsBlockedId, blockedUserId),
+          ),
+          and(
+            eq(this.schema.block.userWhoIsBlockingId, blockedUserId),
+            eq(this.schema.block.userWhoIsBlockedId, userId),
+          ),
         ),
       )
       .limit(1);
