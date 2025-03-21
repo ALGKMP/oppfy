@@ -18,6 +18,7 @@ export type ReportCommentReason =
 
 export type User = InferSelectModel<typeof schema.user>;
 export type Profile = InferSelectModel<typeof schema.profile>;
+export type Block = InferSelectModel<typeof schema.block>;
 export type UserWithProfile = User & {
   profile: Profile;
 };

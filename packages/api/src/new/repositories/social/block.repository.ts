@@ -1,96 +1,77 @@
 import { and, asc, eq, gt, or } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
-import type {
-  Database,
-  DatabaseOrTransaction,
-  Schema,
-  Transaction,
-} from "@oppfy/db";
+import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 
 import { TYPES } from "../../container";
-import {
+import type {
   BlockUserParams,
-  GetBlockedUserParams,
-  GetPaginatedBlockedUsersParams,
-  GetPaginatedBlockedUsersResult,
+  GetBlockedUsersParams,
   IBlockRepository,
-  UnblockUserParams,
 } from "../../interfaces/repositories/social/blockRepository.interface";
+import type { Profile } from "../../models";
 
 @injectable()
 export class BlockRepository implements IBlockRepository {
-  private db: Database;
-  private schema: Schema;
-
   constructor(
-    @inject(TYPES.Database) db: Database,
-    @inject(TYPES.Schema) schema: Schema,
-  ) {
-    this.db = db;
-    this.schema = schema;
-  }
+    @inject(TYPES.Database)
+    private readonly db: Database,
+    @inject(TYPES.Schema)
+    private readonly schema: Schema,
+  ) {}
 
-  async getPaginatedBlockedUsers(
-    params: GetPaginatedBlockedUsersParams,
+  async getBlockedUsers(
+    params: GetBlockedUsersParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<GetPaginatedBlockedUsersResult[]> {
-    const { forUserId, cursor = null, pageSize = 10 } = params;
+  ): Promise<Profile[]> {
+    const { userId, cursor = null, limit = 10 } = params;
 
-    return await db
+    const blockedUsers = await db
       .select({
-        userId: this.schema.user.id,
-        username: this.schema.profile.username,
-        name: this.schema.profile.name,
-        profilePictureUrl: this.schema.profile.profilePictureKey,
-        createdAt: this.schema.block.createdAt,
-        profileId: this.schema.profile.id,
+        profile: this.schema.profile,
       })
-      .from(this.schema.user)
-      .innerJoin(
-        this.schema.block,
-        eq(this.schema.user.id, this.schema.block.blockedUserId),
-      )
+      .from(this.schema.block)
       .innerJoin(
         this.schema.profile,
-        eq(this.schema.user.id, this.schema.profile.userId),
+        eq(this.schema.profile.userId, this.schema.block.blockedUserId),
       )
       .where(
         and(
-          eq(this.schema.block.blockedByUserId, forUserId),
+          eq(this.schema.block.blockedByUserId, userId),
           cursor
             ? or(
                 gt(this.schema.block.createdAt, cursor.createdAt),
                 and(
                   eq(this.schema.block.createdAt, cursor.createdAt),
-                  gt(this.schema.profile.id, cursor.profileId),
+                  gt(this.schema.profile.userId, cursor.userId),
                 ),
               )
             : undefined,
         ),
       )
-      .orderBy(asc(this.schema.block.createdAt), asc(this.schema.profile.id))
-      .limit(pageSize + 1);
+      .orderBy(
+        asc(this.schema.block.createdAt),
+        asc(this.schema.profile.userId),
+      )
+      .limit(limit);
+
+    return blockedUsers.map((result) => result.profile);
   }
 
-  async getBlockedUser(
-    params: GetBlockedUserParams,
+  async isUserBlocked(
+    params: BlockUserParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<{ id: string } | undefined> {
+  ): Promise<boolean> {
     const { userId, blockedUserId } = params;
 
-    const result = await db
-      .select({ id: this.schema.block.id })
-      .from(this.schema.block)
-      .where(
-        and(
-          eq(this.schema.block.blockedByUserId, userId),
-          eq(this.schema.block.blockedUserId, blockedUserId),
-        ),
-      )
-      .limit(1);
+    const block = await db.query.block.findFirst({
+      where: and(
+        eq(this.schema.block.blockedByUserId, userId),
+        eq(this.schema.block.blockedUserId, blockedUserId),
+      ),
+    });
 
-    return result[0];
+    return !!block;
   }
 
   async blockUser(
@@ -101,12 +82,12 @@ export class BlockRepository implements IBlockRepository {
 
     await db.insert(this.schema.block).values({
       blockedByUserId: userId,
-      blockedUserId: blockedUserId,
+      blockedUserId,
     });
   }
 
   async unblockUser(
-    params: UnblockUserParams,
+    params: BlockUserParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { userId, blockedUserId } = params;
