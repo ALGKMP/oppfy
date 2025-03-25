@@ -10,17 +10,23 @@ import { s3 } from "@oppfy/s3";
 
 import { TYPES } from "../../container";
 import { PostErrors } from "../../errors/content/post.error";
-import type { IPostRepository } from "../../interfaces/repositories/content/postRepository.interface";
+import type {
+  IPostRepository,
+  PostForNextJs,
+  Post as RepositoryPost,
+} from "../../interfaces/repositories/content/postRepository.interface";
 import type { IPostStatsRepository } from "../../interfaces/repositories/content/postStatsRepository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/userRepository.interface";
 import type {
   DeletePostParams,
+  FeedCursor,
   GetPostForNextJsParams,
   GetPostParams,
   IPostService,
   PaginatedResponse,
   PaginatePostsForFeedParams,
   PaginatePostsParams,
+  Post,
   PostCursor,
   UpdatePostParams,
   UploadPostForUserNotOnAppUrlParams,
@@ -28,7 +34,6 @@ import type {
   UploadVideoPostForUserNotOnAppUrlParams,
   UploadVideoPostForUserOnAppUrlParams,
 } from "../../interfaces/services/content/postService.interface";
-import type { Post } from "../../models";
 
 @injectable()
 export class PostService implements IPostService {
@@ -45,7 +50,12 @@ export class PostService implements IPostService {
 
   async uploadPostForUserOnAppUrl(
     params: UploadPostForUserOnAppUrlParams,
-  ): Promise<{ presignedUrl: string; postId: string }> {
+  ): Promise<
+    Result<
+      { presignedUrl: string; postId: string },
+      PostErrors.FailedToCreatePost
+    >
+  > {
     const {
       author,
       recipient,
@@ -69,9 +79,9 @@ export class PostService implements IPostService {
         Metadata: { author, recipient, caption, height, width, postid: postId },
       });
 
-      return { presignedUrl, postId };
-    } catch (err) {
-      throw new PostErrors.FailedToCreatePost(author);
+      return ok({ presignedUrl, postId });
+    } catch (error: unknown) {
+      return err(new PostErrors.FailedToCreatePost(author));
     }
   }
 
@@ -94,31 +104,34 @@ export class PostService implements IPostService {
       contentType,
     } = params;
 
-    await this.db.transaction(async (tx) => {
-      const recipient = await this.userRepository.getUserByPhoneNumber({
-        phoneNumber: recipientNotOnAppPhoneNumber,
-      });
-      const recipientId = recipient ? recipient.id : randomUUID();
+    try {
+      let presignedUrl: string | undefined;
+      let postId: string | undefined;
 
-      if (!recipient) {
-        await this.userRepository.createUser(
-          {
-            userId: recipientId,
-            name: recipientNotOnAppName,
-            phoneNumber: recipientNotOnAppPhoneNumber,
-            username: recipientNotOnAppName,
-            isOnApp: false,
-          },
-          tx,
-        );
-      }
+      await this.db.transaction(async (tx) => {
+        const recipient = await this.userRepository.getUserByPhoneNumber({
+          phoneNumber: recipientNotOnAppPhoneNumber,
+        });
+        const recipientId = recipient ? recipient.id : randomUUID();
 
-      const currentDate = Date.now();
-      const objectKey = `posts/${currentDate}-${recipientId}-${author}.jpg`;
-      const postId = randomUUID();
+        if (!recipient) {
+          await this.userRepository.createUser(
+            {
+              userId: recipientId,
+              name: recipientNotOnAppName,
+              phoneNumber: recipientNotOnAppPhoneNumber,
+              username: recipientNotOnAppName,
+              isOnApp: false,
+            },
+            tx,
+          );
+        }
 
-      try {
-        const presignedUrl = await s3.putObjectPresignedUrl({
+        postId = randomUUID();
+        const currentDate = Date.now();
+        const objectKey = `posts/${currentDate}-${recipientId}-${author}.jpg`;
+
+        presignedUrl = await s3.putObjectPresignedUrl({
           Bucket: env.S3_POST_BUCKET,
           Key: objectKey,
           ContentLength: contentLength,
@@ -132,22 +145,30 @@ export class PostService implements IPostService {
             postid: postId,
           },
         });
+      });
 
-        return ok({ presignedUrl, postId });
-      } catch (err) {
-        throw new PostErrors.FailedToCreatePost(author);
+      if (!presignedUrl || !postId) {
+        return err(new PostErrors.FailedToCreatePost(author));
       }
-    });
+
+      return ok({ presignedUrl, postId });
+    } catch (error) {
+      return err(new PostErrors.FailedToCreatePost(author));
+    }
   }
 
   async uploadVideoPostForUserOnAppUrl(
     params: UploadVideoPostForUserOnAppUrlParams,
-  ): Promise<{ presignedUrl: string; postId: string }> {
+  ): Promise<
+    Result<
+      { presignedUrl: string; postId: string },
+      PostErrors.FailedToCreatePost
+    >
+  > {
     const { author, recipient, caption, height, width } = params;
 
     try {
       const postId = randomUUID();
-
       const presignedUrl = await mux.getPresignedUrlForVideo({
         author,
         recipient,
@@ -157,15 +178,20 @@ export class PostService implements IPostService {
         postid: postId,
       });
 
-      return { presignedUrl, postId };
-    } catch (err) {
-      throw new PostErrors.FailedToCreatePost(author);
+      return ok({ presignedUrl, postId });
+    } catch (error: unknown) {
+      return err(new PostErrors.FailedToCreatePost(author));
     }
   }
 
   async uploadVideoPostForUserNotOnAppUrl(
     params: UploadVideoPostForUserNotOnAppUrlParams,
-  ): Promise<{ presignedUrl: string; postId: string }> {
+  ): Promise<
+    Result<
+      { presignedUrl: string; postId: string },
+      PostErrors.FailedToCreatePost
+    >
+  > {
     const {
       author,
       recipientNotOnAppPhoneNumber,
@@ -175,29 +201,32 @@ export class PostService implements IPostService {
       width,
     } = params;
 
-    await this.db.transaction(async (tx) => {
-      const recipient = await this.userRepository.getUserByPhoneNumber({
-        phoneNumber: recipientNotOnAppPhoneNumber,
-      });
-      const recipientId = recipient ? recipient.id : randomUUID();
+    try {
+      let presignedUrl: string | undefined;
+      let postId: string | undefined;
 
-      if (!recipient) {
-        await this.userRepository.createUser(
-          {
-            userId: recipientId,
-            name: recipientNotOnAppName,
-            phoneNumber: recipientNotOnAppPhoneNumber,
-            username: recipientNotOnAppName,
-            isOnApp: false,
-          },
-          tx,
-        );
-      }
+      await this.db.transaction(async (tx) => {
+        const recipient = await this.userRepository.getUserByPhoneNumber({
+          phoneNumber: recipientNotOnAppPhoneNumber,
+        });
+        const recipientId = recipient ? recipient.id : randomUUID();
 
-      const postId = randomUUID();
+        if (!recipient) {
+          await this.userRepository.createUser(
+            {
+              userId: recipientId,
+              name: recipientNotOnAppName,
+              phoneNumber: recipientNotOnAppPhoneNumber,
+              username: recipientNotOnAppName,
+              isOnApp: false,
+            },
+            tx,
+          );
+        }
 
-      try {
-        const presignedUrl = await mux.getPresignedUrlForVideo({
+        postId = randomUUID();
+
+        presignedUrl = await mux.getPresignedUrlForVideo({
           author,
           recipient: recipientId,
           caption,
@@ -205,12 +234,16 @@ export class PostService implements IPostService {
           width,
           postid: postId,
         });
+      });
 
-        return { presignedUrl, postId };
-      } catch (err) {
-        throw new PostErrors.FailedToCreatePost(author);
+      if (!presignedUrl || !postId) {
+        return err(new PostErrors.FailedToCreatePost(author));
       }
-    });
+
+      return ok({ presignedUrl, postId });
+    } catch (error) {
+      return err(new PostErrors.FailedToCreatePost(author));
+    }
   }
 
   async deletePost(
@@ -243,7 +276,20 @@ export class PostService implements IPostService {
       return err(new PostErrors.PostNotFound(postId));
     }
 
-    return ok(post);
+    return ok({
+      id: post.postId,
+      authorId: post.authorId,
+      recipientId: post.recipientId,
+      caption: post.caption,
+      key: post.imageUrl,
+      width: post.width,
+      height: post.height,
+      mediaType: post.mediaType as "image" | "video",
+      postType: "public",
+      privacy: "public",
+      createdAt: post.createdAt,
+      updatedAt: post.createdAt,
+    });
   }
 
   async paginatePosts(
@@ -251,18 +297,31 @@ export class PostService implements IPostService {
   ): Promise<Result<PaginatedResponse<Post, PostCursor>, never>> {
     const { userId, cursor, pageSize = 20 } = params;
 
-    const posts = await this.postRepository.paginatePosts({
+    const posts = await this.postRepository.paginatePostsOfUser({
       userId,
       cursor,
       pageSize,
     });
 
     return ok({
-      items: posts,
+      items: posts.map((post) => ({
+        id: post.postId,
+        authorId: post.authorId,
+        recipientId: post.recipientId,
+        caption: post.caption,
+        key: post.imageUrl,
+        width: post.width,
+        height: post.height,
+        mediaType: post.mediaType as "image" | "video",
+        postType: "public",
+        privacy: "public",
+        createdAt: post.createdAt,
+        updatedAt: post.createdAt,
+      })),
       nextCursor:
         posts.length === pageSize
           ? {
-              postId: posts[posts.length - 1]!.id,
+              postId: posts[posts.length - 1]!.postId,
               createdAt: posts[posts.length - 1]!.createdAt,
             }
           : null,
@@ -271,47 +330,85 @@ export class PostService implements IPostService {
 
   async paginatePostsForFeed(
     params: PaginatePostsForFeedParams,
-  ): Promise<PaginatedResponse<Post, PostCursor>> {
-    const { userId, cursor, pageSize } = params;
+  ): Promise<
+    Result<PaginatedResponse<Post, FeedCursor>, PostErrors.PostNotFound>
+  > {
+    try {
+      const { userId, cursor, pageSize } = params;
 
-    const posts = await this.postRepository.paginatePostsOfFollowing({
-      userId,
-      cursor,
-      pageSize,
-    });
+      const posts = await this.postRepository.paginatePostsOfFollowing({
+        userId,
+        cursor,
+        pageSize,
+      });
 
-    return {
-      items: posts,
-      nextCursor:
-        posts.length === pageSize
-          ? {
-              postId: posts[posts.length - 1]!.id,
-              createdAt: posts[posts.length - 1]!.createdAt,
-              type: "following",
-            }
-          : null,
-    };
+      return ok({
+        items: posts.map((post) => ({
+          id: post.postId,
+          authorId: post.authorId,
+          recipientId: post.recipientId,
+          caption: post.caption,
+          key: post.imageUrl,
+          width: post.width,
+          height: post.height,
+          mediaType: post.mediaType as "image" | "video",
+          postType: "public",
+          privacy: "public",
+          createdAt: post.createdAt,
+          updatedAt: post.createdAt,
+        })),
+        nextCursor:
+          posts.length === pageSize
+            ? {
+                postId: posts[posts.length - 1]!.postId,
+                createdAt: posts[posts.length - 1]!.createdAt,
+                type: "following" as const,
+              }
+            : null,
+      });
+    } catch (error: unknown) {
+      return err(new PostErrors.PostNotFound(""));
+    }
   }
 
   async getPostForNextJs(
     params: GetPostForNextJsParams,
-  ): Promise<Omit<Post, "hasLiked">> {
-    const { postId } = params;
+  ): Promise<Result<Omit<Post, "hasLiked">, PostErrors.PostNotFound>> {
+    try {
+      const { postId } = params;
 
-    const post = await this.postRepository.getPostForNextJs({ postId });
-    if (!post) {
-      throw new PostErrors.PostNotFound(postId);
+      const post = await this.postRepository.getPostForNextJs({ postId });
+      if (!post) {
+        return err(new PostErrors.PostNotFound(postId));
+      }
+
+      const user = await this.userRepository.getUserWithProfile({
+        userId: post.authorId,
+      });
+      if (!user) {
+        return err(new PostErrors.PostNotFound(postId));
+      }
+
+      if (user.profile.privacy !== "public") {
+        return err(new PostErrors.PostNotFound(postId));
+      }
+
+      return ok({
+        id: post.postId,
+        authorId: post.authorId,
+        recipientId: post.recipientId,
+        caption: post.caption,
+        key: post.imageUrl,
+        width: post.width,
+        height: post.height,
+        mediaType: post.mediaType as "image" | "video",
+        postType: "public",
+        privacy: "public",
+        createdAt: post.createdAt,
+        updatedAt: post.createdAt,
+      });
+    } catch (error: unknown) {
+      return err(new PostErrors.PostNotFound(params.postId));
     }
-
-    const user = await this.userRepository.getUser({ userId: post.authorId });
-    if (!user) {
-      throw new PostErrors.PostNotFound(postId);
-    }
-
-    if (user.privacySetting !== "public") {
-      throw new PostErrors.PostNotFound(postId);
-    }
-
-    return post;
   }
 }
