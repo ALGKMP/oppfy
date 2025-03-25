@@ -1,6 +1,6 @@
 import type { DatabaseOrTransaction } from "@oppfy/db";
 
-import type { Post } from "../../../models";
+import type { Like, Post } from "../../../models";
 
 export interface GetPostParams {
   postId: string;
@@ -33,6 +33,11 @@ export interface CreatePostStatsParams {
 export interface DeletePostParams {
   userId: string;
   postId: string;
+}
+
+export interface LikeParams {
+  postId: string;
+  userId: string;
 }
 
 export interface IPostRepository {
@@ -70,6 +75,15 @@ export interface IPostRepository {
     params: DeletePostParams,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
+
+  addLike(params: LikeParams, db?: DatabaseOrTransaction): Promise<void>;
+
+  removeLike(params: LikeParams, db?: DatabaseOrTransaction): Promise<void>;
+
+  findLike(
+    params: LikeParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<Like | undefined>;
 }
 
 export type PostForNextJs = Omit<Post, "hasLiked">;
