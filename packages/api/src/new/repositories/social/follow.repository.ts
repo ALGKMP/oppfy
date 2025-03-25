@@ -257,7 +257,9 @@ export class FollowRepository implements IFollowRepository {
     const { otherUserId: userId, cursor, limit = 10 } = params;
 
     const requests = await db
-      .select()
+      .select({
+        profile: this.schema.profile,
+      })
       .from(this.schema.followRequest)
       .innerJoin(
         this.schema.user,
