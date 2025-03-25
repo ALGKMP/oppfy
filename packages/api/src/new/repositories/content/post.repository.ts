@@ -94,7 +94,7 @@ export class PostRepository implements IPostRepository {
 
   async getPost(
     { postId, userId }: GetPostParams,
-    tx: Database | Transaction = this.db,
+    tx: DatabaseOrTransaction = this.db,
   ): Promise<Post | undefined> {
     const { query } = this.baseQuery(userId, tx);
     const results = await query.where(eq(this.schema.post.id, postId)).limit(1);
@@ -103,7 +103,7 @@ export class PostRepository implements IPostRepository {
 
   async getPostForNextJs(
     { postId }: GetPostForNextJsParams,
-    tx: Database | Transaction = this.db,
+    tx: DatabaseOrTransaction = this.db,
   ): Promise<PostForNextJs | undefined> {
     const { query } = this.baseQuery(undefined, tx);
     const results = await query.where(eq(this.schema.post.id, postId)).limit(1);
@@ -112,7 +112,7 @@ export class PostRepository implements IPostRepository {
 
   async paginatePostsOfFollowing(
     { userId, cursor, pageSize = 10 }: PaginatePostsParams,
-    tx: Database | Transaction = this.db,
+    tx: DatabaseOrTransaction = this.db,
   ): Promise<PaginatedPost[]> {
     const { query } = this.baseQuery(userId, tx);
 
@@ -149,7 +149,7 @@ export class PostRepository implements IPostRepository {
 
   async paginatePostsOfUser(
     { userId, cursor, pageSize = 10 }: PaginatePostsParams,
-    tx: Database | Transaction = this.db,
+    tx: DatabaseOrTransaction = this.db,
   ): Promise<PaginatedPost[]> {
     const { query } = this.baseQuery(userId, tx);
 
@@ -179,7 +179,7 @@ export class PostRepository implements IPostRepository {
 
   async updatePost(
     { postId, caption }: UpdatePostParams,
-    tx: Database | Transaction = this.db,
+    tx: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     await tx
       .update(this.schema.post)
@@ -192,7 +192,7 @@ export class PostRepository implements IPostRepository {
 
   async createPostStats(
     { postId }: CreatePostStatsParams,
-    tx: Database | Transaction = this.db,
+    tx: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const now = new Date();
     await tx.insert(this.schema.postStats).values({
@@ -206,7 +206,7 @@ export class PostRepository implements IPostRepository {
 
   async deletePost(
     { userId, postId }: DeletePostParams,
-    tx: Transaction,
+    tx: DatabaseOrTransaction,
   ): Promise<void> {
     const post = await tx.query.post.findFirst({
       where: eq(this.schema.post.id, postId),
