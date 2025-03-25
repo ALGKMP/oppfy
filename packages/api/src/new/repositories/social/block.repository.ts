@@ -20,44 +20,6 @@ export class BlockRepository implements IBlockRepository {
     private readonly schema: Schema,
   ) {}
 
-  async getBlockedUsers(
-    params: GetBlockedUsersParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<Profile[]> {
-    const { userId, cursor = null, limit = 10 } = params;
-
-    const blockedUsers = await db
-      .select({
-        profile: this.schema.profile,
-      })
-      .from(this.schema.block)
-      .innerJoin(
-        this.schema.profile,
-        eq(this.schema.profile.userId, this.schema.block.blockedUserId),
-      )
-      .where(
-        and(
-          eq(this.schema.block.blockedByUserId, userId),
-          cursor
-            ? or(
-                gt(this.schema.block.createdAt, cursor.createdAt),
-                and(
-                  eq(this.schema.block.createdAt, cursor.createdAt),
-                  gt(this.schema.profile.userId, cursor.userId),
-                ),
-              )
-            : undefined,
-        ),
-      )
-      .orderBy(
-        asc(this.schema.block.createdAt),
-        asc(this.schema.profile.userId),
-      )
-      .limit(limit);
-
-    return blockedUsers.map((result) => result.profile);
-  }
-
   async isUserBlocked(
     params: BlockUserParams,
     db: DatabaseOrTransaction = this.db,
@@ -100,5 +62,43 @@ export class BlockRepository implements IBlockRepository {
           eq(this.schema.block.blockedUserId, blockedUserId),
         ),
       );
+  }
+
+  async paginateBlockedUsers(
+    params: GetBlockedUsersParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<Profile[]> {
+    const { userId, cursor = null, limit = 10 } = params;
+
+    const blockedUsers = await db
+      .select({
+        profile: this.schema.profile,
+      })
+      .from(this.schema.block)
+      .innerJoin(
+        this.schema.profile,
+        eq(this.schema.profile.userId, this.schema.block.blockedUserId),
+      )
+      .where(
+        and(
+          eq(this.schema.block.blockedByUserId, userId),
+          cursor
+            ? or(
+                gt(this.schema.block.createdAt, cursor.createdAt),
+                and(
+                  eq(this.schema.block.createdAt, cursor.createdAt),
+                  gt(this.schema.profile.userId, cursor.userId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(
+        asc(this.schema.block.createdAt),
+        asc(this.schema.profile.userId),
+      )
+      .limit(limit);
+
+    return blockedUsers.map((result) => result.profile);
   }
 }

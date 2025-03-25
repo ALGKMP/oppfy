@@ -39,11 +39,6 @@ export interface IFriendRepository {
     tx: Transaction,
   ): Promise<void>;
 
-  acceptFriendRequest(
-    params: FriendRequestParams,
-    tx: Transaction,
-  ): Promise<void>;
-
   isFriends(params: FriendParams, db?: DatabaseOrTransaction): Promise<boolean>;
 
   isFriendRequested(

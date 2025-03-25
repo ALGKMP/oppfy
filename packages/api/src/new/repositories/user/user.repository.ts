@@ -121,7 +121,7 @@ export class UserRepository implements IUserRepository {
     await db.delete(this.schema.user).where(eq(this.schema.user.id, userId));
   }
 
-  async getRandomActiveProfilesForRecs(
+  async getRandomActiveUserIds(
     { limit }: GetRandomActiveProfilesForRecsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<{ userId: string }[]> {
