@@ -72,8 +72,11 @@ export class CommentRepository implements ICommentRepository {
     { postId, cursor, pageSize = 10 }: PaginateCommentsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<PaginatedComment[]> {
-    const results = await db
-      .select()
+    const commentsAndProfiles = await db
+      .select({
+        comment: this.schema.comment,
+        profile: this.schema.profile,
+      })
       .from(this.schema.comment)
       .innerJoin(
         this.schema.user,
@@ -102,11 +105,6 @@ export class CommentRepository implements ICommentRepository {
         desc(this.schema.comment.id),
       )
       .limit(pageSize + 1);
-
-    const commentsAndProfiles = results.map((result) => ({
-      comment: result.comment,
-      profile: result.profile,
-    }));
 
     return commentsAndProfiles;
   }

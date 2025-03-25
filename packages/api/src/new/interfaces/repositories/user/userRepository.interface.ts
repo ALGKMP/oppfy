@@ -25,7 +25,7 @@ export interface UpdatePrivacyParams {
   newPrivacySetting: Profile["privacy"];
 }
 
-export interface GetRandomActiveProfilesForRecsParams {
+export interface GetRandomActiveUserIdsParams {
   limit: number;
 }
 
@@ -45,7 +45,7 @@ export interface IUserRepository {
   ): Promise<User | undefined>;
 
   getRandomActiveUserIds(
-    params: GetRandomActiveProfilesForRecsParams,
+    params: GetRandomActiveUserIdsParams,
     db?: DatabaseOrTransaction,
   ): Promise<{ userId: string }[]>;
 
