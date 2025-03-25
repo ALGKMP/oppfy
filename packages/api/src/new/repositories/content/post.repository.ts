@@ -1,7 +1,8 @@
 import { aliasedTable, and, desc, eq, lt, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
-import type { Database, Schema, SQL, Transaction } from "@oppfy/db";
+import type { Database, DatabaseOrTransaction, Schema, SQL, Transaction } from "@oppfy/db";
+
 import { TYPES } from "../../container";
 import {
   CreatePostStatsParams,
@@ -11,10 +12,10 @@ import {
   IPostRepository,
   PaginatedPost,
   PaginatePostsParams,
-  Post,
   PostForNextJs,
   UpdatePostParams,
 } from "../../interfaces/repositories/content/postRepository.interface";
+import type { Post } from "../../models";
 
 @injectable()
 export class PostRepository implements IPostRepository {
@@ -23,31 +24,36 @@ export class PostRepository implements IPostRepository {
     @inject(TYPES.Schema) private readonly schema: Schema,
   ) {}
 
-  private getBaseQuery(userId?: string, tx: Database | Transaction = this.db) {
+  private baseQuery(userId?: string, tx: DatabaseOrTransaction = this.db) {
     const author = aliasedTable(this.schema.user, "author");
     const recipient = aliasedTable(this.schema.user, "recipient");
     const authorProfile = aliasedTable(this.schema.profile, "authorProfile");
-    const recipientProfile = aliasedTable(this.schema.profile, "recipientProfile");
+    const recipientProfile = aliasedTable(
+      this.schema.profile,
+      "recipientProfile",
+    );
 
     const baseSelect = {
-      postId: this.schema.post.id,
-      authorId: this.schema.post.authorId,
+      id: this.schema.post.id,
+      authorUserId: this.schema.post.authorUserId,
       authorUsername: authorProfile.username,
       authorProfileId: authorProfile.id,
       authorProfilePicture: authorProfile.profilePictureKey,
       authorName: authorProfile.name,
-      recipientId: this.schema.post.recipientId,
+      recipientUserId: this.schema.post.recipientUserId,
       recipientProfileId: recipientProfile.id,
       recipientUsername: recipientProfile.username,
       recipientProfilePicture: recipientProfile.profilePictureKey,
       recipientName: recipientProfile.name,
       caption: this.schema.post.caption,
-      imageUrl: this.schema.post.key,
+      key: this.schema.post.key,
       width: this.schema.post.width,
       height: this.schema.post.height,
       commentsCount: this.schema.postStats.comments,
       likesCount: this.schema.postStats.likes,
       mediaType: this.schema.post.mediaType,
+      postType: this.schema.post.postType,
+      updatedAt: this.schema.post.updatedAt,
       createdAt: this.schema.post.createdAt,
     };
 
@@ -64,10 +70,13 @@ export class PostRepository implements IPostRepository {
         }),
       })
       .from(this.schema.post)
-      .innerJoin(this.schema.postStats, eq(this.schema.postStats.postId, this.schema.post.id))
-      .innerJoin(author, eq(this.schema.post.authorId, author.id))
+      .innerJoin(
+        this.schema.postStats,
+        eq(this.schema.postStats.postId, this.schema.post.id),
+      )
+      .innerJoin(author, eq(this.schema.post.authorUserId, author.id))
       .innerJoin(authorProfile, eq(authorProfile.userId, author.id))
-      .innerJoin(recipient, eq(this.schema.post.recipientId, recipient.id))
+      .innerJoin(recipient, eq(this.schema.post.recipientUserId, recipient.id))
       .innerJoin(recipientProfile, eq(recipientProfile.userId, recipient.id));
 
     if (userId) {
@@ -87,10 +96,8 @@ export class PostRepository implements IPostRepository {
     { postId, userId }: GetPostParams,
     tx: Database | Transaction = this.db,
   ): Promise<Post | undefined> {
-    const { query } = this.getBaseQuery(userId, tx);
-    const results = await query
-      .where(eq(this.schema.post.id, postId))
-      .limit(1);
+    const { query } = this.baseQuery(userId, tx);
+    const results = await query.where(eq(this.schema.post.id, postId)).limit(1);
     return results[0];
   }
 
@@ -98,10 +105,8 @@ export class PostRepository implements IPostRepository {
     { postId }: GetPostForNextJsParams,
     tx: Database | Transaction = this.db,
   ): Promise<PostForNextJs | undefined> {
-    const { query } = this.getBaseQuery(undefined, tx);
-    const results = await query
-      .where(eq(this.schema.post.id, postId))
-      .limit(1);
+    const { query } = this.baseQuery(undefined, tx);
+    const results = await query.where(eq(this.schema.post.id, postId)).limit(1);
     return results[0];
   }
 
@@ -109,11 +114,11 @@ export class PostRepository implements IPostRepository {
     { userId, cursor, pageSize = 10 }: PaginatePostsParams,
     tx: Database | Transaction = this.db,
   ): Promise<PaginatedPost[]> {
-    const { query } = this.getBaseQuery(userId, tx);
+    const { query } = this.baseQuery(userId, tx);
 
     let whereClause = or(
       eq(this.schema.follow.senderId, userId),
-      eq(this.schema.post.authorId, userId)
+      eq(this.schema.post.authorUserId, userId),
     );
 
     if (cursor) {
@@ -121,8 +126,8 @@ export class PostRepository implements IPostRepository {
         lt(this.schema.post.createdAt, cursor.createdAt),
         and(
           eq(this.schema.post.createdAt, cursor.createdAt),
-          lt(this.schema.post.id, cursor.postId)
-        )
+          lt(this.schema.post.id, cursor.postId),
+        ),
       );
       whereClause = and(whereClause, cursorCondition);
     }
@@ -132,7 +137,7 @@ export class PostRepository implements IPostRepository {
         this.schema.follow,
         and(
           eq(this.schema.follow.senderId, userId),
-          eq(this.schema.follow.recipientId, this.schema.post.authorId),
+          eq(this.schema.follow.recipientId, this.schema.post.authorUserId),
         ),
       )
       .where(whereClause)
@@ -146,17 +151,20 @@ export class PostRepository implements IPostRepository {
     { userId, cursor, pageSize = 10 }: PaginatePostsParams,
     tx: Database | Transaction = this.db,
   ): Promise<PaginatedPost[]> {
-    const { query } = this.getBaseQuery(userId, tx);
+    const { query } = this.baseQuery(userId, tx);
 
-    let whereClause: SQL<unknown> | undefined = eq(this.schema.post.authorId, userId);
+    let whereClause: SQL<unknown> | undefined = eq(
+      this.schema.post.authorUserId,
+      userId,
+    );
 
     if (cursor) {
       const cursorCondition = or(
         lt(this.schema.post.createdAt, cursor.createdAt),
         and(
           eq(this.schema.post.createdAt, cursor.createdAt),
-          lt(this.schema.post.id, cursor.postId)
-        )
+          lt(this.schema.post.id, cursor.postId),
+        ),
       );
       whereClause = and(whereClause, cursorCondition);
     }
@@ -202,11 +210,11 @@ export class PostRepository implements IPostRepository {
   ): Promise<void> {
     const post = await tx.query.post.findFirst({
       where: eq(this.schema.post.id, postId),
-      columns: { authorId: true },
+      columns: { authorUserId: true },
     });
 
     if (!post) throw new Error("Post not found");
-    if (post.authorId !== userId)
+    if (post.authorUserId !== userId)
       throw new Error("Unauthorized: User does not own this post");
 
     await Promise.all([
