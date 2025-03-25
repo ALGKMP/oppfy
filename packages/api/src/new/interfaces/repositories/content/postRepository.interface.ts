@@ -1,4 +1,4 @@
-import type { DatabaseOrTransaction, SQL, Transaction } from "@oppfy/db";
+import type { DatabaseOrTransaction } from "@oppfy/db";
 
 import type { Post } from "../../../models";
 
@@ -36,25 +36,40 @@ export interface DeletePostParams {
 }
 
 export interface IPostRepository {
-  getPost(params: GetPostParams, tx?: Transaction): Promise<Post | undefined>;
+  getPost(
+    params: GetPostParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<Post | undefined>;
+
   getPostForNextJs(
     params: GetPostForNextJsParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<PostForNextJs | undefined>;
+
   paginatePostsOfFollowing(
     params: PaginatePostsParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<PaginatedPost[]>;
+
   paginatePostsOfUser(
     params: PaginatePostsParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<PaginatedPost[]>;
-  updatePost(params: UpdatePostParams, tx?: Transaction): Promise<void>;
+
+  updatePost(
+    params: UpdatePostParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<void>;
+
   createPostStats(
     params: CreatePostStatsParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
-  deletePost(params: DeletePostParams, tx: Transaction): Promise<void>;
+
+  deletePost(
+    params: DeletePostParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<void>;
 }
 
 export type PostForNextJs = Omit<Post, "hasLiked">;

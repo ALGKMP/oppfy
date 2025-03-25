@@ -1,4 +1,4 @@
-import type { Transaction } from "@oppfy/db";
+import type { DatabaseOrTransaction } from "@oppfy/db";
 
 export interface UpdateUserContactsParams {
   userId: string;
@@ -28,15 +28,21 @@ export interface ContactRecommendation {
 export interface IContactsRepository {
   updateUserContacts(
     params: UpdateUserContactsParams,
-    tx: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
-  deleteContacts(params: DeleteContactsParams, tx?: Transaction): Promise<void>;
+  deleteContacts(
+    params: DeleteContactsParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<void>;
 
-  getContacts(params: GetContactsParams, tx?: Transaction): Promise<string[]>;
+  getContacts(
+    params: GetContactsParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<string[]>;
 
   getRecommendations(
     params: GetRecommendationsParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<ContactRecommendation[]>;
 }

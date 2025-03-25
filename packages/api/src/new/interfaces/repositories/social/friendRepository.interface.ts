@@ -1,4 +1,4 @@
-import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
+import type { DatabaseOrTransaction } from "@oppfy/db";
 
 import type { Profile } from "../../../models";
 
@@ -25,18 +25,18 @@ export interface PaginateFriendParams extends PaginationParams {
 }
 
 export interface IFriendRepository {
-  createFriend(params: FriendParams, tx: Transaction): Promise<void>;
+  createFriend(params: FriendParams, db?: DatabaseOrTransaction): Promise<void>;
 
-  removeFriend(params: FriendParams, tx: Transaction): Promise<void>;
+  removeFriend(params: FriendParams, db?: DatabaseOrTransaction): Promise<void>;
 
   createFriendRequest(
     params: FriendRequestParams,
-    tx: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   deleteFriendRequest(
     params: FriendRequestParams,
-    tx: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   isFriends(params: FriendParams, db?: DatabaseOrTransaction): Promise<boolean>;

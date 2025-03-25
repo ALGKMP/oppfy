@@ -1,4 +1,4 @@
-import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
+import type { DatabaseOrTransaction } from "@oppfy/db";
 
 import type { Profile, User, UserStatus } from "../../../models";
 
@@ -51,12 +51,12 @@ export interface IUserRepository {
 
   createUserOnApp(
     params: CreateUserOnAppParams,
-    tx: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   createUserNotOnApp(
     params: CreateUserNotOnAppParams,
-    tx: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   deleteUser(params: UserIdParams, db?: DatabaseOrTransaction): Promise<void>;

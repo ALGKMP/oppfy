@@ -1,4 +1,4 @@
-import type { Transaction } from "@oppfy/db";
+import type { DatabaseOrTransaction } from "@oppfy/db";
 
 import type {
   ReportCommentReason,
@@ -27,14 +27,16 @@ export interface CreateCommentReportParams {
 export interface IReportRepository {
   createUserReport(
     params: CreateUserReportParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
+
   createPostReport(
     params: CreatePostReportParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
+
   createCommentReport(
     params: CreateCommentReportParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 }

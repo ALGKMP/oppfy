@@ -1,6 +1,6 @@
 import type { InferSelectModel } from "drizzle-orm";
 
-import type { schema, Transaction } from "@oppfy/db";
+import type { DatabaseOrTransaction, schema } from "@oppfy/db";
 
 import type { Profile } from "../../../models";
 import type { CommentCursor } from "../../services/content/postInteractionService.interface";
@@ -39,13 +39,22 @@ export interface PaginatedComment {
 export interface ICommentRepository {
   getComment(
     params: GetCommentParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<Comment | undefined>;
-  addComment(params: AddCommentParams, tx?: Transaction): Promise<void>;
-  removeComment(params: RemoveCommentParams, tx?: Transaction): Promise<void>;
-  countComments(params: CountCommentsParams, tx?: Transaction): Promise<number>;
+  addComment(
+    params: AddCommentParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<void>;
+  removeComment(
+    params: RemoveCommentParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<void>;
+  countComments(
+    params: CountCommentsParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<number>;
   paginateComments(
     params: PaginateCommentsParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<PaginatedComment[]>;
 }
