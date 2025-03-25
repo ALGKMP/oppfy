@@ -1,6 +1,80 @@
-import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
-import type { InferSelectModel } from "drizzle-orm";
-import type { schema } from "@oppfy/db";
+import type { Result } from "neverthrow";
+
+import type { Schema } from "@oppfy/db";
+
+import type { PostErrors } from "../../../errors/content/post.error";
+
+import type { Post } from "../../../models";
+
+export interface PaginatedResponse<TItem, TCursor> {
+  items: TItem[];
+  nextCursor: TCursor | null;
+}
+
+export type PostStats = Schema["postStats"]["$inferSelect"];
+
+export interface BaseCursor {
+  createdAt: Date;
+}
+
+export interface PostCursor extends BaseCursor {
+  postId: string;
+}
+
+export interface FeedCursor extends BaseCursor {
+  postId: string;
+  type: "following" | "recommended";
+}
+
+export interface UploadPostForUserOnAppUrlParams {
+  author: string;
+  recipient: string;
+  caption: string;
+  height: string;
+  width: string;
+  contentLength: number;
+  contentType: "image/jpeg" | "image/png" | "image/heic";
+}
+
+export interface UploadPostForUserNotOnAppUrlParams {
+  author: string;
+  recipientNotOnAppPhoneNumber: string;
+  recipientNotOnAppName: string;
+  caption: string;
+  height: string;
+  width: string;
+  contentLength: number;
+  contentType: "image/jpeg" | "image/png" | "image/heic";
+}
+
+export interface UploadVideoPostForUserOnAppUrlParams {
+  author: string;
+  recipient: string;
+  caption: string;
+  height: string;
+  width: string;
+}
+
+export interface UploadVideoPostForUserNotOnAppUrlParams {
+  author: string;
+  recipientNotOnAppPhoneNumber: string;
+  recipientNotOnAppName: string;
+  caption: string;
+  height: string;
+  width: string;
+}
+
+export interface UpdatePostParams {
+  userId: string;
+  postId: string;
+  content: string;
+  mediaUrls?: string[];
+}
+
+export interface DeletePostParams {
+  userId: string;
+  postId: string;
+}
 
 export interface GetPostParams {
   postId: string;
@@ -13,50 +87,80 @@ export interface GetPostForNextJsParams {
 
 export interface PaginatePostsParams {
   userId: string;
-  cursor?: { createdAt: Date; postId: string } | null;
+  cursor: PostCursor | null;
   pageSize?: number;
 }
 
-export interface UpdatePostParams {
-  postId: string;
-  caption: string;
-}
-
-export interface CreatePostStatsParams {
-  postId: string;
-}
-
-export interface DeletePostParams {
+export interface PaginatePostsForFeedParams {
   userId: string;
-  postId: string;
+  cursor: FeedCursor | null;
+  pageSize: number;
 }
 
-// Updated raw result type without author and recipient
-export interface PostResult {
-  post: InferSelectModel<typeof schema.post>;
-  postStats: InferSelectModel<typeof schema.postStats>;
-  authorProfile: InferSelectModel<typeof schema.profile>;
-  recipientProfile: InferSelectModel<typeof schema.profile>;
-  like: InferSelectModel<typeof schema.like> | null;
-};
+export interface IPostService {
+  uploadPostForUserOnAppUrl(
+    params: UploadPostForUserOnAppUrlParams,
+  ): Promise<
+    Result<
+      { presignedUrl: string; postId: string },
+      PostErrors.FailedToCreatePost
+    >
+  >;
 
-type PostResultWithoutLike = Omit<PostResult, "like">;
+  uploadPostForUserNotOnAppUrl(
+    params: UploadPostForUserNotOnAppUrlParams,
+  ): Promise<
+    Result<
+      { presignedUrl: string; postId: string },
+      PostErrors.FailedToCreatePost
+    >
+  >;
 
-export interface IPostRepository {
-  getPost(params: GetPostParams, tx?: Transaction): Promise<PostResult | undefined>;
+  uploadVideoPostForUserOnAppUrl(
+    params: UploadVideoPostForUserOnAppUrlParams,
+  ): Promise<
+    Result<
+      { presignedUrl: string; postId: string },
+      PostErrors.FailedToCreatePost
+    >
+  >;
+
+  uploadVideoPostForUserNotOnAppUrl(
+    params: UploadVideoPostForUserNotOnAppUrlParams,
+  ): Promise<
+    Result<
+      { presignedUrl: string; postId: string },
+      PostErrors.FailedToCreatePost
+    >
+  >;
+
+  deletePost(
+    params: DeletePostParams,
+  ): Promise<
+    Result<
+      void,
+      | PostErrors.FailedToDeletePost
+      | PostErrors.PostNotFound
+      | PostErrors.NotPostOwner
+      | PostErrors.PostDeleted
+    >
+  >;
+
+  getPost(
+    params: GetPostParams,
+  ): Promise<Result<Post, PostErrors.PostNotFound | PostErrors.PostDeleted>>;
+
+  paginatePosts(
+    params: PaginatePostsParams,
+  ): Promise<Result<PaginatedResponse<Post, PostCursor>, never>>;
+
+  paginatePostsForFeed(
+    params: PaginatePostsForFeedParams,
+  ): Promise<
+    Result<PaginatedResponse<Post, FeedCursor>, PostErrors.PostNotFound>
+  >;
+
   getPostForNextJs(
     params: GetPostForNextJsParams,
-    tx?: Transaction,
-  ): Promise<PostResultWithoutLike | undefined>;
-  paginatePostsOfFollowing(
-    params: PaginatePostsParams,
-    tx?: Transaction,
-  ): Promise<PostResult[]>;
-  paginatePostsOfUser(
-    params: PaginatePostsParams,
-    tx?: Transaction,
-  ): Promise<PostResult[]>;
-  updatePost(params: UpdatePostParams, tx?: Transaction): Promise<void>;
-  createPostStats(params: CreatePostStatsParams, tx?: Transaction): Promise<void>;
-  deletePost(params: DeletePostParams, tx: Transaction): Promise<void>;
+  ): Promise<Result<Omit<Post, "hasLiked">, PostErrors.PostNotFound>>;
 }
