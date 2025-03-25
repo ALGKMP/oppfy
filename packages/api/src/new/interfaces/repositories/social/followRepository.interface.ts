@@ -42,11 +42,6 @@ export interface IFollowRepository {
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
-  acceptFollowRequest(
-    params: FollowParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<void>;
-
   isFollowing(
     params: FollowParams,
     db?: DatabaseOrTransaction,

@@ -104,26 +104,6 @@ export class FollowRepository implements IFollowRepository {
       );
   }
 
-  async acceptFollowRequest(
-    params: FollowParams,
-    tx: Transaction,
-  ): Promise<void> {
-    const { senderId, recipientId } = params;
-
-    // Remove the follow request
-    await tx
-      .delete(this.schema.followRequest)
-      .where(
-        and(
-          eq(this.schema.followRequest.senderId, senderId),
-          eq(this.schema.followRequest.recipientId, recipientId),
-        ),
-      );
-
-    // Create the follower relationship using the same db instance
-    await this.createFollower({ senderId, recipientId }, tx);
-  }
-
   async isFollowing(
     params: FollowParams,
     db: DatabaseOrTransaction = this.db,
