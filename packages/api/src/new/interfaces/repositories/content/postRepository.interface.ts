@@ -1,4 +1,6 @@
-import type { Transaction } from "@oppfy/db";
+import type { DatabaseOrTransaction, SQL, Transaction } from "@oppfy/db";
+
+import type { Post } from "../../../models";
 
 export interface GetPostParams {
   postId: string;
@@ -53,30 +55,6 @@ export interface IPostRepository {
     tx?: Transaction,
   ): Promise<void>;
   deletePost(params: DeletePostParams, tx: Transaction): Promise<void>;
-}
-
-// Return types
-export interface Post {
-  postId: string;
-  authorId: string;
-  authorUsername: string;
-  authorProfileId: string;
-  authorProfilePicture: string | null;
-  authorName: string | null;
-  recipientId: string;
-  recipientProfileId: string;
-  recipientUsername: string;
-  recipientProfilePicture: string | null;
-  recipientName: string | null;
-  caption: string;
-  imageUrl: string;
-  width: number;
-  height: number;
-  commentsCount: number;
-  likesCount: number;
-  mediaType: string;
-  createdAt: Date;
-  hasLiked: boolean;
 }
 
 export type PostForNextJs = Omit<Post, "hasLiked">;

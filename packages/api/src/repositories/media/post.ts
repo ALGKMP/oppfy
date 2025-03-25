@@ -19,12 +19,12 @@ export class PostRepository {
     const result = await this.db
       .selectDistinct({
         postId: schema.post.id,
-        authorId: schema.post.authorId,
+        authorId: schema.post.authorUserId,
         authorUsername: authorProfile.username,
         authorProfileId: authorProfile.id,
         authorProfilePicture: authorProfile.profilePictureKey,
         authorName: authorProfile.name,
-        recipientId: schema.post.recipientId,
+        recipientId: schema.post.recipientUserId,
         recipientProfileId: recipientProfile.id,
         recipientUsername: recipientProfile.username,
         recipientProfilePicture: recipientProfile.profilePictureKey,
@@ -44,9 +44,9 @@ export class PostRepository {
       })
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
-      .innerJoin(author, eq(schema.post.authorId, author.id))
+      .innerJoin(author, eq(schema.post.authorUserId, author.id))
       .innerJoin(authorProfile, eq(authorProfile.userId, author.id))
-      .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
+      .innerJoin(recipient, eq(schema.post.recipientUserId, recipient.id))
       .innerJoin(recipientProfile, eq(recipientProfile.userId, recipient.id))
       .leftJoin(
         schema.like,
@@ -70,12 +70,12 @@ export class PostRepository {
     const result = await this.db
       .selectDistinct({
         postId: schema.post.id,
-        authorId: schema.post.authorId,
+        authorId: schema.post.authorUserId,
         authorUsername: authorProfile.username,
         authorProfileId: authorProfile.id,
         authorProfilePicture: authorProfile.profilePictureKey,
         authorName: authorProfile.name,
-        recipientId: schema.post.recipientId,
+        recipientId: schema.post.recipientUserId,
         recipientProfileId: recipientProfile.id,
         recipientUsername: recipientProfile.username,
         recipientProfilePicture: recipientProfile.profilePictureKey,
@@ -91,9 +91,9 @@ export class PostRepository {
       })
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
-      .innerJoin(author, eq(schema.post.authorId, author.id))
+      .innerJoin(author, eq(schema.post.authorUserId, author.id))
       .innerJoin(authorProfile, eq(authorProfile.userId, author.id))
-      .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
+      .innerJoin(recipient, eq(schema.post.recipientUserId, recipient.id))
       .innerJoin(recipientProfile, eq(recipientProfile.userId, recipient.id))
       .where(eq(schema.post.id, postId))
       .limit(1);
@@ -111,12 +111,12 @@ export class PostRepository {
     const post = await this.db
       .selectDistinct({
         postId: schema.post.id,
-        authorId: schema.post.authorId,
+        authorId: schema.post.authorUserId,
         authorName: authorProfile.name,
         authorUsername: authorProfile.username,
         authorProfileId: authorProfile.id,
         authorProfilePicture: authorProfile.profilePictureKey,
-        recipientId: schema.post.recipientId,
+        recipientId: schema.post.recipientUserId,
         recipientProfileId: recipientProfile.id,
         recipientName: recipientProfile.name,
         recipientUsername: recipientProfile.username,
@@ -133,9 +133,9 @@ export class PostRepository {
       .from(schema.comment)
       .innerJoin(schema.post, eq(schema.comment.postId, schema.post.id))
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
-      .innerJoin(author, eq(schema.post.authorId, author.id))
+      .innerJoin(author, eq(schema.post.authorUserId, author.id))
       .innerJoin(authorProfile, eq(authorProfile.userId, author.id))
-      .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
+      .innerJoin(recipient, eq(schema.post.recipientUserId, recipient.id))
       .innerJoin(recipientProfile, eq(recipientProfile.userId, recipient.id))
       .where(eq(schema.comment.id, commentId))
       .limit(1);
@@ -157,12 +157,12 @@ export class PostRepository {
     return await this.db
       .selectDistinct({
         postId: schema.post.id,
-        authorId: schema.post.authorId,
+        authorId: schema.post.authorUserId,
         authorName: authorProfile.name,
         authorUsername: authorProfile.username,
         authorProfileId: authorProfile.id,
         authorProfilePicture: authorProfile.profilePictureKey,
-        recipientId: schema.post.recipientId,
+        recipientId: schema.post.recipientUserId,
         recipientName: recipientProfile.name,
         recipientUsername: recipientProfile.username,
         recipientProfileId: recipientProfile.id,
@@ -182,9 +182,9 @@ export class PostRepository {
       })
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
-      .innerJoin(author, eq(schema.post.authorId, author.id))
+      .innerJoin(author, eq(schema.post.authorUserId, author.id))
       .innerJoin(authorProfile, eq(authorProfile.userId, author.id))
-      .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
+      .innerJoin(recipient, eq(schema.post.recipientUserId, recipient.id))
       .innerJoin(recipientProfile, eq(recipientProfile.userId, recipient.id))
       .leftJoin(
         schema.like,
@@ -197,7 +197,7 @@ export class PostRepository {
         schema.follow,
         and(
           eq(schema.follow.senderId, userId),
-          eq(schema.follow.recipientId, schema.post.recipientId),
+          eq(schema.follow.recipientId, schema.post.recipientUserId),
         ),
       )
       .where(
@@ -206,7 +206,7 @@ export class PostRepository {
             // Posts where user follows the recipient
             eq(schema.follow.senderId, userId),
             // Posts authored by the user
-            eq(schema.post.authorId, userId),
+            eq(schema.post.authorUserId, userId),
           ),
           cursor
             ? or(
@@ -254,22 +254,22 @@ export class PostRepository {
     const latestPosts = this.db
       .select({
         postId: sql<number>`max(${schema.post.id})`.as("latest_post_id"),
-        authorId: schema.post.authorId,
+        authorId: schema.post.authorUserId,
       })
       .from(schema.post)
-      .where(inArray(schema.post.authorId, recommendedUserIds))
-      .groupBy(schema.post.authorId)
+      .where(inArray(schema.post.authorUserId, recommendedUserIds))
+      .groupBy(schema.post.authorUserId)
       .as("latest_posts");
 
     return await this.db
       .select({
         postId: schema.post.id,
-        authorId: schema.post.authorId,
+        authorId: schema.post.authorUserId,
         authorUsername: authorProfile.username,
         authorProfileId: authorProfile.id,
         authorProfilePicture: authorProfile.profilePictureKey,
         authorName: authorProfile.name,
-        recipientId: schema.post.recipientId,
+        recipientId: schema.post.recipientUserId,
         recipientUsername: recipientProfile.username,
         recipientProfileId: recipientProfile.id,
         recipientProfilePicture: recipientProfile.profilePictureKey,
@@ -290,9 +290,9 @@ export class PostRepository {
       .from(latestPosts)
       .innerJoin(schema.post, eq(schema.post.id, latestPosts.postId))
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
-      .innerJoin(author, eq(schema.post.authorId, author.id))
+      .innerJoin(author, eq(schema.post.authorUserId, author.id))
       .innerJoin(authorProfile, eq(authorProfile.userId, author.id))
-      .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
+      .innerJoin(recipient, eq(schema.post.recipientUserId, recipient.id))
       .innerJoin(recipientProfile, eq(recipientProfile.userId, recipient.id))
       .leftJoin(
         schema.like,
@@ -334,12 +334,12 @@ export class PostRepository {
     return await this.db
       .select({
         postId: schema.post.id,
-        authorId: schema.post.authorId,
+        authorId: schema.post.authorUserId,
         authorName: authorProfile.name,
         authorUsername: authorProfile.username,
         authorProfileId: authorProfile.id,
         authorProfilePicture: authorProfile.profilePictureKey,
-        recipientId: schema.post.recipientId,
+        recipientId: schema.post.recipientUserId,
         recipientProfileId: recipientProfile.id,
         recipientName: recipientProfile.name,
         recipientUsername: recipientProfile.username,
@@ -359,9 +359,9 @@ export class PostRepository {
       })
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
-      .innerJoin(author, eq(schema.post.authorId, author.id))
+      .innerJoin(author, eq(schema.post.authorUserId, author.id))
       .innerJoin(authorProfile, eq(authorProfile.userId, author.id))
-      .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
+      .innerJoin(recipient, eq(schema.post.recipientUserId, recipient.id))
       .innerJoin(recipientProfile, eq(recipientProfile.userId, recipient.id))
       .leftJoin(
         schema.like,
@@ -372,7 +372,7 @@ export class PostRepository {
       )
       .where(
         and(
-          eq(schema.post.recipientId, userId),
+          eq(schema.post.recipientUserId, userId),
           cursor
             ? or(
                 lt(schema.post.createdAt, cursor.createdAt),
@@ -406,12 +406,12 @@ export class PostRepository {
     return await this.db
       .select({
         postId: schema.post.id,
-        authorId: schema.post.authorId,
+        authorId: schema.post.authorUserId,
         authorUsername: authorProfile.username,
         authorProfileId: authorProfile.id,
         authorProfilePicture: authorProfile.profilePictureKey,
         authorName: authorProfile.name,
-        recipientId: schema.post.recipientId,
+        recipientId: schema.post.recipientUserId,
         recipientUsername: recipientProfile.username,
         recipientProfileId: recipientProfile.id,
         recipientProfilePicture: recipientProfile.profilePictureKey,
@@ -431,14 +431,14 @@ export class PostRepository {
       })
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
-      .innerJoin(author, eq(schema.post.authorId, author.id))
+      .innerJoin(author, eq(schema.post.authorUserId, author.id))
       .innerJoin(authorProfile, eq(authorProfile.userId, author.id))
-      .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
+      .innerJoin(recipient, eq(schema.post.recipientUserId, recipient.id))
       .innerJoin(recipientProfile, eq(recipientProfile.userId, recipient.id))
       .leftJoin(schema.like, eq(schema.like.postId, schema.post.id))
       .where(
         and(
-          eq(schema.post.authorId, userId),
+          eq(schema.post.authorUserId, userId),
           cursor
             ? or(
                 gt(schema.post.createdAt, cursor.createdAt),
@@ -476,7 +476,7 @@ export class PostRepository {
       // Get the post and verify ownership before deleting
       const post = await tx.query.post.findFirst({
         where: eq(schema.post.id, postId),
-        columns: { authorId: true, recipientId: true },
+        columns: { authorId: true, recipientUserId: true },
       });
 
       if (!post) {
