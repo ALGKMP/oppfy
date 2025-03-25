@@ -1,37 +1,8 @@
-import type {
-  DatabaseOrTransaction,
-  InferInsertModel,
-  Transaction,
-} from "@oppfy/db";
+import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
-import type {
-  User,
-  UserStatus,
-  UserWithNotificationSettings,
-  UserWithProfile,
-} from "../../../models";
+import type { Profile, User, UserStatus } from "../../../models";
 
-export type PrivacySettings = NonNullable<
-  InferInsertModel<typeof import("@oppfy/db").schema.user>["privacySetting"]
->;
-
-export interface CreateUserParams {
-  userId: string;
-  phoneNumber: string;
-  username: string;
-  isOnApp: boolean;
-  name?: string;
-}
-
-export interface GetUserParams {
-  userId: string;
-}
-
-export interface GetUserWithProfileParams {
-  userId: string;
-}
-
-export interface GetUserStatusParams {
+export interface UserIdParams {
   userId: string;
 }
 
@@ -39,13 +10,19 @@ export interface GetUserByPhoneNumberParams {
   phoneNumber: string;
 }
 
-export interface DeleteUserParams {
+export interface CreateUserOnAppParams {
   userId: string;
+  phoneNumber: string;
+  username: string;
+}
+
+export interface CreateUserNotOnAppParams extends CreateUserOnAppParams {
+  name: string;
 }
 
 export interface UpdatePrivacyParams {
   userId: string;
-  newPrivacySetting: PrivacySettings;
+  newPrivacySetting: Profile["privacy"];
 }
 
 export interface GetRandomActiveProfilesForRecsParams {
@@ -56,89 +33,56 @@ export interface ExistingPhoneNumbersParams {
   phoneNumbers: string[];
 }
 
-export interface UpdateStatsOnUserDeleteParams {
-  userId: string;
-}
-
-export interface UpdateUserOnAppStatusParams {
-  userId: string;
-  isOnApp: boolean;
-}
-
-export interface UpdateUserTutorialCompleteParams {
-  userId: string;
-  hasCompletedTutorial: boolean;
-}
-
-export interface UpdateUserOnboardingCompleteParams {
-  userId: string;
-  hasCompletedOnboarding: boolean;
-}
-
-export interface GetUserWithNotificationSettingsParams {
-  userId: string;
-}
-
 export interface IUserRepository {
-  createUser(params: CreateUserParams, tx: Transaction): Promise<void>;
-
   getUser(
-    params: GetUserParams,
+    params: UserIdParams,
     db?: DatabaseOrTransaction,
   ): Promise<User | undefined>;
-
-  getUserWithProfile(
-    params: GetUserWithProfileParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<UserWithProfile | undefined>;
-
-  getUserWithNotificationSettings(
-    params: GetUserWithNotificationSettingsParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<UserWithNotificationSettings | undefined>;
-
-  getUserStatus(
-    params: GetUserStatusParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<UserStatus | undefined>;
 
   getUserByPhoneNumber(
     params: GetUserByPhoneNumberParams,
     db?: DatabaseOrTransaction,
   ): Promise<User | undefined>;
 
-  deleteUser(
-    params: DeleteUserParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<void>;
-
-  getRandomActiveProfilesForRecs(
+  getRandomActiveUserIds(
     params: GetRandomActiveProfilesForRecsParams,
     db?: DatabaseOrTransaction,
   ): Promise<{ userId: string }[]>;
+
+  createUserOnApp(
+    params: CreateUserOnAppParams,
+    tx: Transaction,
+  ): Promise<void>;
+
+  createUserNotOnApp(
+    params: CreateUserNotOnAppParams,
+    tx: Transaction,
+  ): Promise<void>;
+
+  deleteUser(params: UserIdParams, db?: DatabaseOrTransaction): Promise<void>;
+
+  getUserStatus(
+    params: UserIdParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<UserStatus | undefined>;
 
   existingPhoneNumbers(
     params: ExistingPhoneNumbersParams,
     db?: DatabaseOrTransaction,
   ): Promise<string[]>;
 
-  updateStatsOnUserDelete(
-    params: UpdateStatsOnUserDeleteParams,
-    tx: Transaction,
-  ): Promise<void>;
-
-  updateUserOnAppStatus(
-    params: UpdateUserOnAppStatusParams,
+  markUserAsOnApp(
+    params: UserIdParams,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
-  updateUserTutorialComplete(
-    params: UpdateUserTutorialCompleteParams,
+  markUserAsTutorialComplete(
+    params: UserIdParams,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
-  updateUserOnboardingComplete(
-    params: UpdateUserOnboardingCompleteParams,
+  markUserAsOnboardingComplete(
+    params: UserIdParams,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 }
