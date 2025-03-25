@@ -47,7 +47,7 @@ export class CloudFront {
   }
 
   hydratePost(post: Post): HydratedPost {
-    const postUrl = post.key ? this.getPublicPostUrl(post.key) : null;
+    const postUrl = post.postKey ? this.getPublicPostUrl(post.postKey) : null;
 
     return { ...post, postUrl };
   }
