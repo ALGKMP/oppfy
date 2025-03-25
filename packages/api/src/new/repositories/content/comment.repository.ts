@@ -1,4 +1,4 @@
-import { and, count, desc, eq, lt, lte, or } from "drizzle-orm";
+import { and, count, desc, eq, lte, or } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
