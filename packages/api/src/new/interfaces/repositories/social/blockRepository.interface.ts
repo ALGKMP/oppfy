@@ -1,23 +1,11 @@
-import type { Transaction } from "@oppfy/db";
+import type { DatabaseOrTransaction } from "@oppfy/db";
 
-export interface GetPaginatedBlockedUsersParams {
-  forUserId: string;
-  cursor?: { createdAt: Date; profileId: string } | null;
-  pageSize?: number;
-}
+import type { Profile } from "../../../models";
 
-export interface GetPaginatedBlockedUsersResult {
+export interface GetBlockedUsersParams {
   userId: string;
-  username: string;
-  name: string | null;
-  profilePictureUrl: string | null;
-  createdAt: Date;
-  profileId: string;
-}
-
-export interface GetBlockedUserParams {
-  userId: string;
-  blockedUserId: string;
+  cursor?: { createdAt: Date; userId: string } | null;
+  limit?: number;
 }
 
 export interface BlockUserParams {
@@ -25,23 +13,21 @@ export interface BlockUserParams {
   blockedUserId: string;
 }
 
-export interface UnblockUserParams {
-  userId: string;
-  blockedUserId: string;
-}
-
 export interface IBlockRepository {
-  getPaginatedBlockedUsers(
-    params: GetPaginatedBlockedUsersParams,
-    tx?: Transaction,
-  ): Promise<GetPaginatedBlockedUsersResult[]>;
+  getBlockedUsers(
+    params: GetBlockedUsersParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<Profile[]>;
 
-  getBlockedUser(
-    params: GetBlockedUserParams,
-    tx?: Transaction,
-  ): Promise<{ id: string } | undefined>;
+  isUserBlocked(
+    params: BlockUserParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<boolean>;
 
-  blockUser(params: BlockUserParams, tx?: Transaction): Promise<void>;
+  blockUser(params: BlockUserParams, db?: DatabaseOrTransaction): Promise<void>;
 
-  unblockUser(params: UnblockUserParams, tx?: Transaction): Promise<void>;
+  unblockUser(
+    params: BlockUserParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<void>;
 }

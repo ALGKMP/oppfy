@@ -1,186 +1,89 @@
-import type { Transaction } from "@oppfy/db";
+import type { DatabaseOrTransaction } from "@oppfy/db";
 
-export interface CreateFollowerParams {
-  senderUserId: string;
-  recipientUserId: string;
-}
+import type { Profile } from "../../../models";
 
-export interface RemoveFollowerParams {
-  followerId: string;
-  followeeId: string;
-}
-
-export interface GetFollowerParams {
-  followerId: string;
-  followeeId: string;
-}
-
-export interface CountFollowersParams {
+export interface UserIdParams {
   userId: string;
 }
 
-export interface CountFollowingParams {
-  userId: string;
-}
-
-export interface CountFollowRequestsParams {
-  userId: string;
-}
-
-export interface DeleteFollowRequestParams {
+export interface FollowParams {
   senderId: string;
   recipientId: string;
 }
 
-export interface CreateFollowRequestParams {
-  senderId: string;
-  recipientId: string;
+export interface PaginationParams {
+  cursor?: { createdAt: Date; userId: string } | null;
+  limit?: number;
 }
 
-export interface GetFollowRequestParams {
-  senderId: string;
-  recipientId: string;
-}
-
-export interface AcceptFollowRequestParams {
-  senderId: string;
-  recipientId: string;
-}
-
-export interface PaginateFollowersSelfParams {
-  forUserId: string;
-  cursor?: { createdAt: Date; profileId: string } | null;
-  pageSize?: number;
-}
-
-export interface PaginateFollowersOthersParams {
-  forUserId: string;
-  currentUserId: string;
-  cursor?: { createdAt: Date; profileId: string } | null;
-  pageSize?: number;
-}
-
-export interface GetAllFollowingIdsParams {
-  forUserId: string;
-}
-
-export interface PaginateFollowingSelfParams {
-  userId: string;
-  cursor?: { createdAt: Date; profileId: string } | null;
-  pageSize?: number;
-}
-
-export interface PaginateFollowingOthersParams {
-  forUserId: string;
-  currentUserId: string;
-  cursor?: { createdAt: Date; profileId: string } | null;
-  pageSize?: number;
-}
-
-export interface PaginateFollowRequestsParams {
-  forUserId: string;
-  cursor?: { createdAt: Date; profileId: string } | null;
-  pageSize?: number;
-}
-
-export interface FollowerResult {
-  userId: string;
-  username: string;
-  name: string | null;
-  profilePictureUrl: string | null;
-  createdAt: Date;
-  profileId: string;
-  isFollowing?: boolean;
-  isFollowRequested?: boolean;
-}
-
-export interface FollowRequestResult {
-  userId: string;
-  username: string;
-  name: string | null;
-  profilePictureUrl: string | null;
-  createdAt: Date;
-  profileId: string;
+export interface PaginateFollowParams extends PaginationParams {
+  otherUserId: string;
+  selfUserId?: string;
 }
 
 export interface IFollowRepository {
-  createFollower(params: CreateFollowerParams, tx?: Transaction): Promise<void>;
-
-  removeFollower(params: RemoveFollowerParams, tx?: Transaction): Promise<void>;
-
-  removeFollowRequest(
-    senderId: string,
-    recipientId: string,
-    tx: Transaction,
+  createFollower(
+    params: FollowParams,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
-  getFollower(
-    params: GetFollowerParams,
-    tx?: Transaction,
-  ): Promise<{ id: string } | undefined>;
-
-  countFollowers(
-    params: CountFollowersParams,
-    tx?: Transaction,
-  ): Promise<number | undefined>;
-
-  countFollowing(
-    params: CountFollowingParams,
-    tx?: Transaction,
-  ): Promise<number | undefined>;
-
-  countFollowRequests(
-    params: CountFollowRequestsParams,
-    tx?: Transaction,
-  ): Promise<number | undefined>;
-
-  deleteFollowRequest(
-    params: DeleteFollowRequestParams,
-    tx: Transaction,
+  removeFollower(
+    params: FollowParams,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   createFollowRequest(
-    params: CreateFollowRequestParams,
-    tx: Transaction,
+    params: FollowParams,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
-  getFollowRequest(
-    params: GetFollowRequestParams,
-    tx?: Transaction,
-  ): Promise<{ id: string } | undefined>;
+  deleteFollowRequest(
+    params: FollowParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<void>;
 
   acceptFollowRequest(
-    params: AcceptFollowRequestParams,
-    tx: Transaction,
+    params: FollowParams,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
-  paginateFollowersSelf(
-    params: PaginateFollowersSelfParams,
-    tx?: Transaction,
-  ): Promise<FollowerResult[]>;
+  isFollowing(
+    params: FollowParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<boolean>;
 
-  paginateFollowersOthers(
-    params: PaginateFollowersOthersParams,
-    tx?: Transaction,
-  ): Promise<FollowerResult[]>;
+  isFollowRequested(
+    params: FollowParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<boolean>;
 
-  getAllFollowingIds(
-    params: GetAllFollowingIdsParams,
-    tx?: Transaction,
-  ): Promise<string[]>;
+  countFollowers(
+    params: UserIdParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<number>;
 
-  paginateFollowingSelf(
-    params: PaginateFollowingSelfParams,
-    tx?: Transaction,
-  ): Promise<FollowerResult[]>;
+  countFollowing(
+    params: UserIdParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<number>;
 
-  paginateFollowingOthers(
-    params: PaginateFollowingOthersParams,
-    tx?: Transaction,
-  ): Promise<FollowerResult[]>;
+  countFollowRequests(
+    params: UserIdParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<number>;
+
+  paginateFollowers(
+    params: PaginateFollowParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<Profile[]>;
+
+  paginateFollowing(
+    params: PaginateFollowParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<Profile[]>;
 
   paginateFollowRequests(
-    params: PaginateFollowRequestsParams,
-    tx?: Transaction,
-  ): Promise<FollowRequestResult[]>;
+    params: PaginateFollowParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<Profile[]>;
 }

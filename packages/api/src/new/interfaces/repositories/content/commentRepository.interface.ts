@@ -1,6 +1,8 @@
 import type { InferSelectModel } from "drizzle-orm";
 
 import type { schema, Transaction } from "@oppfy/db";
+
+import type { Profile } from "../../../models";
 import type { CommentCursor } from "../../services/content/postInteractionService.interface";
 
 export type Comment = InferSelectModel<typeof schema.comment>;
@@ -30,13 +32,8 @@ export interface PaginateCommentsParams {
 }
 
 export interface PaginatedComment {
-  commentId: string;
-  userId: string;
-  username: string;
-  profilePictureUrl: string | null;
-  postId: string;
-  body: string;
-  createdAt: Date;
+  comment: Comment;
+  profile: Profile;
 }
 
 export interface ICommentRepository {
