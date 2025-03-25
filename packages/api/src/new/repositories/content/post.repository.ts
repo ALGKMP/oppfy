@@ -130,18 +130,18 @@ export class PostRepository implements IPostRepository {
   ): Promise<PostResult[]> {
     const { query } = this.baseQuery(userId, tx);
 
-    let whereClause = eq(this.schema.post.authorUserId, userId);
-
-    if (cursor) {
-      const cursorCondition = or(
-        lt(this.schema.post.createdAt, cursor.createdAt),
-        and(
-          eq(this.schema.post.createdAt, cursor.createdAt),
-          lt(this.schema.post.id, cursor.postId),
-        ),
-      );
-      whereClause = and(whereClause, cursorCondition);
-    }
+    const whereClause = and(
+      eq(this.schema.post.authorUserId, userId),
+      cursor
+        ? or(
+            lt(this.schema.post.createdAt, cursor.createdAt),
+            and(
+              eq(this.schema.post.createdAt, cursor.createdAt),
+              lt(this.schema.post.id, cursor.postId),
+            ),
+          )
+        : undefined,
+    );
 
     const results = await query
       .where(whereClause)
