@@ -103,11 +103,11 @@ export class CommentRepository implements ICommentRepository {
       )
       .limit(pageSize + 1);
 
-    const commentsWithProfiles = results.map((result) => ({
+    const commentsAndProfiles = results.map((result) => ({
       comment: result.comment,
       profile: result.profile,
     }));
 
-    return commentsWithProfiles;
+    return commentsAndProfiles;
   }
 }

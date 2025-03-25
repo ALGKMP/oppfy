@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull, or } from "drizzle-orm";
 import type { PgSelect } from "drizzle-orm/pg-core";
 
 import type { Schema } from "../..";
@@ -28,11 +28,17 @@ export function withoutBlocked<T extends PgSelect>(
 ) {
   return qb
     .leftJoin(
-      schema.userRelationship,
-      and(
-        eq(schema.userRelationship.userIdA, userId),
-        eq(schema.userRelationship.userIdB, schema.profile.userId),
+      schema.block,
+      or(
+        and(
+          eq(schema.block.blockedByUserId, userId),
+          eq(schema.block.blockedUserId, schema.profile.userId),
+        ),
+        and(
+          eq(schema.block.blockedUserId, userId),
+          eq(schema.block.blockedByUserId, schema.profile.userId),
+        ),
       ),
     )
-    .where(eq(schema.userRelationship.blocked, false));
+    .where(isNull(schema.block.id));
 }

@@ -14,7 +14,7 @@ export interface BlockUserParams {
 }
 
 export interface IBlockRepository {
-  getBlockedUsers(
+  paginateBlockedUsers(
     params: GetBlockedUsersParams,
     db?: DatabaseOrTransaction,
   ): Promise<Profile[]>;
