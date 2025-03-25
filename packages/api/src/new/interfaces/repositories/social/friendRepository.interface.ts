@@ -1,139 +1,73 @@
 import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
-export interface CreateFriendParams {
-  senderId: string;
-  recipientId: string;
-}
+import type { Profile } from "../../../models";
 
-export interface RemoveFriendParams {
+export interface UserIdParams {
+  userId: string;
+}
+export interface FriendParams {
   userIdA: string;
   userIdB: string;
 }
 
-export interface GetFriendshipParams {
-  userIdA: string;
-  userIdB: string;
-}
-
-export interface CountFriendsParams {
-  userId: string;
-}
-
-export interface CountFriendRequestsParams {
-  userId: string;
-}
-
-export interface CreateFriendRequestParams {
+export interface FriendRequestParams {
   senderId: string;
   recipientId: string;
 }
 
-export interface DeleteFriendRequestParams {
-  senderId: string;
-  recipientId: string;
+export interface PaginationParams {
+  cursor?: { createdAt: Date; userId: string } | null;
+  limit?: number;
 }
 
-export interface GetFriendRequestParams {
-  senderId: string;
-  recipientId: string;
-}
-
-export interface PaginateFriendsSelfParams {
-  forUserId: string;
-  cursor?: { createdAt: Date; profileId: string } | null;
-  pageSize?: number;
-}
-
-export interface PaginateFriendsOtherParams {
-  forUserId: string;
-  currentUserId: string;
-  cursor?: { createdAt: Date; profileId: string } | null;
-  pageSize?: number;
-}
-
-export interface PaginateFriendRequestsParams {
-  forUserId: string;
-  cursor?: { createdAt: Date; profileId: string } | null;
-  pageSize?: number;
-}
-
-export interface FriendshipExistsParams {
-  userIdA: string;
-  userIdB: string;
-}
-
-export interface FriendResult {
+export interface PaginateFriendParams extends PaginationParams {
   userId: string;
-  username: string;
-  name: string | null;
-  profilePictureUrl: string | null;
-  createdAt: Date;
-  profileId: string;
-  isFriend?: boolean;
-  isFriendRequested?: boolean;
-}
-
-export interface FriendRequestResult {
-  userId: string;
-  username: string;
-  name: string | null;
-  profilePictureUrl: string | null;
-  createdAt: Date;
-  profileId: string;
 }
 
 export interface IFriendRepository {
-  createFriend(params: CreateFriendParams, tx: Transaction): Promise<void>;
+  createFriend(params: FriendParams, tx: Transaction): Promise<void>;
 
-  removeFriend(params: RemoveFriendParams, tx: Transaction): Promise<void>;
-
-  getFriendship(
-    params: GetFriendshipParams,
-    tx?: Transaction,
-  ): Promise<{ id: string } | undefined>;
-
-  countFriends(
-    params: CountFriendsParams,
-    tx?: Transaction,
-  ): Promise<number | undefined>;
-
-  countFriendRequests(
-    params: CountFriendRequestsParams,
-    tx?: Transaction,
-  ): Promise<number | undefined>;
+  removeFriend(params: FriendParams, tx: Transaction): Promise<void>;
 
   createFriendRequest(
-    params: CreateFriendRequestParams,
+    params: FriendRequestParams,
     tx: Transaction,
   ): Promise<void>;
 
   deleteFriendRequest(
-    params: DeleteFriendRequestParams,
+    params: FriendRequestParams,
     tx: Transaction,
   ): Promise<void>;
 
-  getFriendRequest(
-    params: GetFriendRequestParams,
-    tx?: Transaction,
-  ): Promise<{ id: string } | undefined>;
+  acceptFriendRequest(
+    params: FriendRequestParams,
+    tx: Transaction,
+  ): Promise<void>;
 
-  paginateFriendsSelf(
-    params: PaginateFriendsSelfParams,
-    tx?: Transaction,
-  ): Promise<FriendResult[]>;
+  isFriends(params: FriendParams, db?: DatabaseOrTransaction): Promise<boolean>;
 
-  paginateFriendsOther(
-    params: PaginateFriendsOtherParams,
-    tx?: Transaction,
-  ): Promise<FriendResult[]>;
+  isFriendRequested(
+    params: FriendRequestParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<boolean>;
+
+  countFriends(
+    params: UserIdParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<number>;
+
+  countFriendRequests(
+    params: UserIdParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<number>;
+
+  paginateFriends(
+    params: PaginateFriendParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<Profile[]>;
 
   paginateFriendRequests(
-    params: PaginateFriendRequestsParams,
-    tx?: Transaction,
-  ): Promise<FriendRequestResult[]>;
-
-  friendshipExists(
-    params: FriendshipExistsParams,
-    tx?: Transaction,
-  ): Promise<boolean>;
+    params: PaginateFriendParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<Profile[]>;
 }

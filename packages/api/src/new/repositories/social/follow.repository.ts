@@ -31,37 +31,37 @@ export class FollowRepository implements IFollowRepository {
   }
 
   async createFollower(params: FollowParams, tx: Transaction): Promise<void> {
-    const { followerId, followeeId } = params;
+    const { senderId, recipientId } = params;
 
     // Insert the follow relationship
     await tx.insert(this.schema.follow).values({
-      senderId: followerId,
-      recipientId: followeeId,
+      senderId,
+      recipientId,
     });
 
     // Increment follower's following count in userStats
     await tx
       .update(this.schema.userStats)
       .set({ following: sql`${this.schema.userStats.following} + 1` })
-      .where(eq(this.schema.userStats.userId, followerId));
+      .where(eq(this.schema.userStats.userId, senderId));
 
     // Increment followee's followers count in userStats
     await tx
       .update(this.schema.userStats)
       .set({ followers: sql`${this.schema.userStats.followers} + 1` })
-      .where(eq(this.schema.userStats.userId, followeeId));
+      .where(eq(this.schema.userStats.userId, recipientId));
   }
 
   async removeFollower(params: FollowParams, tx: Transaction): Promise<void> {
-    const { followerId, followeeId } = params;
+    const { senderId, recipientId } = params;
 
     // Delete the follow relationship
     await tx
       .delete(this.schema.follow)
       .where(
         and(
-          eq(this.schema.follow.senderId, followerId),
-          eq(this.schema.follow.recipientId, followeeId),
+          eq(this.schema.follow.senderId, senderId),
+          eq(this.schema.follow.recipientId, recipientId),
         ),
       );
 
@@ -69,23 +69,23 @@ export class FollowRepository implements IFollowRepository {
     await tx
       .update(this.schema.userStats)
       .set({ following: sql`${this.schema.userStats.following} - 1` })
-      .where(eq(this.schema.userStats.userId, followerId));
+      .where(eq(this.schema.userStats.userId, senderId));
 
     // Decrement followee's followers count
     await tx
       .update(this.schema.userStats)
       .set({ followers: sql`${this.schema.userStats.followers} - 1` })
-      .where(eq(this.schema.userStats.userId, followeeId));
+      .where(eq(this.schema.userStats.userId, recipientId));
   }
 
   async createFollowRequest(
     params: FollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const { followerId, followeeId } = params;
+    const { senderId, recipientId } = params;
     await db.insert(this.schema.followRequest).values({
-      senderId: followerId,
-      recipientId: followeeId,
+      senderId,
+      recipientId,
     });
   }
 
@@ -93,13 +93,13 @@ export class FollowRepository implements IFollowRepository {
     params: FollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const { followerId, followeeId } = params;
+    const { senderId, recipientId } = params;
     await db
       .delete(this.schema.followRequest)
       .where(
         and(
-          eq(this.schema.followRequest.senderId, followerId),
-          eq(this.schema.followRequest.recipientId, followeeId),
+          eq(this.schema.followRequest.senderId, senderId),
+          eq(this.schema.followRequest.recipientId, recipientId),
         ),
       );
   }
@@ -108,34 +108,34 @@ export class FollowRepository implements IFollowRepository {
     params: FollowParams,
     tx: Transaction,
   ): Promise<void> {
-    const { followerId, followeeId } = params;
+    const { senderId, recipientId } = params;
 
     // Remove the follow request
     await tx
       .delete(this.schema.followRequest)
       .where(
         and(
-          eq(this.schema.followRequest.senderId, followerId),
-          eq(this.schema.followRequest.recipientId, followeeId),
+          eq(this.schema.followRequest.senderId, senderId),
+          eq(this.schema.followRequest.recipientId, recipientId),
         ),
       );
 
     // Create the follower relationship using the same db instance
-    await this.createFollower({ followerId, followeeId }, tx);
+    await this.createFollower({ senderId, recipientId }, tx);
   }
 
   async isFollowing(
     params: FollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<boolean> {
-    const { followerId, followeeId } = params;
+    const { senderId, recipientId } = params;
     const result = await db
       .select({ id: this.schema.follow.id })
       .from(this.schema.follow)
       .where(
         and(
-          eq(this.schema.follow.senderId, followerId),
-          eq(this.schema.follow.recipientId, followeeId),
+          eq(this.schema.follow.senderId, senderId),
+          eq(this.schema.follow.recipientId, recipientId),
         ),
       )
       .limit(1);
@@ -146,14 +146,14 @@ export class FollowRepository implements IFollowRepository {
     params: FollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<boolean> {
-    const { followerId, followeeId } = params;
+    const { senderId, recipientId } = params;
     const result = await db
       .select({ id: this.schema.followRequest.id })
       .from(this.schema.followRequest)
       .where(
         and(
-          eq(this.schema.followRequest.senderId, followerId),
-          eq(this.schema.followRequest.recipientId, followeeId),
+          eq(this.schema.followRequest.senderId, senderId),
+          eq(this.schema.followRequest.recipientId, recipientId),
         ),
       )
       .limit(1);
@@ -200,7 +200,7 @@ export class FollowRepository implements IFollowRepository {
     params: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile[]> {
-    const { userId, cursor, limit = 10 } = params;
+    const { otherUserId: userId, cursor, limit = 10 } = params;
 
     const followers = await db
       .select()
@@ -237,7 +237,7 @@ export class FollowRepository implements IFollowRepository {
     params: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile[]> {
-    const { userId, cursor, limit = 10 } = params;
+    const { otherUserId: userId, cursor, limit = 10 } = params;
 
     const following = await db
       .select()
@@ -274,7 +274,7 @@ export class FollowRepository implements IFollowRepository {
     params: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile[]> {
-    const { userId, cursor, limit = 10 } = params;
+    const { otherUserId: userId, cursor, limit = 10 } = params;
 
     const requests = await db
       .select()

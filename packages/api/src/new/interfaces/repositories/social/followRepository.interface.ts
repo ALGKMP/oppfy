@@ -2,13 +2,13 @@ import type { DatabaseOrTransaction } from "@oppfy/db";
 
 import type { Profile } from "../../../models";
 
-export interface FollowParams {
-  followerId: string;
-  followeeId: string;
-}
-
 export interface UserIdParams {
   userId: string;
+}
+
+export interface FollowParams {
+  senderId: string;
+  recipientId: string;
 }
 
 export interface PaginationParams {
@@ -17,13 +17,8 @@ export interface PaginationParams {
 }
 
 export interface PaginateFollowParams extends PaginationParams {
-  userId: string;
-  currentUserId?: string;
-}
-
-export interface FollowResult extends Profile {
-  isFollowing?: boolean;
-  isFollowRequested?: boolean;
+  otherUserId: string;
+  selfUserId?: string;
 }
 
 export interface IFollowRepository {
