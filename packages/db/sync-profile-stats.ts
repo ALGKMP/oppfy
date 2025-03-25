@@ -30,7 +30,7 @@ async function syncProfileStats() {
           count: sql<number>`cast(count(*) as integer)`,
         })
         .from(schema.post)
-        .where(sql`${schema.post.recipientId} = ${profile.userId}`);
+        .where(sql`${schema.post.recipientUserId} = ${profile.userId}`);
 
       // Count friends (where user is either user1 or user2)
       const friendsResult = await db

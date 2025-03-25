@@ -326,10 +326,10 @@ export const post = pgTable(
   "post",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    authorId: uuid("author_id")
+    authorUserId: uuid("author_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    recipientId: uuid("recipient_id")
+    recipientUserId: uuid("recipient_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     caption: text("caption").notNull().default(""),
@@ -338,7 +338,6 @@ export const post = pgTable(
     height: integer("height").notNull().default(500),
     mediaType: mediaTypeEnum("media_type").notNull(),
     postType: postTypeEnum("post_type").notNull().default("public"),
-    privacy: privacyEnum("privacy_setting").default("public").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -347,8 +346,8 @@ export const post = pgTable(
       .notNull(),
   },
   (table) => ({
-    authorIdx: index("post_author_idx").on(table.authorId),
-    recipientIdx: index("post_recipient_idx").on(table.recipientId),
+    authorUserIdx: index("post_author_user_idx").on(table.authorUserId),
+    recipientUserIdx: index("post_recipient_user_idx").on(table.recipientUserId),
     postTypeIdx: index("post_type_idx").on(table.postType),
     createdAtIdx: index("post_created_at_idx").on(table.createdAt),
   }),
@@ -357,12 +356,12 @@ export const post = pgTable(
 export const postRelations = relations(post, ({ one, many }) => ({
   author: one(user, {
     relationName: "author",
-    fields: [post.authorId],
+    fields: [post.authorUserId],
     references: [user.id],
   }),
   recipient: one(user, {
     relationName: "recipient",
-    fields: [post.recipientId],
+    fields: [post.recipientUserId],
     references: [user.id],
   }),
   postStats: one(postStats, {
