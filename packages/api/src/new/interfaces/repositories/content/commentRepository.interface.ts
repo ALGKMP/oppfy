@@ -41,18 +41,22 @@ export interface ICommentRepository {
     params: GetCommentParams,
     db?: DatabaseOrTransaction,
   ): Promise<Comment | undefined>;
+
   addComment(
     params: AddCommentParams,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
+
   removeComment(
     params: RemoveCommentParams,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
+
   countComments(
     params: CountCommentsParams,
     db?: DatabaseOrTransaction,
   ): Promise<number>;
+
   paginateComments(
     params: PaginateCommentsParams,
     db?: DatabaseOrTransaction,
