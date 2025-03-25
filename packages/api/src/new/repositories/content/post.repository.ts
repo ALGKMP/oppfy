@@ -1,7 +1,12 @@
 import { aliasedTable, and, desc, eq, lt, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
-import type { Database, DatabaseOrTransaction, Schema, SQL, Transaction } from "@oppfy/db";
+import type {
+  Database,
+  DatabaseOrTransaction,
+  Schema,
+  Transaction,
+} from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import {
@@ -10,12 +15,11 @@ import {
   GetPostForNextJsParams,
   GetPostParams,
   IPostRepository,
-  PaginatedPost,
   PaginatePostsParams,
-  PostForNextJs,
+  PostResult,
+  PostResultWithoutLike,
   UpdatePostParams,
 } from "../../interfaces/repositories/content/postRepository.interface";
-import type { Post } from "../../models";
 
 @injectable()
 export class PostRepository implements IPostRepository {
@@ -25,60 +29,33 @@ export class PostRepository implements IPostRepository {
   ) {}
 
   private baseQuery(userId?: string, tx: DatabaseOrTransaction = this.db) {
-    const author = aliasedTable(this.schema.user, "author");
-    const recipient = aliasedTable(this.schema.user, "recipient");
     const authorProfile = aliasedTable(this.schema.profile, "authorProfile");
     const recipientProfile = aliasedTable(
       this.schema.profile,
       "recipientProfile",
     );
 
-    const baseSelect = {
-      id: this.schema.post.id,
-      authorUserId: this.schema.post.authorUserId,
-      authorUsername: authorProfile.username,
-      authorProfileId: authorProfile.id,
-      authorProfilePicture: authorProfile.profilePictureKey,
-      authorName: authorProfile.name,
-      recipientUserId: this.schema.post.recipientUserId,
-      recipientProfileId: recipientProfile.id,
-      recipientUsername: recipientProfile.username,
-      recipientProfilePicture: recipientProfile.profilePictureKey,
-      recipientName: recipientProfile.name,
-      caption: this.schema.post.caption,
-      key: this.schema.post.key,
-      width: this.schema.post.width,
-      height: this.schema.post.height,
-      commentsCount: this.schema.postStats.comments,
-      likesCount: this.schema.postStats.likes,
-      mediaType: this.schema.post.mediaType,
-      postType: this.schema.post.postType,
-      updatedAt: this.schema.post.updatedAt,
-      createdAt: this.schema.post.createdAt,
-    };
-
     const query = tx
-      .selectDistinct({
-        ...baseSelect,
-        ...(userId && {
-          hasLiked: sql<boolean>`
-            CASE WHEN ${this.schema.like.userId} IS NOT NULL 
-            THEN true 
-            ELSE false 
-            END
-          `.as("has_liked"),
-        }),
-      })
+      .select({
+        authorProfile: authorProfile,
+        recipientProfile: recipientProfile,
+        post: this.schema.post,
+        postStats: this.schema.postStats,
+        like: this.schema.like,
+      }) // Fetch all columns from all joined tables
       .from(this.schema.post)
       .innerJoin(
         this.schema.postStats,
         eq(this.schema.postStats.postId, this.schema.post.id),
       )
-      .innerJoin(author, eq(this.schema.post.authorUserId, author.id))
-      .innerJoin(authorProfile, eq(authorProfile.userId, author.id))
-      .innerJoin(recipient, eq(this.schema.post.recipientUserId, recipient.id))
-      .innerJoin(recipientProfile, eq(recipientProfile.userId, recipient.id));
-
+      .innerJoin(
+        authorProfile,
+        eq(this.schema.post.authorUserId, authorProfile.userId),
+      )
+      .innerJoin(
+        recipientProfile,
+        eq(this.schema.post.recipientUserId, recipientProfile.userId),
+      );
     if (userId) {
       query.leftJoin(
         this.schema.like,
@@ -89,31 +66,31 @@ export class PostRepository implements IPostRepository {
       );
     }
 
-    return { query, author, recipient, authorProfile, recipientProfile };
+    return { query, authorProfile, recipientProfile };
   }
 
   async getPost(
     { postId, userId }: GetPostParams,
     tx: DatabaseOrTransaction = this.db,
-  ): Promise<Post | undefined> {
+  ): Promise<PostResult | undefined> {
     const { query } = this.baseQuery(userId, tx);
     const results = await query.where(eq(this.schema.post.id, postId)).limit(1);
-    return results[0];
+    return results[0]; // Return raw result or undefined
   }
 
   async getPostForNextJs(
     { postId }: GetPostForNextJsParams,
     tx: DatabaseOrTransaction = this.db,
-  ): Promise<PostForNextJs | undefined> {
+  ): Promise<PostResultWithoutLike | undefined> {
     const { query } = this.baseQuery(undefined, tx);
     const results = await query.where(eq(this.schema.post.id, postId)).limit(1);
-    return results[0];
+    return results[0]; // Return raw result or undefined
   }
 
   async paginatePostsOfFollowing(
     { userId, cursor, pageSize = 10 }: PaginatePostsParams,
     tx: DatabaseOrTransaction = this.db,
-  ): Promise<PaginatedPost[]> {
+  ): Promise<PostResult[]> {
     const { query } = this.baseQuery(userId, tx);
 
     let whereClause = or(
@@ -144,19 +121,16 @@ export class PostRepository implements IPostRepository {
       .orderBy(desc(this.schema.post.createdAt), desc(this.schema.post.id))
       .limit(pageSize + 1);
 
-    return results;
+    return results; // Return raw results directly
   }
 
   async paginatePostsOfUser(
     { userId, cursor, pageSize = 10 }: PaginatePostsParams,
     tx: DatabaseOrTransaction = this.db,
-  ): Promise<PaginatedPost[]> {
+  ): Promise<PostResult[]> {
     const { query } = this.baseQuery(userId, tx);
 
-    let whereClause: SQL<unknown> | undefined = eq(
-      this.schema.post.authorUserId,
-      userId,
-    );
+    let whereClause = eq(this.schema.post.authorUserId, userId);
 
     if (cursor) {
       const cursorCondition = or(
@@ -174,7 +148,7 @@ export class PostRepository implements IPostRepository {
       .orderBy(desc(this.schema.post.createdAt), desc(this.schema.post.id))
       .limit(pageSize + 1);
 
-    return results;
+    return results; // Return raw results directly
   }
 
   async updatePost(
@@ -206,7 +180,7 @@ export class PostRepository implements IPostRepository {
 
   async deletePost(
     { userId, postId }: DeletePostParams,
-    tx: DatabaseOrTransaction,
+    tx: Transaction,
   ): Promise<void> {
     const post = await tx.query.post.findFirst({
       where: eq(this.schema.post.id, postId),
