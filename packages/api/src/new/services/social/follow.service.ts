@@ -302,7 +302,7 @@ export class FollowService implements IFollowService {
     >
   > {
     const { userId, limit, cursor } = options;
-    const followers = await this.followRepository.paginateFollowersSelf({
+    const followers = await this.followRepository.paginateFollowers({
       forUserId: userId,
       pageSize: limit,
       cursor: cursor
