@@ -333,7 +333,7 @@ export const post = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     caption: text("caption").notNull().default(""),
-    key: text("key").unique().notNull(),
+    postKey: text("post_key").unique().notNull(),
     width: integer("width").notNull().default(500),
     height: integer("height").notNull().default(500),
     mediaType: mediaTypeEnum("media_type").notNull(),
