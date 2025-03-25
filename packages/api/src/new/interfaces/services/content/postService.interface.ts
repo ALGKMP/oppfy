@@ -4,12 +4,12 @@ import type { Schema } from "@oppfy/db";
 
 import type { PostErrors } from "../../../errors/content/post.error";
 
+import type { Post } from "../../../models";
+
 export interface PaginatedResponse<TItem, TCursor> {
   items: TItem[];
   nextCursor: TCursor | null;
 }
-
-export type Post = Schema["post"]["$inferSelect"];
 
 export type PostStats = Schema["postStats"]["$inferSelect"];
 

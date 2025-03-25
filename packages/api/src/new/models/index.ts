@@ -32,7 +32,7 @@ export type UserStatus = InferSelectModel<typeof schema.userStatus>;
 export type UserStats = InferSelectModel<typeof schema.userStats>;
 export interface Post extends InferSelectModel<typeof schema.post> {
   hasLiked?: boolean;
-  postUrl?: string;
+  postUrl?: string | null;
 }
 export type PostForNextJs = Post & {
   authorUsername: string | null;
