@@ -1,51 +1,49 @@
-import { DomainError } from "../domain.error";
+import { createBaseErrorClass } from "../errorFactory";
+
+const PostError = createBaseErrorClass("Post");
 
 export namespace PostErrors {
-  export class FailedToCreatePost extends DomainError {
+  export class FailedToCreatePost extends PostError {
     constructor(userId: string) {
       super(
-        "FAILED_TO_CREATE_POST",
         `Failed to create post for user ${userId}`,
       );
     }
   }
 
-  export class FailedToUpdatePost extends DomainError {
+  export class FailedToUpdatePost extends PostError {
     constructor(postId: string) {
-      super("FAILED_TO_UPDATE_POST", `Failed to update post ${postId}`);
+      super(`Failed to update post ${postId}`);
     }
   }
 
-  export class FailedToDeletePost extends DomainError {
+  export class FailedToDeletePost extends PostError {
     constructor(postId: string) {
-      super("FAILED_TO_DELETE_POST", `Failed to delete post ${postId}`);
+      super(`Failed to delete post ${postId}`);
     }
   }
 
-  export class PostNotFound extends DomainError {
+  export class PostNotFound extends PostError {
     constructor(postId: string) {
-      super("POST_NOT_FOUND", `Post ${postId} not found`);
+      super(`Post ${postId} not found`);
     }
   }
 
-  export class NotPostOwner extends DomainError {
-    constructor(postId: string, userId: string) {
-      super(
-        "NOT_POST_OWNER",
-        `User ${userId} is not the owner of post ${postId}`,
-      );
-    }
-  }
-
-  export class PostDeleted extends DomainError {
+  export class PostDeleted extends PostError {
     constructor(postId: string) {
-      super("POST_DELETED", `Post ${postId} has been deleted`);
+      super(`Post ${postId} has been deleted`);
     }
   }
 
-  export class InvalidPostContent extends DomainError {
+  export class InvalidPostContent extends PostError {
     constructor(message: string) {
-      super("INVALID_POST_CONTENT", message);
+      super(message);
+    }
+  }
+
+  export class NotPostOwner extends PostError {
+    constructor(postId: string, userId: string) {
+      super(`User ${userId} is not the owner of post ${postId}`);
     }
   }
 }
