@@ -79,7 +79,7 @@ export class BlockService implements IBlockService {
           );
         }
 
-        await this.blockRepository.block(
+        await this.blockRepository.blockUser(
           { userId: blockerId, blockedUserId: blockedId },
           tx,
         );
@@ -111,7 +111,7 @@ export class BlockService implements IBlockService {
           throw new BlockErrors.BlockNotFound(blockerId, blockedId);
         }
 
-        await this.blockRepository.unblock(
+        await this.blockRepository.unblockUser(
           { userId: blockerId, blockedUserId: blockedId },
           tx,
         );

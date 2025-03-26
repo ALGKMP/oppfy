@@ -36,7 +36,7 @@ export class BlockRepository implements IBlockRepository {
     return !!block;
   }
 
-  async block(
+  async blockUser(
     params: BlockParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
@@ -48,7 +48,7 @@ export class BlockRepository implements IBlockRepository {
     });
   }
 
-  async unblock(
+  async unblockUser(
     params: BlockParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {

@@ -21,7 +21,7 @@ export interface IBlockRepository {
 
   isBlocked(params: BlockParams, db?: DatabaseOrTransaction): Promise<boolean>;
 
-  block(params: BlockParams, db?: DatabaseOrTransaction): Promise<void>;
+  blockUser(params: BlockParams, db?: DatabaseOrTransaction): Promise<void>;
 
-  unblock(params: BlockParams, db?: DatabaseOrTransaction): Promise<void>;
+  unblockUser(params: BlockParams, db?: DatabaseOrTransaction): Promise<void>;
 }
