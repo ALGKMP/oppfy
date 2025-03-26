@@ -7,8 +7,8 @@ import type {
   PostResult,
   PostResultWithoutLike,
 } from "../../repositories/content/post.repository.interface";
-import { Comment } from "../../../models";
-import { Profile } from "../../../models";
+import type { Comment } from "../../../models";
+import type { Profile } from "../../../models";
 
 export interface PaginatedResponse<TItem, TCursor> {
   items: TItem[];
