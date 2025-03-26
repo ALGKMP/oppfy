@@ -41,6 +41,19 @@ export class ProfileRepository implements IProfileRepository {
     return profile;
   }
 
+  async getProfileByUsername(
+    params: UsernameParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<Profile | undefined> {
+    const { username } = params;
+
+    const profile = await db.query.profile.findFirst({
+      where: eq(this.schema.profile.username, username),
+    });
+
+    return profile;
+  }
+
   async getProfilesByIds(
     params: ProfilesByIdsParams,
     db: DatabaseOrTransaction = this.db,

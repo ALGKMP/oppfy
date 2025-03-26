@@ -12,12 +12,12 @@ import { TYPES } from "../../container";
 import {
   CreatePostStatsParams,
   DeletePostParams,
-  GetPostForNextJsParams as GetPostForSiteParams,
+  GetPostForSiteParams,
   GetPostParams,
   IPostRepository,
   PaginatePostsParams,
   PostResult,
-  PostResultWithoutLike,
+  PostResultWithLike,
   UpdatePostParams,
 } from "../../interfaces/repositories/content/post.repository.interface";
 
@@ -88,7 +88,7 @@ export class PostRepository implements IPostRepository {
   async getPostForSite(
     { postId }: GetPostForSiteParams,
     tx: DatabaseOrTransaction = this.db,
-  ): Promise<PostResultWithoutLike | undefined> {
+  ): Promise<PostResultWithLike | undefined> {
     const query = this.baseQuery(undefined, tx);
     const results = await query.where(eq(this.schema.post.id, postId)).limit(1);
     return results[0];

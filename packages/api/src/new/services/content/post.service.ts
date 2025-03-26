@@ -14,7 +14,7 @@ import type { ICommentRepository } from "../../interfaces/repositories/content/c
 import type {
   IPostRepository,
   PostResult as RawPostResult,
-  PostResultWithoutLike as RawPostResultWithoutLike,
+  PostResultWithLike as RawPostResultWithoutLike,
 } from "../../interfaces/repositories/content/post.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";

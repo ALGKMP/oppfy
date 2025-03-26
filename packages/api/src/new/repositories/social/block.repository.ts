@@ -5,7 +5,7 @@ import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import type {
-  BlockUserParams,
+  BlockParams,
   GetBlockedUsersParams,
   IBlockRepository,
 } from "../../interfaces/repositories/social/block.repository.interface";
@@ -20,8 +20,8 @@ export class BlockRepository implements IBlockRepository {
     private readonly schema: Schema,
   ) {}
 
-  async isUserBlocked(
-    params: BlockUserParams,
+  async isBlocked(
+    params: BlockParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<boolean> {
     const { userId, blockedUserId } = params;
@@ -36,8 +36,8 @@ export class BlockRepository implements IBlockRepository {
     return !!block;
   }
 
-  async blockUser(
-    params: BlockUserParams,
+  async block(
+    params: BlockParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { userId, blockedUserId } = params;
@@ -48,8 +48,8 @@ export class BlockRepository implements IBlockRepository {
     });
   }
 
-  async unblockUser(
-    params: BlockUserParams,
+  async unblock(
+    params: BlockParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { userId, blockedUserId } = params;
@@ -64,7 +64,7 @@ export class BlockRepository implements IBlockRepository {
       );
   }
 
-  async paginateBlockedUsers(
+  async paginateBlockedProfiles(
     params: GetBlockedUsersParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<BlockWithProfile[]> {

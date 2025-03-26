@@ -8,26 +8,20 @@ export interface GetBlockedUsersParams {
   limit?: number;
 }
 
-export interface BlockUserParams {
+export interface BlockParams {
   userId: string;
   blockedUserId: string;
 }
 
 export interface IBlockRepository {
-  paginateBlockedUsers(
+  paginateBlockedProfiles(
     params: GetBlockedUsersParams,
     db?: DatabaseOrTransaction,
   ): Promise<BlockWithProfile[]>;
 
-  isUserBlocked(
-    params: BlockUserParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<boolean>;
+  isBlocked(params: BlockParams, db?: DatabaseOrTransaction): Promise<boolean>;
 
-  blockUser(params: BlockUserParams, db?: DatabaseOrTransaction): Promise<void>;
+  block(params: BlockParams, db?: DatabaseOrTransaction): Promise<void>;
 
-  unblockUser(
-    params: BlockUserParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<void>;
+  unblock(params: BlockParams, db?: DatabaseOrTransaction): Promise<void>;
 }

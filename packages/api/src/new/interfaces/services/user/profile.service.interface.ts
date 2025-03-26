@@ -40,17 +40,17 @@ export interface GenerateProfilePicturePresignedUrlParams {
   contentLength: number;
 }
 
-type FollowRelationshipState =
+export type FollowRelationshipState =
   | "NOT_FOLLOWING"
   | "FOLLOW_REQUEST_SENT"
   | "FOLLOWING";
 
-type FriendRelationshipState =
+export type FriendRelationshipState =
   | "NOT_FRIENDS"
   | "FRIEND_REQUEST_SENT"
   | "FRIENDS";
 
-interface RelationshipState {
+export interface RelationshipState {
   follow: FollowRelationshipState;
   friend: FriendRelationshipState;
 }
