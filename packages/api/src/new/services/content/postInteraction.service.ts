@@ -11,276 +11,149 @@ import type {
 } from "../../interfaces/repositories/content/comment.repository.interface";
 import type { ILikeRepository } from "../../interfaces/repositories/content/like.repository.interface";
 import type { IPostRepository } from "../../interfaces/repositories/content/post.repository.interface";
-import type { IPostStatsRepository } from "../../interfaces/repositories/content/postStatsRepository.interface";
-import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
-import type { INotificationsRepository } from "../../interfaces/repositories/user/notification.repository.interface";
-import type { IUserStatsRepository } from "../../interfaces/repositories/user/profileStatsRepository.interface";
 import type {
+  AddCommentParams,
   CommentCursor,
-  CommentOnPostParams,
-  DeleteCommentParams,
-  GetLikeParams,
   IPostInteractionService,
   LikePostParams,
   PaginateCommentsParams,
   PaginatedResponse,
+  RemoveCommentParams,
   UnlikePostParams,
 } from "../../interfaces/services/content/postInteraction.service.interface";
 
 @injectable()
 export class PostInteractionService implements IPostInteractionService {
   constructor(
-    @inject(TYPES.Database)
-    private db: Database,
+    @inject(TYPES.Database) private readonly db: Database,
     @inject(TYPES.PostRepository)
-    private postRepository: IPostRepository,
-    @inject(TYPES.LikeRepository)
-    private likeRepository: ILikeRepository,
+    private readonly postRepository: IPostRepository,
     @inject(TYPES.CommentRepository)
-    private commentRepository: ICommentRepository,
-    @inject(TYPES.PostStatsRepository)
-    private postStatsRepository: IPostStatsRepository,
-    @inject(TYPES.NotificationsRepository)
-    private notificationsRepository: INotificationsRepository,
-    @inject(TYPES.UserStatsRepository)
-    private userStatsRepository: IUserStatsRepository,
-    @inject(TYPES.RelationshipRepository)
-    private relationshipRepository: IRelationshipRepository,
+    private readonly commentRepository: ICommentRepository,
+    @inject(TYPES.LikeRepository)
+    private readonly likeRepository: ILikeRepository,
   ) {}
 
-  async likePost(
-    params: LikePostParams,
-  ): Promise<
+  async likePost({
+    postId,
+    userId,
+  }: LikePostParams): Promise<
     Result<
       void,
+      | PostInteractionErrors.PostNotFound
       | PostInteractionErrors.FailedToLikePost
       | PostInteractionErrors.AlreadyLiked
-      | PostInteractionErrors.PostNotFound
     >
   > {
-    const { userId, postId } = params;
-
-    // Check if post exists
-    const post = await this.postRepository.getPost({ postId, userId });
-    if (!post) {
-      return err(new PostInteractionErrors.PostNotFound(postId));
-    }
-
-    // Check if already liked
-    const existingLike = await this.likeRepository.findLike({
-      userId,
-      postId,
-    });
-
-    if (existingLike) {
-      return err(new PostInteractionErrors.AlreadyLiked(postId, userId));
-    }
-
     await this.db.transaction(async (tx) => {
-      // Create like
-      await this.likeRepository.addLike(
-        {
-          userId,
-          postId,
-        },
-        tx,
-      );
+      const post = await this.postRepository.getPost({ postId, userId }, tx);
+      if (!post) throw new PostInteractionErrors.PostNotFound(postId);
 
-      // Update post stats
-      await this.postStatsRepository.incrementLikesCount(
-        {
-          postId,
-        },
+      const existingLike = await this.likeRepository.getLike(
+        { postId, userId },
         tx,
       );
+      if (existingLike)
+        throw new PostInteractionErrors.AlreadyLiked(postId, userId);
+
+      await this.likeRepository.addLike({ postId, userId }, tx);
     });
-
     return ok(undefined);
   }
 
-  async unlikePost(
-    params: UnlikePostParams,
-  ): Promise<
+  async unlikePost({
+    postId,
+    userId,
+  }: UnlikePostParams): Promise<
     Result<
       void,
+      | PostInteractionErrors.PostNotFound
       | PostInteractionErrors.FailedToUnlikePost
       | PostInteractionErrors.NotLiked
-      | PostInteractionErrors.PostNotFound
     >
   > {
-    const { userId, postId } = params;
-
-    // Check if post exists
-    const post = await this.postRepository.getPost({ postId, userId });
-    if (!post) {
-      return err(new PostInteractionErrors.PostNotFound(postId));
-    }
-
-    // Check if liked
-    const existingLike = await this.likeRepository.findLike({
-      userId,
-      postId,
-    });
-
-    if (!existingLike) {
-      return err(new PostInteractionErrors.NotLiked(postId, userId));
-    }
-
     await this.db.transaction(async (tx) => {
-      // Delete like
-      await this.likeRepository.removeLike(
-        {
-          userId,
-          postId,
-        },
-        tx,
-      );
+      const post = await this.postRepository.getPost({ postId, userId }, tx);
+      if (!post) throw new PostInteractionErrors.PostNotFound(postId);
 
-      // Update post stats
-      await this.postStatsRepository.decrementLikesCount(
-        {
-          postId,
-        },
+      const existingLike = await this.likeRepository.getLike(
+        { postId, userId },
         tx,
       );
+      if (!existingLike)
+        throw new PostInteractionErrors.NotLiked(postId, userId);
+
+      await this.likeRepository.removeLike({ postId, userId }, tx);
     });
-
     return ok(undefined);
   }
 
-  async getLike(
-    params: GetLikeParams,
-  ): Promise<Result<boolean, PostInteractionErrors.PostNotFound>> {
-    const { userId, postId } = params;
-
-    // Check if post exists
-    const post = await this.postRepository.getPost({ postId, userId });
-    if (!post) {
-      return err(new PostInteractionErrors.PostNotFound(postId));
-    }
-
-    const like = await this.likeRepository.findLike({
-      userId,
-      postId,
-    });
-
-    return ok(!!like);
-  }
-
-  async commentOnPost(
-    params: CommentOnPostParams,
-  ): Promise<
+  async addComment({
+    postId,
+    userId,
+    body,
+  }: AddCommentParams): Promise<
     Result<
       void,
-      PostInteractionErrors.FailedToComment | PostInteractionErrors.PostNotFound
+      PostInteractionErrors.PostNotFound | PostInteractionErrors.FailedToComment
     >
   > {
-    const { userId, postId, body } = params;
-
-    // Check if post exists
-    const post = await this.postRepository.getPost({ postId, userId });
-    if (!post) {
-      return err(new PostInteractionErrors.PostNotFound(postId));
-    }
-
     await this.db.transaction(async (tx) => {
-      // Create comment
-      await this.commentRepository.addComment(
-        {
-          userId,
-          postId,
-          body,
-        },
-        tx,
-      );
+      const post = await this.postRepository.getPost({ postId, userId }, tx);
+      if (!post) throw new PostInteractionErrors.PostNotFound(postId);
 
-      // Update post stats
-      await this.postStatsRepository.incrementCommentsCount(
-        {
-          postId,
-        },
-        tx,
-      );
+      await this.commentRepository.addComment({ postId, userId, body }, tx);
     });
-
     return ok(undefined);
   }
 
-  async deleteComment(
-    params: DeleteCommentParams,
-  ): Promise<
+  async removeComment({
+    commentId,
+    postId,
+    userId,
+  }: RemoveCommentParams): Promise<
     Result<
       void,
-      | PostInteractionErrors.FailedToDeleteComment
       | PostInteractionErrors.CommentNotFound
       | PostInteractionErrors.NotCommentOwner
+      | PostInteractionErrors.FailedToDeleteComment
     >
   > {
-    const { userId, commentId, postId } = params;
-
-    // Check if comment exists
-    const comment = await this.commentRepository.getComment({
-      commentId,
-    });
-    if (!comment) {
-      return err(new PostInteractionErrors.CommentNotFound(commentId));
-    }
-
-    // Check if user owns the comment
-    if (comment.userId !== userId) {
-      return err(new PostInteractionErrors.NotCommentOwner(commentId, userId));
-    }
-
     await this.db.transaction(async (tx) => {
-      // Delete comment
-      await this.commentRepository.removeComment(
-        {
-          commentId,
-        },
+      const comment = await this.commentRepository.getComment(
+        { commentId },
         tx,
       );
+      if (!comment) throw new PostInteractionErrors.CommentNotFound(commentId);
+      if (comment.userId !== userId)
+        throw new PostInteractionErrors.NotCommentOwner(commentId, userId);
 
-      // Update post stats
-      await this.postStatsRepository.decrementCommentsCount(
-        {
-          postId,
-        },
-        tx,
-      );
+      await this.commentRepository.removeComment({ commentId, postId }, tx);
     });
-
     return ok(undefined);
   }
 
-  async paginateComments(
-    params: PaginateCommentsParams,
-  ): Promise<
-    Result<
-      PaginatedResponse<PaginatedComment, CommentCursor>,
-      PostInteractionErrors.PostNotFound
-    >
+  async paginateComments({
+    postId,
+    cursor,
+    pageSize = 10,
+  }: PaginateCommentsParams): Promise<
+    Result<PaginatedResponse<PaginatedComment, CommentCursor>, never>
   > {
-    const { postId, cursor, pageSize = 20, userId } = params;
-
-    // Check if post exists
-    const post = await this.postRepository.getPost({ postId, userId });
-    if (!post) {
-      return err(new PostInteractionErrors.PostNotFound(postId));
-    }
-
     const comments = await this.commentRepository.paginateComments({
       postId,
       cursor,
       pageSize,
     });
+    const lastComment = comments[pageSize - 1];
 
     return ok({
-      items: comments,
+      items: comments.slice(0, pageSize),
       nextCursor:
-        comments.length === pageSize
+        comments.length > pageSize && lastComment
           ? {
-              commentId: comments[comments.length - 1]!.commentId,
-              createdAt: comments[comments.length - 1]!.createdAt,
+              commentId: lastComment.comment.id,
+              createdAt: lastComment.comment.createdAt,
             }
           : null,
     });
