@@ -4,7 +4,7 @@ import type { Schema } from "@oppfy/db";
 
 import type { PostErrors } from "../../../errors/content/post.error";
 
-import type { Post } from "../../../models";
+import type { PostResult, PostResultWithoutLike } from "../../../interfaces/repositories/content/postRepository.interface";
 
 export interface PaginatedResponse<TItem, TCursor> {
   items: TItem[];
@@ -148,19 +148,19 @@ export interface IPostService {
 
   getPost(
     params: GetPostParams,
-  ): Promise<Result<Post, PostErrors.PostNotFound | PostErrors.PostDeleted>>;
+  ): Promise<Result<PostResult, PostErrors.PostNotFound | PostErrors.PostDeleted>>;
 
   paginatePosts(
     params: PaginatePostsParams,
-  ): Promise<Result<PaginatedResponse<Post, PostCursor>, never>>;
+  ): Promise<Result<PaginatedResponse<PostResult, PostCursor | null>, never>>;
 
   paginatePostsForFeed(
     params: PaginatePostsForFeedParams,
   ): Promise<
-    Result<PaginatedResponse<Post, FeedCursor>, PostErrors.PostNotFound>
+    Result<PaginatedResponse<PostResult, FeedCursor | null>, PostErrors.PostNotFound>
   >;
 
   getPostForNextJs(
     params: GetPostForNextJsParams,
-  ): Promise<Result<Omit<Post, "hasLiked">, PostErrors.PostNotFound>>;
+  ): Promise<Result<PostResultWithoutLike, PostErrors.PostNotFound>>;
 }

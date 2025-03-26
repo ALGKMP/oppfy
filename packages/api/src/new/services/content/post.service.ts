@@ -2,16 +2,16 @@ import { randomUUID } from "crypto";
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import type { Database, InferSelectModel, schema } from "@oppfy/db";
+import type { Database } from "@oppfy/db";
 import { env } from "@oppfy/env";
 import { mux } from "@oppfy/mux";
 import { s3 } from "@oppfy/s3";
-import { cloudfront } from "@oppfy/cloudfront"; // Adjust path as needed
 
 import { TYPES } from "../../container";
 import { PostErrors } from "../../errors/content/post.error";
-import type { IPostRepository } from "../../interfaces/repositories/content/postRepository.interface";
+import type { IPostRepository, PostResult, PostResultWithoutLike } from "../../interfaces/repositories/content/postRepository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/userRepository.interface";
+import type { IProfileRepository } from "../../interfaces/repositories/user/profileRepository.interface";
 import type {
   DeletePostParams,
   FeedCursor,
@@ -28,20 +28,6 @@ import type {
   UploadVideoPostForUserNotOnAppUrlParams,
   UploadVideoPostForUserOnAppUrlParams,
 } from "../../interfaces/services/content/postService.interface";
-import type { Post } from "../../models";
-type RepositoryPost = InferSelectModel<typeof schema.post> & {
-  authorUsername: string;
-  authorProfileId: string;
-  authorProfilePicture: string | null;
-  authorName: string | null;
-  recipientUsername: string;
-  recipientProfileId: string;
-  recipientProfilePicture: string | null;
-  recipientName: string | null;
-  commentsCount: number;
-  likesCount: number;
-  hasLiked?: boolean;
-};
 
 @injectable()
 export class PostService implements IPostService {
@@ -49,6 +35,7 @@ export class PostService implements IPostService {
     @inject(TYPES.Database) private readonly db: Database,
     @inject(TYPES.PostRepository) private readonly postRepository: IPostRepository,
     @inject(TYPES.UserRepository) private readonly userRepository: IUserRepository,
+    @inject(TYPES.ProfileRepository) private readonly profileRepository: IProfileRepository,
   ) {}
 
   private async generatePresignedUrl(
@@ -64,11 +51,6 @@ export class PostService implements IPostService {
       ContentType: contentType,
       Metadata: metadata,
     });
-  }
-
-  private transformPost(post: RepositoryPost): Post {
-    const hydratedPost = cloudfront.hydratePost(post);
-    return hydratedPost;
   }
 
   private async handleUpload(
@@ -204,8 +186,8 @@ export class PostService implements IPostService {
     } catch (error) {
       if (error instanceof Error) {
         if (error.message.includes("not found")) return err(new PostErrors.PostNotFound(params.postId));
-        if (error.message.includes("Unauthorized")) return err(new PostErrors.NotPostOwner(params.postId, params.userId));
-        if (error.message.includes("deleted")) return err(new PostErrors.PostDeleted(params.postId));
+        if (error.message.includes("Unauthorized")) return err(new PostErrors.NotPostOwner(params.userId, params.postId));
+        // Assuming PostDeleted could be added later; not thrown by repo currently
       }
       return err(new PostErrors.FailedToDeletePost(params.postId));
     }
@@ -213,109 +195,67 @@ export class PostService implements IPostService {
 
   async getPost(
     params: GetPostParams,
-  ): Promise<Result<Post, PostErrors.PostNotFound | PostErrors.PostDeleted>> {
+  ): Promise<Result<PostResult, PostErrors.PostNotFound | PostErrors.PostDeleted>> {
     const post = await this.postRepository.getPost(params);
     if (!post) return err(new PostErrors.PostNotFound(params.postId));
-    return ok(this.transformPost(post));
+    return ok(post);
   }
 
   async paginatePosts(
     params: PaginatePostsParams,
-  ): Promise<Result<PaginatedResponse<Post, PostCursor>, never>> {
+  ): Promise<Result<PaginatedResponse<PostResult, PostCursor | null>, never>> {
     const { userId, cursor, pageSize = 20 } = params;
-    const posts = await this.postRepository.paginatePostsOfUser({ userId, cursor: cursor ?? undefined, pageSize });
-    const hydratedPosts = cloudfront.hydratePosts(posts.map(p => ({
-      id: p.id,
-      authorUserId: p.authorUserId,
-      recipientUserId: p.recipientUserId,
-      caption: p.caption,
-      key: p.key,
-      width: p.width,
-      height: p.height,
-      mediaType: p.mediaType,
-      postType: p.postType,
-      createdAt: p.createdAt,
-      updatedAt: p.updatedAt,
-    })));
+    const posts = await this.postRepository.paginatePostsOfUser({ userId, cursor, pageSize });
 
     return ok({
-      items: hydratedPosts.map(hp => ({
-        ...hp,
-        authorUserId: hp.authorUserId,
-        recipientUserId: hp.recipientUserId,
-      })),
+      items: posts.slice(0, pageSize), // Trim to exact pageSize
       nextCursor: posts.length > pageSize ? {
-        postId: posts[posts.length - 1].id,
-        createdAt: posts[posts.length - 1].createdAt,
+        postId: posts[pageSize - 1]?.post.id ?? null,
+        createdAt: posts[pageSize - 1]?.post.createdAt ?? null,
       } : null,
     });
   }
 
   async paginatePostsForFeed(
     params: PaginatePostsForFeedParams,
-  ): Promise<Result<PaginatedResponse<Post, FeedCursor>, PostErrors.PostNotFound>> {
+  ): Promise<Result<PaginatedResponse<PostResult, FeedCursor>, PostErrors.PostNotFound>> {
     const { userId, cursor, pageSize } = params;
-    const posts = await this.postRepository.paginatePostsOfFollowing({ userId, cursor: cursor ?? undefined, pageSize });
+    const posts = await this.postRepository.paginatePostsOfFollowing({ userId, cursor, pageSize });
     if (!posts.length && cursor) return err(new PostErrors.PostNotFound(cursor.postId));
 
-    const hydratedPosts = cloudfront.hydratePosts(posts.map(p => ({
-      id: p.id,
-      authorUserId: p.authorUserId,
-      recipientUserId: p.recipientUserId,
-      caption: p.caption,
-      key: p.key,
-      width: p.width,
-      height: p.height,
-      mediaType: p.mediaType,
-      postType: p.postType,
-      createdAt: p.createdAt,
-      updatedAt: p.updatedAt,
-    })));
-
     return ok({
-      items: hydratedPosts.map(hp => ({
-        ...hp,
-        authorUserId: hp.authorUserId,
-        recipientUserId: hp.recipientUserId,
-      })),
+      items: posts.slice(0, pageSize),
       nextCursor: posts.length > pageSize ? {
-        postId: posts[posts.length - 1].id,
-        createdAt: posts[posts.length - 1].createdAt,
-        type: "following", // Assuming only following feed for now; extend for "recommended" if needed
+        postId: posts[pageSize - 1]?.post.id ?? null,
+        createdAt: posts[pageSize - 1]?.post.createdAt ?? null,
+        type: "following", // Only following for now; extend for "recommended" later
       } : null,
     });
   }
 
   async getPostForNextJs(
     params: GetPostForNextJsParams,
-  ): Promise<Result<Omit<Post, "hasLiked">, PostErrors.PostNotFound>> {
+  ): Promise<Result<PostResultWithoutLike, PostErrors.PostNotFound>> {
     const post = await this.postRepository.getPostForNextJs(params);
     if (!post) return err(new PostErrors.PostNotFound(params.postId));
 
-    const user = await this.userRepository.getUserWithProfile({ userId: post.authorUserId });
-    if (!user || user.profile.privacy !== "public") {
+    const profile = await this.profileRepository.getProfile({ userId: post.post.authorUserId });
+    if (!profile || profile.privacy !== "public") {
       return err(new PostErrors.PostNotFound(params.postId));
     }
 
-    const transformedPost = this.transformPost(post);
-    const { hasLiked, ...postWithoutHasLiked } = transformedPost;
-    return ok(postWithoutHasLiked);
+    return ok(post);
   }
 
-  // Note: UpdatePostParams is defined but not implemented in IPostService; adding it here for completeness
   async updatePost(
     params: UpdatePostParams,
   ): Promise<Result<void, PostErrors.FailedToUpdatePost | PostErrors.PostNotFound | PostErrors.NotPostOwner>> {
-    const { userId, postId, content: caption } = params; // Assuming content maps to caption
+    const { userId, postId, content: caption } = params; // Map content to caption
     try {
       await this.db.transaction(async (tx) => {
-        const post = await tx.query.post.findFirst({
-          where: eq(this.schema.post.id, postId),
-          columns: { authorUserId: true },
-        });
-
+        const post = await this.postRepository.getPost({ postId, userId }, tx);
         if (!post) throw new Error("Post not found");
-        if (post.authorUserId !== userId) throw new Error("Unauthorized: User does not own this post");
+        if (post.post.authorUserId !== userId) throw new Error("Unauthorized: User does not own this post");
 
         await this.postRepository.updatePost({ postId, caption }, tx);
       });
@@ -323,7 +263,7 @@ export class PostService implements IPostService {
     } catch (error) {
       if (error instanceof Error) {
         if (error.message.includes("not found")) return err(new PostErrors.PostNotFound(postId));
-        if (error.message.includes("Unauthorized")) return err(new PostErrors.NotPostOwner(userId));
+        if (error.message.includes("Unauthorized")) return err(new PostErrors.NotPostOwner(userId, postId));
       }
       return err(new PostErrors.FailedToUpdatePost(postId));
     }

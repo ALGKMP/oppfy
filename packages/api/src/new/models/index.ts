@@ -34,13 +34,6 @@ export interface Post extends InferSelectModel<typeof schema.post> {
   hasLiked?: boolean;
   postUrl?: string | null;
 }
-export type PostForNextJs = Post & {
-  authorUsername: string | null;
-  recipientUsername: string | null;
-};
-export type HydratedPost = Post & {
-  postUrl: string | null;
-};
 export type PostStats = InferSelectModel<typeof schema.postStats>;
 export type Comment = InferSelectModel<typeof schema.comment>;
 export type Like = InferSelectModel<typeof schema.like>;
