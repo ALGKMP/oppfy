@@ -1,7 +1,7 @@
-import { and, count, desc, eq, lte, or } from "drizzle-orm";
+import { and, count, desc, eq, lte, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
-import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
+import type { Database, DatabaseOrTransaction, Schema, Transaction } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import {
@@ -39,22 +39,30 @@ export class CommentRepository implements ICommentRepository {
 
   async addComment(
     { postId, userId, body }: AddCommentParams,
-    db: DatabaseOrTransaction = this.db,
+    tx: Transaction,
   ): Promise<void> {
-    await db.insert(this.schema.comment).values({
+    await tx.insert(this.schema.comment).values({
       postId,
       userId,
       body,
     });
+
+    await tx.update(this.schema.postStats).set({
+      comments: sql`comments + 1`,
+    }).where(eq(this.schema.postStats.postId, postId));
   }
 
   async removeComment(
-    { commentId }: RemoveCommentParams,
-    db: DatabaseOrTransaction = this.db,
+    { commentId, postId }: RemoveCommentParams,
+    tx: Transaction,
   ): Promise<void> {
-    await db
+    await tx
       .delete(this.schema.comment)
       .where(eq(this.schema.comment.id, commentId));
+
+    await tx.update(this.schema.postStats).set({
+      comments: sql`comments - 1`,
+    }).where(eq(this.schema.postStats.postId, postId));
   }
 
   async countComments(

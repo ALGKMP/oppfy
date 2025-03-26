@@ -42,18 +42,10 @@ export class CloudFront {
     };
   }
 
-  hydrateProfiles(profiles: Profile[]): HydratedProfile[] {
-    return profiles.map((profile) => this.hydrateProfile(profile));
-  }
-
   hydratePost(post: Post): HydratedPost {
     const postUrl = post.postKey ? this.getPublicPostUrl(post.postKey) : null;
 
     return { ...post, postUrl };
-  }
-
-  hydratePosts(posts: Post[]): HydratedPost[] {
-    return posts.map((post) => this.hydratePost(post));
   }
 
   getProfilePictureUrl(objectKey: string): string {
