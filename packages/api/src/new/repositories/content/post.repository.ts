@@ -23,38 +23,45 @@ import {
 
 @injectable()
 export class PostRepository implements IPostRepository {
+  private readonly aliasedSchema;
+
   constructor(
     @inject(TYPES.Database) private readonly db: Database,
     @inject(TYPES.Schema) private readonly schema: Schema,
-  ) {}
+  ) {
+    this.aliasedSchema = {
+      authorProfile: aliasedTable(this.schema.profile, "authorProfile"),
+      recipientProfile: aliasedTable(this.schema.profile, "recipientProfile"),
+    };
+  }
 
   private baseQuery(userId?: string, tx: DatabaseOrTransaction = this.db) {
-    const authorProfile = aliasedTable(this.schema.profile, "authorProfile");
-    const recipientProfile = aliasedTable(
-      this.schema.profile,
-      "recipientProfile",
-    );
-
     const query = tx
       .select({
-        authorProfile: authorProfile,
-        recipientProfile: recipientProfile,
+        authorProfile: this.aliasedSchema.authorProfile,
+        recipientProfile: this.aliasedSchema.recipientProfile,
         post: this.schema.post,
         postStats: this.schema.postStats,
         like: this.schema.like,
-      }) // Fetch all columns from all joined tables
+      })
       .from(this.schema.post)
       .innerJoin(
         this.schema.postStats,
         eq(this.schema.postStats.postId, this.schema.post.id),
       )
       .innerJoin(
-        authorProfile,
-        eq(this.schema.post.authorUserId, authorProfile.userId),
+        this.aliasedSchema.authorProfile,
+        eq(
+          this.schema.post.authorUserId,
+          this.aliasedSchema.authorProfile.userId,
+        ),
       )
       .innerJoin(
-        recipientProfile,
-        eq(this.schema.post.recipientUserId, recipientProfile.userId),
+        this.aliasedSchema.recipientProfile,
+        eq(
+          this.schema.post.recipientUserId,
+          this.aliasedSchema.recipientProfile.userId,
+        ),
       );
     if (userId) {
       query.leftJoin(
@@ -66,32 +73,32 @@ export class PostRepository implements IPostRepository {
       );
     }
 
-    return { query, authorProfile, recipientProfile };
+    return query;
   }
 
   async getPost(
     { postId, userId }: GetPostParams,
     tx: DatabaseOrTransaction = this.db,
   ): Promise<PostResult | undefined> {
-    const { query } = this.baseQuery(userId, tx);
+    const query = this.baseQuery(userId, tx);
     const results = await query.where(eq(this.schema.post.id, postId)).limit(1);
-    return results[0]; // Return raw result or undefined
+    return results[0];
   }
 
   async getPostForNextJs(
     { postId }: GetPostForNextJsParams,
     tx: DatabaseOrTransaction = this.db,
   ): Promise<PostResultWithoutLike | undefined> {
-    const { query } = this.baseQuery(undefined, tx);
+    const query = this.baseQuery(undefined, tx);
     const results = await query.where(eq(this.schema.post.id, postId)).limit(1);
-    return results[0]; // Return raw result or undefined
+    return results[0];
   }
 
   async paginatePostsOfFollowing(
     { userId, cursor, pageSize = 10 }: PaginatePostsParams,
     tx: DatabaseOrTransaction = this.db,
   ): Promise<PostResult[]> {
-    const { query } = this.baseQuery(userId, tx);
+    const query = this.baseQuery(userId, tx);
 
     let whereClause = or(
       eq(this.schema.follow.senderId, userId),
@@ -121,14 +128,14 @@ export class PostRepository implements IPostRepository {
       .orderBy(desc(this.schema.post.createdAt), desc(this.schema.post.id))
       .limit(pageSize + 1);
 
-    return results; // Return raw results directly
+    return results;
   }
 
   async paginatePostsOfUser(
     { userId, cursor, pageSize = 10 }: PaginatePostsParams,
     tx: DatabaseOrTransaction = this.db,
   ): Promise<PostResult[]> {
-    const { query } = this.baseQuery(userId, tx);
+    const query = this.baseQuery(userId, tx);
 
     const whereClause = and(
       eq(this.schema.post.authorUserId, userId),
@@ -148,7 +155,7 @@ export class PostRepository implements IPostRepository {
       .orderBy(desc(this.schema.post.createdAt), desc(this.schema.post.id))
       .limit(pageSize + 1);
 
-    return results; // Return raw results directly
+    return results;
   }
 
   async updatePost(
@@ -168,13 +175,8 @@ export class PostRepository implements IPostRepository {
     { postId }: CreatePostStatsParams,
     tx: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const now = new Date();
     await tx.insert(this.schema.postStats).values({
       postId,
-      likes: 0,
-      comments: 0,
-      createdAt: now,
-      updatedAt: now,
     });
   }
 
