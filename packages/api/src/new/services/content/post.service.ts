@@ -178,7 +178,7 @@ export class PostService implements IPostService {
   }
 
   // Hydration function for PostResult
-  private hydratePostResult(raw: RawPostResult): HydratedAndProcessedPost {
+  private hydrateAndProcessPost(raw: RawPostResult): HydratedAndProcessedPost {
     const hydratedPost = cloudfront.hydratePost(raw.post);
     const hydratedAuthorProfile = cloudfront.hydrateProfile(raw.authorProfile);
     const hydratedRecipientProfile = cloudfront.hydrateProfile(
@@ -202,7 +202,7 @@ export class PostService implements IPostService {
   }
 
   // Hydration function for PostResultWithoutLike
-  private hydratePostResultWithoutLike(
+  private hydrateAndProcessPostResultWithoutLike(
     raw: RawPostResultWithoutLike,
   ): HydratedAndProcessedPostWithoutLike {
     const hydratedPost = cloudfront.hydratePost(raw.post);
@@ -227,7 +227,7 @@ export class PostService implements IPostService {
   }
 
   // Hydration function for PaginatedComment
-  private hydrateComment(
+  private hydrateAndProcessComment(
     raw: RawPaginatedComment,
   ): HydratedAndProcessedComment {
     const hydratedProfile = cloudfront.hydrateProfile(raw.profile);
@@ -315,7 +315,7 @@ export class PostService implements IPostService {
   ): Promise<Result<HydratedAndProcessedPost, PostErrors.PostNotFound>> {
     const rawPost = await this.postRepository.getPost(params);
     if (!rawPost) return err(new PostErrors.PostNotFound(params.postId));
-    return ok(this.hydratePostResult(rawPost));
+    return ok(this.hydrateAndProcessPost(rawPost));
   }
 
   async paginatePosts({
@@ -330,7 +330,7 @@ export class PostService implements IPostService {
       cursor,
       pageSize,
     });
-    const hydratedPosts = rawPosts.map((post) => this.hydratePostResult(post));
+    const hydratedPosts = rawPosts.map((post) => this.hydrateAndProcessPost(post));
     const lastPost = hydratedPosts[pageSize - 1];
 
     return ok({
@@ -363,7 +363,7 @@ export class PostService implements IPostService {
     if (!rawPosts.length && cursor)
       return err(new PostErrors.PostNotFound(cursor.postId));
 
-    const hydratedPosts = rawPosts.map((post) => this.hydratePostResult(post));
+    const hydratedPosts = rawPosts.map((post) => this.hydrateAndProcessPost(post));
     const lastPost = hydratedPosts[pageSize - 1];
 
     return ok({
@@ -394,7 +394,7 @@ export class PostService implements IPostService {
       return err(new PostErrors.PostNotFound(params.postId));
     }
 
-    return ok(this.hydratePostResultWithoutLike(rawPost));
+    return ok(this.hydrateAndProcessPostResultWithoutLike(rawPost));
   }
 
   async updatePost({
@@ -443,7 +443,7 @@ export class PostService implements IPostService {
       pageSize,
     });
     const hydratedComments = rawComments.map((comment) =>
-      this.hydrateComment(comment),
+      this.hydrateAndProcessComment(comment),
     );
     const lastComment = hydratedComments[pageSize - 1];
 
