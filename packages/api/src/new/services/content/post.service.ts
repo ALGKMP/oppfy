@@ -325,24 +325,14 @@ export class PostService implements IPostService {
     >
   > {
     const { userId, postId, content: caption } = params; // Map content to caption
-    try {
-      await this.db.transaction(async (tx) => {
-        const post = await this.postRepository.getPost({ postId, userId }, tx);
-        if (!post) throw new Error("Post not found");
-        if (post.post.authorUserId !== userId)
-          throw new Error("Unauthorized: User does not own this post");
+    await this.db.transaction(async (tx) => {
+      const post = await this.postRepository.getPost({ postId, userId }, tx);
+      if (!post) return err(new PostErrors.PostNotFound(postId));
+      if (post.post.authorUserId !== userId)
+        return err(new PostErrors.NotPostOwner(userId, postId));
 
-        await this.postRepository.updatePost({ postId, caption }, tx);
-      });
-      return ok(undefined);
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.message.includes("not found"))
-          return err(new PostErrors.PostNotFound(postId));
-        if (error.message.includes("Unauthorized"))
-          return err(new PostErrors.NotPostOwner(userId, postId));
-      }
-      return err(new PostErrors.FailedToUpdatePost(postId));
-    }
+      await this.postRepository.updatePost({ postId, caption }, tx);
+    });
+    return ok(undefined);
   }
 }
