@@ -30,10 +30,8 @@ export type UserWithNotificationSettings = User & {
 };
 export type UserStatus = InferSelectModel<typeof schema.userStatus>;
 export type UserStats = InferSelectModel<typeof schema.userStats>;
-export interface Post extends InferSelectModel<typeof schema.post> {
-  hasLiked?: boolean;
-  postUrl?: string | null;
-}
+export type Post = InferSelectModel<typeof schema.post>;
+
 export type PostStats = InferSelectModel<typeof schema.postStats>;
 export type Comment = InferSelectModel<typeof schema.comment>;
 export type Like = InferSelectModel<typeof schema.like>;

@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
+import { cloudfront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { env } from "@oppfy/env";
 import { mux } from "@oppfy/mux";
@@ -9,32 +10,35 @@ import { s3 } from "@oppfy/s3";
 
 import { TYPES } from "../../container";
 import { PostErrors } from "../../errors/content/post.error";
+import type { ICommentRepository } from "../../interfaces/repositories/content/comment.repository.interface";
 import type {
   IPostRepository,
-  PostResult,
-  PostResultWithoutLike,
+  PostResult as RawPostResult,
+  PostResultWithoutLike as RawPostResultWithoutLike,
 } from "../../interfaces/repositories/content/post.repository.interface";
-import type { ICommentRepository } from "../../interfaces/repositories/content/comment.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type {
+  CommentCursor,
   DeletePostParams,
   FeedCursor,
   GetPostForNextJsParams,
   GetPostParams,
+  HydratedAndProcessedComment,
+  HydratedAndProcessedPost,
+  HydratedAndProcessedPostWithoutLike,
   IPostService,
-  PaginatedComment,
   PaginateCommentsParams,
   PaginatedResponse,
   PaginatePostsForFeedParams,
   PaginatePostsParams,
   PostCursor,
+  PaginatedComment as RawPaginatedComment,
   UpdatePostParams,
   UploadPostForUserNotOnAppUrlParams,
   UploadPostForUserOnAppUrlParams,
   UploadVideoPostForUserNotOnAppUrlParams,
   UploadVideoPostForUserOnAppUrlParams,
-  CommentCursor,
 } from "../../interfaces/services/content/post.service.interface";
 
 @injectable()
@@ -85,7 +89,6 @@ export class PostService implements IPostService {
 
     try {
       if ("recipient" in params) {
-        // On-app user cases
         const { recipient } = params;
         if (isVideo) {
           const presignedUrl = await mux.getPresignedUrlForVideo({
@@ -105,19 +108,11 @@ export class PostService implements IPostService {
             objectKey,
             contentLength,
             contentType,
-            {
-              author,
-              recipient,
-              caption,
-              height,
-              width,
-              postid: postId,
-            },
+            { author, recipient, caption, height, width, postid: postId },
           );
           return ok({ presignedUrl, postId });
         }
       } else {
-        // Not-on-app user cases
         const { recipientNotOnAppPhoneNumber, recipientNotOnAppName } = params;
         let result: { presignedUrl: string; postId: string } | undefined;
 
@@ -182,6 +177,69 @@ export class PostService implements IPostService {
     }
   }
 
+  // Hydration function for PostResult
+  private hydratePostResult(raw: RawPostResult): HydratedAndProcessedPost {
+    const hydratedPost = cloudfront.hydratePost(raw.post);
+    const hydratedAuthorProfile = cloudfront.hydrateProfile(raw.authorProfile);
+    const hydratedRecipientProfile = cloudfront.hydrateProfile(
+      raw.recipientProfile,
+    );
+
+    return {
+      post: hydratedPost,
+      assetUrl: hydratedPost.postUrl,
+      postStats: raw.postStats,
+      authorUserId: raw.authorProfile.userId,
+      authorUsername: raw.authorProfile.username ?? "",
+      authorName: raw.authorProfile.name ?? null,
+      authorProfilePictureUrl: hydratedAuthorProfile.profilePictureUrl,
+      recipientUserId: raw.recipientProfile.userId,
+      recipientUsername: raw.recipientProfile.username ?? "",
+      recipientName: raw.recipientProfile.name ?? null,
+      recipientProfilePictureUrl: hydratedRecipientProfile.profilePictureUrl,
+      hasLiked: !!raw.like,
+    };
+  }
+
+  // Hydration function for PostResultWithoutLike
+  private hydratePostResultWithoutLike(
+    raw: RawPostResultWithoutLike,
+  ): HydratedAndProcessedPostWithoutLike {
+    const hydratedPost = cloudfront.hydratePost(raw.post);
+    const hydratedAuthorProfile = cloudfront.hydrateProfile(raw.authorProfile);
+    const hydratedRecipientProfile = cloudfront.hydrateProfile(
+      raw.recipientProfile,
+    );
+
+    return {
+      post: hydratedPost,
+      assetUrl: hydratedPost.postUrl,
+      postStats: raw.postStats,
+      authorUserId: raw.authorProfile.userId,
+      authorUsername: raw.authorProfile.username ?? "",
+      authorName: raw.authorProfile.name ?? null,
+      authorProfilePictureUrl: hydratedAuthorProfile.profilePictureUrl,
+      recipientUserId: raw.recipientProfile.userId,
+      recipientUsername: raw.recipientProfile.username ?? "",
+      recipientName: raw.recipientProfile.name ?? null,
+      recipientProfilePictureUrl: hydratedRecipientProfile.profilePictureUrl,
+    };
+  }
+
+  // Hydration function for PaginatedComment
+  private hydrateComment(
+    raw: RawPaginatedComment,
+  ): HydratedAndProcessedComment {
+    const hydratedProfile = cloudfront.hydrateProfile(raw.profile);
+    return {
+      comment: raw.comment,
+      authorUserId: raw.profile.userId,
+      authorUsername: raw.profile.username ?? "",
+      authorName: raw.profile.name ?? null,
+      authorProfilePictureUrl: hydratedProfile.profilePictureUrl,
+    };
+  }
+
   async uploadPostForUserOnAppUrl(
     params: UploadPostForUserOnAppUrlParams,
   ): Promise<
@@ -229,45 +287,56 @@ export class PostService implements IPostService {
   async deletePost(
     params: DeletePostParams,
   ): Promise<Result<void, PostErrors.NotPostOwner | PostErrors.PostNotFound>> {
-    await this.db.transaction(async (tx) => {
-      // check if the post owner is the same as the user
-      const post = await this.postRepository.getPost(
-        { postId: params.postId, userId: params.userId },
-        tx,
-      );
-      if (!post) return err(new PostErrors.PostNotFound(params.postId));
-      if (post.post.authorUserId !== params.userId)
-        return err(new PostErrors.NotPostOwner(params.userId, params.postId));
-      await this.postRepository.deletePost(params, tx);
-    });
-    return ok(undefined);
+    try {
+      await this.db.transaction(async (tx) => {
+        const post = await this.postRepository.getPost(
+          { postId: params.postId, userId: params.userId },
+          tx,
+        );
+        if (!post) throw new PostErrors.PostNotFound(params.postId);
+        if (post.post.authorUserId !== params.userId)
+          throw new PostErrors.NotPostOwner(params.userId, params.postId);
+        await this.postRepository.deletePost(params, tx);
+      });
+      return ok(undefined);
+    } catch (error) {
+      if (
+        error instanceof PostErrors.PostNotFound ||
+        error instanceof PostErrors.NotPostOwner
+      ) {
+        return err(error);
+      }
+      throw error; // Unexpected errors bubble up
+    }
   }
 
   async getPost(
     params: GetPostParams,
-  ): Promise<
-    Result<PostResult, PostErrors.PostNotFound | PostErrors.PostDeleted>
-  > {
-    const post = await this.postRepository.getPost(params);
-    if (!post) return err(new PostErrors.PostNotFound(params.postId));
-    return ok(post);
+  ): Promise<Result<HydratedAndProcessedPost, PostErrors.PostNotFound>> {
+    const rawPost = await this.postRepository.getPost(params);
+    if (!rawPost) return err(new PostErrors.PostNotFound(params.postId));
+    return ok(this.hydratePostResult(rawPost));
   }
 
-  async paginatePosts(
-    params: PaginatePostsParams,
-  ): Promise<Result<PaginatedResponse<PostResult, PostCursor | null>, never>> {
-    const { userId, cursor, pageSize = 20 } = params;
-    const posts = await this.postRepository.paginatePostsOfUser({
+  async paginatePosts({
+    userId,
+    cursor,
+    pageSize = 20,
+  }: PaginatePostsParams): Promise<
+    Result<PaginatedResponse<HydratedAndProcessedPost, PostCursor>, never>
+  > {
+    const rawPosts = await this.postRepository.paginatePostsOfUser({
       userId,
       cursor,
       pageSize,
     });
+    const hydratedPosts = rawPosts.map((post) => this.hydratePostResult(post));
+    const lastPost = hydratedPosts[pageSize - 1];
 
-    const lastPost = posts[pageSize - 1];
     return ok({
-      items: posts.slice(0, pageSize),
+      items: hydratedPosts.slice(0, pageSize),
       nextCursor:
-        posts.length > pageSize && lastPost
+        rawPosts.length > pageSize && lastPost
           ? {
               postId: lastPost.post.id,
               createdAt: lastPost.post.createdAt,
@@ -276,29 +345,35 @@ export class PostService implements IPostService {
     });
   }
 
-  async paginatePostsForFeed(
-    params: PaginatePostsForFeedParams,
-  ): Promise<
-    Result<PaginatedResponse<PostResult, FeedCursor>, PostErrors.PostNotFound>
+  async paginatePostsForFeed({
+    userId,
+    cursor,
+    pageSize,
+  }: PaginatePostsForFeedParams): Promise<
+    Result<
+      PaginatedResponse<HydratedAndProcessedPost, FeedCursor>,
+      PostErrors.PostNotFound
+    >
   > {
-    const { userId, cursor, pageSize } = params;
-    const posts = await this.postRepository.paginatePostsOfFollowing({
+    const rawPosts = await this.postRepository.paginatePostsOfFollowing({
       userId,
       cursor,
       pageSize,
     });
-    if (!posts.length && cursor)
+    if (!rawPosts.length && cursor)
       return err(new PostErrors.PostNotFound(cursor.postId));
 
-    const lastPost = posts[pageSize - 1];
+    const hydratedPosts = rawPosts.map((post) => this.hydratePostResult(post));
+    const lastPost = hydratedPosts[pageSize - 1];
+
     return ok({
-      items: posts.slice(0, pageSize),
+      items: hydratedPosts.slice(0, pageSize),
       nextCursor:
-        posts.length > pageSize && lastPost
+        rawPosts.length > pageSize && lastPost
           ? {
               postId: lastPost.post.id,
               createdAt: lastPost.post.createdAt,
-              type: "following",
+              type: "following", // Only "following" for now; extend for "recommended" later
             }
           : null,
     });
@@ -306,23 +381,27 @@ export class PostService implements IPostService {
 
   async getPostForNextJs(
     params: GetPostForNextJsParams,
-  ): Promise<Result<PostResultWithoutLike, PostErrors.PostNotFound>> {
-    const post = await this.postRepository.getPostForNextJs(params);
-    if (!post) return err(new PostErrors.PostNotFound(params.postId));
+  ): Promise<
+    Result<HydratedAndProcessedPostWithoutLike, PostErrors.PostNotFound>
+  > {
+    const rawPost = await this.postRepository.getPostForNextJs(params);
+    if (!rawPost) return err(new PostErrors.PostNotFound(params.postId));
 
     const profile = await this.profileRepository.getProfile({
-      userId: post.post.authorUserId,
+      userId: rawPost.post.authorUserId,
     });
     if (!profile || profile.privacy !== "public") {
       return err(new PostErrors.PostNotFound(params.postId));
     }
 
-    return ok(post);
+    return ok(this.hydratePostResultWithoutLike(rawPost));
   }
 
-  async updatePost(
-    params: UpdatePostParams,
-  ): Promise<
+  async updatePost({
+    userId,
+    postId,
+    content: caption,
+  }: UpdatePostParams): Promise<
     Result<
       void,
       | PostErrors.FailedToUpdatePost
@@ -330,16 +409,25 @@ export class PostService implements IPostService {
       | PostErrors.NotPostOwner
     >
   > {
-    const { userId, postId, content: caption } = params; // Map content to caption
-    await this.db.transaction(async (tx) => {
-      const post = await this.postRepository.getPost({ postId, userId }, tx);
-      if (!post) return err(new PostErrors.PostNotFound(postId));
-      if (post.post.authorUserId !== userId)
-        return err(new PostErrors.NotPostOwner(userId, postId));
-
-      await this.postRepository.updatePost({ postId, caption }, tx);
-    });
-    return ok(undefined);
+    try {
+      await this.db.transaction(async (tx) => {
+        const post = await this.postRepository.getPost({ postId, userId }, tx);
+        if (!post) throw new PostErrors.PostNotFound(postId);
+        if (post.post.authorUserId !== userId) {
+          throw new PostErrors.NotPostOwner(userId, postId);
+        }
+        await this.postRepository.updatePost({ postId, caption }, tx);
+      });
+      return ok(undefined);
+    } catch (error) {
+      if (
+        error instanceof PostErrors.PostNotFound ||
+        error instanceof PostErrors.NotPostOwner
+      ) {
+        return err(error);
+      }
+      return err(new PostErrors.FailedToUpdatePost(postId));
+    }
   }
 
   async paginateComments({
@@ -347,19 +435,22 @@ export class PostService implements IPostService {
     cursor,
     pageSize = 10,
   }: PaginateCommentsParams): Promise<
-    Result<PaginatedResponse<PaginatedComment, CommentCursor>, never>
+    Result<PaginatedResponse<HydratedAndProcessedComment, CommentCursor>, never>
   > {
-    const comments = await this.commentRepository.paginateComments({
+    const rawComments = await this.commentRepository.paginateComments({
       postId,
       cursor,
       pageSize,
     });
-    const lastComment = comments[pageSize - 1];
+    const hydratedComments = rawComments.map((comment) =>
+      this.hydrateComment(comment),
+    );
+    const lastComment = hydratedComments[pageSize - 1];
 
     return ok({
-      items: comments.slice(0, pageSize),
+      items: hydratedComments.slice(0, pageSize),
       nextCursor:
-        comments.length > pageSize && lastComment
+        rawComments.length > pageSize && lastComment
           ? {
               commentId: lastComment.comment.id,
               createdAt: lastComment.comment.createdAt,

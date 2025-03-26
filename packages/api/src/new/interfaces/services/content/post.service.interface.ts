@@ -3,16 +3,39 @@ import type { Result } from "neverthrow";
 import type { Schema } from "@oppfy/db";
 
 import type { PostErrors } from "../../../errors/content/post.error";
-import type {
-  PostResult,
-  PostResultWithoutLike,
-} from "../../repositories/content/post.repository.interface";
-import type { Comment } from "../../../models";
-import type { Profile } from "../../../models";
+import type { Comment, Post, Profile } from "../../../models";
 
 export interface PaginatedResponse<TItem, TCursor> {
   items: TItem[];
   nextCursor: TCursor | null;
+}
+
+export interface HydratedAndProcessedPost {
+  post: Post;
+  assetUrl: string | null;
+  postStats: PostStats;
+  authorUserId: string;
+  authorUsername: string;
+  authorName: string | null;
+  authorProfilePictureUrl: string | null;
+  recipientUserId: string;
+  recipientUsername: string;
+  recipientName: string | null;
+  recipientProfilePictureUrl: string | null;
+  hasLiked: boolean;
+}
+
+export type HydratedAndProcessedPostWithoutLike = Omit<
+  HydratedAndProcessedPost,
+  "hasLiked"
+>;
+
+export interface HydratedAndProcessedComment {
+  comment: Comment;
+  authorUserId: string;
+  authorUsername: string;
+  authorName: string | null;
+  authorProfilePictureUrl: string | null;
 }
 
 export type PostStats = Schema["postStats"]["$inferSelect"];
@@ -160,28 +183,35 @@ export interface IPostService {
 
   getPost(
     params: GetPostParams,
-  ): Promise<Result<PostResult, PostErrors.PostNotFound>>;
+  ): Promise<Result<HydratedAndProcessedPost, PostErrors.PostNotFound>>;
 
   paginatePosts(
     params: PaginatePostsParams,
-  ): Promise<Result<PaginatedResponse<PostResult, PostCursor | null>, never>>;
+  ): Promise<
+    Result<
+      PaginatedResponse<HydratedAndProcessedPost, PostCursor | null>,
+      never
+    >
+  >;
 
   paginatePostsForFeed(
     params: PaginatePostsForFeedParams,
   ): Promise<
     Result<
-      PaginatedResponse<PostResult, FeedCursor | null>,
+      PaginatedResponse<HydratedAndProcessedPost, FeedCursor | null>,
       PostErrors.PostNotFound
     >
   >;
 
   getPostForNextJs(
     params: GetPostForNextJsParams,
-  ): Promise<Result<PostResultWithoutLike, PostErrors.PostNotFound>>;
+  ): Promise<
+    Result<HydratedAndProcessedPostWithoutLike, PostErrors.PostNotFound>
+  >;
 
   paginateComments(
-    params: PaginateCommentsParams
+    params: PaginateCommentsParams,
   ): Promise<
-    Result<PaginatedResponse<PaginatedComment, CommentCursor>, never>
+    Result<PaginatedResponse<HydratedAndProcessedComment, CommentCursor>, never>
   >;
 }
