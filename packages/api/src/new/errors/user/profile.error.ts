@@ -27,3 +27,5 @@ export namespace ProfileErrors {
     }
   }
 }
+
+export type ProfileError = InstanceType<typeof ProfileError>;

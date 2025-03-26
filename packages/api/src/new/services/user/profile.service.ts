@@ -9,9 +9,9 @@ import { ProfileErrors } from "../../errors/user/profile.error";
 import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type {
-  GetProfileParams,
   GetStatsParams,
   IProfileService,
+  ProfileParams,
   SearchProfilesByUsernameParams,
   UpdateProfileParams,
 } from "../../interfaces/services/user/profile.service.interface";
@@ -31,7 +31,7 @@ export class ProfileService implements IProfileService {
   ) {}
 
   async profile(
-    params: GetProfileParams,
+    params: ProfileParams,
   ): Promise<Result<HydratedProfile, ProfileErrors.ProfileNotFound>> {
     const { selfUserId, otherUserId } = params;
 

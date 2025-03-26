@@ -1,16 +1,29 @@
 import type { Result } from "neverthrow";
 
-import type { ProfileErrors } from "../../../errors/user/profile.error";
-import type { HydratedProfile } from "../../../models";
+import type { ProfileError } from "../../../errors/user/profile.error";
+import type {
+  HydratedProfile,
+  ProfileInsert,
+  UserStats,
+} from "../../../models";
 
-export interface GetProfileParams {
+export interface ProfileParams {
   selfUserId: string;
   otherUserId: string;
+}
+
+export interface ProfileForSiteParams {
+  username: string;
 }
 
 export interface SearchProfilesByUsernameParams {
   username: string;
   selfUserId: string;
+}
+
+export interface RelationshipStatesBetweenUsersParams {
+  currentUserId: string;
+  otherUserId: string;
 }
 
 export interface GetStatsParams {
@@ -19,35 +32,53 @@ export interface GetStatsParams {
 
 export interface UpdateProfileParams {
   userId: string;
-  newData: Partial<{
-    name: string;
-    username: string;
-    bio: string;
-    dateOfBirth: Date;
-  }>;
+  update: Partial<ProfileInsert>;
 }
 
-export interface ProfileStats {
-  followers: number;
-  following: number;
-  friends: number;
-  posts: number;
+export interface GenerateProfilePicturePresignedUrlParams {
+  userId: string;
+  contentLength: number;
+}
+
+type FollowRelationshipState =
+  | "NOT_FOLLOWING"
+  | "FOLLOW_REQUEST_SENT"
+  | "FOLLOWING";
+
+type FriendRelationshipState =
+  | "NOT_FRIENDS"
+  | "FRIEND_REQUEST_SENT"
+  | "FRIENDS";
+
+interface RelationshipState {
+  follow: FollowRelationshipState;
+  friend: FriendRelationshipState;
 }
 
 export interface IProfileService {
   profile(
-    params: GetProfileParams,
-  ): Promise<Result<HydratedProfile, ProfileErrors.ProfileNotFound>>;
+    params: ProfileParams,
+  ): Promise<Result<HydratedProfile, ProfileError>>;
+
+  profileForSite(
+    params: ProfileForSiteParams,
+  ): Promise<Result<HydratedProfile, ProfileError>>;
 
   searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,
   ): Promise<Result<HydratedProfile[], never>>;
 
-  stats(
-    params: GetStatsParams,
-  ): Promise<Result<ProfileStats, ProfileErrors.ProfileNotFound>>;
+  relationshipStatesBetweenUsers(
+    params: RelationshipStatesBetweenUsersParams,
+  ): Promise<Result<RelationshipState[], never>>;
+
+  stats(params: GetStatsParams): Promise<Result<UserStats, ProfileError>>;
 
   updateProfile(
     params: UpdateProfileParams,
-  ): Promise<Result<void, ProfileErrors.UsernameTaken>>;
+  ): Promise<Result<void, ProfileError>>;
+
+  generateProfilePicturePresignedUrl(
+    params: GenerateProfilePicturePresignedUrlParams,
+  ): Promise<Result<string, ProfileError>>;
 }
