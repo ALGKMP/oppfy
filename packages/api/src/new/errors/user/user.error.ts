@@ -1,7 +1,5 @@
 import { createBaseErrorClass } from "../errorFactory";
 
-
-
 const UserError = createBaseErrorClass("User");
 
 export namespace UserErrors {
@@ -12,3 +10,5 @@ export namespace UserErrors {
     }
   }
 }
+
+export type UserError = InstanceType<typeof UserError>;
