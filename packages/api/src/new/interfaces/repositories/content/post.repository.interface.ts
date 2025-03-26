@@ -40,6 +40,7 @@ export interface PostResult {
   postStats: InferSelectModel<typeof schema.postStats>;
   authorProfile: InferSelectModel<typeof schema.profile>;
   recipientProfile: InferSelectModel<typeof schema.profile>;
+  like: InferSelectModel<typeof schema.like> | null;
 }
 
 export interface PostResultWithLike extends PostResult {
