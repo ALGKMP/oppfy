@@ -347,7 +347,9 @@ export const post = pgTable(
   },
   (table) => ({
     authorUserIdx: index("post_author_user_idx").on(table.authorUserId),
-    recipientUserIdx: index("post_recipient_user_idx").on(table.recipientUserId),
+    recipientUserIdx: index("post_recipient_user_idx").on(
+      table.recipientUserId,
+    ),
     postTypeIdx: index("post_type_idx").on(table.postType),
     createdAtIdx: index("post_created_at_idx").on(table.createdAt),
   }),
@@ -611,10 +613,10 @@ export const block = pgTable(
   "block",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    blockedByUserId: uuid("blocked_by_user_id")
+    senderUserId: uuid("sender_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    blockedUserId: uuid("blocked_user_id")
+    recipientUserId: uuid("recipient_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -622,11 +624,11 @@ export const block = pgTable(
       .notNull(),
   },
   (table) => ({
-    blockedUserIdx: index("block_blocking_user_idx").on(table.blockedByUserId),
-    blockedByUserIdx: index("block_blocked_user_idx").on(table.blockedUserId),
+    senderUserIdx: index("block_sender_user_idx").on(table.senderUserId),
+    recipientUserIdx: index("block_recipient_user_idx").on(table.recipientUserId),
     uniqueBlockPair: uniqueIndex("block_unique_pair").on(
-      table.blockedByUserId,
-      table.blockedUserId,
+      table.senderUserId,
+      table.recipientUserId,
     ),
   }),
 );
@@ -634,12 +636,12 @@ export const block = pgTable(
 export const blockRelations = relations(block, ({ one }) => ({
   userWhoIsBlocking: one(user, {
     relationName: "userWhoIsBlocking",
-    fields: [block.blockedByUserId],
+    fields: [block.senderUserId],
     references: [user.id],
   }),
   userWhoIsBlocked: one(user, {
     relationName: "userWhoIsBlocked",
-    fields: [block.blockedUserId],
+    fields: [block.recipientUserId],
     references: [user.id],
   }),
 }));

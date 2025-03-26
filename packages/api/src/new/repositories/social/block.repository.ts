@@ -28,8 +28,8 @@ export class BlockRepository implements IBlockRepository {
 
     const block = await db.query.block.findFirst({
       where: and(
-        eq(this.schema.block.blockedByUserId, userId),
-        eq(this.schema.block.blockedUserId, blockedUserId),
+        eq(this.schema.block.senderUserId, userId),
+        eq(this.schema.block.recipientUserId, blockedUserId),
       ),
     });
 
@@ -43,8 +43,8 @@ export class BlockRepository implements IBlockRepository {
     const { userId, blockedUserId } = params;
 
     await db.insert(this.schema.block).values({
-      blockedByUserId: userId,
-      blockedUserId,
+      senderUserId: userId,
+      recipientUserId: blockedUserId,
     });
   }
 
@@ -58,8 +58,8 @@ export class BlockRepository implements IBlockRepository {
       .delete(this.schema.block)
       .where(
         and(
-          eq(this.schema.block.blockedByUserId, userId),
-          eq(this.schema.block.blockedUserId, blockedUserId),
+          eq(this.schema.block.senderUserId, userId),
+          eq(this.schema.block.recipientUserId, blockedUserId),
         ),
       );
   }
@@ -78,11 +78,11 @@ export class BlockRepository implements IBlockRepository {
       .from(this.schema.block)
       .innerJoin(
         this.schema.profile,
-        eq(this.schema.profile.userId, this.schema.block.blockedUserId),
+        eq(this.schema.profile.userId, this.schema.block.recipientUserId),
       )
       .where(
         and(
-          eq(this.schema.block.blockedByUserId, userId),
+          eq(this.schema.block.senderUserId, userId),
           cursor
             ? or(
                 gt(this.schema.block.createdAt, cursor.createdAt),

@@ -31,12 +31,12 @@ export function withoutBlocked<T extends PgSelect>(
       schema.block,
       or(
         and(
-          eq(schema.block.blockedByUserId, userId),
-          eq(schema.block.blockedUserId, schema.profile.userId),
+          eq(schema.block.senderUserId, userId),
+          eq(schema.block.recipientUserId, schema.profile.userId),
         ),
         and(
-          eq(schema.block.blockedUserId, userId),
-          eq(schema.block.blockedByUserId, schema.profile.userId),
+          eq(schema.block.recipientUserId, userId),
+          eq(schema.block.senderUserId, schema.profile.userId),
         ),
       ),
     )
