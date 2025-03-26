@@ -1,6 +1,6 @@
-import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
 import type { InferSelectModel } from "drizzle-orm";
-import type { schema } from "@oppfy/db";
+
+import type { DatabaseOrTransaction, schema } from "@oppfy/db";
 
 export interface GetPostParams {
   postId: string;
@@ -42,26 +42,38 @@ export interface PostResult {
   authorProfile: InferSelectModel<typeof schema.profile>;
   recipientProfile: InferSelectModel<typeof schema.profile>;
   like: InferSelectModel<typeof schema.like> | null;
-};
+}
 
 // For methods without the like join (e.g., getPostForNextJs)
 export type PostResultWithoutLike = Omit<PostResult, "like">;
 
 export interface IPostRepository {
-  getPost(params: GetPostParams, tx?: Transaction): Promise<PostResult | undefined>;
+  getPost(
+    params: GetPostParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<PostResult | undefined>;
   getPostForNextJs(
     params: GetPostForNextJsParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<PostResultWithoutLike | undefined>;
   paginatePostsOfFollowing(
     params: PaginatePostsParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<PostResult[]>;
   paginatePostsOfUser(
     params: PaginatePostsParams,
-    tx?: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<PostResult[]>;
-  updatePost(params: UpdatePostParams, tx?: Transaction): Promise<void>;
-  createPostStats(params: CreatePostStatsParams, tx?: Transaction): Promise<void>;
-  deletePost(params: DeletePostParams, tx: Transaction): Promise<void>;
+  updatePost(
+    params: UpdatePostParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<void>;
+  createPostStats(
+    params: CreatePostStatsParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<void>;
+  deletePost(
+    params: DeletePostParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<void>;
 }
