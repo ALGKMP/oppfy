@@ -14,6 +14,7 @@ import type {
   PostResult,
   PostResultWithoutLike,
 } from "../../interfaces/repositories/content/post.repository.interface";
+import type { ICommentRepository } from "../../interfaces/repositories/content/comment.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type {
@@ -22,6 +23,8 @@ import type {
   GetPostForNextJsParams,
   GetPostParams,
   IPostService,
+  PaginatedComment,
+  PaginateCommentsParams,
   PaginatedResponse,
   PaginatePostsForFeedParams,
   PaginatePostsParams,
@@ -31,6 +34,7 @@ import type {
   UploadPostForUserOnAppUrlParams,
   UploadVideoPostForUserNotOnAppUrlParams,
   UploadVideoPostForUserOnAppUrlParams,
+  CommentCursor,
 } from "../../interfaces/services/content/post.service.interface";
 
 @injectable()
@@ -43,6 +47,8 @@ export class PostService implements IPostService {
     private readonly userRepository: IUserRepository,
     @inject(TYPES.ProfileRepository)
     private readonly profileRepository: IProfileRepository,
+    @inject(TYPES.CommentRepository)
+    private readonly commentRepository: ICommentRepository,
   ) {}
 
   private async generatePresignedUrl(
@@ -334,5 +340,31 @@ export class PostService implements IPostService {
       await this.postRepository.updatePost({ postId, caption }, tx);
     });
     return ok(undefined);
+  }
+
+  async paginateComments({
+    postId,
+    cursor,
+    pageSize = 10,
+  }: PaginateCommentsParams): Promise<
+    Result<PaginatedResponse<PaginatedComment, CommentCursor>, never>
+  > {
+    const comments = await this.commentRepository.paginateComments({
+      postId,
+      cursor,
+      pageSize,
+    });
+    const lastComment = comments[pageSize - 1];
+
+    return ok({
+      items: comments.slice(0, pageSize),
+      nextCursor:
+        comments.length > pageSize && lastComment
+          ? {
+              commentId: lastComment.comment.id,
+              createdAt: lastComment.comment.createdAt,
+            }
+          : null,
+    });
   }
 }

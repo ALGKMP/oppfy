@@ -7,6 +7,8 @@ import type {
   PostResult,
   PostResultWithoutLike,
 } from "../../repositories/content/post.repository.interface";
+import { Comment } from "../../../models";
+import { Profile } from "../../../models";
 
 export interface PaginatedResponse<TItem, TCursor> {
   items: TItem[];
@@ -93,10 +95,26 @@ export interface PaginatePostsParams {
   pageSize?: number;
 }
 
+export interface PaginateCommentsParams {
+  postId: string;
+  cursor: CommentCursor | null;
+  pageSize?: number;
+}
+
 export interface PaginatePostsForFeedParams {
   userId: string;
   cursor: FeedCursor | null;
   pageSize: number;
+}
+
+export interface PaginatedComment {
+  comment: Comment;
+  profile: Profile;
+}
+
+export interface CommentCursor {
+  createdAt: Date;
+  commentId: string;
 }
 
 export interface IPostService {
@@ -160,4 +178,10 @@ export interface IPostService {
   getPostForNextJs(
     params: GetPostForNextJsParams,
   ): Promise<Result<PostResultWithoutLike, PostErrors.PostNotFound>>;
+
+  paginateComments(
+    params: PaginateCommentsParams
+  ): Promise<
+    Result<PaginatedResponse<PaginatedComment, CommentCursor>, never>
+  >;
 }
