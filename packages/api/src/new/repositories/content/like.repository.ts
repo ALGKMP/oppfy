@@ -2,8 +2,12 @@ import { and, eq } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
+
 import { TYPES } from "../../container";
-import type { LikeParams, ILikeRepository } from "../../interfaces/repositories/content/like.repository.interface";
+import type {
+  ILikeRepository,
+  LikeParams,
+} from "../../interfaces/repositories/content/like.repository.interface";
 import type { Like } from "../../models";
 
 @injectable()
@@ -17,11 +21,14 @@ export class LikeRepository implements ILikeRepository {
     { postId, userId }: LikeParams,
     tx: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    await tx.insert(this.schema.like).values({
-      postId,
-      userId,
-      createdAt: new Date(),
-    }).onConflictDoNothing(); // Prevents duplicate likes
+    await tx
+      .insert(this.schema.like)
+      .values({
+        postId,
+        userId,
+        createdAt: new Date(),
+      })
+      .onConflictDoNothing(); // Prevents duplicate likes
   }
 
   async removeLike(
@@ -42,11 +49,11 @@ export class LikeRepository implements ILikeRepository {
     }
   }
 
-  async findLike(
+  async isLiked(
     { postId, userId }: LikeParams,
-    tx: DatabaseOrTransaction = this.db,
-  ): Promise<Like | undefined> {
-    const result = await tx
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<boolean> {
+    const result = await db
       .select()
       .from(this.schema.like)
       .where(
@@ -57,6 +64,6 @@ export class LikeRepository implements ILikeRepository {
       )
       .limit(1);
 
-    return result[0]; // Returns the Like object or undefined if not found
+    return result.length > 0;
   }
 }
