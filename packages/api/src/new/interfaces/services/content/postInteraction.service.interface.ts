@@ -1,108 +1,92 @@
 import type { Result } from "neverthrow";
-
 import type { PostInteractionErrors } from "../../../errors/content/postInteraction.error";
 import type { PaginatedComment } from "../../repositories/content/comment.repository.interface";
 
-export interface BaseCursor {
-  createdAt: Date;
-}
-
-export interface CommentCursor extends BaseCursor {
-  commentId: string;
-}
-
-export interface PaginatedResponse<TItem, TCursor extends BaseCursor> {
-  items: TItem[];
-  nextCursor: TCursor | null;
-}
-
 export interface LikePostParams {
-  userId: string;
   postId: string;
+  userId: string;
 }
 
 export interface UnlikePostParams {
-  userId: string;
   postId: string;
+  userId: string;
 }
 
-export interface GetLikeParams {
-  userId: string;
+export interface AddCommentParams {
   postId: string;
-}
-
-export interface CommentOnPostParams {
   userId: string;
-  postId: string;
   body: string;
 }
 
-export interface DeleteCommentParams {
-  userId: string;
+export interface RemoveCommentParams {
   commentId: string;
   postId: string;
+  userId: string;
 }
 
 export interface PaginateCommentsParams {
   postId: string;
-  userId: string;
   cursor: CommentCursor | null;
   pageSize?: number;
 }
 
+export interface CommentCursor {
+  createdAt: Date;
+  commentId: string;
+}
+
+export interface PaginatedResponse<TItem, TCursor> {
+  items: TItem[];
+  nextCursor: TCursor | null;
+}
+
 export interface IPostInteractionService {
   likePost(
-    params: LikePostParams,
+    params: LikePostParams
   ): Promise<
     Result<
       void,
-      | PostInteractionErrors.FailedToLikePost
-      | PostInteractionErrors.AlreadyLiked
-      | PostInteractionErrors.PostNotFound
+      PostInteractionErrors.PostNotFound |
+      PostInteractionErrors.FailedToLikePost |
+      PostInteractionErrors.AlreadyLiked
     >
   >;
 
   unlikePost(
-    params: UnlikePostParams,
+    params: UnlikePostParams
   ): Promise<
     Result<
       void,
-      | PostInteractionErrors.FailedToUnlikePost
-      | PostInteractionErrors.NotLiked
-      | PostInteractionErrors.PostNotFound
+      PostInteractionErrors.PostNotFound |
+      PostInteractionErrors.FailedToUnlikePost |
+      PostInteractionErrors.NotLiked
     >
   >;
 
-  getLike(
-    params: GetLikeParams,
-  ): Promise<Result<boolean, PostInteractionErrors.PostNotFound>>;
-
-  commentOnPost(
-    params: CommentOnPostParams,
+  addComment(
+    params: AddCommentParams
   ): Promise<
     Result<
       void,
-      PostInteractionErrors.FailedToComment | PostInteractionErrors.PostNotFound
+      PostInteractionErrors.PostNotFound |
+      PostInteractionErrors.FailedToComment
     >
   >;
 
-  deleteComment(
-    params: DeleteCommentParams,
+  removeComment(
+    params: RemoveCommentParams
   ): Promise<
     Result<
       void,
-      | PostInteractionErrors.FailedToDeleteComment
-      | PostInteractionErrors.CommentNotFound
-      | PostInteractionErrors.NotCommentOwner
+      PostInteractionErrors.CommentNotFound |
+      PostInteractionErrors.NotCommentOwner |
+      PostInteractionErrors.FailedToDeleteComment
     >
   >;
 
   paginateComments(
-    params: PaginateCommentsParams,
+    params: PaginateCommentsParams
   ): Promise<
-    Result<
-      PaginatedResponse<PaginatedComment, CommentCursor>,
-      PostInteractionErrors.PostNotFound
-    >
+    Result<PaginatedResponse<PaginatedComment, CommentCursor>, never>
   >;
 }
