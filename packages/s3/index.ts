@@ -50,8 +50,7 @@ export class S3 {
     await this.client.send(command);
   }
 
-  // New methods for post-related operations
-  async uploadPost({
+  async createPostPresignedUrl({
     bucket,
     objectKey,
     contentLength,
@@ -73,8 +72,7 @@ export class S3 {
     });
   }
 
-  // New methods for profile picture operations
-  async uploadProfilePicture({
+  async createProfilePicturePresignedUrl({
     userId,
     contentLength,
   }: {
