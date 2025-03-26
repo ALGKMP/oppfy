@@ -12,11 +12,14 @@ import type { IFollowRepository } from "../../interfaces/repositories/social/fol
 import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type {
+  FollowRelationshipState,
+  FriendRelationshipState,
   GenerateProfilePicturePresignedUrlParams,
   GetStatsParams,
   IProfileService,
   ProfileForSiteParams,
   ProfileParams,
+  RelationshipState,
   RelationshipStatesBetweenUsersParams,
   SearchProfilesByUsernameParams,
   UpdateProfileParams,
@@ -103,7 +106,7 @@ export class ProfileService implements IProfileService {
   }
 
   /**
-   * Searches profiles by username, filtering by privacy and block status.
+   * Searches profiles by username, filtering by blocked status and onboarding completion.
    */
   async searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,
@@ -120,11 +123,62 @@ export class ProfileService implements IProfileService {
     );
   }
 
-  relationshipStatesBetweenUsers(
+  /**
+   * Determines relationship states (follow/friend) between users, considering blocks.
+   */
+  async relationshipStatesBetweenUsers(
     params: RelationshipStatesBetweenUsersParams,
   ): Promise<Result<RelationshipState[], never>> {
-    throw new Error("Method not implemented.");
+    const { currentUserId, otherUserId } = params;
+
+    const isBlocked = await this.blockRepository.isBlocked({
+      userId: currentUserId,
+      blockedUserId: otherUserId,
+    });
+
+    if (isBlocked) {
+      return ok([{ follow: "NOT_FOLLOWING", friend: "NOT_FRIENDS" }]);
+    }
+
+    const [isFollowing, isFollowRequested, isFriends, isFriendRequested] =
+      await Promise.all([
+        this.followRepository.isFollowing({
+          senderId: currentUserId,
+          recipientId: otherUserId,
+        }),
+        this.followRepository.isFollowRequested({
+          senderId: currentUserId,
+          recipientId: otherUserId,
+        }),
+        this.friendRepository.isFriends({
+          userIdA: currentUserId,
+          userIdB: otherUserId,
+        }),
+        this.friendRepository.isFriendRequested({
+          senderId: currentUserId,
+          recipientId: otherUserId,
+        }),
+      ]);
+
+    const followState = (
+      isFollowing
+        ? "FOLLOWING"
+        : isFollowRequested
+          ? "FOLLOW_REQUEST_SENT"
+          : "NOT_FOLLOWING"
+    ) satisfies FollowRelationshipState;
+
+    const friendState = (
+      isFriends
+        ? "FRIENDS"
+        : isFriendRequested
+          ? "FRIEND_REQUEST_SENT"
+          : "NOT_FRIENDS"
+    ) satisfies FriendRelationshipState;
+
+    return ok([{ follow: followState, friend: friendState }]);
   }
+
   stats(params: GetStatsParams): Promise<Result<UserStats, ProfileError>> {
     throw new Error("Method not implemented.");
   }
