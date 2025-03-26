@@ -7,7 +7,7 @@ export interface GetPostParams {
   userId: string;
 }
 
-export interface GetPostForNextJsParams {
+export interface GetPostForSiteParams {
   postId: string;
 }
 
@@ -35,17 +35,16 @@ export interface DeletePostParams {
   postId: string;
 }
 
-// Define the raw result type based on schema
 export interface PostResult {
   post: InferSelectModel<typeof schema.post>;
   postStats: InferSelectModel<typeof schema.postStats>;
   authorProfile: InferSelectModel<typeof schema.profile>;
   recipientProfile: InferSelectModel<typeof schema.profile>;
-  like: InferSelectModel<typeof schema.like> | null;
 }
 
-// For methods without the like join (e.g., getPostForNextJs)
-export type PostResultWithoutLike = Omit<PostResult, "like">;
+export interface PostResultWithLike extends PostResult {
+  like: InferSelectModel<typeof schema.like> | null;
+}
 
 export interface IPostRepository {
   getPost(
@@ -53,9 +52,9 @@ export interface IPostRepository {
     db?: DatabaseOrTransaction,
   ): Promise<PostResult | undefined>;
   getPostForSite(
-    params: GetPostForNextJsParams,
+    params: GetPostForSiteParams,
     db?: DatabaseOrTransaction,
-  ): Promise<PostResultWithoutLike | undefined>;
+  ): Promise<PostResultWithLike | undefined>;
   paginatePostsOfFollowing(
     params: PaginatePostsParams,
     db?: DatabaseOrTransaction,
