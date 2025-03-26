@@ -3,15 +3,20 @@ import { err, ok, Result } from "neverthrow";
 
 import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
+import { S3 } from "@oppfy/s3";
 
 import { TYPES } from "../../container";
-import { ProfileErrors } from "../../errors/user/profile.error";
-import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
+import { ProfileError, ProfileErrors } from "../../errors/user/profile.error";
+import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
+import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type {
+  GenerateProfilePicturePresignedUrlParams,
   GetStatsParams,
   IProfileService,
+  ProfileForSiteParams,
   ProfileParams,
+  RelationshipStatesBetweenUsersParams,
   SearchProfilesByUsernameParams,
   UpdateProfileParams,
 } from "../../interfaces/services/user/profile.service.interface";
@@ -23,92 +28,48 @@ export class ProfileService implements IProfileService {
     @inject(TYPES.Database)
     private readonly db: Database,
     @inject(TYPES.ProfileRepository)
-    private readonly profileRepository: IProfileRepository,
-    @inject(TYPES.RelationshipRepository)
-    private readonly relationshipRepository: IRelationshipRepository,
-    @inject(TYPES.CloudFront)
     private readonly cloudfront: CloudFront,
+    @inject(TYPES.S3)
+    private readonly s3: S3,
+    @inject(TYPES.FollowRepository)
+    private readonly profileRepository: IProfileRepository,
+    @inject(TYPES.CloudFront)
+    private readonly followRepository: IFollowRepository,
+    @inject(TYPES.FriendRepository)
+    private readonly friendRepository: IFriendRepository,
   ) {}
 
-  async profile(
+  profile(
     params: ProfileParams,
-  ): Promise<Result<HydratedProfile, ProfileErrors.ProfileNotFound>> {
-    const { selfUserId, otherUserId } = params;
-
-    const [relationshipA, relationshipB] = await Promise.all([
-      this.relationshipRepository.getByUserIds({
-        userIdA: selfUserId,
-        userIdB: otherUserId,
-      }),
-      this.relationshipRepository.getByUserIds({
-        userIdA: otherUserId,
-        userIdB: selfUserId,
-      }),
-    ]);
-
-    if (relationshipA.blocked || relationshipB.blocked) {
-      return err(new ProfileErrors.ProfileBlocked(otherUserId));
-    }
-
-    const profile = await this.profileRepository.getProfile({
-      userId: otherUserId,
-    });
-
-    if (profile === undefined)
-      return err(new ProfileErrors.ProfileNotFound(otherUserId));
-
-    return ok(this.cloudfront.hydrateProfile(profile));
+  ): Promise<Result<HydratedProfile, ProfileError>> {
+    throw new Error("Method not implemented.");
   }
-
-  async stats(
-    params: GetStatsParams,
-  ): Promise<Result<UserStats, ProfileErrors.ProfileNotFound>> {
-    const { userId } = params;
-
-    const stats = await this.profileRepository.getStats({
-      userId,
-    });
-
-    if (stats === undefined)
-      return err(new ProfileErrors.StatsNotFound(userId));
-
-    return ok(stats);
+  profileForSite(
+    params: ProfileForSiteParams,
+  ): Promise<Result<HydratedProfile, ProfileError>> {
+    throw new Error("Method not implemented.");
   }
-
-  async updateProfile(
-    params: UpdateProfileParams,
-  ): Promise<Result<void, ProfileErrors.UsernameTaken>> {
-    const { userId, newData } = params;
-
-    if (newData.username) {
-      const usernameTaken = await this.profileRepository.usernameTaken({
-        username: newData.username,
-      });
-
-      if (usernameTaken) {
-        return err(new ProfileErrors.UsernameTaken(newData.username));
-      }
-    }
-
-    await this.profileRepository.updateProfile({
-      userId,
-      update: newData,
-    });
-
-    return ok();
-  }
-
-  async searchProfilesByUsername(
+  searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,
   ): Promise<Result<HydratedProfile[], never>> {
-    const { username, selfUserId } = params;
-
-    const profiles = await this.profileRepository.getProfilesByUsername({
-      username,
-      selfUserId,
-      limit: 15,
-    });
-
-    return ok(this.cloudfront.hydrateProfiles(profiles));
+    throw new Error("Method not implemented.");
+  }
+  relationshipStatesBetweenUsers(
+    params: RelationshipStatesBetweenUsersParams,
+  ): Promise<Result<RelationshipState[], never>> {
+    throw new Error("Method not implemented.");
+  }
+  stats(params: GetStatsParams): Promise<Result<UserStats, ProfileError>> {
+    throw new Error("Method not implemented.");
+  }
+  updateProfile(
+    params: UpdateProfileParams,
+  ): Promise<Result<void, ProfileError>> {
+    throw new Error("Method not implemented.");
+  }
+  generateProfilePicturePresignedUrl(
+    params: GenerateProfilePicturePresignedUrlParams,
+  ): Promise<Result<string, ProfileError>> {
+    throw new Error("Method not implemented.");
   }
 }

@@ -14,7 +14,7 @@ import { env } from "@oppfy/env";
 
 const FIVE_MINUTES = 300;
 
-export class S3Service {
+export class S3 {
   private client: S3Client;
 
   constructor() {
@@ -95,4 +95,4 @@ export class S3Service {
 }
 
 // Export a singleton instance
-export const s3 = new S3Service();
+export const s3 = new S3();

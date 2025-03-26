@@ -4,6 +4,7 @@ import { Container } from "inversify";
 
 import { CloudFront } from "@oppfy/cloudfront";
 import { db, schema } from "@oppfy/db";
+import { S3 } from "@oppfy/s3";
 
 import type { IBlockRepository } from "./interfaces/repositories/social/block.repository.interface";
 import type { IFollowRepository } from "./interfaces/repositories/social/follow.repository.interface";
@@ -11,7 +12,6 @@ import type { IFriendRepository } from "./interfaces/repositories/social/friend.
 import type { IContactsRepository } from "./interfaces/repositories/user/contacts.repository.interface";
 import type { INotificationsRepository } from "./interfaces/repositories/user/notification.repository.interface";
 import type { IProfileRepository } from "./interfaces/repositories/user/profile.repository.interface";
-import type { IUserStatsRepository } from "./interfaces/repositories/user/profileStatsRepository.interface";
 import type { IReportRepository } from "./interfaces/repositories/user/report.repository.interface";
 import type { IUserRepository } from "./interfaces/repositories/user/user.repository.interface";
 import type { IReportService } from "./interfaces/services/user/report.service.interface";
@@ -23,7 +23,6 @@ import { NotificationsRepository } from "./repositories/user/notifications.repos
 import { ProfileRepository } from "./repositories/user/profile.repository";
 import { ReportRepository } from "./repositories/user/report.repository";
 import { UserRepository } from "./repositories/user/user.repository";
-import { UserStatsRepository } from "./repositories/user/userStats.repository";
 import { ReportService } from "./services/user/report.service";
 
 // Define symbol constants for our interfaces
@@ -34,6 +33,7 @@ export const TYPES = {
   Transaction: Symbol.for("Transaction"),
 
   // SDKs
+  S3: Symbol.for("S3"),
   CloudFront: Symbol.for("CloudFront"),
 
   // Repositories
@@ -65,6 +65,7 @@ container.bind(TYPES.Database).toConstantValue(db);
 container.bind(TYPES.Schema).toConstantValue(schema);
 
 // Bind sdk's
+container.bind<S3>(TYPES.S3).to(S3);
 container.bind<CloudFront>(TYPES.CloudFront).to(CloudFront);
 
 // Bind repositories
@@ -81,9 +82,6 @@ container
 container
   .bind<IProfileRepository>(TYPES.ProfileRepository)
   .to(ProfileRepository);
-container
-  .bind<IUserStatsRepository>(TYPES.UserStatsRepository)
-  .to(UserStatsRepository);
 container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
 
 // Bind services
