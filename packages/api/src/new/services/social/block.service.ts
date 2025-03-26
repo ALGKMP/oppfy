@@ -1,34 +1,38 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
+import { cloudfront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
+
 import { TYPES } from "../../container";
 import { BlockErrors } from "../../errors/social/block.error";
-import { cloudfront } from "@oppfy/cloudfront";
 import type { IBlockRepository } from "../../interfaces/repositories/social/block.repository.interface";
+import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
-import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
-import type { Profile } from "../../models";
 import type {
+  BlockedUser,
   BlockUserParams,
-  UnblockUserParams,
-  IsBlockedParams,
   GetBlockedUsersParams,
   IBlockService,
-  BlockedUser,
+  IsBlockedParams,
   PaginatedResponse,
-  PaginationCursor,
+  UnblockUserParams,
 } from "../../interfaces/services/social/block.service.interface";
+import type { Profile } from "../../models";
 
 @injectable()
 export class BlockService implements IBlockService {
   constructor(
     @inject(TYPES.Database) private readonly db: Database,
-    @inject(TYPES.BlockRepository) private readonly blockRepository: IBlockRepository,
-    @inject(TYPES.ProfileRepository) private readonly profileRepository: IProfileRepository,
-    @inject(TYPES.UserRepository) private readonly userRepository: IUserRepository,
-    @inject(TYPES.FriendRepository) private readonly friendRepository: IFriendRepository,
+    @inject(TYPES.BlockRepository)
+    private readonly blockRepository: IBlockRepository,
+    @inject(TYPES.ProfileRepository)
+    private readonly profileRepository: IProfileRepository,
+    @inject(TYPES.UserRepository)
+    private readonly userRepository: IUserRepository,
+    @inject(TYPES.FriendRepository)
+    private readonly friendRepository: IFriendRepository,
   ) {}
 
   // Hydrate BlockedUser from Profile and block createdAt
@@ -43,9 +47,10 @@ export class BlockService implements IBlockService {
     };
   }
 
-  async blockUser(
-    { blockerId, blockedId }: BlockUserParams,
-  ): Promise<
+  async blockUser({
+    blockerId,
+    blockedId,
+  }: BlockUserParams): Promise<
     Result<void, BlockErrors.CannotBlockSelf | BlockErrors.AlreadyBlocked>
   > {
     try {
@@ -54,7 +59,7 @@ export class BlockService implements IBlockService {
       }
 
       await this.db.transaction(async (tx) => {
-        const isBlocked = await this.blockRepository.isUserBlocked(
+        const isBlocked = await this.blockRepository.isBlocked(
           { userId: blockerId, blockedUserId: blockedId },
           tx,
         );
@@ -74,7 +79,7 @@ export class BlockService implements IBlockService {
           );
         }
 
-        await this.blockRepository.blockUser(
+        await this.blockRepository.block(
           { userId: blockerId, blockedUserId: blockedId },
           tx,
         );
@@ -92,12 +97,13 @@ export class BlockService implements IBlockService {
     }
   }
 
-  async unblockUser(
-    { blockerId, blockedId }: UnblockUserParams,
-  ): Promise<Result<void, BlockErrors.BlockNotFound>> {
+  async unblockUser({
+    blockerId,
+    blockedId,
+  }: UnblockUserParams): Promise<Result<void, BlockErrors.BlockNotFound>> {
     try {
       await this.db.transaction(async (tx) => {
-        const isBlocked = await this.blockRepository.isUserBlocked(
+        const isBlocked = await this.blockRepository.isBlocked(
           { userId: blockerId, blockedUserId: blockedId },
           tx,
         );
@@ -105,7 +111,7 @@ export class BlockService implements IBlockService {
           throw new BlockErrors.BlockNotFound(blockerId, blockedId);
         }
 
-        await this.blockRepository.unblockUser(
+        await this.blockRepository.unblock(
           { userId: blockerId, blockedUserId: blockedId },
           tx,
         );
@@ -120,20 +126,25 @@ export class BlockService implements IBlockService {
     }
   }
 
-  async isBlocked(
-    { blockerId, blockedId }: IsBlockedParams,
-  ): Promise<Result<boolean, never>> {
-    const isBlocked = await this.blockRepository.isUserBlocked({
+  async isBlocked({
+    blockerId,
+    blockedId,
+  }: IsBlockedParams): Promise<Result<boolean, never>> {
+    const isBlocked = await this.blockRepository.isBlocked({
       userId: blockerId,
       blockedUserId: blockedId,
     });
     return ok(isBlocked);
   }
 
-  async getBlockedUsers(
-    { userId, cursor, pageSize = 10 }: GetBlockedUsersParams,
-  ): Promise<Result<PaginatedResponse<BlockedUser>, never>> {
-    const rawBlockedData = await this.blockRepository.paginateBlockedUsers({
+  async getBlockedUsers({
+    userId,
+    cursor,
+    pageSize = 10,
+  }: GetBlockedUsersParams): Promise<
+    Result<PaginatedResponse<BlockedUser>, never>
+  > {
+    const rawBlockedData = await this.blockRepository.paginateBlockedProfiles({
       userId,
       cursor: cursor ?? null,
       limit: pageSize + 1,
