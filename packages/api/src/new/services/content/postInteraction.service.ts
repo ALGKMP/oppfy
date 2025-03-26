@@ -7,17 +7,13 @@ import { TYPES } from "../../container";
 import { PostInteractionErrors } from "../../errors/content/postInteraction.error";
 import type {
   ICommentRepository,
-  PaginatedComment,
 } from "../../interfaces/repositories/content/comment.repository.interface";
 import type { ILikeRepository } from "../../interfaces/repositories/content/like.repository.interface";
 import type { IPostRepository } from "../../interfaces/repositories/content/post.repository.interface";
 import type {
   AddCommentParams,
-  CommentCursor,
   IPostInteractionService,
   LikePostParams,
-  PaginateCommentsParams,
-  PaginatedResponse,
   RemoveCommentParams,
   UnlikePostParams,
 } from "../../interfaces/services/content/postInteraction.service.interface";
@@ -131,31 +127,5 @@ export class PostInteractionService implements IPostInteractionService {
       await this.commentRepository.removeComment({ commentId, postId }, tx);
     });
     return ok(undefined);
-  }
-
-  async paginateComments({
-    postId,
-    cursor,
-    pageSize = 10,
-  }: PaginateCommentsParams): Promise<
-    Result<PaginatedResponse<PaginatedComment, CommentCursor>, never>
-  > {
-    const comments = await this.commentRepository.paginateComments({
-      postId,
-      cursor,
-      pageSize,
-    });
-    const lastComment = comments[pageSize - 1];
-
-    return ok({
-      items: comments.slice(0, pageSize),
-      nextCursor:
-        comments.length > pageSize && lastComment
-          ? {
-              commentId: lastComment.comment.id,
-              createdAt: lastComment.comment.createdAt,
-            }
-          : null,
-    });
   }
 }

@@ -1,6 +1,5 @@
 import type { Result } from "neverthrow";
 import type { PostInteractionErrors } from "../../../errors/content/postInteraction.error";
-import type { PaginatedComment } from "../../repositories/content/comment.repository.interface";
 
 export interface LikePostParams {
   postId: string;
@@ -22,17 +21,6 @@ export interface RemoveCommentParams {
   commentId: string;
   postId: string;
   userId: string;
-}
-
-export interface PaginateCommentsParams {
-  postId: string;
-  cursor: CommentCursor | null;
-  pageSize?: number;
-}
-
-export interface CommentCursor {
-  createdAt: Date;
-  commentId: string;
 }
 
 export interface PaginatedResponse<TItem, TCursor> {
@@ -82,11 +70,5 @@ export interface IPostInteractionService {
       PostInteractionErrors.NotCommentOwner |
       PostInteractionErrors.FailedToDeleteComment
     >
-  >;
-
-  paginateComments(
-    params: PaginateCommentsParams
-  ): Promise<
-    Result<PaginatedResponse<PaginatedComment, CommentCursor>, never>
   >;
 }
