@@ -27,7 +27,8 @@ export interface RelationshipStatesBetweenUsersParams {
 }
 
 export interface GetStatsParams {
-  userId: string;
+  selfUserId: string;
+  otherUserId?: string;
 }
 
 export interface UpdateProfileParams {
@@ -66,11 +67,11 @@ export interface IProfileService {
 
   searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,
-  ): Promise<Result<HydratedProfile[], never>>;
+  ): Promise<Result<HydratedProfile[], ProfileError>>;
 
   relationshipStatesBetweenUsers(
     params: RelationshipStatesBetweenUsersParams,
-  ): Promise<Result<RelationshipState[], never>>;
+  ): Promise<Result<RelationshipState[], ProfileError>>;
 
   stats(params: GetStatsParams): Promise<Result<UserStats, ProfileError>>;
 

@@ -5,6 +5,7 @@ import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { S3 } from "@oppfy/s3";
 
+import { userStats } from "../../../../../db/src/schema";
 import { TYPES } from "../../container";
 import { ProfileError, ProfileErrors } from "../../errors/user/profile.error";
 import type { IBlockRepository } from "../../interfaces/repositories/social/block.repository.interface";
@@ -50,7 +51,14 @@ export class ProfileService implements IProfileService {
    */
   async profile(
     params: ProfileParams,
-  ): Promise<Result<HydratedProfile, ProfileError>> {
+  ): Promise<
+    Result<
+      HydratedProfile,
+      | ProfileErrors.ProfileNotFound
+      | ProfileErrors.ProfilePrivate
+      | ProfileErrors.ProfileBlocked
+    >
+  > {
     const { selfUserId, otherUserId } = params;
 
     const isBlocked = await this.blockRepository.isBlocked({
@@ -91,7 +99,7 @@ export class ProfileService implements IProfileService {
    */
   async profileForSite(
     params: ProfileForSiteParams,
-  ): Promise<Result<HydratedProfile, ProfileError>> {
+  ): Promise<Result<HydratedProfile, ProfileErrors.ProfileNotFound>> {
     const { username } = params;
 
     const profileData = await this.profileRepository.getProfileByUsername({
@@ -128,7 +136,7 @@ export class ProfileService implements IProfileService {
    */
   async relationshipStatesBetweenUsers(
     params: RelationshipStatesBetweenUsersParams,
-  ): Promise<Result<RelationshipState[], never>> {
+  ): Promise<Result<RelationshipState[], ProfileErrors.ProfileBlocked>> {
     const { currentUserId, otherUserId } = params;
 
     const isBlocked = await this.blockRepository.isBlocked({
@@ -137,7 +145,7 @@ export class ProfileService implements IProfileService {
     });
 
     if (isBlocked) {
-      return ok([{ follow: "NOT_FOLLOWING", friend: "NOT_FRIENDS" }]);
+      return err(new ProfileErrors.ProfileBlocked(otherUserId));
     }
 
     const [isFollowing, isFollowRequested, isFriends, isFriendRequested] =
@@ -179,17 +187,75 @@ export class ProfileService implements IProfileService {
     return ok([{ follow: followState, friend: friendState }]);
   }
 
-  stats(params: GetStatsParams): Promise<Result<UserStats, ProfileError>> {
-    throw new Error("Method not implemented.");
+  /**
+   * Retrieves user stats, ensuring the requester is not blocked.
+   */
+  async stats(
+    params: GetStatsParams,
+  ): Promise<Result<UserStats, ProfileError>> {
+    const { selfUserId, otherUserId } = params;
+
+    if (otherUserId === undefined) {
+      const stats = await this.profileRepository.getStats({
+        userId: selfUserId,
+      });
+
+      if (stats === undefined) {
+        return err(new ProfileErrors.StatsNotFound(selfUserId));
+      }
+
+      return ok(stats);
+    }
+
+    const isBlocked = await this.blockRepository.isBlocked({
+      userId: selfUserId,
+      blockedUserId: otherUserId,
+    });
+
+    if (isBlocked) {
+      return err(new ProfileErrors.ProfileBlocked(otherUserId));
+    }
+
+    const stats = await this.profileRepository.getStats({
+      userId: otherUserId,
+    });
+
+    if (stats === undefined) {
+      return err(new ProfileErrors.StatsNotFound(otherUserId));
+    }
+
+    return ok(stats);
   }
-  updateProfile(
+
+  /**
+   * Updates a user's profile, restricted to the profile owner.
+   */
+  async updateProfile(
     params: UpdateProfileParams,
   ): Promise<Result<void, ProfileError>> {
-    throw new Error("Method not implemented.");
+    const { userId, update } = params;
+
+    await this.profileRepository.updateProfile({
+      userId,
+      update,
+    });
+
+    return ok();
   }
-  generateProfilePicturePresignedUrl(
+
+  /**
+   * Generates a presigned URL for profile picture upload, restricted to the owner.
+   */
+  async generateProfilePicturePresignedUrl(
     params: GenerateProfilePicturePresignedUrlParams,
   ): Promise<Result<string, ProfileError>> {
-    throw new Error("Method not implemented.");
+    const { userId, contentLength } = params;
+
+    const presignedUrl = await this.s3.createProfilePicturePresignedUrl({
+      userId,
+      contentLength,
+    });
+
+    return ok(presignedUrl);
   }
 }

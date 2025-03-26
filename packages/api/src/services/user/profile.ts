@@ -5,10 +5,7 @@ import { s3 } from "@oppfy/s3";
 import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
-import {
-  ProfileRepository,
-  UserRepository,
-} from "../../repositories";
+import { ProfileRepository, UserRepository } from "../../repositories";
 import { UserRelationshipRepository } from "../../repositories/network/userRelationship";
 
 const _updateProfile = z.object({
@@ -30,7 +27,10 @@ export class ProfileService {
     userId: string;
     contentLength: number;
   }) {
-    const url = await s3.uploadProfilePicture({ userId, contentLength });
+    const url = await s3.createProfilePicturePresignedUrl({
+      userId,
+      contentLength,
+    });
 
     await cloudfront.invalidateProfilePicture(userId);
     return url;
@@ -148,15 +148,17 @@ export class ProfileService {
         )
       : null;
 
-    const relationshipCurrentUserToOtherUser = await this.userRelationshipRepository.getRelationship({
-      userIdA: currentUserId,
-      userIdB: otherUserId,
-    });
+    const relationshipCurrentUserToOtherUser =
+      await this.userRelationshipRepository.getRelationship({
+        userIdA: currentUserId,
+        userIdB: otherUserId,
+      });
 
-    const relationshipOtherUserToCurrentUser = await this.userRelationshipRepository.getRelationship({
-      userIdA: otherUserId,
-      userIdB: currentUserId,
-    });
+    const relationshipOtherUserToCurrentUser =
+      await this.userRelationshipRepository.getRelationship({
+        userIdA: otherUserId,
+        userIdB: currentUserId,
+      });
 
     return {
       userId: user.id,
@@ -205,15 +207,17 @@ export class ProfileService {
       );
     }
 
-    const relationshipCurrentUserToOtherUser = await this.userRelationshipRepository.getRelationship({
-      userIdA: currentUserId,
-      userIdB: otherUserId,
-    });
+    const relationshipCurrentUserToOtherUser =
+      await this.userRelationshipRepository.getRelationship({
+        userIdA: currentUserId,
+        userIdB: otherUserId,
+      });
 
-    const relationshipOtherUserToCurrentUser = await this.userRelationshipRepository.getRelationship({
-      userIdA: otherUserId,
-      userIdB: currentUserId,
-    });
+    const relationshipOtherUserToCurrentUser =
+      await this.userRelationshipRepository.getRelationship({
+        userIdA: otherUserId,
+        userIdB: currentUserId,
+      });
 
     return {
       relationshipCurrentUserToOtherUser,
