@@ -1,6 +1,4 @@
-import type { Transaction } from "@oppfy/db";
-
-import type { Like } from "../../../models";
+import type { DatabaseOrTransaction } from "@oppfy/db";
 
 export interface LikeParams {
   postId: string;
@@ -8,7 +6,7 @@ export interface LikeParams {
 }
 
 export interface ILikeRepository {
-  addLike(params: LikeParams, tx?: Transaction): Promise<void>;
-  removeLike(params: LikeParams, tx?: Transaction): Promise<void>;
-  findLike(params: LikeParams, tx?: Transaction): Promise<Like | undefined>;
+  addLike(params: LikeParams, db?: DatabaseOrTransaction): Promise<void>;
+  removeLike(params: LikeParams, db?: DatabaseOrTransaction): Promise<void>;
+  isLiked(params: LikeParams, db?: DatabaseOrTransaction): Promise<boolean>;
 }
