@@ -54,7 +54,7 @@ export class PostInteractionService implements IPostInteractionService {
         tx,
       );
       if (existingLike)
-        throw new PostInteractionErrors.AlreadyLiked(postId, userId);
+        return err(new PostInteractionErrors.AlreadyLiked(postId, userId));
 
       await this.likeRepository.addLike({ postId, userId }, tx);
     });
@@ -74,14 +74,14 @@ export class PostInteractionService implements IPostInteractionService {
   > {
     await this.db.transaction(async (tx) => {
       const post = await this.postRepository.getPost({ postId, userId }, tx);
-      if (!post) throw new PostInteractionErrors.PostNotFound(postId);
+        if (!post) return err(new PostInteractionErrors.PostNotFound(postId));
 
       const existingLike = await this.likeRepository.getLike(
         { postId, userId },
         tx,
       );
       if (!existingLike)
-        throw new PostInteractionErrors.NotLiked(postId, userId);
+        return err(new PostInteractionErrors.NotLiked(postId, userId));
 
       await this.likeRepository.removeLike({ postId, userId }, tx);
     });
@@ -100,7 +100,7 @@ export class PostInteractionService implements IPostInteractionService {
   > {
     await this.db.transaction(async (tx) => {
       const post = await this.postRepository.getPost({ postId, userId }, tx);
-      if (!post) throw new PostInteractionErrors.PostNotFound(postId);
+      if (!post) return err(new PostInteractionErrors.PostNotFound(postId));
 
       await this.commentRepository.addComment({ postId, userId, body }, tx);
     });
@@ -124,9 +124,9 @@ export class PostInteractionService implements IPostInteractionService {
         { commentId },
         tx,
       );
-      if (!comment) throw new PostInteractionErrors.CommentNotFound(commentId);
+      if (!comment) return err(new PostInteractionErrors.CommentNotFound(commentId));
       if (comment.userId !== userId)
-        throw new PostInteractionErrors.NotCommentOwner(commentId, userId);
+        return err(new PostInteractionErrors.NotCommentOwner(commentId, userId));
 
       await this.commentRepository.removeComment({ commentId, postId }, tx);
     });
