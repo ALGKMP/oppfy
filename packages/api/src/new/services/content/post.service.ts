@@ -9,9 +9,13 @@ import { s3 } from "@oppfy/s3";
 
 import { TYPES } from "../../container";
 import { PostErrors } from "../../errors/content/post.error";
-import type { IPostRepository, PostResult, PostResultWithoutLike } from "../../interfaces/repositories/content/postRepository.interface";
-import type { IUserRepository } from "../../interfaces/repositories/user/userRepository.interface";
+import type {
+  IPostRepository,
+  PostResult,
+  PostResultWithoutLike,
+} from "../../interfaces/repositories/content/postRepository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profileRepository.interface";
+import type { IUserRepository } from "../../interfaces/repositories/user/userRepository.interface";
 import type {
   DeletePostParams,
   FeedCursor,
@@ -33,9 +37,12 @@ import type {
 export class PostService implements IPostService {
   constructor(
     @inject(TYPES.Database) private readonly db: Database,
-    @inject(TYPES.PostRepository) private readonly postRepository: IPostRepository,
-    @inject(TYPES.UserRepository) private readonly userRepository: IUserRepository,
-    @inject(TYPES.ProfileRepository) private readonly profileRepository: IProfileRepository,
+    @inject(TYPES.PostRepository)
+    private readonly postRepository: IPostRepository,
+    @inject(TYPES.UserRepository)
+    private readonly userRepository: IUserRepository,
+    @inject(TYPES.ProfileRepository)
+    private readonly profileRepository: IProfileRepository,
   ) {}
 
   private async generatePresignedUrl(
@@ -54,9 +61,18 @@ export class PostService implements IPostService {
   }
 
   private async handleUpload(
-    params: UploadPostForUserOnAppUrlParams | UploadPostForUserNotOnAppUrlParams | UploadVideoPostForUserOnAppUrlParams | UploadVideoPostForUserNotOnAppUrlParams,
+    params:
+      | UploadPostForUserOnAppUrlParams
+      | UploadPostForUserNotOnAppUrlParams
+      | UploadVideoPostForUserOnAppUrlParams
+      | UploadVideoPostForUserNotOnAppUrlParams,
     isVideo: boolean,
-  ): Promise<Result<{ presignedUrl: string; postId: string }, PostErrors.FailedToCreatePost>> {
+  ): Promise<
+    Result<
+      { presignedUrl: string; postId: string },
+      PostErrors.FailedToCreatePost
+    >
+  > {
     const { author, caption, height, width } = params;
     const postId = randomUUID();
     const currentDate = Date.now();
@@ -76,16 +92,22 @@ export class PostService implements IPostService {
           });
           return ok({ presignedUrl, postId });
         } else {
-          const { contentLength, contentType } = params as UploadPostForUserOnAppUrlParams;
+          const { contentLength, contentType } =
+            params as UploadPostForUserOnAppUrlParams;
           const objectKey = `posts/${currentDate}-${recipient}-${author}.jpg`;
-          const presignedUrl = await this.generatePresignedUrl(objectKey, contentLength, contentType, {
-            author,
-            recipient,
-            caption,
-            height,
-            width,
-            postid: postId,
-          });
+          const presignedUrl = await this.generatePresignedUrl(
+            objectKey,
+            contentLength,
+            contentType,
+            {
+              author,
+              recipient,
+              caption,
+              height,
+              width,
+              postid: postId,
+            },
+          );
           return ok({ presignedUrl, postId });
         }
       } else {
@@ -94,7 +116,9 @@ export class PostService implements IPostService {
         let result: { presignedUrl: string; postId: string } | undefined;
 
         await this.db.transaction(async (tx) => {
-          const recipient = await this.userRepository.getUserByPhoneNumber({ phoneNumber: recipientNotOnAppPhoneNumber });
+          const recipient = await this.userRepository.getUserByPhoneNumber({
+            phoneNumber: recipientNotOnAppPhoneNumber,
+          });
           const recipientId = recipient?.id ?? randomUUID();
 
           if (!recipient) {
@@ -122,17 +146,23 @@ export class PostService implements IPostService {
               postId,
             };
           } else {
-            const { contentLength, contentType } = params as UploadPostForUserNotOnAppUrlParams;
+            const { contentLength, contentType } =
+              params as UploadPostForUserNotOnAppUrlParams;
             const objectKey = `posts/${currentDate}-${recipientId}-${author}.jpg`;
             result = {
-              presignedUrl: await this.generatePresignedUrl(objectKey, contentLength, contentType, {
-                author,
-                caption,
-                height,
-                width,
-                recipient: recipientId,
-                postid: postId,
-              }),
+              presignedUrl: await this.generatePresignedUrl(
+                objectKey,
+                contentLength,
+                contentType,
+                {
+                  author,
+                  caption,
+                  height,
+                  width,
+                  recipient: recipientId,
+                  postid: postId,
+                },
+              ),
               postId,
             };
           }
@@ -148,25 +178,45 @@ export class PostService implements IPostService {
 
   async uploadPostForUserOnAppUrl(
     params: UploadPostForUserOnAppUrlParams,
-  ): Promise<Result<{ presignedUrl: string; postId: string }, PostErrors.FailedToCreatePost>> {
+  ): Promise<
+    Result<
+      { presignedUrl: string; postId: string },
+      PostErrors.FailedToCreatePost
+    >
+  > {
     return this.handleUpload(params, false);
   }
 
   async uploadPostForUserNotOnAppUrl(
     params: UploadPostForUserNotOnAppUrlParams,
-  ): Promise<Result<{ presignedUrl: string; postId: string }, PostErrors.FailedToCreatePost>> {
+  ): Promise<
+    Result<
+      { presignedUrl: string; postId: string },
+      PostErrors.FailedToCreatePost
+    >
+  > {
     return this.handleUpload(params, false);
   }
 
   async uploadVideoPostForUserOnAppUrl(
     params: UploadVideoPostForUserOnAppUrlParams,
-  ): Promise<Result<{ presignedUrl: string; postId: string }, PostErrors.FailedToCreatePost>> {
+  ): Promise<
+    Result<
+      { presignedUrl: string; postId: string },
+      PostErrors.FailedToCreatePost
+    >
+  > {
     return this.handleUpload(params, true);
   }
 
   async uploadVideoPostForUserNotOnAppUrl(
     params: UploadVideoPostForUserNotOnAppUrlParams,
-  ): Promise<Result<{ presignedUrl: string; postId: string }, PostErrors.FailedToCreatePost>> {
+  ): Promise<
+    Result<
+      { presignedUrl: string; postId: string },
+      PostErrors.FailedToCreatePost
+    >
+  > {
     return this.handleUpload(params, true);
   }
 
@@ -175,7 +225,10 @@ export class PostService implements IPostService {
   ): Promise<
     Result<
       void,
-      PostErrors.FailedToDeletePost | PostErrors.PostNotFound | PostErrors.NotPostOwner | PostErrors.PostDeleted
+      | PostErrors.FailedToDeletePost
+      | PostErrors.PostNotFound
+      | PostErrors.NotPostOwner
+      | PostErrors.PostDeleted
     >
   > {
     try {
@@ -185,8 +238,10 @@ export class PostService implements IPostService {
       return ok(undefined);
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message.includes("not found")) return err(new PostErrors.PostNotFound(params.postId));
-        if (error.message.includes("Unauthorized")) return err(new PostErrors.NotPostOwner(params.userId, params.postId));
+        if (error.message.includes("not found"))
+          return err(new PostErrors.PostNotFound(params.postId));
+        if (error.message.includes("Unauthorized"))
+          return err(new PostErrors.NotPostOwner(params.userId, params.postId));
         // Assuming PostDeleted could be added later; not thrown by repo currently
       }
       return err(new PostErrors.FailedToDeletePost(params.postId));
@@ -195,7 +250,9 @@ export class PostService implements IPostService {
 
   async getPost(
     params: GetPostParams,
-  ): Promise<Result<PostResult, PostErrors.PostNotFound | PostErrors.PostDeleted>> {
+  ): Promise<
+    Result<PostResult, PostErrors.PostNotFound | PostErrors.PostDeleted>
+  > {
     const post = await this.postRepository.getPost(params);
     if (!post) return err(new PostErrors.PostNotFound(params.postId));
     return ok(post);
@@ -205,31 +262,50 @@ export class PostService implements IPostService {
     params: PaginatePostsParams,
   ): Promise<Result<PaginatedResponse<PostResult, PostCursor | null>, never>> {
     const { userId, cursor, pageSize = 20 } = params;
-    const posts = await this.postRepository.paginatePostsOfUser({ userId, cursor, pageSize });
+    const posts = await this.postRepository.paginatePostsOfUser({
+      userId,
+      cursor,
+      pageSize,
+    });
 
+    const lastPost = posts[pageSize - 1];
     return ok({
-      items: posts.slice(0, pageSize), // Trim to exact pageSize
-      nextCursor: posts.length > pageSize ? {
-        postId: posts[pageSize - 1]?.post.id ?? null,
-        createdAt: posts[pageSize - 1]?.post.createdAt ?? null,
-      } : null,
+      items: posts.slice(0, pageSize),
+      nextCursor:
+        posts.length > pageSize && lastPost
+          ? {
+              postId: lastPost.post.id,
+              createdAt: lastPost.post.createdAt,
+            }
+          : null,
     });
   }
 
   async paginatePostsForFeed(
     params: PaginatePostsForFeedParams,
-  ): Promise<Result<PaginatedResponse<PostResult, FeedCursor>, PostErrors.PostNotFound>> {
+  ): Promise<
+    Result<PaginatedResponse<PostResult, FeedCursor>, PostErrors.PostNotFound>
+  > {
     const { userId, cursor, pageSize } = params;
-    const posts = await this.postRepository.paginatePostsOfFollowing({ userId, cursor, pageSize });
-    if (!posts.length && cursor) return err(new PostErrors.PostNotFound(cursor.postId));
+    const posts = await this.postRepository.paginatePostsOfFollowing({
+      userId,
+      cursor,
+      pageSize,
+    });
+    if (!posts.length && cursor)
+      return err(new PostErrors.PostNotFound(cursor.postId));
 
+    const lastPost = posts[pageSize - 1];
     return ok({
       items: posts.slice(0, pageSize),
-      nextCursor: posts.length > pageSize ? {
-        postId: posts[pageSize - 1]?.post.id ?? null,
-        createdAt: posts[pageSize - 1]?.post.createdAt ?? null,
-        type: "following", // Only following for now; extend for "recommended" later
-      } : null,
+      nextCursor:
+        posts.length > pageSize && lastPost
+          ? {
+              postId: lastPost.post.id,
+              createdAt: lastPost.post.createdAt,
+              type: "following",
+            }
+          : null,
     });
   }
 
@@ -239,7 +315,9 @@ export class PostService implements IPostService {
     const post = await this.postRepository.getPostForNextJs(params);
     if (!post) return err(new PostErrors.PostNotFound(params.postId));
 
-    const profile = await this.profileRepository.getProfile({ userId: post.post.authorUserId });
+    const profile = await this.profileRepository.getProfile({
+      userId: post.post.authorUserId,
+    });
     if (!profile || profile.privacy !== "public") {
       return err(new PostErrors.PostNotFound(params.postId));
     }
@@ -249,21 +327,31 @@ export class PostService implements IPostService {
 
   async updatePost(
     params: UpdatePostParams,
-  ): Promise<Result<void, PostErrors.FailedToUpdatePost | PostErrors.PostNotFound | PostErrors.NotPostOwner>> {
+  ): Promise<
+    Result<
+      void,
+      | PostErrors.FailedToUpdatePost
+      | PostErrors.PostNotFound
+      | PostErrors.NotPostOwner
+    >
+  > {
     const { userId, postId, content: caption } = params; // Map content to caption
     try {
       await this.db.transaction(async (tx) => {
         const post = await this.postRepository.getPost({ postId, userId }, tx);
         if (!post) throw new Error("Post not found");
-        if (post.post.authorUserId !== userId) throw new Error("Unauthorized: User does not own this post");
+        if (post.post.authorUserId !== userId)
+          throw new Error("Unauthorized: User does not own this post");
 
         await this.postRepository.updatePost({ postId, caption }, tx);
       });
       return ok(undefined);
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message.includes("not found")) return err(new PostErrors.PostNotFound(postId));
-        if (error.message.includes("Unauthorized")) return err(new PostErrors.NotPostOwner(userId, postId));
+        if (error.message.includes("not found"))
+          return err(new PostErrors.PostNotFound(postId));
+        if (error.message.includes("Unauthorized"))
+          return err(new PostErrors.NotPostOwner(userId, postId));
       }
       return err(new PostErrors.FailedToUpdatePost(postId));
     }
