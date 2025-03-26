@@ -1,7 +1,7 @@
 import type { Result } from "neverthrow";
 
 import type { PostInteractionErrors } from "../../../errors/content/postInteraction.error";
-import type { PaginatedComment } from "../../../interfaces/repositories/content/commentRepository.interface";
+import type { PaginatedComment } from "../../repositories/content/comment.repository.interface";
 
 export interface BaseCursor {
   createdAt: Date;

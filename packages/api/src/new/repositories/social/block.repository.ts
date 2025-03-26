@@ -8,7 +8,7 @@ import type {
   BlockUserParams,
   GetBlockedUsersParams,
   IBlockRepository,
-} from "../../interfaces/repositories/social/blockRepository.interface";
+} from "../../interfaces/repositories/social/block.repository.interface";
 import type { Profile } from "../../models";
 
 @injectable()

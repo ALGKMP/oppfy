@@ -17,7 +17,7 @@ import {
   GetUserByPhoneNumberParams,
   IUserRepository,
   UserIdParams,
-} from "../../interfaces/repositories/user/userRepository.interface";
+} from "../../interfaces/repositories/user/user.repository.interface";
 import type { User, UserStatus } from "../../models";
 
 @injectable()

@@ -5,18 +5,18 @@ import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import { BlockErrors } from "../../errors/social/block.error";
-import type { IBlockRepository } from "../../interfaces/repositories/social/blockRepository.interface";
-import type { IFollowRepository } from "../../interfaces/repositories/social/followRepository.interface";
-import type { IFriendRepository } from "../../interfaces/repositories/social/friendRepository.interface";
+import type { IBlockRepository } from "../../interfaces/repositories/social/block.repository.interface";
+import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
+import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
-import type { INotificationsRepository } from "../../interfaces/repositories/user/notificationRepository.interface";
+import type { INotificationsRepository } from "../../interfaces/repositories/user/notification.repository.interface";
 import type { IUserStatsRepository } from "../../interfaces/repositories/user/profileStatsRepository.interface";
 import type {
   BlockedUser,
   IBlockService,
   PaginatedResponse,
   PaginationCursor,
-} from "../../interfaces/services/social/blockService.interface";
+} from "../../interfaces/services/social/block.service.interface";
 
 @injectable()
 export class BlockService implements IBlockService {

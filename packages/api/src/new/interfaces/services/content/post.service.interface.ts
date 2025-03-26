@@ -6,7 +6,7 @@ import type { PostErrors } from "../../../errors/content/post.error";
 import type {
   PostResult,
   PostResultWithoutLike,
-} from "../../../interfaces/repositories/content/postRepository.interface";
+} from "../../repositories/content/post.repository.interface";
 
 export interface PaginatedResponse<TItem, TCursor> {
   items: TItem[];

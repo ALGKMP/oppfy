@@ -16,7 +16,7 @@ import type {
   UpdateProfileParams,
   UserIdParams,
   UsernameParams,
-} from "../../interfaces/repositories/user/profileRepository.interface";
+} from "../../interfaces/repositories/user/profile.repository.interface";
 import type { Profile, UserStats } from "../../models";
 
 @injectable()

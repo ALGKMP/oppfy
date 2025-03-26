@@ -19,7 +19,7 @@ import {
   PostResult,
   PostResultWithoutLike,
   UpdatePostParams,
-} from "../../interfaces/repositories/content/postRepository.interface";
+} from "../../interfaces/repositories/content/post.repository.interface";
 
 @injectable()
 export class PostRepository implements IPostRepository {

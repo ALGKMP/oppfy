@@ -7,12 +7,12 @@ import { TYPES } from "../../container";
 import { FriendErrors } from "../../errors/social/friend.error";
 import { ProfileErrors } from "../../errors/user/profile.error";
 import { UserErrors } from "../../errors/user/user.error";
-import type { IFollowRepository } from "../../interfaces/repositories/social/followRepository.interface";
-import type { IFriendRepository } from "../../interfaces/repositories/social/friendRepository.interface";
+import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
+import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
-import type { INotificationsRepository } from "../../interfaces/repositories/user/notificationRepository.interface";
-import type { IUserRepository } from "../../interfaces/repositories/user/userRepository.interface";
-import type { IFriendService } from "../../interfaces/services/social/friendService.interface";
+import type { INotificationsRepository } from "../../interfaces/repositories/user/notification.repository.interface";
+import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
+import type { IFriendService } from "../../interfaces/services/social/friend.service.interface";
 
 @injectable()
 export class FriendService implements IFriendService {

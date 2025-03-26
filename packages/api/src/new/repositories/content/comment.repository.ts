@@ -13,7 +13,7 @@ import {
   PaginateCommentsParams,
   PaginatedComment,
   RemoveCommentParams,
-} from "../../interfaces/repositories/content/commentRepository.interface";
+} from "../../interfaces/repositories/content/comment.repository.interface";
 
 @injectable()
 export class CommentRepository implements ICommentRepository {

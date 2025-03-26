@@ -6,11 +6,11 @@ import type { Database } from "@oppfy/db";
 import { TYPES } from "../../container";
 import { FollowErrors } from "../../errors/social/follow.error";
 import { UserErrors } from "../../errors/user/user.error";
-import type { IFollowRepository } from "../../interfaces/repositories/social/followRepository.interface";
+import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
 import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
-import type { INotificationsRepository } from "../../interfaces/repositories/user/notificationRepository.interface";
-import type { IUserRepository } from "../../interfaces/repositories/user/userRepository.interface";
-import type { IFollowService } from "../../interfaces/services/social/followService.interface";
+import type { INotificationsRepository } from "../../interfaces/repositories/user/notification.repository.interface";
+import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
+import type { IFollowService } from "../../interfaces/services/social/follow.service.interface";
 
 @injectable()
 export class FollowService implements IFollowService {

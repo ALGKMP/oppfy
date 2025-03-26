@@ -15,7 +15,7 @@ import {
   IFriendRepository,
   PaginateFriendParams,
   UserIdParams,
-} from "../../interfaces/repositories/social/friendRepository.interface";
+} from "../../interfaces/repositories/social/friend.repository.interface";
 import { Profile } from "../../models";
 
 @injectable()

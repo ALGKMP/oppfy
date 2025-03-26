@@ -20,7 +20,7 @@ import type {
   IContactService,
   SyncContactsParams,
   SyncContactsResult,
-} from "../../interfaces/services/user/contactService.interface";
+} from "../../interfaces/services/user/contact.service.interface";
 import { ContactsRepository } from "../../repositories/user/contacts.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";

@@ -17,7 +17,7 @@ import type {
   GetRecommendationsParams,
   IContactsRepository,
   UpdateUserContactsParams,
-} from "../../interfaces/repositories/user/contactsRepository.interface";
+} from "../../interfaces/repositories/user/contacts.repository.interface";
 
 @injectable()
 export class ContactsRepository implements IContactsRepository {

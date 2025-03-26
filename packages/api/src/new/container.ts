@@ -5,16 +5,16 @@ import { Container } from "inversify";
 import { CloudFront } from "@oppfy/cloudfront";
 import { db, schema } from "@oppfy/db";
 
-import type { IBlockRepository } from "./interfaces/repositories/social/blockRepository.interface";
-import type { IFollowRepository } from "./interfaces/repositories/social/followRepository.interface";
-import type { IFriendRepository } from "./interfaces/repositories/social/friendRepository.interface";
-import type { IContactsRepository } from "./interfaces/repositories/user/contactsRepository.interface";
-import type { INotificationsRepository } from "./interfaces/repositories/user/notificationRepository.interface";
-import type { IProfileRepository } from "./interfaces/repositories/user/profileRepository.interface";
+import type { IBlockRepository } from "./interfaces/repositories/social/block.repository.interface";
+import type { IFollowRepository } from "./interfaces/repositories/social/follow.repository.interface";
+import type { IFriendRepository } from "./interfaces/repositories/social/friend.repository.interface";
+import type { IContactsRepository } from "./interfaces/repositories/user/contacts.repository.interface";
+import type { INotificationsRepository } from "./interfaces/repositories/user/notification.repository.interface";
+import type { IProfileRepository } from "./interfaces/repositories/user/profile.repository.interface";
 import type { IUserStatsRepository } from "./interfaces/repositories/user/profileStatsRepository.interface";
-import type { IReportRepository } from "./interfaces/repositories/user/reportRepository.interface";
-import type { IUserRepository } from "./interfaces/repositories/user/userRepository.interface";
-import type { IReportService } from "./interfaces/services/user/reportService.interface";
+import type { IReportRepository } from "./interfaces/repositories/user/report.repository.interface";
+import type { IUserRepository } from "./interfaces/repositories/user/user.repository.interface";
+import type { IReportService } from "./interfaces/services/user/report.service.interface";
 import { BlockRepository } from "./repositories/social/block.repository";
 import { FollowRepository } from "./repositories/social/follow.repository";
 import { FriendRepository } from "./repositories/social/friend.repository";
@@ -52,7 +52,6 @@ export const TYPES = {
   CommentRepository: Symbol.for("CommentRepository"),
   PostStatsRepository: Symbol.for("PostStatsRepository"),
   PostInteractionRepository: Symbol.for("PostInteractionRepository"),
-  
 
   // Services
   ReportService: Symbol.for("ReportService"),

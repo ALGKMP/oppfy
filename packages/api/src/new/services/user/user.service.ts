@@ -11,15 +11,15 @@ import { sqs } from "@oppfy/sqs";
 import { TYPES } from "../../container";
 import { AwsErrors } from "../../errors/aws.error";
 import { UserErrors } from "../../errors/user/user.error";
-import type { IPostRepository } from "../../interfaces/repositories/content/postRepository.interface";
-import type { IBlockRepository } from "../../interfaces/repositories/social/blockRepository.interface";
-import type { IFollowRepository } from "../../interfaces/repositories/social/followRepository.interface";
+import type { IPostRepository } from "../../interfaces/repositories/content/post.repository.interface";
+import type { IBlockRepository } from "../../interfaces/repositories/social/block.repository.interface";
+import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
 import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
-import type { IContactsRepository } from "../../interfaces/repositories/user/contactsRepository.interface";
-import type { INotificationsRepository } from "../../interfaces/repositories/user/notificationRepository.interface";
-import type { IProfileRepository } from "../../interfaces/repositories/user/profileRepository.interface";
-import type { IUserRepository } from "../../interfaces/repositories/user/userRepository.interface";
-import type { IUserService } from "../../interfaces/services/user/userService.interface";
+import type { IContactsRepository } from "../../interfaces/repositories/user/contacts.repository.interface";
+import type { INotificationsRepository } from "../../interfaces/repositories/user/notification.repository.interface";
+import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
+import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
+import type { IUserService } from "../../interfaces/services/user/user.service.interface";
 import type { User, UserStatus } from "../../models";
 
 @injectable()

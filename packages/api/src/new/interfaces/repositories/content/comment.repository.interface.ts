@@ -3,7 +3,7 @@ import type { InferSelectModel } from "drizzle-orm";
 import type { DatabaseOrTransaction, schema } from "@oppfy/db";
 
 import type { Profile } from "../../../models";
-import type { CommentCursor } from "../../services/content/postInteractionService.interface";
+import type { CommentCursor } from "../../services/content/postInteraction.service.interface";
 
 export type Comment = InferSelectModel<typeof schema.comment>;
 

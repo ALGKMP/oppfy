@@ -8,12 +8,12 @@ import { PostInteractionErrors } from "../../errors/content/postInteraction.erro
 import type {
   ICommentRepository,
   PaginatedComment,
-} from "../../interfaces/repositories/content/commentRepository.interface";
-import type { ILikeRepository } from "../../interfaces/repositories/content/likeRepository.interface";
-import type { IPostRepository } from "../../interfaces/repositories/content/postRepository.interface";
+} from "../../interfaces/repositories/content/comment.repository.interface";
+import type { ILikeRepository } from "../../interfaces/repositories/content/like.repository.interface";
+import type { IPostRepository } from "../../interfaces/repositories/content/post.repository.interface";
 import type { IPostStatsRepository } from "../../interfaces/repositories/content/postStatsRepository.interface";
 import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
-import type { INotificationsRepository } from "../../interfaces/repositories/user/notificationRepository.interface";
+import type { INotificationsRepository } from "../../interfaces/repositories/user/notification.repository.interface";
 import type { IUserStatsRepository } from "../../interfaces/repositories/user/profileStatsRepository.interface";
 import type {
   CommentCursor,
@@ -25,7 +25,7 @@ import type {
   PaginateCommentsParams,
   PaginatedResponse,
   UnlikePostParams,
-} from "../../interfaces/services/content/postInteractionService.interface";
+} from "../../interfaces/services/content/postInteraction.service.interface";
 
 @injectable()
 export class PostInteractionService implements IPostInteractionService {

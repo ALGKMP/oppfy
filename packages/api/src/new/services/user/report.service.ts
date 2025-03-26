@@ -4,13 +4,13 @@ import { ok, Result } from "neverthrow";
 import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
-import type { IReportRepository } from "../../interfaces/repositories/user/reportRepository.interface";
+import type { IReportRepository } from "../../interfaces/repositories/user/report.repository.interface";
 import {
   CreateCommentReportParams,
   CreatePostReportParams,
   CreateUserReportParams,
   IReportService,
-} from "../../interfaces/services/user/reportService.interface";
+} from "../../interfaces/services/user/report.service.interface";
 
 @injectable()
 export class ReportService implements IReportService {

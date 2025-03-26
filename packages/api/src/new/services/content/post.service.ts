@@ -13,9 +13,9 @@ import type {
   IPostRepository,
   PostResult,
   PostResultWithoutLike,
-} from "../../interfaces/repositories/content/postRepository.interface";
-import type { IProfileRepository } from "../../interfaces/repositories/user/profileRepository.interface";
-import type { IUserRepository } from "../../interfaces/repositories/user/userRepository.interface";
+} from "../../interfaces/repositories/content/post.repository.interface";
+import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
+import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type {
   DeletePostParams,
   FeedCursor,
@@ -31,7 +31,7 @@ import type {
   UploadPostForUserOnAppUrlParams,
   UploadVideoPostForUserNotOnAppUrlParams,
   UploadVideoPostForUserOnAppUrlParams,
-} from "../../interfaces/services/content/postService.interface";
+} from "../../interfaces/services/content/post.service.interface";
 
 @injectable()
 export class PostService implements IPostService {

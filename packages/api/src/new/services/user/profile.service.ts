@@ -7,14 +7,14 @@ import type { Database } from "@oppfy/db";
 import { TYPES } from "../../container";
 import { ProfileErrors } from "../../errors/user/profile.error";
 import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
-import type { IProfileRepository } from "../../interfaces/repositories/user/profileRepository.interface";
+import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type {
   GetProfileParams,
   GetStatsParams,
   IProfileService,
   SearchProfilesByUsernameParams,
   UpdateProfileParams,
-} from "../../interfaces/services/user/profileService.interface";
+} from "../../interfaces/services/user/profile.service.interface";
 import { HydratedProfile, UserStats } from "../../models";
 
 @injectable()

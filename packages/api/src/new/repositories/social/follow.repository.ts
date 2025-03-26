@@ -14,7 +14,7 @@ import {
   IFollowRepository,
   PaginateFollowParams,
   UserIdParams,
-} from "../../interfaces/repositories/social/followRepository.interface";
+} from "../../interfaces/repositories/social/follow.repository.interface";
 import { Profile } from "../../models";
 
 @injectable()
