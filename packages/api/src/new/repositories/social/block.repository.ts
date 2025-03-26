@@ -9,7 +9,7 @@ import type {
   GetBlockedUsersParams,
   IBlockRepository,
 } from "../../interfaces/repositories/social/block.repository.interface";
-import type { Profile } from "../../models";
+import type { BlockWithProfile } from "../../models";
 
 @injectable()
 export class BlockRepository implements IBlockRepository {
@@ -67,12 +67,13 @@ export class BlockRepository implements IBlockRepository {
   async paginateBlockedUsers(
     params: GetBlockedUsersParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Profile[]> {
+  ): Promise<BlockWithProfile[]> {
     const { userId, cursor = null, limit = 10 } = params;
 
     const blockedUsers = await db
       .select({
         profile: this.schema.profile,
+        block: this.schema.block,
       })
       .from(this.schema.block)
       .innerJoin(
@@ -99,6 +100,6 @@ export class BlockRepository implements IBlockRepository {
       )
       .limit(limit);
 
-    return blockedUsers.map((result) => result.profile);
+    return blockedUsers;
   }
 }
