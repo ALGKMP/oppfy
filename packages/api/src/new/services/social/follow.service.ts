@@ -1,45 +1,53 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
+import { cloudfront } from "@oppfy/cloudfront"; // Assuming this is the correct import path
 import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import { FollowErrors } from "../../errors/social/follow.error";
 import { UserErrors } from "../../errors/user/user.error";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
-import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
-import type { INotificationsRepository } from "../../interfaces/repositories/user/notification.repository.interface";
+import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
-import type { IFollowService } from "../../interfaces/services/social/follow.service.interface";
+import type {
+  AcceptFollowRequestParams,
+  CancelFollowRequestParams,
+  DeclineFollowRequestParams,
+  GetFollowersParams,
+  GetFollowingParams,
+  GetFollowRequestParams,
+  GetFollowRequestsParams,
+  GetFollowStatusParams,
+  IFollowService,
+  RemoveFollowerParams,
+  RemoveFollowParams,
+  SendFollowRequestParams,
+} from "../../interfaces/services/social/follow.service.interface";
+import { Profile } from "../../models";
 
 @injectable()
 export class FollowService implements IFollowService {
   constructor(
-    @inject(TYPES.Database) private db: Database,
-    @inject(TYPES.FollowRepository) private followRepository: IFollowRepository,
-    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
-    @inject(TYPES.NotificationsRepository)
-    private notificationsRepository: INotificationsRepository,
-    @inject(TYPES.RelationshipRepository)
-    private relationshipRepository: IRelationshipRepository,
+    @inject(TYPES.Database) private readonly db: Database,
+    @inject(TYPES.FollowRepository)
+    private readonly followRepository: IFollowRepository,
+    @inject(TYPES.UserRepository)
+    private readonly userRepository: IUserRepository,
+    @inject(TYPES.ProfileRepository)
+    private readonly profileRepository: IProfileRepository,
   ) {}
 
-  async isFollowing(options: {
-    followerId: string;
-    followeeId: string;
-  }): Promise<Result<boolean, never>> {
-    const { followerId, followeeId } = options;
-    const follower = await this.followRepository.getFollower({
-      followerId,
-      followeeId,
-    });
-    return ok(!!follower);
+  // Hydration helper for profile data
+  private hydrateFollowItem(profile: Profile) {
+    const hydratedProfile = cloudfront.hydrateProfile(profile);
+    return hydratedProfile;
   }
 
-  async sendFollowRequest(options: {
-    senderId: string;
-    recipientId: string;
-  }): Promise<
+  async sendFollowRequest({
+    senderId,
+    recipientId,
+  }: SendFollowRequestParams): Promise<
     Result<
       void,
       | FollowErrors.AlreadyFollowing
@@ -49,435 +57,304 @@ export class FollowService implements IFollowService {
       | UserErrors.UserNotFound
     >
   > {
-    const { senderId, recipientId } = options;
-
     if (senderId === recipientId) {
       return err(new FollowErrors.CannotFollowSelf(senderId));
     }
 
-    // Check if users exist
-    const [sender, recipient] = await Promise.all([
-      this.userRepository.getUserWithProfile({ userId: senderId }),
-      this.userRepository.getUserWithProfile({ userId: recipientId }),
-    ]);
-
-    if (!sender || !recipient) {
-      return err(new UserErrors.UserNotFound(!sender ? senderId : recipientId));
-    }
-
-    const relationship = await this.relationshipRepository.getByUserIds({
-      userIdA: senderId,
-      userIdB: recipientId,
+    const recipient = await this.userRepository.getUser({
+      userId: recipientId,
     });
-
-    if (relationship.followStatus === "following") {
-      return err(new FollowErrors.AlreadyFollowing(senderId, recipientId));
-    } else if (relationship.followStatus === "outboundRequest") {
-      return err(new FollowErrors.RequestAlreadySent(senderId, recipientId));
+    if (!recipient) {
+      return err(new UserErrors.UserNotFound(recipientId));
     }
 
     await this.db.transaction(async (tx) => {
-      // Create follow request
-      await this.followRepository.createFollowRequest(
-        {
-          senderId,
-          recipientId,
-        },
+      const isFollowing = await this.followRepository.getFollower(
+        { senderUserId: senderId, recipientUserId: recipientId },
         tx,
       );
-
-      // Get notification settings
-      const notificationSettings =
-        await this.notificationsRepository.getNotificationSettings({
-          notificationSettingsId: recipient.notificationSettingsId,
-        });
-
-      if (notificationSettings?.followRequests) {
-        await this.notificationsRepository.storeNotification(
-          {
-            senderId,
-            recipientId,
-            notificationData: {
-              eventType: "follow",
-              entityType: "profile",
-              entityId: senderId,
-            },
-          },
-          tx,
-        );
+      if (isFollowing) {
+        throw new FollowErrors.AlreadyFollowing(senderId, recipientId);
       }
-    });
 
+      const isRequested = await this.followRepository.isFollowRequested(
+        { senderUserId: senderId, recipientUserId: recipientId },
+        tx,
+      );
+      if (isRequested) {
+        throw new FollowErrors.RequestAlreadySent(senderId, recipientId);
+      }
+
+      await this.followRepository.createFollowRequest(
+        { senderUserId: senderId, recipientUserId: recipientId },
+        tx,
+      );
+    });
     return ok(undefined);
   }
 
-  async acceptFollowRequest(options: {
-    senderId: string;
-    recipientId: string;
-  }): Promise<
+  async acceptFollowRequest({
+    senderId,
+    recipientId,
+  }: AcceptFollowRequestParams): Promise<
     Result<
       void,
       FollowErrors.RequestNotFound | FollowErrors.FailedToAcceptRequest
     >
   > {
-    const { senderId, recipientId } = options;
-
-    // Check if follow request exists
-    const existingRequest = await this.followRepository.getFollowRequest({
-      senderId,
-      recipientId,
-    });
-
-    if (!existingRequest) {
-      return err(new FollowErrors.RequestNotFound(senderId, recipientId));
-    }
-
     await this.db.transaction(async (tx) => {
-      // Delete follow request and create follower
+      const isRequested = await this.followRepository.isFollowRequested(
+        { senderUserId: senderId, recipientUserId: recipientId },
+        tx,
+      );
+      if (!isRequested) {
+        throw new FollowErrors.RequestNotFound(senderId, recipientId);
+      }
+
       await this.followRepository.deleteFollowRequest(
-        {
-          senderId,
-          recipientId,
-        },
+        { senderUserId: senderId, recipientUserId: recipientId },
         tx,
       );
       await this.followRepository.createFollower(
-        {
-          senderUserId: senderId,
-          recipientUserId: recipientId,
-        },
+        { senderUserId: senderId, recipientUserId: recipientId },
         tx,
       );
-
-      // Get notification settings
-      const sender = await this.userRepository.getUser({ userId: senderId });
-      if (!sender) {
-        return err(
-          new FollowErrors.FailedToAcceptRequest(senderId, recipientId),
-        );
-      }
-
-      const notificationSettings =
-        await this.notificationsRepository.getNotificationSettings({
-          notificationSettingsId: sender.notificationSettingsId,
-        });
-
-      if (notificationSettings?.followRequests) {
-        await this.notificationsRepository.storeNotification(
-          {
-            senderId: recipientId,
-            recipientId: senderId,
-            notificationData: {
-              eventType: "follow",
-              entityType: "profile",
-              entityId: recipientId,
-            },
-          },
-          tx,
-        );
-      }
     });
-
     return ok(undefined);
   }
 
-  async declineFollowRequest(options: {
-    senderId: string;
-    recipientId: string;
-  }): Promise<
+  async declineFollowRequest({
+    senderId,
+    recipientId,
+  }: DeclineFollowRequestParams): Promise<
     Result<
       void,
       FollowErrors.RequestNotFound | FollowErrors.FailedToDeclineRequest
     >
   > {
-    const { senderId, recipientId } = options;
-
-    // Check if follow request exists
-    const existingRequest = await this.followRepository.getFollowRequest({
-      senderId,
-      recipientId,
+    const isRequested = await this.followRepository.isFollowRequested({
+      senderUserId: senderId,
+      recipientUserId: recipientId,
     });
-
-    if (!existingRequest) {
+    if (!isRequested) {
       return err(new FollowErrors.RequestNotFound(senderId, recipientId));
     }
 
-    await this.db.transaction(async (tx) => {
-      // Delete follow request
-      await this.followRepository.deleteFollowRequest(
-        {
-          senderId,
-          recipientId,
-        },
-        tx,
-      );
+    await this.followRepository.deleteFollowRequest({
+      senderUserId: senderId,
+      recipientUserId: recipientId,
     });
-
     return ok(undefined);
   }
 
-  async removeFollow(options: {
-    followerId: string;
-    followeeId: string;
-  }): Promise<
+  async removeFollow({
+    followerId,
+    followeeId,
+  }: RemoveFollowParams): Promise<
     Result<void, FollowErrors.NotFollowing | FollowErrors.FailedToRemove>
   > {
-    const { followerId, followeeId } = options;
-
-    // Check if following
-    const existingFollow = await this.followRepository.getFollower({
-      followerId,
-      followeeId,
+    const isFollowing = await this.followRepository.getFollower({
+      senderUserId: followerId,
+      recipientUserId: followeeId,
     });
-
-    if (!existingFollow) {
+    if (!isFollowing) {
       return err(new FollowErrors.NotFollowing(followerId, followeeId));
     }
 
-    await this.db.transaction(async (tx) => {
-      // Remove follower
-      await this.followRepository.removeFollower(
-        {
-          followerId,
-          followeeId,
-        },
-        tx,
-      );
+    await this.followRepository.removeFollower({
+      senderUserId: followerId,
+      recipientUserId: followeeId,
     });
-
     return ok(undefined);
   }
 
-  async getFollowRequest(options: {
-    senderId: string;
-    recipientId: string;
-  }): Promise<
+  async getFollowRequest({
+    senderId,
+    recipientId,
+  }: GetFollowRequestParams): Promise<
     Result<
       { senderId: string; recipientId: string; createdAt: Date } | undefined,
       never
     >
   > {
-    const { senderId, recipientId } = options;
-    const request = await this.followRepository.getFollowRequest({
-      senderId,
-      recipientId,
+    const request = await this.db.query.followRequest.findFirst({
+      where: (fr, { eq, and }) =>
+        and(eq(fr.senderUserId, senderId), eq(fr.recipientUserId, recipientId)),
     });
     return ok(
-      request ? { senderId, recipientId, createdAt: new Date() } : undefined,
+      request
+        ? { senderId, recipientId, createdAt: request.createdAt }
+        : undefined,
     );
   }
 
-  async countFollowers(options: {
-    userId: string;
-  }): Promise<Result<number, FollowErrors.FailedToCountFollowers>> {
-    const { userId } = options;
-    const count = await this.followRepository.countFollowers({ userId });
-    return ok(count ?? 0);
-  }
-
-  async countFollowing(options: {
-    userId: string;
-  }): Promise<Result<number, FollowErrors.FailedToCountFollowing>> {
-    const { userId } = options;
-    const count = await this.followRepository.countFollowing({ userId });
-    return ok(count ?? 0);
-  }
-
-  async countFollowRequests(options: {
-    userId: string;
-  }): Promise<Result<number, FollowErrors.FailedToCountRequests>> {
-    const { userId } = options;
-    const count = await this.followRepository.countFollowRequests({ userId });
-    return ok(count ?? 0);
-  }
-
-  async getFollowers(options: {
-    userId: string;
-    limit?: number;
-    cursor?: string;
-  }): Promise<
-    Result<
-      { items: { id: string; username: string }[]; nextCursor?: string },
-      never
-    >
-  > {
-    const { userId, limit, cursor } = options;
-    const followers = await this.followRepository.paginateFollowers({
-      forUserId: userId,
-      pageSize: limit,
-      cursor: cursor
-        ? { createdAt: new Date(cursor), profileId: cursor }
-        : null,
-    });
-    return ok({
-      items: followers.map((follower) => ({
-        id: follower.userId,
-        username: follower.username,
-      })),
-      nextCursor:
-        followers.length === limit && followers[followers.length - 1]?.profileId
-          ? followers[followers.length - 1]!.profileId
-          : undefined,
-    });
-  }
-
-  async getFollowing(options: {
-    userId: string;
-    limit?: number;
-    cursor?: string;
-  }): Promise<
-    Result<
-      { items: { id: string; username: string }[]; nextCursor?: string },
-      never
-    >
-  > {
-    const { userId, limit, cursor } = options;
-    const following = await this.followRepository.paginateFollowingSelf({
-      userId,
-      pageSize: limit,
-      cursor: cursor
-        ? { createdAt: new Date(cursor), profileId: cursor }
-        : null,
-    });
-    return ok({
-      items: following.map((followee) => ({
-        id: followee.userId,
-        username: followee.username,
-      })),
-      nextCursor:
-        following.length === limit && following[following.length - 1]?.profileId
-          ? following[following.length - 1]!.profileId
-          : undefined,
-    });
-  }
-
-  async getFollowRequests(options: {
-    userId: string;
-    limit?: number;
-    cursor?: string;
-  }): Promise<
+  async getFollowers({
+    userId,
+    limit = 10,
+    cursor,
+  }: GetFollowersParams): Promise<
     Result<
       {
-        items: { id: string; username: string; createdAt: Date }[];
+        items: {
+          id: string;
+          username: string;
+          profilePictureUrl: string | null;
+        }[];
         nextCursor?: string;
       },
       never
     >
   > {
-    const { userId, limit, cursor } = options;
-    const requests = await this.followRepository.paginateFollowRequests({
-      forUserId: userId,
-      pageSize: limit,
-      cursor: cursor
-        ? { createdAt: new Date(cursor), profileId: cursor }
-        : null,
+    const profiles = await this.followRepository.paginateFollowers({
+      otherUserId: userId,
+      cursor: cursor ? { createdAt: new Date(cursor), userId: "" } : null,
+      limit: limit + 1,
     });
-    return ok({
-      items: requests.map((request) => ({
-        id: request.userId,
-        username: request.username,
-        createdAt: request.createdAt,
-      })),
-      nextCursor:
-        requests.length === limit && requests[requests.length - 1]?.profileId
-          ? requests[requests.length - 1]!.profileId
-          : undefined,
-    });
+
+    const items = profiles
+      .slice(0, limit)
+      .map((profile) => this.hydrateFollowItem(profile));
+    const nextCursor =
+      profiles.length > limit
+        ? profiles[limit - 1].createdAt.toISOString()
+        : undefined;
+
+    return ok({ items, nextCursor });
   }
 
-  async getFollowStatus(options: {
-    userId: string;
-    targetUserId: string;
-  }): Promise<Result<"following" | "requested" | "notFollowing", never>> {
-    const { userId, targetUserId } = options;
-
-    // Check if following
-    const isFollowing = await this.followRepository.getFollower({
-      followerId: userId,
-      followeeId: targetUserId,
+  async getFollowing({
+    userId,
+    limit = 10,
+    cursor,
+  }: GetFollowingParams): Promise<
+    Result<
+      {
+        items: {
+          id: string;
+          username: string;
+          profilePictureUrl: string | null;
+        }[];
+        nextCursor?: string;
+      },
+      never
+    >
+  > {
+    const profiles = await this.followRepository.paginateFollowing({
+      otherUserId: userId,
+      cursor: cursor ? { createdAt: new Date(cursor), userId: "" } : null,
+      limit: limit + 1,
     });
 
+    const items = profiles
+      .slice(0, limit)
+      .map((profile) => this.hydrateFollowItem(profile));
+    const nextCursor =
+      profiles.length > limit
+        ? profiles[limit - 1].createdAt.toISOString()
+        : undefined;
+
+    return ok({ items, nextCursor });
+  }
+
+  async getFollowRequests({
+    userId,
+    limit = 10,
+    cursor,
+  }: GetFollowRequestsParams): Promise<
+    Result<
+      {
+        items: {
+          id: string;
+          username: string;
+          profilePictureUrl: string | null;
+          createdAt: Date;
+        }[];
+        nextCursor?: string;
+      },
+      never
+    >
+  > {
+    const profiles = await this.followRepository.paginateFollowRequests({
+      otherUserId: userId,
+      cursor: cursor ? { createdAt: new Date(cursor), userId: "" } : null,
+      limit: limit + 1,
+    });
+
+    const items = profiles.slice(0, limit).map((profile) => ({
+      ...this.hydrateFollowItem(profile),
+      createdAt: profile.createdAt ?? new Date(), // Fallback if missing
+    }));
+    const nextCursor =
+      profiles.length > limit
+        ? profiles[limit - 1].createdAt.toISOString()
+        : undefined;
+
+    return ok({ items, nextCursor });
+  }
+
+  async getFollowStatus({
+    userId,
+    targetUserId,
+  }: GetFollowStatusParams): Promise<
+    Result<"following" | "requested" | "notFollowing", never>
+  > {
+    const isFollowing = await this.followRepository.getFollower({
+      senderUserId: userId,
+      recipientUserId: targetUserId,
+    });
     if (isFollowing) {
       return ok("following");
     }
 
-    // Check if there's a pending follow request
-    const followRequest = await this.followRepository.getFollowRequest({
-      senderId: userId,
-      recipientId: targetUserId,
+    const isRequested = await this.followRepository.isFollowRequested({
+      senderUserId: userId,
+      recipientUserId: targetUserId,
     });
-
-    if (followRequest) {
-      return ok("requested");
-    }
-
-    return ok("notFollowing");
+    return ok(isRequested ? "requested" : "notFollowing");
   }
 
-  async removeFollower(options: {
-    userId: string;
-    followerToRemove: string;
-  }): Promise<
+  async removeFollower({
+    userId,
+    followerToRemove,
+  }: RemoveFollowerParams): Promise<
     Result<void, FollowErrors.NotFollowing | FollowErrors.FailedToRemove>
   > {
-    const { userId, followerToRemove } = options;
-
-    // Check if following
-    const existingFollow = await this.followRepository.getFollower({
-      followerId: followerToRemove,
-      followeeId: userId,
+    const isFollowing = await this.followRepository.getFollower({
+      senderUserId: followerToRemove,
+      recipientUserId: userId,
     });
-
-    if (!existingFollow) {
+    if (!isFollowing) {
       return err(new FollowErrors.NotFollowing(followerToRemove, userId));
     }
 
-    await this.db.transaction(async (tx) => {
-      // Remove follower
-      await this.followRepository.removeFollower(
-        {
-          followerId: followerToRemove,
-          followeeId: userId,
-        },
-        tx,
-      );
+    await this.followRepository.removeFollower({
+      senderUserId: followerToRemove,
+      recipientUserId: userId,
     });
-
     return ok(undefined);
   }
 
-  async cancelFollowRequest(options: {
-    senderId: string;
-    recipientId: string;
-  }): Promise<
+  async cancelFollowRequest({
+    senderId,
+    recipientId,
+  }: CancelFollowRequestParams): Promise<
     Result<
       void,
       FollowErrors.RequestNotFound | FollowErrors.FailedToDeclineRequest
     >
   > {
-    const { senderId, recipientId } = options;
-
-    // Check if follow request exists
-    const existingRequest = await this.followRepository.getFollowRequest({
-      senderId,
-      recipientId,
+    const isRequested = await this.followRepository.isFollowRequested({
+      senderUserId: senderId,
+      recipientUserId: recipientId,
     });
-
-    if (!existingRequest) {
+    if (!isRequested) {
       return err(new FollowErrors.RequestNotFound(senderId, recipientId));
     }
 
-    await this.db.transaction(async (tx) => {
-      // Delete follow request
-      await this.followRepository.deleteFollowRequest(
-        {
-          senderId,
-          recipientId,
-        },
-        tx,
-      );
+    await this.followRepository.deleteFollowRequest({
+      senderUserId: senderId,
+      recipientUserId: recipientId,
     });
-
     return ok(undefined);
   }
 }
