@@ -222,30 +222,19 @@ export class PostService implements IPostService {
 
   async deletePost(
     params: DeletePostParams,
-  ): Promise<
-    Result<
-      void,
-      | PostErrors.FailedToDeletePost
-      | PostErrors.PostNotFound
-      | PostErrors.NotPostOwner
-      | PostErrors.PostDeleted
-    >
-  > {
-    try {
-      await this.db.transaction(async (tx) => {
-        await this.postRepository.deletePost(params, tx);
-      });
-      return ok(undefined);
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.message.includes("not found"))
-          return err(new PostErrors.PostNotFound(params.postId));
-        if (error.message.includes("Unauthorized"))
-          return err(new PostErrors.NotPostOwner(params.userId, params.postId));
-        // Assuming PostDeleted could be added later; not thrown by repo currently
-      }
-      return err(new PostErrors.FailedToDeletePost(params.postId));
-    }
+  ): Promise<Result<void, PostErrors.NotPostOwner | PostErrors.PostNotFound>> {
+    await this.db.transaction(async (tx) => {
+      // check if the post owner is the same as the user
+      const post = await this.postRepository.getPost(
+        { postId: params.postId, userId: params.userId },
+        tx,
+      );
+      if (!post) return err(new PostErrors.PostNotFound(params.postId));
+      if (post.post.authorUserId !== params.userId)
+        return err(new PostErrors.NotPostOwner(params.userId, params.postId));
+      await this.postRepository.deletePost(params, tx);
+    });
+    return ok(undefined);
   }
 
   async getPost(

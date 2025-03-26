@@ -3,8 +3,10 @@ import type { Result } from "neverthrow";
 import type { Schema } from "@oppfy/db";
 
 import type { PostErrors } from "../../../errors/content/post.error";
-
-import type { PostResult, PostResultWithoutLike } from "../../../interfaces/repositories/content/postRepository.interface";
+import type {
+  PostResult,
+  PostResultWithoutLike,
+} from "../../../interfaces/repositories/content/postRepository.interface";
 
 export interface PaginatedResponse<TItem, TCursor> {
   items: TItem[];
@@ -136,19 +138,11 @@ export interface IPostService {
 
   deletePost(
     params: DeletePostParams,
-  ): Promise<
-    Result<
-      void,
-      | PostErrors.FailedToDeletePost
-      | PostErrors.PostNotFound
-      | PostErrors.NotPostOwner
-      | PostErrors.PostDeleted
-    >
-  >;
+  ): Promise<Result<void, PostErrors.NotPostOwner | PostErrors.PostNotFound>>;
 
   getPost(
     params: GetPostParams,
-  ): Promise<Result<PostResult, PostErrors.PostNotFound | PostErrors.PostDeleted>>;
+  ): Promise<Result<PostResult, PostErrors.PostNotFound>>;
 
   paginatePosts(
     params: PaginatePostsParams,
@@ -157,7 +151,10 @@ export interface IPostService {
   paginatePostsForFeed(
     params: PaginatePostsForFeedParams,
   ): Promise<
-    Result<PaginatedResponse<PostResult, FeedCursor | null>, PostErrors.PostNotFound>
+    Result<
+      PaginatedResponse<PostResult, FeedCursor | null>,
+      PostErrors.PostNotFound
+    >
   >;
 
   getPostForNextJs(

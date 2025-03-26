@@ -182,15 +182,6 @@ export class PostRepository implements IPostRepository {
     { userId, postId }: DeletePostParams,
     tx: Transaction,
   ): Promise<void> {
-    const post = await tx.query.post.findFirst({
-      where: eq(this.schema.post.id, postId),
-      columns: { authorUserId: true },
-    });
-
-    if (!post) throw new Error("Post not found");
-    if (post.authorUserId !== userId)
-      throw new Error("Unauthorized: User does not own this post");
-
     await Promise.all([
       tx.delete(this.schema.post).where(eq(this.schema.post.id, postId)),
       tx
