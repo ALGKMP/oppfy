@@ -102,11 +102,24 @@ export class ProfileService implements IProfileService {
     return ok(this.cloudfront.hydrateProfile(profileData));
   }
 
-  searchProfilesByUsername(
+  /**
+   * Searches profiles by username, filtering by privacy and block status.
+   */
+  async searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,
   ): Promise<Result<HydratedProfile[], never>> {
-    throw new Error("Method not implemented.");
+    const { username, selfUserId } = params;
+
+    const profiles = await this.profileRepository.getProfilesByUsername({
+      username,
+      selfUserId,
+    });
+
+    return ok(
+      profiles.map((profile) => this.cloudfront.hydrateProfile(profile)),
+    );
   }
+
   relationshipStatesBetweenUsers(
     params: RelationshipStatesBetweenUsersParams,
   ): Promise<Result<RelationshipState[], never>> {
