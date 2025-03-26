@@ -95,8 +95,8 @@ export class FriendService implements IFriendService {
       // Create follow request
       await this.followRepository.createFollowRequest(
         {
-          senderId,
-          recipientId,
+          senderUserId: senderId,
+          recipientUserId: recipientId,
         },
         tx,
       );

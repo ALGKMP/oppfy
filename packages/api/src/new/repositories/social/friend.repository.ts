@@ -125,8 +125,8 @@ export class FriendRepository implements IFriendRepository {
       .delete(this.schema.friendRequest)
       .where(
         and(
-          eq(this.schema.friendRequest.senderId, senderId),
-          eq(this.schema.friendRequest.recipientId, recipientId),
+          eq(this.schema.friendRequest.senderUserId, senderId),
+          eq(this.schema.friendRequest.recipientUserId, recipientId),
         ),
       );
   }
@@ -173,8 +173,8 @@ export class FriendRepository implements IFriendRepository {
       .from(this.schema.friendRequest)
       .where(
         and(
-          eq(this.schema.friendRequest.senderId, senderId),
-          eq(this.schema.friendRequest.recipientId, recipientId),
+          eq(this.schema.friendRequest.senderUserId, senderId),
+          eq(this.schema.friendRequest.recipientUserId, recipientId),
         ),
       )
       .limit(1);
@@ -216,7 +216,7 @@ export class FriendRepository implements IFriendRepository {
     const result = await db
       .select({ count: count() })
       .from(this.schema.friendRequest)
-      .where(eq(this.schema.friendRequest.recipientId, userId));
+      .where(eq(this.schema.friendRequest.recipientUserId, userId));
 
     return result[0]?.count ?? 0;
   }
@@ -280,7 +280,7 @@ export class FriendRepository implements IFriendRepository {
       .from(this.schema.friendRequest)
       .innerJoin(
         this.schema.user,
-        eq(this.schema.friendRequest.senderId, this.schema.user.id),
+        eq(this.schema.friendRequest.senderUserId, this.schema.user.id),
       )
       .innerJoin(
         this.schema.profile,
@@ -288,7 +288,7 @@ export class FriendRepository implements IFriendRepository {
       )
       .where(
         and(
-          eq(this.schema.friendRequest.recipientId, userId),
+          eq(this.schema.friendRequest.recipientUserId, userId),
           cursor
             ? or(
                 gt(this.schema.friendRequest.createdAt, cursor.createdAt),

@@ -187,9 +187,9 @@ export class UserRepository {
               .from(schema.follow)
               .innerJoin(
                 schema.user,
-                eq(schema.follow.recipientId, schema.user.id),
+                eq(schema.follow.recipientUserId, schema.user.id),
               )
-              .where(eq(schema.follow.senderId, userId)),
+              .where(eq(schema.follow.senderUserId, userId)),
           ),
         );
 
@@ -205,9 +205,9 @@ export class UserRepository {
               .from(schema.follow)
               .innerJoin(
                 schema.user,
-                eq(schema.follow.senderId, schema.user.id),
+                eq(schema.follow.senderUserId, schema.user.id),
               )
-              .where(eq(schema.follow.recipientId, userId)),
+              .where(eq(schema.follow.recipientUserId, userId)),
           ),
         );
 

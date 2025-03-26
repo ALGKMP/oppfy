@@ -30,12 +30,12 @@ export class FriendRepository {
         .where(
           or(
             and(
-              eq(schema.friendRequest.senderId, senderId),
-              eq(schema.friendRequest.recipientId, recipientId),
+              eq(schema.friendRequest.senderUserId, senderId),
+              eq(schema.friendRequest.recipientUserId, recipientId),
             ),
             and(
-              eq(schema.friendRequest.senderId, recipientId),
-              eq(schema.friendRequest.recipientId, senderId),
+              eq(schema.friendRequest.senderUserId, recipientId),
+              eq(schema.friendRequest.recipientUserId, senderId),
             ),
           ),
         );
@@ -141,7 +141,7 @@ export class FriendRepository {
     const result = await this.db
       .select({ count: count() })
       .from(schema.friendRequest)
-      .where(eq(schema.friendRequest.recipientId, userId));
+      .where(eq(schema.friendRequest.recipientUserId, userId));
 
     return result[0]?.count;
   }
@@ -171,8 +171,8 @@ export class FriendRepository {
       .delete(schema.friendRequest)
       .where(
         and(
-          eq(schema.friendRequest.senderId, senderId),
-          eq(schema.friendRequest.recipientId, recipientId),
+          eq(schema.friendRequest.senderUserId, senderId),
+          eq(schema.friendRequest.recipientUserId, recipientId),
         ),
       );
   }
@@ -187,8 +187,8 @@ export class FriendRepository {
   }) {
     return await this.db.query.friendRequest.findFirst({
       where: and(
-        eq(schema.friendRequest.senderId, senderId),
-        eq(schema.friendRequest.recipientId, recipientId),
+        eq(schema.friendRequest.senderUserId, senderId),
+        eq(schema.friendRequest.recipientUserId, recipientId),
       ),
     });
   }
@@ -360,11 +360,14 @@ export class FriendRepository {
         createdAt: schema.friendRequest.createdAt,
       })
       .from(schema.friendRequest)
-      .innerJoin(schema.user, eq(schema.friendRequest.senderId, schema.user.id))
+      .innerJoin(
+        schema.user,
+        eq(schema.friendRequest.senderUserId, schema.user.id),
+      )
       .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
-          eq(schema.friendRequest.recipientId, forUserId),
+          eq(schema.friendRequest.recipientUserId, forUserId),
           cursor
             ? or(
                 gt(schema.friendRequest.createdAt, cursor.createdAt),

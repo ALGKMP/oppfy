@@ -11,11 +11,12 @@ import type {
 import { TYPES } from "../../container";
 import {
   FollowParams,
+  GetFollowParams,
   IFollowRepository,
   PaginateFollowParams,
   UserIdParams,
 } from "../../interfaces/repositories/social/follow.repository.interface";
-import { Profile } from "../../models";
+import { Follow, Profile } from "../../models";
 
 @injectable()
 export class FollowRepository implements IFollowRepository {
@@ -30,38 +31,55 @@ export class FollowRepository implements IFollowRepository {
     this.schema = schema;
   }
 
+  async getFollower(
+    params: GetFollowParams,
+    tx: Transaction,
+  ): Promise<Follow | undefined> {
+    const { senderUserId, recipientUserId } = params;
+    const result = await tx
+      .select()
+      .from(this.schema.follow)
+      .where(
+        and(
+          eq(this.schema.follow.senderUserId, senderUserId),
+          eq(this.schema.follow.recipientUserId, recipientUserId),
+        ),
+      );
+    return result[0];
+  }
+
   async createFollower(params: FollowParams, tx: Transaction): Promise<void> {
-    const { senderId, recipientId } = params;
+    const { senderUserId, recipientUserId } = params;
 
     // Insert the follow relationship
     await tx.insert(this.schema.follow).values({
-      senderId,
-      recipientId,
+      senderUserId,
+      recipientUserId,
     });
 
     // Increment follower's following count in userStats
     await tx
       .update(this.schema.userStats)
       .set({ following: sql`${this.schema.userStats.following} + 1` })
-      .where(eq(this.schema.userStats.userId, senderId));
+      .where(eq(this.schema.userStats.userId, senderUserId));
 
     // Increment followee's followers count in userStats
     await tx
       .update(this.schema.userStats)
       .set({ followers: sql`${this.schema.userStats.followers} + 1` })
-      .where(eq(this.schema.userStats.userId, recipientId));
+      .where(eq(this.schema.userStats.userId, recipientUserId));
   }
 
   async removeFollower(params: FollowParams, tx: Transaction): Promise<void> {
-    const { senderId, recipientId } = params;
+    const { senderUserId, recipientUserId } = params;
 
     // Delete the follow relationship
     await tx
       .delete(this.schema.follow)
       .where(
         and(
-          eq(this.schema.follow.senderId, senderId),
-          eq(this.schema.follow.recipientId, recipientId),
+          eq(this.schema.follow.senderUserId, senderUserId),
+          eq(this.schema.follow.recipientUserId, recipientUserId),
         ),
       );
 
@@ -69,23 +87,23 @@ export class FollowRepository implements IFollowRepository {
     await tx
       .update(this.schema.userStats)
       .set({ following: sql`${this.schema.userStats.following} - 1` })
-      .where(eq(this.schema.userStats.userId, senderId));
+      .where(eq(this.schema.userStats.userId, senderUserId));
 
     // Decrement followee's followers count
     await tx
       .update(this.schema.userStats)
       .set({ followers: sql`${this.schema.userStats.followers} - 1` })
-      .where(eq(this.schema.userStats.userId, recipientId));
+      .where(eq(this.schema.userStats.userId, recipientUserId));
   }
 
   async createFollowRequest(
     params: FollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const { senderId, recipientId } = params;
+    const { senderUserId, recipientUserId } = params;
     await db.insert(this.schema.followRequest).values({
-      senderId,
-      recipientId,
+      senderUserId,
+      recipientUserId,
     });
   }
 
@@ -93,13 +111,13 @@ export class FollowRepository implements IFollowRepository {
     params: FollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const { senderId, recipientId } = params;
+    const { senderUserId, recipientUserId } = params;
     await db
       .delete(this.schema.followRequest)
       .where(
         and(
-          eq(this.schema.followRequest.senderId, senderId),
-          eq(this.schema.followRequest.recipientId, recipientId),
+          eq(this.schema.followRequest.senderUserId, senderUserId),
+          eq(this.schema.followRequest.recipientUserId, recipientUserId),
         ),
       );
   }
@@ -108,14 +126,14 @@ export class FollowRepository implements IFollowRepository {
     params: FollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<boolean> {
-    const { senderId, recipientId } = params;
+    const { senderUserId, recipientUserId } = params;
     const result = await db
       .select({ id: this.schema.follow.id })
       .from(this.schema.follow)
       .where(
         and(
-          eq(this.schema.follow.senderId, senderId),
-          eq(this.schema.follow.recipientId, recipientId),
+          eq(this.schema.follow.senderUserId, senderUserId),
+          eq(this.schema.follow.recipientUserId, recipientUserId),
         ),
       )
       .limit(1);
@@ -126,14 +144,14 @@ export class FollowRepository implements IFollowRepository {
     params: FollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<boolean> {
-    const { senderId, recipientId } = params;
+    const { senderUserId, recipientUserId } = params;
     const result = await db
       .select({ id: this.schema.followRequest.id })
       .from(this.schema.followRequest)
       .where(
         and(
-          eq(this.schema.followRequest.senderId, senderId),
-          eq(this.schema.followRequest.recipientId, recipientId),
+          eq(this.schema.followRequest.senderUserId, senderUserId),
+          eq(this.schema.followRequest.recipientUserId, recipientUserId),
         ),
       )
       .limit(1);
@@ -148,7 +166,7 @@ export class FollowRepository implements IFollowRepository {
     const result = await db
       .select({ count: count() })
       .from(this.schema.follow)
-      .where(eq(this.schema.follow.recipientId, userId));
+      .where(eq(this.schema.follow.recipientUserId, userId));
     return result[0]?.count ?? 0;
   }
 
@@ -160,7 +178,7 @@ export class FollowRepository implements IFollowRepository {
     const result = await db
       .select({ count: count() })
       .from(this.schema.follow)
-      .where(eq(this.schema.follow.senderId, userId));
+      .where(eq(this.schema.follow.senderUserId, userId));
     return result[0]?.count ?? 0;
   }
 
@@ -172,7 +190,7 @@ export class FollowRepository implements IFollowRepository {
     const result = await db
       .select({ count: count() })
       .from(this.schema.followRequest)
-      .where(eq(this.schema.followRequest.recipientId, userId));
+      .where(eq(this.schema.followRequest.recipientUserId, userId));
     return result[0]?.count ?? 0;
   }
 
@@ -187,7 +205,7 @@ export class FollowRepository implements IFollowRepository {
       .from(this.schema.follow)
       .innerJoin(
         this.schema.user,
-        eq(this.schema.follow.senderId, this.schema.user.id),
+        eq(this.schema.follow.senderUserId, this.schema.user.id),
       )
       .innerJoin(
         this.schema.profile,
@@ -195,7 +213,7 @@ export class FollowRepository implements IFollowRepository {
       )
       .where(
         and(
-          eq(this.schema.follow.recipientId, userId),
+          eq(this.schema.follow.recipientUserId, userId),
           cursor
             ? or(
                 gt(this.schema.follow.createdAt, cursor.createdAt),
@@ -224,7 +242,7 @@ export class FollowRepository implements IFollowRepository {
       .from(this.schema.follow)
       .innerJoin(
         this.schema.user,
-        eq(this.schema.follow.recipientId, this.schema.user.id),
+        eq(this.schema.follow.recipientUserId, this.schema.user.id),
       )
       .innerJoin(
         this.schema.profile,
@@ -232,7 +250,7 @@ export class FollowRepository implements IFollowRepository {
       )
       .where(
         and(
-          eq(this.schema.follow.senderId, userId),
+          eq(this.schema.follow.senderUserId, userId),
           cursor
             ? or(
                 gt(this.schema.follow.createdAt, cursor.createdAt),
@@ -263,7 +281,7 @@ export class FollowRepository implements IFollowRepository {
       .from(this.schema.followRequest)
       .innerJoin(
         this.schema.user,
-        eq(this.schema.followRequest.senderId, this.schema.user.id),
+        eq(this.schema.followRequest.senderUserId, this.schema.user.id),
       )
       .innerJoin(
         this.schema.profile,
@@ -271,7 +289,7 @@ export class FollowRepository implements IFollowRepository {
       )
       .where(
         and(
-          eq(this.schema.followRequest.recipientId, userId),
+          eq(this.schema.followRequest.recipientUserId, userId),
           cursor
             ? or(
                 gt(this.schema.followRequest.createdAt, cursor.createdAt),

@@ -101,7 +101,7 @@ export class PostRepository implements IPostRepository {
     const query = this.baseQuery(userId, tx);
 
     let whereClause = or(
-      eq(this.schema.follow.senderId, userId),
+      eq(this.schema.follow.senderUserId, userId),
       eq(this.schema.post.authorUserId, userId),
     );
 
@@ -120,8 +120,8 @@ export class PostRepository implements IPostRepository {
       .leftJoin(
         this.schema.follow,
         and(
-          eq(this.schema.follow.senderId, userId),
-          eq(this.schema.follow.recipientId, this.schema.post.authorUserId),
+          eq(this.schema.follow.senderUserId, userId),
+          eq(this.schema.follow.recipientUserId, this.schema.post.authorUserId),
         ),
       )
       .where(whereClause)

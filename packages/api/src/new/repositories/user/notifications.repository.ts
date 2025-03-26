@@ -120,7 +120,7 @@ export class NotificationsRepository implements INotificationsRepository {
       .from(this.schema.notifications)
       .where(
         and(
-          eq(this.schema.notifications.recipientId, userId),
+          eq(this.schema.notifications.recipientUserId, userId),
           eq(this.schema.notifications.read, false),
         ),
       );
@@ -153,10 +153,10 @@ export class NotificationsRepository implements INotificationsRepository {
     );
 
     if (senderId)
-      query = query.where(eq(this.schema.notifications.senderId, senderId));
+      query = query.where(eq(this.schema.notifications.senderUserId, senderId));
     if (recipientId)
       query = query.where(
-        eq(this.schema.notifications.recipientId, recipientId),
+        eq(this.schema.notifications.recipientUserId, recipientId),
       );
     if (eventType)
       query = query.where(eq(this.schema.notifications.eventType, eventType));
@@ -181,8 +181,8 @@ export class NotificationsRepository implements INotificationsRepository {
     const fetchedNotifications = await tx
       .select({
         id: this.schema.notifications.id,
-        senderId: this.schema.notifications.senderId,
-        recipientId: this.schema.notifications.recipientId,
+        senderId: this.schema.notifications.senderUserId,
+        recipientId: this.schema.notifications.recipientUserId,
         userId: this.schema.user.id,
         profileId: this.schema.profile.id,
         name: this.schema.profile.name,
@@ -200,11 +200,11 @@ export class NotificationsRepository implements INotificationsRepository {
     CASE
       WHEN EXISTS (
         SELECT 1 FROM ${this.schema.follow}
-        WHERE ${this.schema.follow.senderId} = ${userId} AND ${this.schema.follow.recipientId} = ${this.schema.user.id}
+        WHERE ${this.schema.follow.senderUserId} = ${userId} AND ${this.schema.follow.recipientUserId} = ${this.schema.user.id}
       ) THEN 'following'
       WHEN EXISTS (
         SELECT 1 FROM ${this.schema.followRequest}
-        WHERE ${this.schema.followRequest.senderId} = ${userId} AND ${this.schema.followRequest.recipientId} = ${this.schema.user.id}
+        WHERE ${this.schema.followRequest.senderUserId} = ${userId} AND ${this.schema.followRequest.recipientUserId} = ${this.schema.user.id}
       ) THEN 'followRequestSent'
       ELSE 'notFollowing'
     END
@@ -213,7 +213,7 @@ export class NotificationsRepository implements INotificationsRepository {
       .from(this.schema.notifications)
       .innerJoin(
         this.schema.user,
-        eq(this.schema.notifications.senderId, this.schema.user.id),
+        eq(this.schema.notifications.senderUserId, this.schema.user.id),
       )
       .innerJoin(
         this.schema.profile,
@@ -221,7 +221,7 @@ export class NotificationsRepository implements INotificationsRepository {
       )
       .where(
         and(
-          eq(this.schema.notifications.recipientId, userId),
+          eq(this.schema.notifications.recipientUserId, userId),
           cursor
             ? or(
                 lt(this.schema.notifications.createdAt, cursor.createdAt),
@@ -247,7 +247,7 @@ export class NotificationsRepository implements INotificationsRepository {
     await tx
       .update(this.schema.notifications)
       .set({ read: true })
-      .where(eq(this.schema.notifications.recipientId, userId));
+      .where(eq(this.schema.notifications.recipientUserId, userId));
 
     return fetchedNotifications.filter(
       (notification) => notification.name !== null,
@@ -313,10 +313,12 @@ export class NotificationsRepository implements INotificationsRepository {
     const conditions = [];
 
     if (senderId) {
-      conditions.push(eq(this.schema.notifications.senderId, senderId));
+      conditions.push(eq(this.schema.notifications.senderUserId, senderId));
     }
     if (recipientId) {
-      conditions.push(eq(this.schema.notifications.recipientId, recipientId));
+      conditions.push(
+        eq(this.schema.notifications.recipientUserId, recipientId),
+      );
     }
     if (eventType) {
       if (Array.isArray(eventType)) {
@@ -352,12 +354,12 @@ export class NotificationsRepository implements INotificationsRepository {
       .where(
         or(
           and(
-            eq(this.schema.notifications.senderId, userIdA),
-            eq(this.schema.notifications.recipientId, userIdB),
+            eq(this.schema.notifications.senderUserId, userIdA),
+            eq(this.schema.notifications.recipientUserId, userIdB),
           ),
           and(
-            eq(this.schema.notifications.senderId, userIdB),
-            eq(this.schema.notifications.recipientId, userIdA),
+            eq(this.schema.notifications.senderUserId, userIdB),
+            eq(this.schema.notifications.recipientUserId, userIdA),
           ),
         ),
       );

@@ -155,8 +155,8 @@ export class ProfileService implements IProfileService {
           recipientId: otherUserId,
         }),
         this.followRepository.isFollowRequested({
-          senderId: currentUserId,
-          recipientId: otherUserId,
+          senderUserId: currentUserId,
+          recipientUserId: otherUserId,
         }),
         this.friendRepository.isFriends({
           userIdA: currentUserId,

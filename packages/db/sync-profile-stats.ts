@@ -48,7 +48,7 @@ async function syncProfileStats() {
           count: sql<number>`cast(count(*) as integer)`,
         })
         .from(schema.follow)
-        .where(sql`${schema.follow.recipientId} = ${profile.userId}`);
+        .where(sql`${schema.follow.recipientUserId} = ${profile.userId}`);
 
       // Count following (where user is the sender)
       const followingResult = await db
@@ -56,7 +56,7 @@ async function syncProfileStats() {
           count: sql<number>`cast(count(*) as integer)`,
         })
         .from(schema.follow)
-        .where(sql`${schema.follow.senderId} = ${profile.userId}`);
+        .where(sql`${schema.follow.senderUserId} = ${profile.userId}`);
 
       const regularPosts = regularPostsResult[0]?.count ?? 0;
       const friends = friendsResult[0]?.count ?? 0;

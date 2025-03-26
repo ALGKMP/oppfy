@@ -262,10 +262,10 @@ export const notifications = pgTable(
   "notifications",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    senderId: uuid("sender_id")
+    senderUserId: uuid("sender_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    recipientId: uuid("recipient_id")
+    recipientUserId: uuid("recipient_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     read: boolean("read").default(false).notNull(),
@@ -281,8 +281,8 @@ export const notifications = pgTable(
       .notNull(),
   },
   (table) => ({
-    recipientIdx: index("notifications_recipient_idx").on(table.recipientId),
-    senderIdx: index("notifications_sender_idx").on(table.senderId),
+    recipientIdx: index("notifications_recipient_idx").on(table.recipientUserId),
+    senderIdx: index("notifications_sender_idx").on(table.senderUserId),
     readIdx: index("notifications_read_idx").on(table.read),
     activeIdx: index("notifications_active_idx").on(table.active),
     eventTypeIdx: index("notifications_event_type_idx").on(table.eventType),
@@ -292,12 +292,12 @@ export const notifications = pgTable(
 
 export const notificationsRelations = relations(notifications, ({ one }) => ({
   recipient: one(user, {
-    fields: [notifications.recipientId],
+    fields: [notifications.recipientUserId],
     references: [user.id],
     relationName: "notificationRecipient",
   }),
   sender: one(user, {
-    fields: [notifications.senderId],
+    fields: [notifications.senderUserId],
     references: [user.id],
     relationName: "notificationSender",
   }),
@@ -463,10 +463,10 @@ export const follow = pgTable(
   "follow",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    senderId: uuid("sender_id")
+    senderUserId: uuid("sender_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    recipientId: uuid("recipient_id")
+    recipientUserId: uuid("recipient_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -474,20 +474,20 @@ export const follow = pgTable(
       .notNull(),
   },
   (table) => ({
-    senderIdx: index("follow_sender_idx").on(table.senderId),
-    recipientIdx: index("follow_recipient_idx").on(table.recipientId),
+    senderIdx: index("follow_sender_idx").on(table.senderUserId),
+    recipientIdx: index("follow_recipient_idx").on(table.recipientUserId),
   }),
 );
 
 export const followRelations = relations(follow, ({ one }) => ({
   sender: one(user, {
     relationName: "sender",
-    fields: [follow.senderId],
+    fields: [follow.senderUserId],
     references: [user.id],
   }),
   recipient: one(user, {
     relationName: "recipient",
-    fields: [follow.recipientId],
+    fields: [follow.recipientUserId],
     references: [user.id],
   }),
 }));
@@ -496,10 +496,10 @@ export const friendRequest = pgTable(
   "friend_request",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    senderId: uuid("sender_id")
+    senderUserId: uuid("sender_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    recipientId: uuid("recipient_id")
+    recipientUserId: uuid("recipient_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -510,23 +510,25 @@ export const friendRequest = pgTable(
       .notNull(),
   },
   (table) => ({
-    senderIdx: index("friend_request_sender_idx").on(table.senderId),
-    recipientIdx: index("friend_request_recipient_idx").on(table.recipientId),
+    senderIdx: index("friend_request_sender_idx").on(table.senderUserId),
+    recipientIdx: index("friend_request_recipient_idx").on(
+      table.recipientUserId,
+    ),
     uniqueSenderRecipient: uniqueIndex(
       "friend_request_sender_recipient_unique",
-    ).on(table.senderId, table.recipientId),
+    ).on(table.senderUserId, table.recipientUserId),
   }),
 );
 
 export const friendRequestRelations = relations(friendRequest, ({ one }) => ({
   sender: one(user, {
     relationName: "sender",
-    fields: [friendRequest.senderId],
+    fields: [friendRequest.senderUserId],
     references: [user.id],
   }),
   recipient: one(user, {
     relationName: "recipient",
-    fields: [friendRequest.recipientId],
+    fields: [friendRequest.recipientUserId],
     references: [user.id],
   }),
 }));
@@ -535,10 +537,10 @@ export const followRequest = pgTable(
   "follow_request",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    senderId: uuid("sender_id")
+    senderUserId: uuid("sender_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    recipientId: uuid("recipient_id")
+    recipientUserId: uuid("recipient_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -549,23 +551,25 @@ export const followRequest = pgTable(
       .notNull(),
   },
   (table) => ({
-    senderIdx: index("follow_request_sender_idx").on(table.senderId),
-    recipientIdx: index("follow_request_recipient_idx").on(table.recipientId),
+    senderIdx: index("follow_request_sender_idx").on(table.senderUserId),
+    recipientIdx: index("follow_request_recipient_idx").on(
+      table.recipientUserId,
+    ),
     uniqueSenderRecipient: uniqueIndex(
       "follow_request_sender_recipient_unique",
-    ).on(table.senderId, table.recipientId),
+    ).on(table.senderUserId, table.recipientUserId),
   }),
 );
 
 export const followRequestRelations = relations(followRequest, ({ one }) => ({
   sender: one(user, {
     relationName: "sender",
-    fields: [followRequest.senderId],
+    fields: [followRequest.senderUserId],
     references: [user.id],
   }),
   recipient: one(user, {
     relationName: "recipient",
-    fields: [followRequest.recipientId],
+    fields: [followRequest.recipientUserId],
     references: [user.id],
   }),
 }));
@@ -625,7 +629,9 @@ export const block = pgTable(
   },
   (table) => ({
     senderUserIdx: index("block_sender_user_idx").on(table.senderUserId),
-    recipientUserIdx: index("block_recipient_user_idx").on(table.recipientUserId),
+    recipientUserIdx: index("block_recipient_user_idx").on(
+      table.recipientUserId,
+    ),
     uniqueBlockPair: uniqueIndex("block_unique_pair").on(
       table.senderUserId,
       table.recipientUserId,

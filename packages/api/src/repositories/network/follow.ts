@@ -57,8 +57,8 @@ export class FollowRepository {
         .delete(schema.follow)
         .where(
           and(
-            eq(schema.follow.senderId, followerId),
-            eq(schema.follow.recipientId, followeeId),
+            eq(schema.follow.senderUserId, followerId),
+            eq(schema.follow.recipientUserId, followeeId),
           ),
         );
 
@@ -92,8 +92,8 @@ export class FollowRepository {
       .delete(schema.followRequest)
       .where(
         and(
-          eq(schema.followRequest.senderId, senderId),
-          eq(schema.followRequest.recipientId, recipientId),
+          eq(schema.followRequest.senderUserId, senderId),
+          eq(schema.followRequest.recipientUserId, recipientId),
         ),
       );
     return result[0];
@@ -109,8 +109,8 @@ export class FollowRepository {
   }) {
     return await this.db.query.follow.findFirst({
       where: and(
-        eq(schema.follow.senderId, followerId),
-        eq(schema.follow.recipientId, followeeId),
+        eq(schema.follow.senderUserId, followerId),
+        eq(schema.follow.recipientUserId, followeeId),
       ),
     });
   }
@@ -124,7 +124,7 @@ export class FollowRepository {
     const result = await this.db
       .select({ count: count() })
       .from(schema.follow)
-      .where(eq(schema.follow.recipientId, userId));
+      .where(eq(schema.follow.recipientUserId, userId));
 
     return result[0]?.count;
   }
@@ -138,7 +138,7 @@ export class FollowRepository {
     const result = await this.db
       .select({ count: count() })
       .from(schema.follow)
-      .where(eq(schema.follow.senderId, userId));
+      .where(eq(schema.follow.senderUserId, userId));
 
     return result[0]?.count;
   }
@@ -152,7 +152,7 @@ export class FollowRepository {
     const result = await this.db
       .select({ count: count() })
       .from(schema.followRequest)
-      .where(eq(schema.followRequest.recipientId, userId));
+      .where(eq(schema.followRequest.recipientUserId, userId));
 
     return result[0]?.count;
   }
@@ -169,8 +169,8 @@ export class FollowRepository {
       .delete(schema.followRequest)
       .where(
         and(
-          eq(schema.followRequest.senderId, senderId),
-          eq(schema.followRequest.recipientId, recipientId),
+          eq(schema.followRequest.senderUserId, senderId),
+          eq(schema.followRequest.recipientUserId, recipientId),
         ),
       );
   }
@@ -198,8 +198,8 @@ export class FollowRepository {
   }) {
     return await this.db.query.followRequest.findFirst({
       where: and(
-        eq(schema.followRequest.senderId, senderId),
-        eq(schema.followRequest.recipientId, recipientId),
+        eq(schema.followRequest.senderUserId, senderId),
+        eq(schema.followRequest.recipientUserId, recipientId),
       ),
     });
   }
@@ -218,8 +218,8 @@ export class FollowRepository {
         .delete(schema.followRequest)
         .where(
           and(
-            eq(schema.followRequest.senderId, senderId),
-            eq(schema.followRequest.recipientId, recipientId),
+            eq(schema.followRequest.senderUserId, senderId),
+            eq(schema.followRequest.recipientUserId, recipientId),
           ),
         );
 
@@ -273,11 +273,11 @@ export class FollowRepository {
         createdAt: schema.follow.createdAt,
       })
       .from(schema.follow)
-      .innerJoin(schema.user, eq(schema.follow.senderId, schema.user.id))
+      .innerJoin(schema.user, eq(schema.follow.senderUserId, schema.user.id))
       .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
-          eq(schema.follow.recipientId, forUserId),
+          eq(schema.follow.recipientUserId, forUserId),
           cursor
             ? or(
                 gt(schema.follow.createdAt, cursor.createdAt),
@@ -344,11 +344,11 @@ export class FollowRepository {
         `,
       })
       .from(schema.follow)
-      .innerJoin(schema.user, eq(schema.follow.senderId, schema.user.id))
+      .innerJoin(schema.user, eq(schema.follow.senderUserId, schema.user.id))
       .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
-          eq(schema.follow.recipientId, forUserId),
+          eq(schema.follow.recipientUserId, forUserId),
           cursor
             ? or(
                 gt(schema.follow.createdAt, cursor.createdAt),
@@ -381,9 +381,9 @@ export class FollowRepository {
   @handleDatabaseErrors
   async getAllFollowingIds({ forUserId }: { forUserId: string }) {
     const followingUsers = await this.db
-      .select({ followingId: schema.follow.recipientId })
+      .select({ followingId: schema.follow.recipientUserId })
       .from(schema.follow)
-      .where(eq(schema.follow.senderId, forUserId));
+      .where(eq(schema.follow.senderUserId, forUserId));
 
     return followingUsers.map((user) => user.followingId);
   }
@@ -424,11 +424,11 @@ export class FollowRepository {
         `,
       })
       .from(schema.follow)
-      .innerJoin(schema.user, eq(schema.follow.recipientId, schema.user.id))
+      .innerJoin(schema.user, eq(schema.follow.recipientUserId, schema.user.id))
       .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
-          eq(schema.follow.senderId, userId),
+          eq(schema.follow.senderUserId, userId),
           cursor
             ? or(
                 gt(schema.follow.createdAt, cursor.createdAt),
@@ -496,11 +496,11 @@ export class FollowRepository {
         `,
       })
       .from(schema.follow)
-      .innerJoin(schema.user, eq(schema.follow.recipientId, schema.user.id))
+      .innerJoin(schema.user, eq(schema.follow.recipientUserId, schema.user.id))
       .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
-          eq(schema.follow.senderId, forUserId),
+          eq(schema.follow.senderUserId, forUserId),
           cursor
             ? or(
                 gt(schema.follow.createdAt, cursor.createdAt),
@@ -551,11 +551,14 @@ export class FollowRepository {
         createdAt: schema.followRequest.createdAt,
       })
       .from(schema.followRequest)
-      .innerJoin(schema.user, eq(schema.followRequest.senderId, schema.user.id))
+      .innerJoin(
+        schema.user,
+        eq(schema.followRequest.senderUserId, schema.user.id),
+      )
       .innerJoin(schema.profile, eq(schema.profile.userId, schema.user.id))
       .where(
         and(
-          eq(schema.followRequest.recipientId, forUserId),
+          eq(schema.followRequest.recipientUserId, forUserId),
           cursor
             ? or(
                 gt(schema.followRequest.createdAt, cursor.createdAt),

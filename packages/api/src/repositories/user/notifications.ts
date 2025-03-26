@@ -123,7 +123,7 @@ export class NotificationsRepository {
       .from(schema.notifications)
       .where(
         and(
-          eq(schema.notifications.recipientId, userId),
+          eq(schema.notifications.recipientUserId, userId),
           eq(schema.notifications.read, false),
         ),
       );
@@ -162,9 +162,11 @@ export class NotificationsRepository {
     );
 
     if (senderId)
-      query = query.where(eq(schema.notifications.senderId, senderId));
+      query = query.where(eq(schema.notifications.senderUserId, senderId));
     if (recipientId)
-      query = query.where(eq(schema.notifications.recipientId, recipientId));
+      query = query.where(
+        eq(schema.notifications.recipientUserId, recipientId),
+      );
     if (eventType)
       query = query.where(eq(schema.notifications.eventType, eventType));
     if (entityId)
@@ -208,11 +210,11 @@ export class NotificationsRepository {
       CASE
         WHEN EXISTS (
           SELECT 1 FROM ${schema.follow}
-          WHERE ${schema.follow.senderId} = ${userId} AND ${schema.follow.recipientId} = ${schema.user.id}
+          WHERE ${schema.follow.senderUserId} = ${userId} AND ${schema.follow.recipientUserId} = ${schema.user.id}
         ) THEN 'following'
         WHEN EXISTS (
           SELECT 1 FROM ${schema.followRequest}
-          WHERE ${schema.followRequest.senderId} = ${userId} AND ${schema.followRequest.recipientId} = ${schema.user.id}
+          WHERE ${schema.followRequest.senderUserId} = ${userId} AND ${schema.followRequest.recipientUserId} = ${schema.user.id}
         ) THEN 'followRequestSent'
         ELSE 'notFollowing'
       END
@@ -221,12 +223,12 @@ export class NotificationsRepository {
         .from(schema.notifications)
         .innerJoin(
           schema.user,
-          eq(schema.notifications.senderId, schema.user.id),
+          eq(schema.notifications.senderUserId, schema.user.id),
         )
         .innerJoin(schema.profile, eq(schema.user.id, schema.profile.userId))
         .where(
           and(
-            eq(schema.notifications.recipientId, userId),
+            eq(schema.notifications.recipientUserId, userId),
             cursor
               ? or(
                   lt(schema.notifications.createdAt, cursor.createdAt),
@@ -252,7 +254,7 @@ export class NotificationsRepository {
       await tx
         .update(schema.notifications)
         .set({ read: true })
-        .where(eq(schema.notifications.recipientId, userId));
+        .where(eq(schema.notifications.recipientUserId, userId));
 
       return fetchedNotifications;
     });
@@ -318,11 +320,11 @@ export class NotificationsRepository {
     const conditions = [];
 
     if (options.senderId) {
-      conditions.push(eq(schema.notifications.senderId, options.senderId));
+      conditions.push(eq(schema.notifications.senderUserId, options.senderId));
     }
     if (options.recipientId) {
       conditions.push(
-        eq(schema.notifications.recipientId, options.recipientId),
+        eq(schema.notifications.recipientUserId, options.recipientId),
       );
     }
     if (options.eventType) {
@@ -361,12 +363,12 @@ export class NotificationsRepository {
       .where(
         or(
           and(
-            eq(schema.notifications.senderId, userIdA),
-            eq(schema.notifications.recipientId, userIdB),
+            eq(schema.notifications.senderUserId, userIdA),
+            eq(schema.notifications.recipientUserId, userIdB),
           ),
           and(
-            eq(schema.notifications.senderId, userIdB),
-            eq(schema.notifications.recipientId, userIdA),
+            eq(schema.notifications.senderUserId, userIdB),
+            eq(schema.notifications.recipientUserId, userIdA),
           ),
         ),
       );

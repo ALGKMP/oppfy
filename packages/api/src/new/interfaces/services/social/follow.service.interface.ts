@@ -4,12 +4,9 @@ import type { followStatusEnum } from "@oppfy/db";
 
 import type { FollowErrors } from "../../../errors/social/follow.error";
 import type { UserErrors } from "../../../errors/user/user.error";
-export type FollowStatus = (typeof followStatusEnum.enumValues)[number];
+import type { Profile } from "../../../models";
 
-export interface IsFollowingParams {
-  followerId: string;
-  followeeId: string;
-}
+export type FollowStatus = (typeof followStatusEnum.enumValues)[number];
 
 export interface SendFollowRequestParams {
   senderId: string;
@@ -34,18 +31,6 @@ export interface RemoveFollowParams {
 export interface GetFollowRequestParams {
   senderId: string;
   recipientId: string;
-}
-
-export interface CountFollowersParams {
-  userId: string;
-}
-
-export interface CountFollowingParams {
-  userId: string;
-}
-
-export interface CountFollowRequestsParams {
-  userId: string;
 }
 
 export interface GetFollowersParams {
@@ -82,7 +67,6 @@ export interface CancelFollowRequestParams {
 }
 
 export interface IFollowService {
-  isFollowing(params: IsFollowingParams): Promise<Result<boolean, never>>;
 
   sendFollowRequest(
     params: SendFollowRequestParams,
@@ -130,40 +114,18 @@ export interface IFollowService {
     >
   >;
 
-  countFollowers(
-    params: CountFollowersParams,
-  ): Promise<Result<number, FollowErrors.FailedToCountFollowers>>;
-
-  countFollowing(
-    params: CountFollowingParams,
-  ): Promise<Result<number, FollowErrors.FailedToCountFollowing>>;
-
-  countFollowRequests(
-    params: CountFollowRequestsParams,
-  ): Promise<Result<number, FollowErrors.FailedToCountRequests>>;
-
   getFollowers(
     params: GetFollowersParams,
-  ): Promise<
-    Result<
-      { items: Array<{ id: string; username: string }>; nextCursor?: string },
-      never
-    >
-  >;
+  ): Promise<Result<{ items: Profile[]; nextCursor?: string }, never>>;
 
   getFollowing(
     params: GetFollowingParams,
-  ): Promise<
-    Result<
-      { items: Array<{ id: string; username: string }>; nextCursor?: string },
-      never
-    >
-  >;
+  ): Promise<Result<{ items: Profile[]; nextCursor?: string }, never>>;
 
   getFollowRequests(params: GetFollowRequestsParams): Promise<
     Result<
       {
-        items: Array<{ id: string; username: string; createdAt: Date }>;
+        items: Profile[];
         nextCursor?: string;
       },
       never
