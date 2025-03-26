@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
@@ -47,13 +47,20 @@ export class LikeRepository implements ILikeRepository {
         createdAt: new Date(),
       })
       .onConflictDoNothing(); // Prevents duplicate likes
+
+    await tx
+      .update(this.schema.postStats)
+      .set({
+        likes: sql`likes + 1`,
+      })
+      .where(eq(this.schema.postStats.postId, postId));
   }
 
   async removeLike(
     { postId, userId }: LikeParams,
     tx: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const result = await tx
+    await tx
       .delete(this.schema.like)
       .where(
         and(
@@ -62,9 +69,12 @@ export class LikeRepository implements ILikeRepository {
         ),
       );
 
-    if (result.length === 0) {
-      throw new Error("Like not found");
-    }
+    await tx
+      .update(this.schema.postStats)
+      .set({
+        likes: sql`likes - 1`,
+      })
+      .where(eq(this.schema.postStats.postId, postId));
   }
 
   async isLiked(
