@@ -83,11 +83,25 @@ export class ProfileService implements IProfileService {
     return ok(this.cloudfront.hydrateProfile(profileData));
   }
 
-  profileForSite(
+  /**
+   * Retrieves a profile by username for site display.
+   */
+  async profileForSite(
     params: ProfileForSiteParams,
   ): Promise<Result<HydratedProfile, ProfileError>> {
-    throw new Error("Method not implemented.");
+    const { username } = params;
+
+    const profileData = await this.profileRepository.getProfileByUsername({
+      username,
+    });
+
+    if (profileData === undefined) {
+      return err(new ProfileErrors.ProfileNotFound(username));
+    }
+
+    return ok(this.cloudfront.hydrateProfile(profileData));
   }
+
   searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,
   ): Promise<Result<HydratedProfile[], never>> {

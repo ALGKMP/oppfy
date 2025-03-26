@@ -35,6 +35,11 @@ export interface IProfileRepository {
     db?: DatabaseOrTransaction,
   ): Promise<Profile | undefined>;
 
+  getProfileByUsername(
+    params: UsernameParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<Profile | undefined>;
+
   getProfilesByIds(
     params: ProfilesByIdsParams,
     db?: DatabaseOrTransaction,
