@@ -85,7 +85,7 @@ export class PostRepository implements IPostRepository {
     return results[0];
   }
 
-  async getPostForNextJs(
+  async getPostForSite(
     { postId }: GetPostForNextJsParams,
     tx: DatabaseOrTransaction = this.db,
   ): Promise<PostResultWithoutLike | undefined> {

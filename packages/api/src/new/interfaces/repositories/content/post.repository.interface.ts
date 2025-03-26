@@ -52,7 +52,7 @@ export interface IPostRepository {
     params: GetPostParams,
     db?: DatabaseOrTransaction,
   ): Promise<PostResult | undefined>;
-  getPostForNextJs(
+  getPostForSite(
     params: GetPostForNextJsParams,
     db?: DatabaseOrTransaction,
   ): Promise<PostResultWithoutLike | undefined>;

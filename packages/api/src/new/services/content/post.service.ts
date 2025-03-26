@@ -330,7 +330,9 @@ export class PostService implements IPostService {
       cursor,
       pageSize,
     });
-    const hydratedPosts = rawPosts.map((post) => this.hydrateAndProcessPost(post));
+    const hydratedPosts = rawPosts.map((post) =>
+      this.hydrateAndProcessPost(post),
+    );
     const lastPost = hydratedPosts[pageSize - 1];
 
     return ok({
@@ -363,7 +365,9 @@ export class PostService implements IPostService {
     if (!rawPosts.length && cursor)
       return err(new PostErrors.PostNotFound(cursor.postId));
 
-    const hydratedPosts = rawPosts.map((post) => this.hydrateAndProcessPost(post));
+    const hydratedPosts = rawPosts.map((post) =>
+      this.hydrateAndProcessPost(post),
+    );
     const lastPost = hydratedPosts[pageSize - 1];
 
     return ok({
@@ -384,7 +388,7 @@ export class PostService implements IPostService {
   ): Promise<
     Result<HydratedAndProcessedPostWithoutLike, PostErrors.PostNotFound>
   > {
-    const rawPost = await this.postRepository.getPostForNextJs(params);
+    const rawPost = await this.postRepository.getPostForSite(params);
     if (!rawPost) return err(new PostErrors.PostNotFound(params.postId));
 
     const profile = await this.profileRepository.getProfile({
