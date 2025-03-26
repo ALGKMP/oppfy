@@ -99,7 +99,7 @@ export class BlockService implements IBlockService {
       // Clean up relationships and update stats
       const cleanupPromises = [
         // Create block
-        this.blockRepository.blockUser(
+        this.blockRepository.block(
           {
             userId: blockerId,
             blockedUserId: blockedId,
@@ -226,7 +226,7 @@ export class BlockService implements IBlockService {
 
     await this.db.transaction(async (tx) => {
       await Promise.all([
-        this.blockRepository.unblockUser(
+        this.blockRepository.unblock(
           {
             userId: blockerId,
             blockedUserId: blockedId,

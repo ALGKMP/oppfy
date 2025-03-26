@@ -26,6 +26,12 @@ export namespace ProfileErrors {
       super(`Username "${username}" is already taken`);
     }
   }
+
+  export class ProfilePrivate extends ProfileError {
+    constructor(userId: string) {
+      super(`Profile is private for user ${userId}`);
+    }
+  }
 }
 
 export type ProfileError = InstanceType<typeof ProfileError>;
