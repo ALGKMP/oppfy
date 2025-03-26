@@ -43,8 +43,8 @@ export class BlockRepository implements IBlockRepository {
     const { userId, blockedUserId } = params;
 
     await db.insert(this.schema.block).values({
-      blockedByUserId: userId,
-      blockedUserId,
+      senderUserId: userId,
+      recipientUserId: blockedUserId,
     });
   }
 
