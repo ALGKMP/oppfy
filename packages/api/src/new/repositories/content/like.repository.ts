@@ -17,6 +17,24 @@ export class LikeRepository implements ILikeRepository {
     @inject(TYPES.Schema) private readonly schema: Schema,
   ) {}
 
+  async getLike(
+    { postId, userId }: LikeParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<Like | undefined> {
+    const result = await db
+      .select()
+      .from(this.schema.like)
+      .where(
+        and(
+          eq(this.schema.like.postId, postId),
+          eq(this.schema.like.userId, userId),
+        ),
+      )
+      .limit(1);
+
+    return result[0];
+  }
+
   async addLike(
     { postId, userId }: LikeParams,
     tx: DatabaseOrTransaction = this.db,
