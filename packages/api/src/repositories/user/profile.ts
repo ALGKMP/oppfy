@@ -132,12 +132,12 @@ export class ProfileRepository {
         schema.block,
         or(
           and(
-            eq(schema.block.blockedByUserId, currentUserId),
-            eq(schema.block.blockedUserId, schema.user.id),
+            eq(schema.block.senderUserId, currentUserId),
+            eq(schema.block.recipientUserId, schema.user.id),
           ),
           and(
-            eq(schema.block.blockedByUserId, schema.user.id),
-            eq(schema.block.blockedUserId, currentUserId),
+            eq(schema.block.senderUserId, schema.user.id),
+            eq(schema.block.recipientUserId, currentUserId),
           ),
         ),
       )

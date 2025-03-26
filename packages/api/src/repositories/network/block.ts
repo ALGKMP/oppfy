@@ -27,11 +27,11 @@ export class BlockRepository {
         profileId: schema.profile.id,
       })
       .from(schema.user)
-      .innerJoin(schema.block, eq(schema.user.id, schema.block.blockedUserId))
+      .innerJoin(schema.block, eq(schema.user.id, schema.block.recipientUserId))
       .innerJoin(schema.profile, eq(schema.user.id, schema.profile.userId))
       .where(
         and(
-          eq(schema.block.blockedByUserId, forUserId),
+          eq(schema.block.senderUserId, forUserId),
           cursor
             ? or(
                 gt(schema.block.createdAt, cursor.createdAt),
@@ -58,12 +58,12 @@ export class BlockRepository {
     return await this.db.query.block.findFirst({
       where: or(
         and(
-          eq(schema.block.blockedByUserId, userId),
-          eq(schema.block.blockedUserId, blockedUserId),
+          eq(schema.block.senderUserId, userId),
+          eq(schema.block.recipientUserId, blockedUserId),
         ),
         and(
-          eq(schema.block.blockedByUserId, blockedUserId),
-          eq(schema.block.blockedUserId, userId),
+          eq(schema.block.senderUserId, blockedUserId),
+          eq(schema.block.recipientUserId, userId),
         ),
       ),
     });
@@ -96,8 +96,8 @@ export class BlockRepository {
       .delete(schema.block)
       .where(
         and(
-          eq(schema.block.blockedByUserId, userId),
-          eq(schema.block.blockedUserId, blockedUserId),
+          eq(schema.block.senderUserId, userId),
+          eq(schema.block.recipientUserId, blockedUserId),
         ),
       );
     return result[0];
