@@ -53,77 +53,60 @@ export class BlockService implements IBlockService {
   }: BlockUserParams): Promise<
     Result<void, BlockErrors.CannotBlockSelf | BlockErrors.AlreadyBlocked>
   > {
-    try {
-      if (blockerId === blockedId) {
-        return err(new BlockErrors.CannotBlockSelf(blockerId)); // Adjusted to match your constructor
+    if (blockerId === blockedId) {
+      return err(new BlockErrors.CannotBlockSelf(blockerId));
+    }
+
+    await this.db.transaction(async (tx) => {
+      const isBlocked = await this.blockRepository.isBlocked(
+        { userId: blockerId, blockedUserId: blockedId },
+        tx,
+      );
+      if (isBlocked) {
+        throw new BlockErrors.AlreadyBlocked(blockerId, blockedId);
       }
 
-      await this.db.transaction(async (tx) => {
-        const isBlocked = await this.blockRepository.isBlocked(
-          { userId: blockerId, blockedUserId: blockedId },
-          tx,
-        );
-        if (isBlocked) {
-          throw new BlockErrors.AlreadyBlocked(blockerId, blockedId);
-        }
-
-        // Check if users are friends and remove friendship if so
-        const areFriends = await this.friendRepository.isFriends(
+      // Check if users are friends and remove friendship if so
+      const areFriends = await this.friendRepository.isFriends(
+        { userIdA: blockerId, userIdB: blockedId },
+        tx,
+      );
+      if (areFriends) {
+        await this.friendRepository.removeFriend(
           { userIdA: blockerId, userIdB: blockedId },
           tx,
         );
-        if (areFriends) {
-          await this.friendRepository.removeFriend(
-            { userIdA: blockerId, userIdB: blockedId },
-            tx,
-          );
-        }
-
-        await this.blockRepository.blockUser(
-          { userId: blockerId, blockedUserId: blockedId },
-          tx,
-        );
-      });
-
-      return ok(undefined);
-    } catch (error) {
-      if (
-        error instanceof BlockErrors.CannotBlockSelf ||
-        error instanceof BlockErrors.AlreadyBlocked
-      ) {
-        return err(error);
       }
-      throw error; // Unexpected errors bubble up
-    }
+
+      await this.blockRepository.blockUser(
+        { userId: blockerId, blockedUserId: blockedId },
+        tx,
+      );
+    });
+
+    return ok(undefined);
   }
 
   async unblockUser({
     blockerId,
     blockedId,
   }: UnblockUserParams): Promise<Result<void, BlockErrors.BlockNotFound>> {
-    try {
-      await this.db.transaction(async (tx) => {
-        const isBlocked = await this.blockRepository.isBlocked(
-          { userId: blockerId, blockedUserId: blockedId },
-          tx,
-        );
-        if (!isBlocked) {
-          throw new BlockErrors.BlockNotFound(blockerId, blockedId);
-        }
-
-        await this.blockRepository.unblockUser(
-          { userId: blockerId, blockedUserId: blockedId },
-          tx,
-        );
-      });
-
-      return ok(undefined);
-    } catch (error) {
-      if (error instanceof BlockErrors.BlockNotFound) {
-        return err(error);
+    await this.db.transaction(async (tx) => {
+      const isBlocked = await this.blockRepository.isBlocked(
+        { userId: blockerId, blockedUserId: blockedId },
+        tx,
+      );
+      if (!isBlocked) {
+        throw new BlockErrors.BlockNotFound(blockerId, blockedId);
       }
-      throw error; // Unexpected errors bubble up
-    }
+
+      await this.blockRepository.unblockUser(
+        { userId: blockerId, blockedUserId: blockedId },
+        tx,
+      );
+    });
+
+    return ok(undefined);
   }
 
   async isBlocked({
