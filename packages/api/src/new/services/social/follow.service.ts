@@ -69,7 +69,7 @@ export class FollowService implements IFollowService {
     }
 
     await this.db.transaction(async (tx) => {
-      const isFollowing = await this.followRepository.getFollower(
+      const isFollowing = await this.followRepository.isFollowing(
         { senderUserId: senderId, recipientUserId: recipientId },
         tx,
       );
@@ -153,7 +153,7 @@ export class FollowService implements IFollowService {
   }: RemoveFollowParams): Promise<
     Result<void, FollowErrors.NotFollowing | FollowErrors.FailedToRemove>
   > {
-    const isFollowing = await this.followRepository.getFollower({
+    const isFollowing = await this.followRepository.isFollowing({
       senderUserId: followerId,
       recipientUserId: followeeId,
     });
@@ -298,7 +298,7 @@ export class FollowService implements IFollowService {
   }: GetFollowStatusParams): Promise<
     Result<"following" | "requested" | "notFollowing", never>
   > {
-    const isFollowing = await this.followRepository.getFollower({
+    const isFollowing = await this.followRepository.isFollowing({
       senderUserId: userId,
       recipientUserId: targetUserId,
     });
@@ -319,7 +319,7 @@ export class FollowService implements IFollowService {
   }: RemoveFollowerParams): Promise<
     Result<void, FollowErrors.NotFollowing | FollowErrors.FailedToRemove>
   > {
-    const isFollowing = await this.followRepository.getFollower({
+    const isFollowing = await this.followRepository.isFollowing({
       senderUserId: followerToRemove,
       recipientUserId: userId,
     });

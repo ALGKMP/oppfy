@@ -60,11 +60,11 @@ export class BlockService {
       outgoingFollowRequest,
       incomingFollowRequest,
     ] = await Promise.all([
-      this.followRepository.getFollower({
+      this.followRepository.isFollowing({
         followerId: userId,
         followeeId: userIdBeingBlocked,
       }),
-      this.followRepository.getFollower({
+      this.followRepository.isFollowing({
         followerId: userIdBeingBlocked,
         followeeId: userId,
       }),
@@ -76,7 +76,7 @@ export class BlockService {
         senderId: userId,
         recipientId: userIdBeingBlocked,
       }),
-      this.followRepository.getFollower({
+      this.followRepository.isFollowing({
         followerId: userId,
         followeeId: userIdBeingBlocked,
       }),
@@ -84,7 +84,7 @@ export class BlockService {
         senderId: userIdBeingBlocked,
         recipientId: userId,
       }),
-      this.followRepository.getFollower({
+      this.followRepository.isFollowing({
         followerId: userIdBeingBlocked,
         followeeId: userId,
       }),

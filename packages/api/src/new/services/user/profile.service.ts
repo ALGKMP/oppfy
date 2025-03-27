@@ -82,8 +82,8 @@ export class ProfileService implements IProfileService {
     // Check privacy settings
     if (profileData.privacy === "private") {
       const isFollowing = await this.followRepository.isFollowing({
-        senderId: selfUserId,
-        recipientId: otherUserId,
+        senderUserId: selfUserId,
+        recipientUserId: otherUserId,
       });
 
       if (!isFollowing) {
@@ -151,8 +151,8 @@ export class ProfileService implements IProfileService {
     const [isFollowing, isFollowRequested, isFriends, isFriendRequested] =
       await Promise.all([
         this.followRepository.isFollowing({
-          senderId: currentUserId,
-          recipientId: otherUserId,
+          senderUserId: currentUserId,
+          recipientUserId: otherUserId,
         }),
         this.followRepository.isFollowRequested({
           senderUserId: currentUserId,
@@ -163,8 +163,8 @@ export class ProfileService implements IProfileService {
           userIdB: otherUserId,
         }),
         this.friendRepository.isFriendRequested({
-          senderId: currentUserId,
-          recipientId: otherUserId,
+          senderUserId: currentUserId,
+          recipientUserId: otherUserId,
         }),
       ]);
 

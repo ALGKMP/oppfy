@@ -21,7 +21,7 @@ export class FriendService {
     recipientId: string;
   }) {
     if (senderId === recipientId) return true; // Temporary fix
-    return !!(await this.followRepository.getFollower({
+    return !!(await this.followRepository.isFollowing({
       followerId: senderId,
       followeeId: recipientId,
     }));
@@ -165,11 +165,11 @@ export class FriendService {
     await this.friendRepository.deleteFriendRequest({ senderId, recipientId });
     await this.friendRepository.createFriend({ senderId, recipientId });
 
-    const senderFollowsRecipient = await this.followRepository.getFollower({
+    const senderFollowsRecipient = await this.followRepository.isFollowing({
       followerId: senderId,
       followeeId: recipientId,
     });
-    const recipientFollowsSender = await this.followRepository.getFollower({
+    const recipientFollowsSender = await this.followRepository.isFollowing({
       followerId: recipientId,
       followeeId: senderId,
     });

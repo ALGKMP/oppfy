@@ -32,7 +32,7 @@ export class FriendService implements IFriendService {
     recipientId: string;
   }): Promise<Result<boolean, never>> {
     const { senderId, recipientId } = options;
-    const follower = await this.followRepository.getFollower({
+    const follower = await this.followRepository.isFollowing({
       followerId: senderId,
       followeeId: recipientId,
     });

@@ -102,12 +102,12 @@ export class FriendRepository implements IFriendRepository {
     params: FriendRequestParams,
     tx: Transaction,
   ): Promise<void> {
-    const { senderId, recipientId } = params;
+    const { senderUserId, recipientUserId } = params;
 
     // Insert the friend request record
     await tx.insert(this.schema.friendRequest).values({
-      senderId,
-      recipientId,
+      senderUserId,
+      recipientUserId,
     });
   }
 
@@ -118,15 +118,15 @@ export class FriendRepository implements IFriendRepository {
     params: FriendRequestParams,
     tx: Transaction,
   ): Promise<void> {
-    const { senderId, recipientId } = params;
+    const { senderUserId, recipientUserId } = params;
 
     // Delete the friend request record
     await tx
       .delete(this.schema.friendRequest)
       .where(
         and(
-          eq(this.schema.friendRequest.senderUserId, senderId),
-          eq(this.schema.friendRequest.recipientUserId, recipientId),
+          eq(this.schema.friendRequest.senderUserId, senderUserId),
+          eq(this.schema.friendRequest.recipientUserId, recipientUserId),
         ),
       );
   }
@@ -166,15 +166,15 @@ export class FriendRepository implements IFriendRepository {
     params: FriendRequestParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<boolean> {
-    const { senderId, recipientId } = params;
+    const { senderUserId, recipientUserId } = params;
 
     const result = await db
       .select({ id: this.schema.friendRequest.id })
       .from(this.schema.friendRequest)
       .where(
         and(
-          eq(this.schema.friendRequest.senderUserId, senderId),
-          eq(this.schema.friendRequest.recipientUserId, recipientId),
+          eq(this.schema.friendRequest.senderUserId, senderUserId),
+          eq(this.schema.friendRequest.recipientUserId, recipientUserId),
         ),
       )
       .limit(1);
