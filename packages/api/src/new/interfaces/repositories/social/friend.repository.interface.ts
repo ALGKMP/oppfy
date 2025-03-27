@@ -1,6 +1,6 @@
 import type { DatabaseOrTransaction } from "@oppfy/db";
 
-import type { Profile } from "../../../models";
+import type { Friend, FriendRequest, Profile } from "../../../models";
 
 export interface UserIdParams {
   userId: string;
@@ -24,10 +24,24 @@ export interface PaginateFriendParams extends PaginationParams {
   userId: string;
 }
 
+export interface SocialProfile extends Profile {
+  friendedAt: Date;
+}
+
 export interface IFriendRepository {
+  getFriend(
+    params: FriendParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<Friend | undefined>;
+
   createFriend(params: FriendParams, db?: DatabaseOrTransaction): Promise<void>;
 
   deleteFriend(params: FriendParams, db?: DatabaseOrTransaction): Promise<void>;
+
+  getFriendRequest(
+    params: FriendRequestParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<FriendRequest | undefined>;
 
   createFriendRequest(
     params: FriendRequestParams,
@@ -39,30 +53,13 @@ export interface IFriendRepository {
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
-  isFriends(params: FriendParams, db?: DatabaseOrTransaction): Promise<boolean>;
-
-  isFriendRequested(
-    params: FriendRequestParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<boolean>;
-
-  countFriends(
-    params: UserIdParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<number>;
-
-  countFriendRequests(
-    params: UserIdParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<number>;
-
   paginateFriends(
     params: PaginateFriendParams,
     db?: DatabaseOrTransaction,
-  ): Promise<Profile[]>;
+  ): Promise<SocialProfile[]>;
 
   paginateFriendRequests(
     params: PaginateFriendParams,
     db?: DatabaseOrTransaction,
-  ): Promise<Profile[]>;
+  ): Promise<SocialProfile[]>;
 }

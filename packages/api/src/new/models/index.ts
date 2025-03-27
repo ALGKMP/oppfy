@@ -21,10 +21,12 @@ export type Profile = InferSelectModel<typeof schema.profile>;
 export type Block = InferSelectModel<typeof schema.block>;
 export type Follow = InferSelectModel<typeof schema.follow>;
 export type FollowRequest = InferSelectModel<typeof schema.followRequest>;
+export type Friend = InferSelectModel<typeof schema.friend>;
+export type FriendRequest = InferSelectModel<typeof schema.friendRequest>;
 export interface BlockWithProfile {
   block: Block;
   profile: Profile;
-};
+}
 export type UserWithProfile = User & {
   profile: Profile;
 };

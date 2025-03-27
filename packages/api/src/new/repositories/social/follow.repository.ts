@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gt, or, sql } from "drizzle-orm";
+import { and, asc, count, eq, exists, gt, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type {
@@ -10,9 +10,7 @@ import type {
 
 import { TYPES } from "../../container";
 import {
-  FollowParams,
-  GetFollowParams,
-  GetFollowRequestParams,
+  CleanupFollowRelationshipsParams,
   IFollowRepository,
   PaginateFollowParams,
   SocialProfile,
@@ -34,7 +32,7 @@ export class FollowRepository implements IFollowRepository {
   }
 
   async getFollower(
-    params: GetFollowParams,
+    params: UserIdsParams,
     tx: Transaction,
   ): Promise<Follow | undefined> {
     const { senderUserId, recipientUserId } = params;
@@ -51,7 +49,7 @@ export class FollowRepository implements IFollowRepository {
   }
 
   async getFollowRequest(
-    params: GetFollowRequestParams,
+    params: UserIdsParams,
     tx: Transaction,
   ): Promise<FollowRequest | undefined> {
     const { senderUserId, recipientUserId } = params;
@@ -67,7 +65,7 @@ export class FollowRepository implements IFollowRepository {
     return result[0];
   }
 
-  async createFollower(params: FollowParams, tx: Transaction): Promise<void> {
+  async createFollower(params: UserIdsParams, tx: Transaction): Promise<void> {
     const { senderUserId, recipientUserId } = params;
 
     // Insert the follow relationship
@@ -89,7 +87,7 @@ export class FollowRepository implements IFollowRepository {
       .where(eq(this.schema.userStats.userId, recipientUserId));
   }
 
-  async deleteFollower(params: FollowParams, tx: Transaction): Promise<void> {
+  async deleteFollower(params: UserIdsParams, tx: Transaction): Promise<void> {
     const { senderUserId, recipientUserId } = params;
 
     // Delete the follow relationship
@@ -116,7 +114,7 @@ export class FollowRepository implements IFollowRepository {
   }
 
   async createFollowRequest(
-    params: FollowParams,
+    params: UserIdsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { senderUserId, recipientUserId } = params;
@@ -127,7 +125,7 @@ export class FollowRepository implements IFollowRepository {
   }
 
   async deleteFollowRequest(
-    params: FollowParams,
+    params: UserIdsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     const { senderUserId, recipientUserId } = params;
@@ -139,6 +137,131 @@ export class FollowRepository implements IFollowRepository {
           eq(this.schema.followRequest.recipientUserId, recipientUserId),
         ),
       );
+  }
+
+  async cleanupFollowRelationships(
+    params: CleanupFollowRelationshipsParams,
+    tx: Transaction,
+  ): Promise<void> {
+    const { userIdA, userIdB } = params;
+
+    await Promise.all([
+      // Remove follow relationships: userIdA -> userIdB and userIdB -> userIdA
+      tx
+        .delete(this.schema.follow)
+        .where(
+          or(
+            and(
+              eq(this.schema.follow.senderUserId, userIdA),
+              eq(this.schema.follow.recipientUserId, userIdB),
+            ),
+            and(
+              eq(this.schema.follow.senderUserId, userIdB),
+              eq(this.schema.follow.recipientUserId, userIdA),
+            ),
+          ),
+        ),
+
+      // Delete follow requests: userIdA -> userIdB and userIdB -> userIdA
+      tx
+        .delete(this.schema.followRequest)
+        .where(
+          or(
+            and(
+              eq(this.schema.followRequest.senderUserId, userIdA),
+              eq(this.schema.followRequest.recipientUserId, userIdB),
+            ),
+            and(
+              eq(this.schema.followRequest.senderUserId, userIdB),
+              eq(this.schema.followRequest.recipientUserId, userIdA),
+            ),
+          ),
+        ),
+
+      // Update userStats for userIdA: decrement following if they followed userIdB
+      tx
+        .update(this.schema.userStats)
+        .set({ following: sql`${this.schema.userStats.following} - 1` })
+        .where(
+          and(
+            eq(this.schema.userStats.userId, userIdA),
+            exists(
+              tx
+                .select()
+                .from(this.schema.follow)
+                .where(
+                  and(
+                    eq(this.schema.follow.senderUserId, userIdA),
+                    eq(this.schema.follow.recipientUserId, userIdB),
+                  ),
+                ),
+            ),
+          ),
+        ),
+
+      // Update userStats for userIdB: decrement followers if userIdA was following them
+      tx
+        .update(this.schema.userStats)
+        .set({ followers: sql`${this.schema.userStats.followers} - 1` })
+        .where(
+          and(
+            eq(this.schema.userStats.userId, userIdB),
+            exists(
+              tx
+                .select()
+                .from(this.schema.follow)
+                .where(
+                  and(
+                    eq(this.schema.follow.senderUserId, userIdA),
+                    eq(this.schema.follow.recipientUserId, userIdB),
+                  ),
+                ),
+            ),
+          ),
+        ),
+
+      // Update userStats for userIdB: decrement following if they followed userIdA
+      tx
+        .update(this.schema.userStats)
+        .set({ following: sql`${this.schema.userStats.following} - 1` })
+        .where(
+          and(
+            eq(this.schema.userStats.userId, userIdB),
+            exists(
+              tx
+                .select()
+                .from(this.schema.follow)
+                .where(
+                  and(
+                    eq(this.schema.follow.senderUserId, userIdB),
+                    eq(this.schema.follow.recipientUserId, userIdA),
+                  ),
+                ),
+            ),
+          ),
+        ),
+
+      // Update userStats for userIdA: decrement followers if userIdB was following them
+      tx
+        .update(this.schema.userStats)
+        .set({ followers: sql`${this.schema.userStats.followers} - 1` })
+        .where(
+          and(
+            eq(this.schema.userStats.userId, userIdA),
+            exists(
+              tx
+                .select()
+                .from(this.schema.follow)
+                .where(
+                  and(
+                    eq(this.schema.follow.senderUserId, userIdB),
+                    eq(this.schema.follow.recipientUserId, userIdA),
+                  ),
+                ),
+            ),
+          ),
+        ),
+    ]);
   }
 
   async paginateFollowers(
@@ -178,7 +301,10 @@ export class FollowRepository implements IFollowRepository {
       .orderBy(asc(this.schema.follow.createdAt), asc(this.schema.user.id))
       .limit(limit);
 
-    return followers;
+    return followers.map((follower) => ({
+      ...follower.profile,
+      followedAt: follower.createdAt,
+    }));
   }
 
   async paginateFollowing(
@@ -218,7 +344,10 @@ export class FollowRepository implements IFollowRepository {
       .orderBy(asc(this.schema.follow.createdAt), asc(this.schema.user.id))
       .limit(limit);
 
-    return following;
+    return following.map((following) => ({
+      ...following.profile,
+      followedAt: following.createdAt,
+    }));
   }
 
   async paginateFollowRequests(
@@ -261,6 +390,9 @@ export class FollowRepository implements IFollowRepository {
       )
       .limit(limit);
 
-    return requests;
+    return requests.map((request) => ({
+      ...request.profile,
+      followedAt: request.createdAt,
+    }));
   }
 }
