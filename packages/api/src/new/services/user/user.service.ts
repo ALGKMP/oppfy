@@ -5,8 +5,10 @@ import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import { UserErrors } from "../../errors/user/user.error";
-import type { UserIdParams } from "../../interfaces/repositories/social/follow.repository.interface";
-import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
+import type {
+  IUserRepository,
+  UserIdParams,
+} from "../../interfaces/repositories/user/user.repository.interface";
 import type { IUserService } from "../../interfaces/services/user/user.service.interface";
 import { UserStatus } from "../../models";
 

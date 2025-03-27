@@ -16,7 +16,7 @@ import {
   IFollowRepository,
   PaginateFollowParams,
   SocialProfile,
-  UserIdParams,
+  UserIdsParams,
 } from "../../interfaces/repositories/social/follow.repository.interface";
 import { Follow, FollowRequest, Profile } from "../../models";
 

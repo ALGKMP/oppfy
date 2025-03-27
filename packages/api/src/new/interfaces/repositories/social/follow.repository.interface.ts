@@ -1,12 +1,8 @@
 import type { DatabaseOrTransaction } from "@oppfy/db";
 
-import type { Follow, Profile } from "../../../models";
+import type { Follow, FollowRequest, Profile } from "../../../models";
 
-export interface UserIdParams {
-  userId: string;
-}
-
-export interface FollowParams {
+export interface UserIdsParams {
   senderUserId: string;
   recipientUserId: string;
 }
@@ -26,49 +22,38 @@ export interface PaginateFollowParams extends PaginationParams {
   selfUserId?: string;
 }
 
-export interface GetFollowParams {
-  senderUserId: string;
-  recipientUserId: string;
-}
-
-export interface GetFollowRequestParams {
-  senderUserId: string;
-  recipientUserId: string;
-}
-
-export interface SocialProfile {
-  profile: Profile;
-  createdAt: Date;
+export interface SocialProfile extends Profile {
+  followedAt: Date;
 }
 
 export interface IFollowRepository {
   getFollower(
-    params: GetFollowParams,
+    params: UserIdsParams,
     db?: DatabaseOrTransaction,
   ): Promise<Follow | undefined>;
 
   getFollowRequest(
-    params: GetFollowRequestParams,
+    params: UserIdsParams,
     db?: DatabaseOrTransaction,
   ): Promise<FollowRequest | undefined>;
 
   createFollower(
-    params: FollowParams,
+    params: UserIdsParams,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   createFollowRequest(
-    params: FollowParams,
+    params: UserIdsParams,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   deleteFollower(
-    params: FollowParams,
+    params: UserIdsParams,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   deleteFollowRequest(
-    params: FollowParams,
+    params: UserIdsParams,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
