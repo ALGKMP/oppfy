@@ -35,18 +35,6 @@ export class BlockService implements IBlockService {
     private readonly friendRepository: IFriendRepository,
   ) {}
 
-  // Hydrate BlockedUser from Profile and block createdAt
-  private hydrateBlockedUser(profile: Profile, createdAt: Date): BlockedUser {
-    const hydratedProfile = cloudfront.hydrateProfile(profile);
-    return {
-      userId: profile.userId,
-      username: profile.username ?? "",
-      name: profile.name ?? "",
-      profilePictureUrl: hydratedProfile.profilePictureUrl,
-      createdAt,
-    };
-  }
-
   async blockUser({
     blockerId,
     blockedId,
@@ -84,7 +72,7 @@ export class BlockService implements IBlockService {
       );
     });
 
-    return ok(undefined);
+    return ok();
   }
 
   async unblockUser({
@@ -106,7 +94,7 @@ export class BlockService implements IBlockService {
       );
     });
 
-    return ok(undefined);
+    return ok();
   }
 
   async isBlocked({
@@ -129,7 +117,7 @@ export class BlockService implements IBlockService {
   > {
     const rawBlockedData = await this.blockRepository.paginateBlockedProfiles({
       userId,
-      cursor: cursor ?? null,
+      cursor: cursor,
       limit: pageSize + 1,
     });
 
@@ -148,5 +136,16 @@ export class BlockService implements IBlockService {
             }
           : null,
     });
+  }
+
+  private hydrateBlockedUser(profile: Profile, createdAt: Date): BlockedUser {
+    const hydratedProfile = cloudfront.hydrateProfile(profile);
+    return {
+      userId: profile.userId,
+      username: profile.username ?? "",
+      name: profile.name ?? "",
+      profilePictureUrl: hydratedProfile.profilePictureUrl,
+      createdAt,
+    };
   }
 }

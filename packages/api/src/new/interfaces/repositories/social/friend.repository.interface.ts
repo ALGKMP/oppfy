@@ -11,8 +11,8 @@ export interface FriendParams {
 }
 
 export interface FriendRequestParams {
-  senderId: string;
-  recipientId: string;
+  senderUserId: string;
+  recipientUserId: string;
 }
 
 export interface PaginationParams {

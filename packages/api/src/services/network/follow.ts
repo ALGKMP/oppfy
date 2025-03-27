@@ -21,7 +21,7 @@ export class FollowService {
     recipientId: string;
   }) {
     if (senderId === recipientId) return true; // Temporary fix
-    return !!(await this.followRepository.getFollower({
+    return !!(await this.followRepository.isFollowing({
       followerId: senderId,
       followeeId: recipientId,
     }));
@@ -307,7 +307,7 @@ export class FollowService {
     userId: string;
     followerToRemove: string;
   }) {
-    const followerExists = await this.followRepository.getFollower({
+    const followerExists = await this.followRepository.isFollowing({
       followerId: followerToRemove,
       followeeId: userId,
     });
@@ -348,7 +348,7 @@ export class FollowService {
     targetUserId: string;
     privacySetting: "public" | "private";
   }) {
-    const isFollowing = await this.followRepository.getFollower({
+    const isFollowing = await this.followRepository.isFollowing({
       followerId: userId,
       followeeId: targetUserId,
     });

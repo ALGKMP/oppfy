@@ -332,7 +332,7 @@ export class UserService {
 
     if (targetUser.privacySetting === "public") return true;
 
-    const isFollowing = await this.followRepository.getFollower({
+    const isFollowing = await this.followRepository.isFollowing({
       followerId: currentUserId,
       followeeId: targetUserId,
     });

@@ -1,6 +1,6 @@
 import type { DatabaseOrTransaction } from "@oppfy/db";
 
-import type { Follow, Profile } from "../../../models";
+import type { Profile } from "../../../models";
 
 export interface UserIdParams {
   userId: string;
