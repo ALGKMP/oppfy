@@ -26,6 +26,16 @@ export interface GetFollowParams {
   recipientUserId: string;
 }
 
+export interface GetFollowRequestParams {
+  senderUserId: string;
+  recipientUserId: string;
+}
+
+export interface SocialProfile {
+  profile: Profile;
+  createdAt: Date;
+}
+
 export interface IFollowRepository {
   createFollower(
     params: FollowParams,
@@ -34,6 +44,11 @@ export interface IFollowRepository {
 
   getFollower(
     params: GetFollowParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<Follow | undefined>;
+
+  getFollowRequest(
+    params: GetFollowRequestParams,
     db?: DatabaseOrTransaction,
   ): Promise<Follow | undefined>;
 
@@ -52,23 +67,18 @@ export interface IFollowRepository {
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
-  isFollowRequested(
-    params: FollowParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<boolean>;
-
   paginateFollowers(
     params: PaginateFollowParams,
     db?: DatabaseOrTransaction,
-  ): Promise<Profile[]>;
+  ): Promise<SocialProfile[]>;
 
   paginateFollowing(
     params: PaginateFollowParams,
     db?: DatabaseOrTransaction,
-  ): Promise<Profile[]>;
+  ): Promise<SocialProfile[]>;
 
   paginateFollowRequests(
     params: PaginateFollowParams,
     db?: DatabaseOrTransaction,
-  ): Promise<Profile[]>;
+  ): Promise<SocialProfile[]>;
 }

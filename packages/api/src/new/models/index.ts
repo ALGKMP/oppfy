@@ -20,6 +20,7 @@ export type User = InferSelectModel<typeof schema.user>;
 export type Profile = InferSelectModel<typeof schema.profile>;
 export type Block = InferSelectModel<typeof schema.block>;
 export type Follow = InferSelectModel<typeof schema.follow>;
+export type FollowRequest = InferSelectModel<typeof schema.followRequest>;
 export interface BlockWithProfile {
   block: Block;
   profile: Profile;
