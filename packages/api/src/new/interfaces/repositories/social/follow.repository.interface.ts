@@ -1,6 +1,6 @@
 import type { DatabaseOrTransaction } from "@oppfy/db";
 
-import type { Profile } from "../../../models";
+import type { Follow, FollowRequest, Profile } from "../../../models";
 
 export interface UserIdParams {
   userId: string;
@@ -50,7 +50,7 @@ export interface IFollowRepository {
   getFollowRequest(
     params: GetFollowRequestParams,
     db?: DatabaseOrTransaction,
-  ): Promise<Follow | undefined>;
+  ): Promise<FollowRequest | undefined>;
 
   removeFollower(
     params: FollowParams,
