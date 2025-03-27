@@ -50,7 +50,7 @@ export interface IFollowRepository {
   getFollowRequest(
     params: GetFollowRequestParams,
     db?: DatabaseOrTransaction,
-  ): Promise<Follow | undefined>;
+  ): Promise<FollowRequest | undefined>;
 
   createFollower(
     params: FollowParams,
