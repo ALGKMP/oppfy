@@ -5,7 +5,6 @@ import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { S3 } from "@oppfy/s3";
 
-import { userStats } from "../../../../../db/src/schema";
 import { TYPES } from "../../container";
 import { ProfileError, ProfileErrors } from "../../errors/user/profile.error";
 import type { IBlockRepository } from "../../interfaces/repositories/social/block.repository.interface";
@@ -61,7 +60,7 @@ export class ProfileService implements IProfileService {
   > {
     const { selfUserId, otherUserId } = params;
 
-    const isBlocked = await this.blockRepository.isBlocked({
+    const isBlocked = await this.blockRepository.getBlock({
       userId: selfUserId,
       blockedUserId: otherUserId,
     });
@@ -81,9 +80,9 @@ export class ProfileService implements IProfileService {
 
     // Check privacy settings
     if (profileData.privacy === "private") {
-      const isFollowing = await this.followRepository.isFollowing({
-        senderUserId: selfUserId,
-        recipientUserId: otherUserId,
+      const isFollowing = await this.followRepository.getFollower({
+        senderUserId: otherUserId,
+        recipientUserId: selfUserId,
       });
 
       if (!isFollowing) {
@@ -139,7 +138,7 @@ export class ProfileService implements IProfileService {
   ): Promise<Result<RelationshipState[], ProfileErrors.ProfileBlocked>> {
     const { currentUserId, otherUserId } = params;
 
-    const isBlocked = await this.blockRepository.isBlocked({
+    const isBlocked = await this.blockRepository.getBlock({
       userId: currentUserId,
       blockedUserId: otherUserId,
     });
@@ -150,19 +149,19 @@ export class ProfileService implements IProfileService {
 
     const [isFollowing, isFollowRequested, isFriends, isFriendRequested] =
       await Promise.all([
-        this.followRepository.isFollowing({
+        this.followRepository.getFollower({
           senderUserId: currentUserId,
           recipientUserId: otherUserId,
         }),
-        this.followRepository.isFollowRequested({
+        this.followRepository.getFollowRequest({
           senderUserId: currentUserId,
           recipientUserId: otherUserId,
         }),
-        this.friendRepository.isFriends({
-          userIdA: currentUserId,
-          userIdB: otherUserId,
+        this.friendRepository.getFriendRequest({
+          senderUserId: currentUserId,
+          recipientUserId: otherUserId,
         }),
-        this.friendRepository.isFriendRequested({
+        this.friendRepository.getFriendRequest({
           senderUserId: currentUserId,
           recipientUserId: otherUserId,
         }),
@@ -207,7 +206,7 @@ export class ProfileService implements IProfileService {
       return ok(stats);
     }
 
-    const isBlocked = await this.blockRepository.isBlocked({
+    const isBlocked = await this.blockRepository.getBlock({
       userId: selfUserId,
       blockedUserId: otherUserId,
     });
