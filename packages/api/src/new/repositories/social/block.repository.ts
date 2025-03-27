@@ -9,7 +9,7 @@ import type {
   GetBlockedUsersParams,
   IBlockRepository,
 } from "../../interfaces/repositories/social/block.repository.interface";
-import type { BlockWithProfile } from "../../models";
+import type { Block, BlockWithProfile } from "../../models";
 
 @injectable()
 export class BlockRepository implements IBlockRepository {
@@ -20,10 +20,10 @@ export class BlockRepository implements IBlockRepository {
     private readonly schema: Schema,
   ) {}
 
-  async isBlocked(
+  async getBlock(
     params: BlockParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<boolean> {
+  ): Promise<Block | undefined> {
     const { userId, blockedUserId } = params;
 
     const block = await db.query.block.findFirst({
@@ -33,7 +33,7 @@ export class BlockRepository implements IBlockRepository {
       ),
     });
 
-    return !!block;
+    return block;
   }
 
   async blockUser(

@@ -1,6 +1,6 @@
 import type { DatabaseOrTransaction } from "@oppfy/db";
 
-import type { BlockWithProfile } from "../../../models";
+import type { Block, BlockWithProfile } from "../../../models";
 
 export interface GetBlockedUsersParams {
   userId: string;
@@ -19,7 +19,10 @@ export interface IBlockRepository {
     db?: DatabaseOrTransaction,
   ): Promise<BlockWithProfile[]>;
 
-  isBlocked(params: BlockParams, db?: DatabaseOrTransaction): Promise<boolean>;
+  getBlock(
+    params: BlockParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<Block | undefined>;
 
   blockUser(params: BlockParams, db?: DatabaseOrTransaction): Promise<void>;
 
