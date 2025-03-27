@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gt, not, or, sql } from "drizzle-orm";
+import { and, asc, count, eq, exists, gt, not, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type {
@@ -14,9 +14,10 @@ import {
   FriendRequestParams,
   IFriendRepository,
   PaginateFriendParams,
+  SocialProfile,
   UserIdParams,
 } from "../../interfaces/repositories/social/friend.repository.interface";
-import { Profile } from "../../models";
+import { Friend, FriendRequest, Profile } from "../../models";
 
 @injectable()
 export class FriendRepository implements IFriendRepository {
@@ -29,6 +30,44 @@ export class FriendRepository implements IFriendRepository {
   ) {
     this.db = db;
     this.schema = schema;
+  }
+
+  async getFriend(
+    params: FriendParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<Friend | undefined> {
+    const { userIdA, userIdB } = params;
+    const [sortedUserIdA, sortedUserIdB] =
+      userIdA < userIdB ? [userIdA, userIdB] : [userIdB, userIdA];
+
+    const result = await db
+      .select()
+      .from(this.schema.friend)
+      .where(
+        and(
+          eq(this.schema.friend.userIdA, sortedUserIdA),
+          eq(this.schema.friend.userIdB, sortedUserIdB),
+        ),
+      );
+    return result[0];
+  }
+
+  async getFriendRequest(
+    params: FriendRequestParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<FriendRequest | undefined> {
+    const { senderUserId, recipientUserId } = params;
+
+    const result = await db
+      .select()
+      .from(this.schema.friendRequest)
+      .where(
+        and(
+          eq(this.schema.friendRequest.senderUserId, senderUserId),
+          eq(this.schema.friendRequest.recipientUserId, recipientUserId),
+        ),
+      );
+    return result[0];
   }
 
   /**
@@ -131,94 +170,99 @@ export class FriendRepository implements IFriendRepository {
       );
   }
 
-  /**
-   * Checks if two users are friends.
-   * Uses sorted user IDs for consistency.
-   */
-  async isFriends(
+  async cleanupFriendRelationships(
     params: FriendParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<boolean> {
+    tx: Transaction,
+  ): Promise<void> {
     const { userIdA, userIdB } = params;
 
-    // Sort user IDs to ensure userIdA < userIdB
-    const [sortedUserIdA, sortedUserIdB] =
-      userIdA < userIdB ? [userIdA, userIdB] : [userIdB, userIdA];
-
-    const result = await db
-      .select({ id: this.schema.friend.id })
-      .from(this.schema.friend)
-      .where(
-        and(
-          eq(this.schema.friend.userIdA, sortedUserIdA),
-          eq(this.schema.friend.userIdB, sortedUserIdB),
+    await Promise.all([
+      // Remove friendship (bidirectional)
+      tx
+        .delete(this.schema.friend)
+        .where(
+          or(
+            and(
+              eq(this.schema.friend.userIdA, userIdA),
+              eq(this.schema.friend.userIdB, userIdB),
+            ),
+            and(
+              eq(this.schema.friend.userIdA, userIdB),
+              eq(this.schema.friend.userIdB, userIdA),
+            ),
+          ),
         ),
-      )
-      .limit(1);
 
-    return result.length > 0;
-  }
-
-  /**
-   * Checks if a friend request exists from sender to recipient.
-   */
-  async isFriendRequested(
-    params: FriendRequestParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<boolean> {
-    const { senderUserId, recipientUserId } = params;
-
-    const result = await db
-      .select({ id: this.schema.friendRequest.id })
-      .from(this.schema.friendRequest)
-      .where(
-        and(
-          eq(this.schema.friendRequest.senderUserId, senderUserId),
-          eq(this.schema.friendRequest.recipientUserId, recipientUserId),
+      // Delete friend requests: userIdA -> userIdB and userIdB -> userIdA
+      tx
+        .delete(this.schema.friendRequest)
+        .where(
+          or(
+            and(
+              eq(this.schema.friendRequest.senderUserId, userIdA),
+              eq(this.schema.friendRequest.recipientUserId, userIdB),
+            ),
+            and(
+              eq(this.schema.friendRequest.senderUserId, userIdB),
+              eq(this.schema.friendRequest.recipientUserId, userIdA),
+            ),
+          ),
         ),
-      )
-      .limit(1);
 
-    return result.length > 0;
-  }
-
-  /**
-   * Counts the number of friends for a given user.
-   */
-  async countFriends(
-    params: UserIdParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<number> {
-    const { userId } = params;
-
-    const result = await db
-      .select({ count: count() })
-      .from(this.schema.friend)
-      .where(
-        or(
-          eq(this.schema.friend.userIdA, userId),
-          eq(this.schema.friend.userIdB, userId),
+      // Update userStats for userIdA: decrement friends if a friendship existed
+      tx
+        .update(this.schema.userStats)
+        .set({ friends: sql`${this.schema.userStats.friends} - 1` })
+        .where(
+          and(
+            eq(this.schema.userStats.userId, userIdA),
+            exists(
+              tx
+                .select()
+                .from(this.schema.friend)
+                .where(
+                  or(
+                    and(
+                      eq(this.schema.friend.userIdA, userIdA),
+                      eq(this.schema.friend.userIdB, userIdB),
+                    ),
+                    and(
+                      eq(this.schema.friend.userIdA, userIdB),
+                      eq(this.schema.friend.userIdB, userIdA),
+                    ),
+                  ),
+                ),
+            ),
+          ),
         ),
-      );
 
-    return result[0]?.count ?? 0;
-  }
-
-  /**
-   * Counts the number of incoming friend requests for a given user.
-   */
-  async countFriendRequests(
-    params: UserIdParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<number> {
-    const { userId } = params;
-
-    const result = await db
-      .select({ count: count() })
-      .from(this.schema.friendRequest)
-      .where(eq(this.schema.friendRequest.recipientUserId, userId));
-
-    return result[0]?.count ?? 0;
+      // Update userStats for userIdB: decrement friends if a friendship existed
+      tx
+        .update(this.schema.userStats)
+        .set({ friends: sql`${this.schema.userStats.friends} - 1` })
+        .where(
+          and(
+            eq(this.schema.userStats.userId, userIdB),
+            exists(
+              tx
+                .select()
+                .from(this.schema.friend)
+                .where(
+                  or(
+                    and(
+                      eq(this.schema.friend.userIdA, userIdA),
+                      eq(this.schema.friend.userIdB, userIdB),
+                    ),
+                    and(
+                      eq(this.schema.friend.userIdA, userIdB),
+                      eq(this.schema.friend.userIdB, userIdA),
+                    ),
+                  ),
+                ),
+            ),
+          ),
+        ),
+    ]);
   }
 
   /**
@@ -228,11 +272,14 @@ export class FriendRepository implements IFriendRepository {
   async paginateFriends(
     params: PaginateFriendParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Profile[]> {
+  ): Promise<SocialProfile[]> {
     const { userId, cursor, limit = 10 } = params;
 
     const friends = await db
-      .select()
+      .select({
+        profile: this.schema.profile,
+        friendedAt: this.schema.friend.createdAt,
+      })
       .from(this.schema.friend)
       .innerJoin(
         this.schema.user,
@@ -262,7 +309,10 @@ export class FriendRepository implements IFriendRepository {
       .orderBy(asc(this.schema.friend.createdAt), asc(this.schema.user.id))
       .limit(limit);
 
-    return friends.map((result) => result.profile);
+    return friends.map((friend) => ({
+      ...friend.profile,
+      friendedAt: friend.friendedAt,
+    }));
   }
 
   /**
@@ -272,11 +322,14 @@ export class FriendRepository implements IFriendRepository {
   async paginateFriendRequests(
     params: PaginateFriendParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Profile[]> {
+  ): Promise<SocialProfile[]> {
     const { userId, cursor, limit = 10 } = params;
 
     const requests = await db
-      .select()
+      .select({
+        profile: this.schema.profile,
+        friendedAt: this.schema.friendRequest.createdAt,
+      })
       .from(this.schema.friendRequest)
       .innerJoin(
         this.schema.user,
@@ -306,6 +359,9 @@ export class FriendRepository implements IFriendRepository {
       )
       .limit(limit);
 
-    return requests.map((result) => result.profile);
+    return requests.map((request) => ({
+      ...request.profile,
+      friendedAt: request.friendedAt,
+    }));
   }
 }

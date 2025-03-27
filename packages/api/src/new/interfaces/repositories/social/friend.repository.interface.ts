@@ -53,6 +53,11 @@ export interface IFriendRepository {
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
+  cleanupFriendRelationships(
+    params: FriendParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<void>;
+
   paginateFriends(
     params: PaginateFriendParams,
     db?: DatabaseOrTransaction,

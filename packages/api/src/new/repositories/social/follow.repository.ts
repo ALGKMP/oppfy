@@ -273,7 +273,7 @@ export class FollowRepository implements IFollowRepository {
     const followers = await db
       .select({
         profile: this.schema.profile,
-        createdAt: this.schema.follow.createdAt,
+        followedAt: this.schema.follow.createdAt,
       })
       .from(this.schema.follow)
       .innerJoin(
@@ -303,7 +303,7 @@ export class FollowRepository implements IFollowRepository {
 
     return followers.map((follower) => ({
       ...follower.profile,
-      followedAt: follower.createdAt,
+      followedAt: follower.followedAt,
     }));
   }
 
@@ -316,7 +316,7 @@ export class FollowRepository implements IFollowRepository {
     const following = await db
       .select({
         profile: this.schema.profile,
-        createdAt: this.schema.follow.createdAt,
+        followedAt: this.schema.follow.createdAt,
       })
       .from(this.schema.follow)
       .innerJoin(
@@ -346,7 +346,7 @@ export class FollowRepository implements IFollowRepository {
 
     return following.map((following) => ({
       ...following.profile,
-      followedAt: following.createdAt,
+      followedAt: following.followedAt,
     }));
   }
 
@@ -359,7 +359,7 @@ export class FollowRepository implements IFollowRepository {
     const requests = await db
       .select({
         profile: this.schema.profile,
-        createdAt: this.schema.followRequest.createdAt,
+        followedAt: this.schema.followRequest.createdAt,
       })
       .from(this.schema.followRequest)
       .innerJoin(
@@ -392,7 +392,7 @@ export class FollowRepository implements IFollowRepository {
 
     return requests.map((request) => ({
       ...request.profile,
-      followedAt: request.createdAt,
+      followedAt: request.followedAt,
     }));
   }
 }
