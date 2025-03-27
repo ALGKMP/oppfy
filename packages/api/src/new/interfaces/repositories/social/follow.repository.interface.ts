@@ -28,13 +28,33 @@ export interface GetFollowParams {
   recipientUserId: string;
 }
 
+export interface GetFollowRequestParams {
+  senderUserId: string;
+  recipientUserId: string;
+}
+
+export interface SocialProfile {
+  profile: Profile;
+  createdAt: Date;
+}
+
 export interface IFollowRepository {
   createFollower(
     params: FollowParams,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
-  deleteFollower(
+  getFollower(
+    params: GetFollowParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<Follow | undefined>;
+
+  getFollowRequest(
+    params: GetFollowRequestParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<Follow | undefined>;
+
+  removeFollower(
     params: FollowParams,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
@@ -49,47 +69,18 @@ export interface IFollowRepository {
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
-  cleanupFollowRelationships(
-    params: 
-  )
-
-  isFollowing(
-    params: FollowParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<boolean>;
-
-  isFollowRequested(
-    params: FollowParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<boolean>;
-
-  countFollowers(
-    params: UserIdParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<number>;
-
-  countFollowing(
-    params: UserIdParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<number>;
-
-  countFollowRequests(
-    params: UserIdParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<number>;
-
   paginateFollowers(
     params: PaginateFollowParams,
     db?: DatabaseOrTransaction,
-  ): Promise<Profile[]>;
+  ): Promise<SocialProfile[]>;
 
   paginateFollowing(
     params: PaginateFollowParams,
     db?: DatabaseOrTransaction,
-  ): Promise<Profile[]>;
+  ): Promise<SocialProfile[]>;
 
   paginateFollowRequests(
     params: PaginateFollowParams,
     db?: DatabaseOrTransaction,
-  ): Promise<Profile[]>;
+  ): Promise<SocialProfile[]>;
 }
