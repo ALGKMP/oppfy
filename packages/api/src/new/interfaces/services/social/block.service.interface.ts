@@ -4,10 +4,10 @@ import type { BlockErrors } from "../../../errors/social/block.error";
 
 export interface BlockedUser {
   userId: string;
-  username: string;
-  name: string;
+  username: string | null;
+  name: string | null;
   profilePictureUrl: string | null;
-  createdAt: Date;
+  blockedAt: Date;
 }
 
 export interface PaginationCursor {
@@ -54,7 +54,7 @@ export interface IBlockService {
 
   isBlocked(params: IsBlockedParams): Promise<Result<boolean, never>>;
 
-  getBlockedUsers(
+  paginateBlockedUsers(
     params: GetBlockedUsersParams,
   ): Promise<Result<PaginatedResponse<BlockedUser>, never>>;
 }

@@ -6,7 +6,10 @@ import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import { BlockErrors } from "../../errors/social/block.error";
-import type { IBlockRepository } from "../../interfaces/repositories/social/block.repository.interface";
+import type {
+  IBlockRepository,
+  SocialProfile,
+} from "../../interfaces/repositories/social/block.repository.interface";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
@@ -114,7 +117,7 @@ export class BlockService implements IBlockService {
     return ok(!!block);
   }
 
-  async getBlockedUsers({
+  async paginateBlockedUsers({
     userId,
     cursor,
     pageSize = 10,
@@ -127,9 +130,10 @@ export class BlockService implements IBlockService {
       limit: pageSize + 1,
     });
 
-    const hydratedBlockedUsers = rawBlockedData.map(({ profile, block }) =>
-      this.hydrateBlockedUser(profile, block.createdAt),
+    const hydratedBlockedUsers = rawBlockedData.map((profile) =>
+      this.hydrateAndTransformBlockedUser(profile),
     );
+
     const lastUser = hydratedBlockedUsers[pageSize - 1];
 
     return ok({
@@ -138,20 +142,21 @@ export class BlockService implements IBlockService {
         rawBlockedData.length > pageSize && lastUser
           ? {
               userId: lastUser.userId,
-              createdAt: lastUser.createdAt,
+              createdAt: lastUser.blockedAt,
             }
           : null,
     });
   }
 
-  private hydrateBlockedUser(profile: Profile, createdAt: Date): BlockedUser {
+  private hydrateAndTransformBlockedUser(profile: SocialProfile): BlockedUser {
     const hydratedProfile = cloudfront.hydrateProfile(profile);
+
     return {
-      userId: profile.userId,
-      username: profile.username ?? "",
-      name: profile.name ?? "",
+      userId: hydratedProfile.userId,
+      username: hydratedProfile.username,
+      name: hydratedProfile.name,
       profilePictureUrl: hydratedProfile.profilePictureUrl,
-      createdAt,
+      blockedAt: profile.blockedAt,
     };
   }
 }

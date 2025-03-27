@@ -1,6 +1,6 @@
 import type { DatabaseOrTransaction } from "@oppfy/db";
 
-import type { Block, BlockWithProfile } from "../../../models";
+import type { Block, BlockWithProfile, Profile } from "../../../models";
 
 export interface GetBlockedUsersParams {
   userId: string;
@@ -13,12 +13,11 @@ export interface BlockParams {
   blockedUserId: string;
 }
 
-export interface IBlockRepository {
-  paginateBlockedProfiles(
-    params: GetBlockedUsersParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<BlockWithProfile[]>;
+export interface SocialProfile extends Profile {
+  blockedAt: Date;
+}
 
+export interface IBlockRepository {
   getBlock(
     params: BlockParams,
     db?: DatabaseOrTransaction,
@@ -27,4 +26,9 @@ export interface IBlockRepository {
   blockUser(params: BlockParams, db?: DatabaseOrTransaction): Promise<void>;
 
   unblockUser(params: BlockParams, db?: DatabaseOrTransaction): Promise<void>;
+
+  paginateBlockedProfiles(
+    params: GetBlockedUsersParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<SocialProfile[]>;
 }
