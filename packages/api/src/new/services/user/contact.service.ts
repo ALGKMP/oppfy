@@ -13,10 +13,8 @@ import type {
   DeleteContactsParams,
   DeleteContactsResult,
   FilterPhoneNumbersOnAppParams,
-  GetRecomendationIdsResult,
+  GetRecommendationProfilesResult,
   GetRecommendationProfilesSelfParams,
-  GetRecommendationProfilesSelfResult,
-  GetRecommendationsIdsParams,
   IContactService,
   SyncContactsParams,
   SyncContactsResult,
@@ -138,42 +136,17 @@ export class ContactService implements IContactService {
     );
   }
 
-  async getRecommendationsIds({
+  async getProfileRecommendations({
     userId,
-  }: GetRecommendationsIdsParams): Promise<GetRecomendationIdsResult> {
+  }: GetRecommendationProfilesSelfParams): Promise<GetRecommendationProfilesResult> {
     const user = await this.userRepository.getUser({ userId });
 
     if (user === undefined) {
       return err(new UserErrors.UserNotFound(userId));
     }
 
-    //TODO: look at
-    const thing = await this.contactsRepository.getRecommendationIds(userId);
-    return ok(thing);
-  }
-
-  async getRecommendationProfilesSelf({
-    userId,
-  }: GetRecommendationProfilesSelfParams): Promise<GetRecommendationProfilesSelfResult> {
-    const user = await this.userRepository.getUser({ userId });
-
-    if (user === undefined) {
-      return err(new UserErrors.UserNotFound(userId));
-    }
-
-    const recommendationsIds = (
-      await this.getRecommendationsIds({ userId })
-    ).unwrapOr({
-      tier1: [],
-      tier2: [],
-      tier3: [],
-    });
-
-    let allRecommendations = [
-      ...recommendationsIds.tier1,
-      ...recommendationsIds.tier2,
-      ...recommendationsIds.tier3,
-    ];
+    const { tier1, tier2, tier3 } = await this.contactsRepository.getRecommendationIds(userId);
+    let allRecommendations = [...tier1, ...tier2, ...tier3];
 
     if (allRecommendations.length === 0) {
       const randomProfiles = await this.userRepository.getRandomActiveUserIds({
@@ -188,12 +161,10 @@ export class ContactService implements IContactService {
       userIds: allRecommendations,
     });
 
-    const profilesWithUrls = this.cloudfront.hydrateProfiles(profiles);
-    const profilesWithRelationshipStatus = profilesWithUrls.map((profile) => ({
-      ...profile,
-      relationshipStatus: "notFollowing" as const,
-    }));
+    const profilesWithUrls = profiles.map((profile) => {
+      return this.cloudfront.hydrateProfile(profile);
+    });
 
-    return ok(profilesWithRelationshipStatus);
+    return ok(profilesWithUrls);
   }
 }
