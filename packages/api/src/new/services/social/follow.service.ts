@@ -1,5 +1,6 @@
 import { inject, injectable } from "inversify";
-import { err, ok, Result } from "neverthrow";
+import type { Result } from "neverthrow";
+import { err, ok } from "neverthrow";
 
 import { cloudfront } from "@oppfy/cloudfront"; // Assuming this is the correct import path
 import type { Database } from "@oppfy/db";
@@ -8,7 +9,6 @@ import { TYPES } from "../../container";
 import { FollowErrors } from "../../errors/social/follow.error";
 import { UserErrors } from "../../errors/user/user.error";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
-import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type {
   AcceptFollowRequestParams,
@@ -24,7 +24,7 @@ import type {
   RemoveFollowParams,
   SendFollowRequestParams,
 } from "../../interfaces/services/social/follow.service.interface";
-import { Profile } from "../../models";
+import type { Profile } from "../../models";
 
 @injectable()
 export class FollowService implements IFollowService {
@@ -34,8 +34,6 @@ export class FollowService implements IFollowService {
     private readonly followRepository: IFollowRepository,
     @inject(TYPES.UserRepository)
     private readonly userRepository: IUserRepository,
-    @inject(TYPES.ProfileRepository)
-    private readonly profileRepository: IProfileRepository,
   ) {}
 
   // Hydration helper for profile data
@@ -77,7 +75,7 @@ export class FollowService implements IFollowService {
         throw new FollowErrors.AlreadyFollowing(senderId, recipientId);
       }
 
-      const isRequested = await this.followRepository.isFollowRequested(
+      const isRequested = await this.followRepository.getFollowRequest(
         { senderUserId: senderId, recipientUserId: recipientId },
         tx,
       );
@@ -103,7 +101,7 @@ export class FollowService implements IFollowService {
     >
   > {
     await this.db.transaction(async (tx) => {
-      const isRequested = await this.followRepository.isFollowRequested(
+      const isRequested = await this.followRepository.getFollowRequest(
         { senderUserId: senderId, recipientUserId: recipientId },
         tx,
       );
@@ -132,7 +130,7 @@ export class FollowService implements IFollowService {
       FollowErrors.RequestNotFound | FollowErrors.FailedToDeclineRequest
     >
   > {
-    const isRequested = await this.followRepository.isFollowRequested({
+    const isRequested = await this.followRepository.getFollowRequest({
       senderUserId: senderId,
       recipientUserId: recipientId,
     });
@@ -195,11 +193,7 @@ export class FollowService implements IFollowService {
   }: GetFollowersParams): Promise<
     Result<
       {
-        items: {
-          id: string;
-          username: string;
-          profilePictureUrl: string | null;
-        }[];
+        items: Profile[];
         nextCursor?: string;
       },
       never
@@ -213,10 +207,10 @@ export class FollowService implements IFollowService {
 
     const items = profiles
       .slice(0, limit)
-      .map((profile) => this.hydrateFollowItem(profile));
+      .map((profile) => this.hydrateFollowItem(profile.profile));
     const nextCursor =
-      profiles.length > limit
-        ? profiles[limit - 1].createdAt.toISOString()
+      profiles.length > limit && profiles[limit - 1]?.createdAt
+        ? profiles[limit - 1]?.createdAt.toISOString()
         : undefined;
 
     return ok({ items, nextCursor });
@@ -229,11 +223,7 @@ export class FollowService implements IFollowService {
   }: GetFollowingParams): Promise<
     Result<
       {
-        items: {
-          id: string;
-          username: string;
-          profilePictureUrl: string | null;
-        }[];
+        items: Profile[];
         nextCursor?: string;
       },
       never
@@ -247,10 +237,10 @@ export class FollowService implements IFollowService {
 
     const items = profiles
       .slice(0, limit)
-      .map((profile) => this.hydrateFollowItem(profile));
+      .map((profile) => this.hydrateFollowItem(profile.profile));
     const nextCursor =
-      profiles.length > limit
-        ? profiles[limit - 1].createdAt.toISOString()
+      profiles.length > limit && profiles[limit - 1]?.createdAt
+        ? profiles[limit - 1]?.createdAt.toISOString()
         : undefined;
 
     return ok({ items, nextCursor });
@@ -263,12 +253,7 @@ export class FollowService implements IFollowService {
   }: GetFollowRequestsParams): Promise<
     Result<
       {
-        items: {
-          id: string;
-          username: string;
-          profilePictureUrl: string | null;
-          createdAt: Date;
-        }[];
+        items: Profile[];
         nextCursor?: string;
       },
       never
@@ -281,12 +266,12 @@ export class FollowService implements IFollowService {
     });
 
     const items = profiles.slice(0, limit).map((profile) => ({
-      ...this.hydrateFollowItem(profile),
-      createdAt: profile.createdAt ?? new Date(), // Fallback if missing
+      ...this.hydrateFollowItem(profile.profile),
+      createdAt: profile.createdAt, // Fallback if missing
     }));
     const nextCursor =
-      profiles.length > limit
-        ? profiles[limit - 1].createdAt.toISOString()
+      profiles.length > limit && profiles[limit - 1]?.createdAt
+        ? profiles[limit - 1]?.createdAt.toISOString()
         : undefined;
 
     return ok({ items, nextCursor });
@@ -306,7 +291,7 @@ export class FollowService implements IFollowService {
       return ok("following");
     }
 
-    const isRequested = await this.followRepository.isFollowRequested({
+    const isRequested = await this.followRepository.getFollowRequest({
       senderUserId: userId,
       recipientUserId: targetUserId,
     });
@@ -343,7 +328,7 @@ export class FollowService implements IFollowService {
       FollowErrors.RequestNotFound | FollowErrors.FailedToDeclineRequest
     >
   > {
-    const isRequested = await this.followRepository.isFollowRequested({
+    const isRequested = await this.followRepository.getFollowRequest({
       senderUserId: senderId,
       recipientUserId: recipientId,
     });
