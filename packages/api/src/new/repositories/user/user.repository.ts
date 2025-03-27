@@ -120,16 +120,7 @@ export class UserRepository implements IUserRepository {
         this.schema.userStatus,
         eq(this.schema.user.id, this.schema.userStatus.userId),
       )
-      .innerJoin(
-        this.schema.profile,
-        eq(this.schema.user.id, this.schema.profile.userId),
-      )
-      .where(
-        and(
-          eq(this.schema.userStatus.isOnApp, true),
-          eq(this.schema.profile.privacy, "public"),
-        ),
-      )
+      .where(eq(this.schema.userStatus.isOnApp, true))
       .orderBy(sql`RANDOM()`)
       .limit(limit);
   }
