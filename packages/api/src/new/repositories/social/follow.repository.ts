@@ -11,12 +11,11 @@ import type {
 import { TYPES } from "../../container";
 import {
   FollowParams,
-  GetFollowParams,
   IFollowRepository,
   PaginateFollowParams,
   UserIdParams,
 } from "../../interfaces/repositories/social/follow.repository.interface";
-import { Follow, Profile } from "../../models";
+import { Profile } from "../../models";
 
 @injectable()
 export class FollowRepository implements IFollowRepository {
@@ -29,23 +28,6 @@ export class FollowRepository implements IFollowRepository {
   ) {
     this.db = db;
     this.schema = schema;
-  }
-
-  async getFollower(
-    params: GetFollowParams,
-    tx: Transaction,
-  ): Promise<Follow | undefined> {
-    const { senderUserId, recipientUserId } = params;
-    const result = await tx
-      .select()
-      .from(this.schema.follow)
-      .where(
-        and(
-          eq(this.schema.follow.senderUserId, senderUserId),
-          eq(this.schema.follow.recipientUserId, recipientUserId),
-        ),
-      );
-    return result[0];
   }
 
   async createFollower(params: FollowParams, tx: Transaction): Promise<void> {

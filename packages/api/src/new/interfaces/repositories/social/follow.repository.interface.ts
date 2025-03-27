@@ -1,6 +1,6 @@
 import type { DatabaseOrTransaction } from "@oppfy/db";
 
-import type { Follow, Profile } from "../../../models";
+import type { Profile } from "../../../models";
 
 export interface UserIdParams {
   userId: string;
@@ -32,11 +32,6 @@ export interface IFollowRepository {
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
-  getFollower(
-    params: GetFollowParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<Follow | undefined>;
-
   removeFollower(
     params: FollowParams,
     db?: DatabaseOrTransaction,
@@ -52,10 +47,30 @@ export interface IFollowRepository {
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
+  isFollowing(
+    params: FollowParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<boolean>;
+
   isFollowRequested(
     params: FollowParams,
     db?: DatabaseOrTransaction,
   ): Promise<boolean>;
+
+  countFollowers(
+    params: UserIdParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<number>;
+
+  countFollowing(
+    params: UserIdParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<number>;
+
+  countFollowRequests(
+    params: UserIdParams,
+    db?: DatabaseOrTransaction,
+  ): Promise<number>;
 
   paginateFollowers(
     params: PaginateFollowParams,
