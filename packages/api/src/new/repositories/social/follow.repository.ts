@@ -52,7 +52,7 @@ export class FollowRepository implements IFollowRepository {
       .where(eq(this.schema.userStats.userId, recipientUserId));
   }
 
-  async removeFollower(params: FollowParams, tx: Transaction): Promise<void> {
+  async deleteFollower(params: FollowParams, tx: Transaction): Promise<void> {
     const { senderUserId, recipientUserId } = params;
 
     // Delete the follow relationship

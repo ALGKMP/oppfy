@@ -325,7 +325,7 @@ export class FriendService implements IFriendService {
 
     await this.db.transaction(async (tx) => {
       // Remove friendship
-      await this.friendRepository.removeFriend(
+      await this.friendRepository.deleteFriend(
         {
           userIdA: targetUserId,
           userIdB: otherUserId,
@@ -334,14 +334,14 @@ export class FriendService implements IFriendService {
       );
 
       // Remove follow relationship in both directions
-      await this.followRepository.removeFollower(
+      await this.followRepository.deleteFollower(
         {
           followerId: targetUserId,
           followeeId: otherUserId,
         },
         tx,
       );
-      await this.followRepository.removeFollower(
+      await this.followRepository.deleteFollower(
         {
           followerId: otherUserId,
           followeeId: targetUserId,

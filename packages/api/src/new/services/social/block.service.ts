@@ -24,7 +24,8 @@ import type { Profile } from "../../models";
 @injectable()
 export class BlockService implements IBlockService {
   constructor(
-    @inject(TYPES.Database) private readonly db: Database,
+    @inject(TYPES.Database)
+    private readonly db: Database,
     @inject(TYPES.BlockRepository)
     private readonly blockRepository: IBlockRepository,
     @inject(TYPES.ProfileRepository)
@@ -60,7 +61,7 @@ export class BlockService implements IBlockService {
         tx,
       );
       if (areFriends) {
-        await this.friendRepository.removeFriend(
+        await this.friendRepository.deleteFriend(
           { userIdA: blockerId, userIdB: blockedId },
           tx,
         );

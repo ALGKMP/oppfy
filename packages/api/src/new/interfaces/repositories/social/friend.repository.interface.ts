@@ -27,7 +27,7 @@ export interface PaginateFriendParams extends PaginationParams {
 export interface IFriendRepository {
   createFriend(params: FriendParams, db?: DatabaseOrTransaction): Promise<void>;
 
-  removeFriend(params: FriendParams, db?: DatabaseOrTransaction): Promise<void>;
+  deleteFriend(params: FriendParams, db?: DatabaseOrTransaction): Promise<void>;
 
   createFriendRequest(
     params: FriendRequestParams,

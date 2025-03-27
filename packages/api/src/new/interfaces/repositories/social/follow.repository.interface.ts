@@ -6,6 +6,8 @@ export interface UserIdParams {
   userId: string;
 }
 
+
+
 export interface FollowParams {
   senderUserId: string;
   recipientUserId: string;
@@ -32,7 +34,7 @@ export interface IFollowRepository {
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
-  removeFollower(
+  deleteFollower(
     params: FollowParams,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
@@ -46,6 +48,10 @@ export interface IFollowRepository {
     params: FollowParams,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
+
+  cleanupFollowRelationships(
+    params: 
+  )
 
   isFollowing(
     params: FollowParams,

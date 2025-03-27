@@ -66,7 +66,7 @@ export class FriendRepository implements IFriendRepository {
    * Uses sorted user IDs for consistency.
    * Decrements the friends count for both users in userStats.
    */
-  async removeFriend(params: FriendParams, tx: Transaction): Promise<void> {
+  async deleteFriend(params: FriendParams, tx: Transaction): Promise<void> {
     const { userIdA, userIdB } = params;
 
     // Sort user IDs to ensure userIdA < userIdB

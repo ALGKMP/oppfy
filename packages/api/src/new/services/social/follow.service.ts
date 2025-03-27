@@ -161,7 +161,7 @@ export class FollowService implements IFollowService {
       return err(new FollowErrors.NotFollowing(followerId, followeeId));
     }
 
-    await this.followRepository.removeFollower({
+    await this.followRepository.deleteFollower({
       senderUserId: followerId,
       recipientUserId: followeeId,
     });
@@ -327,7 +327,7 @@ export class FollowService implements IFollowService {
       return err(new FollowErrors.NotFollowing(followerToRemove, userId));
     }
 
-    await this.followRepository.removeFollower({
+    await this.followRepository.deleteFollower({
       senderUserId: followerToRemove,
       recipientUserId: userId,
     });
