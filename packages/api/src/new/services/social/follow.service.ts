@@ -7,7 +7,6 @@ import type { Database } from "@oppfy/db";
 import { TYPES } from "../../container";
 import { FollowErrors } from "../../errors/social/follow.error";
 import { ProfileErrors } from "../../errors/user/profile.error";
-import { UserErrors } from "../../errors/user/user.error";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";

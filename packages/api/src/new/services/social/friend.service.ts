@@ -122,7 +122,7 @@ export class FriendService implements IFriendService {
         );
       }
     });
-    return ok(undefined);
+    return ok();
   }
 
   async acceptFriendRequest(options: {
@@ -199,7 +199,7 @@ export class FriendService implements IFriendService {
       });
     }
 
-    return ok(undefined);
+    return ok();
   }
 
   async declineFriendRequest(options: {
@@ -241,7 +241,7 @@ export class FriendService implements IFriendService {
       );
     });
 
-    return ok(undefined);
+    return ok();
   }
 
   async cancelFriendRequest(options: {
@@ -283,7 +283,7 @@ export class FriendService implements IFriendService {
       );
     });
 
-    return ok(undefined);
+    return ok();
   }
 
   async getFriendRequest(options: {
@@ -350,7 +350,7 @@ export class FriendService implements IFriendService {
       );
     });
 
-    return ok(undefined);
+    return ok();
   }
 
   async countFriendRequests(options: {
