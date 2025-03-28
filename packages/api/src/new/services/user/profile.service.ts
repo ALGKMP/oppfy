@@ -12,8 +12,6 @@ import type { IFollowRepository } from "../../interfaces/repositories/social/fol
 import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type {
-  FollowRelationshipState,
-  FriendRelationshipState,
   GenerateProfilePicturePresignedUrlParams,
   GetStatsParams,
   IProfileService,
