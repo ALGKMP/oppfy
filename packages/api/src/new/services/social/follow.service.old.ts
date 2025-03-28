@@ -83,7 +83,7 @@ export class FollowService implements IFollowService {
         tx,
       );
     });
-    return ok(undefined);
+    return ok();
   }
 
   async acceptFollowRequest({
@@ -113,7 +113,7 @@ export class FollowService implements IFollowService {
         tx,
       );
     });
-    return ok(undefined);
+    return ok();
   }
 
   async declineFollowRequest({
@@ -137,7 +137,7 @@ export class FollowService implements IFollowService {
       senderUserId: senderId,
       recipientUserId: recipientId,
     });
-    return ok(undefined);
+    return ok();
   }
 
   async removeFollow({
@@ -158,7 +158,7 @@ export class FollowService implements IFollowService {
       senderUserId: followerId,
       recipientUserId: followeeId,
     });
-    return ok(undefined);
+    return ok();
   }
 
   async getFollowRequest({
@@ -312,7 +312,7 @@ export class FollowService implements IFollowService {
       senderUserId: followerToRemove,
       recipientUserId: userId,
     });
-    return ok(undefined);
+    return ok();
   }
 
   async cancelFollowRequest({
@@ -336,6 +336,6 @@ export class FollowService implements IFollowService {
       senderUserId: senderId,
       recipientUserId: recipientId,
     });
-    return ok(undefined);
+    return ok();
   }
 }

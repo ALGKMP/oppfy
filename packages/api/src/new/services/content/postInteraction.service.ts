@@ -5,9 +5,7 @@ import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import { PostInteractionErrors } from "../../errors/content/postInteraction.error";
-import type {
-  ICommentRepository,
-} from "../../interfaces/repositories/content/comment.repository.interface";
+import type { ICommentRepository } from "../../interfaces/repositories/content/comment.repository.interface";
 import type { ILikeRepository } from "../../interfaces/repositories/content/like.repository.interface";
 import type { IPostRepository } from "../../interfaces/repositories/content/post.repository.interface";
 import type {
@@ -54,7 +52,7 @@ export class PostInteractionService implements IPostInteractionService {
 
       await this.likeRepository.addLike({ postId, userId }, tx);
     });
-    return ok(undefined);
+    return ok();
   }
 
   async unlikePost({
@@ -70,7 +68,7 @@ export class PostInteractionService implements IPostInteractionService {
   > {
     await this.db.transaction(async (tx) => {
       const post = await this.postRepository.getPost({ postId, userId }, tx);
-        if (!post) return err(new PostInteractionErrors.PostNotFound(postId));
+      if (!post) return err(new PostInteractionErrors.PostNotFound(postId));
 
       const existingLike = await this.likeRepository.getLike(
         { postId, userId },
@@ -81,7 +79,7 @@ export class PostInteractionService implements IPostInteractionService {
 
       await this.likeRepository.removeLike({ postId, userId }, tx);
     });
-    return ok(undefined);
+    return ok();
   }
 
   async addComment({
@@ -100,7 +98,7 @@ export class PostInteractionService implements IPostInteractionService {
 
       await this.commentRepository.addComment({ postId, userId, body }, tx);
     });
-    return ok(undefined);
+    return ok();
   }
 
   async removeComment({
@@ -120,12 +118,15 @@ export class PostInteractionService implements IPostInteractionService {
         { commentId },
         tx,
       );
-      if (!comment) return err(new PostInteractionErrors.CommentNotFound(commentId));
+      if (!comment)
+        return err(new PostInteractionErrors.CommentNotFound(commentId));
       if (comment.userId !== userId)
-        return err(new PostInteractionErrors.NotCommentOwner(commentId, userId));
+        return err(
+          new PostInteractionErrors.NotCommentOwner(commentId, userId),
+        );
 
       await this.commentRepository.removeComment({ commentId, postId }, tx);
     });
-    return ok(undefined);
+    return ok();
   }
 }

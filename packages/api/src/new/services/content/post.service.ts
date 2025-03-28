@@ -298,7 +298,7 @@ export class PostService implements IPostService {
           throw new PostErrors.NotPostOwner(params.userId, params.postId);
         await this.postRepository.deletePost(params, tx);
       });
-      return ok(undefined);
+      return ok();
     } catch (error) {
       if (
         error instanceof PostErrors.PostNotFound ||
@@ -422,7 +422,7 @@ export class PostService implements IPostService {
         }
         await this.postRepository.updatePost({ postId, caption }, tx);
       });
-      return ok(undefined);
+      return ok();
     } catch (error) {
       if (
         error instanceof PostErrors.PostNotFound ||

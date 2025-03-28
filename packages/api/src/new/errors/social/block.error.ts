@@ -2,7 +2,6 @@ import { createBaseErrorClass } from "../errorFactory";
 
 const BlockError = createBaseErrorClass("Block");
 
-export namespace BlockErrors {
   export class CannotBlockSelf extends BlockError {
     constructor(blockerId: string) {
       super(`User ${blockerId} cannot block themselves`);
@@ -22,6 +21,5 @@ export namespace BlockErrors {
       );
     }
   }
-}
 
 export type BlockError = InstanceType<typeof BlockError>;
