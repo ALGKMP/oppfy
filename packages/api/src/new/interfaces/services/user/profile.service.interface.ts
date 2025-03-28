@@ -6,6 +6,7 @@ import type {
   ProfileInsert,
   UserStats,
 } from "../../../models";
+import { FollowStatus, FriendStatus } from "../../types";
 
 export interface ProfileParams {
   selfUserId: string;
@@ -41,19 +42,9 @@ export interface GenerateProfilePicturePresignedUrlParams {
   contentLength: number;
 }
 
-export type FollowRelationshipState =
-  | "NOT_FOLLOWING"
-  | "FOLLOW_REQUEST_SENT"
-  | "FOLLOWING";
-
-export type FriendRelationshipState =
-  | "NOT_FRIENDS"
-  | "FRIEND_REQUEST_SENT"
-  | "FRIENDS";
-
 export interface RelationshipState {
-  follow: FollowRelationshipState;
-  friend: FriendRelationshipState;
+  follow: FollowStatus;
+  friend: FriendStatus;
 }
 
 export interface IProfileService {

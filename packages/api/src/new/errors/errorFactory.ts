@@ -23,3 +23,7 @@ export function createBaseErrorClass<D extends ErrorDomain>(domain: D) {
     }
   };
 }
+
+export type ErrorClass<D extends ErrorDomain> = InstanceType<
+  ReturnType<typeof createBaseErrorClass<D>>
+>;

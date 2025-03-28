@@ -1,3 +1,8 @@
+export type FollowStatus = "FOLLOWING" | "REQUESTED" | "NOT_FOLLOWING";
+export type FriendStatus = "FRIENDS" | "REQUESTED" | "NOT_FRIENDS";
+export type BlockStatus = "BLOCKED" | "NOT_BLOCKED";
+export type Privacy = "PUBLIC" | "PRIVATE";
+
 export interface UserIdParam {
   userId: string;
 }

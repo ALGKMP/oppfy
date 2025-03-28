@@ -24,6 +24,7 @@ import type {
   SearchProfilesByUsernameParams,
   UpdateProfileParams,
 } from "../../interfaces/services/user/profile.service.interface";
+import { FollowStatus, FriendStatus } from "../../interfaces/types";
 import { HydratedProfile, UserStats } from "../../models";
 
 @injectable()
@@ -171,17 +172,13 @@ export class ProfileService implements IProfileService {
       isFollowing
         ? "FOLLOWING"
         : isFollowRequested
-          ? "FOLLOW_REQUEST_SENT"
+          ? "REQUESTED"
           : "NOT_FOLLOWING"
-    ) satisfies FollowRelationshipState;
+    ) satisfies FollowStatus;
 
     const friendState = (
-      isFriends
-        ? "FRIENDS"
-        : isFriendRequested
-          ? "FRIEND_REQUEST_SENT"
-          : "NOT_FRIENDS"
-    ) satisfies FriendRelationshipState;
+      isFriends ? "FRIENDS" : isFriendRequested ? "REQUESTED" : "NOT_FRIENDS"
+    ) satisfies FriendStatus;
 
     return ok([{ follow: followState, friend: friendState }]);
   }

@@ -1,7 +1,7 @@
 import type { Result } from "neverthrow";
 
 import type { BlockError } from "../../../errors/social/block.error";
-import { Profile } from "../../../models";
+import type { Profile } from "../../../models";
 import type {
   DirectionalUserIdsParams,
   PaginatedResponse,
