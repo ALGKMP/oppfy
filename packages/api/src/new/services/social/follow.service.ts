@@ -9,7 +9,8 @@ import { FollowErrors } from "../../errors/social/follow.error";
 import { ProfileErrors } from "../../errors/user/profile.error";
 import { UserErrors } from "../../errors/user/user.error";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
-import { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
+import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
+import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type {
   IFollowService,
@@ -21,9 +22,12 @@ import type { DirectionalUserIdsParams } from "../../interfaces/types";
 @injectable()
 export class FollowService implements IFollowService {
   constructor(
-    @inject(TYPES.Database) private readonly db: Database,
+    @inject(TYPES.Database)
+    private readonly db: Database,
     @inject(TYPES.FollowRepository)
     private readonly followRepository: IFollowRepository,
+    @inject(TYPES.FriendRepository)
+    private readonly friendRepository: IFriendRepository,
     @inject(TYPES.UserRepository)
     private readonly userRepository: IUserRepository,
     @inject(TYPES.ProfileRepository)
@@ -38,7 +42,13 @@ export class FollowService implements IFollowService {
     senderUserId,
     recipientUserId,
   }: DirectionalUserIdsParams): Promise<
-    Result<void, FollowErrors.CannotFollowSelf | UserErrors.UserNotFound>
+    Result<
+      void,
+      | FollowErrors.CannotFollowSelf
+      | ProfileErrors.ProfileNotFound
+      | FollowErrors.AlreadyFollowing
+      | FollowErrors.RequestAlreadySent
+    >
   > {
     // Prevent a user from following themselves
     if (senderUserId === recipientUserId) {
@@ -85,34 +95,54 @@ export class FollowService implements IFollowService {
   }
 
   /**
-   * Allows a user to unfollow another user by removing the follower relationship, if it exists.
+   * Allows a user to unfollow another user by removing the follower relationship, and the friend relationship if it exists.
    */
   async unfollowUser({
     senderUserId,
     recipientUserId,
-  }: DirectionalUserIdsParams): Promise<Result<void, FollowErrors>> {
-    try {
-      await this.db.transaction(async (tx) => {
-        const isFollowing = await this.followRepository.getFollower(
+  }: DirectionalUserIdsParams): Promise<
+    Result<void, FollowErrors.NotFollowing>
+  > {
+    await this.db.transaction(async (tx) => {
+      const [isFollowing, isFriends, isFriendRequested] = await Promise.all([
+        this.followRepository.getFollower(
           { senderUserId, recipientUserId },
           tx,
-        );
-        if (!isFollowing) {
-          throw new FollowErrors.NotFollowing(senderUserId, recipientUserId);
-        }
+        ),
+        this.friendRepository.getFriend(
+          { userIdA: senderUserId, userIdB: recipientUserId },
+          tx,
+        ),
+        this.friendRepository.getFriendRequest(
+          { senderUserId, recipientUserId },
+          tx,
+        ),
+      ]);
 
-        await this.followRepository.deleteFollower(
+      if (!isFollowing)
+        return err(
+          new FollowErrors.NotFollowing(senderUserId, recipientUserId),
+        );
+
+      if (isFriends) {
+        await this.friendRepository.deleteFriend(
+          { userIdA: senderUserId, userIdB: recipientUserId },
+          tx,
+        );
+      } else if (isFriendRequested) {
+        await this.friendRepository.deleteFriendRequest(
           { senderUserId, recipientUserId },
           tx,
         );
-      });
-      return ok();
-    } catch (error) {
-      if (error instanceof FollowErrors.NotFollowing) {
-        return err(error);
       }
-      return err(new FollowErrors.FailedToUnfollow(error));
-    }
+
+      await this.followRepository.deleteFollower(
+        { senderUserId, recipientUserId },
+        tx,
+      );
+    });
+
+    return ok();
   }
 
   /**
