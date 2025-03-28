@@ -6,6 +6,7 @@ import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import { FollowErrors } from "../../errors/social/follow.error";
+import { FriendErrors } from "../../errors/social/friend.error";
 import { ProfileErrors } from "../../errors/user/profile.error";
 import { UserErrors } from "../../errors/user/user.error";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
@@ -63,26 +64,28 @@ export class FollowService implements IFollowService {
       return err(new ProfileErrors.ProfileNotFound(recipientUserId));
 
     await this.db.transaction(async (tx) => {
+      const [isFollowing, isRequested] = await Promise.all([
+        this.followRepository.getFollower(
+          { senderUserId, recipientUserId },
+          tx,
+        ),
+        this.followRepository.getFollowRequest(
+          { senderUserId, recipientUserId },
+          tx,
+        ),
+      ]);
+
       // Check if the user is already following the recipient
-      const isFollowing = await this.followRepository.getFollower(
-        { senderUserId, recipientUserId },
-        tx,
-      );
       if (isFollowing)
         return err(
           new FollowErrors.AlreadyFollowing(senderUserId, recipientUserId),
         );
 
       // Check if a follow request is already pending
-      const isRequested = await this.followRepository.getFollowRequest(
-        { senderUserId, recipientUserId },
-        tx,
-      );
-      if (isRequested) {
+      if (isRequested)
         return err(
           new FollowErrors.RequestAlreadySent(senderUserId, recipientUserId),
         );
-      }
 
       // Based on privacy, either create a follower relationship or a follow request
       await this.followRepository[
@@ -95,22 +98,18 @@ export class FollowService implements IFollowService {
   }
 
   /**
-   * Allows a user to unfollow another user by removing the follower relationship, and the friend relationship if it exists.
+   * Allows a user to unfollow another user by removing the follower relationship, if it exists.
    */
   async unfollowUser({
     senderUserId,
     recipientUserId,
   }: DirectionalUserIdsParams): Promise<
-    Result<void, FollowErrors.NotFollowing>
+    Result<void, FollowErrors.NotFollowing | FriendErrors.MustUnfriendFirst>
   > {
     await this.db.transaction(async (tx) => {
-      const [isFollowing, isFriends, isFriendRequested] = await Promise.all([
+      const [isFollowing, isFriends] = await Promise.all([
         this.followRepository.getFollower(
           { senderUserId, recipientUserId },
-          tx,
-        ),
-        this.friendRepository.getFriend(
-          { userIdA: senderUserId, userIdB: recipientUserId },
           tx,
         ),
         this.friendRepository.getFriendRequest(
@@ -119,22 +118,17 @@ export class FollowService implements IFollowService {
         ),
       ]);
 
+      // If the user is not following the recipient, return an error
       if (!isFollowing)
         return err(
           new FollowErrors.NotFollowing(senderUserId, recipientUserId),
         );
 
-      if (isFriends) {
-        await this.friendRepository.deleteFriend(
-          { userIdA: senderUserId, userIdB: recipientUserId },
-          tx,
+      // If the user is friends with the recipient, they must unfriend first
+      if (isFriends)
+        return err(
+          new FriendErrors.MustUnfriendFirst(senderUserId, recipientUserId),
         );
-      } else if (isFriendRequested) {
-        await this.friendRepository.deleteFriendRequest(
-          { senderUserId, recipientUserId },
-          tx,
-        );
-      }
 
       await this.followRepository.deleteFollower(
         { senderUserId, recipientUserId },
@@ -152,30 +146,26 @@ export class FollowService implements IFollowService {
   async removeFollower({
     senderUserId,
     recipientUserId,
-  }: DirectionalUserIdsParams): Promise<Result<void, FollowErrors>> {
-    try {
-      await this.db.transaction(async (tx) => {
-        // Check if recipientUserId is following senderUserId
-        const isFollowing = await this.followRepository.getFollower(
-          { senderUserId: recipientUserId, recipientUserId: senderUserId },
-          tx,
-        );
-        if (!isFollowing) {
-          throw new FollowErrors.NotFollowing(recipientUserId, senderUserId);
-        }
-
-        await this.followRepository.deleteFollower(
-          { senderUserId: recipientUserId, recipientUserId: senderUserId },
-          tx,
-        );
-      });
-      return ok();
-    } catch (error) {
-      if (error instanceof FollowErrors.NotFollowing) {
-        return err(error);
+  }: DirectionalUserIdsParams): Promise<
+    Result<void, FollowErrors.NotFollowing>
+  > {
+    await this.db.transaction(async (tx) => {
+      // Check if recipientUserId is following senderUserId
+      const isFollowing = await this.followRepository.getFollower(
+        { senderUserId: recipientUserId, recipientUserId: senderUserId },
+        tx,
+      );
+      if (!isFollowing) {
+        throw new FollowErrors.NotFollowing(recipientUserId, senderUserId);
       }
-      return err(new FollowErrors.FailedToRemoveFollower(error));
-    }
+
+      await this.followRepository.deleteFollower(
+        { senderUserId: recipientUserId, recipientUserId: senderUserId },
+        tx,
+      );
+    });
+
+    return ok();
   }
 
   /**

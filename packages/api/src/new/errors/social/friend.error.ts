@@ -29,6 +29,14 @@ export namespace FriendErrors {
     }
   }
 
+  export class MustUnfriendFirst extends FriendError {
+    constructor(userIdA: string, userIdB: string) {
+      super(
+        `Users "${userIdA}" and "${userIdB}" must unfriend each other first`,
+      );
+    }
+  }
+
   export class CannotFriendSelf extends FriendError {
     constructor(userId: string) {
       super(`User "${userId}" cannot friend themselves`);
