@@ -52,8 +52,6 @@ export interface IBlockService {
     params: UnblockUserParams,
   ): Promise<Result<void, BlockErrors.BlockNotFound>>;
 
-  isBlocked(params: IsBlockedParams): Promise<Result<boolean, never>>;
-
   paginateBlockedUsers(
     params: GetBlockedUsersParams,
   ): Promise<Result<PaginatedResponse<BlockedUser>, never>>;

@@ -36,12 +36,6 @@ export class FollowService implements IFollowService {
     private readonly userRepository: IUserRepository,
   ) {}
 
-  // Hydration helper for profile data
-  private hydrateFollowItem(profile: Profile) {
-    const hydratedProfile = cloudfront.hydrateProfile(profile);
-    return hydratedProfile;
-  }
-
   async sendFollowRequest({
     senderId,
     recipientId,
@@ -186,7 +180,7 @@ export class FollowService implements IFollowService {
     );
   }
 
-  async getFollowers({
+  async paginateFollowers({
     userId,
     limit = 10,
     cursor,
@@ -208,6 +202,7 @@ export class FollowService implements IFollowService {
     const items = profiles
       .slice(0, limit)
       .map((profile) => this.hydrateFollowItem(profile.profile));
+
     const nextCursor =
       profiles.length > limit && profiles[limit - 1]?.createdAt
         ? profiles[limit - 1]?.createdAt.toISOString()

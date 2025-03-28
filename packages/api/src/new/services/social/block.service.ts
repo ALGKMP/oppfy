@@ -19,11 +19,9 @@ import type {
   BlockUserParams,
   GetBlockedUsersParams,
   IBlockService,
-  IsBlockedParams,
   PaginatedResponse,
   UnblockUserParams,
 } from "../../interfaces/services/social/block.service.interface";
-import type { Profile } from "../../models";
 
 @injectable()
 export class BlockService implements IBlockService {
@@ -42,6 +40,7 @@ export class BlockService implements IBlockService {
     private readonly followRepository: IFollowRepository,
   ) {}
 
+  // Blocks a user after performing necessary checks and cleanup.
   async blockUser({
     blockerId,
     blockedId,
@@ -84,6 +83,7 @@ export class BlockService implements IBlockService {
     return ok();
   }
 
+  // Unblocks a user if the block exists.
   async unblockUser({
     blockerId,
     blockedId,
@@ -106,17 +106,7 @@ export class BlockService implements IBlockService {
     return ok();
   }
 
-  async isBlocked({
-    blockerId,
-    blockedId,
-  }: IsBlockedParams): Promise<Result<boolean, never>> {
-    const block = await this.blockRepository.getBlock({
-      userId: blockerId,
-      blockedUserId: blockedId,
-    });
-    return ok(!!block);
-  }
-
+  // Retrieves a paginated list of blocked users.
   async paginateBlockedUsers({
     userId,
     cursor,
@@ -126,29 +116,27 @@ export class BlockService implements IBlockService {
   > {
     const rawBlockedData = await this.blockRepository.paginateBlockedProfiles({
       userId,
-      cursor: cursor,
+      cursor,
       limit: pageSize + 1,
     });
 
-    const hydratedBlockedUsers = rawBlockedData.map((profile) =>
-      this.hydrateAndTransformBlockedUser(profile),
+    const blockedUsers = rawBlockedData.map((profile) =>
+      this.mapProfileToBlockedUser(profile),
     );
-
-    const lastUser = hydratedBlockedUsers[pageSize - 1];
+    const hasMore = rawBlockedData.length > pageSize;
+    const items = blockedUsers.slice(0, pageSize);
+    const lastUser = items[items.length - 1];
 
     return ok({
-      items: hydratedBlockedUsers.slice(0, pageSize),
+      items,
       nextCursor:
-        rawBlockedData.length > pageSize && lastUser
-          ? {
-              userId: lastUser.userId,
-              createdAt: lastUser.blockedAt,
-            }
+        hasMore && lastUser
+          ? { userId: lastUser.userId, createdAt: lastUser.blockedAt }
           : null,
     });
   }
 
-  private hydrateAndTransformBlockedUser(profile: SocialProfile): BlockedUser {
+  private mapProfileToBlockedUser(profile: SocialProfile): BlockedUser {
     const hydratedProfile = cloudfront.hydrateProfile(profile);
 
     return {

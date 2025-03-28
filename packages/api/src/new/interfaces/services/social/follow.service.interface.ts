@@ -67,7 +67,6 @@ export interface CancelFollowRequestParams {
 }
 
 export interface IFollowService {
-
   sendFollowRequest(
     params: SendFollowRequestParams,
   ): Promise<
@@ -114,7 +113,7 @@ export interface IFollowService {
     >
   >;
 
-  getFollowers(
+  paginateFollowers(
     params: GetFollowersParams,
   ): Promise<Result<{ items: Profile[]; nextCursor?: string }, never>>;
 
