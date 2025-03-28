@@ -10,8 +10,6 @@ type ErrorDomain =
   | "Follow"
   | "PostInteraction";
 
-// Type to ensure error names follow the pattern
-type ErrorClassName<D extends ErrorDomain> = `${D}Error`;
 
 // Factory function to create base error classes
 export function createBaseErrorClass<D extends ErrorDomain>(domain: D) {
