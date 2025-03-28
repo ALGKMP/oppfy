@@ -85,3 +85,5 @@ export namespace FollowErrors {
     }
   }
 }
+
+export type FollowError = InstanceType<typeof FollowError>;

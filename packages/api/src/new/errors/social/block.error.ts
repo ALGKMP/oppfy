@@ -17,7 +17,11 @@ export namespace BlockErrors {
 
   export class BlockNotFound extends BlockError {
     constructor(blockerId: string, blockedId: string) {
-      super(`Block relationship between user ${blockerId} and user ${blockedId} not found`);
+      super(
+        `Block relationship between user ${blockerId} and user ${blockedId} not found`,
+      );
     }
   }
 }
+
+export type BlockError = InstanceType<typeof BlockError>;

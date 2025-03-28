@@ -1,6 +1,6 @@
 import type { Result } from "neverthrow";
 
-import type { BlockErrors } from "../../../errors/social/block.error";
+import type { BlockError } from "../../../errors/social/block.error";
 
 export interface BlockedUser {
   userId: string;
@@ -42,15 +42,9 @@ export interface GetBlockedUsersParams {
 }
 
 export interface IBlockService {
-  blockUser(
-    params: BlockUserParams,
-  ): Promise<
-    Result<void, BlockErrors.CannotBlockSelf | BlockErrors.AlreadyBlocked>
-  >;
+  blockUser(params: BlockUserParams): Promise<Result<void, BlockError>>;
 
-  unblockUser(
-    params: UnblockUserParams,
-  ): Promise<Result<void, BlockErrors.BlockNotFound>>;
+  unblockUser(params: UnblockUserParams): Promise<Result<void, BlockError>>;
 
   paginateBlockedUsers(
     params: GetBlockedUsersParams,

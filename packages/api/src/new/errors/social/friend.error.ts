@@ -81,3 +81,5 @@ export namespace FriendErrors {
     }
   }
 }
+
+export type FriendError = InstanceType<typeof FriendError>;

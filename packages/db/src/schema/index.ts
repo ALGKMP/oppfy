@@ -3,6 +3,7 @@ import {
   boolean,
   check,
   customType,
+  date,
   index,
   integer,
   pgEnum,
@@ -14,18 +15,6 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-
-const dateType = customType<{ data: Date | null; driverData: string | null }>({
-  dataType() {
-    return "date";
-  },
-  toDriver(value: Date | null): string | null {
-    return value ? (value.toISOString().split("T")[0] ?? null) : null;
-  },
-  fromDriver(value: string | null): Date | null {
-    return value ? new Date(value) : null;
-  },
-});
 
 export const privacyEnum = pgEnum("privacy", ["public", "private"]);
 
@@ -51,18 +40,11 @@ export const postTypeEnum = pgEnum("post_type", [
 
 export const mediaTypeEnum = pgEnum("media_type", ["image", "video"]);
 
-export const friendStatusEnum = pgEnum("friend_status", [
-  "notFriends",
-  "friends",
-  "outboundRequest",
-  "inboundRequest",
-]);
-
-export const followStatusEnum = pgEnum("follow_status", [
-  "notFollowing",
-  "following",
-  "outboundRequest",
-  "inboundRequest",
+export const reportUserReasonEnum = pgEnum("report_user_reason", [
+  "Posting explicit content",
+  "Under the age of 13",
+  "Catfish account",
+  "Scam/spam account",
 ]);
 
 export const reportPostReasonEnum = pgEnum("report_post_reason", [
@@ -81,13 +63,6 @@ export const reportCommentReasonEnum = pgEnum("report_comment_reason", [
   "Suicide and self-harm",
   "Spam or scam",
   "Other",
-]);
-
-export const reportUserReasonEnum = pgEnum("report_user_reason", [
-  "Posting explicit content",
-  "Under the age of 13",
-  "Catfish account",
-  "Scam/spam account",
 ]);
 
 export const user = pgTable("user", {
@@ -191,7 +166,7 @@ export const profile = pgTable(
     privacy: privacyEnum("privacy").default("public").notNull(),
     username: varchar("username", { length: 30 }).unique(),
     name: varchar("name", { length: 30 }),
-    dateOfBirth: dateType("date_of_birth"),
+    dateOfBirth: timestamp("date_of_birth"),
     bio: varchar("bio", { length: 100 }),
     profilePictureKey: text("profile_picture_key"),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -281,7 +256,9 @@ export const notifications = pgTable(
       .notNull(),
   },
   (table) => ({
-    recipientIdx: index("notifications_recipient_idx").on(table.recipientUserId),
+    recipientIdx: index("notifications_recipient_idx").on(
+      table.recipientUserId,
+    ),
     senderIdx: index("notifications_sender_idx").on(table.senderUserId),
     readIdx: index("notifications_read_idx").on(table.read),
     activeIdx: index("notifications_active_idx").on(table.active),
