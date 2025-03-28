@@ -16,12 +16,13 @@ import type { IProfileRepository } from "../../interfaces/repositories/user/prof
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type {
   BlockedUser,
-  BlockUserParams,
   GetBlockedUsersParams,
   IBlockService,
-  PaginatedResponse,
-  UnblockUserParams,
 } from "../../interfaces/services/social/block.service.interface";
+import type {
+  DirectionalUserIdsParams,
+  PaginatedResponse,
+} from "../../interfaces/types";
 
 @injectable()
 export class BlockService implements IBlockService {
@@ -42,39 +43,41 @@ export class BlockService implements IBlockService {
 
   // Blocks a user after performing necessary checks and cleanup.
   async blockUser({
-    blockerId,
-    blockedId,
-  }: BlockUserParams): Promise<
+    senderUserId,
+    recipientUserId,
+  }: DirectionalUserIdsParams): Promise<
     Result<void, BlockErrors.CannotBlockSelf | BlockErrors.AlreadyBlocked>
   > {
     // Prevent a user from blocking themselves
-    if (blockerId === blockedId)
-      return err(new BlockErrors.CannotBlockSelf(blockerId));
+    if (senderUserId === recipientUserId)
+      return err(new BlockErrors.CannotBlockSelf(senderUserId));
 
     await this.db.transaction(async (tx) => {
       // Check if the block already exists
       const isBlocked = await this.blockRepository.getBlock(
-        { userId: blockerId, blockedUserId: blockedId },
+        { userId: senderUserId, blockedUserId: recipientUserId },
         tx,
       );
       if (isBlocked)
-        return err(new BlockErrors.AlreadyBlocked(blockerId, blockedId));
+        return err(
+          new BlockErrors.AlreadyBlocked(senderUserId, recipientUserId),
+        );
 
       // Clean up all friend and follow relationships concurrently
       await Promise.all([
         this.friendRepository.cleanupFriendRelationships(
-          { userIdA: blockerId, userIdB: blockedId },
+          { userIdA: senderUserId, userIdB: recipientUserId },
           tx,
         ),
         this.followRepository.cleanupFollowRelationships(
-          { userIdA: blockerId, userIdB: blockedId },
+          { userIdA: senderUserId, userIdB: recipientUserId },
           tx,
         ),
       ]);
 
       // Create the block
       await this.blockRepository.blockUser(
-        { userId: blockerId, blockedUserId: blockedId },
+        { userId: senderUserId, blockedUserId: recipientUserId },
         tx,
       );
     });
@@ -85,20 +88,24 @@ export class BlockService implements IBlockService {
 
   // Unblocks a user if the block exists.
   async unblockUser({
-    blockerId,
-    blockedId,
-  }: UnblockUserParams): Promise<Result<void, BlockErrors.BlockNotFound>> {
+    senderUserId,
+    recipientUserId,
+  }: DirectionalUserIdsParams): Promise<
+    Result<void, BlockErrors.BlockNotFound>
+  > {
     await this.db.transaction(async (tx) => {
       const isBlocked = await this.blockRepository.getBlock(
-        { userId: blockerId, blockedUserId: blockedId },
+        { userId: senderUserId, blockedUserId: recipientUserId },
         tx,
       );
 
       if (!isBlocked)
-        return err(new BlockErrors.BlockNotFound(blockerId, blockedId));
+        return err(
+          new BlockErrors.BlockNotFound(senderUserId, recipientUserId),
+        );
 
       await this.blockRepository.unblockUser(
-        { userId: blockerId, blockedUserId: blockedId },
+        { userId: senderUserId, blockedUserId: recipientUserId },
         tx,
       );
     });

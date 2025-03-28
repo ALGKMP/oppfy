@@ -9,8 +9,6 @@ import type {
 import type { UserErrors } from "../../../errors/user/user.error";
 import type { Profile } from "../../../models";
 
-export type FollowStatus = (typeof followStatusEnum.enumValues)[number];
-
 // export interface SendFollowRequestParams {
 //   senderId: string;
 //   recipientId: string;
@@ -68,6 +66,18 @@ export type FollowStatus = (typeof followStatusEnum.enumValues)[number];
 //   senderId: string;
 //   recipientId: string;
 // }
+
+// followUser
+// unfollowUser
+// removeFollower
+// acceptFollowRequest
+// declineFollowRequest
+// cancelFollowRequest
+// paginateFollwoersSelf
+// paginateFollowingSelf
+// paginateFollowersOthers
+// paginateFollowingOthers
+// paginateFollowRequests
 
 export interface IFollowService {
   // sendFollowRequest(

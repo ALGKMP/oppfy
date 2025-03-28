@@ -1,52 +1,35 @@
 import type { Result } from "neverthrow";
 
 import type { BlockError } from "../../../errors/social/block.error";
+import { Profile } from "../../../models";
+import type {
+  DirectionalUserIdsParams,
+  PaginatedResponse,
+  PaginationParams,
+} from "../../types";
 
 export interface BlockedUser {
-  userId: string;
-  username: string | null;
-  name: string | null;
-  profilePictureUrl: string | null;
+  userId: Profile["userId"];
+  username: Profile["username"];
+  name: Profile["name"];
+  profilePictureUrl: Profile["profilePictureKey"];
   blockedAt: Date;
 }
 
-export interface PaginationCursor {
-  createdAt: Date;
+export interface GetBlockedUsersParams extends PaginationParams {
   userId: string;
-}
-
-export interface PaginatedResponse<T> {
-  items: T[];
-  nextCursor: PaginationCursor | null;
-}
-
-export interface BlockUserParams {
-  blockerId: string;
-  blockedId: string;
-}
-
-export interface UnblockUserParams {
-  blockerId: string;
-  blockedId: string;
-}
-
-export interface IsBlockedParams {
-  blockerId: string;
-  blockedId: string;
-}
-
-export interface GetBlockedUsersParams {
-  userId: string;
-  cursor?: PaginationCursor | null;
-  pageSize?: number;
 }
 
 export interface IBlockService {
-  blockUser(params: BlockUserParams): Promise<Result<void, BlockError>>;
+  blockUser(
+    params: DirectionalUserIdsParams,
+  ): Promise<Result<void, BlockError>>;
 
-  unblockUser(params: UnblockUserParams): Promise<Result<void, BlockError>>;
+  unblockUser(
+    params: DirectionalUserIdsParams,
+  ): Promise<Result<void, BlockError>>;
 
   paginateBlockedUsers(
     params: GetBlockedUsersParams,
-  ): Promise<Result<PaginatedResponse<BlockedUser>, never>>;
+  ): Promise<Result<PaginatedResponse<BlockedUser>, BlockError>>;
 }
