@@ -26,6 +26,14 @@ export class AlreadyFriends extends FriendError {
   }
 }
 
+export class MustUnfriendFirst extends FriendError {
+  constructor(userIdA: string, userIdB: string) {
+    super(
+      `User "${userIdA}" must unfriend "${userIdB}" before sending a friend request`,
+    );
+  }
+}
+
 export class CannotFriendSelf extends FriendError {
   constructor(userId: string) {
     super(`User "${userId}" cannot friend themselves`);

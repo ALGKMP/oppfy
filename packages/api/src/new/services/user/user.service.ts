@@ -4,7 +4,7 @@ import { err, ok, Result } from "neverthrow";
 import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
-import { UserErrors } from "../../errors/user/user.error";
+import * as UserErrors from "../../errors/user/user.error";
 import type {
   IUserRepository,
   UserIdParams,

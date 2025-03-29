@@ -5,9 +5,12 @@ import { cloudfront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
-import { FollowErrors } from "../../errors/social/follow.error";
-import { FriendErrors } from "../../errors/social/friend.error";
-import { ProfileErrors } from "../../errors/user/profile.error";
+// import { FollowErrors } from "../../errors/social/follow.error";
+// import { FriendErrors } from "../../errors/social/friend.error";
+// import { ProfileErrors } from "../../errors/user/profile.error";
+import * as FollowErrors from "../../errors/social/follow.error";
+import * as FriendErrors from "../../errors/social/friend.error";
+import * as ProfileErrors from "../../errors/user/profile.error";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
@@ -93,6 +96,7 @@ export class FollowService implements IFollowService {
           : "createFollowRequest"
       ]({ senderUserId, recipientUserId }, tx);
     });
+
     return ok();
   }
 
@@ -149,19 +153,72 @@ export class FollowService implements IFollowService {
     Result<void, FollowErrors.NotFollowing>
   > {
     await this.db.transaction(async (tx) => {
-      // Check if recipientUserId is following senderUserId
-      const isFollowing = await this.followRepository.getFollower(
-        { senderUserId: recipientUserId, recipientUserId: senderUserId },
-        tx,
-      );
-      if (!isFollowing) {
-        throw new FollowErrors.NotFollowing(recipientUserId, senderUserId);
+      const [
+        isFollowing,
+        isFriends,
+        isFriendRequestedIncoming,
+        isFriendRequestedOutgoing,
+      ] = await Promise.all([
+        this.followRepository.getFollower(
+          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          tx,
+        ),
+        this.friendRepository.getFriend(
+          {
+            userIdA: recipientUserId,
+            userIdB: senderUserId,
+          },
+          tx,
+        ),
+        this.friendRepository.getFriendRequest(
+          {
+            senderUserId: recipientUserId,
+            recipientUserId: senderUserId,
+          },
+          tx,
+        ),
+        this.friendRepository.getFriendRequest(
+          {
+            senderUserId: senderUserId,
+            recipientUserId: recipientUserId,
+          },
+          tx,
+        ),
+      ]);
+
+      if (isFriends) {
+        await this.friendRepository.deleteFriend(
+          {
+            userIdA: recipientUserId,
+            userIdB: senderUserId,
+          },
+          tx,
+        );
       }
 
-      await this.followRepository.deleteFollower(
-        { senderUserId: recipientUserId, recipientUserId: senderUserId },
-        tx,
-      );
+      if (isFriendRequestedIncoming) {
+        await this.friendRepository.deleteFriendRequest(
+          {
+            senderUserId: recipientUserId,
+            recipientUserId: senderUserId,
+          },
+          tx,
+        );
+      }
+
+      if (isFriendRequestedOutgoing) {
+        await this.friendRepository.deleteFriendRequest({
+          senderUserId: senderUserId,
+          recipientUserId: recipientUserId,
+        });
+      }
+
+      if (isFollowing) {
+        await this.followRepository.deleteFollower(
+          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          tx,
+        );
+      }
     });
 
     return ok();
@@ -174,33 +231,32 @@ export class FollowService implements IFollowService {
   async acceptFollowRequest({
     senderUserId,
     recipientUserId,
-  }: DirectionalUserIdsParams): Promise<Result<void, FollowErrors>> {
-    try {
-      await this.db.transaction(async (tx) => {
-        const isRequested = await this.followRepository.getFollowRequest(
-          { senderUserId: recipientUserId, recipientUserId: senderUserId },
-          tx,
+  }: DirectionalUserIdsParams): Promise<
+    Result<void, FollowErrors.RequestNotFound>
+  > {
+    await this.db.transaction(async (tx) => {
+      const isRequested = await this.followRepository.getFollowRequest(
+        { senderUserId: recipientUserId, recipientUserId: senderUserId },
+        tx,
+      );
+      if (!isRequested)
+        return err(
+          new FollowErrors.RequestNotFound(recipientUserId, senderUserId),
         );
-        if (!isRequested) {
-          throw new FollowErrors.RequestNotFound(recipientUserId, senderUserId);
-        }
 
-        await this.followRepository.deleteFollowRequest(
+      await Promise.all([
+        this.followRepository.deleteFollowRequest(
           { senderUserId: recipientUserId, recipientUserId: senderUserId },
           tx,
-        );
-        await this.followRepository.createFollower(
+        ),
+        this.followRepository.createFollower(
           { senderUserId: recipientUserId, recipientUserId: senderUserId },
           tx,
-        );
-      });
-      return ok();
-    } catch (error) {
-      if (error instanceof FollowErrors.RequestNotFound) {
-        return err(error);
-      }
-      return err(new FollowErrors.FailedToAcceptRequest(error));
-    }
+        ),
+      ]);
+    });
+
+    return ok();
   }
 
   /**
@@ -210,29 +266,26 @@ export class FollowService implements IFollowService {
   async declineFollowRequest({
     senderUserId,
     recipientUserId,
-  }: DirectionalUserIdsParams): Promise<Result<void, FollowErrors>> {
-    try {
-      await this.db.transaction(async (tx) => {
-        const isRequested = await this.followRepository.getFollowRequest(
-          { senderUserId: recipientUserId, recipientUserId: senderUserId },
-          tx,
+  }: DirectionalUserIdsParams): Promise<
+    Result<void, FollowErrors.RequestNotFound>
+  > {
+    await this.db.transaction(async (tx) => {
+      const isRequested = await this.followRepository.getFollowRequest(
+        { senderUserId: recipientUserId, recipientUserId: senderUserId },
+        tx,
+      );
+      if (!isRequested)
+        return err(
+          new FollowErrors.RequestNotFound(recipientUserId, senderUserId),
         );
-        if (!isRequested) {
-          throw new FollowErrors.RequestNotFound(recipientUserId, senderUserId);
-        }
 
-        await this.followRepository.deleteFollowRequest(
-          { senderUserId: recipientUserId, recipientUserId: senderUserId },
-          tx,
-        );
-      });
-      return ok();
-    } catch (error) {
-      if (error instanceof FollowErrors.RequestNotFound) {
-        return err(error);
-      }
-      return err(new FollowErrors.FailedToDeclineRequest(error));
-    }
+      await this.followRepository.deleteFollowRequest(
+        { senderUserId: recipientUserId, recipientUserId: senderUserId },
+        tx,
+      );
+    });
+
+    return ok();
   }
 
   /**
@@ -242,29 +295,25 @@ export class FollowService implements IFollowService {
   async cancelFollowRequest({
     senderUserId,
     recipientUserId,
-  }: DirectionalUserIdsParams): Promise<Result<void, FollowErrors>> {
-    try {
-      await this.db.transaction(async (tx) => {
-        const isRequested = await this.followRepository.getFollowRequest(
-          { senderUserId, recipientUserId },
-          tx,
+  }: DirectionalUserIdsParams): Promise<
+    Result<void, FollowErrors.RequestNotFound>
+  > {
+    await this.db.transaction(async (tx) => {
+      const isRequested = await this.followRepository.getFollowRequest(
+        { senderUserId, recipientUserId },
+        tx,
+      );
+      if (!isRequested)
+        return err(
+          new FollowErrors.RequestNotFound(senderUserId, recipientUserId),
         );
-        if (!isRequested) {
-          throw new FollowErrors.RequestNotFound(senderUserId, recipientUserId);
-        }
 
-        await this.followRepository.deleteFollowRequest(
-          { senderUserId, recipientUserId },
-          tx,
-        );
-      });
-      return ok();
-    } catch (error) {
-      if (error instanceof FollowErrors.RequestNotFound) {
-        return err(error);
-      }
-      return err(new FollowErrors.FailedToCancelRequest(error));
-    }
+      await this.followRepository.deleteFollowRequest(
+        { senderUserId, recipientUserId },
+        tx,
+      );
+    });
+    return ok();
   }
 
   /**
