@@ -1,4 +1,4 @@
-import type { DatabaseOrTransaction } from "@oppfy/db";
+import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
 import type { Friend, FriendRequest, Profile } from "../../../models";
 
@@ -45,17 +45,17 @@ export interface IFriendRepository {
 
   createFriendRequest(
     params: FriendRequestParams,
-    db?: DatabaseOrTransaction,
+    tx: Transaction,
   ): Promise<void>;
 
   deleteFriendRequest(
     params: FriendRequestParams,
-    db?: DatabaseOrTransaction,
+    tx: Transaction,
   ): Promise<void>;
 
   cleanupFriendRelationships(
     params: FriendParams,
-    db?: DatabaseOrTransaction,
+    tx: Transaction,
   ): Promise<void>;
 
   paginateFriends(

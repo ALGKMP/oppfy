@@ -1,56 +1,41 @@
 import type { Result } from "neverthrow";
 
-import type { FriendStatus } from "@oppfy/db";
-
-import type { FriendErrors } from "../../../errors/social/friend.error";
+import type { FriendError } from "../../../errors/social/friend.error";
+import type { FriendRequest } from "../../../models";
 
 export interface IsFollowingParams {
-  senderId: string;
-  recipientId: string;
+  senderUserId: string;
+  recipientUserId: string;
 }
 
 export interface SendFriendRequestParams {
-  senderId: string;
-  recipientId: string;
+  senderUserId: string;
+  recipientUserId: string;
 }
 
 export interface AcceptFriendRequestParams {
-  senderId: string;
-  recipientId: string;
+  senderUserId: string;
+  recipientUserId: string;
 }
 
 export interface DeclineFriendRequestParams {
-  senderId: string;
-  recipientId: string;
+  senderUserId: string;
+  recipientUserId: string;
 }
 
 export interface CancelFriendRequestParams {
-  senderId: string;
-  recipientId: string;
+  senderUserId: string;
+  recipientUserId: string;
 }
 
 export interface GetFriendRequestParams {
-  senderId: string;
-  recipientId: string;
+  senderUserId: string;
+  recipientUserId: string;
 }
 
 export interface RemoveFriendParams {
-  targetUserId: string;
-  otherUserId: string;
-}
-
-export interface CountFriendRequestsParams {
-  userId: string;
-}
-
-export interface DetermineFriendStateParams {
-  userId: string;
-  targetUserId: string;
-}
-
-export interface FriendshipExistsParams {
-  userIdA: string;
-  userIdB: string;
+  senderUserId: string;
+  recipientUserId: string;
 }
 
 export interface IFriendService {
@@ -58,65 +43,23 @@ export interface IFriendService {
 
   sendFriendRequest(
     params: SendFriendRequestParams,
-  ): Promise<
-    Result<
-      void,
-      | FriendErrors.RequestAlreadySent
-      | FriendErrors.AlreadyFriends
-      | FriendErrors.CannotFriendSelf
-      | FriendErrors.FailedToSendRequest
-    >
-  >;
+  ): Promise<Result<void, FriendError>>;
 
   acceptFriendRequest(
     params: AcceptFriendRequestParams,
-  ): Promise<
-    Result<
-      void,
-      FriendErrors.RequestNotFound | FriendErrors.FailedToAcceptRequest
-    >
-  >;
+  ): Promise<Result<void, FriendError>>;
 
   declineFriendRequest(
     params: DeclineFriendRequestParams,
-  ): Promise<
-    Result<
-      void,
-      FriendErrors.RequestNotFound | FriendErrors.FailedToDeclineRequest
-    >
-  >;
+  ): Promise<Result<void, FriendError>>;
 
   cancelFriendRequest(
     params: CancelFriendRequestParams,
-  ): Promise<
-    Result<
-      void,
-      FriendErrors.RequestNotFound | FriendErrors.FailedToCancelRequest
-    >
-  >;
+  ): Promise<Result<void, FriendError>>;
 
   getFriendRequest(
     params: GetFriendRequestParams,
-  ): Promise<
-    Result<
-      { senderId: string; recipientId: string; createdAt: Date } | undefined,
-      never
-    >
-  >;
+  ): Promise<Result<FriendRequest | undefined, never>>;
 
-  removeFriend(
-    params: RemoveFriendParams,
-  ): Promise<Result<void, FriendErrors.NotFound | FriendErrors.FailedToRemove>>;
-
-  countFriendRequests(
-    params: CountFriendRequestsParams,
-  ): Promise<Result<number, FriendErrors.FailedToCountRequests>>;
-
-  determineFriendState(
-    params: DetermineFriendStateParams,
-  ): Promise<Result<FriendStatus, never>>;
-
-  friendshipExists(
-    params: FriendshipExistsParams,
-  ): Promise<Result<boolean, never>>;
+  removeFriend(params: RemoveFriendParams): Promise<Result<void, FriendError>>;
 }

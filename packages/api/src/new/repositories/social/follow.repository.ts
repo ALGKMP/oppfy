@@ -115,21 +115,25 @@ export class FollowRepository implements IFollowRepository {
 
   async createFollowRequest(
     params: UserIdsParams,
-    db: DatabaseOrTransaction = this.db,
+    tx: Transaction,
   ): Promise<void> {
     const { senderUserId, recipientUserId } = params;
-    await db.insert(this.schema.followRequest).values({
+    await tx.insert(this.schema.followRequest).values({
       senderUserId,
       recipientUserId,
     });
+    await tx
+      .update(this.schema.userStats)
+      .set({ followRequests: sql`${this.schema.userStats.followRequests} + 1` })
+      .where(eq(this.schema.userStats.userId, recipientUserId));
   }
 
   async deleteFollowRequest(
     params: UserIdsParams,
-    db: DatabaseOrTransaction = this.db,
+    tx: Transaction,
   ): Promise<void> {
     const { senderUserId, recipientUserId } = params;
-    await db
+    await tx
       .delete(this.schema.followRequest)
       .where(
         and(
@@ -137,6 +141,10 @@ export class FollowRepository implements IFollowRepository {
           eq(this.schema.followRequest.recipientUserId, recipientUserId),
         ),
       );
+    await tx
+      .update(this.schema.userStats)
+      .set({ followRequests: sql`${this.schema.userStats.followRequests} - 1` })
+      .where(eq(this.schema.userStats.userId, recipientUserId));
   }
 
   async cleanupFollowRelationships(
@@ -262,6 +270,17 @@ export class FollowRepository implements IFollowRepository {
           ),
         ),
     ]);
+
+    // Decrement follow requests: userIdA -> userIdB and userIdB -> userIdA
+    await tx
+      .update(this.schema.userStats)
+      .set({ followRequests: sql`${this.schema.userStats.followRequests} - 1` })
+      .where(
+        and(
+          eq(this.schema.userStats.userId, userIdA),
+          eq(this.schema.userStats.userId, userIdB),
+        ),
+      );
   }
 
   async paginateFollowers(
