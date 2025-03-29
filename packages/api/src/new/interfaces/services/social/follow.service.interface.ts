@@ -16,8 +16,8 @@ export interface PaginateByUserIdParams extends PaginationParams {
 
 export type PaginateResult = PaginatedResponse<
   Profile & {
+    followedAt: Date;
     followStatus: FollowStatus;
-    privacy: Privacy;
   }
 >;
 
