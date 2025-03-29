@@ -11,26 +11,26 @@ export type Privacy = "PUBLIC" | "PRIVATE";
 /**
  * Only include profiles of users who have completed onboarding
  */
-export function withOnboardingCompleted<T extends PgSelect>(
+export const withOnboardingCompleted = <T extends PgSelect>(
   qb: T,
   schema: Schema,
-) {
+) => {
   return qb
     .innerJoin(
       schema.userStatus,
       eq(schema.userStatus.userId, schema.profile.userId),
     )
     .where(eq(schema.userStatus.hasCompletedOnboarding, true));
-}
+};
 
 /**
  * Exclude profiles that have blocked or been blocked by the given user
  */
-export function withoutBlocked<T extends PgSelect>(
+export const withoutBlocked = <T extends PgSelect>(
   qb: T,
   schema: Schema,
   userId: string,
-) {
+) => {
   return qb
     .leftJoin(
       schema.block,
@@ -46,10 +46,9 @@ export function withoutBlocked<T extends PgSelect>(
       ),
     )
     .where(isNull(schema.block.id));
-}
+};
 
-// SQL expression for followStatus
-export function getFollowStatusSql(schema: Schema, currentUserId: string) {
+export const getFollowStatusSql = (schema: Schema, currentUserId: string) => {
   return sql<FollowStatus>`CASE
     WHEN EXISTS (
       SELECT 1 FROM ${schema.follow}
@@ -63,10 +62,9 @@ export function getFollowStatusSql(schema: Schema, currentUserId: string) {
     ) THEN 'REQUESTED'
     ELSE 'NOT_FOLLOWING'
   END`;
-}
+};
 
-// SQL expression for friendStatus
-export function getFriendStatusSql(schema: Schema, currentUserId: string) {
+export const getFriendStatusSql = (schema: Schema, currentUserId: string) => {
   return sql<FriendStatus>`CASE
     WHEN EXISTS (
       SELECT 1 FROM ${schema.friend}
@@ -83,4 +81,4 @@ export function getFriendStatusSql(schema: Schema, currentUserId: string) {
     ) THEN 'REQUESTED'
     ELSE 'NOT_FRIENDS'
   END`;
-}
+};

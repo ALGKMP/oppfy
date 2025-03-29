@@ -45,17 +45,17 @@ export interface IFriendRepository {
 
   createFriendRequest(
     params: FriendRequestParams,
-    tx: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   deleteFriendRequest(
     params: FriendRequestParams,
-    tx: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   cleanupFriendRelationships(
     params: FriendParams,
-    tx: Transaction,
+    db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   paginateFriends(

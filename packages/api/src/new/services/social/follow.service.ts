@@ -321,7 +321,7 @@ export class FollowService implements IFollowService {
     userId,
     cursor,
     pageSize = 10,
-  }: PaginateByUserIdParams): Promise<Result<PaginateResult, FollowErrors>> {
+  }: PaginateByUserIdParams): Promise<Result<PaginateResult, never>> {
     const rawProfiles = await this.followRepository.paginateFollowers({
       userId,
       cursor,
@@ -355,30 +355,30 @@ export class FollowService implements IFollowService {
     userId,
     cursor,
     pageSize = 10,
-  }: PaginateByUserIdParams): Promise<Result<PaginateResult, FollowErrors>> {
-    const profiles = await this.followRepository.paginateFollowing({
-      otherUserId: userId,
-      cursor: cursor
-        ? { createdAt: new Date(cursor.createdAt), userId: cursor.userId }
-        : null,
+  }: PaginateByUserIdParams): Promise<Result<PaginateResult, never>> {
+    const rawProfiles = await this.followRepository.paginateFollowing({
+      userId,
+      cursor,
       limit: pageSize + 1,
     });
 
-    const items = profiles.slice(0, pageSize).map((profile) => ({
+    const profiles = rawProfiles.map((profile) => ({
       ...cloudfront.hydrateProfile(profile),
-      followStatus: "FOLLOWING" as const,
-      privacy: profile.privacy,
+      followedAt: profile.followedAt,
+      followStatus: profile.followStatus,
     }));
 
-    const hasMore = profiles.length > pageSize;
-    const nextCursor = hasMore
-      ? {
-          userId: profiles[pageSize - 1].userId,
-          createdAt: profiles[pageSize - 1].followedAt,
-        }
-      : null;
+    const hasMore = rawProfiles.length > pageSize;
+    const items = profiles.slice(0, pageSize);
+    const lastUser = items[items.length - 1];
 
-    return ok({ items, nextCursor });
+    return ok({
+      items,
+      nextCursor:
+        hasMore && lastUser
+          ? { userId: lastUser.userId, createdAt: lastUser.createdAt }
+          : null,
+    });
   }
 
   /**
@@ -389,39 +389,30 @@ export class FollowService implements IFollowService {
     userId,
     cursor,
     pageSize = 10,
-  }: PaginateByUserIdParams): Promise<Result<PaginateResult, FollowErrors>> {
-    // In a real system, followStatus should be computed based on the viewer's ID, not userId.
-    const profiles = await this.followRepository.paginateFollowers({
-      otherUserId: userId,
-      cursor: cursor
-        ? { createdAt: new Date(cursor.createdAt), userId: cursor.userId }
-        : null,
+  }: PaginateByUserIdParams): Promise<Result<PaginateResult, never>> {
+    const rawProfiles = await this.followRepository.paginateFollowers({
+      userId,
+      cursor,
       limit: pageSize + 1,
     });
 
-    const items = await Promise.all(
-      profiles.slice(0, pageSize).map(async (profile) => {
-        const followStatus = await this.followRepository.getFollower({
-          senderUserId: userId, // Should be viewer ID in a real implementation
-          recipientUserId: profile.userId,
-        });
-        return {
-          ...cloudfront.hydrateProfile(profile),
-          followStatus: followStatus ? "FOLLOWING" : "NOT_FOLLOWING",
-          privacy: profile.privacy,
-        };
-      }),
-    );
+    const profiles = rawProfiles.map((profile) => ({
+      ...cloudfront.hydrateProfile(profile),
+      followedAt: profile.followedAt,
+      followStatus: profile.followStatus,
+    }));
 
-    const hasMore = profiles.length > pageSize;
-    const nextCursor = hasMore
-      ? {
-          userId: profiles[pageSize - 1].userId,
-          createdAt: profiles[pageSize - 1].followedAt,
-        }
-      : null;
+    const hasMore = rawProfiles.length > pageSize;
+    const items = profiles.slice(0, pageSize);
+    const lastUser = items[items.length - 1];
 
-    return ok({ items, nextCursor });
+    return ok({
+      items,
+      nextCursor:
+        hasMore && lastUser
+          ? { userId: lastUser.userId, createdAt: lastUser.createdAt }
+          : null,
+    });
   }
 
   /**
@@ -432,39 +423,30 @@ export class FollowService implements IFollowService {
     userId,
     cursor,
     pageSize = 10,
-  }: PaginateByUserIdParams): Promise<Result<PaginateResult, FollowErrors>> {
-    // In a real system, followStatus should be computed based on the viewer's ID.
-    const profiles = await this.followRepository.paginateFollowing({
-      otherUserId: userId,
-      cursor: cursor
-        ? { createdAt: new Date(cursor.createdAt), userId: cursor.userId }
-        : null,
+  }: PaginateByUserIdParams): Promise<Result<PaginateResult, never>> {
+    const rawProfiles = await this.followRepository.paginateFollowing({
+      userId,
+      cursor,
       limit: pageSize + 1,
     });
 
-    const items = await Promise.all(
-      profiles.slice(0, pageSize).map(async (profile) => {
-        const followStatus = await this.followRepository.getFollower({
-          senderUserId: userId, // Should be viewer ID in a real implementation
-          recipientUserId: profile.userId,
-        });
-        return {
-          ...cloudfront.hydrateProfile(profile),
-          followStatus: followStatus ? "FOLLOWING" : "NOT_FOLLOWING",
-          privacy: profile.privacy,
-        };
-      }),
-    );
+    const profiles = rawProfiles.map((profile) => ({
+      ...cloudfront.hydrateProfile(profile),
+      followedAt: profile.followedAt,
+      followStatus: profile.followStatus,
+    }));
 
-    const hasMore = profiles.length > pageSize;
-    const nextCursor = hasMore
-      ? {
-          userId: profiles[pageSize - 1].userId,
-          createdAt: profiles[pageSize - 1].followedAt,
-        }
-      : null;
+    const hasMore = rawProfiles.length > pageSize;
+    const items = profiles.slice(0, pageSize);
+    const lastUser = items[items.length - 1];
 
-    return ok({ items, nextCursor });
+    return ok({
+      items,
+      nextCursor:
+        hasMore && lastUser
+          ? { userId: lastUser.userId, createdAt: lastUser.createdAt }
+          : null,
+    });
   }
 
   /**
@@ -475,29 +457,29 @@ export class FollowService implements IFollowService {
     userId,
     cursor,
     pageSize = 10,
-  }: PaginateByUserIdParams): Promise<Result<PaginateResult, FollowErrors>> {
-    const profiles = await this.followRepository.paginateFollowRequests({
-      otherUserId: userId,
-      cursor: cursor
-        ? { createdAt: new Date(cursor.createdAt), userId: cursor.userId }
-        : null,
+  }: PaginateByUserIdParams): Promise<Result<PaginateResult, never>> {
+    const rawProfiles = await this.followRepository.paginateFollowRequests({
+      userId,
+      cursor,
       limit: pageSize + 1,
     });
 
-    const items = profiles.slice(0, pageSize).map((profile) => ({
+    const profiles = rawProfiles.map((profile) => ({
       ...cloudfront.hydrateProfile(profile),
-      followStatus: "REQUESTED" as const,
-      privacy: profile.privacy,
+      followedAt: profile.followedAt,
+      followStatus: profile.followStatus,
     }));
 
-    const hasMore = profiles.length > pageSize;
-    const nextCursor = hasMore
-      ? {
-          userId: profiles[pageSize - 1].userId,
-          createdAt: profiles[pageSize - 1].followedAt,
-        }
-      : null;
+    const hasMore = rawProfiles.length > pageSize;
+    const items = profiles.slice(0, pageSize);
+    const lastUser = items[items.length - 1];
 
-    return ok({ items, nextCursor });
+    return ok({
+      items,
+      nextCursor:
+        hasMore && lastUser
+          ? { userId: lastUser.userId, createdAt: lastUser.createdAt }
+          : null,
+    });
   }
 }
