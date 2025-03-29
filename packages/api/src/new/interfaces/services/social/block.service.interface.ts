@@ -14,6 +14,7 @@ export interface BlockedUser {
   name: Profile["name"];
   profilePictureUrl: Profile["profilePictureKey"];
   blockedAt: Date;
+  createdAt: Date;
 }
 
 export interface GetBlockedUsersParams extends PaginationParams {

@@ -121,17 +121,18 @@ export class BlockService implements IBlockService {
   }: GetBlockedUsersParams): Promise<
     Result<PaginatedResponse<BlockedUser>, never>
   > {
-    const rawBlockedData = await this.blockRepository.paginateBlockedProfiles({
-      userId,
-      cursor,
-      limit: pageSize + 1,
-    });
+    const rawBlockedProfiles =
+      await this.blockRepository.paginateBlockedProfiles({
+        userId,
+        cursor,
+        limit: pageSize + 1,
+      });
 
-    const blockedUsers = rawBlockedData.map((profile) =>
+    const blockedProfiles = rawBlockedProfiles.map((profile) =>
       this.mapProfileToBlockedUser(profile),
     );
-    const hasMore = rawBlockedData.length > pageSize;
-    const items = blockedUsers.slice(0, pageSize);
+    const hasMore = rawBlockedProfiles.length > pageSize;
+    const items = blockedProfiles.slice(0, pageSize);
     const lastUser = items[items.length - 1];
 
     return ok({
@@ -152,6 +153,7 @@ export class BlockService implements IBlockService {
       name: hydratedProfile.name,
       profilePictureUrl: hydratedProfile.profilePictureUrl,
       blockedAt: profile.blockedAt,
+      createdAt: profile.createdAt,
     };
   }
 }

@@ -7,6 +7,7 @@ import type {
   Schema,
   Transaction,
 } from "@oppfy/db";
+import { getFollowStatusSql } from "@oppfy/db/utils/query-helpers";
 
 import { TYPES } from "../../container";
 import {
@@ -293,6 +294,7 @@ export class FollowRepository implements IFollowRepository {
       .select({
         profile: this.schema.profile,
         followedAt: this.schema.follow.createdAt,
+        followStatus: getFollowStatusSql(this.schema, userId),
       })
       .from(this.schema.follow)
       .innerJoin(
@@ -323,6 +325,7 @@ export class FollowRepository implements IFollowRepository {
     return followers.map((follower) => ({
       ...follower.profile,
       followedAt: follower.followedAt,
+      followStatus: follower.followStatus,
     }));
   }
 
@@ -336,6 +339,7 @@ export class FollowRepository implements IFollowRepository {
       .select({
         profile: this.schema.profile,
         followedAt: this.schema.follow.createdAt,
+        followStatus: getFollowStatusSql(this.schema, userId),
       })
       .from(this.schema.follow)
       .innerJoin(
@@ -366,6 +370,7 @@ export class FollowRepository implements IFollowRepository {
     return following.map((following) => ({
       ...following.profile,
       followedAt: following.followedAt,
+      followStatus: following.followStatus,
     }));
   }
 
@@ -379,6 +384,7 @@ export class FollowRepository implements IFollowRepository {
       .select({
         profile: this.schema.profile,
         followedAt: this.schema.followRequest.createdAt,
+        followStatus: getFollowStatusSql(this.schema, userId),
       })
       .from(this.schema.followRequest)
       .innerJoin(
@@ -412,6 +418,7 @@ export class FollowRepository implements IFollowRepository {
     return requests.map((request) => ({
       ...request.profile,
       followedAt: request.followedAt,
+      followStatus: request.followStatus,
     }));
   }
 }

@@ -1,6 +1,7 @@
 import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
 import type { Follow, FollowRequest, Profile } from "../../../models";
+import { FollowStatus } from "../../types";
 
 export interface UserIdsParams {
   senderUserId: string;
@@ -23,6 +24,7 @@ export interface PaginateFollowParams extends PaginationParams {
 
 export interface SocialProfile extends Profile {
   followedAt: Date;
+  followStatus: FollowStatus;
 }
 
 export interface IFollowRepository {
