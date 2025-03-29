@@ -148,6 +148,11 @@ export class FriendRepository implements IFriendRepository {
       senderUserId,
       recipientUserId,
     });
+
+    await tx
+      .update(this.schema.userStats)
+      .set({ friendRequests: sql`${this.schema.userStats.friendRequests} + 1` })
+      .where(eq(this.schema.userStats.userId, recipientUserId));
   }
 
   /**
@@ -168,6 +173,11 @@ export class FriendRepository implements IFriendRepository {
           eq(this.schema.friendRequest.recipientUserId, recipientUserId),
         ),
       );
+
+    await tx
+      .update(this.schema.userStats)
+      .set({ friendRequests: sql`${this.schema.userStats.friendRequests} - 1` })
+      .where(eq(this.schema.userStats.userId, recipientUserId));
   }
 
   async cleanupFriendRelationships(
@@ -263,6 +273,17 @@ export class FriendRepository implements IFriendRepository {
           ),
         ),
     ]);
+
+    // Decrement friend requests: userIdA -> userIdB and userIdB -> userIdA
+    await tx
+      .update(this.schema.userStats)
+      .set({ friendRequests: sql`${this.schema.userStats.friendRequests} - 1` })
+      .where(
+        and(
+          eq(this.schema.userStats.userId, userIdA),
+          eq(this.schema.userStats.userId, userIdB),
+        ),
+      );  
   }
 
   /**
