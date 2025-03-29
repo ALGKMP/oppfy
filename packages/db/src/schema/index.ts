@@ -194,6 +194,8 @@ export const userStats = pgTable("profile_stats", {
   followers: integer("followers").notNull().default(0),
   following: integer("following").notNull().default(0),
   friends: integer("friends").notNull().default(0),
+  friendRequests: integer("friend_requests").notNull().default(0),
+  followRequests: integer("follow_requests").notNull().default(0),
   posts: integer("posts").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
