@@ -12,8 +12,6 @@ import { env } from "@oppfy/env";
 import type {
   entityTypeEnum,
   eventTypeEnum,
-  followStatusEnum,
-  friendStatusEnum,
 } from "./src/schema";
 import * as schema from "./src/schema";
 
@@ -30,8 +28,6 @@ type Schema = typeof schema;
 type Database = PostgresJsDatabase<Schema>;
 
 type EntityType = (typeof entityTypeEnum.enumValues)[number];
-type FriendStatus = (typeof friendStatusEnum.enumValues)[number];
-type FollowStatus = (typeof followStatusEnum.enumValues)[number];
 
 type EventType = (typeof eventTypeEnum.enumValues)[number];
 export type NotificationSettings =
@@ -48,8 +44,6 @@ export {
   db,
   schema,
   entityTypeEnum,
-  friendStatusEnum,
-  followStatusEnum,
   eventTypeEnum,
 };
 export type {
@@ -58,7 +52,5 @@ export type {
   Transaction,
   DatabaseOrTransaction,
   EntityType,
-  FriendStatus,
-  FollowStatus,
   EventType,
 };
