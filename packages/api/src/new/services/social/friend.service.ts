@@ -1,413 +1,242 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import type { Database, FriendStatus } from "@oppfy/db";
+import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
-import { FriendErrors } from "../../errors/social/friend.error";
-import { ProfileErrors } from "../../errors/user/profile.error";
-import { UserErrors } from "../../errors/user/user.error";
+import { FriendError } from "../../errors/social/friend.error";
+import { UserError } from "../../errors/user/user.error";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
-import type { IRelationshipRepository } from "../../interfaces/repositories/social/relationshipRepository.interface";
 import type { INotificationsRepository } from "../../interfaces/repositories/user/notification.repository.interface";
+import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
-import type { IFriendService } from "../../interfaces/services/social/friend.service.interface";
+import type {
+  AcceptFriendRequestParams,
+  CancelFriendRequestParams,
+  DeclineFriendRequestParams,
+  GetFriendRequestParams,
+  IFriendService,
+  IsFollowingParams,
+  RemoveFriendParams,
+  SendFriendRequestParams,
+} from "../../interfaces/services/social/friend.service.interface";
+import { FriendRequest } from "../../models";
 
 @injectable()
 export class FriendService implements IFriendService {
   constructor(
-    @inject(TYPES.Database) private db: Database,
-    @inject(TYPES.FriendRepository) private friendRepository: IFriendRepository,
-    @inject(TYPES.FollowRepository) private followRepository: IFollowRepository,
-    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
+    @inject(TYPES.Database) private readonly db: Database,
+    @inject(TYPES.FriendRepository)
+    private readonly friendRepository: IFriendRepository,
+    @inject(TYPES.FollowRepository)
+    private readonly followRepository: IFollowRepository,
+    @inject(TYPES.UserRepository)
+    private readonly userRepository: IUserRepository,
     @inject(TYPES.NotificationsRepository)
-    private notificationsRepository: INotificationsRepository,
-    @inject(TYPES.RelationshipRepository)
-    private relationshipRepository: IRelationshipRepository,
+    private readonly notificationsRepository: INotificationsRepository,
+    @inject(TYPES.ProfileRepository)
+    private readonly profileRepository: IProfileRepository,
   ) {}
 
-  async isFollowing(options: {
-    senderId: string;
-    recipientId: string;
-  }): Promise<Result<boolean, never>> {
-    const { senderId, recipientId } = options;
-    const follower = await this.followRepository.isFollowing({
-      followerId: senderId,
-      followeeId: recipientId,
+  async isFollowing({
+    senderUserId,
+    recipientUserId,
+  }: IsFollowingParams): Promise<Result<boolean, never>> {
+    const follower = await this.followRepository.getFollower({
+      senderUserId,
+      recipientUserId,
     });
     return ok(!!follower);
   }
 
-  async sendFriendRequest(options: {
-    senderId: string;
-    recipientId: string;
-  }): Promise<
-    Result<
-      void,
-      | FriendErrors.RequestAlreadySent
-      | FriendErrors.AlreadyFriends
-      | FriendErrors.CannotFriendSelf
-      | FriendErrors.FailedToSendRequest
-      | ProfileErrors.ProfileNotFound
-    >
-  > {
-    const { senderId, recipientId } = options;
-
-    // Check if the sender and recipient are the same
-    if (senderId === recipientId) {
-      return err(new FriendErrors.CannotFriendSelf(senderId));
+  async sendFriendRequest({
+    senderUserId,
+    recipientUserId,
+  }: SendFriendRequestParams): Promise<Result<void, FriendError>> {
+    if (senderUserId === recipientUserId) {
+      return err(new FriendError.CannotFriendSelf(senderUserId));
     }
 
-    // Get the sender and recipient profiles
-    const [sender, recipient] = await Promise.all([
-      this.userRepository.getUserWithProfile({ userId: senderId }),
-      this.userRepository.getUserWithProfile({ userId: recipientId }),
-    ]);
-
-    if (!sender || !recipient) {
-      return err(
-        new ProfileErrors.ProfileNotFound(!sender ? senderId : recipientId),
-      );
-    }
-
-    const existingRelationship = await this.relationshipRepository.getByUserIds(
-      {
-        userIdA: senderId,
-        userIdB: recipientId,
-      },
-    );
-
-    if (existingRelationship.friendshipStatus === "friends") {
-      return err(new FriendErrors.AlreadyFriends(senderId, recipientId));
+    const recipient = await this.userRepository.getUser({
+      userId: recipientUserId,
+    });
+    if (!recipient) {
+      return err(new UserError.UserNotFound(recipientUserId));
     }
 
     await this.db.transaction(async (tx) => {
-      // Create friend request
+      const areFriends = await this.friendRepository.getFriend(
+        { userIdA: senderUserId, userIdB: recipientUserId },
+        tx,
+      );
+      if (areFriends) {
+        throw new FriendError.AlreadyFriends(senderUserId, recipientUserId);
+      }
+
+      const existingRequest = await this.friendRepository.getFriendRequest(
+        { senderUserId, recipientUserId },
+        tx,
+      );
+      if (existingRequest) {
+        throw new FriendError.RequestAlreadySent(senderUserId, recipientUserId);
+      }
+
       await this.friendRepository.createFriendRequest(
-        {
-          senderId,
-          recipientId,
-        },
+        { senderUserId, recipientUserId },
+        tx,
+      );
+    });
+
+    return ok(undefined);
+  }
+
+  async acceptFriendRequest({
+    senderUserId,
+    recipientUserId,
+  }: AcceptFriendRequestParams): Promise<Result<void, FriendError>> {
+    await this.db.transaction(async (tx) => {
+      const request = await this.friendRepository.getFriendRequest(
+        { senderUserId, recipientUserId },
+        tx,
+      );
+      if (!request) {
+        throw new FriendErrors.RequestNotFound(senderUserId, recipientUserId);
+      }
+
+      await this.friendRepository.deleteFriendRequest(
+        { senderUserId, recipientUserId },
+        tx,
+      );
+      await this.friendRepository.createFriend(
+        { userIdA: senderUserId, userIdB: recipientUserId },
         tx,
       );
 
-      // Create follow request
-      await this.followRepository.createFollowRequest(
-        {
-          senderUserId: senderId,
-          recipientUserId: recipientId,
-        },
+      await this.followRepository.createFollower(
+        { senderUserId, recipientUserId },
+        tx,
+      );
+      await this.followRepository.createFollower(
+        { senderUserId: recipientUserId, recipientUserId: senderUserId },
         tx,
       );
 
-      // Get notification settings
+      const sender = await this.userRepository.getUser(
+        { userId: senderUserId },
+        tx,
+      );
+      if (!sender) throw new UserErrors.UserNotFound(senderUserId);
+
       const notificationSettings =
-        await this.notificationsRepository.getNotificationSettings({
-          notificationSettingsId: recipient.notificationSettingsId,
-        });
-
+        await this.notificationsRepository.getNotificationSettings(
+          { notificationSettingsId: sender.notificationSettingsId },
+          tx,
+        );
       if (notificationSettings?.friendRequests) {
         await this.notificationsRepository.storeNotification(
           {
-            senderId,
-            recipientId,
+            senderId: recipientUserId,
+            recipientId: senderUserId,
             notificationData: {
               eventType: "friend",
               entityType: "profile",
-              entityId: senderId,
+              entityId: recipientUserId,
             },
           },
-          undefined,
+          tx,
         );
       }
     });
-    return ok();
+
+    return ok(undefined);
   }
 
-  async acceptFriendRequest(options: {
-    senderId: string;
-    recipientId: string;
-  }): Promise<
-    Result<
-      void,
-      FriendErrors.RequestNotFound | FriendErrors.FailedToAcceptRequest
-    >
-  > {
-    const { senderId, recipientId } = options;
-
-    // Check if friend request exists
-    const relationship = await this.relationshipRepository.getByUserIds({
-      userIdA: senderId,
-      userIdB: recipientId,
-    });
-
-    if (relationship.friendshipStatus !== "inboundRequest") {
-      return err(new FriendErrors.RequestNotFound(senderId, recipientId));
-    }
-
-    await this.db.transaction(async (tx) => {
-      // Delete friend request and create friendship
-      await this.friendRepository.deleteFriendRequest(
-        {
-          senderId,
-          recipientId,
-        },
-        tx,
-      );
-      await this.friendRepository.createFriend({ senderId, recipientId }, tx);
-
-      // Accept follow request
-      await this.followRepository.createFollower(
-        {
-          senderUserId: senderId,
-          recipientUserId: recipientId,
-        },
-        tx,
-      );
-      await this.followRepository.createFollower(
-        {
-          senderUserId: recipientId,
-          recipientUserId: senderId,
-        },
-        tx,
-      );
-    });
-
-    // Get notification settings
-    const sender = await this.userRepository.getUserWithNotificationSettings({
-      userId: senderId,
-    });
-    if (!sender) {
-      return err(new UserErrors.UserNotFound(senderId));
-    }
-
-    const notificationSettings =
-      await this.notificationsRepository.getNotificationSettings({
-        notificationSettingsId: sender.notificationSettingsId,
-      });
-
-    if (notificationSettings?.friendRequests) {
-      await this.notificationsRepository.storeNotification({
-        senderId: recipientId,
-        recipientId: senderId,
-        notificationData: {
-          eventType: "friend",
-          entityType: "profile",
-          entityId: recipientId,
-        },
-      });
-    }
-
-    return ok();
-  }
-
-  async declineFriendRequest(options: {
-    senderId: string;
-    recipientId: string;
-  }): Promise<
-    Result<
-      void,
-      FriendErrors.RequestNotFound | FriendErrors.FailedToDeclineRequest
-    >
-  > {
-    const { senderId, recipientId } = options;
-
-    // Check if friend request exists
-    const existingRequest = await this.friendRepository.getFriendRequest({
-      senderId,
-      recipientId,
-    });
-
-    if (!existingRequest) {
-      return err(new FriendErrors.RequestNotFound(senderId, recipientId));
-    }
-
-    await this.db.transaction(async (tx) => {
-      // Delete friend request
-      await this.friendRepository.deleteFriendRequest(
-        {
-          senderId,
-          recipientId,
-        },
-        tx,
-      );
-
-      // Delete follow request
-      await this.followRepository.removeFollowRequest(
-        senderId,
-        recipientId,
-        tx,
-      );
-    });
-
-    return ok();
-  }
-
-  async cancelFriendRequest(options: {
-    senderId: string;
-    recipientId: string;
-  }): Promise<
-    Result<
-      void,
-      FriendErrors.RequestNotFound | FriendErrors.FailedToCancelRequest
-    >
-  > {
-    const { senderId, recipientId } = options;
-
-    // Check if friend request exists
-    const existingRequest = await this.friendRepository.getFriendRequest({
-      senderId,
-      recipientId,
-    });
-
-    if (!existingRequest) {
-      return err(new FriendErrors.RequestNotFound(senderId, recipientId));
-    }
-
-    await this.db.transaction(async (tx) => {
-      // Delete friend request
-      await this.friendRepository.deleteFriendRequest(
-        {
-          senderId,
-          recipientId,
-        },
-        tx,
-      );
-
-      // Delete follow request
-      await this.followRepository.removeFollowRequest(
-        senderId,
-        recipientId,
-        tx,
-      );
-    });
-
-    return ok();
-  }
-
-  async getFriendRequest(options: {
-    senderId: string;
-    recipientId: string;
-  }): Promise<
-    Result<
-      { senderId: string; recipientId: string; createdAt: Date } | undefined,
-      never
-    >
-  > {
-    const { senderId, recipientId } = options;
+  async declineFriendRequest({
+    senderUserId,
+    recipientUserId,
+  }: DeclineFriendRequestParams): Promise<Result<void, FriendError>> {
     const request = await this.friendRepository.getFriendRequest({
-      senderId,
-      recipientId,
+      senderUserId,
+      recipientUserId,
     });
-    return ok(
-      request ? { senderId, recipientId, createdAt: new Date() } : undefined,
-    );
+    if (!request) {
+      return err(
+        new FriendErrors.RequestNotFound(senderUserId, recipientUserId),
+      );
+    }
+
+    await this.friendRepository.deleteFriendRequest({
+      senderUserId,
+      recipientUserId,
+    });
+
+    return ok(undefined);
   }
 
-  async removeFriend(options: {
-    targetUserId: string;
-    otherUserId: string;
-  }): Promise<
-    Result<void, FriendErrors.NotFound | FriendErrors.FailedToRemove>
-  > {
-    const { targetUserId, otherUserId } = options;
+  async cancelFriendRequest({
+    senderUserId,
+    recipientUserId,
+  }: CancelFriendRequestParams): Promise<Result<void, FriendError>> {
+    const request = await this.friendRepository.getFriendRequest({
+      senderUserId,
+      recipientUserId,
+    });
+    if (!request) {
+      return err(
+        new FriendErrors.RequestNotFound(senderUserId, recipientUserId),
+      );
+    }
 
-    // Check if friendship exists
-    const existingFriendship = await this.friendRepository.getFriendship({
-      userIdA: targetUserId,
-      userIdB: otherUserId,
+    await this.friendRepository.deleteFriendRequest({
+      senderUserId,
+      recipientUserId,
     });
 
-    if (!existingFriendship) {
-      return err(new FriendErrors.NotFound(targetUserId, otherUserId));
+    return ok(undefined);
+  }
+
+  async getFriendRequest({
+    senderUserId,
+    recipientUserId,
+  }: GetFriendRequestParams): Promise<
+    Result<FriendRequest | undefined, never>
+  > {
+    const request = await this.friendRepository.getFriendRequest({
+      senderUserId,
+      recipientUserId,
+    });
+    return ok(request);
+  }
+
+  async removeFriend({
+    senderUserId,
+    recipientUserId,
+  }: RemoveFriendParams): Promise<Result<void, FriendError>> {
+    const friendship = await this.friendRepository.getFriend({
+      userIdA: senderUserId,
+      userIdB: recipientUserId,
+    });
+    if (!friendship) {
+      return err(new FriendError.NotFriends(senderUserId, recipientUserId));
     }
 
     await this.db.transaction(async (tx) => {
-      // Remove friendship
       await this.friendRepository.deleteFriend(
-        {
-          userIdA: targetUserId,
-          userIdB: otherUserId,
-        },
+        { userIdA: senderUserId, userIdB: recipientUserId },
         tx,
       );
 
-      // Remove follow relationship in both directions
       await this.followRepository.deleteFollower(
-        {
-          followerId: targetUserId,
-          followeeId: otherUserId,
-        },
+        { senderUserId, recipientUserId },
         tx,
       );
       await this.followRepository.deleteFollower(
-        {
-          followerId: otherUserId,
-          followeeId: targetUserId,
-        },
+        { senderUserId: recipientUserId, recipientUserId: senderUserId },
         tx,
       );
     });
 
-    return ok();
-  }
-
-  async countFriendRequests(options: {
-    userId: string;
-  }): Promise<Result<number, FriendErrors.FailedToCountRequests>> {
-    const { userId } = options;
-    const count = await this.friendRepository.countFriendRequests({ userId });
-    return ok(count ?? 0);
-  }
-
-  async determineFriendState(options: {
-    userId: string;
-    targetUserId: string;
-  }): Promise<Result<FriendStatus, never>> {
-    const { userId, targetUserId } = options;
-
-    // Check if they are friends
-    const areFriends = await this.friendRepository.friendshipExists({
-      userIdA: userId,
-      userIdB: targetUserId,
-    });
-
-    if (areFriends) {
-      return ok("friends");
-    }
-
-    // Check if there's a pending friend request
-    const friendRequest = await this.friendRepository.getFriendRequest({
-      senderId: targetUserId,
-      recipientId: userId,
-    });
-
-    if (friendRequest) {
-      return ok("inboundRequest");
-    }
-
-    const sentFriendRequest = await this.friendRepository.getFriendRequest({
-      senderId: userId,
-      recipientId: targetUserId,
-    });
-
-    if (sentFriendRequest) {
-      return ok("outboundRequest");
-    }
-
-    return ok("notFriends");
-  }
-
-  async friendshipExists(options: {
-    userIdA: string;
-    userIdB: string;
-  }): Promise<Result<boolean, never>> {
-    const { userIdA, userIdB } = options;
-    const exists = await this.friendRepository.friendshipExists({
-      userIdA,
-      userIdB,
-    });
-    return ok(exists);
+    return ok(undefined);
   }
 }

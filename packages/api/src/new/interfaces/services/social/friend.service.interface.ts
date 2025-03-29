@@ -1,7 +1,5 @@
 import type { Result } from "neverthrow";
 
-import type { FriendStatus } from "@oppfy/db";
-
 import type { FriendError } from "../../../errors/social/friend.error";
 import type { FriendRequest } from "../../../models";
 
@@ -40,20 +38,6 @@ export interface RemoveFriendParams {
   recipientUserId: string;
 }
 
-export interface CountFriendRequestsParams {
-  userId: string;
-}
-
-export interface DetermineFriendStateParams {
-  selfUserId: string;
-  otherUserId: string;
-}
-
-export interface FriendshipExistsParams {
-  userIdA: string;
-  userIdB: string;
-}
-
 export interface IFriendService {
   isFollowing(params: IsFollowingParams): Promise<Result<boolean, never>>;
 
@@ -78,16 +62,4 @@ export interface IFriendService {
   ): Promise<Result<FriendRequest | undefined, never>>;
 
   removeFriend(params: RemoveFriendParams): Promise<Result<void, FriendError>>;
-
-  countFriendRequests(
-    params: CountFriendRequestsParams,
-  ): Promise<Result<number, FriendError>>;
-
-  determineFriendState(
-    params: DetermineFriendStateParams,
-  ): Promise<Result<FriendStatus, never>>;
-
-  friendshipExists(
-    params: FriendshipExistsParams,
-  ): Promise<Result<boolean, never>>;
 }
