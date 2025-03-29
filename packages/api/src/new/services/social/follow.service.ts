@@ -5,9 +5,6 @@ import { cloudfront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
-// import { FollowErrors } from "../../errors/social/follow.error";
-// import { FriendErrors } from "../../errors/social/friend.error";
-// import { ProfileErrors } from "../../errors/user/profile.error";
 import * as FollowErrors from "../../errors/social/follow.error";
 import * as FriendErrors from "../../errors/social/friend.error";
 import * as ProfileErrors from "../../errors/user/profile.error";

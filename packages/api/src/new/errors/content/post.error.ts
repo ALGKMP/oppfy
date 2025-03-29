@@ -2,48 +2,46 @@ import { createBaseErrorClass } from "../errorFactory";
 
 const PostError = createBaseErrorClass("Post");
 
-export const PostErrors = {
-  FailedToCreatePost: class extends PostError {
-    constructor(userId: string) {
-      super(`Failed to create post for user ${userId}`);
-    }
-  },
+export class FailedToCreatePost extends PostError {
+  constructor(userId: string) {
+    super(`Failed to create post for user ${userId}`);
+  }
+}
 
-  FailedToUpdatePost: class extends PostError {
-    constructor(postId: string) {
-      super(`Failed to update post ${postId}`);
-    }
-  },
+export class FailedToUpdatePost extends PostError {
+  constructor(postId: string) {
+    super(`Failed to update post ${postId}`);
+  }
+}
 
-  FailedToDeletePost: class extends PostError {
-    constructor(postId: string) {
-      super(`Failed to delete post ${postId}`);
-    }
-  },
+export class FailedToDeletePost extends PostError {
+  constructor(postId: string) {
+    super(`Failed to delete post ${postId}`);
+  }
+}
 
-  PostNotFound: class extends PostError {
-    constructor(postId: string) {
-      super(`Post ${postId} not found`);
-    }
-  },
+export class PostNotFound extends PostError {
+  constructor(postId: string) {
+    super(`Post ${postId} not found`);
+  }
+}
 
-  PostDeleted: class extends PostError {
-    constructor(postId: string) {
-      super(`Post ${postId} has been deleted`);
-    }
-  },
+export class PostDeleted extends PostError {
+  constructor(postId: string) {
+    super(`Post ${postId} has been deleted`);
+  }
+}
 
-  InvalidPostContent: class extends PostError {
-    constructor(message: string) {
-      super(message);
-    }
-  },
+export class InvalidPostContent extends PostError {
+  constructor(message: string) {
+    super(message);
+  }
+}
 
-  NotPostOwner: class extends PostError {
-    constructor(postId: string, userId: string) {
-      super(`User ${userId} is not the owner of post ${postId}`);
-    }
-  },
-};
+export class NotPostOwner extends PostError {
+  constructor(postId: string, userId: string) {
+    super(`User ${userId} is not the owner of post ${postId}`);
+  }
+}
 
 export type PostError = InstanceType<typeof PostError>;
