@@ -1,6 +1,6 @@
 import { createBaseErrorClass } from "../errorFactory";
 
-const FriendError = createBaseErrorClass("Friend");
+export const FriendError = createBaseErrorClass("Friend");
 
 export class NotFound extends FriendError {
   constructor(userIdA: string, userIdB: string) {

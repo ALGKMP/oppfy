@@ -1,4 +1,4 @@
-import type { DatabaseOrTransaction } from "@oppfy/db";
+import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
 import type { Follow, FollowRequest, Profile } from "../../../models";
 
@@ -39,27 +39,27 @@ export interface IFollowRepository {
 
   createFollower(
     params: UserIdsParams,
-    db?: DatabaseOrTransaction,
+    tx: Transaction,
   ): Promise<void>;
 
   createFollowRequest(
     params: UserIdsParams,
-    db?: DatabaseOrTransaction,
+    tx: Transaction,
   ): Promise<void>;
 
   deleteFollower(
     params: UserIdsParams,
-    db?: DatabaseOrTransaction,
+    tx: Transaction,
   ): Promise<void>;
 
   deleteFollowRequest(
     params: UserIdsParams,
-    db?: DatabaseOrTransaction,
+    tx: Transaction,
   ): Promise<void>;
 
   cleanupFollowRelationships(
     params: CleanupFollowRelationshipsParams,
-    db?: DatabaseOrTransaction,
+    tx: Transaction,
   ): Promise<void>;
 
   paginateFollowers(
