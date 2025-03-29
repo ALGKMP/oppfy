@@ -134,26 +134,6 @@ export class FriendService implements IFriendService {
         tx,
       );
       if (!sender) throw new UserNotFound(senderUserId);
-
-      const notificationSettings =
-        await this.notificationsRepository.getNotificationSettings(
-          { notificationSettingsId: sender.notificationSettingsId },
-          tx,
-        );
-      if (notificationSettings?.friendRequests) {
-        await this.notificationsRepository.storeNotification(
-          {
-            senderId: recipientUserId,
-            recipientId: senderUserId,
-            notificationData: {
-              eventType: "friend",
-              entityType: "profile",
-              entityId: recipientUserId,
-            },
-          },
-          tx,
-        );
-      }
     });
 
     return ok(undefined);
@@ -171,9 +151,11 @@ export class FriendService implements IFriendService {
       return err(new RequestNotFound(senderUserId, recipientUserId));
     }
 
-    await this.friendRepository.deleteFriendRequest({
-      senderUserId,
-      recipientUserId,
+    await this.db.transaction(async (tx) => { 
+      await this.friendRepository.deleteFriendRequest(
+        { senderUserId, recipientUserId },
+        tx,
+      );
     });
 
     return ok(undefined);
@@ -191,9 +173,11 @@ export class FriendService implements IFriendService {
       return err(new RequestNotFound(senderUserId, recipientUserId));
     }
 
-    await this.friendRepository.deleteFriendRequest({
-      senderUserId,
-      recipientUserId,
+    await this.db.transaction(async (tx) => {
+      await this.friendRepository.deleteFriendRequest(
+        { senderUserId, recipientUserId },
+        tx,
+      );
     });
 
     return ok(undefined);
