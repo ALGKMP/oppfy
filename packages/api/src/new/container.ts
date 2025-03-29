@@ -14,7 +14,15 @@ import type { INotificationsRepository } from "./interfaces/repositories/user/no
 import type { IProfileRepository } from "./interfaces/repositories/user/profile.repository.interface";
 import type { IReportRepository } from "./interfaces/repositories/user/report.repository.interface";
 import type { IUserRepository } from "./interfaces/repositories/user/user.repository.interface";
+import type { IPostService } from "./interfaces/services/content/post.service.interface";
+import type { IPostInteractionService } from "./interfaces/services/content/postInteraction.service.interface";
+import type { IBlockService } from "./interfaces/services/social/block.service.interface";
+import type { IFollowService } from "./interfaces/services/social/follow.service.interface";
+import type { IFriendService } from "./interfaces/services/social/friend.service.interface";
+import type { INotificationService } from "./interfaces/services/user/notification.service.interface";
+import type { IProfileService } from "./interfaces/services/user/profile.service.interface";
 import type { IReportService } from "./interfaces/services/user/report.service.interface";
+import type { IUserService } from "./interfaces/services/user/user.service.interface";
 import { BlockRepository } from "./repositories/social/block.repository";
 import { FollowRepository } from "./repositories/social/follow.repository";
 import { FriendRepository } from "./repositories/social/friend.repository";
@@ -23,7 +31,14 @@ import { NotificationsRepository } from "./repositories/user/notifications.repos
 import { ProfileRepository } from "./repositories/user/profile.repository";
 import { ReportRepository } from "./repositories/user/report.repository";
 import { UserRepository } from "./repositories/user/user.repository";
+import { PostService } from "./services/content/post.service";
+import { PostInteractionService } from "./services/content/postInteraction.service";
+import { BlockService } from "./services/social/block.service";
+import { FollowService } from "./services/social/follow.service";
+import { FriendService } from "./services/social/friend.service";
+import { ProfileService } from "./services/user/profile.service";
 import { ReportService } from "./services/user/report.service";
+import { UserService } from "./services/user/user.service";
 
 // Define symbol constants for our interfaces
 export const TYPES = {
@@ -54,7 +69,15 @@ export const TYPES = {
   PostInteractionRepository: Symbol.for("PostInteractionRepository"),
 
   // Services
+  UserService: Symbol.for("UserService"),
+  ProfileService: Symbol.for("ProfileService"),
   ReportService: Symbol.for("ReportService"),
+  FriendService: Symbol.for("FriendService"),
+  FollowService: Symbol.for("FollowService"),
+  BlockService: Symbol.for("BlockService"),
+  PostService: Symbol.for("PostService"),
+  PostInteractionService: Symbol.for("PostInteractionService"),
+  NotificationService: Symbol.for("NotificationService"),
 };
 
 // Create and configure the container
@@ -86,5 +109,15 @@ container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
 
 // Bind services
 container.bind<IReportService>(TYPES.ReportService).to(ReportService);
+container.bind<IUserService>(TYPES.UserService).to(UserService);
+container.bind<IProfileService>(TYPES.ProfileService).to(ProfileService);
+container.bind<IFriendService>(TYPES.FriendService).to(FriendService);
+container.bind<IFollowService>(TYPES.FollowService).to(FollowService);
+container.bind<IBlockService>(TYPES.BlockService).to(BlockService);
+container.bind<IPostService>(TYPES.PostService).to(PostService);
+container
+  .bind<IPostInteractionService>(TYPES.PostInteractionService)
+  .to(PostInteractionService);
+// container.bind<INotificationService>(TYPES.NotificationService).to(NotificationService);
 
 export { container };
