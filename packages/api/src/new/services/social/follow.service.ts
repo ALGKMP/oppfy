@@ -323,10 +323,8 @@ export class FollowService implements IFollowService {
     pageSize = 10,
   }: PaginateByUserIdParams): Promise<Result<PaginateResult, FollowErrors>> {
     const profiles = await this.followRepository.paginateFollowers({
-      otherUserId: userId,
-      cursor: cursor
-        ? { createdAt: new Date(cursor.createdAt), userId: cursor.userId }
-        : null,
+      userId,
+      cursor,
       limit: pageSize + 1,
     });
 

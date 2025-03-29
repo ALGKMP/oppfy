@@ -18,8 +18,7 @@ export interface PaginationParams {
 }
 
 export interface PaginateFollowParams extends PaginationParams {
-  otherUserId: string;
-  selfUserId?: string;
+  userId: string;
 }
 
 export interface SocialProfile extends Profile {
@@ -37,25 +36,13 @@ export interface IFollowRepository {
     db?: DatabaseOrTransaction,
   ): Promise<FollowRequest | undefined>;
 
-  createFollower(
-    params: UserIdsParams,
-    tx: Transaction,
-  ): Promise<void>;
+  createFollower(params: UserIdsParams, tx: Transaction): Promise<void>;
 
-  createFollowRequest(
-    params: UserIdsParams,
-    tx: Transaction,
-  ): Promise<void>;
+  createFollowRequest(params: UserIdsParams, tx: Transaction): Promise<void>;
 
-  deleteFollower(
-    params: UserIdsParams,
-    tx: Transaction,
-  ): Promise<void>;
+  deleteFollower(params: UserIdsParams, tx: Transaction): Promise<void>;
 
-  deleteFollowRequest(
-    params: UserIdsParams,
-    tx: Transaction,
-  ): Promise<void>;
+  deleteFollowRequest(params: UserIdsParams, tx: Transaction): Promise<void>;
 
   cleanupFollowRelationships(
     params: CleanupFollowRelationshipsParams,

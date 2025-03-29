@@ -287,7 +287,7 @@ export class FollowRepository implements IFollowRepository {
     params: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<SocialProfile[]> {
-    const { otherUserId: userId, cursor, limit = 10 } = params;
+    const { userId, cursor, limit = 10 } = params;
 
     const followers = await db
       .select({
@@ -330,7 +330,7 @@ export class FollowRepository implements IFollowRepository {
     params: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<SocialProfile[]> {
-    const { otherUserId: userId, cursor, limit = 10 } = params;
+    const { userId, cursor, limit = 10 } = params;
 
     const following = await db
       .select({
@@ -373,7 +373,7 @@ export class FollowRepository implements IFollowRepository {
     params: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<SocialProfile[]> {
-    const { otherUserId: userId, cursor, limit = 10 } = params;
+    const { userId, cursor, limit = 10 } = params;
 
     const requests = await db
       .select({

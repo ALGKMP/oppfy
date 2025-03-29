@@ -30,12 +30,6 @@ export const entityTypeEnum = pgEnum("entity_type", [
   "comment",
 ]);
 
-export const postTypeEnum = pgEnum("post_type", [
-  "public",
-  "private",
-  "direct",
-]);
-
 export const mediaTypeEnum = pgEnum("media_type", ["image", "video"]);
 
 export const reportUserReasonEnum = pgEnum("report_user_reason", [
@@ -314,7 +308,6 @@ export const post = pgTable(
     width: integer("width").notNull().default(500),
     height: integer("height").notNull().default(500),
     mediaType: mediaTypeEnum("media_type").notNull(),
-    postType: postTypeEnum("post_type").notNull().default("public"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -327,7 +320,6 @@ export const post = pgTable(
     recipientUserIdx: index("post_recipient_user_idx").on(
       table.recipientUserId,
     ),
-    postTypeIdx: index("post_type_idx").on(table.postType),
     createdAtIdx: index("post_created_at_idx").on(table.createdAt),
   }),
 );

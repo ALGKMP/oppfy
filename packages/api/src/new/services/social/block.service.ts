@@ -5,7 +5,7 @@ import { cloudfront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
-import { BlockErrors } from "../../errors/social/block.error";
+import * as BlockErrors from "../../errors/social/block.error";
 import type {
   IBlockRepository,
   SocialProfile,
