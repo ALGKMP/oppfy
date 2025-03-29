@@ -4,8 +4,15 @@ import { err, ok, Result } from "neverthrow";
 import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
-import { FriendError } from "../../errors/social/friend.error";
-import { UserError } from "../../errors/user/user.error";
+import {
+  AlreadyFriends,
+  CannotFriendSelf,
+  FriendError,
+  NotFound,
+  RequestAlreadySent,
+  RequestNotFound,
+} from "../../errors/social/friend.error";
+import { UserNotFound } from "../../errors/user/user.error";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { INotificationsRepository } from "../../interfaces/repositories/user/notification.repository.interface";
@@ -55,14 +62,14 @@ export class FriendService implements IFriendService {
     recipientUserId,
   }: SendFriendRequestParams): Promise<Result<void, FriendError>> {
     if (senderUserId === recipientUserId) {
-      return err(new FriendError.CannotFriendSelf(senderUserId));
+      return err(new CannotFriendSelf(senderUserId));
     }
 
     const recipient = await this.userRepository.getUser({
       userId: recipientUserId,
     });
     if (!recipient) {
-      return err(new UserError.UserNotFound(recipientUserId));
+      return err(new UserNotFound(recipientUserId));
     }
 
     await this.db.transaction(async (tx) => {
@@ -71,7 +78,7 @@ export class FriendService implements IFriendService {
         tx,
       );
       if (areFriends) {
-        throw new FriendError.AlreadyFriends(senderUserId, recipientUserId);
+        throw new AlreadyFriends(senderUserId, recipientUserId);
       }
 
       const existingRequest = await this.friendRepository.getFriendRequest(
@@ -79,7 +86,7 @@ export class FriendService implements IFriendService {
         tx,
       );
       if (existingRequest) {
-        throw new FriendError.RequestAlreadySent(senderUserId, recipientUserId);
+        throw new RequestAlreadySent(senderUserId, recipientUserId);
       }
 
       await this.friendRepository.createFriendRequest(
@@ -101,7 +108,7 @@ export class FriendService implements IFriendService {
         tx,
       );
       if (!request) {
-        throw new FriendErrors.RequestNotFound(senderUserId, recipientUserId);
+        throw new RequestNotFound(senderUserId, recipientUserId);
       }
 
       await this.friendRepository.deleteFriendRequest(
@@ -126,7 +133,7 @@ export class FriendService implements IFriendService {
         { userId: senderUserId },
         tx,
       );
-      if (!sender) throw new UserErrors.UserNotFound(senderUserId);
+      if (!sender) throw new UserNotFound(senderUserId);
 
       const notificationSettings =
         await this.notificationsRepository.getNotificationSettings(
@@ -161,9 +168,7 @@ export class FriendService implements IFriendService {
       recipientUserId,
     });
     if (!request) {
-      return err(
-        new FriendErrors.RequestNotFound(senderUserId, recipientUserId),
-      );
+      return err(new RequestNotFound(senderUserId, recipientUserId));
     }
 
     await this.friendRepository.deleteFriendRequest({
@@ -183,9 +188,7 @@ export class FriendService implements IFriendService {
       recipientUserId,
     });
     if (!request) {
-      return err(
-        new FriendErrors.RequestNotFound(senderUserId, recipientUserId),
-      );
+      return err(new RequestNotFound(senderUserId, recipientUserId));
     }
 
     await this.friendRepository.deleteFriendRequest({
@@ -218,7 +221,7 @@ export class FriendService implements IFriendService {
       userIdB: recipientUserId,
     });
     if (!friendship) {
-      return err(new FriendError.NotFriends(senderUserId, recipientUserId));
+      return err(new NotFound(senderUserId, recipientUserId));
     }
 
     await this.db.transaction(async (tx) => {
