@@ -8,17 +8,17 @@ interface UserIdParams {
 }
 
 export interface IUserService {
-  deleteUser(params: UserIdParams): Promise<Result<void, UserError>>;
+  deleteUser(params: UserIdParams): Promise<Result<void, never>>;
 
   userStatus(params: UserIdParams): Promise<Result<UserStatus, UserError>>;
 
-  markUserAsOnApp(params: UserIdParams): Promise<Result<void, UserError>>;
+  markUserAsOnApp(params: UserIdParams): Promise<Result<void, never>>;
 
   markUserAsTutorialComplete(
     params: UserIdParams,
-  ): Promise<Result<void, UserError>>;
+  ): Promise<Result<void, never>>;
 
   markUserAsOnboardingComplete(
     params: UserIdParams,
-  ): Promise<Result<void, UserError>>;
+  ): Promise<Result<void, never>>;
 }
