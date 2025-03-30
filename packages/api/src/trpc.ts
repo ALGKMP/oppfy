@@ -10,7 +10,7 @@ import crypto from "crypto";
 import { initTRPC, TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import superjson from "superjson";
-import { z, ZodError } from "zod";
+import { ZodError } from "zod";
 
 import { cloudfront } from "@oppfy/cloudfront";
 import { db } from "@oppfy/db";
