@@ -7,7 +7,6 @@ import type {
   FollowStatus,
   PaginatedResponse,
   PaginationParams,
-  Privacy,
 } from "../../types";
 
 export interface PaginateByUserIdParams extends PaginationParams {

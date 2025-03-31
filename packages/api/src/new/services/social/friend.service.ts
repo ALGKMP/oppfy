@@ -33,7 +33,8 @@ import { FriendRequest } from "../../models";
 @injectable()
 export class FriendService implements IFriendService {
   constructor(
-    @inject(TYPES.Database) private readonly db: Database,
+    @inject(TYPES.Database)
+    private readonly db: Database,
     @inject(TYPES.FriendRepository)
     private readonly friendRepository: IFriendRepository,
     @inject(TYPES.FollowRepository)
@@ -46,184 +47,35 @@ export class FriendService implements IFriendService {
     private readonly profileRepository: IProfileRepository,
   ) {}
 
-  async isFollowing({
-    senderUserId,
-    recipientUserId,
-  }: IsFollowingParams): Promise<Result<boolean, never>> {
-    const follower = await this.followRepository.getFollower({
-      senderUserId,
-      recipientUserId,
-    });
-    return ok(!!follower);
+  isFollowing(params: IsFollowingParams): Promise<Result<boolean, never>> {
+    throw new Error("Method not implemented.");
   }
-
-  async sendFriendRequest({
-    senderUserId,
-    recipientUserId,
-  }: SendFriendRequestParams): Promise<Result<void, FriendError>> {
-    if (senderUserId === recipientUserId) {
-      return err(new CannotFriendSelf(senderUserId));
-    }
-
-    const recipient = await this.userRepository.getUser({
-      userId: recipientUserId,
-    });
-    if (!recipient) {
-      return err(new UserNotFound(recipientUserId));
-    }
-
-    await this.db.transaction(async (tx) => {
-      const areFriends = await this.friendRepository.getFriend(
-        { userIdA: senderUserId, userIdB: recipientUserId },
-        tx,
-      );
-      if (areFriends) {
-        throw new AlreadyFriends(senderUserId, recipientUserId);
-      }
-
-      const existingRequest = await this.friendRepository.getFriendRequest(
-        { senderUserId, recipientUserId },
-        tx,
-      );
-      if (existingRequest) {
-        throw new RequestAlreadySent(senderUserId, recipientUserId);
-      }
-
-      await this.friendRepository.createFriendRequest(
-        { senderUserId, recipientUserId },
-        tx,
-      );
-    });
-
-    return ok(undefined);
+  sendFriendRequest(
+    params: SendFriendRequestParams,
+  ): Promise<Result<void, FriendError>> {
+    throw new Error("Method not implemented.");
   }
-
-  async acceptFriendRequest({
-    senderUserId,
-    recipientUserId,
-  }: AcceptFriendRequestParams): Promise<Result<void, FriendError>> {
-    await this.db.transaction(async (tx) => {
-      const request = await this.friendRepository.getFriendRequest(
-        { senderUserId, recipientUserId },
-        tx,
-      );
-      if (!request) {
-        throw new RequestNotFound(senderUserId, recipientUserId);
-      }
-
-      await this.friendRepository.deleteFriendRequest(
-        { senderUserId, recipientUserId },
-        tx,
-      );
-      await this.friendRepository.createFriend(
-        { userIdA: senderUserId, userIdB: recipientUserId },
-        tx,
-      );
-
-      await this.followRepository.createFollower(
-        { senderUserId, recipientUserId },
-        tx,
-      );
-      await this.followRepository.createFollower(
-        { senderUserId: recipientUserId, recipientUserId: senderUserId },
-        tx,
-      );
-
-      const sender = await this.userRepository.getUser(
-        { userId: senderUserId },
-        tx,
-      );
-      if (!sender) throw new UserNotFound(senderUserId);
-    });
-
-    return ok(undefined);
+  acceptFriendRequest(
+    params: AcceptFriendRequestParams,
+  ): Promise<Result<void, FriendError>> {
+    throw new Error("Method not implemented.");
   }
-
-  async declineFriendRequest({
-    senderUserId,
-    recipientUserId,
-  }: DeclineFriendRequestParams): Promise<Result<void, FriendError>> {
-    const request = await this.friendRepository.getFriendRequest({
-      senderUserId,
-      recipientUserId,
-    });
-    if (!request) {
-      return err(new RequestNotFound(senderUserId, recipientUserId));
-    }
-
-    await this.db.transaction(async (tx) => { 
-      await this.friendRepository.deleteFriendRequest(
-        { senderUserId, recipientUserId },
-        tx,
-      );
-    });
-
-    return ok(undefined);
+  declineFriendRequest(
+    params: DeclineFriendRequestParams,
+  ): Promise<Result<void, FriendError>> {
+    throw new Error("Method not implemented.");
   }
-
-  async cancelFriendRequest({
-    senderUserId,
-    recipientUserId,
-  }: CancelFriendRequestParams): Promise<Result<void, FriendError>> {
-    const request = await this.friendRepository.getFriendRequest({
-      senderUserId,
-      recipientUserId,
-    });
-    if (!request) {
-      return err(new RequestNotFound(senderUserId, recipientUserId));
-    }
-
-    await this.db.transaction(async (tx) => {
-      await this.friendRepository.deleteFriendRequest(
-        { senderUserId, recipientUserId },
-        tx,
-      );
-    });
-
-    return ok(undefined);
+  cancelFriendRequest(
+    params: CancelFriendRequestParams,
+  ): Promise<Result<void, FriendError>> {
+    throw new Error("Method not implemented.");
   }
-
-  async getFriendRequest({
-    senderUserId,
-    recipientUserId,
-  }: GetFriendRequestParams): Promise<
-    Result<FriendRequest | undefined, never>
-  > {
-    const request = await this.friendRepository.getFriendRequest({
-      senderUserId,
-      recipientUserId,
-    });
-    return ok(request);
+  getFriendRequest(
+    params: GetFriendRequestParams,
+  ): Promise<Result<FriendRequest | undefined, never>> {
+    throw new Error("Method not implemented.");
   }
-
-  async removeFriend({
-    senderUserId,
-    recipientUserId,
-  }: RemoveFriendParams): Promise<Result<void, FriendError>> {
-    const friendship = await this.friendRepository.getFriend({
-      userIdA: senderUserId,
-      userIdB: recipientUserId,
-    });
-    if (!friendship) {
-      return err(new NotFound(senderUserId, recipientUserId));
-    }
-
-    await this.db.transaction(async (tx) => {
-      await this.friendRepository.deleteFriend(
-        { userIdA: senderUserId, userIdB: recipientUserId },
-        tx,
-      );
-
-      await this.followRepository.deleteFollower(
-        { senderUserId, recipientUserId },
-        tx,
-      );
-      await this.followRepository.deleteFollower(
-        { senderUserId: recipientUserId, recipientUserId: senderUserId },
-        tx,
-      );
-    });
-
-    return ok(undefined);
+  removeFriend(params: RemoveFriendParams): Promise<Result<void, FriendError>> {
+    throw new Error("Method not implemented.");
   }
 }

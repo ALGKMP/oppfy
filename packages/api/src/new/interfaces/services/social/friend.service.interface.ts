@@ -1,46 +1,25 @@
 import type { Result } from "neverthrow";
 
 import type { FriendError } from "../../../errors/social/friend.error";
-import type { FriendRequest } from "../../../models";
+import type { FriendRequest, Profile } from "../../../models";
+import type {
+  FriendStatus,
+  PaginatedResponse,
+  PaginationParams,
+} from "../../types";
 
-export interface IsFollowingParams {
-  senderUserId: string;
-  recipientUserId: string;
+export interface PaginateByUserIdParams extends PaginationParams {
+  userId: string;
 }
 
-export interface SendFriendRequestParams {
-  senderUserId: string;
-  recipientUserId: string;
-}
-
-export interface AcceptFriendRequestParams {
-  senderUserId: string;
-  recipientUserId: string;
-}
-
-export interface DeclineFriendRequestParams {
-  senderUserId: string;
-  recipientUserId: string;
-}
-
-export interface CancelFriendRequestParams {
-  senderUserId: string;
-  recipientUserId: string;
-}
-
-export interface GetFriendRequestParams {
-  senderUserId: string;
-  recipientUserId: string;
-}
-
-export interface RemoveFriendParams {
-  senderUserId: string;
-  recipientUserId: string;
-}
+export type PaginateResult = PaginatedResponse<
+  Profile & {
+    friendedAt: Date;
+    friendStatus: FriendStatus;
+  }
+>;
 
 export interface IFriendService {
-  isFollowing(params: IsFollowingParams): Promise<Result<boolean, never>>;
-
   sendFriendRequest(
     params: SendFriendRequestParams,
   ): Promise<Result<void, FriendError>>;
