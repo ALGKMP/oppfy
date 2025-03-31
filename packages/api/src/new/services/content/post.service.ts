@@ -9,7 +9,7 @@ import { mux } from "@oppfy/mux";
 import { s3 } from "@oppfy/s3";
 
 import { TYPES } from "../../container";
-import { PostErrors } from "../../errors/content/post.error";
+import * as PostErrors from "../../errors/content/post.error";
 import type { ICommentRepository } from "../../interfaces/repositories/content/comment.repository.interface";
 import type {
   IPostRepository,

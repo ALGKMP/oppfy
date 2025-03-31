@@ -6,7 +6,8 @@ import type { Database } from "@oppfy/db";
 import { S3 } from "@oppfy/s3";
 
 import { TYPES } from "../../container";
-import { ProfileError, ProfileErrors } from "../../errors/user/profile.error";
+import * as ProfileErrors from "../../errors/user/profile.error";
+import { ProfileError } from "../../errors/user/profile.error";
 import type { IBlockRepository } from "../../interfaces/repositories/social/block.repository.interface";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
