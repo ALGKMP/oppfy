@@ -13,12 +13,10 @@ export interface PaginateByUserIdParams extends PaginationParams {
   userId: string;
 }
 
-export type PaginateResult = PaginatedResponse<
-  Profile & {
-    followedAt: Date;
-    followStatus: FollowStatus;
-  }
->;
+export type SocialProfile = Profile & {
+  followedAt: Date;
+  followStatus: FollowStatus;
+};
 
 export interface IFollowService {
   followUser(
@@ -47,13 +45,13 @@ export interface IFollowService {
 
   paginateFollowers(
     params: PaginateByUserIdParams,
-  ): Promise<Result<PaginateResult, FollowError>>;
+  ): Promise<Result<PaginatedResponse<SocialProfile>, FollowError>>;
 
   paginateFollowing(
     params: PaginateByUserIdParams,
-  ): Promise<Result<PaginateResult, FollowError>>;
+  ): Promise<Result<PaginatedResponse<SocialProfile>, FollowError>>;
 
   paginateFollowRequests(
     params: PaginateByUserIdParams,
-  ): Promise<Result<PaginateResult, FollowError>>;
+  ): Promise<Result<PaginatedResponse<SocialProfile>, FollowError>>;
 }

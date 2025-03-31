@@ -6,18 +6,24 @@ import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import * as FollowErrors from "../../errors/social/follow.error";
+import { FollowError } from "../../errors/social/follow.error";
 import * as FriendErrors from "../../errors/social/friend.error";
 import * as ProfileErrors from "../../errors/user/profile.error";
-import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
+import type {
+  IFollowRepository,
+  SocialProfile,
+} from "../../interfaces/repositories/social/follow.repository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
-import type {
+import {
   IFollowService,
   PaginateByUserIdParams,
-  PaginateResult,
 } from "../../interfaces/services/social/follow.service.interface";
-import type { DirectionalUserIdsParams } from "../../interfaces/types";
+import {
+  DirectionalUserIdsParams,
+  PaginatedResponse,
+} from "../../interfaces/types";
 
 @injectable()
 export class FollowService implements IFollowService {
@@ -62,24 +68,30 @@ export class FollowService implements IFollowService {
     if (recipientProfile === undefined)
       return err(new ProfileErrors.ProfileNotFound(recipientUserId));
 
-    const [isFollowing, isRequested] = await Promise.all([
-      this.followRepository.getFollower({ senderUserId, recipientUserId }),
-      this.followRepository.getFollowRequest({ senderUserId, recipientUserId }),
-    ]);
-
-    // Check if the user is already following the recipient
-    if (isFollowing)
-      return err(
-        new FollowErrors.AlreadyFollowing(senderUserId, recipientUserId),
-      );
-
-    // Check if a follow request is already pending
-    if (isRequested)
-      return err(
-        new FollowErrors.RequestAlreadySent(senderUserId, recipientUserId),
-      );
-
     await this.db.transaction(async (tx) => {
+      const [isFollowing, isRequested] = await Promise.all([
+        this.followRepository.getFollower(
+          { senderUserId, recipientUserId },
+          tx,
+        ),
+        this.followRepository.getFollowRequest(
+          { senderUserId, recipientUserId },
+          tx,
+        ),
+      ]);
+
+      // Check if the user is already following the recipient
+      if (isFollowing)
+        return err(
+          new FollowErrors.AlreadyFollowing(senderUserId, recipientUserId),
+        );
+
+      // Check if a follow request is already pending
+      if (isRequested)
+        return err(
+          new FollowErrors.RequestAlreadySent(senderUserId, recipientUserId),
+        );
+
       // Based on privacy, either create a follower relationship or a follow request
       await this.followRepository[
         recipientProfile.privacy === "public"
@@ -315,7 +327,9 @@ export class FollowService implements IFollowService {
     userId,
     cursor,
     pageSize = 10,
-  }: PaginateByUserIdParams): Promise<Result<PaginateResult, never>> {
+  }: PaginateByUserIdParams): Promise<
+    Result<PaginatedResponse<SocialProfile>, FollowError>
+  > {
     const rawProfiles = await this.followRepository.paginateFollowers({
       userId,
       cursor,
@@ -349,7 +363,9 @@ export class FollowService implements IFollowService {
     userId,
     cursor,
     pageSize = 10,
-  }: PaginateByUserIdParams): Promise<Result<PaginateResult, never>> {
+  }: PaginateByUserIdParams): Promise<
+    Result<PaginatedResponse<SocialProfile>, FollowError>
+  > {
     const rawProfiles = await this.followRepository.paginateFollowing({
       userId,
       cursor,
@@ -383,7 +399,9 @@ export class FollowService implements IFollowService {
     userId,
     cursor,
     pageSize = 10,
-  }: PaginateByUserIdParams): Promise<Result<PaginateResult, never>> {
+  }: PaginateByUserIdParams): Promise<
+    Result<PaginatedResponse<SocialProfile>, FollowError>
+  > {
     const rawProfiles = await this.followRepository.paginateFollowRequests({
       userId,
       cursor,

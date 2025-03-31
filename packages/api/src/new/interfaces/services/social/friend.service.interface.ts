@@ -5,6 +5,7 @@ import type { Profile } from "../../../models";
 import type {
   BidirectionalUserIdsparams,
   DirectionalUserIdsParams,
+  FollowStatus,
   FriendStatus,
   PaginatedResponse,
   PaginationParams,
@@ -14,12 +15,11 @@ export interface PaginateByUserIdParams extends PaginationParams {
   userId: string;
 }
 
-export type PaginateResult = PaginatedResponse<
-  Profile & {
-    friendedAt: Date;
-    friendStatus: FriendStatus;
-  }
->;
+export type SocialProfile = Profile & {
+  followedAt: Date;
+  friendedAt: Date;
+  followStatus: FollowStatus;
+};
 
 export interface IFriendService {
   friendUser(
@@ -44,9 +44,9 @@ export interface IFriendService {
 
   paginateFriends(
     params: PaginateByUserIdParams,
-  ): Promise<Result<PaginateResult, FriendError>>;
+  ): Promise<Result<PaginatedResponse<SocialProfile>, FriendError>>;
 
   paginateFriendRequests(
     params: PaginateByUserIdParams,
-  ): Promise<Result<PaginateResult, FriendError>>;
+  ): Promise<Result<PaginatedResponse<Profile>, FriendError>>;
 }
