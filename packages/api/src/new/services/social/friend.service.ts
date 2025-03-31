@@ -12,6 +12,7 @@ import {
   RequestAlreadySent,
   RequestNotFound,
 } from "../../errors/social/friend.error";
+import * as FriendErrors from "../../errors/social/friend.error";
 import { UserNotFound } from "../../errors/user/user.error";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
@@ -46,11 +47,83 @@ export class FriendService implements IFriendService {
     private readonly profileRepository: IProfileRepository,
   ) {}
 
-  friendUser(
-    params: DirectionalUserIdsParams,
-  ): Promise<Result<void, FriendError>> {
-    throw new Error("Method not implemented.");
+  async friendUser({
+    recipientUserId,
+    senderUserId,
+  }: DirectionalUserIdsParams): Promise<Result<void, FriendError>> {
+    // prevent a user from friending themselves
+    if (senderUserId === recipientUserId) {
+      return err(new FriendErrors.CannotFriendSelf(senderUserId));
+    }
+
+    const [isFriends, isRequestedOutgoing, isRequestedIncoming] =
+      await Promise.all([
+        this.friendRepository.getFriend({
+          userIdA: senderUserId,
+          userIdB: recipientUserId,
+        }),
+        this.friendRepository.getFriendRequest({
+          senderUserId,
+          recipientUserId,
+        }),
+        this.friendRepository.getFriendRequest({
+          senderUserId: recipientUserId,
+          recipientUserId: senderUserId,
+        }),
+      ]);
+
+    // check if the users are already friends
+    if (isFriends)
+      return err(
+        new FriendErrors.AlreadyFriends(senderUserId, recipientUserId),
+      );
+
+    // check if a friend request is pending
+    if (isRequestedOutgoing)
+      return err(
+        new FriendErrors.RequestAlreadySent(senderUserId, recipientUserId),
+      );
+
+    // check if a friend request is pending from the recipient to the sender
+    if (isRequestedIncoming) {
+      await this.db.transaction(async (tx) => {
+        await this.friendRepository.createFriend(
+          {
+            userIdA: senderUserId,
+            userIdB: recipientUserId,
+          },
+          tx,
+        );
+
+        await this.followRepository.deleteFollowRequest(
+          {
+            senderUserId,
+            recipientUserId,
+          },
+          tx,
+        );
+
+        await this.friendRepository.deleteFriendRequest(
+          {
+            senderUserId: recipientUserId,
+            recipientUserId: senderUserId,
+          },
+          tx,
+        );
+      });
+
+      return ok();
+    }
+
+    // create a friend request
+    await this.friendRepository.createFriendRequest({
+      senderUserId,
+      recipientUserId,
+    });
+
+    return ok();
   }
+
   unfriendUser(
     params: BidirectionalUserIdsparams,
   ): Promise<Result<void, FriendError>> {

@@ -62,30 +62,24 @@ export class FollowService implements IFollowService {
     if (recipientProfile === undefined)
       return err(new ProfileErrors.ProfileNotFound(recipientUserId));
 
+    const [isFollowing, isRequested] = await Promise.all([
+      this.followRepository.getFollower({ senderUserId, recipientUserId }),
+      this.followRepository.getFollowRequest({ senderUserId, recipientUserId }),
+    ]);
+
+    // Check if the user is already following the recipient
+    if (isFollowing)
+      return err(
+        new FollowErrors.AlreadyFollowing(senderUserId, recipientUserId),
+      );
+
+    // Check if a follow request is already pending
+    if (isRequested)
+      return err(
+        new FollowErrors.RequestAlreadySent(senderUserId, recipientUserId),
+      );
+
     await this.db.transaction(async (tx) => {
-      const [isFollowing, isRequested] = await Promise.all([
-        this.followRepository.getFollower(
-          { senderUserId, recipientUserId },
-          tx,
-        ),
-        this.followRepository.getFollowRequest(
-          { senderUserId, recipientUserId },
-          tx,
-        ),
-      ]);
-
-      // Check if the user is already following the recipient
-      if (isFollowing)
-        return err(
-          new FollowErrors.AlreadyFollowing(senderUserId, recipientUserId),
-        );
-
-      // Check if a follow request is already pending
-      if (isRequested)
-        return err(
-          new FollowErrors.RequestAlreadySent(senderUserId, recipientUserId),
-        );
-
       // Based on privacy, either create a follower relationship or a follow request
       await this.followRepository[
         recipientProfile.privacy === "public"
