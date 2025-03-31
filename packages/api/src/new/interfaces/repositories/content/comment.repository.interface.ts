@@ -28,7 +28,7 @@ export interface AddCommentParams {
 
 export interface PaginateCommentsParams {
   postId: string;
-  cursor: CommentCursor | null;
+  cursor?: { createdAt: Date; commentId: string } | null;
   pageSize?: number;
 }
 
@@ -43,15 +43,9 @@ export interface ICommentRepository {
     db?: DatabaseOrTransaction,
   ): Promise<Comment | undefined>;
 
-  addComment(
-    params: AddCommentParams,
-    tx: Transaction,
-  ): Promise<void>;
+  addComment(params: AddCommentParams, tx: Transaction): Promise<void>;
 
-  removeComment(
-    params: RemoveCommentParams,
-    tx: Transaction,
-  ): Promise<void>;
+  removeComment(params: RemoveCommentParams, tx: Transaction): Promise<void>;
 
   countComments(
     params: CountCommentsParams,

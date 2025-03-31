@@ -1,4 +1,4 @@
-import { and, asc, count, eq, exists, gt, not, or, sql } from "drizzle-orm";
+import { and, asc, eq, exists, gt, not, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type {
@@ -16,7 +16,6 @@ import {
   IFriendRepository,
   PaginateFriendParams,
   SocialProfile,
-  UserIdParams,
 } from "../../interfaces/repositories/social/friend.repository.interface";
 import { Friend, FriendRequest, Profile } from "../../models";
 
