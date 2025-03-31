@@ -45,19 +45,11 @@ export interface IFollowService {
     params: DirectionalUserIdsParams,
   ): Promise<Result<void, FollowError>>;
 
-  paginateFollowersSelf(
+  paginateFollowers(
     params: PaginateByUserIdParams,
   ): Promise<Result<PaginateResult, FollowError>>;
 
-  paginateFollowingSelf(
-    params: PaginateByUserIdParams,
-  ): Promise<Result<PaginateResult, FollowError>>;
-
-  paginateFollowersOthers(
-    params: PaginateByUserIdParams,
-  ): Promise<Result<PaginateResult, FollowError>>;
-
-  paginateFollowingOthers(
+  paginateFollowing(
     params: PaginateByUserIdParams,
   ): Promise<Result<PaginateResult, FollowError>>;
 

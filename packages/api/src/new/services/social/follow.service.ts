@@ -317,7 +317,7 @@ export class FollowService implements IFollowService {
    * Retrieves a paginated list of the user's followers.
    * For each follower, followStatus indicates if the user follows them back.
    */
-  async paginateFollowersSelf({
+  async paginateFollowers({
     userId,
     cursor,
     pageSize = 10,
@@ -351,75 +351,7 @@ export class FollowService implements IFollowService {
    * Retrieves a paginated list of users the specified user is following.
    * followStatus is always "FOLLOWING" since these are users the user follows.
    */
-  async paginateFollowingSelf({
-    userId,
-    cursor,
-    pageSize = 10,
-  }: PaginateByUserIdParams): Promise<Result<PaginateResult, never>> {
-    const rawProfiles = await this.followRepository.paginateFollowing({
-      userId,
-      cursor,
-      limit: pageSize + 1,
-    });
-
-    const profiles = rawProfiles.map((profile) => ({
-      ...cloudfront.hydrateProfile(profile),
-      followedAt: profile.followedAt,
-      followStatus: profile.followStatus,
-    }));
-
-    const hasMore = rawProfiles.length > pageSize;
-    const items = profiles.slice(0, pageSize);
-    const lastUser = items[items.length - 1];
-
-    return ok({
-      items,
-      nextCursor:
-        hasMore && lastUser
-          ? { userId: lastUser.userId, createdAt: lastUser.createdAt }
-          : null,
-    });
-  }
-
-  /**
-   * Retrieves a paginated list of another user's followers.
-   * Note: Ideally, followStatus should reflect the viewer's relationship, but viewer ID is not provided.
-   */
-  async paginateFollowersOthers({
-    userId,
-    cursor,
-    pageSize = 10,
-  }: PaginateByUserIdParams): Promise<Result<PaginateResult, never>> {
-    const rawProfiles = await this.followRepository.paginateFollowers({
-      userId,
-      cursor,
-      limit: pageSize + 1,
-    });
-
-    const profiles = rawProfiles.map((profile) => ({
-      ...cloudfront.hydrateProfile(profile),
-      followedAt: profile.followedAt,
-      followStatus: profile.followStatus,
-    }));
-
-    const hasMore = rawProfiles.length > pageSize;
-    const items = profiles.slice(0, pageSize);
-    const lastUser = items[items.length - 1];
-
-    return ok({
-      items,
-      nextCursor:
-        hasMore && lastUser
-          ? { userId: lastUser.userId, createdAt: lastUser.createdAt }
-          : null,
-    });
-  }
-
-  /**
-   * Retrieves a paginated list of users another user is following.
-   * Note: Ideally, followStatus should reflect the viewer's relationship, but viewer ID is not provided.
-   */
-  async paginateFollowingOthers({
+  async paginateFollowing({
     userId,
     cursor,
     pageSize = 10,

@@ -19,15 +19,14 @@ import type { INotificationsRepository } from "../../interfaces/repositories/use
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type {
-  AcceptFriendRequestParams,
-  CancelFriendRequestParams,
-  DeclineFriendRequestParams,
-  GetFriendRequestParams,
   IFriendService,
-  IsFollowingParams,
-  RemoveFriendParams,
-  SendFriendRequestParams,
+  PaginateByUserIdParams,
+  PaginateResult,
 } from "../../interfaces/services/social/friend.service.interface";
+import {
+  BidirectionalUserIdsparams,
+  DirectionalUserIdsParams,
+} from "../../interfaces/types";
 import { FriendRequest } from "../../models";
 
 @injectable()
@@ -47,35 +46,39 @@ export class FriendService implements IFriendService {
     private readonly profileRepository: IProfileRepository,
   ) {}
 
-  isFollowing(params: IsFollowingParams): Promise<Result<boolean, never>> {
+  friendUser(
+    params: DirectionalUserIdsParams,
+  ): Promise<Result<void, FriendError>> {
     throw new Error("Method not implemented.");
   }
-  sendFriendRequest(
-    params: SendFriendRequestParams,
+  unfriendUser(
+    params: BidirectionalUserIdsparams,
   ): Promise<Result<void, FriendError>> {
     throw new Error("Method not implemented.");
   }
   acceptFriendRequest(
-    params: AcceptFriendRequestParams,
+    params: DirectionalUserIdsParams,
   ): Promise<Result<void, FriendError>> {
     throw new Error("Method not implemented.");
   }
   declineFriendRequest(
-    params: DeclineFriendRequestParams,
+    params: DirectionalUserIdsParams,
   ): Promise<Result<void, FriendError>> {
     throw new Error("Method not implemented.");
   }
   cancelFriendRequest(
-    params: CancelFriendRequestParams,
+    params: DirectionalUserIdsParams,
   ): Promise<Result<void, FriendError>> {
     throw new Error("Method not implemented.");
   }
-  getFriendRequest(
-    params: GetFriendRequestParams,
-  ): Promise<Result<FriendRequest | undefined, never>> {
+  paginateFriends(
+    params: PaginateByUserIdParams,
+  ): Promise<Result<PaginateResult, FriendError>> {
     throw new Error("Method not implemented.");
   }
-  removeFriend(params: RemoveFriendParams): Promise<Result<void, FriendError>> {
+  paginateFriendRequests(
+    params: PaginateByUserIdParams,
+  ): Promise<Result<PaginateResult, FriendError>> {
     throw new Error("Method not implemented.");
   }
 }
