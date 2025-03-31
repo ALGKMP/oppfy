@@ -64,5 +64,5 @@ export interface IFollowRepository {
   paginateFollowRequests(
     params: PaginateFollowParams,
     db?: DatabaseOrTransaction,
-  ): Promise<SocialProfile[]>;
+  ): Promise<Profile[]>;
 }

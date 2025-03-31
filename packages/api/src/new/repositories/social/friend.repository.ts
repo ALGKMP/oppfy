@@ -7,6 +7,7 @@ import type {
   Schema,
   Transaction,
 } from "@oppfy/db";
+import { getFollowStatusSql } from "@oppfy/db/utils/query-helpers";
 
 import { TYPES } from "../../container";
 import {
@@ -283,7 +284,7 @@ export class FriendRepository implements IFriendRepository {
           eq(this.schema.userStats.userId, userIdA),
           eq(this.schema.userStats.userId, userIdB),
         ),
-      );  
+      );
   }
 
   /**
@@ -299,7 +300,9 @@ export class FriendRepository implements IFriendRepository {
     const friends = await db
       .select({
         profile: this.schema.profile,
+        followedAt: this.schema.follow.createdAt,
         friendedAt: this.schema.friend.createdAt,
+        followStatus: getFollowStatusSql(this.schema, userId),
       })
       .from(this.schema.friend)
       .innerJoin(
@@ -332,7 +335,9 @@ export class FriendRepository implements IFriendRepository {
 
     return friends.map((friend) => ({
       ...friend.profile,
+      followedAt: friend.followedAt,
       friendedAt: friend.friendedAt,
+      followStatus: friend.followStatus,
     }));
   }
 
@@ -343,7 +348,7 @@ export class FriendRepository implements IFriendRepository {
   async paginateFriendRequests(
     params: PaginateFriendParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<SocialProfile[]> {
+  ): Promise<Profile[]> {
     const { userId, cursor, limit = 10 } = params;
 
     const requests = await db
@@ -380,9 +385,6 @@ export class FriendRepository implements IFriendRepository {
       )
       .limit(limit);
 
-    return requests.map((request) => ({
-      ...request.profile,
-      friendedAt: request.friendedAt,
-    }));
+    return requests.map((request) => request.profile);
   }
 }

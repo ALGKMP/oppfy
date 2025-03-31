@@ -24,6 +24,7 @@ import {
   DirectionalUserIdsParams,
   PaginatedResponse,
 } from "../../interfaces/types";
+import { Profile } from "../../models";
 
 @injectable()
 export class FollowService implements IFollowService {
@@ -393,14 +394,13 @@ export class FollowService implements IFollowService {
 
   /**
    * Retrieves a paginated list of pending follow requests sent to the user.
-   * followStatus is always "REQUESTED" for these users.
    */
   async paginateFollowRequests({
     userId,
     cursor,
     pageSize = 10,
   }: PaginateByUserIdParams): Promise<
-    Result<PaginatedResponse<SocialProfile>, FollowError>
+    Result<PaginatedResponse<Profile>, FollowError>
   > {
     const rawProfiles = await this.followRepository.paginateFollowRequests({
       userId,
@@ -408,11 +408,9 @@ export class FollowService implements IFollowService {
       limit: pageSize + 1,
     });
 
-    const profiles = rawProfiles.map((profile) => ({
-      ...cloudfront.hydrateProfile(profile),
-      followedAt: profile.followedAt,
-      followStatus: profile.followStatus,
-    }));
+    const profiles = rawProfiles.map((profile) =>
+      cloudfront.hydrateProfile(profile),
+    );
 
     const hasMore = rawProfiles.length > pageSize;
     const items = profiles.slice(0, pageSize);

@@ -69,5 +69,5 @@ export interface IFriendRepository {
   paginateFriendRequests(
     params: PaginateFriendParams,
     db?: DatabaseOrTransaction,
-  ): Promise<SocialProfile[]>;
+  ): Promise<Profile[]>;
 }

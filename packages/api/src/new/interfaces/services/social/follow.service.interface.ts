@@ -53,5 +53,5 @@ export interface IFollowService {
 
   paginateFollowRequests(
     params: PaginateByUserIdParams,
-  ): Promise<Result<PaginatedResponse<SocialProfile>, FollowError>>;
+  ): Promise<Result<PaginatedResponse<Profile>, FollowError>>;
 }
