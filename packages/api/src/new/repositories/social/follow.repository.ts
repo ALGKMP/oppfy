@@ -1,4 +1,4 @@
-import { and, asc, count, eq, exists, gt, or, sql } from "drizzle-orm";
+import { and, asc, eq, exists, gt, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type {
@@ -377,7 +377,7 @@ export class FollowRepository implements IFollowRepository {
   async paginateFollowRequests(
     params: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<SocialProfile[]> {
+  ): Promise<Profile[]> {
     const { userId, cursor, limit = 10 } = params;
 
     const requests = await db
@@ -415,10 +415,6 @@ export class FollowRepository implements IFollowRepository {
       )
       .limit(limit);
 
-    return requests.map((request) => ({
-      ...request.profile,
-      followedAt: request.followedAt,
-      followStatus: request.followStatus,
-    }));
+    return requests.map((request) => request.profile);
   }
 }

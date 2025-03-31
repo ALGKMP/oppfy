@@ -7,19 +7,16 @@ import type {
   FollowStatus,
   PaginatedResponse,
   PaginationParams,
-  Privacy,
 } from "../../types";
 
 export interface PaginateByUserIdParams extends PaginationParams {
   userId: string;
 }
 
-export type PaginateResult = PaginatedResponse<
-  Profile & {
-    followedAt: Date;
-    followStatus: FollowStatus;
-  }
->;
+export type SocialProfile = Profile & {
+  followedAt: Date;
+  followStatus: FollowStatus;
+};
 
 export interface IFollowService {
   followUser(
@@ -46,23 +43,15 @@ export interface IFollowService {
     params: DirectionalUserIdsParams,
   ): Promise<Result<void, FollowError>>;
 
-  paginateFollowersSelf(
+  paginateFollowers(
     params: PaginateByUserIdParams,
-  ): Promise<Result<PaginateResult, FollowError>>;
+  ): Promise<Result<PaginatedResponse<SocialProfile>, FollowError>>;
 
-  paginateFollowingSelf(
+  paginateFollowing(
     params: PaginateByUserIdParams,
-  ): Promise<Result<PaginateResult, FollowError>>;
-
-  paginateFollowersOthers(
-    params: PaginateByUserIdParams,
-  ): Promise<Result<PaginateResult, FollowError>>;
-
-  paginateFollowingOthers(
-    params: PaginateByUserIdParams,
-  ): Promise<Result<PaginateResult, FollowError>>;
+  ): Promise<Result<PaginatedResponse<SocialProfile>, FollowError>>;
 
   paginateFollowRequests(
     params: PaginateByUserIdParams,
-  ): Promise<Result<PaginateResult, FollowError>>;
+  ): Promise<Result<PaginatedResponse<Profile>, FollowError>>;
 }

@@ -10,7 +10,7 @@ import type {
   IBlockRepository,
   SocialProfile,
 } from "../../interfaces/repositories/social/block.repository.interface";
-import type { Block, BlockWithProfile } from "../../models";
+import type { Block } from "../../models";
 
 @injectable()
 export class BlockRepository implements IBlockRepository {

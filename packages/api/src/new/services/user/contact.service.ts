@@ -2,13 +2,13 @@ import { createHash } from "crypto";
 import { inject, injectable } from "inversify";
 import { err, ok } from "neverthrow";
 
-import { CloudFront, cloudfront } from "@oppfy/cloudfront";
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Transaction } from "@oppfy/db";
 import { sqs } from "@oppfy/sqs";
 
 import { TYPES } from "../../container";
-import { AwsErrors } from "../../errors/aws.error";
-import { UserErrors } from "../../errors/user/user.error";
+import * as AwsErrors from "../../errors/aws.error";
+import * as UserErrors from "../../errors/user/user.error";
 import type {
   DeleteContactsParams,
   DeleteContactsResult,
@@ -145,7 +145,8 @@ export class ContactService implements IContactService {
       return err(new UserErrors.UserNotFound(userId));
     }
 
-    const { tier1, tier2, tier3 } = await this.contactsRepository.getRecommendationIds(userId);
+    const { tier1, tier2, tier3 } =
+      await this.contactsRepository.getRecommendationIds(userId);
     let allRecommendations = [...tier1, ...tier2, ...tier3];
 
     if (allRecommendations.length === 0) {

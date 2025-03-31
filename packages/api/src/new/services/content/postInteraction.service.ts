@@ -4,7 +4,7 @@ import { err, ok, Result } from "neverthrow";
 import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
-import { PostInteractionErrors } from "../../errors/content/postInteraction.error";
+import * as PostInteractionErrors from "../../errors/content/postInteraction.error";
 import type { ICommentRepository } from "../../interfaces/repositories/content/comment.repository.interface";
 import type { ILikeRepository } from "../../interfaces/repositories/content/like.repository.interface";
 import type { IPostRepository } from "../../interfaces/repositories/content/post.repository.interface";

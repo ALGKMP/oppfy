@@ -1,6 +1,7 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
@@ -14,26 +15,31 @@ import {
 } from "../../errors/social/friend.error";
 import { UserNotFound } from "../../errors/user/user.error";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
-import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
+import type {
+  IFriendRepository,
+  SocialProfile,
+} from "../../interfaces/repositories/social/friend.repository.interface";
 import type { INotificationsRepository } from "../../interfaces/repositories/user/notification.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type {
-  AcceptFriendRequestParams,
-  CancelFriendRequestParams,
-  DeclineFriendRequestParams,
-  GetFriendRequestParams,
   IFriendService,
-  IsFollowingParams,
-  RemoveFriendParams,
-  SendFriendRequestParams,
+  PaginateByUserIdParams,
 } from "../../interfaces/services/social/friend.service.interface";
-import { FriendRequest } from "../../models";
+import {
+  BidirectionalUserIdsparams,
+  DirectionalUserIdsParams,
+  PaginatedResponse,
+} from "../../interfaces/types";
+import { Profile } from "../../models";
 
 @injectable()
 export class FriendService implements IFriendService {
   constructor(
-    @inject(TYPES.Database) private readonly db: Database,
+    @inject(TYPES.Database)
+    private readonly db: Database,
+    @inject(TYPES.CloudFront)
+    private readonly cloudfront: CloudFront,
     @inject(TYPES.FriendRepository)
     private readonly friendRepository: IFriendRepository,
     @inject(TYPES.FollowRepository)
@@ -46,73 +52,177 @@ export class FriendService implements IFriendService {
     private readonly profileRepository: IProfileRepository,
   ) {}
 
-  async isFollowing({
+  /**
+   * Initiates or completes a friend relationship. Sends a friend request if no prior relationship exists,
+   * or accepts an incoming request if one is present.
+   */
+  async friendUser({
     senderUserId,
     recipientUserId,
-  }: IsFollowingParams): Promise<Result<boolean, never>> {
-    const follower = await this.followRepository.getFollower({
-      senderUserId,
-      recipientUserId,
-    });
-    return ok(!!follower);
-  }
-
-  async sendFriendRequest({
-    senderUserId,
-    recipientUserId,
-  }: SendFriendRequestParams): Promise<Result<void, FriendError>> {
+  }: DirectionalUserIdsParams): Promise<Result<void, FriendError>> {
     if (senderUserId === recipientUserId) {
       return err(new CannotFriendSelf(senderUserId));
     }
 
-    const recipient = await this.userRepository.getUser({
-      userId: recipientUserId,
-    });
-    if (!recipient) {
-      return err(new UserNotFound(recipientUserId));
-    }
+    const [senderExists, recipientProfile] = await Promise.all([
+      this.userRepository.getUser({ userId: senderUserId }),
+      this.profileRepository.getProfile({ userId: recipientUserId }),
+    ]);
+    if (!senderExists) return err(new UserNotFound(senderUserId));
+    if (!recipientProfile) return err(new UserNotFound(recipientUserId));
 
-    await this.db.transaction(async (tx) => {
-      const areFriends = await this.friendRepository.getFriend(
-        { userIdA: senderUserId, userIdB: recipientUserId },
-        tx,
-      );
-      if (areFriends) {
-        throw new AlreadyFriends(senderUserId, recipientUserId);
+    return await this.db.transaction(async (tx) => {
+      const [
+        isFriends,
+        isFriendRequestedOutgoing,
+        isFriendRequestedIncoming,
+        isFollowing,
+        isFollowRequested,
+        isRecipientFollowing,
+        isRecipientFollowRequested,
+      ] = await Promise.all([
+        this.friendRepository.getFriend(
+          { userIdA: senderUserId, userIdB: recipientUserId },
+          tx,
+        ),
+        this.friendRepository.getFriendRequest(
+          { senderUserId, recipientUserId },
+          tx,
+        ),
+        this.friendRepository.getFriendRequest(
+          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          tx,
+        ),
+        this.followRepository.getFollower(
+          { senderUserId, recipientUserId },
+          tx,
+        ),
+        this.followRepository.getFollowRequest(
+          { senderUserId, recipientUserId },
+          tx,
+        ),
+        this.followRepository.getFollower(
+          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          tx,
+        ),
+        this.followRepository.getFollowRequest(
+          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          tx,
+        ),
+      ]);
+
+      if (isFriends) {
+        return err(new AlreadyFriends(senderUserId, recipientUserId));
+      }
+      if (isFriendRequestedOutgoing) {
+        return err(new RequestAlreadySent(senderUserId, recipientUserId));
       }
 
-      const existingRequest = await this.friendRepository.getFriendRequest(
-        { senderUserId, recipientUserId },
-        tx,
-      );
-      if (existingRequest) {
-        throw new RequestAlreadySent(senderUserId, recipientUserId);
+      if (isFriendRequestedIncoming) {
+        await this.friendRepository.createFriend(
+          { userIdA: senderUserId, userIdB: recipientUserId },
+          tx,
+        );
+        await this.friendRepository.deleteFriendRequest(
+          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          tx,
+        );
+
+        if (isFollowRequested) {
+          await this.followRepository.deleteFollowRequest(
+            { senderUserId, recipientUserId },
+            tx,
+          );
+        }
+        if (isRecipientFollowRequested) {
+          await this.followRepository.deleteFollowRequest(
+            { senderUserId: recipientUserId, recipientUserId: senderUserId },
+            tx,
+          );
+        }
+        if (!isFollowing) {
+          await this.followRepository.createFollower(
+            { senderUserId, recipientUserId },
+            tx,
+          );
+        }
+        if (!isRecipientFollowing) {
+          await this.followRepository.createFollower(
+            { senderUserId: recipientUserId, recipientUserId: senderUserId },
+            tx,
+          );
+        }
+
+        return ok();
       }
 
       await this.friendRepository.createFriendRequest(
         { senderUserId, recipientUserId },
         tx,
       );
-    });
 
-    return ok(undefined);
+      if (!isFollowing && !isFollowRequested) {
+        await this.followRepository[
+          recipientProfile.privacy === "public"
+            ? "createFollower"
+            : "createFollowRequest"
+        ]({ senderUserId, recipientUserId }, tx);
+      }
+      if (isRecipientFollowRequested) {
+        await this.followRepository.deleteFollowRequest(
+          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          tx,
+        );
+        await this.followRepository.createFollower(
+          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          tx,
+        );
+      }
+
+      return ok();
+    });
   }
 
+  /**
+   * Removes the friend relationship between two users. Follows persist.
+   */
+  async unfriendUser({
+    userIdA,
+    userIdB,
+  }: BidirectionalUserIdsparams): Promise<Result<void, FriendError>> {
+    return await this.db.transaction(async (tx) => {
+      const isFriends = await this.friendRepository.getFriend(
+        { userIdA, userIdB },
+        tx,
+      );
+      if (!isFriends) {
+        return err(new NotFound(userIdA, userIdB));
+      }
+
+      await this.friendRepository.deleteFriend({ userIdA, userIdB }, tx);
+
+      return ok();
+    });
+  }
+
+  /**
+   * Accepts an incoming friend request, establishing a friendship and ensuring mutual follows.
+   */
   async acceptFriendRequest({
     senderUserId,
     recipientUserId,
-  }: AcceptFriendRequestParams): Promise<Result<void, FriendError>> {
-    await this.db.transaction(async (tx) => {
-      const request = await this.friendRepository.getFriendRequest(
-        { senderUserId, recipientUserId },
+  }: DirectionalUserIdsParams): Promise<Result<void, FriendError>> {
+    return await this.db.transaction(async (tx) => {
+      const isRequested = await this.friendRepository.getFriendRequest(
+        { senderUserId: recipientUserId, recipientUserId: senderUserId },
         tx,
       );
-      if (!request) {
-        throw new RequestNotFound(senderUserId, recipientUserId);
+      if (!isRequested) {
+        return err(new RequestNotFound(recipientUserId, senderUserId));
       }
 
       await this.friendRepository.deleteFriendRequest(
-        { senderUserId, recipientUserId },
+        { senderUserId: recipientUserId, recipientUserId: senderUserId },
         tx,
       );
       await this.friendRepository.createFriend(
@@ -120,110 +230,174 @@ export class FriendService implements IFriendService {
         tx,
       );
 
-      await this.followRepository.createFollower(
-        { senderUserId, recipientUserId },
-        tx,
+      const [isFollowRequested, isRecipientFollowRequested] = await Promise.all(
+        [
+          this.followRepository.getFollowRequest(
+            { senderUserId, recipientUserId },
+            tx,
+          ),
+          this.followRepository.getFollowRequest(
+            { senderUserId: recipientUserId, recipientUserId: senderUserId },
+            tx,
+          ),
+        ],
       );
-      await this.followRepository.createFollower(
-        { senderUserId: recipientUserId, recipientUserId: senderUserId },
-        tx,
-      );
+      if (isFollowRequested) {
+        await this.followRepository.deleteFollowRequest(
+          { senderUserId, recipientUserId },
+          tx,
+        );
+      }
+      if (isRecipientFollowRequested) {
+        await this.followRepository.deleteFollowRequest(
+          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          tx,
+        );
+      }
 
-      const sender = await this.userRepository.getUser(
-        { userId: senderUserId },
-        tx,
-      );
-      if (!sender) throw new UserNotFound(senderUserId);
+      const [isFollowing, isRecipientFollowing] = await Promise.all([
+        this.followRepository.getFollower(
+          { senderUserId, recipientUserId },
+          tx,
+        ),
+        this.followRepository.getFollower(
+          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          tx,
+        ),
+      ]);
+      if (!isFollowing) {
+        await this.followRepository.createFollower(
+          { senderUserId, recipientUserId },
+          tx,
+        );
+      }
+      if (!isRecipientFollowing) {
+        await this.followRepository.createFollower(
+          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          tx,
+        );
+      }
+
+      return ok();
     });
-
-    return ok(undefined);
   }
 
+  /**
+   * Declines an incoming friend request by deleting it.
+   */
   async declineFriendRequest({
     senderUserId,
     recipientUserId,
-  }: DeclineFriendRequestParams): Promise<Result<void, FriendError>> {
-    const request = await this.friendRepository.getFriendRequest({
-      senderUserId,
-      recipientUserId,
-    });
-    if (!request) {
-      return err(new RequestNotFound(senderUserId, recipientUserId));
-    }
-
-    await this.db.transaction(async (tx) => { 
-      await this.friendRepository.deleteFriendRequest(
-        { senderUserId, recipientUserId },
-        tx,
-      );
-    });
-
-    return ok(undefined);
-  }
-
-  async cancelFriendRequest({
-    senderUserId,
-    recipientUserId,
-  }: CancelFriendRequestParams): Promise<Result<void, FriendError>> {
-    const request = await this.friendRepository.getFriendRequest({
-      senderUserId,
-      recipientUserId,
-    });
-    if (!request) {
-      return err(new RequestNotFound(senderUserId, recipientUserId));
-    }
-
-    await this.db.transaction(async (tx) => {
-      await this.friendRepository.deleteFriendRequest(
-        { senderUserId, recipientUserId },
-        tx,
-      );
-    });
-
-    return ok(undefined);
-  }
-
-  async getFriendRequest({
-    senderUserId,
-    recipientUserId,
-  }: GetFriendRequestParams): Promise<
-    Result<FriendRequest | undefined, never>
-  > {
-    const request = await this.friendRepository.getFriendRequest({
-      senderUserId,
-      recipientUserId,
-    });
-    return ok(request);
-  }
-
-  async removeFriend({
-    senderUserId,
-    recipientUserId,
-  }: RemoveFriendParams): Promise<Result<void, FriendError>> {
-    const friendship = await this.friendRepository.getFriend({
-      userIdA: senderUserId,
-      userIdB: recipientUserId,
-    });
-    if (!friendship) {
-      return err(new NotFound(senderUserId, recipientUserId));
-    }
-
-    await this.db.transaction(async (tx) => {
-      await this.friendRepository.deleteFriend(
-        { userIdA: senderUserId, userIdB: recipientUserId },
-        tx,
-      );
-
-      await this.followRepository.deleteFollower(
-        { senderUserId, recipientUserId },
-        tx,
-      );
-      await this.followRepository.deleteFollower(
+  }: DirectionalUserIdsParams): Promise<Result<void, FriendError>> {
+    return await this.db.transaction(async (tx) => {
+      const isRequested = await this.friendRepository.getFriendRequest(
         { senderUserId: recipientUserId, recipientUserId: senderUserId },
         tx,
       );
+      if (!isRequested) {
+        return err(new RequestNotFound(recipientUserId, senderUserId));
+      }
+
+      await this.friendRepository.deleteFriendRequest(
+        { senderUserId: recipientUserId, recipientUserId: senderUserId },
+        tx,
+      );
+
+      return ok();
+    });
+  }
+
+  /**
+   * Cancels an outgoing friend request sent by the user.
+   */
+  async cancelFriendRequest({
+    senderUserId,
+    recipientUserId,
+  }: DirectionalUserIdsParams): Promise<Result<void, FriendError>> {
+    return await this.db.transaction(async (tx) => {
+      const isRequested = await this.friendRepository.getFriendRequest(
+        { senderUserId, recipientUserId },
+        tx,
+      );
+      if (!isRequested) {
+        return err(new RequestNotFound(senderUserId, recipientUserId));
+      }
+
+      await this.friendRepository.deleteFriendRequest(
+        { senderUserId, recipientUserId },
+        tx,
+      );
+
+      return ok();
+    });
+  }
+
+  /**
+   * Retrieves a paginated list of the user's friends.
+   */
+  async paginateFriends({
+    userId,
+    cursor,
+    pageSize = 10,
+  }: PaginateByUserIdParams): Promise<
+    Result<PaginatedResponse<SocialProfile>, FriendError>
+  > {
+    const rawProfiles = await this.friendRepository.paginateFriends({
+      userId,
+      cursor,
+      limit: pageSize + 1,
     });
 
-    return ok(undefined);
+    const profiles = rawProfiles.map((profile) => ({
+      ...this.cloudfront.hydrateProfile(profile),
+      followedAt: profile.followedAt,
+      friendedAt: profile.friendedAt,
+      followStatus: profile.followStatus,
+    }));
+
+    const hasMore = rawProfiles.length > pageSize;
+    const items = profiles.slice(0, pageSize);
+    const lastUser = items[items.length - 1];
+
+    return ok({
+      items,
+      nextCursor:
+        hasMore && lastUser
+          ? { userId: lastUser.userId, createdAt: lastUser.createdAt }
+          : null,
+    });
+  }
+
+  /**
+   * Retrieves a paginated list of incoming friend requests.
+   */
+  async paginateFriendRequests({
+    userId,
+    cursor,
+    pageSize = 10,
+  }: PaginateByUserIdParams): Promise<
+    Result<PaginatedResponse<Profile>, FriendError>
+  > {
+    const rawProfiles = await this.friendRepository.paginateFriendRequests({
+      userId,
+      cursor,
+      limit: pageSize + 1,
+    });
+
+    const profiles = rawProfiles.map((profile) =>
+      this.cloudfront.hydrateProfile(profile),
+    );
+
+    const hasMore = rawProfiles.length > pageSize;
+    const items = profiles.slice(0, pageSize);
+    const lastUser = items[items.length - 1];
+
+    return ok({
+      items,
+      nextCursor:
+        hasMore && lastUser
+          ? { userId: lastUser.userId, createdAt: lastUser.createdAt }
+          : null,
+    });
   }
 }

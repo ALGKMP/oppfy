@@ -1,7 +1,12 @@
 import { and, count, desc, eq, lte, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
-import type { Database, DatabaseOrTransaction, Schema, Transaction } from "@oppfy/db";
+import type {
+  Database,
+  DatabaseOrTransaction,
+  Schema,
+  Transaction,
+} from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import {
@@ -47,9 +52,12 @@ export class CommentRepository implements ICommentRepository {
       body,
     });
 
-    await tx.update(this.schema.postStats).set({
-      comments: sql`comments + 1`,
-    }).where(eq(this.schema.postStats.postId, postId));
+    await tx
+      .update(this.schema.postStats)
+      .set({
+        comments: sql`comments + 1`,
+      })
+      .where(eq(this.schema.postStats.postId, postId));
   }
 
   async removeComment(
@@ -60,9 +68,12 @@ export class CommentRepository implements ICommentRepository {
       .delete(this.schema.comment)
       .where(eq(this.schema.comment.id, commentId));
 
-    await tx.update(this.schema.postStats).set({
-      comments: sql`comments - 1`,
-    }).where(eq(this.schema.postStats.postId, postId));
+    await tx
+      .update(this.schema.postStats)
+      .set({
+        comments: sql`comments - 1`,
+      })
+      .where(eq(this.schema.postStats.postId, postId));
   }
 
   async countComments(

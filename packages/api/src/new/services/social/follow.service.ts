@@ -6,18 +6,25 @@ import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import * as FollowErrors from "../../errors/social/follow.error";
+import { FollowError } from "../../errors/social/follow.error";
 import * as FriendErrors from "../../errors/social/friend.error";
 import * as ProfileErrors from "../../errors/user/profile.error";
-import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
+import type {
+  IFollowRepository,
+  SocialProfile,
+} from "../../interfaces/repositories/social/follow.repository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
-import type {
+import {
   IFollowService,
   PaginateByUserIdParams,
-  PaginateResult,
 } from "../../interfaces/services/social/follow.service.interface";
-import type { DirectionalUserIdsParams } from "../../interfaces/types";
+import {
+  DirectionalUserIdsParams,
+  PaginatedResponse,
+} from "../../interfaces/types";
+import { Profile } from "../../models";
 
 @injectable()
 export class FollowService implements IFollowService {
@@ -317,11 +324,13 @@ export class FollowService implements IFollowService {
    * Retrieves a paginated list of the user's followers.
    * For each follower, followStatus indicates if the user follows them back.
    */
-  async paginateFollowersSelf({
+  async paginateFollowers({
     userId,
     cursor,
     pageSize = 10,
-  }: PaginateByUserIdParams): Promise<Result<PaginateResult, never>> {
+  }: PaginateByUserIdParams): Promise<
+    Result<PaginatedResponse<SocialProfile>, FollowError>
+  > {
     const rawProfiles = await this.followRepository.paginateFollowers({
       userId,
       cursor,
@@ -351,79 +360,13 @@ export class FollowService implements IFollowService {
    * Retrieves a paginated list of users the specified user is following.
    * followStatus is always "FOLLOWING" since these are users the user follows.
    */
-  async paginateFollowingSelf({
+  async paginateFollowing({
     userId,
     cursor,
     pageSize = 10,
-  }: PaginateByUserIdParams): Promise<Result<PaginateResult, never>> {
-    const rawProfiles = await this.followRepository.paginateFollowing({
-      userId,
-      cursor,
-      limit: pageSize + 1,
-    });
-
-    const profiles = rawProfiles.map((profile) => ({
-      ...cloudfront.hydrateProfile(profile),
-      followedAt: profile.followedAt,
-      followStatus: profile.followStatus,
-    }));
-
-    const hasMore = rawProfiles.length > pageSize;
-    const items = profiles.slice(0, pageSize);
-    const lastUser = items[items.length - 1];
-
-    return ok({
-      items,
-      nextCursor:
-        hasMore && lastUser
-          ? { userId: lastUser.userId, createdAt: lastUser.createdAt }
-          : null,
-    });
-  }
-
-  /**
-   * Retrieves a paginated list of another user's followers.
-   * Note: Ideally, followStatus should reflect the viewer's relationship, but viewer ID is not provided.
-   */
-  async paginateFollowersOthers({
-    userId,
-    cursor,
-    pageSize = 10,
-  }: PaginateByUserIdParams): Promise<Result<PaginateResult, never>> {
-    const rawProfiles = await this.followRepository.paginateFollowers({
-      userId,
-      cursor,
-      limit: pageSize + 1,
-    });
-
-    const profiles = rawProfiles.map((profile) => ({
-      ...cloudfront.hydrateProfile(profile),
-      followedAt: profile.followedAt,
-      followStatus: profile.followStatus,
-    }));
-
-    const hasMore = rawProfiles.length > pageSize;
-    const items = profiles.slice(0, pageSize);
-    const lastUser = items[items.length - 1];
-
-    return ok({
-      items,
-      nextCursor:
-        hasMore && lastUser
-          ? { userId: lastUser.userId, createdAt: lastUser.createdAt }
-          : null,
-    });
-  }
-
-  /**
-   * Retrieves a paginated list of users another user is following.
-   * Note: Ideally, followStatus should reflect the viewer's relationship, but viewer ID is not provided.
-   */
-  async paginateFollowingOthers({
-    userId,
-    cursor,
-    pageSize = 10,
-  }: PaginateByUserIdParams): Promise<Result<PaginateResult, never>> {
+  }: PaginateByUserIdParams): Promise<
+    Result<PaginatedResponse<SocialProfile>, FollowError>
+  > {
     const rawProfiles = await this.followRepository.paginateFollowing({
       userId,
       cursor,
@@ -451,24 +394,23 @@ export class FollowService implements IFollowService {
 
   /**
    * Retrieves a paginated list of pending follow requests sent to the user.
-   * followStatus is always "REQUESTED" for these users.
    */
   async paginateFollowRequests({
     userId,
     cursor,
     pageSize = 10,
-  }: PaginateByUserIdParams): Promise<Result<PaginateResult, never>> {
+  }: PaginateByUserIdParams): Promise<
+    Result<PaginatedResponse<Profile>, FollowError>
+  > {
     const rawProfiles = await this.followRepository.paginateFollowRequests({
       userId,
       cursor,
       limit: pageSize + 1,
     });
 
-    const profiles = rawProfiles.map((profile) => ({
-      ...cloudfront.hydrateProfile(profile),
-      followedAt: profile.followedAt,
-      followStatus: profile.followStatus,
-    }));
+    const profiles = rawProfiles.map((profile) =>
+      cloudfront.hydrateProfile(profile),
+    );
 
     const hasMore = rawProfiles.length > pageSize;
     const items = profiles.slice(0, pageSize);
