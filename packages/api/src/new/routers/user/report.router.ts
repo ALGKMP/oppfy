@@ -18,7 +18,7 @@ export const reportRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await reportService.reportUser({
-        reporterUserId: ctx.session.uid,
+        userId: ctx.session.uid,
         ...input,
       });
     }),
@@ -33,7 +33,7 @@ export const reportRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await reportService.reportPost({
         ...input,
-        reporterUserId: ctx.session.uid,
+        userId: ctx.session.uid,
       });
     }),
 
@@ -47,7 +47,7 @@ export const reportRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await reportService.reportComment({
         ...input,
-        reporterUserId: ctx.session.uid,
+        userId: ctx.session.uid,
       });
     }),
 });

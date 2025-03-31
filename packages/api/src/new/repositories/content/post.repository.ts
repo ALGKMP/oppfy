@@ -126,7 +126,7 @@ export class PostRepository implements IPostRepository {
       )
       .where(whereClause)
       .orderBy(desc(this.schema.post.createdAt), desc(this.schema.post.id))
-      .limit(pageSize + 1);
+      .limit(pageSize);
 
     return results;
   }
@@ -153,7 +153,7 @@ export class PostRepository implements IPostRepository {
     const results = await query
       .where(whereClause)
       .orderBy(desc(this.schema.post.createdAt), desc(this.schema.post.id))
-      .limit(pageSize + 1);
+      .limit(pageSize);
 
     return results;
   }

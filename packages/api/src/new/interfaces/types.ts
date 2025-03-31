@@ -17,17 +17,24 @@ export interface DirectionalUserIdsParams {
   recipientUserId: string;
 }
 
-export interface PaginationCursor {
-  userId: string;
+export interface SelfOtherUserIdsParams {
+  selfUserId: string;
+  otherUserId: string;
+}
+
+interface Cursor {
+  id: string;
   createdAt: Date;
 }
 
+export type PaginationCursor = Cursor | null;
+
 export interface PaginatedResponse<T> {
   items: T[];
-  nextCursor: PaginationCursor | null;
+  nextCursor: PaginationCursor;
 }
 
 export interface PaginationParams {
-  cursor?: PaginationCursor | null;
+  cursor?: PaginationCursor;
   pageSize?: number;
 }

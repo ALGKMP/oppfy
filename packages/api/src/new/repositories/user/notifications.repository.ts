@@ -237,7 +237,7 @@ export class NotificationsRepository implements INotificationsRepository {
         desc(this.schema.notifications.createdAt),
         desc(this.schema.notifications.id),
       )
-      .limit(pageSize + 1);
+      .limit(pageSize);
 
     if (fetchedNotifications.length === 0) {
       return [];

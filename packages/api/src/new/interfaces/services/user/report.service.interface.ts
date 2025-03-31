@@ -6,23 +6,25 @@ import type {
   ReportUserReason,
 } from "../../../models";
 
-export interface CreatePostReportParams {
-  reason: ReportPostReason;
-  postId: string;
-  reporterUserId: string;
+// eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
+type ReportReason = ReportUserReason | ReportPostReason | ReportCommentReason;
+
+export interface ReportParams<T extends ReportReason> {
+  reason: T;
+  userId: string;
 }
 
-export interface CreateUserReportParams {
-  reason: ReportUserReason;
+export type CreateUserReportParams = ReportParams<ReportUserReason> & {
   reportedUserId: string;
-  reporterUserId: string;
-}
+};
 
-export interface CreateCommentReportParams {
-  reason: ReportCommentReason;
-  commentId: string;
-  reporterUserId: string;
-}
+export type CreatePostReportParams = ReportParams<ReportPostReason> & {
+  reportedPostId: string;
+};
+
+export type CreateCommentReportParams = ReportParams<ReportCommentReason> & {
+  reportedCommentId: string;
+};
 
 export interface IReportService {
   reportUser(params: CreateUserReportParams): Promise<Result<void, never>>;

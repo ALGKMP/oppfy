@@ -6,7 +6,7 @@ import type {
   ProfileInsert,
   UserStats,
 } from "../../../models";
-import { FollowStatus, FriendStatus } from "../../types";
+import type { FollowStatus, FriendStatus } from "../../types";
 
 export interface ProfileParams {
   selfUserId: string;

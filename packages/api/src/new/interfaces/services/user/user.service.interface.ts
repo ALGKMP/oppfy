@@ -2,23 +2,18 @@ import type { Result } from "neverthrow";
 
 import type { UserError } from "../../../errors/user/user.error";
 import type { UserStatus } from "../../../models";
-
-interface UserIdParams {
-  userId: string;
-}
+import type { UserIdParam } from "../../types";
 
 export interface IUserService {
-  deleteUser(params: UserIdParams): Promise<Result<void, never>>;
+  deleteUser(params: UserIdParam): Promise<Result<void, never>>;
 
-  userStatus(params: UserIdParams): Promise<Result<UserStatus, UserError>>;
+  userStatus(params: UserIdParam): Promise<Result<UserStatus, UserError>>;
 
-  markUserAsOnApp(params: UserIdParams): Promise<Result<void, never>>;
+  markUserAsOnApp(params: UserIdParam): Promise<Result<void, never>>;
 
-  markUserAsTutorialComplete(
-    params: UserIdParams,
-  ): Promise<Result<void, never>>;
+  markUserAsTutorialComplete(params: UserIdParam): Promise<Result<void, never>>;
 
   markUserAsOnboardingComplete(
-    params: UserIdParams,
+    params: UserIdParam,
   ): Promise<Result<void, never>>;
 }

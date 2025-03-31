@@ -123,7 +123,7 @@ export class CommentRepository implements ICommentRepository {
         desc(this.schema.comment.createdAt),
         desc(this.schema.comment.id),
       )
-      .limit(pageSize + 1);
+      .limit(pageSize);
 
     return commentsAndProfiles;
   }
