@@ -1,11 +1,3 @@
-/**
- * YOU PROBABLY DON'T NEED TO EDIT THIS FILE, UNLESS:
- * 1. You want to modify request context (see Part 1).
- * 2. You want to create a new middleware or type of procedure (see Part 3).
- *
- * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
- * need to use are documented accordingly near the end.
- */
 import crypto from "crypto";
 import { initTRPC, TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
@@ -31,7 +23,6 @@ interface JWTPayload {
  * 1. CONTEXT
  *
  * This section defines the "contexts" that are available in the backend API.
- *
  * These allow you to access things when processing a request, like the database, the session, etc.
  */
 
@@ -90,7 +81,6 @@ export const createTRPCContext = (opts: { headers: Headers }) => {
       // Verify and decode the token
       session = jwt.verify(token, env.JWT_ACCESS_SECRET) as JWTPayload;
     } catch (err) {
-      console.log("Error verifying token:", err);
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message:
@@ -143,9 +133,10 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 export const createTRPCRouter = t.router;
 
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.session) {
+  if (ctx.session === null) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+
   return next({
     ctx: {
       // infers the `session` as non-nullable
