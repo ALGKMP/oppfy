@@ -13,7 +13,7 @@ export const userRouter = createTRPCRouter({
     .input(z.object({ userId: z.string().optional() }))
     .mutation(async ({ ctx, input }) => {
       const userId = input.userId ?? ctx.session.uid;
-      const result = await userService.deleteUser({ userId });
+      const result = await ctx.services.user.deleteUser({ userId });
 
       return result.match(
         () => ({ success: true }),

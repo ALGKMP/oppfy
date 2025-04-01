@@ -4,13 +4,10 @@ import jwt from "jsonwebtoken";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import { cloudfront } from "@oppfy/cloudfront";
-import { db } from "@oppfy/db";
 import { env } from "@oppfy/env";
-import { mux } from "@oppfy/mux";
-import { s3 } from "@oppfy/s3";
 
-import { services } from "./services";
+import { container, TYPES } from "./new/container";
+import type { Services } from "./new/services/index";
 
 interface JWTPayload {
   uid: string;
@@ -42,12 +39,8 @@ interface CreateContextOptions {
  */
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
-    s3,
-    db,
-    mux,
-    cloudfront,
-    services,
     session: opts.session,
+    services: container.get<Services>(TYPES.Services),
   };
 };
 

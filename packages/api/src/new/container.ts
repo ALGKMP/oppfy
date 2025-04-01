@@ -19,7 +19,6 @@ import type { IPostInteractionService } from "./interfaces/services/content/post
 import type { IBlockService } from "./interfaces/services/social/block.service.interface";
 import type { IFollowService } from "./interfaces/services/social/follow.service.interface";
 import type { IFriendService } from "./interfaces/services/social/friend.service.interface";
-import type { INotificationService } from "./interfaces/services/user/notification.service.interface";
 import type { IProfileService } from "./interfaces/services/user/profile.service.interface";
 import type { IReportService } from "./interfaces/services/user/report.service.interface";
 import type { IUserService } from "./interfaces/services/user/user.service.interface";
@@ -33,6 +32,7 @@ import { ReportRepository } from "./repositories/user/report.repository";
 import { UserRepository } from "./repositories/user/user.repository";
 import { PostService } from "./services/content/post.service";
 import { PostInteractionService } from "./services/content/postInteraction.service";
+import { Services } from "./services/index";
 import { BlockService } from "./services/social/block.service";
 import { FollowService } from "./services/social/follow.service";
 import { FriendService } from "./services/social/friend.service";
@@ -69,6 +69,8 @@ export const TYPES = {
   PostInteractionRepository: Symbol.for("PostInteractionRepository"),
 
   // Services
+  Services: Symbol.for("Services"),
+
   UserService: Symbol.for("UserService"),
   ProfileService: Symbol.for("ProfileService"),
   ReportService: Symbol.for("ReportService"),
@@ -118,6 +120,7 @@ container.bind<IPostService>(TYPES.PostService).to(PostService);
 container
   .bind<IPostInteractionService>(TYPES.PostInteractionService)
   .to(PostInteractionService);
-// container.bind<INotificationService>(TYPES.NotificationService).to(NotificationService);
+
+container.bind<Services>(TYPES.Services).to(Services);
 
 export { container };
