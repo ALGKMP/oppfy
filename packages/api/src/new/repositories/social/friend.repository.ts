@@ -101,6 +101,25 @@ export class FriendRepository implements IFriendRepository {
   }
 
   /**
+   * Creates a new friend request from sender to recipient.
+   */
+  async createFriendRequest(
+    { senderUserId, recipientUserId }: DirectionalUserIdsParams,
+    tx: Transaction,
+  ): Promise<void> {
+    // Insert the friend request record
+    await tx.insert(this.schema.friendRequest).values({
+      senderUserId,
+      recipientUserId,
+    });
+
+    await tx
+      .update(this.schema.userStats)
+      .set({ friendRequests: sql`${this.schema.userStats.friendRequests} + 1` })
+      .where(eq(this.schema.userStats.userId, recipientUserId));
+  }
+
+  /**
    * Removes an existing friendship between two users.
    * Uses sorted user IDs for consistency.
    * Decrements the friends count for both users in userStats.
@@ -133,25 +152,6 @@ export class FriendRepository implements IFriendRepository {
       .update(this.schema.userStats)
       .set({ friends: sql`${this.schema.userStats.friends} - 1` })
       .where(eq(this.schema.userStats.userId, userIdB));
-  }
-
-  /**
-   * Creates a new friend request from sender to recipient.
-   */
-  async createFriendRequest(
-    { senderUserId, recipientUserId }: DirectionalUserIdsParams,
-    tx: Transaction,
-  ): Promise<void> {
-    // Insert the friend request record
-    await tx.insert(this.schema.friendRequest).values({
-      senderUserId,
-      recipientUserId,
-    });
-
-    await tx
-      .update(this.schema.userStats)
-      .set({ friendRequests: sql`${this.schema.userStats.friendRequests} + 1` })
-      .where(eq(this.schema.userStats.userId, recipientUserId));
   }
 
   /**
