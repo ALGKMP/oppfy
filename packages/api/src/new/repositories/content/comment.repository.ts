@@ -1,4 +1,4 @@
-import { and, count, desc, eq, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, lte, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type {
@@ -36,9 +36,11 @@ export class CommentRepository implements ICommentRepository {
     { commentId }: GetCommentParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Comment | undefined> {
-    return await db.query.comment.findFirst({
+    const comment = await db.query.comment.findFirst({
       where: eq(this.schema.comment.id, commentId),
     });
+
+    return comment;
   }
 
   async createComment(
