@@ -12,7 +12,6 @@ export interface ILikeRepository {
     params: LikeParams,
     db?: DatabaseOrTransaction,
   ): Promise<Like | undefined>;
-  addLike(params: LikeParams, db?: DatabaseOrTransaction): Promise<void>;
-  removeLike(params: LikeParams, db?: DatabaseOrTransaction): Promise<void>;
-  isLiked(params: LikeParams, db?: DatabaseOrTransaction): Promise<boolean>;
+  createLike(params: LikeParams, db?: DatabaseOrTransaction): Promise<void>;
+  deleteLike(params: LikeParams, db?: DatabaseOrTransaction): Promise<void>;
 }

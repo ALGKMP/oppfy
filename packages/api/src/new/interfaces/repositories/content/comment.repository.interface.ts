@@ -1,6 +1,4 @@
-import type { InferSelectModel } from "drizzle-orm";
-
-import type { DatabaseOrTransaction, schema, Transaction } from "@oppfy/db";
+import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
 import type { Comment, Profile } from "../../../models";
 import type { PaginationParams } from "../../types";
@@ -9,16 +7,12 @@ export interface GetCommentParams {
   commentId: string;
 }
 
-export interface RemoveCommentParams {
+export interface DeleteCommentParams {
   commentId: string;
   postId: string;
 }
 
-export interface CountCommentsParams {
-  postId: string;
-}
-
-export interface AddCommentParams {
+export interface CreateCommentParams {
   userId: string;
   postId: string;
   body: string;
@@ -39,14 +33,9 @@ export interface ICommentRepository {
     db?: DatabaseOrTransaction,
   ): Promise<Comment | undefined>;
 
-  addComment(params: AddCommentParams, tx: Transaction): Promise<void>;
+  createComment(params: CreateCommentParams, tx: Transaction): Promise<void>;
 
-  removeComment(params: RemoveCommentParams, tx: Transaction): Promise<void>;
-
-  countComments(
-    params: CountCommentsParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<number>;
+  deleteComment(params: DeleteCommentParams, tx: Transaction): Promise<void>;
 
   paginateComments(
     params: PaginateCommentsParams,

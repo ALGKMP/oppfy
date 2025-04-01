@@ -10,15 +10,15 @@ import type {
 
 import { TYPES } from "../../container";
 import {
-  AddCommentParams,
-  Comment,
   CountCommentsParams,
+  CreateCommentParams,
+  DeleteCommentParams,
   GetCommentParams,
   ICommentRepository,
   PaginateCommentsParams,
   PaginatedCommentResult,
-  RemoveCommentParams,
 } from "../../interfaces/repositories/content/comment.repository.interface";
+import { Comment } from "../../models";
 
 @injectable()
 export class CommentRepository implements ICommentRepository {
@@ -42,8 +42,8 @@ export class CommentRepository implements ICommentRepository {
     });
   }
 
-  async addComment(
-    { postId, userId, body }: AddCommentParams,
+  async createComment(
+    { postId, userId, body }: CreateCommentParams,
     tx: Transaction,
   ): Promise<void> {
     await tx.insert(this.schema.comment).values({
@@ -60,8 +60,8 @@ export class CommentRepository implements ICommentRepository {
       .where(eq(this.schema.postStats.postId, postId));
   }
 
-  async removeComment(
-    { commentId, postId }: RemoveCommentParams,
+  async deleteComment(
+    { commentId, postId }: DeleteCommentParams,
     tx: Transaction,
   ): Promise<void> {
     await tx
@@ -113,7 +113,7 @@ export class CommentRepository implements ICommentRepository {
                 lte(this.schema.comment.createdAt, cursor.createdAt),
                 and(
                   eq(this.schema.comment.createdAt, cursor.createdAt),
-                  lte(this.schema.comment.id, cursor.commentId),
+                  lte(this.schema.comment.id, cursor.id),
                 ),
               )
             : undefined,

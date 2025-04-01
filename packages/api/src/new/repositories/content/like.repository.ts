@@ -35,7 +35,7 @@ export class LikeRepository implements ILikeRepository {
     return result[0];
   }
 
-  async addLike(
+  async createLike(
     { postId, userId }: LikeParams,
     tx: DatabaseOrTransaction = this.db,
   ): Promise<void> {
@@ -56,7 +56,7 @@ export class LikeRepository implements ILikeRepository {
       .where(eq(this.schema.postStats.postId, postId));
   }
 
-  async removeLike(
+  async deleteLike(
     { postId, userId }: LikeParams,
     tx: DatabaseOrTransaction = this.db,
   ): Promise<void> {
@@ -75,23 +75,5 @@ export class LikeRepository implements ILikeRepository {
         likes: sql`likes - 1`,
       })
       .where(eq(this.schema.postStats.postId, postId));
-  }
-
-  async isLiked(
-    { postId, userId }: LikeParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<boolean> {
-    const result = await db
-      .select()
-      .from(this.schema.like)
-      .where(
-        and(
-          eq(this.schema.like.postId, postId),
-          eq(this.schema.like.userId, userId),
-        ),
-      )
-      .limit(1);
-
-    return result.length > 0;
   }
 }

@@ -50,7 +50,7 @@ export class PostInteractionService implements IPostInteractionService {
       if (existingLike)
         return err(new PostInteractionErrors.AlreadyLiked(postId, userId));
 
-      await this.likeRepository.addLike({ postId, userId }, tx);
+      await this.likeRepository.createLike({ postId, userId }, tx);
     });
     return ok();
   }
@@ -77,7 +77,7 @@ export class PostInteractionService implements IPostInteractionService {
       if (!existingLike)
         return err(new PostInteractionErrors.NotLiked(postId, userId));
 
-      await this.likeRepository.removeLike({ postId, userId }, tx);
+      await this.likeRepository.deleteLike({ postId, userId }, tx);
     });
     return ok();
   }
@@ -96,7 +96,7 @@ export class PostInteractionService implements IPostInteractionService {
       const post = await this.postRepository.getPost({ postId, userId }, tx);
       if (!post) return err(new PostInteractionErrors.PostNotFound(postId));
 
-      await this.commentRepository.addComment({ postId, userId, body }, tx);
+      await this.commentRepository.createComment({ postId, userId, body }, tx);
     });
     return ok();
   }
@@ -125,7 +125,7 @@ export class PostInteractionService implements IPostInteractionService {
           new PostInteractionErrors.NotCommentOwner(commentId, userId),
         );
 
-      await this.commentRepository.removeComment({ commentId, postId }, tx);
+      await this.commentRepository.deleteComment({ commentId, postId }, tx);
     });
     return ok();
   }
