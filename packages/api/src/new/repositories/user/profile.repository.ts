@@ -9,14 +9,12 @@ import {
 
 import { TYPES } from "../../container";
 import type {
-  GetStatsParams,
   IProfileRepository,
   ProfilesByIdsParams,
   ProfilesByUsernameParams,
   UpdateProfileParams,
-  UserIdParams,
-  UsernameParams,
 } from "../../interfaces/repositories/user/profile.repository.interface";
+import { UserIdParam, UsernameParam } from "../../interfaces/types";
 import type { Profile, UserStats } from "../../models";
 
 @injectable()
@@ -29,11 +27,9 @@ export class ProfileRepository implements IProfileRepository {
   ) {}
 
   async getProfile(
-    params: UserIdParams,
+    { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile | undefined> {
-    const { userId } = params;
-
     const profile = await db.query.profile.findFirst({
       where: eq(this.schema.profile.userId, userId),
     });
@@ -42,11 +38,9 @@ export class ProfileRepository implements IProfileRepository {
   }
 
   async getProfileByUsername(
-    params: UsernameParams,
+    { username }: UsernameParam,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile | undefined> {
-    const { username } = params;
-
     const profile = await db.query.profile.findFirst({
       where: eq(this.schema.profile.username, username),
     });
@@ -55,11 +49,9 @@ export class ProfileRepository implements IProfileRepository {
   }
 
   async getProfilesByIds(
-    params: ProfilesByIdsParams,
+    { userIds }: ProfilesByIdsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile[]> {
-    const { userIds } = params;
-
     const profiles = await db.query.profile.findMany({
       where: inArray(this.schema.profile.userId, userIds),
     });
@@ -68,11 +60,9 @@ export class ProfileRepository implements IProfileRepository {
   }
 
   async getProfilesByUsername(
-    params: ProfilesByUsernameParams,
+    { userId, username, limit = 10 }: ProfilesByUsernameParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile[]> {
-    const { username, selfUserId, limit = 15 } = params;
-
     let query = db
       .select({
         profile: this.schema.profile,
@@ -82,22 +72,20 @@ export class ProfileRepository implements IProfileRepository {
       .$dynamic();
 
     query = withOnboardingCompleted(query, this.schema);
-    query = withoutBlocked(query, this.schema, selfUserId);
+    query = withoutBlocked(query, this.schema, userId);
 
     // Add final conditions and execute
     const results = await query
-      .where(ne(this.schema.profile.userId, selfUserId))
+      .where(ne(this.schema.profile.userId, userId))
       .limit(limit);
 
     return results.map((result) => result.profile);
   }
 
   async getStats(
-    params: GetStatsParams,
+    { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
   ): Promise<UserStats | undefined> {
-    const { userId } = params;
-
     const stats = await db.query.userStats.findFirst({
       where: eq(this.schema.userStats.userId, userId),
     });
@@ -106,11 +94,9 @@ export class ProfileRepository implements IProfileRepository {
   }
 
   async usernameTaken(
-    params: UsernameParams,
+    { username }: UsernameParam,
     db: DatabaseOrTransaction = this.db,
   ): Promise<boolean> {
-    const { username } = params;
-
     const profile = await db.query.profile.findFirst({
       where: eq(this.schema.profile.username, username),
     });

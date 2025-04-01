@@ -27,20 +27,32 @@ export class ReportRepository implements IReportRepository {
     params: CreateUserReportParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    await db.insert(this.schema.reportUser).values(params);
+    await db.insert(this.schema.reportUser).values({
+      reporterUserId: params.userId,
+      reportedUserId: params.reportedUserId,
+      reason: params.reason,
+    });
   }
 
   async createPostReport(
     params: CreatePostReportParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    await db.insert(this.schema.reportPost).values(params);
+    await db.insert(this.schema.reportPost).values({
+      reporterUserId: params.userId,
+      postId: params.reportedPostId,
+      reason: params.reason,
+    });
   }
 
   async createCommentReport(
     params: CreateCommentReportParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    await db.insert(this.schema.reportComment).values(params);
+    await db.insert(this.schema.reportComment).values({
+      reporterUserId: params.userId,
+      commentId: params.reportedCommentId,
+      reason: params.reason,
+    });
   }
 }
