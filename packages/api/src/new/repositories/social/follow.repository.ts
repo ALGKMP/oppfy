@@ -18,7 +18,6 @@ import {
 import {
   BidirectionalUserIdsparams,
   DirectionalUserIdsParams,
-  UserIdParam,
 } from "../../interfaces/types";
 import { Follow, FollowRequest, Profile } from "../../models";
 
@@ -37,9 +36,9 @@ export class FollowRepository implements IFollowRepository {
 
   async getFollower(
     { senderUserId, recipientUserId }: DirectionalUserIdsParams,
-    tx: Transaction,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<Follow | undefined> {
-    const result = await tx
+    const result = await db
       .select()
       .from(this.schema.follow)
       .where(
@@ -53,9 +52,9 @@ export class FollowRepository implements IFollowRepository {
 
   async getFollowRequest(
     { senderUserId, recipientUserId }: DirectionalUserIdsParams,
-    tx: Transaction,
+    db: DatabaseOrTransaction = this.db,
   ): Promise<FollowRequest | undefined> {
-    const result = await tx
+    const result = await db
       .select()
       .from(this.schema.followRequest)
       .where(
