@@ -14,10 +14,9 @@ import {
   CreateUserOnAppParams,
   ExistingPhoneNumbersParams,
   GetRandomActiveUserIdsParams,
-  GetUserByPhoneNumberParams,
   IUserRepository,
-  UserIdParams,
 } from "../../interfaces/repositories/user/user.repository.interface";
+import { PhoneNumberParam, UserIdParam } from "../../interfaces/types";
 import type { User, UserStatus } from "../../models";
 
 @injectable()
@@ -90,7 +89,7 @@ export class UserRepository implements IUserRepository {
 
   /** Retrieves a user by their ID. */
   async getUser(
-    { userId }: UserIdParams,
+    { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
   ): Promise<User | undefined> {
     return await db.query.user.findFirst({
@@ -100,7 +99,7 @@ export class UserRepository implements IUserRepository {
 
   /** Retrieves a user by their phone number. */
   async getUserByPhoneNumber(
-    { phoneNumber }: GetUserByPhoneNumberParams,
+    { phoneNumber }: PhoneNumberParam,
     db: DatabaseOrTransaction = this.db,
   ): Promise<User | undefined> {
     return await db.query.user.findFirst({
@@ -110,7 +109,7 @@ export class UserRepository implements IUserRepository {
 
   /** Fetches a list of random active user IDs, limited by the specified number. */
   async getRandomActiveUserIds(
-    { limit }: GetRandomActiveUserIdsParams,
+    { pageSize = 10 }: GetRandomActiveUserIdsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<{ userId: string }[]> {
     return await db
@@ -122,12 +121,12 @@ export class UserRepository implements IUserRepository {
       )
       .where(eq(this.schema.userStatus.isOnApp, true))
       .orderBy(sql`RANDOM()`)
-      .limit(limit);
+      .limit(pageSize);
   }
 
   /** Deletes a user by their ID. */
   async deleteUser(
-    { userId }: UserIdParams,
+    { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     await db.delete(this.schema.user).where(eq(this.schema.user.id, userId));
@@ -135,7 +134,7 @@ export class UserRepository implements IUserRepository {
 
   /** Retrieves the status of a user by their ID. */
   async getUserStatus(
-    { userId }: UserIdParams,
+    { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
   ): Promise<UserStatus | undefined> {
     return await db.query.userStatus.findFirst({
@@ -167,7 +166,7 @@ export class UserRepository implements IUserRepository {
 
   /** Marks a user as being on the app. */
   async markUserAsOnApp(
-    { userId }: UserIdParams,
+    { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     await db
@@ -178,7 +177,7 @@ export class UserRepository implements IUserRepository {
 
   /** Marks a user as having completed the tutorial. */
   async markUserAsTutorialComplete(
-    { userId }: UserIdParams,
+    { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     await db
@@ -189,7 +188,7 @@ export class UserRepository implements IUserRepository {
 
   /** Marks a user as having completed onboarding. */
   async markUserAsOnboardingComplete(
-    { userId }: UserIdParams,
+    { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     await db
