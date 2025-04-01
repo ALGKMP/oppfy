@@ -11,12 +11,14 @@ import { getFollowStatusSql } from "@oppfy/db/utils/query-helpers";
 
 import { TYPES } from "../../container";
 import {
-  FriendParams,
-  FriendRequestParams,
   IFriendRepository,
   PaginateFriendParams,
   SocialProfile,
 } from "../../interfaces/repositories/social/friend.repository.interface";
+import {
+  BidirectionalUserIdsparams,
+  DirectionalUserIdsParams,
+} from "../../interfaces/types";
 import { Friend, FriendRequest, Profile } from "../../models";
 
 @injectable()
@@ -33,10 +35,9 @@ export class FriendRepository implements IFriendRepository {
   }
 
   async getFriend(
-    params: FriendParams,
+    { userIdA, userIdB }: BidirectionalUserIdsparams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Friend | undefined> {
-    const { userIdA, userIdB } = params;
     const [sortedUserIdA, sortedUserIdB] =
       userIdA < userIdB ? [userIdA, userIdB] : [userIdB, userIdA];
 
@@ -53,11 +54,9 @@ export class FriendRepository implements IFriendRepository {
   }
 
   async getFriendRequest(
-    params: FriendRequestParams,
+    { senderUserId, recipientUserId }: DirectionalUserIdsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<FriendRequest | undefined> {
-    const { senderUserId, recipientUserId } = params;
-
     const result = await db
       .select()
       .from(this.schema.friendRequest)
@@ -75,9 +74,10 @@ export class FriendRepository implements IFriendRepository {
    * Ensures userIdA < userIdB for consistency in the database.
    * Updates the friends count for both users in userStats.
    */
-  async createFriend(params: FriendParams, tx: Transaction): Promise<void> {
-    const { userIdA, userIdB } = params;
-
+  async createFriend(
+    { userIdA, userIdB }: BidirectionalUserIdsparams,
+    tx: Transaction,
+  ): Promise<void> {
     // Sort user IDs to ensure userIdA < userIdB
     const [sortedUserIdA, sortedUserIdB] =
       userIdA < userIdB ? [userIdA, userIdB] : [userIdB, userIdA];
@@ -105,9 +105,10 @@ export class FriendRepository implements IFriendRepository {
    * Uses sorted user IDs for consistency.
    * Decrements the friends count for both users in userStats.
    */
-  async deleteFriend(params: FriendParams, tx: Transaction): Promise<void> {
-    const { userIdA, userIdB } = params;
-
+  async deleteFriend(
+    { userIdA, userIdB }: BidirectionalUserIdsparams,
+    tx: Transaction,
+  ): Promise<void> {
     // Sort user IDs to ensure userIdA < userIdB
     const [sortedUserIdA, sortedUserIdB] =
       userIdA < userIdB ? [userIdA, userIdB] : [userIdB, userIdA];
@@ -138,11 +139,9 @@ export class FriendRepository implements IFriendRepository {
    * Creates a new friend request from sender to recipient.
    */
   async createFriendRequest(
-    params: FriendRequestParams,
+    { senderUserId, recipientUserId }: DirectionalUserIdsParams,
     tx: Transaction,
   ): Promise<void> {
-    const { senderUserId, recipientUserId } = params;
-
     // Insert the friend request record
     await tx.insert(this.schema.friendRequest).values({
       senderUserId,
@@ -159,11 +158,9 @@ export class FriendRepository implements IFriendRepository {
    * Deletes an existing friend request.
    */
   async deleteFriendRequest(
-    params: FriendRequestParams,
+    { senderUserId, recipientUserId }: DirectionalUserIdsParams,
     tx: Transaction,
   ): Promise<void> {
-    const { senderUserId, recipientUserId } = params;
-
     // Delete the friend request record
     await tx
       .delete(this.schema.friendRequest)
@@ -181,11 +178,9 @@ export class FriendRepository implements IFriendRepository {
   }
 
   async cleanupFriendRelationships(
-    params: FriendParams,
+    { userIdA, userIdB }: BidirectionalUserIdsparams,
     tx: Transaction,
   ): Promise<void> {
-    const { userIdA, userIdB } = params;
-
     await Promise.all([
       // Remove friendship (bidirectional)
       tx
@@ -291,11 +286,9 @@ export class FriendRepository implements IFriendRepository {
    * Uses cursor-based pagination with createdAt and userId.
    */
   async paginateFriends(
-    params: PaginateFriendParams,
+    { userId, cursor, pageSize = 10 }: PaginateFriendParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<SocialProfile[]> {
-    const { userId, cursor, limit = 10 } = params;
-
     const friends = await db
       .select({
         profile: this.schema.profile,
@@ -323,14 +316,14 @@ export class FriendRepository implements IFriendRepository {
                 gt(this.schema.friend.createdAt, cursor.createdAt),
                 and(
                   eq(this.schema.friend.createdAt, cursor.createdAt),
-                  gt(this.schema.user.id, cursor.userId),
+                  gt(this.schema.user.id, cursor.id),
                 ),
               )
             : undefined,
         ),
       )
       .orderBy(asc(this.schema.friend.createdAt), asc(this.schema.user.id))
-      .limit(limit);
+      .limit(pageSize);
 
     return friends.map((friend) => ({
       ...friend.profile,
@@ -345,11 +338,9 @@ export class FriendRepository implements IFriendRepository {
    * Uses cursor-based pagination with createdAt and userId.
    */
   async paginateFriendRequests(
-    params: PaginateFriendParams,
+    { userId, cursor, pageSize = 10 }: PaginateFriendParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile[]> {
-    const { userId, cursor, limit = 10 } = params;
-
     const requests = await db
       .select({
         profile: this.schema.profile,
@@ -372,7 +363,7 @@ export class FriendRepository implements IFriendRepository {
                 gt(this.schema.friendRequest.createdAt, cursor.createdAt),
                 and(
                   eq(this.schema.friendRequest.createdAt, cursor.createdAt),
-                  gt(this.schema.user.id, cursor.userId),
+                  gt(this.schema.user.id, cursor.id),
                 ),
               )
             : undefined,
@@ -382,7 +373,7 @@ export class FriendRepository implements IFriendRepository {
         asc(this.schema.friendRequest.createdAt),
         asc(this.schema.user.id),
       )
-      .limit(limit);
+      .limit(pageSize);
 
     return requests.map((request) => request.profile);
   }
