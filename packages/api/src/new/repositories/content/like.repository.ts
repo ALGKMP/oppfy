@@ -39,14 +39,11 @@ export class LikeRepository implements ILikeRepository {
     { postId, userId }: LikeParams,
     tx: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    await tx
-      .insert(this.schema.like)
-      .values({
-        postId,
-        userId,
-        createdAt: new Date(),
-      })
-      .onConflictDoNothing(); // Prevents duplicate likes
+    await tx.insert(this.schema.like).values({
+      postId,
+      userId,
+      createdAt: new Date(),
+    });
 
     await tx
       .update(this.schema.postStats)

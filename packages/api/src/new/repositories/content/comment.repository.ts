@@ -10,7 +10,6 @@ import type {
 
 import { TYPES } from "../../container";
 import {
-  CountCommentsParams,
   CreateCommentParams,
   DeleteCommentParams,
   GetCommentParams,
@@ -74,17 +73,6 @@ export class CommentRepository implements ICommentRepository {
         comments: sql`comments - 1`,
       })
       .where(eq(this.schema.postStats.postId, postId));
-  }
-
-  async countComments(
-    { postId }: CountCommentsParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<number> {
-    const result = await db
-      .select({ count: count() })
-      .from(this.schema.comment)
-      .where(eq(this.schema.comment.postId, postId));
-    return result[0]?.count ?? 0;
   }
 
   async paginateComments(
