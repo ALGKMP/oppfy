@@ -13,8 +13,10 @@ import { UserStatus } from "../../models";
 @injectable()
 export class UserService implements IUserService {
   constructor(
-    @inject(TYPES.Database) private db: Database,
-    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
+    @inject(TYPES.Database)
+    private db: Database,
+    @inject(TYPES.UserRepository)
+    private userRepository: IUserRepository,
   ) {}
 
   async deleteUser(params: UserIdParam): Promise<Result<void, never>> {

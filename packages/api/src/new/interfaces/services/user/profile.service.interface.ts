@@ -1,6 +1,6 @@
 import type { Result } from "neverthrow";
 
-import type { ProfileError } from "../../../errors/user/profile.error";
+import type * as ProfileErrors from "../../../errors/user/profile.error";
 import type {
   HydratedProfile,
   ProfileInsert,
@@ -36,29 +36,45 @@ export interface GenerateProfilePicturePresignedUrlParams {
 export interface IProfileService {
   profile(
     params: SelfOtherUserIdsParams<"optional">,
-  ): Promise<Result<HydratedProfile, ProfileError>>;
+  ): Promise<
+    Result<
+      HydratedProfile,
+      | ProfileErrors.ProfileBlocked
+      | ProfileErrors.ProfileNotFound
+      | ProfileErrors.ProfilePrivate
+    >
+  >;
 
   profileForSite(
     params: UsernameParam,
-  ): Promise<Result<HydratedProfile, ProfileError>>;
+  ): Promise<Result<HydratedProfile, ProfileErrors.ProfileNotFound>>;
 
   searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,
-  ): Promise<Result<HydratedProfile[], ProfileError>>;
+  ): Promise<Result<HydratedProfile[], never>>;
 
   relationshipStatesBetweenUsers(
     params: SelfOtherUserIdsParams<"optional">,
-  ): Promise<Result<RelationshipState[], ProfileError>>;
+  ): Promise<
+    Result<
+      RelationshipState[],
+      | ProfileErrors.ProfileBlocked
+      | ProfileErrors.CannotCheckRelationshipWithSelf
+    >
+  >;
 
   stats(
     params: SelfOtherUserIdsParams<"optional">,
-  ): Promise<Result<UserStats, ProfileError>>;
+  ): Promise<
+    Result<
+      UserStats,
+      ProfileErrors.ProfileBlocked | ProfileErrors.StatsNotFound
+    >
+  >;
 
-  updateProfile(
-    params: UpdateProfileParams,
-  ): Promise<Result<void, ProfileError>>;
+  updateProfile(params: UpdateProfileParams): Promise<Result<void, never>>;
 
   generateProfilePicturePresignedUrl(
     params: GenerateProfilePicturePresignedUrlParams,
-  ): Promise<Result<string, ProfileError>>;
+  ): Promise<Result<string, never>>;
 }

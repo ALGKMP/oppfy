@@ -1,8 +1,6 @@
 import { inject, injectable } from "inversify";
 import { ok, Result } from "neverthrow";
 
-import type { Database } from "@oppfy/db";
-
 import { TYPES } from "../../container";
 import type { IReportRepository } from "../../interfaces/repositories/user/report.repository.interface";
 import {
@@ -15,8 +13,6 @@ import {
 @injectable()
 export class ReportService implements IReportService {
   constructor(
-    @inject(TYPES.Database)
-    private readonly db: Database,
     @inject(TYPES.ReportRepository)
     private readonly reportRepository: IReportRepository,
   ) {}

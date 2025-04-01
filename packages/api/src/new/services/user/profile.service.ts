@@ -54,9 +54,9 @@ export class ProfileService implements IProfileService {
   ): Promise<
     Result<
       HydratedProfile,
+      | ProfileErrors.ProfileBlocked
       | ProfileErrors.ProfileNotFound
       | ProfileErrors.ProfilePrivate
-      | ProfileErrors.ProfileBlocked
     >
   > {
     const { selfUserId, otherUserId } = params;
@@ -122,10 +122,11 @@ export class ProfileService implements IProfileService {
     params: SearchProfilesByUsernameParams,
   ): Promise<Result<HydratedProfile[], never>> {
     const profiles = await this.profileRepository.getProfilesByUsername(params);
-
-    return ok(
-      profiles.map((profile) => this.cloudfront.hydrateProfile(profile)),
+    const hydratedProfiles = profiles.map((profile) =>
+      this.cloudfront.hydrateProfile(profile),
     );
+
+    return ok(hydratedProfiles);
   }
 
   /**
@@ -133,7 +134,13 @@ export class ProfileService implements IProfileService {
    */
   async relationshipStatesBetweenUsers(
     params: SelfOtherUserIdsParams,
-  ): Promise<Result<RelationshipState[], ProfileErrors.ProfileBlocked>> {
+  ): Promise<
+    Result<
+      RelationshipState[],
+      | ProfileErrors.ProfileBlocked
+      | ProfileErrors.CannotCheckRelationshipWithSelf
+    >
+  > {
     const { selfUserId, otherUserId } = params;
 
     if (selfUserId === otherUserId) {
@@ -191,7 +198,12 @@ export class ProfileService implements IProfileService {
    */
   async stats(
     params: SelfOtherUserIdsParams<"optional">,
-  ): Promise<Result<UserStats, ProfileError>> {
+  ): Promise<
+    Result<
+      UserStats,
+      ProfileErrors.ProfileBlocked | ProfileErrors.StatsNotFound
+    >
+  > {
     const { selfUserId, otherUserId } = params;
 
     if (otherUserId) {
@@ -219,7 +231,7 @@ export class ProfileService implements IProfileService {
    */
   async updateProfile(
     params: UpdateProfileParams,
-  ): Promise<Result<void, ProfileError>> {
+  ): Promise<Result<void, never>> {
     const { userId, update } = params;
 
     await this.profileRepository.updateProfile({
@@ -235,7 +247,7 @@ export class ProfileService implements IProfileService {
    */
   async generateProfilePicturePresignedUrl(
     params: GenerateProfilePicturePresignedUrlParams,
-  ): Promise<Result<string, ProfileError>> {
+  ): Promise<Result<string, never>> {
     const { userId, contentLength } = params;
 
     const presignedUrl = await this.s3.createProfilePicturePresignedUrl({
