@@ -1,6 +1,6 @@
 import type { Result } from "neverthrow";
 
-import type { FriendError } from "../../../errors/social/friend.error";
+import type * as FriendErrors from "../../../errors/social/friend.error";
 import type { Profile } from "../../../models";
 import type {
   BidirectionalUserIdsparams,
@@ -23,29 +23,36 @@ export interface PaginateByUserIdParams extends PaginationParams {
 export interface IFriendService {
   friendUser(
     params: DirectionalUserIdsParams,
-  ): Promise<Result<void, FriendError>>;
+  ): Promise<
+    Result<
+      void,
+      | FriendErrors.CannotFriendSelf
+      | FriendErrors.AlreadyFriends
+      | FriendErrors.RequestAlreadySent
+    >
+  >;
 
   unfriendUser(
     params: BidirectionalUserIdsparams,
-  ): Promise<Result<void, FriendError>>;
+  ): Promise<Result<void, FriendErrors.NotFound>>;
 
   acceptFriendRequest(
     params: DirectionalUserIdsParams,
-  ): Promise<Result<void, FriendError>>;
+  ): Promise<Result<void, FriendErrors.RequestNotFound>>;
 
   declineFriendRequest(
     params: DirectionalUserIdsParams,
-  ): Promise<Result<void, FriendError>>;
+  ): Promise<Result<void, FriendErrors.RequestNotFound>>;
 
   cancelFriendRequest(
     params: DirectionalUserIdsParams,
-  ): Promise<Result<void, FriendError>>;
+  ): Promise<Result<void, FriendErrors.RequestNotFound>>;
 
   paginateFriends(
     params: PaginateByUserIdParams,
-  ): Promise<Result<PaginatedResponse<SocialProfile>, FriendError>>;
+  ): Promise<Result<PaginatedResponse<SocialProfile>, never>>;
 
   paginateFriendRequests(
     params: PaginateByUserIdParams,
-  ): Promise<Result<PaginatedResponse<Profile>, FriendError>>;
+  ): Promise<Result<PaginatedResponse<Profile>, never>>;
 }

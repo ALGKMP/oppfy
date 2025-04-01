@@ -5,14 +5,7 @@ import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
-import {
-  AlreadyFriends,
-  CannotFriendSelf,
-  FriendError,
-  NotFound,
-  RequestAlreadySent,
-  RequestNotFound,
-} from "../../errors/social/friend.error";
+import * as FriendErrors from "../../errors/social/friend.error";
 import { UserNotFound } from "../../errors/user/user.error";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
 import type {
@@ -59,9 +52,16 @@ export class FriendService implements IFriendService {
   async friendUser({
     senderUserId,
     recipientUserId,
-  }: DirectionalUserIdsParams): Promise<Result<void, FriendError>> {
+  }: DirectionalUserIdsParams): Promise<
+    Result<
+      void,
+      | FriendErrors.CannotFriendSelf
+      | FriendErrors.AlreadyFriends
+      | FriendErrors.RequestAlreadySent
+    >
+  > {
     if (senderUserId === recipientUserId) {
-      return err(new CannotFriendSelf(senderUserId));
+      return err(new FriendErrors.CannotFriendSelf(senderUserId));
     }
 
     const [senderExists, recipientProfile] = await Promise.all([
@@ -112,10 +112,14 @@ export class FriendService implements IFriendService {
       ]);
 
       if (isFriends) {
-        return err(new AlreadyFriends(senderUserId, recipientUserId));
+        return err(
+          new FriendErrors.AlreadyFriends(senderUserId, recipientUserId),
+        );
       }
       if (isFriendRequestedOutgoing) {
-        return err(new RequestAlreadySent(senderUserId, recipientUserId));
+        return err(
+          new FriendErrors.RequestAlreadySent(senderUserId, recipientUserId),
+        );
       }
 
       if (isFriendRequestedIncoming) {
@@ -189,14 +193,14 @@ export class FriendService implements IFriendService {
   async unfriendUser({
     userIdA,
     userIdB,
-  }: BidirectionalUserIdsparams): Promise<Result<void, FriendError>> {
+  }: BidirectionalUserIdsparams): Promise<Result<void, FriendErrors.NotFound>> {
     return await this.db.transaction(async (tx) => {
       const isFriends = await this.friendRepository.getFriend(
         { userIdA, userIdB },
         tx,
       );
       if (!isFriends) {
-        return err(new NotFound(userIdA, userIdB));
+        return err(new FriendErrors.NotFound(userIdA, userIdB));
       }
 
       await this.friendRepository.deleteFriend({ userIdA, userIdB }, tx);
@@ -211,14 +215,18 @@ export class FriendService implements IFriendService {
   async acceptFriendRequest({
     senderUserId,
     recipientUserId,
-  }: DirectionalUserIdsParams): Promise<Result<void, FriendError>> {
+  }: DirectionalUserIdsParams): Promise<
+    Result<void, FriendErrors.RequestNotFound>
+  > {
     return await this.db.transaction(async (tx) => {
       const isRequested = await this.friendRepository.getFriendRequest(
         { senderUserId: recipientUserId, recipientUserId: senderUserId },
         tx,
       );
       if (!isRequested) {
-        return err(new RequestNotFound(recipientUserId, senderUserId));
+        return err(
+          new FriendErrors.RequestNotFound(recipientUserId, senderUserId),
+        );
       }
 
       await this.friendRepository.deleteFriendRequest(
@@ -288,14 +296,18 @@ export class FriendService implements IFriendService {
   async declineFriendRequest({
     senderUserId,
     recipientUserId,
-  }: DirectionalUserIdsParams): Promise<Result<void, FriendError>> {
+  }: DirectionalUserIdsParams): Promise<
+    Result<void, FriendErrors.RequestNotFound>
+  > {
     return await this.db.transaction(async (tx) => {
       const isRequested = await this.friendRepository.getFriendRequest(
         { senderUserId: recipientUserId, recipientUserId: senderUserId },
         tx,
       );
       if (!isRequested) {
-        return err(new RequestNotFound(recipientUserId, senderUserId));
+        return err(
+          new FriendErrors.RequestNotFound(recipientUserId, senderUserId),
+        );
       }
 
       await this.friendRepository.deleteFriendRequest(
@@ -313,14 +325,18 @@ export class FriendService implements IFriendService {
   async cancelFriendRequest({
     senderUserId,
     recipientUserId,
-  }: DirectionalUserIdsParams): Promise<Result<void, FriendError>> {
+  }: DirectionalUserIdsParams): Promise<
+    Result<void, FriendErrors.RequestNotFound>
+  > {
     return await this.db.transaction(async (tx) => {
       const isRequested = await this.friendRepository.getFriendRequest(
         { senderUserId, recipientUserId },
         tx,
       );
       if (!isRequested) {
-        return err(new RequestNotFound(senderUserId, recipientUserId));
+        return err(
+          new FriendErrors.RequestNotFound(senderUserId, recipientUserId),
+        );
       }
 
       await this.friendRepository.deleteFriendRequest(
@@ -340,7 +356,7 @@ export class FriendService implements IFriendService {
     cursor,
     pageSize = 10,
   }: PaginateByUserIdParams): Promise<
-    Result<PaginatedResponse<SocialProfile>, FriendError>
+    Result<PaginatedResponse<SocialProfile>, never>
   > {
     const rawProfiles = await this.friendRepository.paginateFriends({
       userId,
@@ -348,7 +364,7 @@ export class FriendService implements IFriendService {
       pageSize: pageSize + 1,
     });
 
-    const profiles = rawProfiles.map((profile) => ({
+    const hydratedProfiles = rawProfiles.map((profile) => ({
       ...this.cloudfront.hydrateProfile(profile),
       followedAt: profile.followedAt,
       friendedAt: profile.friendedAt,
@@ -356,7 +372,7 @@ export class FriendService implements IFriendService {
     }));
 
     const hasMore = rawProfiles.length > pageSize;
-    const items = profiles.slice(0, pageSize);
+    const items = hydratedProfiles.slice(0, pageSize);
     const lastUser = items[items.length - 1];
 
     return ok({
@@ -376,7 +392,7 @@ export class FriendService implements IFriendService {
     cursor,
     pageSize = 10,
   }: PaginateByUserIdParams): Promise<
-    Result<PaginatedResponse<Profile>, FriendError>
+    Result<PaginatedResponse<Profile>, never>
   > {
     const rawProfiles = await this.friendRepository.paginateFriendRequests({
       userId,
@@ -384,12 +400,12 @@ export class FriendService implements IFriendService {
       pageSize: pageSize + 1,
     });
 
-    const profiles = rawProfiles.map((profile) =>
+    const hydratedProfiles = rawProfiles.map((profile) =>
       this.cloudfront.hydrateProfile(profile),
     );
 
     const hasMore = rawProfiles.length > pageSize;
-    const items = profiles.slice(0, pageSize);
+    const items = hydratedProfiles.slice(0, pageSize);
     const lastUser = items[items.length - 1];
 
     return ok({

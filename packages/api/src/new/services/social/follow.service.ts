@@ -6,7 +6,6 @@ import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import * as FollowErrors from "../../errors/social/follow.error";
-import { FollowError } from "../../errors/social/follow.error";
 import * as FriendErrors from "../../errors/social/friend.error";
 import * as ProfileErrors from "../../errors/user/profile.error";
 import type {
