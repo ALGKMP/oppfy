@@ -5,11 +5,9 @@ import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import * as UserErrors from "../../errors/user/user.error";
-import type {
-  IUserRepository,
-  UserIdParams,
-} from "../../interfaces/repositories/user/user.repository.interface";
+import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type { IUserService } from "../../interfaces/services/user/user.service.interface";
+import type { UserIdParam } from "../../interfaces/types";
 import { UserStatus } from "../../models";
 
 @injectable()
@@ -19,13 +17,13 @@ export class UserService implements IUserService {
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
   ) {}
 
-  async deleteUser(params: UserIdParams): Promise<Result<void, never>> {
+  async deleteUser(params: UserIdParam): Promise<Result<void, never>> {
     await this.userRepository.deleteUser(params, this.db);
     return ok();
   }
 
   async userStatus(
-    params: UserIdParams,
+    params: UserIdParam,
   ): Promise<Result<UserStatus, UserErrors.UserNotFound>> {
     const userStatus = await this.userRepository.getUserStatus(params, this.db);
 
@@ -35,20 +33,20 @@ export class UserService implements IUserService {
     return ok(userStatus);
   }
 
-  async markUserAsOnApp(params: UserIdParams): Promise<Result<void, never>> {
+  async markUserAsOnApp(params: UserIdParam): Promise<Result<void, never>> {
     await this.userRepository.markUserAsOnApp(params, this.db);
     return ok();
   }
 
   async markUserAsTutorialComplete(
-    params: UserIdParams,
+    params: UserIdParam,
   ): Promise<Result<void, never>> {
     await this.userRepository.markUserAsTutorialComplete(params, this.db);
     return ok();
   }
 
   async markUserAsOnboardingComplete(
-    params: UserIdParams,
+    params: UserIdParam,
   ): Promise<Result<void, never>> {
     await this.userRepository.markUserAsOnboardingComplete(params, this.db);
     return ok();

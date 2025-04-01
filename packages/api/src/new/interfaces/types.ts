@@ -25,10 +25,14 @@ export interface DirectionalUserIdsParams {
   recipientUserId: string;
 }
 
-export interface SelfOtherUserIdsParams {
+export interface BaseSelfOtherUserIdsParams {
   selfUserId: string;
-  otherUserId?: string;
 }
+
+export type SelfOtherUserIdsParams<
+  T extends "required" | "optional" = "required",
+> = BaseSelfOtherUserIdsParams &
+  (T extends "optional" ? { otherUserId?: string } : { otherUserId: string });
 
 interface Cursor {
   id: string;

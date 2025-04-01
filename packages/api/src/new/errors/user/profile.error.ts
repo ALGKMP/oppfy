@@ -20,6 +20,12 @@ export class ProfileBlocked extends ProfileError {
   }
 }
 
+export class CannotCheckRelationshipWithSelf extends ProfileError {
+  constructor() {
+    super(`Cannot check relationship with self`);
+  }
+}
+
 export class UsernameTaken extends ProfileError {
   constructor(username: string) {
     super(`Username "${username}" is already taken`);

@@ -35,7 +35,7 @@ export interface GenerateProfilePicturePresignedUrlParams {
 
 export interface IProfileService {
   profile(
-    params: SelfOtherUserIdsParams,
+    params: SelfOtherUserIdsParams<"optional">,
   ): Promise<Result<HydratedProfile, ProfileError>>;
 
   profileForSite(
@@ -47,11 +47,11 @@ export interface IProfileService {
   ): Promise<Result<HydratedProfile[], ProfileError>>;
 
   relationshipStatesBetweenUsers(
-    params: SelfOtherUserIdsParams,
+    params: SelfOtherUserIdsParams<"optional">,
   ): Promise<Result<RelationshipState[], ProfileError>>;
 
   stats(
-    params: SelfOtherUserIdsParams,
+    params: SelfOtherUserIdsParams<"optional">,
   ): Promise<Result<UserStats, ProfileError>>;
 
   updateProfile(

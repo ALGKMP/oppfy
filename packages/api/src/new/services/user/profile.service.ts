@@ -14,16 +14,17 @@ import type { IFriendRepository } from "../../interfaces/repositories/social/fri
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type {
   GenerateProfilePicturePresignedUrlParams,
-  GetStatsParams,
   IProfileService,
-  ProfileForSiteParams,
-  ProfileParams,
   RelationshipState,
-  RelationshipStatesBetweenUsersParams,
   SearchProfilesByUsernameParams,
   UpdateProfileParams,
 } from "../../interfaces/services/user/profile.service.interface";
-import { FollowStatus, FriendStatus } from "../../interfaces/types";
+import {
+  FollowStatus,
+  FriendStatus,
+  SelfOtherUserIdsParams,
+  UsernameParam,
+} from "../../interfaces/types";
 import { HydratedProfile, UserStats } from "../../models";
 
 @injectable()
@@ -49,7 +50,7 @@ export class ProfileService implements IProfileService {
    * Retrieves a user's profile, ensuring access control with privacy and block checks.
    */
   async profile(
-    params: ProfileParams,
+    params: SelfOtherUserIdsParams<"optional">,
   ): Promise<
     Result<
       HydratedProfile,
@@ -60,26 +61,28 @@ export class ProfileService implements IProfileService {
   > {
     const { selfUserId, otherUserId } = params;
 
-    const isBlocked = await this.blockRepository.getBlock({
-      userId: selfUserId,
-      blockedUserId: otherUserId,
-    });
+    if (otherUserId) {
+      const isBlocked = await this.blockRepository.getBlock({
+        senderUserId: selfUserId,
+        recipientUserId: otherUserId,
+      });
 
-    if (isBlocked) {
-      return err(new ProfileErrors.ProfileBlocked(otherUserId));
+      if (isBlocked) {
+        return err(new ProfileErrors.ProfileBlocked(otherUserId));
+      }
     }
 
     // Fetch the profile
     const profileData = await this.profileRepository.getProfile({
-      userId: otherUserId,
+      userId: otherUserId ?? selfUserId,
     });
 
     if (profileData === undefined) {
-      return err(new ProfileErrors.ProfileNotFound(otherUserId));
+      return err(new ProfileErrors.ProfileNotFound(otherUserId ?? selfUserId));
     }
 
-    // Check privacy settings
-    if (profileData.privacy === "private") {
+    // Check privacy settings if its another profile
+    if (otherUserId && profileData.privacy === "private") {
       const isFollowing = await this.followRepository.getFollower({
         senderUserId: otherUserId,
         recipientUserId: selfUserId,
@@ -97,7 +100,7 @@ export class ProfileService implements IProfileService {
    * Retrieves a profile by username for site display.
    */
   async profileForSite(
-    params: ProfileForSiteParams,
+    params: UsernameParam,
   ): Promise<Result<HydratedProfile, ProfileErrors.ProfileNotFound>> {
     const { username } = params;
 
@@ -118,12 +121,7 @@ export class ProfileService implements IProfileService {
   async searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,
   ): Promise<Result<HydratedProfile[], never>> {
-    const { username, selfUserId } = params;
-
-    const profiles = await this.profileRepository.getProfilesByUsername({
-      username,
-      selfUserId,
-    });
+    const profiles = await this.profileRepository.getProfilesByUsername(params);
 
     return ok(
       profiles.map((profile) => this.cloudfront.hydrateProfile(profile)),
@@ -134,35 +132,41 @@ export class ProfileService implements IProfileService {
    * Determines relationship states (follow/friend) between users, considering blocks.
    */
   async relationshipStatesBetweenUsers(
-    params: RelationshipStatesBetweenUsersParams,
+    params: SelfOtherUserIdsParams,
   ): Promise<Result<RelationshipState[], ProfileErrors.ProfileBlocked>> {
-    const { currentUserId, otherUserId } = params;
+    const { selfUserId, otherUserId } = params;
 
-    const isBlocked = await this.blockRepository.getBlock({
-      userId: currentUserId,
-      blockedUserId: otherUserId,
-    });
+    if (selfUserId === otherUserId) {
+      return err(new ProfileErrors.CannotCheckRelationshipWithSelf());
+    }
 
-    if (isBlocked) {
-      return err(new ProfileErrors.ProfileBlocked(otherUserId));
+    if (otherUserId) {
+      const isBlocked = await this.blockRepository.getBlock({
+        senderUserId: selfUserId,
+        recipientUserId: otherUserId,
+      });
+
+      if (isBlocked) {
+        return err(new ProfileErrors.ProfileBlocked(otherUserId));
+      }
     }
 
     const [isFollowing, isFollowRequested, isFriends, isFriendRequested] =
       await Promise.all([
         this.followRepository.getFollower({
-          senderUserId: currentUserId,
+          senderUserId: selfUserId,
           recipientUserId: otherUserId,
         }),
         this.followRepository.getFollowRequest({
-          senderUserId: currentUserId,
+          senderUserId: selfUserId,
           recipientUserId: otherUserId,
         }),
         this.friendRepository.getFriendRequest({
-          senderUserId: currentUserId,
+          senderUserId: selfUserId,
           recipientUserId: otherUserId,
         }),
         this.friendRepository.getFriendRequest({
-          senderUserId: currentUserId,
+          senderUserId: selfUserId,
           recipientUserId: otherUserId,
         }),
       ]);
@@ -186,37 +190,25 @@ export class ProfileService implements IProfileService {
    * Retrieves user stats, ensuring the requester is not blocked.
    */
   async stats(
-    params: GetStatsParams,
+    params: SelfOtherUserIdsParams<"optional">,
   ): Promise<Result<UserStats, ProfileError>> {
     const { selfUserId, otherUserId } = params;
 
-    if (otherUserId === undefined) {
-      const stats = await this.profileRepository.getStats({
-        userId: selfUserId,
+    if (otherUserId) {
+      const isBlocked = await this.blockRepository.getBlock({
+        senderUserId: selfUserId,
+        recipientUserId: otherUserId,
       });
 
-      if (stats === undefined) {
-        return err(new ProfileErrors.StatsNotFound(selfUserId));
-      }
-
-      return ok(stats);
-    }
-
-    const isBlocked = await this.blockRepository.getBlock({
-      userId: selfUserId,
-      blockedUserId: otherUserId,
-    });
-
-    if (isBlocked) {
-      return err(new ProfileErrors.ProfileBlocked(otherUserId));
+      if (isBlocked) return err(new ProfileErrors.ProfileBlocked(otherUserId));
     }
 
     const stats = await this.profileRepository.getStats({
-      userId: otherUserId,
+      userId: otherUserId ?? selfUserId,
     });
 
     if (stats === undefined) {
-      return err(new ProfileErrors.StatsNotFound(otherUserId));
+      return err(new ProfileErrors.StatsNotFound(otherUserId ?? selfUserId));
     }
 
     return ok(stats);
