@@ -11,12 +11,15 @@ import { getFollowStatusSql } from "@oppfy/db/utils/query-helpers";
 
 import { TYPES } from "../../container";
 import {
-  CleanupFollowRelationshipsParams,
   IFollowRepository,
   PaginateFollowParams,
   SocialProfile,
-  UserIdsParams,
 } from "../../interfaces/repositories/social/follow.repository.interface";
+import {
+  BidirectionalUserIdsparams,
+  DirectionalUserIdsParams,
+  UserIdParam,
+} from "../../interfaces/types";
 import { Follow, FollowRequest, Profile } from "../../models";
 
 @injectable()
@@ -33,10 +36,9 @@ export class FollowRepository implements IFollowRepository {
   }
 
   async getFollower(
-    params: UserIdsParams,
+    { senderUserId, recipientUserId }: DirectionalUserIdsParams,
     tx: Transaction,
   ): Promise<Follow | undefined> {
-    const { senderUserId, recipientUserId } = params;
     const result = await tx
       .select()
       .from(this.schema.follow)
@@ -50,10 +52,9 @@ export class FollowRepository implements IFollowRepository {
   }
 
   async getFollowRequest(
-    params: UserIdsParams,
+    { senderUserId, recipientUserId }: DirectionalUserIdsParams,
     tx: Transaction,
   ): Promise<FollowRequest | undefined> {
-    const { senderUserId, recipientUserId } = params;
     const result = await tx
       .select()
       .from(this.schema.followRequest)
@@ -66,9 +67,10 @@ export class FollowRepository implements IFollowRepository {
     return result[0];
   }
 
-  async createFollower(params: UserIdsParams, tx: Transaction): Promise<void> {
-    const { senderUserId, recipientUserId } = params;
-
+  async createFollower(
+    { senderUserId, recipientUserId }: DirectionalUserIdsParams,
+    tx: Transaction,
+  ): Promise<void> {
     // Insert the follow relationship
     await tx.insert(this.schema.follow).values({
       senderUserId,
@@ -88,9 +90,10 @@ export class FollowRepository implements IFollowRepository {
       .where(eq(this.schema.userStats.userId, recipientUserId));
   }
 
-  async deleteFollower(params: UserIdsParams, tx: Transaction): Promise<void> {
-    const { senderUserId, recipientUserId } = params;
-
+  async deleteFollower(
+    { senderUserId, recipientUserId }: DirectionalUserIdsParams,
+    tx: Transaction,
+  ): Promise<void> {
     // Delete the follow relationship
     await tx
       .delete(this.schema.follow)
@@ -115,10 +118,9 @@ export class FollowRepository implements IFollowRepository {
   }
 
   async createFollowRequest(
-    params: UserIdsParams,
+    { senderUserId, recipientUserId }: DirectionalUserIdsParams,
     tx: Transaction,
   ): Promise<void> {
-    const { senderUserId, recipientUserId } = params;
     await tx.insert(this.schema.followRequest).values({
       senderUserId,
       recipientUserId,
@@ -130,10 +132,9 @@ export class FollowRepository implements IFollowRepository {
   }
 
   async deleteFollowRequest(
-    params: UserIdsParams,
+    { senderUserId, recipientUserId }: DirectionalUserIdsParams,
     tx: Transaction,
   ): Promise<void> {
-    const { senderUserId, recipientUserId } = params;
     await tx
       .delete(this.schema.followRequest)
       .where(
@@ -149,11 +150,9 @@ export class FollowRepository implements IFollowRepository {
   }
 
   async cleanupFollowRelationships(
-    params: CleanupFollowRelationshipsParams,
+    { userIdA, userIdB }: BidirectionalUserIdsparams,
     tx: Transaction,
   ): Promise<void> {
-    const { userIdA, userIdB } = params;
-
     await Promise.all([
       // Remove follow relationships: userIdA -> userIdB and userIdB -> userIdA
       tx
@@ -285,11 +284,9 @@ export class FollowRepository implements IFollowRepository {
   }
 
   async paginateFollowers(
-    params: PaginateFollowParams,
+    { userId, cursor, pageSize = 10 }: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<SocialProfile[]> {
-    const { userId, cursor, limit = 10 } = params;
-
     const followers = await db
       .select({
         profile: this.schema.profile,
@@ -313,14 +310,14 @@ export class FollowRepository implements IFollowRepository {
                 gt(this.schema.follow.createdAt, cursor.createdAt),
                 and(
                   eq(this.schema.follow.createdAt, cursor.createdAt),
-                  gt(this.schema.user.id, cursor.userId),
+                  gt(this.schema.user.id, cursor.id),
                 ),
               )
             : undefined,
         ),
       )
       .orderBy(asc(this.schema.follow.createdAt), asc(this.schema.user.id))
-      .limit(limit);
+      .limit(pageSize);
 
     return followers.map((follower) => ({
       ...follower.profile,
@@ -330,11 +327,9 @@ export class FollowRepository implements IFollowRepository {
   }
 
   async paginateFollowing(
-    params: PaginateFollowParams,
+    { userId, cursor, pageSize = 10 }: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<SocialProfile[]> {
-    const { userId, cursor, limit = 10 } = params;
-
     const following = await db
       .select({
         profile: this.schema.profile,
@@ -358,14 +353,14 @@ export class FollowRepository implements IFollowRepository {
                 gt(this.schema.follow.createdAt, cursor.createdAt),
                 and(
                   eq(this.schema.follow.createdAt, cursor.createdAt),
-                  gt(this.schema.user.id, cursor.userId),
+                  gt(this.schema.user.id, cursor.id),
                 ),
               )
             : undefined,
         ),
       )
       .orderBy(asc(this.schema.follow.createdAt), asc(this.schema.user.id))
-      .limit(limit);
+      .limit(pageSize);
 
     return following.map((following) => ({
       ...following.profile,
@@ -375,11 +370,9 @@ export class FollowRepository implements IFollowRepository {
   }
 
   async paginateFollowRequests(
-    params: PaginateFollowParams,
+    { userId, cursor, pageSize = 10 }: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile[]> {
-    const { userId, cursor, limit = 10 } = params;
-
     const requests = await db
       .select({
         profile: this.schema.profile,
@@ -403,7 +396,7 @@ export class FollowRepository implements IFollowRepository {
                 gt(this.schema.followRequest.createdAt, cursor.createdAt),
                 and(
                   eq(this.schema.followRequest.createdAt, cursor.createdAt),
-                  gt(this.schema.user.id, cursor.userId),
+                  gt(this.schema.user.id, cursor.id),
                 ),
               )
             : undefined,
@@ -413,7 +406,7 @@ export class FollowRepository implements IFollowRepository {
         asc(this.schema.followRequest.createdAt),
         asc(this.schema.user.id),
       )
-      .limit(limit);
+      .limit(pageSize);
 
     return requests.map((request) => request.profile);
   }
