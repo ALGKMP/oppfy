@@ -29,8 +29,6 @@ declare global {
       DATABASE_PASSWORD: string;
       DATABASE_URL: string;
 
-      OPENSEARCH_URL: string;
-
       EXPO_ACCESS_TOKEN: string;
 
       CONTACT_REC_LAMBDA_URL: string;
