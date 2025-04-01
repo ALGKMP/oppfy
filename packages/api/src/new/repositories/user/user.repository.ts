@@ -32,6 +32,53 @@ export class UserRepository implements IUserRepository {
     this.schema = schema;
   }
 
+  /** Retrieves a user by their ID. */
+  async getUser(
+    { userId }: UserIdParam,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<User | undefined> {
+    return await db.query.user.findFirst({
+      where: eq(this.schema.user.id, userId),
+    });
+  }
+
+  /** Retrieves a user by their phone number. */
+  async getUserByPhoneNumber(
+    { phoneNumber }: PhoneNumberParam,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<User | undefined> {
+    return await db.query.user.findFirst({
+      where: eq(this.schema.user.phoneNumber, phoneNumber),
+    });
+  }
+
+  /** Fetches a list of random active user IDs, limited by the specified number. */
+  async getRandomActiveUserIds(
+    { pageSize = 10 }: GetRandomActiveUserIdsParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<{ userId: string }[]> {
+    return await db
+      .select({ userId: this.schema.user.id })
+      .from(this.schema.user)
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.user.id, this.schema.userStatus.userId),
+      )
+      .where(eq(this.schema.userStatus.isOnApp, true))
+      .orderBy(sql`RANDOM()`)
+      .limit(pageSize);
+  }
+
+  /** Retrieves the status of a user by their ID. */
+  async getUserStatus(
+    { userId }: UserIdParam,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<UserStatus | undefined> {
+    return await db.query.userStatus.findFirst({
+      where: eq(this.schema.userStatus.userId, userId),
+    });
+  }
+
   /** Creates a user who is on the app, inserting records into multiple tables within a transaction. */
   async createUserOnApp(
     params: CreateUserOnAppParams,
@@ -87,59 +134,12 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  /** Retrieves a user by their ID. */
-  async getUser(
-    { userId }: UserIdParam,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<User | undefined> {
-    return await db.query.user.findFirst({
-      where: eq(this.schema.user.id, userId),
-    });
-  }
-
-  /** Retrieves a user by their phone number. */
-  async getUserByPhoneNumber(
-    { phoneNumber }: PhoneNumberParam,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<User | undefined> {
-    return await db.query.user.findFirst({
-      where: eq(this.schema.user.phoneNumber, phoneNumber),
-    });
-  }
-
-  /** Fetches a list of random active user IDs, limited by the specified number. */
-  async getRandomActiveUserIds(
-    { pageSize = 10 }: GetRandomActiveUserIdsParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<{ userId: string }[]> {
-    return await db
-      .select({ userId: this.schema.user.id })
-      .from(this.schema.user)
-      .innerJoin(
-        this.schema.userStatus,
-        eq(this.schema.user.id, this.schema.userStatus.userId),
-      )
-      .where(eq(this.schema.userStatus.isOnApp, true))
-      .orderBy(sql`RANDOM()`)
-      .limit(pageSize);
-  }
-
   /** Deletes a user by their ID. */
   async deleteUser(
     { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     await db.delete(this.schema.user).where(eq(this.schema.user.id, userId));
-  }
-
-  /** Retrieves the status of a user by their ID. */
-  async getUserStatus(
-    { userId }: UserIdParam,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<UserStatus | undefined> {
-    return await db.query.userStatus.findFirst({
-      where: eq(this.schema.userStatus.userId, userId),
-    });
   }
 
   /** Checks for existing phone numbers that are on the app. */

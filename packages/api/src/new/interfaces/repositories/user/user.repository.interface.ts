@@ -1,4 +1,4 @@
-import type { DatabaseOrTransaction } from "@oppfy/db";
+import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
 import type { User, UserStatus } from "../../../models";
 import type { PhoneNumberParam, UserIdParam } from "../../types";
@@ -40,22 +40,22 @@ export interface IUserRepository {
     db?: DatabaseOrTransaction,
   ): Promise<{ userId: string }[]>;
 
-  createUserOnApp(
-    params: CreateUserOnAppParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<void>;
-
-  createUserNotOnApp(
-    params: CreateUserNotOnAppParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<void>;
-
-  deleteUser(params: UserIdParam, db?: DatabaseOrTransaction): Promise<void>;
-
   getUserStatus(
     params: UserIdParam,
     db?: DatabaseOrTransaction,
   ): Promise<UserStatus | undefined>;
+
+  createUserOnApp(
+    params: CreateUserOnAppParams,
+    tx: Transaction,
+  ): Promise<void>;
+
+  createUserNotOnApp(
+    params: CreateUserNotOnAppParams,
+    tx: Transaction,
+  ): Promise<void>;
+
+  deleteUser(params: UserIdParam, db?: DatabaseOrTransaction): Promise<void>;
 
   existingPhoneNumbers(
     params: ExistingPhoneNumbersParams,
