@@ -1,4 +1,4 @@
-import type { DatabaseOrTransaction } from "@oppfy/db";
+import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
 import type { Like } from "../../../models";
 
@@ -12,6 +12,6 @@ export interface ILikeRepository {
     params: LikeParams,
     db?: DatabaseOrTransaction,
   ): Promise<Like | undefined>;
-  createLike(params: LikeParams, db?: DatabaseOrTransaction): Promise<void>;
-  deleteLike(params: LikeParams, db?: DatabaseOrTransaction): Promise<void>;
+  createLike(params: LikeParams, tx: Transaction): Promise<void>;
+  deleteLike(params: LikeParams, tx: Transaction): Promise<void>;
 }

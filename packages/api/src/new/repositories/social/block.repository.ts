@@ -35,7 +35,6 @@ export class BlockRepository implements IBlockRepository {
     return block;
   }
 
-  // TODO: Handle normalizing the social counts
   async blockUser(
     { senderUserId, recipientUserId }: DirectionalUserIdsParams,
     db: DatabaseOrTransaction = this.db,

@@ -1,7 +1,12 @@
 import { and, eq, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
-import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
+import type {
+  Database,
+  DatabaseOrTransaction,
+  Schema,
+  Transaction,
+} from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import type {
@@ -21,28 +26,23 @@ export class LikeRepository implements ILikeRepository {
     { postId, userId }: LikeParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Like | undefined> {
-    const result = await db
-      .select()
-      .from(this.schema.like)
-      .where(
-        and(
-          eq(this.schema.like.postId, postId),
-          eq(this.schema.like.userId, userId),
-        ),
-      )
-      .limit(1);
+    const like = await db.query.like.findFirst({
+      where: and(
+        eq(this.schema.like.postId, postId),
+        eq(this.schema.like.userId, userId),
+      ),
+    });
 
-    return result[0];
+    return like;
   }
 
   async createLike(
     { postId, userId }: LikeParams,
-    tx: DatabaseOrTransaction = this.db,
+    tx: Transaction,
   ): Promise<void> {
     await tx.insert(this.schema.like).values({
       postId,
       userId,
-      createdAt: new Date(),
     });
 
     await tx
@@ -55,7 +55,7 @@ export class LikeRepository implements ILikeRepository {
 
   async deleteLike(
     { postId, userId }: LikeParams,
-    tx: DatabaseOrTransaction = this.db,
+    tx: Transaction,
   ): Promise<void> {
     await tx
       .delete(this.schema.like)
