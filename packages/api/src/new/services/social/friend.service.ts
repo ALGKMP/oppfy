@@ -12,7 +12,6 @@ import type {
   IFriendRepository,
   SocialProfile,
 } from "../../interfaces/repositories/social/friend.repository.interface";
-import type { INotificationsRepository } from "../../interfaces/repositories/user/notification.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type {
@@ -39,8 +38,6 @@ export class FriendService implements IFriendService {
     private readonly followRepository: IFollowRepository,
     @inject(TYPES.UserRepository)
     private readonly userRepository: IUserRepository,
-    @inject(TYPES.NotificationsRepository)
-    private readonly notificationsRepository: INotificationsRepository,
     @inject(TYPES.ProfileRepository)
     private readonly profileRepository: IProfileRepository,
   ) {}

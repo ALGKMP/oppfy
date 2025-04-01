@@ -7,7 +7,6 @@ import { S3 } from "@oppfy/s3";
 
 import { TYPES } from "../../container";
 import * as ProfileErrors from "../../errors/user/profile.error";
-import { ProfileError } from "../../errors/user/profile.error";
 import type { IBlockRepository } from "../../interfaces/repositories/social/block.repository.interface";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
@@ -30,8 +29,6 @@ import { HydratedProfile, UserStats } from "../../models";
 @injectable()
 export class ProfileService implements IProfileService {
   constructor(
-    @inject(TYPES.Database)
-    private readonly db: Database,
     @inject(TYPES.S3)
     private readonly s3: S3,
     @inject(TYPES.CloudFront)

@@ -14,7 +14,6 @@ import type {
 } from "../../interfaces/repositories/social/follow.repository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
-import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import {
   IFollowService,
   PaginateByUserIdParams,
@@ -34,8 +33,6 @@ export class FollowService implements IFollowService {
     private readonly followRepository: IFollowRepository,
     @inject(TYPES.FriendRepository)
     private readonly friendRepository: IFriendRepository,
-    @inject(TYPES.UserRepository)
-    private readonly userRepository: IUserRepository,
     @inject(TYPES.ProfileRepository)
     private readonly profileRepository: IProfileRepository,
   ) {}
@@ -215,10 +212,13 @@ export class FollowService implements IFollowService {
       }
 
       if (isFriendRequestedOutgoing) {
-        await this.friendRepository.deleteFriendRequest({
-          senderUserId: senderUserId,
-          recipientUserId: recipientUserId,
-        });
+        await this.friendRepository.deleteFriendRequest(
+          {
+            senderUserId: senderUserId,
+            recipientUserId: recipientUserId,
+          },
+          tx,
+        );
       }
 
       await this.followRepository.deleteFollower(

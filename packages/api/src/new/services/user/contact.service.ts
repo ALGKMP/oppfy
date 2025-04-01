@@ -151,7 +151,7 @@ export class ContactService implements IContactService {
 
     if (allRecommendations.length === 0) {
       const randomProfiles = await this.userRepository.getRandomActiveUserIds({
-        limit: 10,
+        pageSize: 10,
       });
       allRecommendations = randomProfiles
         .map((profile) => profile.userId)

@@ -32,10 +32,6 @@ export class BlockService implements IBlockService {
     private readonly cloudfront: CloudFront,
     @inject(TYPES.BlockRepository)
     private readonly blockRepository: IBlockRepository,
-    @inject(TYPES.ProfileRepository)
-    private readonly profileRepository: IProfileRepository,
-    @inject(TYPES.UserRepository)
-    private readonly userRepository: IUserRepository,
     @inject(TYPES.FriendRepository)
     private readonly friendRepository: IFriendRepository,
     @inject(TYPES.FollowRepository)
