@@ -1,14 +1,7 @@
 import type { DatabaseOrTransaction } from "@oppfy/db";
 
-import type { Profile, User, UserStatus } from "../../../models";
-
-export interface UserIdParams {
-  userId: string;
-}
-
-export interface GetUserByPhoneNumberParams {
-  phoneNumber: string;
-}
+import type { User, UserStatus } from "../../../models";
+import type { PhoneNumberParam, UserIdParam } from "../../types";
 
 export interface CreateUserOnAppParams {
   userId: string;
@@ -16,13 +9,11 @@ export interface CreateUserOnAppParams {
   username: string;
 }
 
-export interface CreateUserNotOnAppParams extends CreateUserOnAppParams {
-  name: string;
-}
-
-export interface UpdatePrivacyParams {
+export interface CreateUserNotOnAppParams {
   userId: string;
-  newPrivacySetting: Profile["privacy"];
+  phoneNumber: string;
+  name: string;
+  username: string;
 }
 
 export interface GetRandomActiveUserIdsParams {
@@ -35,12 +26,12 @@ export interface ExistingPhoneNumbersParams {
 
 export interface IUserRepository {
   getUser(
-    params: UserIdParams,
+    params: UserIdParam,
     db?: DatabaseOrTransaction,
   ): Promise<User | undefined>;
 
   getUserByPhoneNumber(
-    params: GetUserByPhoneNumberParams,
+    params: PhoneNumberParam,
     db?: DatabaseOrTransaction,
   ): Promise<User | undefined>;
 
@@ -59,10 +50,10 @@ export interface IUserRepository {
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
-  deleteUser(params: UserIdParams, db?: DatabaseOrTransaction): Promise<void>;
+  deleteUser(params: UserIdParam, db?: DatabaseOrTransaction): Promise<void>;
 
   getUserStatus(
-    params: UserIdParams,
+    params: UserIdParam,
     db?: DatabaseOrTransaction,
   ): Promise<UserStatus | undefined>;
 
@@ -72,17 +63,17 @@ export interface IUserRepository {
   ): Promise<string[]>;
 
   markUserAsOnApp(
-    params: UserIdParams,
+    params: UserIdParam,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   markUserAsTutorialComplete(
-    params: UserIdParams,
+    params: UserIdParam,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 
   markUserAsOnboardingComplete(
-    params: UserIdParams,
+    params: UserIdParam,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 }

@@ -1,21 +1,10 @@
 import type { DatabaseOrTransaction } from "@oppfy/db";
 
 import type { Profile, ProfileInsert, UserStats } from "../../../models";
-
-export interface UserIdParams {
-  userId: string;
-}
-
-export interface UsernameParams {
-  username: string;
-}
+import type { UserIdParam, UsernameParam } from "../../types";
 
 export interface ProfilesByIdsParams {
   userIds: string[];
-}
-
-export interface GetStatsParams {
-  userId: string;
 }
 
 export interface UpdateProfileParams {
@@ -31,12 +20,12 @@ export interface ProfilesByUsernameParams {
 
 export interface IProfileRepository {
   getProfile(
-    params: UserIdParams,
+    params: UserIdParam,
     db?: DatabaseOrTransaction,
   ): Promise<Profile | undefined>;
 
   getProfileByUsername(
-    params: UsernameParams,
+    params: UsernameParam,
     db?: DatabaseOrTransaction,
   ): Promise<Profile | undefined>;
 
@@ -51,12 +40,12 @@ export interface IProfileRepository {
   ): Promise<Profile[]>;
 
   getStats(
-    params: GetStatsParams,
+    params: UserIdParam,
     db?: DatabaseOrTransaction,
   ): Promise<UserStats | undefined>;
 
   usernameTaken(
-    params: UsernameParams,
+    params: UsernameParam,
     db?: DatabaseOrTransaction,
   ): Promise<boolean>;
 

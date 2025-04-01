@@ -10,7 +10,7 @@ import type {
   FollowStatus,
   FriendStatus,
   SelfOtherUserIdsParams,
-  UserIdParam,
+  UsernameParam,
 } from "../../types";
 
 export interface RelationshipState {
@@ -18,19 +18,18 @@ export interface RelationshipState {
   friend: FriendStatus;
 }
 
-export interface ProfileForSiteParams {
+export interface SearchProfilesByUsernameParams {
+  userId: string;
   username: string;
 }
 
-export interface SearchProfilesByUsernameParams extends UserIdParam {
-  username: string;
-}
-
-export interface UpdateProfileParams extends UserIdParam {
+export interface UpdateProfileParams {
+  userId: string;
   update: Partial<ProfileInsert>;
 }
 
-export interface GenerateProfilePicturePresignedUrlParams extends UserIdParam {
+export interface GenerateProfilePicturePresignedUrlParams {
+  userId: string;
   contentLength: number;
 }
 
@@ -40,7 +39,7 @@ export interface IProfileService {
   ): Promise<Result<HydratedProfile, ProfileError>>;
 
   profileForSite(
-    params: ProfileForSiteParams,
+    params: UsernameParam,
   ): Promise<Result<HydratedProfile, ProfileError>>;
 
   searchProfilesByUsername(

@@ -7,6 +7,14 @@ export interface UserIdParam {
   userId: string;
 }
 
+export interface UsernameParam {
+  username: string;
+}
+
+export interface PhoneNumberParam {
+  phoneNumber: string;
+}
+
 export interface BidirectionalUserIdsparams {
   userIdA: string;
   userIdB: string;
