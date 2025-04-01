@@ -5,11 +5,11 @@ import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import type {
-  BlockParams,
-  GetBlockedUsersParams,
   IBlockRepository,
+  PaginateBlockedUsersParams,
   SocialProfile,
 } from "../../interfaces/repositories/social/block.repository.interface";
+import type { DirectionalUserIdsParams } from "../../interfaces/types";
 import type { Block } from "../../models";
 
 @injectable()
@@ -22,15 +22,13 @@ export class BlockRepository implements IBlockRepository {
   ) {}
 
   async getBlock(
-    params: BlockParams,
+    { senderUserId, recipientUserId }: DirectionalUserIdsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Block | undefined> {
-    const { userId, blockedUserId } = params;
-
     const block = await db.query.block.findFirst({
       where: and(
-        eq(this.schema.block.senderUserId, userId),
-        eq(this.schema.block.recipientUserId, blockedUserId),
+        eq(this.schema.block.senderUserId, senderUserId),
+        eq(this.schema.block.recipientUserId, recipientUserId),
       ),
     });
 
@@ -38,39 +36,33 @@ export class BlockRepository implements IBlockRepository {
   }
 
   async blockUser(
-    params: BlockParams,
+    { senderUserId, recipientUserId }: DirectionalUserIdsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const { userId, blockedUserId } = params;
-
     await db.insert(this.schema.block).values({
-      senderUserId: userId,
-      recipientUserId: blockedUserId,
+      senderUserId,
+      recipientUserId,
     });
   }
 
   async unblockUser(
-    params: BlockParams,
+    { senderUserId, recipientUserId }: DirectionalUserIdsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const { userId, blockedUserId } = params;
-
     await db
       .delete(this.schema.block)
       .where(
         and(
-          eq(this.schema.block.senderUserId, userId),
-          eq(this.schema.block.recipientUserId, blockedUserId),
+          eq(this.schema.block.senderUserId, senderUserId),
+          eq(this.schema.block.recipientUserId, recipientUserId),
         ),
       );
   }
 
   async paginateBlockedProfiles(
-    params: GetBlockedUsersParams,
+    { userId, cursor, pageSize = 10 }: PaginateBlockedUsersParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<SocialProfile[]> {
-    const { userId, cursor = null, limit = 10 } = params;
-
     const blockedUsers = await db
       .select({
         profile: this.schema.profile,
@@ -89,7 +81,7 @@ export class BlockRepository implements IBlockRepository {
                 gt(this.schema.block.createdAt, cursor.createdAt),
                 and(
                   eq(this.schema.block.createdAt, cursor.createdAt),
-                  gt(this.schema.profile.userId, cursor.userId),
+                  gt(this.schema.profile.userId, cursor.id),
                 ),
               )
             : undefined,
@@ -99,7 +91,7 @@ export class BlockRepository implements IBlockRepository {
         asc(this.schema.block.createdAt),
         asc(this.schema.profile.userId),
       )
-      .limit(limit);
+      .limit(pageSize);
 
     return blockedUsers.map(({ profile, blockedAt }) => ({
       ...profile,
