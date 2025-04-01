@@ -2,10 +2,8 @@ import type { InferSelectModel } from "drizzle-orm";
 
 import type { DatabaseOrTransaction, schema, Transaction } from "@oppfy/db";
 
-import type { Profile } from "../../../models";
-import type { CommentCursor } from "../../services/content/postInteraction.service.interface";
-
-export type Comment = InferSelectModel<typeof schema.comment>;
+import type { Comment, Profile } from "../../../models";
+import type { PaginationParams } from "../../types";
 
 export interface GetCommentParams {
   commentId: string;
@@ -21,18 +19,16 @@ export interface CountCommentsParams {
 }
 
 export interface AddCommentParams {
-  postId: string;
   userId: string;
+  postId: string;
   body: string;
 }
 
-export interface PaginateCommentsParams {
+export interface PaginateCommentsParams extends PaginationParams {
   postId: string;
-  cursor?: { createdAt: Date; commentId: string } | null;
-  pageSize?: number;
 }
 
-export interface PaginatedComment {
+export interface PaginatedCommentResult {
   comment: Comment;
   profile: Profile;
 }
@@ -55,5 +51,5 @@ export interface ICommentRepository {
   paginateComments(
     params: PaginateCommentsParams,
     db?: DatabaseOrTransaction,
-  ): Promise<PaginatedComment[]>;
+  ): Promise<PaginatedCommentResult[]>;
 }

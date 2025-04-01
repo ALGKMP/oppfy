@@ -1,53 +1,55 @@
 import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
 import type { Follow, FollowRequest, Profile } from "../../../models";
-import type { FollowStatus } from "../../types";
-
-export interface UserIdsParams {
-  senderUserId: string;
-  recipientUserId: string;
-}
-
-export interface CleanupFollowRelationshipsParams {
-  userIdA: string;
-  userIdB: string;
-}
-
-export interface PaginationParams {
-  cursor?: { createdAt: Date; userId: string } | null;
-  limit?: number;
-}
-
-export interface PaginateFollowParams extends PaginationParams {
-  userId: string;
-}
+import type {
+  BidirectionalUserIdsparams,
+  DirectionalUserIdsParams,
+  FollowStatus,
+  PaginationParams,
+} from "../../types";
 
 export interface SocialProfile extends Profile {
   followedAt: Date;
   followStatus: FollowStatus;
 }
 
+export interface PaginateFollowParams extends PaginationParams {
+  userId: string;
+}
+
 export interface IFollowRepository {
   getFollower(
-    params: UserIdsParams,
+    params: DirectionalUserIdsParams,
     db?: DatabaseOrTransaction,
   ): Promise<Follow | undefined>;
 
   getFollowRequest(
-    params: UserIdsParams,
+    params: DirectionalUserIdsParams,
     db?: DatabaseOrTransaction,
   ): Promise<FollowRequest | undefined>;
 
-  createFollower(params: UserIdsParams, tx: Transaction): Promise<void>;
+  createFollower(
+    params: DirectionalUserIdsParams,
+    tx: Transaction,
+  ): Promise<void>;
 
-  createFollowRequest(params: UserIdsParams, tx: Transaction): Promise<void>;
+  createFollowRequest(
+    params: DirectionalUserIdsParams,
+    tx: Transaction,
+  ): Promise<void>;
 
-  deleteFollower(params: UserIdsParams, tx: Transaction): Promise<void>;
+  deleteFollower(
+    params: DirectionalUserIdsParams,
+    tx: Transaction,
+  ): Promise<void>;
 
-  deleteFollowRequest(params: UserIdsParams, tx: Transaction): Promise<void>;
+  deleteFollowRequest(
+    params: DirectionalUserIdsParams,
+    tx: Transaction,
+  ): Promise<void>;
 
   cleanupFollowRelationships(
-    params: CleanupFollowRelationshipsParams,
+    params: BidirectionalUserIdsparams,
     tx: Transaction,
   ): Promise<void>;
 

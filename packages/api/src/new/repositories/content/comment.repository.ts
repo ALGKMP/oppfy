@@ -16,7 +16,7 @@ import {
   GetCommentParams,
   ICommentRepository,
   PaginateCommentsParams,
-  PaginatedComment,
+  PaginatedCommentResult,
   RemoveCommentParams,
 } from "../../interfaces/repositories/content/comment.repository.interface";
 
@@ -90,7 +90,7 @@ export class CommentRepository implements ICommentRepository {
   async paginateComments(
     { postId, cursor, pageSize = 10 }: PaginateCommentsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<PaginatedComment[]> {
+  ): Promise<PaginatedCommentResult[]> {
     const commentsAndProfiles = await db
       .select({
         comment: this.schema.comment,
