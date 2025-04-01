@@ -334,7 +334,7 @@ export class FollowService implements IFollowService {
     const rawProfiles = await this.followRepository.paginateFollowers({
       userId,
       cursor,
-      limit: pageSize + 1,
+      pageSize: pageSize + 1,
     });
 
     const profiles = rawProfiles.map((profile) => ({
@@ -351,7 +351,7 @@ export class FollowService implements IFollowService {
       items,
       nextCursor:
         hasMore && lastUser
-          ? { userId: lastUser.userId, createdAt: lastUser.createdAt }
+          ? { id: lastUser.userId, createdAt: lastUser.createdAt }
           : null,
     });
   }
@@ -370,7 +370,7 @@ export class FollowService implements IFollowService {
     const rawProfiles = await this.followRepository.paginateFollowing({
       userId,
       cursor,
-      limit: pageSize + 1,
+      pageSize: pageSize + 1,
     });
 
     const profiles = rawProfiles.map((profile) => ({
@@ -387,7 +387,7 @@ export class FollowService implements IFollowService {
       items,
       nextCursor:
         hasMore && lastUser
-          ? { userId: lastUser.userId, createdAt: lastUser.createdAt }
+          ? { id: lastUser.userId, createdAt: lastUser.createdAt }
           : null,
     });
   }
@@ -405,7 +405,7 @@ export class FollowService implements IFollowService {
     const rawProfiles = await this.followRepository.paginateFollowRequests({
       userId,
       cursor,
-      limit: pageSize + 1,
+      pageSize: pageSize + 1,
     });
 
     const profiles = rawProfiles.map((profile) =>
@@ -420,7 +420,7 @@ export class FollowService implements IFollowService {
       items,
       nextCursor:
         hasMore && lastUser
-          ? { userId: lastUser.userId, createdAt: lastUser.createdAt }
+          ? { id: lastUser.userId, createdAt: lastUser.createdAt }
           : null,
     });
   }

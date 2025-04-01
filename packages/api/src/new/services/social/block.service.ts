@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { cloudfront } from "@oppfy/cloudfront";
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
@@ -15,7 +15,6 @@ import type { IFriendRepository } from "../../interfaces/repositories/social/fri
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type {
-  BlockedUser,
   GetBlockedUsersParams,
   IBlockService,
 } from "../../interfaces/services/social/block.service.interface";
@@ -29,6 +28,8 @@ export class BlockService implements IBlockService {
   constructor(
     @inject(TYPES.Database)
     private readonly db: Database,
+    @inject(TYPES.CloudFront)
+    private readonly cloudfront: CloudFront,
     @inject(TYPES.BlockRepository)
     private readonly blockRepository: IBlockRepository,
     @inject(TYPES.ProfileRepository)
@@ -55,7 +56,7 @@ export class BlockService implements IBlockService {
     await this.db.transaction(async (tx) => {
       // Check if the block already exists
       const isBlocked = await this.blockRepository.getBlock(
-        { userId: senderUserId, blockedUserId: recipientUserId },
+        { senderUserId, recipientUserId },
         tx,
       );
       if (isBlocked)
@@ -77,7 +78,7 @@ export class BlockService implements IBlockService {
 
       // Create the block
       await this.blockRepository.blockUser(
-        { userId: senderUserId, blockedUserId: recipientUserId },
+        { senderUserId, recipientUserId },
         tx,
       );
     });
@@ -95,7 +96,7 @@ export class BlockService implements IBlockService {
   > {
     await this.db.transaction(async (tx) => {
       const isBlocked = await this.blockRepository.getBlock(
-        { userId: senderUserId, blockedUserId: recipientUserId },
+        { senderUserId, recipientUserId },
         tx,
       );
 
@@ -105,7 +106,7 @@ export class BlockService implements IBlockService {
         );
 
       await this.blockRepository.unblockUser(
-        { userId: senderUserId, blockedUserId: recipientUserId },
+        { senderUserId, recipientUserId },
         tx,
       );
     });
@@ -119,18 +120,20 @@ export class BlockService implements IBlockService {
     cursor,
     pageSize = 10,
   }: GetBlockedUsersParams): Promise<
-    Result<PaginatedResponse<BlockedUser>, never>
+    Result<PaginatedResponse<SocialProfile>, never>
   > {
     const rawBlockedProfiles =
       await this.blockRepository.paginateBlockedProfiles({
         userId,
         cursor,
-        limit: pageSize + 1,
+        pageSize: pageSize + 1,
       });
 
-    const blockedProfiles = rawBlockedProfiles.map((profile) =>
-      this.mapProfileToBlockedUser(profile),
-    );
+    const blockedProfiles = rawBlockedProfiles.map((profile) => ({
+      ...this.cloudfront.hydrateProfile(profile),
+      blockedAt: profile.blockedAt,
+    }));
+
     const hasMore = rawBlockedProfiles.length > pageSize;
     const items = blockedProfiles.slice(0, pageSize);
     const lastUser = items[items.length - 1];
@@ -139,21 +142,8 @@ export class BlockService implements IBlockService {
       items,
       nextCursor:
         hasMore && lastUser
-          ? { userId: lastUser.userId, createdAt: lastUser.blockedAt }
+          ? { id: lastUser.userId, createdAt: lastUser.createdAt }
           : null,
     });
-  }
-
-  private mapProfileToBlockedUser(profile: SocialProfile): BlockedUser {
-    const hydratedProfile = cloudfront.hydrateProfile(profile);
-
-    return {
-      userId: hydratedProfile.userId,
-      username: hydratedProfile.username,
-      name: hydratedProfile.name,
-      profilePictureUrl: hydratedProfile.profilePictureUrl,
-      blockedAt: profile.blockedAt,
-      createdAt: profile.createdAt,
-    };
   }
 }

@@ -345,7 +345,7 @@ export class FriendService implements IFriendService {
     const rawProfiles = await this.friendRepository.paginateFriends({
       userId,
       cursor,
-      limit: pageSize + 1,
+      pageSize: pageSize + 1,
     });
 
     const profiles = rawProfiles.map((profile) => ({
@@ -363,7 +363,7 @@ export class FriendService implements IFriendService {
       items,
       nextCursor:
         hasMore && lastUser
-          ? { userId: lastUser.userId, createdAt: lastUser.createdAt }
+          ? { id: lastUser.userId, createdAt: lastUser.createdAt }
           : null,
     });
   }
@@ -381,7 +381,7 @@ export class FriendService implements IFriendService {
     const rawProfiles = await this.friendRepository.paginateFriendRequests({
       userId,
       cursor,
-      limit: pageSize + 1,
+      pageSize: pageSize + 1,
     });
 
     const profiles = rawProfiles.map((profile) =>
@@ -396,7 +396,7 @@ export class FriendService implements IFriendService {
       items,
       nextCursor:
         hasMore && lastUser
-          ? { userId: lastUser.userId, createdAt: lastUser.createdAt }
+          ? { id: lastUser.userId, createdAt: lastUser.createdAt }
           : null,
     });
   }
