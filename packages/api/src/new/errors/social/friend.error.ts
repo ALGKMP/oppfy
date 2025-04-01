@@ -83,5 +83,3 @@ export class FailedToCancelRequest extends FriendError {
     );
   }
 }
-
-export type FriendError = InstanceType<typeof FriendError>;

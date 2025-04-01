@@ -82,4 +82,3 @@ export class FailedToCountRequests extends FollowError {
   }
 }
 
-export type FollowError = InstanceType<typeof FollowError>;

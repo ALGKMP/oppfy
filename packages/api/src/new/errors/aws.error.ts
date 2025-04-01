@@ -8,5 +8,3 @@ export class SQSFailedToSend extends AwsError {
     this.name = "SQSFailedToSendError";
   }
 }
-
-export type AwsError = InstanceType<typeof AwsError>;

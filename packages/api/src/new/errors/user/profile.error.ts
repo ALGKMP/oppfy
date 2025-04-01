@@ -37,5 +37,3 @@ export class ProfilePrivate extends ProfileError {
     super(`Profile is private for user ${userId}`);
   }
 }
-
-export type ProfileError = InstanceType<typeof ProfileError>;

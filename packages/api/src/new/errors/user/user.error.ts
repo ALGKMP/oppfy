@@ -8,5 +8,3 @@ export class UserNotFound extends UserError {
     this.name = "UserNotFoundError";
   }
 }
-
-export type UserError = InstanceType<typeof UserError>;

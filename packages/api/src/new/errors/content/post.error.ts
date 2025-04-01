@@ -43,5 +43,3 @@ export class NotPostOwner extends PostError {
     super(`User ${userId} is not the owner of post ${postId}`);
   }
 }
-
-export type PostError = InstanceType<typeof PostError>;

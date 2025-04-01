@@ -56,4 +56,3 @@ export class NotLiked extends PostInteractionError {
   }
 }
 
-export type PostInteractionError = InstanceType<typeof PostInteractionError>;

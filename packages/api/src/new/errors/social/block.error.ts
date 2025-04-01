@@ -22,4 +22,3 @@ export class BlockNotFound extends BlockError {
   }
 }
 
-export type BlockError = InstanceType<typeof BlockError>;
