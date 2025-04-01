@@ -13,8 +13,8 @@ export interface UpdateProfileParams {
 }
 
 export interface ProfilesByUsernameParams {
+  userId: string;
   username: string;
-  selfUserId: string;
   limit?: number;
 }
 

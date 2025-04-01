@@ -17,7 +17,7 @@ export interface CreateUserNotOnAppParams {
 }
 
 export interface GetRandomActiveUserIdsParams {
-  limit: number;
+  limit?: number;
 }
 
 export interface ExistingPhoneNumbersParams {
