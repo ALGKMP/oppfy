@@ -1,6 +1,6 @@
 import type { Result } from "neverthrow";
 
-import type { BlockError } from "../../../errors/social/block.error";
+import type * as BlockErrors from "../../../errors/social/block.error";
 import type { Profile } from "../../../models";
 import type {
   DirectionalUserIdsParams,
@@ -19,13 +19,15 @@ export interface GetBlockedUsersParams extends PaginationParams {
 export interface IBlockService {
   blockUser(
     params: DirectionalUserIdsParams,
-  ): Promise<Result<void, BlockError>>;
+  ): Promise<
+    Result<void, BlockErrors.CannotBlockSelf | BlockErrors.AlreadyBlocked>
+  >;
 
   unblockUser(
     params: DirectionalUserIdsParams,
-  ): Promise<Result<void, BlockError>>;
+  ): Promise<Result<void, BlockErrors.BlockNotFound>>;
 
   paginateBlockedUsers(
     params: GetBlockedUsersParams,
-  ): Promise<Result<PaginatedResponse<SocialProfile>, BlockError>>;
+  ): Promise<Result<PaginatedResponse<SocialProfile>, never>>;
 }

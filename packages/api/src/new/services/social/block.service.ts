@@ -129,13 +129,13 @@ export class BlockService implements IBlockService {
         pageSize: pageSize + 1,
       });
 
-    const blockedProfiles = rawBlockedProfiles.map((profile) => ({
+    const hydratedProfiles = rawBlockedProfiles.map((profile) => ({
       ...this.cloudfront.hydrateProfile(profile),
       blockedAt: profile.blockedAt,
     }));
 
     const hasMore = rawBlockedProfiles.length > pageSize;
-    const items = blockedProfiles.slice(0, pageSize);
+    const items = hydratedProfiles.slice(0, pageSize);
     const lastUser = items[items.length - 1];
 
     return ok({
