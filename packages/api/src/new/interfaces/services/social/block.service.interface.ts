@@ -8,14 +8,9 @@ import type {
   PaginationParams,
 } from "../../types";
 
-export interface BlockedUser {
-  userId: Profile["userId"];
-  username: Profile["username"];
-  name: Profile["name"];
-  profilePictureUrl: Profile["profilePictureKey"];
+export type SocialProfile = Profile & {
   blockedAt: Date;
-  createdAt: Date;
-}
+};
 
 export interface GetBlockedUsersParams extends PaginationParams {
   userId: string;
@@ -32,5 +27,5 @@ export interface IBlockService {
 
   paginateBlockedUsers(
     params: GetBlockedUsersParams,
-  ): Promise<Result<PaginatedResponse<BlockedUser>, BlockError>>;
+  ): Promise<Result<PaginatedResponse<SocialProfile>, BlockError>>;
 }

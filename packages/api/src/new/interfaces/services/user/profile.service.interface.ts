@@ -6,50 +6,37 @@ import type {
   ProfileInsert,
   UserStats,
 } from "../../../models";
-import type { FollowStatus, FriendStatus } from "../../types";
-
-export interface ProfileParams {
-  selfUserId: string;
-  otherUserId: string;
-}
-
-export interface ProfileForSiteParams {
-  username: string;
-}
-
-export interface SearchProfilesByUsernameParams {
-  username: string;
-  selfUserId: string;
-}
-
-export interface RelationshipStatesBetweenUsersParams {
-  currentUserId: string;
-  otherUserId: string;
-}
-
-export interface GetStatsParams {
-  selfUserId: string;
-  otherUserId?: string;
-}
-
-export interface UpdateProfileParams {
-  userId: string;
-  update: Partial<ProfileInsert>;
-}
-
-export interface GenerateProfilePicturePresignedUrlParams {
-  userId: string;
-  contentLength: number;
-}
+import type {
+  FollowStatus,
+  FriendStatus,
+  SelfOtherUserIdsParams,
+  UserIdParam,
+} from "../../types";
 
 export interface RelationshipState {
   follow: FollowStatus;
   friend: FriendStatus;
 }
 
+export interface ProfileForSiteParams {
+  username: string;
+}
+
+export interface SearchProfilesByUsernameParams extends UserIdParam {
+  username: string;
+}
+
+export interface UpdateProfileParams extends UserIdParam {
+  update: Partial<ProfileInsert>;
+}
+
+export interface GenerateProfilePicturePresignedUrlParams extends UserIdParam {
+  contentLength: number;
+}
+
 export interface IProfileService {
   profile(
-    params: ProfileParams,
+    params: SelfOtherUserIdsParams,
   ): Promise<Result<HydratedProfile, ProfileError>>;
 
   profileForSite(
@@ -61,10 +48,12 @@ export interface IProfileService {
   ): Promise<Result<HydratedProfile[], ProfileError>>;
 
   relationshipStatesBetweenUsers(
-    params: RelationshipStatesBetweenUsersParams,
+    params: SelfOtherUserIdsParams,
   ): Promise<Result<RelationshipState[], ProfileError>>;
 
-  stats(params: GetStatsParams): Promise<Result<UserStats, ProfileError>>;
+  stats(
+    params: SelfOtherUserIdsParams,
+  ): Promise<Result<UserStats, ProfileError>>;
 
   updateProfile(
     params: UpdateProfileParams,

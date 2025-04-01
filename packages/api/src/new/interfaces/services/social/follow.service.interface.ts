@@ -9,14 +9,14 @@ import type {
   PaginationParams,
 } from "../../types";
 
-export interface PaginateByUserIdParams extends PaginationParams {
-  userId: string;
-}
-
 export type SocialProfile = Profile & {
   followedAt: Date;
   followStatus: FollowStatus;
 };
+
+export interface PaginateByUserIdParams extends PaginationParams {
+  userId: string;
+}
 
 export interface IFollowService {
   followUser(

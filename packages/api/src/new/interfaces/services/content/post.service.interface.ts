@@ -2,7 +2,7 @@ import type { Result } from "neverthrow";
 
 import type { Schema } from "@oppfy/db";
 
-import type { PostErrors } from "../../../errors/content/post.error";
+import type * as PostErrors from "../../../errors/content/post.error";
 import type { Comment, Post, Profile } from "../../../models";
 
 export interface PaginatedResponse<TItem, TCursor> {

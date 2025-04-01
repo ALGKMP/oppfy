@@ -19,7 +19,7 @@ export interface DirectionalUserIdsParams {
 
 export interface SelfOtherUserIdsParams {
   selfUserId: string;
-  otherUserId: string;
+  otherUserId?: string;
 }
 
 interface Cursor {

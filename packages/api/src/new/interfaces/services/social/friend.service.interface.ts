@@ -6,20 +6,19 @@ import type {
   BidirectionalUserIdsparams,
   DirectionalUserIdsParams,
   FollowStatus,
-  FriendStatus,
   PaginatedResponse,
   PaginationParams,
 } from "../../types";
-
-export interface PaginateByUserIdParams extends PaginationParams {
-  userId: string;
-}
 
 export type SocialProfile = Profile & {
   followedAt: Date;
   friendedAt: Date;
   followStatus: FollowStatus;
 };
+
+export interface PaginateByUserIdParams extends PaginationParams {
+  userId: string;
+}
 
 export interface IFriendService {
   friendUser(

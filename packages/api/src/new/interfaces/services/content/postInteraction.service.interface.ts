@@ -1,5 +1,6 @@
 import type { Result } from "neverthrow";
-import type { PostInteractionErrors } from "../../../errors/content/postInteraction.error";
+
+import type * as PostInteractionErrors from "../../../errors/content/postInteraction.error";
 
 export interface LikePostParams {
   postId: string;
@@ -30,45 +31,44 @@ export interface PaginatedResponse<TItem, TCursor> {
 
 export interface IPostInteractionService {
   likePost(
-    params: LikePostParams
+    params: LikePostParams,
   ): Promise<
     Result<
       void,
-      PostInteractionErrors.PostNotFound |
-      PostInteractionErrors.FailedToLikePost |
-      PostInteractionErrors.AlreadyLiked
+      | PostInteractionErrors.PostNotFound
+      | PostInteractionErrors.FailedToLikePost
+      | PostInteractionErrors.AlreadyLiked
     >
   >;
 
   unlikePost(
-    params: UnlikePostParams
+    params: UnlikePostParams,
   ): Promise<
     Result<
       void,
-      PostInteractionErrors.PostNotFound |
-      PostInteractionErrors.FailedToUnlikePost |
-      PostInteractionErrors.NotLiked
+      | PostInteractionErrors.PostNotFound
+      | PostInteractionErrors.FailedToUnlikePost
+      | PostInteractionErrors.NotLiked
     >
   >;
 
   addComment(
-    params: AddCommentParams
+    params: AddCommentParams,
   ): Promise<
     Result<
       void,
-      PostInteractionErrors.PostNotFound |
-      PostInteractionErrors.FailedToComment
+      PostInteractionErrors.PostNotFound | PostInteractionErrors.FailedToComment
     >
   >;
 
   removeComment(
-    params: RemoveCommentParams
+    params: RemoveCommentParams,
   ): Promise<
     Result<
       void,
-      PostInteractionErrors.CommentNotFound |
-      PostInteractionErrors.NotCommentOwner |
-      PostInteractionErrors.FailedToDeleteComment
+      | PostInteractionErrors.CommentNotFound
+      | PostInteractionErrors.NotCommentOwner
+      | PostInteractionErrors.FailedToDeleteComment
     >
   >;
 }

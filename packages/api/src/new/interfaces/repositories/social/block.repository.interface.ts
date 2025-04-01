@@ -1,6 +1,6 @@
 import type { DatabaseOrTransaction } from "@oppfy/db";
 
-import type { Block, BlockWithProfile, Profile } from "../../../models";
+import type { Block, Profile } from "../../../models";
 
 export interface GetBlockedUsersParams {
   userId: string;
