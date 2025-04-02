@@ -28,7 +28,7 @@ export const userRouter = createTRPCRouter({
           case "UserNotFoundError":
             throw new TRPCError({
               code: "NOT_FOUND",
-              message: `User with ID ${ctx.session?.uid} not found`,
+              message: "User not found",
             });
         }
       },
@@ -54,7 +54,7 @@ export const userRouter = createTRPCRouter({
           case "UserNotFoundError":
             throw new TRPCError({
               code: "NOT_FOUND",
-              message: `User with ID ${ctx.session?.uid} not found`,
+              message: "User not found",
             });
         }
       },
@@ -73,7 +73,7 @@ export const userRouter = createTRPCRouter({
           case "ProfileNotFoundError":
             throw new TRPCError({
               code: "NOT_FOUND",
-              message: `Profile with ID ${ctx.session.uid} not found`,
+              message: "Profile not found",
             });
         }
       },

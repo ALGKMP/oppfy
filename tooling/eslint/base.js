@@ -69,6 +69,7 @@ export default tseslint.config(
       ],
       "@typescript-eslint/no-unnecessary-condition": "off",
       "@typescript-eslint/no-non-null-assertion": "error",
+      "@typescript-eslint/switch-exhaustiveness-check": "error",
       "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
     },
   },
