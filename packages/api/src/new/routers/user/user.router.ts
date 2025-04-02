@@ -1,82 +1,101 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "../../../trpc";
-import { container, TYPES } from "../../container";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "../../../trpc";
 import * as UserErrors from "../../errors/user/user.error";
-import type { IUserService } from "../../interfaces/services/user/user.service.interface";
-
-const userService = container.get<IUserService>(TYPES.UserService);
 
 export const userRouter = createTRPCRouter({
-  deleteUser: protectedProcedure
-    .input(z.object({ userId: z.string().optional() }))
-    .mutation(async ({ ctx, input }) => {
-      const userId = input.userId ?? ctx.session.uid;
-      const result = await ctx.services.user.deleteUser({ userId });
+  deleteUser: protectedProcedure.mutation(
+    async ({ ctx }) =>
+      await ctx.services.user.deleteUser({ userId: ctx.session.uid }),
+  ),
 
-      return result.match(
-        () => ({ success: true }),
-        () => ({ success: true }), // Never case
-      );
-    }),
+  userStatus: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.session?.uid) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "User not found",
+      });
+    }
 
-  userStatus: protectedProcedure
-    .input(z.object({ userId: z.string().optional() }))
-    .query(async ({ ctx, input }) => {
-      const userId = input.userId ?? ctx.session.uid;
-      const result = await userService.userStatus({ userId });
+    const result = await ctx.services.user.userStatus({
+      userId: ctx.session.uid,
+    });
 
-      return result.match(
-        (status) => status,
-        (error: UserErrors.UserError) => {
-          if (error instanceof UserErrors.UserNotFound) {
+    return result.match(
+      (status) => status,
+      (error) => {
+        switch (error.name) {
+          case "":
             throw new TRPCError({
               code: "NOT_FOUND",
-              message: `User with ID ${userId} not found`,
+              message: `User with ID ${ctx.session?.uid} not found`,
             });
-          }
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Unknown error occurred",
-          });
-        },
-      );
-    }),
+        }
+      },
+    );
+  }),
 
-  markUserAsOnApp: protectedProcedure
-    .input(z.object({ userId: z.string().optional() }))
-    .mutation(async ({ ctx, input }) => {
-      const userId = input.userId ?? ctx.session.uid;
-      const result = await userService.markUserAsOnApp({ userId });
+  // userStatus: protectedProcedure
+  //   .input(z.object({ userId: z.string().optional() }))
+  //   .query(async ({ ctx, input }) => {
+  //     const userId = input.userId ?? ctx.session.uid;
+  //     const result = await userService.userStatus({ userId });
 
-      return result.match(
-        () => ({ success: true }),
-        () => ({ success: true }), // Never case
-      );
-    }),
+  //     return result.match(
+  //       (status) => status,
+  //       (error: UserErrors.UserError) => {
+  //         if (error instanceof UserErrors.UserNotFound) {
+  //           throw new TRPCError({
+  //             code: "NOT_FOUND",
+  //             message: `User with ID ${userId} not found`,
+  //           });
+  //         }
+  //         throw new TRPCError({
+  //           code: "INTERNAL_SERVER_ERROR",
+  //           message: "Unknown error occurred",
+  //         });
+  //       },
+  //     );
+  //   }),
 
-  markUserAsTutorialComplete: protectedProcedure
-    .input(z.object({ userId: z.string().optional() }))
-    .mutation(async ({ ctx, input }) => {
-      const userId = input.userId ?? ctx.session.uid;
-      const result = await userService.markUserAsTutorialComplete({ userId });
+  // markUserAsOnApp: protectedProcedure
+  //   .input(z.object({ userId: z.string().optional() }))
+  //   .mutation(async ({ ctx, input }) => {
+  //     const userId = input.userId ?? ctx.session.uid;
+  //     const result = await userService.markUserAsOnApp({ userId });
 
-      return result.match(
-        () => ({ success: true }),
-        () => ({ success: true }), // Never case
-      );
-    }),
+  //     return result.match(
+  //       () => ({ success: true }),
+  //       () => ({ success: true }), // Never case
+  //     );
+  //   }),
 
-  markUserAsOnboardingComplete: protectedProcedure
-    .input(z.object({ userId: z.string().optional() }))
-    .mutation(async ({ ctx, input }) => {
-      const userId = input.userId ?? ctx.session.uid;
-      const result = await userService.markUserAsOnboardingComplete({ userId });
+  // markUserAsTutorialComplete: protectedProcedure
+  //   .input(z.object({ userId: z.string().optional() }))
+  //   .mutation(async ({ ctx, input }) => {
+  //     const userId = input.userId ?? ctx.session.uid;
+  //     const result = await userService.markUserAsTutorialComplete({ userId });
 
-      return result.match(
-        () => ({ success: true }),
-        () => ({ success: true }), // Never case
-      );
-    }),
+  //     return result.match(
+  //       () => ({ success: true }),
+  //       () => ({ success: true }), // Never case
+  //     );
+  //   }),
+
+  // markUserAsOnboardingComplete: protectedProcedure
+  //   .input(z.object({ userId: z.string().optional() }))
+  //   .mutation(async ({ ctx, input }) => {
+  //     const userId = input.userId ?? ctx.session.uid;
+  //     const result = await userService.markUserAsOnboardingComplete({ userId });
+
+  //     return result.match(
+  //       () => ({ success: true }),
+  //       () => ({ success: true }), // Never case
+  //     );
+  //   }),
 });

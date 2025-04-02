@@ -10,6 +10,7 @@ type ErrorDomain =
   | "Follow"
   | "PostInteraction";
 
+
 // Factory function to create base error classes
 export function createBaseErrorClass<D extends ErrorDomain>(domain: D) {
   const className = `${domain}Error`;
@@ -20,3 +21,4 @@ export function createBaseErrorClass<D extends ErrorDomain>(domain: D) {
     }
   };
 }
+
