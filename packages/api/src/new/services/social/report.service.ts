@@ -2,13 +2,13 @@ import { inject, injectable } from "inversify";
 import { ok, Result } from "neverthrow";
 
 import { TYPES } from "../../container";
-import type { IReportRepository } from "../../interfaces/repositories/user/report.repository.interface";
+import type { IReportRepository } from "../../interfaces/repositories/social/report.repository.interface";
 import {
   CreateCommentReportParams,
   CreatePostReportParams,
   CreateUserReportParams,
   IReportService,
-} from "../../interfaces/services/user/report.service.interface";
+} from "../../interfaces/services/social/report.service.interface";
 
 @injectable()
 export class ReportService implements IReportService {

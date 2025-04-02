@@ -8,7 +8,7 @@ import {
   CreatePostReportParams,
   CreateUserReportParams,
   IReportRepository,
-} from "../../interfaces/repositories/user/report.repository.interface";
+} from "../../interfaces/repositories/social/report.repository.interface";
 
 @injectable()
 export class ReportRepository implements IReportRepository {
