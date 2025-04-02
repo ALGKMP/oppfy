@@ -8,6 +8,59 @@ import {
 } from "../../../trpc";
 
 export const userRouter = createTRPCRouter({
+  // TODO: We should be able to make these a protectedProcedure if the auth client is able to syncronously return token
+  getUserStatus: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.session?.uid) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "User not found",
+      });
+    }
+
+    const result = await ctx.services.user.userStatus({
+      userId: ctx.session.uid,
+    });
+
+    return result.match(
+      (result) => result,
+      (err) => {
+        switch (err.name) {
+          case "UserNotFoundError":
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: `User with ID ${ctx.session?.uid} not found`,
+            });
+        }
+      },
+    );
+  }),
+
+  fetchUserStatus: publicProcedure.mutation(async ({ ctx }) => {
+    if (!ctx.session?.uid) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "User not found",
+      });
+    }
+
+    const result = await ctx.services.user.userStatus({
+      userId: ctx.session.uid,
+    });
+
+    return result.match(
+      (result) => result,
+      (err) => {
+        switch (err.name) {
+          case "UserNotFoundError":
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: `User with ID ${ctx.session?.uid} not found`,
+            });
+        }
+      },
+    );
+  }),
+
   getPrivacy: protectedProcedure.query(async ({ ctx }) => {
     const result = await ctx.services.profile.privacy({
       userId: ctx.session.uid,
@@ -82,65 +135,6 @@ export const userRouter = createTRPCRouter({
       });
     }),
 
-  deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
-    await ctx.services.user.deleteUser({
-      userId: ctx.session.uid,
-    });
-  }),
-
-  // TODO: We should be able to make these a protectedProcedure if the auth client is able to syncronously return token
-  getUserStatus: publicProcedure.query(async ({ ctx }) => {
-    if (!ctx.session?.uid) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "User not found",
-      });
-    }
-
-    const result = await ctx.services.user.userStatus({
-      userId: ctx.session.uid,
-    });
-
-    return result.match(
-      (result) => result,
-      (err) => {
-        switch (err.name) {
-          case "UserNotFoundError":
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: `User with ID ${ctx.session?.uid} not found`,
-            });
-        }
-      },
-    );
-  }),
-
-  fetchUserStatus: publicProcedure.mutation(async ({ ctx }) => {
-    if (!ctx.session?.uid) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "User not found",
-      });
-    }
-
-    const result = await ctx.services.user.userStatus({
-      userId: ctx.session.uid,
-    });
-
-    return result.match(
-      (result) => result,
-      (err) => {
-        switch (err.name) {
-          case "UserNotFoundError":
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: `User with ID ${ctx.session?.uid} not found`,
-            });
-        }
-      },
-    );
-  }),
-
   markOnboardingComplete: protectedProcedure.mutation(async ({ ctx }) => {
     await ctx.services.user.markUserAsOnboardingComplete({
       userId: ctx.session.uid,
@@ -149,6 +143,12 @@ export const userRouter = createTRPCRouter({
 
   markTutorialComplete: protectedProcedure.mutation(async ({ ctx }) => {
     await ctx.services.user.markUserAsTutorialComplete({
+      userId: ctx.session.uid,
+    });
+  }),
+
+  deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
+    await ctx.services.user.deleteUser({
       userId: ctx.session.uid,
     });
   }),
