@@ -82,19 +82,20 @@ export const userRouter = createTRPCRouter({
     const result = await ctx.services.profile.privacy({
       userId: ctx.session.uid,
     });
+    return result;
 
-    return result.match(
-      (privacy) => privacy,
-      (err) => {
-        switch (err.name) {
-          case "ProfileNotFoundError":
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: `Profile with ID ${ctx.session.uid} not found`,
-            });
-        }
-      },
-    );
+    // return result.match(
+    //   (privacy) => privacy,
+    //   (err) => {
+    //     switch (err.name) {
+    //       case "ProfileNotFoundError":
+    //         throw new TRPCError({
+    //           code: "NOT_FOUND",
+    //           message: `Profile with ID ${ctx.session.uid} not found`,
+    //         });
+    //     }
+    //   },
+    // );
   }),
 
   // userStatus: protectedProcedure
