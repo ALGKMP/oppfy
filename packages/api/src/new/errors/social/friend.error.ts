@@ -3,30 +3,35 @@ import { createBaseErrorClass } from "../errorFactory";
 const FriendError = createBaseErrorClass("Friend");
 
 export class NotFound extends FriendError {
+  name = "FriendNotFoundError" as const;
   constructor(userIdA: string, userIdB: string) {
     super(`Friendship between users "${userIdA}" and "${userIdB}" not found`);
   }
 }
 
 export class RequestNotFound extends FriendError {
+  name = "FriendRequestNotFoundError" as const;
   constructor(senderId: string, recipientId: string) {
     super(`Friend request from "${senderId}" to "${recipientId}" not found`);
   }
 }
 
 export class RequestAlreadySent extends FriendError {
+  name = "FriendRequestAlreadySentError" as const;
   constructor(senderId: string, recipientId: string) {
     super(`Friend request already sent from "${senderId}" to "${recipientId}"`);
   }
 }
 
 export class AlreadyFriends extends FriendError {
+  name = "AlreadyFriendsError" as const;
   constructor(userIdA: string, userIdB: string) {
     super(`Users "${userIdA}" and "${userIdB}" are already friends`);
   }
 }
 
 export class MustUnfriendFirst extends FriendError {
+  name = "MustUnfriendFirstError" as const;
   constructor(userIdA: string, userIdB: string) {
     super(
       `User "${userIdA}" must unfriend "${userIdB}" before sending a new request`,
@@ -35,12 +40,14 @@ export class MustUnfriendFirst extends FriendError {
 }
 
 export class CannotFriendSelf extends FriendError {
+  name = "CannotFriendSelfError" as const;
   constructor(userId: string) {
     super(`User "${userId}" cannot friend themselves`);
   }
 }
 
 export class FailedToCountRequests extends FriendError {
+  name = "FailedToCountRequestsError" as const;
   constructor() {
     super("Failed to count friend requests");
   }
