@@ -1,25 +1,22 @@
 import { z } from "zod";
 
-import { sharedValidators } from "@oppfy/validators";
+import { schema } from "@oppfy/db";
 
 import { createTRPCRouter, protectedProcedure } from "../../../trpc";
-import { container, TYPES } from "../../container";
-import type { IReportService } from "../../interfaces/services/social/report.service.interface";
-
-const reportService = container.get<IReportService>(TYPES.ReportService);
 
 export const reportRouter = createTRPCRouter({
   reportUser: protectedProcedure
     .input(
       z.object({
         reportedUserId: z.string(),
-        reason: sharedValidators.report.reportUserOptions,
+        reason: z.enum(schema.reportUserReasonEnum.enumValues),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await reportService.reportUser({
+      await ctx.services.report.reportUser({
         userId: ctx.session.uid,
-        ...input,
+        reason: input.reason,
+        reportedUserId: input.reportedUserId,
       });
     }),
 
@@ -27,13 +24,14 @@ export const reportRouter = createTRPCRouter({
     .input(
       z.object({
         postId: z.string(),
-        reason: sharedValidators.report.reportPostOptions,
+        reason: z.enum(schema.reportPostReasonEnum.enumValues),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await reportService.reportPost({
-        ...input,
+      await ctx.services.report.reportPost({
         userId: ctx.session.uid,
+        reason: input.reason,
+        reportedPostId: input.postId,
       });
     }),
 
@@ -41,13 +39,14 @@ export const reportRouter = createTRPCRouter({
     .input(
       z.object({
         commentId: z.string(),
-        reason: sharedValidators.report.reportCommentOptions,
+        reason: z.enum(schema.reportCommentReasonEnum.enumValues),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await reportService.reportComment({
-        ...input,
+      await ctx.services.report.reportComment({
         userId: ctx.session.uid,
+        reason: input.reason,
+        reportedCommentId: input.commentId,
       });
     }),
 });

@@ -13,6 +13,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { z } from "zod";
 
 export const privacyEnum = pgEnum("privacy", ["public", "private"]);
 
