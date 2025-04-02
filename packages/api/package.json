@@ -47,6 +47,7 @@
     "@typescript-eslint/rule-tester": "^8.26.1",
     "@typescript-eslint/utils": "^8.26.1",
     "eslint": "catalog:",
+    "eslint-plugin-neverthrow": "^1.1.4",
     "prettier": "^3.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.4"
