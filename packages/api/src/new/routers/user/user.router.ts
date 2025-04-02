@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import {
   createTRPCRouter,
@@ -7,6 +8,80 @@ import {
 } from "../../../trpc";
 
 export const userRouter = createTRPCRouter({
+  getPrivacy: protectedProcedure.query(async ({ ctx }) => {
+    const result = await ctx.services.profile.privacy({
+      userId: ctx.session.uid,
+    });
+
+    return result.match(
+      (privacy) => privacy,
+      (err) => {
+        switch (err.name) {
+          case "ProfileNotFoundError":
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: `Profile with ID ${ctx.session.uid} not found`,
+            });
+        }
+      },
+    );
+  }),
+
+  updateName: protectedProcedure
+    .input(z.object({ name: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.services.profile.updateProfile({
+        userId: ctx.session.uid,
+        update: {
+          name: input.name,
+        },
+      });
+    }),
+
+  updateUsername: protectedProcedure
+    .input(z.object({ username: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.services.profile.updateProfile({
+        userId: ctx.session.uid,
+        update: {
+          username: input.username,
+        },
+      });
+    }),
+
+  updateBio: protectedProcedure
+    .input(z.object({ bio: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.services.profile.updateProfile({
+        userId: ctx.session.uid,
+        update: {
+          bio: input.bio,
+        },
+      });
+    }),
+
+  updateDateOfBirth: protectedProcedure
+    .input(z.object({ dateOfBirth: z.date() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.services.profile.updateProfile({
+        userId: ctx.session.uid,
+        update: {
+          dateOfBirth: input.dateOfBirth,
+        },
+      });
+    }),
+
+  updatePrivacy: protectedProcedure
+    .input(z.object({ privacy: z.enum(["public", "private"]) }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.services.profile.updateProfile({
+        userId: ctx.session.uid,
+        update: {
+          privacy: input.privacy,
+        },
+      });
+    }),
+
   deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
     await ctx.services.user.deleteUser({
       userId: ctx.session.uid,
@@ -77,83 +152,4 @@ export const userRouter = createTRPCRouter({
       userId: ctx.session.uid,
     });
   }),
-
-  getPrivacy: protectedProcedure.query(async ({ ctx }) => {
-    const result = await ctx.services.profile.privacy({
-      userId: ctx.session.uid,
-    });
-    return result;
-
-    // return result.match(
-    //   (privacy) => privacy,
-    //   (err) => {
-    //     switch (err.name) {
-    //       case "ProfileNotFoundError":
-    //         throw new TRPCError({
-    //           code: "NOT_FOUND",
-    //           message: `Profile with ID ${ctx.session.uid} not found`,
-    //         });
-    //     }
-    //   },
-    // );
-  }),
-
-  // userStatus: protectedProcedure
-  //   .input(z.object({ userId: z.string().optional() }))
-  //   .query(async ({ ctx, input }) => {
-  //     const userId = input.userId ?? ctx.session.uid;
-  //     const result = await userService.userStatus({ userId });
-
-  //     return result.match(
-  //       (status) => status,
-  //       (error: UserErrors.UserError) => {
-  //         if (error instanceof UserErrors.UserNotFound) {
-  //           throw new TRPCError({
-  //             code: "NOT_FOUND",
-  //             message: `User with ID ${userId} not found`,
-  //           });
-  //         }
-  //         throw new TRPCError({
-  //           code: "INTERNAL_SERVER_ERROR",
-  //           message: "Unknown error occurred",
-  //         });
-  //       },
-  //     );
-  //   }),
-
-  // markUserAsOnApp: protectedProcedure
-  //   .input(z.object({ userId: z.string().optional() }))
-  //   .mutation(async ({ ctx, input }) => {
-  //     const userId = input.userId ?? ctx.session.uid;
-  //     const result = await userService.markUserAsOnApp({ userId });
-
-  //     return result.match(
-  //       () => ({ success: true }),
-  //       () => ({ success: true }), // Never case
-  //     );
-  //   }),
-
-  // markUserAsTutorialComplete: protectedProcedure
-  //   .input(z.object({ userId: z.string().optional() }))
-  //   .mutation(async ({ ctx, input }) => {
-  //     const userId = input.userId ?? ctx.session.uid;
-  //     const result = await userService.markUserAsTutorialComplete({ userId });
-
-  //     return result.match(
-  //       () => ({ success: true }),
-  //       () => ({ success: true }), // Never case
-  //     );
-  //   }),
-
-  // markUserAsOnboardingComplete: protectedProcedure
-  //   .input(z.object({ userId: z.string().optional() }))
-  //   .mutation(async ({ ctx, input }) => {
-  //     const userId = input.userId ?? ctx.session.uid;
-  //     const result = await userService.markUserAsOnboardingComplete({ userId });
-
-  //     return result.match(
-  //       () => ({ success: true }),
-  //       () => ({ success: true }), // Never case
-  //     );
-  //   }),
 });
