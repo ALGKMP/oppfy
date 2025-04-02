@@ -93,6 +93,20 @@ export class ProfileRepository implements IProfileRepository {
     return stats;
   }
 
+  async getPrivacy(
+    { userId }: UserIdParam,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<Profile["privacy"] | undefined> {
+    const profile = await db.query.profile.findFirst({
+      where: eq(this.schema.profile.userId, userId),
+      columns: {
+        privacy: true,
+      },
+    });
+
+    return profile?.privacy;
+  }
+
   async usernameTaken(
     { username }: UsernameParam,
     db: DatabaseOrTransaction = this.db,

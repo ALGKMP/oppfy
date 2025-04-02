@@ -39,6 +39,11 @@ export interface IProfileRepository {
     db?: DatabaseOrTransaction,
   ): Promise<Profile[]>;
 
+  getPrivacy(
+    params: UserIdParam,
+    db?: DatabaseOrTransaction,
+  ): Promise<Profile["privacy"] | undefined>;
+
   getStats(
     params: UserIdParam,
     db?: DatabaseOrTransaction,

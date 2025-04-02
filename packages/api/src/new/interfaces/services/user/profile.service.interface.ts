@@ -3,6 +3,7 @@ import type { Result } from "neverthrow";
 import type * as ProfileErrors from "../../../errors/user/profile.error";
 import type {
   HydratedProfile,
+  Profile,
   ProfileInsert,
   UserStats,
 } from "../../../models";
@@ -10,6 +11,7 @@ import type {
   FollowStatus,
   FriendStatus,
   SelfOtherUserIdsParams,
+  UserIdParam,
   UsernameParam,
 } from "../../types";
 
@@ -71,6 +73,10 @@ export interface IProfileService {
       ProfileErrors.ProfileBlocked | ProfileErrors.StatsNotFound
     >
   >;
+
+  privacy(
+    params: UserIdParam,
+  ): Promise<Result<Profile["privacy"], ProfileErrors.ProfileNotFound>>;
 
   updateProfile(params: UpdateProfileParams): Promise<Result<void, never>>;
 

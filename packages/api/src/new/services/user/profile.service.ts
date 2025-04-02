@@ -2,7 +2,6 @@ import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
 import { CloudFront } from "@oppfy/cloudfront";
-import type { Database } from "@oppfy/db";
 import { S3 } from "@oppfy/s3";
 
 import { TYPES } from "../../container";
@@ -22,9 +21,10 @@ import {
   FollowStatus,
   FriendStatus,
   SelfOtherUserIdsParams,
+  UserIdParam,
   UsernameParam,
 } from "../../interfaces/types";
-import { HydratedProfile, UserStats } from "../../models";
+import { HydratedProfile, Profile, UserStats } from "../../models";
 
 @injectable()
 export class ProfileService implements IProfileService {
@@ -221,6 +221,22 @@ export class ProfileService implements IProfileService {
     }
 
     return ok(stats);
+  }
+
+  /**
+   * Retrieves a user's privacy settings.
+   */
+  async privacy(
+    params: UserIdParam,
+  ): Promise<Result<Profile["privacy"], ProfileErrors.ProfileNotFound>> {
+    const privacy = await this.profileRepository.getPrivacy({
+      userId: params.userId,
+    });
+
+    if (privacy === undefined)
+      return err(new ProfileErrors.ProfileNotFound(params.userId));
+
+    return ok(privacy);
   }
 
   /**
