@@ -1,15 +1,42 @@
-import * as sharedAwsSchema from "./src/shared/aws";
-import * as sharedMediaSchema from "./src/shared/media";
-import * as sharedNotificationsSchema from "./src/shared/notifications";
-import * as sharedReportSchema from "./src/shared/report";
-import * as sharedUserSchema from "./src/shared/user";
+import type { CountryCode } from "libphonenumber-js";
+import { isValidPhoneNumber } from "libphonenumber-js";
+import { z } from "zod";
 
-const sharedValidators = {
-  user: sharedUserSchema,
-  media: sharedMediaSchema,
-  notifications: sharedNotificationsSchema,
-  report: sharedReportSchema,
-  aws: sharedAwsSchema,
-};
+import { AgeChecker } from "./utils";
 
-export { sharedValidators };
+export const name = z
+  .string()
+  .min(1, { message: "Name is too short" })
+  .max(50, { message: "Name is too long" })
+  .regex(/^[a-zA-Z]+(?:\s[a-zA-Z]+)?$/, {
+    message: "Name can only contain letters and a single space between names",
+  });
+
+export const username = z
+  .string()
+  .min(1, "Too short")
+  .max(30, "Too long")
+  .regex(/^[a-z0-9_]/, "Must start with letter, number, or underscore")
+  .regex(/^[a-z0-9_.]*$/, "Only lowercase, numbers, underscores, dots allowed")
+  .regex(/[a-z0-9]$/, "Must end with letter or number");
+
+export const bio = z
+  .string()
+  .max(100, { message: "Bio must be at most 100 characters long" });
+
+export const dateOfBirth = z
+  .date()
+  .refine((date) =>
+    new AgeChecker(date).isAtLeast(13).isAtMost(100).checkValid(),
+  );
+
+export const phoneNumber = z
+  .object({
+    phoneNumber: z.string(),
+    countryCode: z.string(),
+  })
+  .refine((data) =>
+    isValidPhoneNumber(data.phoneNumber, data.countryCode as CountryCode),
+  );
+
+export const phoneNumberOTP = z.string().length(6);
