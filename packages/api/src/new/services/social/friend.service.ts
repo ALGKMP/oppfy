@@ -6,6 +6,7 @@ import type { Database } from "@oppfy/db";
 
 import { TYPES } from "../../container";
 import * as FriendErrors from "../../errors/social/friend.error";
+import { ProfileNotFound } from "../../errors/user/profile.error";
 import { UserNotFound } from "../../errors/user/user.error";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
 import type {
@@ -52,6 +53,7 @@ export class FriendService implements IFriendService {
   }: DirectionalUserIdsParams): Promise<
     Result<
       void,
+      | ProfileNotFound
       | FriendErrors.CannotFriendSelf
       | FriendErrors.AlreadyFriends
       | FriendErrors.RequestAlreadySent
@@ -61,12 +63,11 @@ export class FriendService implements IFriendService {
       return err(new FriendErrors.CannotFriendSelf(senderUserId));
     }
 
-    const [senderExists, recipientProfile] = await Promise.all([
-      this.userRepository.getUser({ userId: senderUserId }),
-      this.profileRepository.getProfile({ userId: recipientUserId }),
-    ]);
-    if (!senderExists) return err(new UserNotFound(senderUserId));
-    if (!recipientProfile) return err(new UserNotFound(recipientUserId));
+    const recipientProfile = await this.profileRepository.getProfile({
+      userId: recipientUserId,
+    });
+    if (recipientProfile === undefined)
+      return err(new ProfileNotFound(recipientUserId));
 
     return await this.db.transaction(async (tx) => {
       const [

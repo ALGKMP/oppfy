@@ -1,6 +1,7 @@
 import type { Result } from "neverthrow";
 
 import type * as FriendErrors from "../../../errors/social/friend.error";
+import { ProfileNotFound } from "../../../errors/user/profile.error";
 import type { Profile } from "../../../models";
 import type {
   BidirectionalUserIdsparams,
@@ -26,6 +27,7 @@ export interface IFriendService {
   ): Promise<
     Result<
       void,
+      | ProfileNotFound
       | FriendErrors.CannotFriendSelf
       | FriendErrors.AlreadyFriends
       | FriendErrors.RequestAlreadySent

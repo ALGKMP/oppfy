@@ -20,6 +20,12 @@ export const friendRouter = createTRPCRouter({
         (res) => res,
         (err) => {
           switch (err.name) {
+            case "ProfileNotFoundError": {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Profile not found",
+              });
+            }
             case "CannotFriendSelfError": {
               throw new TRPCError({
                 code: "BAD_REQUEST",
