@@ -7,18 +7,37 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "editor.formatOnSave": true,
-  "eslint.rules.customizations": [{ "rule": "*", "severity": "warn" }],
+  "eslint.rules.customizations": [
+    {
+      "rule": "*",
+      "severity": "warn"
+    }
+  ],
   "eslint.runtime": "node",
   "eslint.workingDirectories": [
-    { "pattern": "apps/*/" },
-    { "pattern": "cloud/*/" },
-    { "pattern": "packages/*/" },
-    { "pattern": "tooling/*/" }
+    {
+      "pattern": "apps/*/"
+    },
+    {
+      "pattern": "cloud/*/"
+    },
+    {
+      "pattern": "packages/*/"
+    },
+    {
+      "pattern": "tooling/*/"
+    }
   ],
   "prettier.ignorePath": ".gitignore",
   "tailwindCSS.experimental.classRegex": [
-    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
-    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+    [
+      "cva\\(([^)]*)\\)",
+      "[\"'`]([^\"'`]*).*?[\"'`]"
+    ],
+    [
+      "cx\\(([^)]*)\\)",
+      "(?:'|\"|`)([^']*)(?:'|\"|`)"
+    ]
   ],
   "tailwindCSS.experimental.configFile": "./tooling/tailwind/web.ts",
   "typescript.enablePromptUseWorkspaceTsdk": true,
@@ -28,4 +47,3 @@
   ],
   "typescript.tsdk": "node_modules/typescript/lib"
 }
-
