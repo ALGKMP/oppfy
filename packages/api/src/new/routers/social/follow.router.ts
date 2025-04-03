@@ -3,15 +3,15 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "../../../trpc";
 
-export const followerRouter = createTRPCRouter({
-  friend: protectedProcedure
+export const followRouter = createTRPCRouter({
+  followUser: protectedProcedure
     .input(
       z.object({
         recipientUserId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.friend.friendUser({
+      const result = await ctx.services.follow.followUser({
         senderUserId: ctx.session.uid,
         recipientUserId: input.recipientUserId,
       });
@@ -20,22 +20,28 @@ export const followerRouter = createTRPCRouter({
         (res) => res,
         (err) => {
           switch (err.name) {
-            case "CannotFriendSelfError": {
+            case "CannotFollowSelfError": {
               throw new TRPCError({
                 code: "BAD_REQUEST",
-                message: "Cannot friend self",
+                message: "Cannot follow self",
               });
             }
-            case "AlreadyFriendsError": {
+            case "ProfileNotFoundError": {
               throw new TRPCError({
-                code: "BAD_REQUEST",
-                message: "Already friends",
+                code: "NOT_FOUND",
+                message: "Profile not found",
               });
             }
-            case "FriendRequestAlreadySentError": {
+            case "AlreadyFollowingError": {
               throw new TRPCError({
                 code: "BAD_REQUEST",
-                message: "Friend request already sent",
+                message: "Already following",
+              });
+            }
+            case "FollowRequestAlreadySentError": {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Follow request already sent",
               });
             }
           }
@@ -43,14 +49,14 @@ export const followerRouter = createTRPCRouter({
       );
     }),
 
-  cancelFriendRequest: protectedProcedure
+  unfollowUser: protectedProcedure
     .input(
       z.object({
         recipientUserId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.friend.cancelFriendRequest({
+      const result = await ctx.services.follow.unfollowUser({
         senderUserId: ctx.session.uid,
         recipientUserId: input.recipientUserId,
       });
@@ -59,10 +65,16 @@ export const followerRouter = createTRPCRouter({
         (res) => res,
         (err) => {
           switch (err.name) {
-            case "FriendRequestNotFoundError": {
+            case "NotFollowingError": {
               throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "Friend request not found",
+                code: "BAD_REQUEST",
+                message: "Not following",
+              });
+            }
+            case "MustUnfriendFirstError": {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Must unfriend first",
               });
             }
           }
@@ -70,80 +82,26 @@ export const followerRouter = createTRPCRouter({
       );
     }),
 
-  acceptFriendRequest: protectedProcedure
-    .input(
-      z.object({
-        senderUserId: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.friend.acceptFriendRequest({
-        senderUserId: input.senderUserId,
-        recipientUserId: ctx.session.uid,
-      });
-
-      return result.match(
-        (res) => res,
-        (err) => {
-          switch (err.name) {
-            case "FriendRequestNotFoundError": {
-              throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "Friend request not found",
-              });
-            }
-          }
-        },
-      );
-    }),
-
-  declineFriendRequest: protectedProcedure
-    .input(
-      z.object({
-        senderUserId: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.friend.declineFriendRequest({
-        senderUserId: input.senderUserId,
-        recipientUserId: ctx.session.uid,
-      });
-
-      return result.match(
-        (res) => res,
-        (err) => {
-          switch (err.name) {
-            case "FriendRequestNotFoundError": {
-              throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "Friend request not found",
-              });
-            }
-          }
-        },
-      );
-    }),
-
-  unfriend: protectedProcedure
+  removeFollower: protectedProcedure
     .input(
       z.object({
         recipientUserId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.friend.unfriendUser({
-        userIdA: ctx.session.uid,
-        userIdB: input.recipientUserId,
+      const result = await ctx.services.follow.removeFollower({
+        senderUserId: ctx.session.uid,
+        recipientUserId: input.recipientUserId,
       });
 
       return result.match(
         (res) => res,
         (err) => {
           switch (err.name) {
-            case "FriendNotFoundError": {
+            case "NotFollowingError": {
               throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "Friend not found",
+                code: "BAD_REQUEST",
+                message: "Not following",
               });
             }
           }
@@ -151,7 +109,88 @@ export const followerRouter = createTRPCRouter({
       );
     }),
 
-  paginateFriends: protectedProcedure
+  cancelFollowRequest: protectedProcedure
+    .input(
+      z.object({
+        recipientUserId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.services.follow.cancelFollowRequest({
+        senderUserId: ctx.session.uid,
+        recipientUserId: input.recipientUserId,
+      });
+
+      return result.match(
+        (res) => res,
+        (err) => {
+          switch (err.name) {
+            case "FollowRequestNotFoundError": {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Follow request not found",
+              });
+            }
+          }
+        },
+      );
+    }),
+
+  acceptFollowRequest: protectedProcedure
+    .input(
+      z.object({
+        senderUserId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.services.follow.acceptFollowRequest({
+        senderUserId: input.senderUserId,
+        recipientUserId: ctx.session.uid,
+      });
+
+      return result.match(
+        (res) => res,
+        (err) => {
+          switch (err.name) {
+            case "FollowRequestNotFoundError": {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Follow request not found",
+              });
+            }
+          }
+        },
+      );
+    }),
+
+  declineFollowRequest: protectedProcedure
+    .input(
+      z.object({
+        senderUserId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.services.follow.declineFollowRequest({
+        senderUserId: input.senderUserId,
+        recipientUserId: ctx.session.uid,
+      });
+
+      return result.match(
+        (res) => res,
+        (err) => {
+          switch (err.name) {
+            case "FollowRequestNotFoundError": {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Follow request not found",
+              });
+            }
+          }
+        },
+      );
+    }),
+
+  paginateFollowers: protectedProcedure
     .input(
       z.object({
         cursor: z
@@ -164,7 +203,7 @@ export const followerRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const result = await ctx.services.friend.paginateFriends({
+      const result = await ctx.services.follow.paginateFollowers({
         userId: ctx.session.uid,
         cursor: input.cursor,
         pageSize: input.pageSize,
@@ -176,7 +215,7 @@ export const followerRouter = createTRPCRouter({
       );
     }),
 
-  paginateFriendRequests: protectedProcedure
+  paginateFollowRequests: protectedProcedure
     .input(
       z.object({
         cursor: z
@@ -189,7 +228,7 @@ export const followerRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const result = await ctx.services.friend.paginateFriendRequests({
+      const result = await ctx.services.follow.paginateFollowRequests({
         userId: ctx.session.uid,
         cursor: input.cursor,
         pageSize: input.pageSize,

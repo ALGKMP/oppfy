@@ -25,10 +25,10 @@ import type { IUserService } from "./interfaces/services/user/user.service.inter
 import { BlockRepository } from "./repositories/social/block.repository";
 import { FollowRepository } from "./repositories/social/follow.repository";
 import { FriendRepository } from "./repositories/social/friend.repository";
+import { ReportRepository } from "./repositories/social/report.repository";
 import { ContactsRepository } from "./repositories/user/contacts.repository";
 import { NotificationsRepository } from "./repositories/user/notifications.repository";
 import { ProfileRepository } from "./repositories/user/profile.repository";
-import { ReportRepository } from "./repositories/social/report.repository";
 import { UserRepository } from "./repositories/user/user.repository";
 import { PostService } from "./services/content/post.service";
 import { PostInteractionService } from "./services/content/postInteraction.service";
@@ -36,8 +36,8 @@ import { Services } from "./services/index";
 import { BlockService } from "./services/social/block.service";
 import { FollowService } from "./services/social/follow.service";
 import { FriendService } from "./services/social/friend.service";
-import { ProfileService } from "./services/user/profile.service";
 import { ReportService } from "./services/social/report.service";
+import { ProfileService } from "./services/user/profile.service";
 import { UserService } from "./services/user/user.service";
 
 // Define symbol constants for our interfaces
@@ -45,7 +45,6 @@ export const TYPES = {
   // DB Dependencies
   Database: Symbol.for("Database"),
   Schema: Symbol.for("Schema"),
-  Transaction: Symbol.for("Transaction"),
 
   // SDKs
   S3: Symbol.for("S3"),

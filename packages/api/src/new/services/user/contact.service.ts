@@ -26,8 +26,6 @@ import { UserRepository } from "../../repositories/user/user.repository";
 @injectable()
 export class ContactService implements IContactService {
   constructor(
-    @inject(TYPES.Transaction)
-    private readonly tx: Transaction,
     @inject(TYPES.UserRepository)
     private readonly userRepository: UserRepository,
     @inject(TYPES.ProfileRepository)

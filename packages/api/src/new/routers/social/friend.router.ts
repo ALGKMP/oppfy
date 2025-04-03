@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../../trpc";
 
 export const friendRouter = createTRPCRouter({
-  friend: protectedProcedure
+  friendUser: protectedProcedure
     .input(
       z.object({
         recipientUserId: z.string(),
@@ -36,6 +36,33 @@ export const friendRouter = createTRPCRouter({
               throw new TRPCError({
                 code: "BAD_REQUEST",
                 message: "Friend request already sent",
+              });
+            }
+          }
+        },
+      );
+    }),
+
+  unfriendUser: protectedProcedure
+    .input(
+      z.object({
+        recipientUserId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.services.friend.unfriendUser({
+        userIdA: ctx.session.uid,
+        userIdB: input.recipientUserId,
+      });
+
+      return result.match(
+        (res) => res,
+        (err) => {
+          switch (err.name) {
+            case "FriendNotFoundError": {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Friend not found",
               });
             }
           }
@@ -117,33 +144,6 @@ export const friendRouter = createTRPCRouter({
               throw new TRPCError({
                 code: "NOT_FOUND",
                 message: "Friend request not found",
-              });
-            }
-          }
-        },
-      );
-    }),
-
-  unfriend: protectedProcedure
-    .input(
-      z.object({
-        recipientUserId: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.friend.unfriendUser({
-        userIdA: ctx.session.uid,
-        userIdB: input.recipientUserId,
-      });
-
-      return result.match(
-        (res) => res,
-        (err) => {
-          switch (err.name) {
-            case "FriendNotFoundError": {
-              throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "Friend not found",
               });
             }
           }
