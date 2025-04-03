@@ -1,5 +1,4 @@
 import { TRPCError } from "@trpc/server";
-import { ok } from "neverthrow";
 import { z } from "zod";
 
 import {
@@ -21,34 +20,20 @@ export const profileRouter = createTRPCRouter({
         otherUserId: input.userId,
       });
 
-      if (result.isErr()) {
-        switch (result.error.name) {
-          case "ProfileNotFoundError":
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: "Profile not found",
-            });
-        }
-
-        return;
-      }
-
-      return result.value;
-
       return result.match(
-        (result) => result,
+        (res) => res,
         (err) => {
           switch (err.name) {
-            // case "ProfileNotFoundError":
-            //   throw new TRPCError({
-            //     code: "NOT_FOUND",
-            //     message: "Profile not found",
-            //   });
-            // case "ProfilePrivateError":
-            //   throw new TRPCError({
-            //     code: "FORBIDDEN",
-            //     message: "Profile is private",
-            //   });
+            case "ProfileNotFoundError":
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Profile not found",
+              });
+            case "ProfilePrivateError":
+              throw new TRPCError({
+                code: "FORBIDDEN",
+                message: "Profile is private",
+              });
             case "ProfileBlockedError":
               throw new TRPCError({
                 code: "FORBIDDEN",
@@ -71,7 +56,7 @@ export const profileRouter = createTRPCRouter({
       });
 
       return result.match(
-        (result) => result,
+        (res) => res,
         (err) => {
           switch (err.name) {
             case "ProfileNotFoundError":
@@ -91,13 +76,13 @@ export const profileRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const test = await ctx.services.profile.searchProfilesByUsername({
+      const result = await ctx.services.profile.searchProfilesByUsername({
         userId: ctx.session.uid,
         username: input.username,
       });
 
-      return test.match(
-        (result) => result,
+      return result.match(
+        (res) => res,
         (_) => null,
       );
     }),
@@ -115,7 +100,7 @@ export const profileRouter = createTRPCRouter({
       });
 
       return result.match(
-        (result) => result,
+        (res) => res,
         (err) => {
           switch (err.name) {
             case "ProfileBlockedError":
@@ -140,9 +125,15 @@ export const profileRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      return await ctx.services.profile.generateProfilePicturePresignedUrl({
-        userId: ctx.session.uid,
-        contentLength: input.contentLength,
-      });
+      const result =
+        await ctx.services.profile.generateProfilePicturePresignedUrl({
+          userId: ctx.session.uid,
+          contentLength: input.contentLength,
+        });
+
+      return result.match(
+        (res) => res,
+        (_) => null,
+      );
     }),
 });
