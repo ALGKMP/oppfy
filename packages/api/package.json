@@ -17,7 +17,6 @@
   "dependencies": {
     "@aws-sdk/cloudfront-signer": "^3.609.0",
     "@aws-sdk/s3-request-presigner": "^3.564.0",
-    "@bufferings/eslint-plugin-neverthrow": "^0.2.12",
     "@oppfy/cloudfront": "workspace:*",
     "@oppfy/db": "workspace:*",
     "@oppfy/env": "workspace:*",

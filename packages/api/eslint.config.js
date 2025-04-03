@@ -1,19 +1,9 @@
-import neverthrowPlugin from "@bufferings/eslint-plugin-neverthrow";
-import eslint from "@eslint/js";
-import tseslint from "typescript-eslint";
+import baseConfig from "@oppfy/eslint-config/base";
 
-export default tseslint.config(
-  eslint.configs.recommended,
-  tseslint.configs.recommendedTypeChecked,
-  neverthrowPlugin.configs.recommended,
+/** @type {import('typescript-eslint').Config} */
+export default [
   {
-    languageOptions: {
-      parserOptions: {
-        projectService: {
-          allowDefaultProject: ["*.config.*"],
-        },
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
+    ignores: [],
   },
-);
+  ...baseConfig,
+];
