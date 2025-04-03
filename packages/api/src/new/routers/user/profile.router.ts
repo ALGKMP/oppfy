@@ -125,15 +125,9 @@ export const profileRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const result =
-        await ctx.services.profile.generateProfilePicturePresignedUrl({
-          userId: ctx.session.uid,
-          contentLength: input.contentLength,
-        });
-
-      return result.match(
-        (res) => res,
-        (_) => null,
-      );
+      await ctx.services.profile.generateProfilePicturePresignedUrl({
+        userId: ctx.session.uid,
+        contentLength: input.contentLength,
+      });
     }),
 });

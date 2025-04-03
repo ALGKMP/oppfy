@@ -22,7 +22,7 @@ export const userRouter = createTRPCRouter({
     });
 
     return result.match(
-      (result) => result,
+      (res) => res,
       (err) => {
         switch (err.name) {
           case "UserNotFoundError":
@@ -48,7 +48,7 @@ export const userRouter = createTRPCRouter({
     });
 
     return result.match(
-      (result) => result,
+      (res) => res,
       (err) => {
         switch (err.name) {
           case "UserNotFoundError":
@@ -67,7 +67,7 @@ export const userRouter = createTRPCRouter({
     });
 
     return result.match(
-      (privacy) => privacy,
+      (res) => res,
       (err) => {
         switch (err.name) {
           case "ProfileNotFoundError":
