@@ -35,7 +35,6 @@
     "@hookform/resolvers": "^3.3.4",
     "@mux/mux-data-react-native-video": "^0.15.2",
     "@oppfy/env": "workspace:*",
-    "@oppfy/utils": "workspace:*",
     "@oppfy/validators": "workspace:*",
     "@react-native-masked-view/masked-view": "0.3.2",
     "@react-navigation/drawer": "^7.0.0",

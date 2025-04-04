@@ -17,7 +17,6 @@
     "@oppfy/eslint-config": "workspace:*",
     "@oppfy/prettier-config": "workspace:*",
     "@oppfy/tsconfig": "workspace:*",
-    "@oppfy/utils": "workspace:*",
     "date-fns": "^4.1.0",
     "libphonenumber-js": "^1.10.61",
     "zod": "^3.23.8"

@@ -21,7 +21,6 @@
     "@middy/http-error-handler": "^5.4.0",
     "@middy/http-json-body-parser": "^5.4.0",
     "@oppfy/db": "workspace:*",
-    "@oppfy/utils": "workspace:*",
     "@oppfy/validators": "workspace:*",
     "@t3-oss/env-core": "^0.10.1",
     "expo-server-sdk": "^3.10.0",

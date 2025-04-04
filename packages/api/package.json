@@ -24,7 +24,6 @@
     "@oppfy/s3": "workspace:*",
     "@oppfy/sns": "workspace:*",
     "@oppfy/sqs": "workspace:*",
-    "@oppfy/utils": "workspace:*",
     "@oppfy/validators": "workspace:*",
     "@trpc/client": "catalog:",
     "@trpc/server": "catalog:",
