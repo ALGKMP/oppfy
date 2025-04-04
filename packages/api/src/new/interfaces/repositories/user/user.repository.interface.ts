@@ -1,3 +1,4 @@
+// interfaces/repositories/user/user.repository.interface.ts
 import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
 import type { User, UserStatus } from "../../../models";
@@ -74,6 +75,21 @@ export interface IUserRepository {
 
   markUserAsOnboardingComplete(
     params: UserIdParam,
+    db?: DatabaseOrTransaction,
+  ): Promise<void>;
+
+  getUserByPhoneNumberNoThrow(
+    params: PhoneNumberParam,
+    db?: DatabaseOrTransaction,
+  ): Promise<User | undefined>;
+
+  isUserOnApp(
+    params: UserIdParam,
+    db?: DatabaseOrTransaction,
+  ): Promise<boolean>;
+
+  updateUserOnAppStatus(
+    params: { userId: string; isOnApp: boolean },
     db?: DatabaseOrTransaction,
   ): Promise<void>;
 }

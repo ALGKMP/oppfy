@@ -166,7 +166,7 @@ export const friendRouter = createTRPCRouter({
             createdAt: z.date(),
           })
           .nullable(),
-        pageSize: z.number().optional(),
+        pageSize: z.number().optional().default(10),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -191,7 +191,7 @@ export const friendRouter = createTRPCRouter({
             createdAt: z.date(),
           })
           .nullable(),
-        pageSize: z.number().optional(),
+        pageSize: z.number().optional().default(10),
       }),
     )
     .query(async ({ ctx, input }) => {

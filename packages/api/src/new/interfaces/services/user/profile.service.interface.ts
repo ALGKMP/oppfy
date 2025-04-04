@@ -35,6 +35,10 @@ export interface GenerateProfilePicturePresignedUrlParams {
   contentLength: number;
 }
 
+export interface SearchProfileByIdsParams {
+  userIds: string[];
+}
+
 export interface IProfileService {
   profile(
     params: SelfOtherUserIdsParams<"optional">,
@@ -53,6 +57,10 @@ export interface IProfileService {
 
   searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,
+  ): Promise<Result<HydratedProfile[], never>>;
+
+  searchProfilesByIds(
+    params: SearchProfileByIdsParams,
   ): Promise<Result<HydratedProfile[], never>>;
 
   relationshipStatesBetweenUsers(

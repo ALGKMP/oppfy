@@ -14,6 +14,7 @@ import type {
   GenerateProfilePicturePresignedUrlParams,
   IProfileService,
   RelationshipState,
+  SearchProfileByIdsParams,
   SearchProfilesByUsernameParams,
   UpdateProfileParams,
 } from "../../interfaces/services/user/profile.service.interface";
@@ -119,6 +120,20 @@ export class ProfileService implements IProfileService {
     params: SearchProfilesByUsernameParams,
   ): Promise<Result<HydratedProfile[], never>> {
     const profiles = await this.profileRepository.getProfilesByUsername(params);
+    const hydratedProfiles = profiles.map((profile) =>
+      this.cloudfront.hydrateProfile(profile),
+    );
+
+    return ok(hydratedProfiles);
+  }
+
+  /**
+   * Searches profiles by IDs, no filter for the blocked status.
+   */
+  async searchProfilesByIds(
+    params: SearchProfileByIdsParams,
+  ): Promise<Result<HydratedProfile[], never>> {
+    const profiles = await this.profileRepository.getProfilesByIds(params);
     const hydratedProfiles = profiles.map((profile) =>
       this.cloudfront.hydrateProfile(profile),
     );

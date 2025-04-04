@@ -49,6 +49,8 @@ export const TYPES = {
   // SDKs
   S3: Symbol.for("S3"),
   CloudFront: Symbol.for("CloudFront"),
+  TwilioService: Symbol.for("TwilioService"),
+
 
   // Repositories
   ReportRepository: Symbol.for("ReportRepository"),
@@ -71,6 +73,7 @@ export const TYPES = {
   Services: Symbol.for("Services"),
 
   UserService: Symbol.for("UserService"),
+  AuthService: Symbol.for("AuthService"),
   ProfileService: Symbol.for("ProfileService"),
   ReportService: Symbol.for("ReportService"),
   FriendService: Symbol.for("FriendService"),

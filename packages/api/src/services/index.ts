@@ -1,10 +1,11 @@
+import { twilio } from "@oppfy/twilio";
+
 import { PaginationService } from "./media/paginate";
 import { PostService } from "./media/post";
 import { BlockService } from "./network/block";
 import { FollowService } from "./network/follow";
 import { FriendService } from "./network/friend";
 import { ReportService } from "./network/report";
-import { TwilioService } from "./twilio";
 import { ContactService } from "./user/contacts";
 import { NotificationsService } from "./user/notifications";
 import { PrivacyService } from "./user/privacy";
@@ -23,5 +24,5 @@ export const services = {
   post: new PostService(),
   paginate: new PaginationService(),
   report: new ReportService(),
-  twilio: new TwilioService(),
+  twilio,
 };

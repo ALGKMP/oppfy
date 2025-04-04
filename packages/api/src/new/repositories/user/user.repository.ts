@@ -1,3 +1,4 @@
+// repositories/user.repository.ts
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
@@ -32,7 +33,6 @@ export class UserRepository implements IUserRepository {
     this.schema = schema;
   }
 
-  /** Retrieves a user by their ID. */
   async getUser(
     { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
@@ -42,7 +42,6 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  /** Retrieves a user by their phone number. */
   async getUserByPhoneNumber(
     { phoneNumber }: PhoneNumberParam,
     db: DatabaseOrTransaction = this.db,
@@ -52,7 +51,15 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  /** Fetches a list of random active user IDs, limited by the specified number. */
+  async getUserByPhoneNumberNoThrow(
+    { phoneNumber }: PhoneNumberParam,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<User | undefined> {
+    return await db.query.user.findFirst({
+      where: eq(this.schema.user.phoneNumber, phoneNumber),
+    });
+  }
+
   async getRandomActiveUserIds(
     { pageSize = 10 }: GetRandomActiveUserIdsParams,
     db: DatabaseOrTransaction = this.db,
@@ -69,7 +76,6 @@ export class UserRepository implements IUserRepository {
       .limit(pageSize);
   }
 
-  /** Retrieves the status of a user by their ID. */
   async getUserStatus(
     { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
@@ -79,13 +85,10 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  /** Creates a user who is on the app, inserting records into multiple tables within a transaction. */
   async createUserOnApp(
-    params: CreateUserOnAppParams,
+    { userId, phoneNumber, username }: CreateUserOnAppParams,
     tx: Transaction,
   ): Promise<void> {
-    const { userId, phoneNumber, username } = params;
-
     await tx.insert(this.schema.user).values({
       id: userId,
       phoneNumber,
@@ -93,20 +96,17 @@ export class UserRepository implements IUserRepository {
 
     await tx.insert(this.schema.profile).values({
       userId,
-      username,
+      username: username || phoneNumber, // Default to phoneNumber if username not provided
     });
 
     await tx.insert(this.schema.userStats).values({ userId });
-
     await tx.insert(this.schema.notificationSettings).values({ userId });
-
     await tx.insert(this.schema.userStatus).values({
       userId,
       isOnApp: true,
     });
   }
 
-  /** Creates a user who is not on the app, including a name, within a transaction. */
   async createUserNotOnApp(
     params: CreateUserNotOnAppParams,
     tx: Transaction,
@@ -125,16 +125,13 @@ export class UserRepository implements IUserRepository {
     });
 
     await tx.insert(this.schema.userStats).values({ userId });
-
     await tx.insert(this.schema.notificationSettings).values({ userId });
-
     await tx.insert(this.schema.userStatus).values({
       userId,
       isOnApp: false,
     });
   }
 
-  /** Deletes a user by their ID. */
   async deleteUser(
     { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
@@ -142,7 +139,6 @@ export class UserRepository implements IUserRepository {
     await db.delete(this.schema.user).where(eq(this.schema.user.id, userId));
   }
 
-  /** Checks for existing phone numbers that are on the app. */
   async existingPhoneNumbers(
     { phoneNumbers }: ExistingPhoneNumbersParams,
     db: DatabaseOrTransaction = this.db,
@@ -164,7 +160,6 @@ export class UserRepository implements IUserRepository {
     return existingNumbers.map((user) => user.phoneNumber);
   }
 
-  /** Marks a user as being on the app. */
   async markUserAsOnApp(
     { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
@@ -175,7 +170,6 @@ export class UserRepository implements IUserRepository {
       .where(eq(this.schema.userStatus.userId, userId));
   }
 
-  /** Marks a user as having completed the tutorial. */
   async markUserAsTutorialComplete(
     { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
@@ -186,7 +180,6 @@ export class UserRepository implements IUserRepository {
       .where(eq(this.schema.userStatus.userId, userId));
   }
 
-  /** Marks a user as having completed onboarding. */
   async markUserAsOnboardingComplete(
     { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
@@ -194,6 +187,26 @@ export class UserRepository implements IUserRepository {
     await db
       .update(this.schema.userStatus)
       .set({ hasCompletedOnboarding: true })
+      .where(eq(this.schema.userStatus.userId, userId));
+  }
+
+  async isUserOnApp(
+    { userId }: UserIdParam,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<boolean> {
+    const status = await db.query.userStatus.findFirst({
+      where: eq(this.schema.userStatus.userId, userId),
+    });
+    return status?.isOnApp ?? false;
+  }
+
+  async updateUserOnAppStatus(
+    { userId, isOnApp }: { userId: string; isOnApp: boolean },
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    await db
+      .update(this.schema.userStatus)
+      .set({ isOnApp })
       .where(eq(this.schema.userStatus.userId, userId));
   }
 }

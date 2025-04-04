@@ -1,8 +1,9 @@
-import { Result } from "neverthrow";
+import type { Result } from "neverthrow";
 
-import * as AwsErrors from "../../../errors/aws.error";
-import * as UserErrors from "../../../errors/user/user.error";
-import { HydratedProfile } from "../../../models";
+import type * as AwsErrors from "../../../errors/aws.error";
+import type * as UserErrors from "../../../errors/user/user.error";
+import type { HydratedProfile } from "../../../models";
+import type { UserIdParam } from "../../types";
 
 export interface UpdateUserContactsParams {
   userId: string;
@@ -13,10 +14,6 @@ export interface FilterPhoneNumbersOnAppParams {
   phoneNumbers: string[];
 }
 
-export interface GetRecommendationParams {
-  userId: string;
-}
-
 export interface ContactRecommendation {
   userId: string;
   username: string | null;
@@ -24,7 +21,6 @@ export interface ContactRecommendation {
   profilePictureUrl: string | null;
   mutualContactsCount: number;
 }
-
 
 export interface IContactsService {
   updateUserContacts(params: UpdateUserContactsParams): Promise<
@@ -36,6 +32,6 @@ export interface IContactsService {
   ): Promise<string[]>;
 
   getProfileRecommendations(
-    params: GetRecommendationParams,
+    params: UserIdParam,
   ): Promise<Result<HydratedProfile[], UserErrors.UserNotFound>>;
 }
