@@ -91,8 +91,8 @@ export class PostService implements IPostService {
             author,
             recipient,
             caption,
-            height,
-            width,
+            height: height.toString(),
+            width: width.toString(),
             postid: postId,
           });
           return ok({ presignedUrl, postId });
@@ -104,7 +104,7 @@ export class PostService implements IPostService {
             objectKey,
             contentLength,
             contentType,
-            { author, recipient, caption, height, width, postid: postId },
+            { author, recipient, caption, height: height.toString(), width: width.toString(), postid: postId },
           );
           return ok({ presignedUrl, postId });
         }
@@ -136,8 +136,8 @@ export class PostService implements IPostService {
                 author,
                 recipient: recipientId,
                 caption,
-                height,
-                width,
+                height: height.toString(),
+                width: width.toString(),
                 postid: postId,
               }),
               postId,
@@ -154,8 +154,8 @@ export class PostService implements IPostService {
                 {
                   author,
                   caption,
-                  height,
-                  width,
+                  height: height.toString(),
+                  width: width.toString(),
                   recipient: recipientId,
                   postid: postId,
                 },
@@ -392,39 +392,6 @@ export class PostService implements IPostService {
     }
 
     return ok(this.hydrateAndProcessPostResultWithoutLike(rawPost));
-  }
-
-  async updatePost({
-    userId,
-    postId,
-    content: caption,
-  }: UpdatePostParams): Promise<
-    Result<
-      void,
-      | PostErrors.FailedToUpdatePost
-      | PostErrors.PostNotFound
-      | PostErrors.NotPostOwner
-    >
-  > {
-    try {
-      await this.db.transaction(async (tx) => {
-        const post = await this.postRepository.getPost({ postId, userId }, tx);
-        if (!post) throw new PostErrors.PostNotFound(postId);
-        if (post.post.authorUserId !== userId) {
-          throw new PostErrors.NotPostOwner(userId, postId);
-        }
-        await this.postRepository.updatePost({ postId, caption }, tx);
-      });
-      return ok();
-    } catch (error) {
-      if (
-        error instanceof PostErrors.PostNotFound ||
-        error instanceof PostErrors.NotPostOwner
-      ) {
-        return err(error);
-      }
-      return err(new PostErrors.FailedToUpdatePost(postId));
-    }
   }
 
   async paginateComments({
