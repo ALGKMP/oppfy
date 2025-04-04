@@ -40,8 +40,8 @@ export interface UploadPostForUserOnAppUrlParams {
   author: string;
   recipient: string;
   caption: string;
-  height: string;
-  width: string;
+  height: number;
+  width: number;
   contentLength: number;
   contentType: "image/jpeg" | "image/png" | "image/heic";
 }
@@ -51,8 +51,8 @@ export interface UploadPostForUserNotOnAppUrlParams {
   recipientNotOnAppPhoneNumber: string;
   recipientNotOnAppName: string;
   caption: string;
-  height: string;
-  width: string;
+  height: number;
+  width: number;
   contentLength: number;
   contentType: "image/jpeg" | "image/png" | "image/heic";
 }
@@ -61,8 +61,8 @@ export interface UploadVideoPostForUserOnAppUrlParams {
   author: string;
   recipient: string;
   caption: string;
-  height: string;
-  width: string;
+  height: number;
+  width: number;
 }
 
 export interface UploadVideoPostForUserNotOnAppUrlParams {
@@ -70,8 +70,8 @@ export interface UploadVideoPostForUserNotOnAppUrlParams {
   recipientNotOnAppPhoneNumber: string;
   recipientNotOnAppName: string;
   caption: string;
-  height: string;
-  width: string;
+  height: number;
+  width: number;
 }
 
 export interface UpdatePostParams {
