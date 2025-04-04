@@ -11,13 +11,11 @@ import { env } from "@oppfy/env";
 
 import { TYPES } from "../../container";
 import type {
-  ContactRecommendation,
-  DeleteContactsParams,
-  GetContactsParams,
-  GetRecommendationsParams,
+  DeleteUserContactsParam,
   IContactsRepository,
-  UpdateUserContactsParams,
+  InsertUserContactsParam,
 } from "../../interfaces/repositories/user/contacts.repository.interface";
+import { UserIdParam } from "../../interfaces/types";
 
 @injectable()
 export class ContactsRepository implements IContactsRepository {
@@ -32,205 +30,58 @@ export class ContactsRepository implements IContactsRepository {
     this.schema = schema;
   }
 
-  async updateUserContacts(
-    params: UpdateUserContactsParams,
+  async findUserContacts(
+    { userId }: UserIdParam,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<{ userId: string; contactId: string }[]> {
+    return db.query.userContact.findMany({
+      where: eq(this.schema.userContact.userId, userId),
+    });
+  }
+
+  async deleteUserContactsByIds(
+    { userId, contactIds }: DeleteUserContactsParam,
     tx: Transaction,
   ): Promise<void> {
-    const { userId, hashedPhoneNumbers } = params;
-
-    const oldContacts = await tx.query.userContact.findMany({
-      where: eq(this.schema.userContact.userId, userId),
-    });
-
-    // Find contacts to delete
-    const contactsToDelete = oldContacts
-      .filter((contact) => !hashedPhoneNumbers.includes(contact.contactId))
-      .map((contact) => contact.contactId);
-
-    // Find contacts to add
-    const contactsToAdd = hashedPhoneNumbers.filter(
-      (hashedPhoneNumber) =>
-        !oldContacts.some((contact) => contact.contactId === hashedPhoneNumber),
-    );
-
-    // Batch delete contacts
-    if (contactsToDelete.length > 0) {
-      await tx
-        .delete(this.schema.userContact)
-        .where(
-          and(
-            eq(this.schema.userContact.userId, userId),
-            inArray(this.schema.userContact.contactId, contactsToDelete),
-          ),
-        );
+    if (contactIds.length === 0) {
+      return;
     }
-
-    // Batch insert contacts into `contact` table if they don't exist
-    if (contactsToAdd.length > 0) {
-      const existingContacts = await tx.query.contact.findMany({
-        where: inArray(this.schema.contact.id, contactsToAdd),
-      });
-
-      const newContactsToInsert = new Set(
-        contactsToAdd.filter(
-          (contact) =>
-            !existingContacts.some((existing) => existing.id === contact),
+    await tx
+      .delete(this.schema.userContact)
+      .where(
+        and(
+          eq(this.schema.userContact.userId, userId),
+          inArray(this.schema.userContact.contactId, contactIds),
         ),
       );
-
-      if (newContactsToInsert.size > 0) {
-        await tx
-          .insert(this.schema.contact)
-          .values(Array.from(newContactsToInsert).map((id) => ({ id })));
-      }
-
-      // Batch insert into `userContact` table
-      const userContactsToInsert = contactsToAdd.map((contact) => ({
-        userId,
-        contactId: contact,
-      }));
-
-      await tx
-        .insert(this.schema.userContact)
-        .values(userContactsToInsert)
-        .onConflictDoNothing();
-    }
   }
 
-  async deleteContacts(
-    params: DeleteContactsParams,
-    db: DatabaseOrTransaction = this.db,
+  async insertUserContacts(
+    { userId, contactIds }: InsertUserContactsParam,
+    tx: Transaction,
   ): Promise<void> {
-    const { userId } = params;
-
-    await db
-      .delete(this.schema.userContact)
-      .where(eq(this.schema.userContact.userId, userId));
-  }
-
-  async getContacts(
-    params: GetContactsParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<string[]> {
-    const { userId } = params;
-
-    const contacts = await db.query.userContact.findMany({
-      where: eq(this.schema.userContact.userId, userId),
-    });
-
-    return contacts.map((contact) => contact.contactId);
-  }
-
-  async getRecommendations(
-    params: GetRecommendationsParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<ContactRecommendation[]> {
-    const { userId } = params;
-
-    // Get recommendations from Lambda function
-    const recommendations = await this.getRecommendationIds(userId);
-
-    // Combine all tiers
-    const allRecommendedUserIds = [
-      ...recommendations.tier1,
-      ...recommendations.tier2,
-      ...recommendations.tier3,
-    ];
-
-    if (allRecommendedUserIds.length === 0) {
-      return [];
+    if (contactIds.length === 0) {
+      return;
     }
 
-    // Get user profiles for recommendations
-    const userProfiles = await db
-      .select({
-        userId: this.schema.user.id,
-        username: this.schema.profile.username,
-        name: this.schema.profile.name,
-        profilePictureUrl: this.schema.profile.profilePictureKey,
-      })
-      .from(this.schema.user)
-      .innerJoin(
-        this.schema.profile,
-        eq(this.schema.user.id, this.schema.profile.userId),
-      )
-      .where(inArray(this.schema.user.id, allRecommendedUserIds));
-
-    // Get mutual contacts count for each recommendation
-    const userContactsMap = new Map<string, string[]>();
-
-    // Get user's contacts
-    const userContacts = await db.query.userContact.findMany({
-      where: eq(this.schema.userContact.userId, userId),
-    });
-
-    userContactsMap.set(
+    const mappings = contactIds.map((contactId) => ({
       userId,
-      userContacts.map((contact) => contact.contactId),
-    );
+      contactId,
+    }));
 
-    // Get contacts for each recommended user
-    for (const recommendedUserId of allRecommendedUserIds) {
-      const contacts = await db.query.userContact.findMany({
-        where: eq(this.schema.userContact.userId, recommendedUserId),
-      });
-
-      userContactsMap.set(
-        recommendedUserId,
-        contacts.map((contact) => contact.contactId),
-      );
-    }
-
-    // Calculate mutual contacts
-    const result: ContactRecommendation[] = [];
-
-    for (const profile of userProfiles) {
-      const userContactIds = userContactsMap.get(userId) ?? [];
-      const recommendedUserContactIds =
-        userContactsMap.get(profile.userId) ?? [];
-
-      const mutualContacts = userContactIds.filter((contactId) =>
-        recommendedUserContactIds.includes(contactId),
-      );
-
-      result.push({
-        userId: profile.userId,
-        username: profile.username,
-        name: profile.name,
-        profilePictureUrl: profile.profilePictureUrl,
-        mutualContactsCount: mutualContacts.length,
-      });
-    }
-
-    // Sort by tier and then by mutual contacts count
-    return result.sort((a, b) => {
-      const aTier = this.getTier(a.userId, recommendations);
-      const bTier = this.getTier(b.userId, recommendations);
-
-      if (aTier !== bTier) {
-        return aTier - bTier;
-      }
-
-      return b.mutualContactsCount - a.mutualContactsCount;
-    });
+    await tx
+      .insert(this.schema.userContact)
+      .values(mappings)
+      .onConflictDoNothing();
   }
 
-  private getTier(
-    userId: string,
-    recommendations: { tier1: string[]; tier2: string[]; tier3: string[] },
-  ): number {
-    if (recommendations.tier1.includes(userId)) {
-      return 1;
-    } else if (recommendations.tier2.includes(userId)) {
-      return 2;
-    } else {
-      return 3;
-    }
-  }
-
-  async getRecommendationIds(
-    userId: string,
-  ): Promise<{ tier1: string[]; tier2: string[]; tier3: string[] }> {
+  async getRecommendationIds({
+    userId,
+  }: UserIdParam): Promise<{
+    tier1: string[];
+    tier2: string[];
+    tier3: string[];
+  }> {
     const lambdaUrl = env.CONTACT_REC_LAMBDA_URL;
 
     // Construct the full URL with the query parameter

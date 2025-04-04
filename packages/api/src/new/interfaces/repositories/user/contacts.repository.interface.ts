@@ -1,48 +1,35 @@
-import type { DatabaseOrTransaction } from "@oppfy/db";
+import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
-export interface UpdateUserContactsParams {
+import { UserIdParam } from "../../types";
+
+export interface DeleteUserContactsParam {
   userId: string;
-  hashedPhoneNumbers: string[];
+  contactIds: string[];
 }
 
-export interface DeleteContactsParams {
+export interface InsertUserContactsParam {
   userId: string;
+  contactIds: string[];
 }
-
-export interface GetContactsParams {
-  userId: string;
-}
-
-export interface GetRecommendationsParams {
-  userId: string;
-}
-
-export interface ContactRecommendation {
-  userId: string;
-  username: string | null;
-  name: string | null;
-  profilePictureUrl: string | null;
-  mutualContactsCount: number;
-}
-
 export interface IContactsRepository {
-  updateUserContacts(
-    params: UpdateUserContactsParams,
-    db?: DatabaseOrTransaction,
+  findUserContacts(
+    params: UserIdParam,
+    db: DatabaseOrTransaction,
+  ): Promise<{ userId: string; contactId: string }[]>;
+
+  deleteUserContactsByIds(
+    params: DeleteUserContactsParam,
+    tx: Transaction,
   ): Promise<void>;
 
-  deleteContacts(
-    params: DeleteContactsParams,
-    db?: DatabaseOrTransaction,
+  insertUserContacts(
+    params: InsertUserContactsParam,
+    tx: Transaction,
   ): Promise<void>;
 
-  getContacts(
-    params: GetContactsParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<string[]>;
-
-  getRecommendations(
-    params: GetRecommendationsParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<ContactRecommendation[]>;
+  getRecommendationIds(params: UserIdParam): Promise<{
+    tier1: string[];
+    tier2: string[];
+    tier3: string[];
+  }>;
 }
