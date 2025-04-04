@@ -1,6 +1,6 @@
 import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
-import { UserIdParam } from "../../types";
+import type { UserIdParam } from "../../types";
 
 export interface DeleteUserContactsParam {
   userId: string;
@@ -11,6 +11,7 @@ export interface InsertUserContactsParam {
   userId: string;
   contactIds: string[];
 }
+
 export interface IContactsRepository {
   findUserContacts(
     params: UserIdParam,
