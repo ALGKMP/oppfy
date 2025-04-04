@@ -33,7 +33,7 @@ export class AuthService implements IAuthService {
     @inject(TYPES.Database) private readonly db: Database,
     @inject(TYPES.UserRepository)
     private readonly userRepository: IUserRepository,
-    @inject(TYPES.TwilioService) private readonly twilio: TwilioService,
+    @inject(TYPES.Twilio) private readonly twilio: TwilioService,
   ) {}
 
   private generateTokens(uid: string): AuthTokens {

@@ -15,7 +15,7 @@
   "prettier": "@oppfy/prettier-config",
   "dependencies": {
     "@oppfy/env": "workspace:*",
-    "twilio": "^4.22.0"
+    "twilio": "^5.4.2"
   },
   "devDependencies": {
     "@oppfy/eslint-config": "workspace:*",

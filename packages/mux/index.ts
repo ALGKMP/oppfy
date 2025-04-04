@@ -30,7 +30,7 @@ export class MuxService {
     caption,
     height,
     width,
-    postid
+    postid,
   }: GetPresignedUrlForVideoOptions) {
     const upload = await this.client.video.uploads.create({
       cors_origin: "*",
@@ -67,6 +67,3 @@ export class MuxService {
     return `https://image.mux.com/${assetId}/thumbnail.jpg`;
   }
 }
-
-// Export a singleton instance
-export const mux = new MuxService();

@@ -113,5 +113,3 @@ export class CloudFront {
     return `https://${env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_DOMAIN}/${objectKey}`;
   }
 }
-
-export const cloudfront = new CloudFront();

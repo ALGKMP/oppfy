@@ -1,6 +1,7 @@
 import "reflect-metadata";
 
 import { Container } from "inversify";
+import { Twilio } from "twilio";
 
 import { CloudFront } from "@oppfy/cloudfront";
 import { db, schema } from "@oppfy/db";
@@ -49,8 +50,7 @@ export const TYPES = {
   // SDKs
   S3: Symbol.for("S3"),
   CloudFront: Symbol.for("CloudFront"),
-  TwilioService: Symbol.for("TwilioService"),
-
+  Twilio: Symbol.for("Twilio"),
 
   // Repositories
   ReportRepository: Symbol.for("ReportRepository"),
@@ -90,6 +90,7 @@ const container = new Container();
 // Bind DB dependencies
 container.bind(TYPES.Database).toConstantValue(db);
 container.bind(TYPES.Schema).toConstantValue(schema);
+container.bind(TYPES.Twilio).toConstantValue(twilio);
 
 // Bind sdk's
 container.bind<S3>(TYPES.S3).to(S3);

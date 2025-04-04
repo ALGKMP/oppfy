@@ -91,6 +91,3 @@ export class S3 {
     });
   }
 }
-
-// Export a singleton instance
-export const s3 = new S3();

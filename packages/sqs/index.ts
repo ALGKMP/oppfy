@@ -74,6 +74,3 @@ export class SQSService {
     };
   }
 }
-
-// Export a singleton instance
-export const sqs = new SQSService();

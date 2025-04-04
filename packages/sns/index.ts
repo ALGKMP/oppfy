@@ -221,6 +221,3 @@ export class SNSService {
     });
   }
 }
-
-// Export a singleton instance
-export const sns = new SNSService();

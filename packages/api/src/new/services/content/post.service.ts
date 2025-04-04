@@ -40,7 +40,8 @@ import type { PaginatedResponse } from "../../interfaces/types";
 @injectable()
 export class PostService implements IPostService {
   constructor(
-    @inject(TYPES.Database) private readonly db: Database,
+    @inject(TYPES.Database)
+    private readonly db: Database,
     @inject(TYPES.PostRepository)
     private readonly postRepository: IPostRepository,
     @inject(TYPES.UserRepository)
@@ -104,7 +105,14 @@ export class PostService implements IPostService {
             objectKey,
             contentLength,
             contentType,
-            { author, recipient, caption, height: height.toString(), width: width.toString(), postid: postId },
+            {
+              author,
+              recipient,
+              caption,
+              height: height.toString(),
+              width: width.toString(),
+              postid: postId,
+            },
           );
           return ok({ presignedUrl, postId });
         }
