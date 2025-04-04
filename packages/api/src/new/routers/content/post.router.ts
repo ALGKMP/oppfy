@@ -27,12 +27,7 @@ export const postRouter = createTRPCRouter({
 
       return result.match(
         (res) => res,
-        (err) => {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to create post",
-          });
-        },
+        (_) => _,
       );
     }),
 
@@ -56,12 +51,7 @@ export const postRouter = createTRPCRouter({
 
       return result.match(
         (res) => res,
-        (err) => {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to create post",
-          });
-        },
+        (_) => _,
       );
     }),
 
@@ -82,12 +72,7 @@ export const postRouter = createTRPCRouter({
 
       return result.match(
         (res) => res,
-        (err) => {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to create post",
-          });
-        },
+        (_) => _,
       );
     }),
 
@@ -109,12 +94,7 @@ export const postRouter = createTRPCRouter({
 
       return result.match(
         (res) => res,
-        (err) => {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to create post",
-          });
-        },
+        (_) => _,
       );
     }),
 
@@ -163,12 +143,7 @@ export const postRouter = createTRPCRouter({
 
       return result.match(
         (res) => res,
-        (err) => {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Post not found",
-          });
-        },
+        (_) => _,
       );
     }),
 
@@ -220,12 +195,7 @@ export const postRouter = createTRPCRouter({
 
       return result.match(
         (res) => res,
-        (err) => {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Post not found",
-          });
-        },
+        (_) => _,
       );
     }),
 
@@ -242,12 +212,7 @@ export const postRouter = createTRPCRouter({
 
       return result.match(
         (res) => res,
-        (err) => {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Post not found",
-          });
-        },
+        (_) => _,
       );
     }),
 
