@@ -1,5 +1,5 @@
 import { inject, injectable } from "inversify";
-import { ok, Result } from "neverthrow";
+import { err, ok, Result } from "neverthrow";
 
 import type { Database, DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
@@ -10,35 +10,68 @@ import type { IContactsRepository } from "../../interfaces/repositories/user/con
 import {
   ContactRecommendation,
   FilterPhoneNumbersOnAppParams,
-  GetRecommendationParams,
   IContactsService,
   UpdateUserContactsParams,
 } from "../../interfaces/services/user/contacts.service.interface";
 import { HydratedProfile } from "../../models";
+import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
+import { UserIdParam } from "../../interfaces/types";
+import type { IProfileService } from "../../interfaces/services/user/profile.service.interface";
 
 @injectable()
 export class ContactsService implements IContactsService {
   private db: Database;
   private contactsRepository: IContactsRepository;
+  private userRepository: IUserRepository;
+  private profileService: IProfileService;
 
   constructor(
     @inject(TYPES.Database) db: Database,
     @inject(TYPES.ContactsRepository) contactsRepository: IContactsRepository,
+    @inject(TYPES.UserRepository) userRepository: IUserRepository,
+    @inject(TYPES.ProfileService) profileService: IProfileService,
   ) {
     this.db = db;
     this.contactsRepository = contactsRepository;
+    this.userRepository = userRepository;
+    this.profileService = profileService;
   }
 
   filterPhoneNumbersOnApp(
     params: FilterPhoneNumbersOnAppParams,
   ): Promise<string[]> {
-    throw new Error("Method not implemented.");
+    const { phoneNumbers } = params;
+    return this.userRepository.existingPhoneNumbers({ phoneNumbers });
   }
 
-  getProfileRecommendations(
-    params: GetRecommendationParams,
+  async getProfileRecommendations(
+    { userId }: UserIdParam,
   ): Promise<Result<HydratedProfile[], UserErrors.UserNotFound>> {
-    throw new Error("Method not implemented.");
+    const user = await this.userRepository.getUser({ userId });
+
+    if (!user) {
+      return err(new UserErrors.UserNotFound(userId));
+    }
+
+    // Get recommendations from Lambda function
+    const { tier1, tier2, tier3 } = await this.contactsRepository
+      .getRecommendationIds(
+        { userId },
+      );
+
+    // Combine all tiers
+    const allRecommendedUserIds = [...tier1, ...tier2, ...tier3];
+
+    if (allRecommendedUserIds.length === 0) {
+      return ok([]);
+    }
+
+    // Get user profiles for recommendations
+    const userProfiles = await this.profileService.searchProfilesByIds({
+      userIds: allRecommendedUserIds,
+    });
+
+    return ok(userProfiles.unwrapOr([]));
   }
 
   async updateUserContacts(

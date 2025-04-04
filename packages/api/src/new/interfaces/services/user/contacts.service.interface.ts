@@ -3,6 +3,7 @@ import { Result } from "neverthrow";
 import * as AwsErrors from "../../../errors/aws.error";
 import * as UserErrors from "../../../errors/user/user.error";
 import { HydratedProfile } from "../../../models";
+import { UserIdParam } from "../../types";
 
 export interface UpdateUserContactsParams {
   userId: string;
@@ -13,9 +14,7 @@ export interface FilterPhoneNumbersOnAppParams {
   phoneNumbers: string[];
 }
 
-export interface GetRecommendationParams {
-  userId: string;
-}
+
 
 export interface ContactRecommendation {
   userId: string;
@@ -36,6 +35,6 @@ export interface IContactsService {
   ): Promise<string[]>;
 
   getProfileRecommendations(
-    params: GetRecommendationParams,
+    params: UserIdParam,
   ): Promise<Result<HydratedProfile[], UserErrors.UserNotFound>>;
 }
