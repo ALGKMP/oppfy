@@ -4,11 +4,7 @@ import type { Schema } from "@oppfy/db";
 
 import type * as PostErrors from "../../../errors/content/post.error";
 import type { Comment, Post, Profile } from "../../../models";
-
-export interface PaginatedResponse<TItem, TCursor> {
-  items: TItem[];
-  nextCursor: TCursor | null;
-}
+import type { PaginatedResponse, PaginationParams } from "../../types";
 
 export interface HydratedAndProcessedPost {
   post: Post;
@@ -39,19 +35,6 @@ export interface HydratedAndProcessedComment {
 }
 
 export type PostStats = Schema["postStats"]["$inferSelect"];
-
-export interface BaseCursor {
-  createdAt: Date;
-}
-
-export interface PostCursor extends BaseCursor {
-  postId: string;
-}
-
-export interface FeedCursor extends BaseCursor {
-  postId: string;
-  type: "following" | "recommended";
-}
 
 export interface UploadPostForUserOnAppUrlParams {
   author: string;
@@ -112,32 +95,17 @@ export interface GetPostForNextJsParams {
   postId: string;
 }
 
-export interface PaginatePostsParams {
+export interface PaginatePostsParams extends PaginationParams {
   userId: string;
-  cursor: PostCursor | null;
-  pageSize?: number;
 }
 
-export interface PaginateCommentsParams {
+export interface PaginateCommentsParams extends PaginationParams {
   postId: string;
-  cursor: CommentCursor | null;
-  pageSize?: number;
-}
-
-export interface PaginatePostsForFeedParams {
-  userId: string;
-  cursor: FeedCursor | null;
-  pageSize: number;
 }
 
 export interface PaginatedComment {
   comment: Comment;
   profile: Profile;
-}
-
-export interface CommentCursor {
-  createdAt: Date;
-  commentId: string;
 }
 
 export interface IPostService {
@@ -188,17 +156,14 @@ export interface IPostService {
   paginatePosts(
     params: PaginatePostsParams,
   ): Promise<
-    Result<
-      PaginatedResponse<HydratedAndProcessedPost, PostCursor | null>,
-      never
-    >
+    Result<PaginatedResponse<HydratedAndProcessedPost>, never>
   >;
 
   paginatePostsForFeed(
-    params: PaginatePostsForFeedParams,
+    params: PaginatePostsParams,
   ): Promise<
     Result<
-      PaginatedResponse<HydratedAndProcessedPost, FeedCursor | null>,
+      PaginatedResponse<HydratedAndProcessedPost>,
       PostErrors.PostNotFound
     >
   >;
@@ -212,6 +177,9 @@ export interface IPostService {
   paginateComments(
     params: PaginateCommentsParams,
   ): Promise<
-    Result<PaginatedResponse<HydratedAndProcessedComment, CommentCursor>, never>
+    Result<
+      PaginatedResponse<HydratedAndProcessedComment>,
+      never
+    >
   >;
 }
