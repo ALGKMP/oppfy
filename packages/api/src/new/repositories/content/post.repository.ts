@@ -10,7 +10,6 @@ import type {
 
 import { TYPES } from "../../container";
 import {
-  CreatePostStatsParams,
   DeletePostParams,
   GetPostForSiteParams,
   GetPostParams,
@@ -110,7 +109,7 @@ export class PostRepository implements IPostRepository {
         lt(this.schema.post.createdAt, cursor.createdAt),
         and(
           eq(this.schema.post.createdAt, cursor.createdAt),
-          lt(this.schema.post.id, cursor.postId),
+          lt(this.schema.post.id, cursor.id),
         ),
       );
       whereClause = and(whereClause, cursorCondition);
@@ -144,7 +143,7 @@ export class PostRepository implements IPostRepository {
             lt(this.schema.post.createdAt, cursor.createdAt),
             and(
               eq(this.schema.post.createdAt, cursor.createdAt),
-              lt(this.schema.post.id, cursor.postId),
+              lt(this.schema.post.id, cursor.id),
             ),
           )
         : undefined,
@@ -169,15 +168,6 @@ export class PostRepository implements IPostRepository {
         updatedAt: new Date(),
       })
       .where(eq(this.schema.post.id, postId));
-  }
-
-  async createPostStats(
-    { postId }: CreatePostStatsParams,
-    tx: DatabaseOrTransaction = this.db,
-  ): Promise<void> {
-    await tx.insert(this.schema.postStats).values({
-      postId,
-    });
   }
 
   async deletePost(

@@ -11,6 +11,10 @@ export interface UsernameParam {
   username: string;
 }
 
+export interface CommentIdParam {
+  commentId: string;
+}
+
 export interface PhoneNumberParam {
   phoneNumber: string;
 }
@@ -48,5 +52,5 @@ export interface PaginatedResponse<T> {
 
 export interface PaginationParams {
   cursor?: PaginationCursor;
-  pageSize?: number;
+  pageSize: number;
 }

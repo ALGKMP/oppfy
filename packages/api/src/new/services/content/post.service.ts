@@ -19,9 +19,7 @@ import type {
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type {
-  CommentCursor,
   DeletePostParams,
-  FeedCursor,
   GetPostForNextJsParams,
   GetPostParams,
   HydratedAndProcessedComment,
@@ -29,10 +27,7 @@ import type {
   HydratedAndProcessedPostWithoutLike,
   IPostService,
   PaginateCommentsParams,
-  PaginatedResponse,
-  PaginatePostsForFeedParams,
   PaginatePostsParams,
-  PostCursor,
   PaginatedComment as RawPaginatedComment,
   UpdatePostParams,
   UploadPostForUserNotOnAppUrlParams,
@@ -40,6 +35,7 @@ import type {
   UploadVideoPostForUserNotOnAppUrlParams,
   UploadVideoPostForUserOnAppUrlParams,
 } from "../../interfaces/services/content/post.service.interface";
+import type { PaginatedResponse } from "../../interfaces/types";
 
 @injectable()
 export class PostService implements IPostService {
@@ -95,8 +91,8 @@ export class PostService implements IPostService {
             author,
             recipient,
             caption,
-            height,
-            width,
+            height: height.toString(),
+            width: width.toString(),
             postid: postId,
           });
           return ok({ presignedUrl, postId });
@@ -108,7 +104,7 @@ export class PostService implements IPostService {
             objectKey,
             contentLength,
             contentType,
-            { author, recipient, caption, height, width, postid: postId },
+            { author, recipient, caption, height: height.toString(), width: width.toString(), postid: postId },
           );
           return ok({ presignedUrl, postId });
         }
@@ -140,8 +136,8 @@ export class PostService implements IPostService {
                 author,
                 recipient: recipientId,
                 caption,
-                height,
-                width,
+                height: height.toString(),
+                width: width.toString(),
                 postid: postId,
               }),
               postId,
@@ -158,8 +154,8 @@ export class PostService implements IPostService {
                 {
                   author,
                   caption,
-                  height,
-                  width,
+                  height: height.toString(),
+                  width: width.toString(),
                   recipient: recipientId,
                   postid: postId,
                 },
@@ -323,7 +319,7 @@ export class PostService implements IPostService {
     cursor,
     pageSize = 20,
   }: PaginatePostsParams): Promise<
-    Result<PaginatedResponse<HydratedAndProcessedPost, PostCursor>, never>
+    Result<PaginatedResponse<HydratedAndProcessedPost>, never>
   > {
     const rawPosts = await this.postRepository.paginatePostsOfUser({
       userId,
@@ -340,7 +336,7 @@ export class PostService implements IPostService {
       nextCursor:
         rawPosts.length > pageSize && lastPost
           ? {
-              postId: lastPost.post.id,
+              id: lastPost.post.id,
               createdAt: lastPost.post.createdAt,
             }
           : null,
@@ -350,12 +346,9 @@ export class PostService implements IPostService {
   async paginatePostsForFeed({
     userId,
     cursor,
-    pageSize,
-  }: PaginatePostsForFeedParams): Promise<
-    Result<
-      PaginatedResponse<HydratedAndProcessedPost, FeedCursor>,
-      PostErrors.PostNotFound
-    >
+    pageSize = 10,
+  }: PaginatePostsParams): Promise<
+    Result<PaginatedResponse<HydratedAndProcessedPost>, PostErrors.PostNotFound>
   > {
     const rawPosts = await this.postRepository.paginatePostsOfFollowing({
       userId,
@@ -363,21 +356,21 @@ export class PostService implements IPostService {
       pageSize,
     });
     if (!rawPosts.length && cursor)
-      return err(new PostErrors.PostNotFound(cursor.postId));
+      return err(new PostErrors.PostNotFound(cursor.id));
 
     const hydratedPosts = rawPosts.map((post) =>
       this.hydrateAndProcessPost(post),
     );
     const lastPost = hydratedPosts[pageSize - 1];
 
+    // TODO: userId not returned here anymore (Might die from react query)
     return ok({
       items: hydratedPosts.slice(0, pageSize),
       nextCursor:
         rawPosts.length > pageSize && lastPost
           ? {
-              postId: lastPost.post.id,
+              id: lastPost.post.id,
               createdAt: lastPost.post.createdAt,
-              type: "following", // Only "following" for now; extend for "recommended" later
             }
           : null,
     });
@@ -401,45 +394,12 @@ export class PostService implements IPostService {
     return ok(this.hydrateAndProcessPostResultWithoutLike(rawPost));
   }
 
-  async updatePost({
-    userId,
-    postId,
-    content: caption,
-  }: UpdatePostParams): Promise<
-    Result<
-      void,
-      | PostErrors.FailedToUpdatePost
-      | PostErrors.PostNotFound
-      | PostErrors.NotPostOwner
-    >
-  > {
-    try {
-      await this.db.transaction(async (tx) => {
-        const post = await this.postRepository.getPost({ postId, userId }, tx);
-        if (!post) throw new PostErrors.PostNotFound(postId);
-        if (post.post.authorUserId !== userId) {
-          throw new PostErrors.NotPostOwner(userId, postId);
-        }
-        await this.postRepository.updatePost({ postId, caption }, tx);
-      });
-      return ok();
-    } catch (error) {
-      if (
-        error instanceof PostErrors.PostNotFound ||
-        error instanceof PostErrors.NotPostOwner
-      ) {
-        return err(error);
-      }
-      return err(new PostErrors.FailedToUpdatePost(postId));
-    }
-  }
-
   async paginateComments({
     postId,
     cursor,
     pageSize = 10,
   }: PaginateCommentsParams): Promise<
-    Result<PaginatedResponse<HydratedAndProcessedComment, CommentCursor>, never>
+    Result<PaginatedResponse<HydratedAndProcessedComment>, never>
   > {
     const rawComments = await this.commentRepository.paginateComments({
       postId,
@@ -456,7 +416,7 @@ export class PostService implements IPostService {
       nextCursor:
         rawComments.length > pageSize && lastComment
           ? {
-              commentId: lastComment.comment.id,
+              id: lastComment.comment.id,
               createdAt: lastComment.comment.createdAt,
             }
           : null,
