@@ -90,11 +90,11 @@ const container = new Container();
 // Bind DB dependencies
 container.bind(TYPES.Database).toConstantValue(db);
 container.bind(TYPES.Schema).toConstantValue(schema);
-container.bind(TYPES.Twilio).toConstantValue(twilio);
 
 // Bind sdk's
 container.bind<S3>(TYPES.S3).to(S3);
 container.bind<CloudFront>(TYPES.CloudFront).to(CloudFront);
+container.bind<Twilio>(TYPES.Twilio).to(Twilio);
 
 // Bind repositories
 container.bind<IReportRepository>(TYPES.ReportRepository).to(ReportRepository);

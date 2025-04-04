@@ -147,6 +147,3 @@ export class TwilioService {
     }
   }
 }
-
-// Export a singleton instance
-export const twilio = new TwilioService();
