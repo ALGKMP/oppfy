@@ -11,6 +11,10 @@ export interface UsernameParam {
   username: string;
 }
 
+export interface CommentIdParam {
+  commentId: string;
+}
+
 export interface PhoneNumberParam {
   phoneNumber: string;
 }

@@ -1,4 +1,5 @@
 import type { InferSelectModel } from "drizzle-orm";
+import type { PaginationParams } from "../../types";
 
 import type { DatabaseOrTransaction, schema } from "@oppfy/db";
 
@@ -15,19 +16,13 @@ export interface GetPostFromCommentIdParams {
   commentId: string;
 }
 
-export interface PaginatePostsParams {
+export interface PaginatePostsParams extends PaginationParams {
   userId: string;
-  cursor?: { createdAt: Date; postId: string } | null;
-  pageSize?: number;
 }
 
 export interface UpdatePostParams {
   postId: string;
   caption: string;
-}
-
-export interface CreatePostStatsParams {
-  postId: string;
 }
 
 export interface DeletePostParams {
@@ -66,10 +61,6 @@ export interface IPostRepository {
   ): Promise<PostResult[]>;
   updatePost(
     params: UpdatePostParams,
-    db?: DatabaseOrTransaction,
-  ): Promise<void>;
-  createPostStats(
-    params: CreatePostStatsParams,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
   deletePost(
