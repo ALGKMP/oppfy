@@ -1,0 +1,28 @@
+{
+  "name": "@oppfy/twilio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "prettier": "@oppfy/prettier-config",
+  "dependencies": {
+    "@oppfy/env": "workspace:*",
+    "twilio": "^4.22.0"
+  },
+  "devDependencies": {
+    "@oppfy/eslint-config": "workspace:*",
+    "@oppfy/prettier-config": "workspace:*",
+    "@oppfy/tsconfig": "workspace:*",
+    "eslint": "catalog:",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4"
+  }
+}
