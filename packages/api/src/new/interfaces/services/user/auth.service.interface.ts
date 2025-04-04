@@ -37,5 +37,5 @@ export interface IAuthService {
 
   refreshToken(
     params: RefreshTokenParams,
-  ): Promise<Result<AuthTokens, AuthErrors.InvalidRefreshToken>>;
+  ): Result<AuthTokens, AuthErrors.InvalidRefreshToken>;
 }

@@ -30,21 +30,13 @@ const ADMIN_PHONE_NUMBERS = [
 @injectable()
 export class AuthService implements IAuthService {
   constructor(
-    @inject(TYPES.Database) private readonly db: Database,
+    @inject(TYPES.Database)
+    private readonly db: Database,
     @inject(TYPES.UserRepository)
     private readonly userRepository: IUserRepository,
-    @inject(TYPES.Twilio) private readonly twilio: TwilioService,
+    @inject(TYPES.Twilio)
+    private readonly twilio: TwilioService,
   ) {}
-
-  private generateTokens(uid: string): AuthTokens {
-    const accessToken = jwt.sign({ uid }, env.JWT_ACCESS_SECRET, {
-      expiresIn: "30m",
-    });
-    const refreshToken = jwt.sign({ uid }, env.JWT_REFRESH_SECRET, {
-      expiresIn: "30d",
-    });
-    return { accessToken, refreshToken };
-  }
 
   async sendVerificationCode({
     phoneNumber,
@@ -109,15 +101,13 @@ export class AuthService implements IAuthService {
       }
     }
 
-    const tokens = this.generateTokens(user!.id);
+    const tokens = this.generateTokens(user.id);
     return ok({ success: true, isNewUser, tokens });
   }
 
-  async refreshToken({
+  refreshToken({
     refreshToken,
-  }: RefreshTokenParams): Promise<
-    Result<AuthTokens, AuthErrors.InvalidRefreshToken>
-  > {
+  }: RefreshTokenParams): Result<AuthTokens, AuthErrors.InvalidRefreshToken> {
     try {
       const { uid } = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET) as {
         uid: string;
@@ -127,5 +117,15 @@ export class AuthService implements IAuthService {
     } catch {
       return err(new AuthErrors.InvalidRefreshToken());
     }
+  }
+
+  private generateTokens(uid: string): AuthTokens {
+    const accessToken = jwt.sign({ uid }, env.JWT_ACCESS_SECRET, {
+      expiresIn: "30m",
+    });
+    const refreshToken = jwt.sign({ uid }, env.JWT_REFRESH_SECRET, {
+      expiresIn: "30d",
+    });
+    return { accessToken, refreshToken };
   }
 }
