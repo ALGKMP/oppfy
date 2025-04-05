@@ -4,17 +4,9 @@ import type { DatabaseOrTransaction, Transaction } from "@oppfy/db";
 import type { User, UserStatus } from "../../../models";
 import type { PhoneNumberParam, UserIdParam } from "../../types";
 
-export interface CreateUserOnAppParams {
-  userId: string;
+export interface CreateUserParams {
   phoneNumber: string;
-  username: string;
-}
-
-export interface CreateUserNotOnAppParams {
-  userId: string;
-  phoneNumber: string;
-  name: string;
-  username: string;
+  isOnApp?: boolean;
 }
 
 export interface GetRandomActiveUserIdsParams {
@@ -46,15 +38,7 @@ export interface IUserRepository {
     db?: DatabaseOrTransaction,
   ): Promise<UserStatus | undefined>;
 
-  createUserOnApp(
-    params: CreateUserOnAppParams,
-    tx: Transaction,
-  ): Promise<void>;
-
-  createUserNotOnApp(
-    params: CreateUserNotOnAppParams,
-    tx: Transaction,
-  ): Promise<void>;
+  createUser(params: CreateUserParams, tx: Transaction): Promise<void>;
 
   deleteUser(params: UserIdParam, db?: DatabaseOrTransaction): Promise<void>;
 
@@ -77,16 +61,6 @@ export interface IUserRepository {
     params: UserIdParam,
     db?: DatabaseOrTransaction,
   ): Promise<void>;
-
-  getUserByPhoneNumberNoThrow(
-    params: PhoneNumberParam,
-    db?: DatabaseOrTransaction,
-  ): Promise<User | undefined>;
-
-  isUserOnApp(
-    params: UserIdParam,
-    db?: DatabaseOrTransaction,
-  ): Promise<boolean>;
 
   updateUserOnAppStatus(
     params: { userId: string; isOnApp: boolean },

@@ -8,3 +8,10 @@ export class UserNotFound extends UserError {
     super(`User with id "${userId}" not found`);
   }
 }
+
+export class UserStatusNotFound extends UserError {
+  name = "UserStatusNotFoundError" as const;
+  constructor(userId: string) {
+    super(`User status with id "${userId}" not found`);
+  }
+}

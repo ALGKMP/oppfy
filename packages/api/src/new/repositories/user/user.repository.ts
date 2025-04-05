@@ -11,8 +11,7 @@ import type {
 
 import { TYPES } from "../../container";
 import {
-  CreateUserNotOnAppParams,
-  CreateUserOnAppParams,
+  CreateUserParams,
   ExistingPhoneNumbersParams,
   GetRandomActiveUserIdsParams,
   IUserRepository,
@@ -51,15 +50,6 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  async getUserByPhoneNumberNoThrow(
-    { phoneNumber }: PhoneNumberParam,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<User | undefined> {
-    return await db.query.user.findFirst({
-      where: eq(this.schema.user.phoneNumber, phoneNumber),
-    });
-  }
-
   async getRandomActiveUserIds(
     { pageSize = 10 }: GetRandomActiveUserIdsParams,
     db: DatabaseOrTransaction = this.db,
@@ -85,53 +75,31 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  async createUserOnApp(
-    { userId, phoneNumber, username }: CreateUserOnAppParams,
+  async createUser(
+    { phoneNumber, isOnApp = true }: CreateUserParams,
     tx: Transaction,
   ): Promise<void> {
-    await tx.insert(this.schema.user).values({
-      id: userId,
-      phoneNumber,
-    });
+    const userId = crypto.randomUUID();
+
+    await tx
+      .insert(this.schema.user)
+      .values({
+        id: userId,
+        phoneNumber,
+      })
+      .returning();
 
     await tx.insert(this.schema.profile).values({
       userId,
-      username: username || phoneNumber, // Default to phoneNumber if username not provided
     });
 
-    await tx.insert(this.schema.userStats).values({ userId });
     await tx.insert(this.schema.notificationSettings).values({ userId });
+    await tx.insert(this.schema.userStats).values({ userId });
     await tx.insert(this.schema.userStatus).values({
       userId,
-      isOnApp: true,
+      isOnApp,
     });
   }
-
-  async createUserNotOnApp(
-    params: CreateUserNotOnAppParams,
-    tx: Transaction,
-  ): Promise<void> {
-    const { userId, phoneNumber, username, name } = params;
-
-    await tx.insert(this.schema.user).values({
-      id: userId,
-      phoneNumber,
-    });
-
-    await tx.insert(this.schema.profile).values({
-      userId,
-      username,
-      name,
-    });
-
-    await tx.insert(this.schema.userStats).values({ userId });
-    await tx.insert(this.schema.notificationSettings).values({ userId });
-    await tx.insert(this.schema.userStatus).values({
-      userId,
-      isOnApp: false,
-    });
-  }
-
   async deleteUser(
     { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
@@ -188,16 +156,6 @@ export class UserRepository implements IUserRepository {
       .update(this.schema.userStatus)
       .set({ hasCompletedOnboarding: true })
       .where(eq(this.schema.userStatus.userId, userId));
-  }
-
-  async isUserOnApp(
-    { userId }: UserIdParam,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<boolean> {
-    const status = await db.query.userStatus.findFirst({
-      where: eq(this.schema.userStatus.userId, userId),
-    });
-    return status?.isOnApp ?? false;
   }
 
   async updateUserOnAppStatus(

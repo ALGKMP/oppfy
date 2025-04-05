@@ -1,5 +1,3 @@
-// services/auth.service.ts
-import crypto from "crypto";
 import { inject, injectable } from "inversify";
 import jwt from "jsonwebtoken";
 import { err, ok, Result } from "neverthrow";
@@ -7,17 +5,20 @@ import { err, ok, Result } from "neverthrow";
 import type { Database } from "@oppfy/db";
 import { env } from "@oppfy/env";
 import type { TwilioService } from "@oppfy/twilio";
+import { RestException } from "@oppfy/twilio";
 
 import { TYPES } from "../../container";
 import * as AuthErrors from "../../errors/user/auth.error";
+import * as UserErrors from "../../errors/user/user.error";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type {
   AuthTokens,
   IAuthService,
   RefreshTokenParams,
-  SendVerificationCodeParams,
   VerifyCodeParams,
+  VerifyCodeResult,
 } from "../../interfaces/services/user/auth.service.interface";
+import { PhoneNumberParam } from "../../interfaces/types";
 
 const ADMIN_PHONE_NUMBERS = [
   "+16478852142",
@@ -26,6 +27,8 @@ const ADMIN_PHONE_NUMBERS = [
   "+16475504668",
   "+14107628976",
 ];
+
+const ADMIN_CODE = "123456";
 
 @injectable()
 export class AuthService implements IAuthService {
@@ -40,69 +43,101 @@ export class AuthService implements IAuthService {
 
   async sendVerificationCode({
     phoneNumber,
-  }: SendVerificationCodeParams): Promise<Result<{ status: string }, never>> {
+  }: PhoneNumberParam): Promise<
+    Result<void, AuthErrors.InvalidPhoneNumber | AuthErrors.RateLimitExceeded>
+  > {
+    // Skip sending for admin phone numbers
     if (ADMIN_PHONE_NUMBERS.includes(phoneNumber)) {
-      return ok({ status: "pending" });
+      return ok();
     }
 
-    const status = await this.twilio.sendVerificationCode({ phoneNumber });
-    return ok({ status });
+    try {
+      await this.twilio.sendVerificationCode({ phoneNumber });
+      return ok();
+    } catch (error: unknown) {
+      if (error instanceof RestException) {
+        switch (error.code) {
+          case 21211: // Invalid phone number
+            return err(new AuthErrors.InvalidPhoneNumber());
+          case 20429: // Rate limit
+            return err(new AuthErrors.RateLimitExceeded());
+        }
+      }
+
+      throw error;
+    }
   }
 
   async verifyCode({
     phoneNumber,
     code,
   }: VerifyCodeParams): Promise<
-    Result<
-      { success: boolean; isNewUser: boolean; tokens: AuthTokens },
-      AuthErrors.InvalidVerificationCode
-    >
+    Result<VerifyCodeResult, AuthErrors.InvalidVerificationCode>
   > {
-    let isValid = false;
     let isNewUser = false;
 
+    // 1) Check if admin phone number
     if (ADMIN_PHONE_NUMBERS.includes(phoneNumber)) {
-      if (code !== "123456") {
-        return err(new AuthErrors.InvalidVerificationCode());
-      }
-      isValid = true;
-    } else {
-      isValid = await this.twilio.verifyCode({ phoneNumber, code });
-      if (!isValid) {
+      if (code !== ADMIN_CODE) {
         return err(new AuthErrors.InvalidVerificationCode());
       }
     }
+    // 2) Call Twilio to verify the code
+    else {
+      try {
+        const isValid = await this.twilio.verifyCode({ phoneNumber, code });
+        if (!isValid) return err(new AuthErrors.InvalidVerificationCode());
+      } catch (error: unknown) {
+        if (error instanceof RestException) {
+          switch (error.code) {
+            case 60400:
+              return err(new AuthErrors.InvalidVerificationCode());
+          }
+        }
+        throw error;
+      }
+    }
 
-    let user = await this.userRepository.getUserByPhoneNumberNoThrow({
+    // 3) Look up user and create if necessary
+    const possibleUser = await this.userRepository.getUserByPhoneNumber({
       phoneNumber,
     });
 
-    if (!user) {
-      const userId = crypto.randomUUID();
+    // If user not found, create them
+    if (possibleUser === undefined) {
       await this.db.transaction(async (tx) => {
-        await this.userRepository.createUserOnApp(
-          { userId, phoneNumber, username: phoneNumber },
-          tx,
-        );
+        await this.userRepository.createUser({ phoneNumber }, tx);
       });
-      user = await this.userRepository.getUserByPhoneNumber({ phoneNumber });
       isNewUser = true;
-    } else {
-      const isOnApp = await this.userRepository.isUserOnApp({
-        userId: user.id,
+    }
+    // If user exists but isn't marked "on app," update them
+    else {
+      const userStatus = await this.userRepository.getUserStatus({
+        userId: possibleUser.id,
       });
-      if (!isOnApp) {
+
+      if (userStatus === undefined) {
+        return err(new UserErrors.UserStatusNotFound(possibleUser.id));
+      }
+
+      if (!userStatus.isOnApp) {
         await this.userRepository.updateUserOnAppStatus({
-          userId: user.id,
+          userId: possibleUser.id,
           isOnApp: true,
         });
         isNewUser = true;
-        user = await this.userRepository.getUserByPhoneNumber({ phoneNumber });
       }
     }
 
+    const user = await this.userRepository.getUserByPhoneNumber({
+      phoneNumber,
+    });
+    if (user === undefined)
+      return err(new UserErrors.UserNotFound(phoneNumber));
+
+    // 4) Generate tokens, return success
     const tokens = this.generateTokens(user.id);
-    return ok({ success: true, isNewUser, tokens });
+    return ok({ isNewUser, tokens });
   }
 
   refreshToken({
@@ -126,6 +161,7 @@ export class AuthService implements IAuthService {
     const refreshToken = jwt.sign({ uid }, env.JWT_REFRESH_SECRET, {
       expiresIn: "30d",
     });
+
     return { accessToken, refreshToken };
   }
 }

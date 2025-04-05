@@ -1,11 +1,7 @@
-// interfaces/services/auth.service.interface.ts
 import type { Result } from "neverthrow";
 
 import type * as AuthErrors from "../../../errors/user/auth.error";
-
-export interface SendVerificationCodeParams {
-  phoneNumber: string;
-}
+import type { PhoneNumberParam } from "../../types";
 
 export interface VerifyCodeParams {
   phoneNumber: string;
@@ -21,19 +17,21 @@ export interface AuthTokens {
   refreshToken: string;
 }
 
+export interface VerifyCodeResult {
+  isNewUser: boolean;
+  tokens: AuthTokens;
+}
+
 export interface IAuthService {
   sendVerificationCode(
-    params: SendVerificationCodeParams,
-  ): Promise<Result<{ status: string }, never>>;
+    params: PhoneNumberParam,
+  ): Promise<
+    Result<void, AuthErrors.InvalidPhoneNumber | AuthErrors.RateLimitExceeded>
+  >;
 
   verifyCode(
     params: VerifyCodeParams,
-  ): Promise<
-    Result<
-      { success: boolean; isNewUser: boolean; tokens: AuthTokens },
-      AuthErrors.InvalidVerificationCode
-    >
-  >;
+  ): Promise<Result<VerifyCodeResult, AuthErrors.InvalidVerificationCode>>;
 
   refreshToken(
     params: RefreshTokenParams,

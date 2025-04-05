@@ -1,8 +1,9 @@
 import { Twilio } from "twilio";
+import RestException from "twilio/lib/base/RestException";
 
 import { env } from "@oppfy/env";
 
-export type Status =
+type Status =
   | "pending"
   | "approved"
   | "canceled"
@@ -47,3 +48,5 @@ export class TwilioService {
     return status === "approved";
   }
 }
+
+export { RestException };
