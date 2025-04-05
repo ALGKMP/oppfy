@@ -1,10 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import {
-  createTRPCRouter,
-  publicProcedure,
-} from "../../../trpc";
+import { createTRPCRouter, publicProcedure } from "../../../trpc";
 
 export const authRouter = createTRPCRouter({
   sendVerificationCode: publicProcedure
@@ -15,8 +12,23 @@ export const authRouter = createTRPCRouter({
       });
 
       return result.match(
-        (res) => res,
         (_) => _,
+        (err) => {
+          switch (err.name) {
+            case "InvalidPhoneNumberError": {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Invalid phone number",
+              });
+            }
+            case "RateLimitExceededError": {
+              throw new TRPCError({
+                code: "TOO_MANY_REQUESTS",
+                message: "Rate limit exceeded",
+              });
+            }
+          }
+        },
       );
     }),
 
@@ -32,11 +44,24 @@ export const authRouter = createTRPCRouter({
         (res) => res,
         (err) => {
           switch (err.name) {
-            case "InvalidVerificationCodeError":
+            case "InvalidVerificationCodeError": {
               throw new TRPCError({
                 code: "BAD_REQUEST",
                 message: "Invalid verification code",
               });
+            }
+            case "UserNotFoundError": {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "User not found",
+              });
+            }
+            case "UserStatusNotFoundError": {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "User status not found",
+              });
+            }
           }
         },
       );
@@ -44,8 +69,8 @@ export const authRouter = createTRPCRouter({
 
   refreshToken: publicProcedure
     .input(z.object({ refreshToken: z.string() }))
-    .mutation(async ({ input, ctx }) => {
-      const result = await ctx.services.auth.refreshToken({
+    .mutation(({ input, ctx }) => {
+      const result = ctx.services.auth.refreshToken({
         refreshToken: input.refreshToken,
       });
 
