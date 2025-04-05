@@ -1,6 +1,7 @@
 import type { Result } from "neverthrow";
 
 import type * as AuthErrors from "../../../errors/user/auth.error";
+import type * as UserErrors from "../../../errors/user/user.error";
 import type { PhoneNumberParam } from "../../types";
 
 export interface VerifyCodeParams {
@@ -31,7 +32,14 @@ export interface IAuthService {
 
   verifyCode(
     params: VerifyCodeParams,
-  ): Promise<Result<VerifyCodeResult, AuthErrors.InvalidVerificationCode>>;
+  ): Promise<
+    Result<
+      VerifyCodeResult,
+      | AuthErrors.InvalidVerificationCode
+      | UserErrors.UserNotFound
+      | UserErrors.UserStatusNotFound
+    >
+  >;
 
   refreshToken(
     params: RefreshTokenParams,

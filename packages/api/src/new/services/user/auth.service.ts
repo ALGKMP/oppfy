@@ -72,7 +72,12 @@ export class AuthService implements IAuthService {
     phoneNumber,
     code,
   }: VerifyCodeParams): Promise<
-    Result<VerifyCodeResult, AuthErrors.InvalidVerificationCode>
+    Result<
+      VerifyCodeResult,
+      | AuthErrors.InvalidVerificationCode
+      | UserErrors.UserNotFound
+      | UserErrors.UserStatusNotFound
+    >
   > {
     let isNewUser = false;
 
