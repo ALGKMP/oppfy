@@ -7,7 +7,7 @@ import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
 
 import { db, eq, schema } from "@oppfy/db";
 import { env } from "@oppfy/env";
-import { sharedValidators } from "@oppfy/validators";
+import { validators } from "@oppfy/validators";
 
 const s3Client = new S3Client({ region: "us-east-1" });
 const cloudFrontClient = new CloudFrontClient({ region: "us-east-1" });
@@ -38,10 +38,9 @@ export const handler = async (
   try {
     const s3Response = await s3Client.send(command);
 
-    const metadata =
-      sharedValidators.aws.s3ObjectMetadataForProfilePicturesSchema.parse(
-        s3Response.Metadata,
-      );
+    const metadata = validators.s3ObjectMetadataForProfilePicturesSchema.parse(
+      s3Response.Metadata,
+    );
 
     const user = await db.query.user.findFirst({
       where: eq(schema.user.id, metadata.user),

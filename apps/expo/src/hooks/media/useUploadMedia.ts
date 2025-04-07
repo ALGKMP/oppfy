@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 
-import { sharedValidators } from "@oppfy/validators";
+import { validators } from "@oppfy/validators";
 
 import { api } from "~/utils/api";
 
@@ -86,7 +86,7 @@ const useUploadMedia = () => {
 
       const photoBlob = await getMediaBlob(uri);
 
-      const parsedMediaType = sharedValidators.media.postContentType.safeParse(
+      const parsedMediaType = validators.postContentType.safeParse(
         photoBlob.type,
       );
 

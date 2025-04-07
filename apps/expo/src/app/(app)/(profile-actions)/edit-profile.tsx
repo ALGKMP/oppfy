@@ -10,7 +10,7 @@ import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { BookLock, ChevronRight } from "@tamagui/lucide-icons";
 import { getToken, useTheme } from "tamagui";
 
-import { sharedValidators } from "@oppfy/validators";
+import { validators } from "@oppfy/validators";
 
 import {
   Button,
@@ -49,7 +49,7 @@ const NameSheet = ({
 
   const isValid = (val: string) => {
     try {
-      sharedValidators.user.name.parse(val);
+      validators.name.parse(val);
       return true;
     } catch {
       return false;
@@ -137,7 +137,7 @@ const UsernameSheet = ({
 
   const isValid = (val: string) => {
     try {
-      sharedValidators.user.username.parse(val);
+      validators.username.parse(val);
       return true;
     } catch {
       return false;
@@ -226,7 +226,7 @@ const BioSheet = ({
 
   const isValid = (val: string) => {
     try {
-      sharedValidators.user.bio.parse(val);
+      validators.bio.parse(val);
       return true;
     } catch {
       return false;

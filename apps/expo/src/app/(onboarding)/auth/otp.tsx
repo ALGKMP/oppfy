@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
-import { sharedValidators } from "@oppfy/validators";
+import { validators } from "@oppfy/validators";
 
 import {
   OnboardingButton,
@@ -25,8 +25,7 @@ const PhoneNumberOTP = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const isValidPhoneNumberOTP = useMemo(
-    () =>
-      sharedValidators.user.phoneNumberOTP.safeParse(phoneNumberOTP).success,
+    () => validators.phoneNumberOTP.safeParse(phoneNumberOTP).success,
     [phoneNumberOTP],
   );
 

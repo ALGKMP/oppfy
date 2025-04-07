@@ -5,26 +5,22 @@ import type {
   entityTypeEnum,
   Transaction,
 } from "@oppfy/db";
-import type { sharedValidators } from "@oppfy/validators";
+import type { validators } from "@oppfy/validators";
 
-export type EventType = z.infer<
-  typeof sharedValidators.notifications.eventType
->;
+export type EventType = z.infer<typeof validators.eventType>;
 
-export type StoreNotificationData = z.infer<
-  typeof sharedValidators.notifications.notificationData
->;
+export type StoreNotificationData = z.infer<typeof validators.notificationData>;
 
 export type SendNotificationData = z.infer<
-  typeof sharedValidators.notifications.sendNotificationData
+  typeof validators.sendNotificationData
 >;
 
 export type SnsNotificationData = z.infer<
-  typeof sharedValidators.notifications.snsNotificationData
+  typeof validators.snsNotificationData
 >;
 
 export type NotificationSettings = z.infer<
-  typeof sharedValidators.notifications.updateNotificationSettings
+  typeof validators.updateNotificationSettings
 >;
 
 export type EntityType = (typeof entityTypeEnum.enumValues)[number];

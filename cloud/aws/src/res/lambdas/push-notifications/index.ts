@@ -8,7 +8,7 @@ import type { Context } from "aws-lambda";
 import { z } from "zod";
 
 import { db, eq, schema } from "@oppfy/db";
-import { sharedValidators } from "@oppfy/validators";
+import { validators } from "@oppfy/validators";
 
 const env = createEnv({
   server: {
@@ -30,7 +30,7 @@ const extendedSnsSchema = SnsSchema.extend({
   Records: z.array(extendedRecordsSchema),
 });
 
-type EntityData = z.infer<typeof sharedValidators.notifications.entityData>;
+type EntityData = z.infer<typeof validators.entityData>;
 type NotificationData = z.infer<typeof extendedSnsSchema>;
 
 const lambdaHandler = async (
@@ -44,7 +44,7 @@ const lambdaHandler = async (
   const messages: ExpoPushMessage[] = [];
 
   for (const record of event.Records) {
-    const result = sharedValidators.notifications.snsNotificationData.safeParse(
+    const result = validators.snsNotificationData.safeParse(
       JSON.parse(record.Sns.Message),
     );
 

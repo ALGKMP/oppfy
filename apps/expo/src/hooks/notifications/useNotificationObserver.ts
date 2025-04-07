@@ -4,11 +4,11 @@ import type { Notification } from "expo-notifications";
 import { useRouter } from "expo-router";
 import type { z } from "zod";
 
-import type { sharedValidators } from "@oppfy/validators";
+import type { validators } from "@oppfy/validators";
 
 import { api } from "~/utils/api";
 
-type EntityData = z.infer<typeof sharedValidators.notifications.entityData>;
+type EntityData = z.infer<typeof validators.entityData>;
 
 const useNotificationObserver = () => {
   const router = useRouter();

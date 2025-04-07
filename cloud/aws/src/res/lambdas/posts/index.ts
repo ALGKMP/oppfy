@@ -12,19 +12,13 @@ import type { Context } from "aws-lambda";
 import { z } from "zod";
 
 import { db, eq, schema, sql } from "@oppfy/db";
-import { sharedValidators } from "@oppfy/validators";
+import { validators } from "@oppfy/validators";
 
-type SnsNotificationData = z.infer<
-  typeof sharedValidators.notifications.snsNotificationData
->;
+type SnsNotificationData = z.infer<typeof validators.snsNotificationData>;
 
-type StoreNotificationData = z.infer<
-  typeof sharedValidators.notifications.notificationData
->;
+type StoreNotificationData = z.infer<typeof validators.notificationData>;
 
-type SendNotificationData = z.infer<
-  typeof sharedValidators.notifications.sendNotificationData
->;
+type SendNotificationData = z.infer<typeof validators.sendNotificationData>;
 
 type S3ObjectLambdaEvent = z.infer<typeof S3Schema>;
 
@@ -78,7 +72,7 @@ const lambdaHandler = async (
       throw new Error("Metadata not provided");
     }
 
-    const metadata = sharedValidators.aws.metadataSchema.parse(Metadata);
+    const metadata = validators.metadataSchema.parse(Metadata);
     metadata.caption = decodeURIComponent(metadata.caption);
 
     console.log("metadata", metadata);

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 
-import { sharedValidators } from "@oppfy/validators";
+import { validators } from "@oppfy/validators";
 
 import {
   OnboardingButton,
@@ -29,7 +29,7 @@ const Name = () => {
   const [name, setName] = useState("");
   const [error, setError] = useState<Error | null>(null);
 
-  const isValidName = sharedValidators.user.name.safeParse(name).success;
+  const isValidName = validators.name.safeParse(name).success;
 
   const handleSubmit = async () => {
     if (!isValidName) return;

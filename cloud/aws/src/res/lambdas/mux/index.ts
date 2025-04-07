@@ -7,19 +7,13 @@ import { z } from "zod";
 
 import { db, eq, schema } from "@oppfy/db";
 import { mux } from "@oppfy/mux";
-import { sharedValidators } from "@oppfy/validators";
+import { validators } from "@oppfy/validators";
 
-type SnsNotificationData = z.infer<
-  typeof sharedValidators.notifications.snsNotificationData
->;
+type SnsNotificationData = z.infer<typeof validators.snsNotificationData>;
 
-type StoreNotificationData = z.infer<
-  typeof sharedValidators.notifications.notificationData
->;
+type StoreNotificationData = z.infer<typeof validators.notificationData>;
 
-type SendNotificationData = z.infer<
-  typeof sharedValidators.notifications.sendNotificationData
->;
+type SendNotificationData = z.infer<typeof validators.sendNotificationData>;
 
 type APIGatewayProxyEvent = z.infer<typeof APIGatewayProxyEventV2Schema>;
 
@@ -49,9 +43,7 @@ const muxBodySchema = z
       playback_ids: z.array(z.object({ id: z.string() })).nonempty(),
       passthrough: z
         .string()
-        .transform((str) =>
-          sharedValidators.aws.metadataSchema.parse(JSON.parse(str)),
-        ),
+        .transform((str) => validators.metadataSchema.parse(JSON.parse(str))),
     }),
   })
   .passthrough();

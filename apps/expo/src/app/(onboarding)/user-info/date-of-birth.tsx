@@ -3,7 +3,7 @@ import DatePicker from "react-native-date-picker";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 
-import { sharedValidators } from "@oppfy/validators";
+import { validators } from "@oppfy/validators";
 
 import {
   OnboardingButton,
@@ -32,7 +32,7 @@ const DateOfBirth = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const isValidDateOfBirth =
-    sharedValidators.user.dateOfBirth.safeParse(dateOfBirth).success;
+    validators.dateOfBirth.safeParse(dateOfBirth).success;
 
   const handleSubmit = async () => {
     if (!isValidDateOfBirth || !dateOfBirth) return;
