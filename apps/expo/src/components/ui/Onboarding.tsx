@@ -18,18 +18,16 @@ import Animated, {
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import type { FlashList as FlashListType } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import {
   Camera,
   CheckCircle2,
-  ChevronLeft,
   ChevronRight,
 } from "@tamagui/lucide-icons";
 import { AsYouType } from "libphonenumber-js";
 import { getToken, getTokens, useTheme } from "tamagui";
 
-import { sharedValidators } from "@oppfy/validators";
+import { validators } from "@oppfy/validators";
 
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
@@ -541,7 +539,7 @@ export function OnboardingPhoneInput({
 
   const isValidPhoneNumber = useMemo(
     () =>
-      sharedValidators.user.phoneNumber.safeParse({
+      validators.phoneNumber.safeParse({
         phoneNumber: value,
         countryCode: countryData.countryCode,
       }).success,
