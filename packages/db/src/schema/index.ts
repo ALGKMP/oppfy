@@ -181,7 +181,7 @@ export const profileRelations = relations(profile, ({ one }) => ({
   }),
 }));
 
-export const userStats = pgTable("profile_stats", {
+export const userStats = pgTable("user_stats", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id")
     .notNull()
