@@ -5,10 +5,10 @@ import { env } from "@oppfy/env";
 import {
   authRouter,
   blockRouter,
-  contactsRouter,
+  // contactsRouter,
   followRouter,
   friendRouter,
-  notificationsRouter,
+  // notificationsRouter,
   postRouter,
   profileRouter,
   reportRouter,
@@ -24,8 +24,8 @@ export const appRouter = createTRPCRouter({
   follow: followRouter,
   friend: friendRouter,
   block: blockRouter,
-  notifications: notificationsRouter,
-  contacts: contactsRouter,
+  // notifications: notificationsRouter,
+  // contacts: contactsRouter,
   report: reportRouter,
 });
 

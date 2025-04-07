@@ -5,7 +5,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
-} from "../../../trpc";
+} from "../../trpc";
 
 export const postRouter = createTRPCRouter({
   uploadPostForUserOnAppUrl: protectedProcedure

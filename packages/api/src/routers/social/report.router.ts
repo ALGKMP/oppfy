@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { schema } from "@oppfy/db";
 
-import { createTRPCRouter, protectedProcedure } from "../../../trpc";
+import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const reportRouter = createTRPCRouter({
   reportUser: protectedProcedure

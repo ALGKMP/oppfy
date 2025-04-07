@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "../../../trpc";
+import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const postInteractionRouter = createTRPCRouter({
   likePost: protectedProcedure

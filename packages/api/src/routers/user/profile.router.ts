@@ -5,7 +5,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
-} from "../../../trpc";
+} from "../../trpc";
 
 export const profileRouter = createTRPCRouter({
   getProfile: protectedProcedure
