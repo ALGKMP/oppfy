@@ -17,13 +17,19 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."privacy_setting" AS ENUM('public', 'private');
+ CREATE TYPE "public"."privacy" AS ENUM('public', 'private');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."report_reason" AS ENUM('Violent or abusive', 'Sexually explicit or predatory', 'Hate, harassment or bullying', 'Suicide and self-harm', 'Spam or scam', 'Other');
+ CREATE TYPE "public"."report_comment_reason" AS ENUM('Violent or abusive', 'Sexually explicit or predatory', 'Hate, harassment or bullying', 'Suicide and self-harm', 'Spam or scam', 'Other');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."report_post_reason" AS ENUM('Violent or abusive', 'Sexually explicit or predatory', 'Hate, harassment or bullying', 'Suicide and self-harm', 'Spam or scam', 'Other');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -34,10 +40,10 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "blocked" (
+CREATE TABLE IF NOT EXISTS "block" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" uuid NOT NULL,
-	"blocked_user_id" uuid NOT NULL,
+	"sender_user_id" uuid NOT NULL,
+	"recipient_user_id" uuid NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
@@ -55,32 +61,32 @@ CREATE TABLE IF NOT EXISTS "contact" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "follow" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"sender_user_id" uuid NOT NULL,
+	"recipient_user_id" uuid NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "follow_request" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"sender_id" uuid NOT NULL,
-	"recipient_id" uuid NOT NULL,
+	"sender_user_id" uuid NOT NULL,
+	"recipient_user_id" uuid NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "follower" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"sender_id" uuid NOT NULL,
-	"recipient_id" uuid NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "friend" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id_1" uuid NOT NULL,
-	"user_id_2" uuid NOT NULL,
+	"user_id_a" uuid NOT NULL,
+	"user_id_b" uuid NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "friend_request" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"sender_id" uuid NOT NULL,
-	"recipient_id" uuid NOT NULL,
+	"sender_user_id" uuid NOT NULL,
+	"recipient_user_id" uuid NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
@@ -94,6 +100,7 @@ CREATE TABLE IF NOT EXISTS "like" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "notification_settings" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
 	"posts" boolean DEFAULT true NOT NULL,
 	"likes" boolean DEFAULT true NOT NULL,
 	"mentions" boolean DEFAULT true NOT NULL,
@@ -106,8 +113,8 @@ CREATE TABLE IF NOT EXISTS "notification_settings" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "notifications" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"sender_id" uuid NOT NULL,
-	"recipient_id" uuid NOT NULL,
+	"sender_user_id" uuid NOT NULL,
+	"recipient_user_id" uuid NOT NULL,
 	"read" boolean DEFAULT false NOT NULL,
 	"active" boolean DEFAULT true NOT NULL,
 	"event_type" "event_type" NOT NULL,
@@ -119,16 +126,16 @@ CREATE TABLE IF NOT EXISTS "notifications" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "post" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"author_id" uuid NOT NULL,
-	"recipient_id" uuid NOT NULL,
+	"author_user_id" uuid NOT NULL,
+	"recipient_user_id" uuid NOT NULL,
 	"caption" text DEFAULT '' NOT NULL,
-	"key" text NOT NULL,
+	"post_key" text NOT NULL,
 	"width" integer DEFAULT 500 NOT NULL,
 	"height" integer DEFAULT 500 NOT NULL,
 	"media_type" "media_type" NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "post_key_unique" UNIQUE("key")
+	CONSTRAINT "post_post_key_unique" UNIQUE("post_key")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "post_stats" (
@@ -136,40 +143,22 @@ CREATE TABLE IF NOT EXISTS "post_stats" (
 	"post_id" uuid NOT NULL,
 	"likes" integer DEFAULT 0 NOT NULL,
 	"comments" integer DEFAULT 0 NOT NULL,
-	"views" integer DEFAULT 0 NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "post_view" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" uuid NOT NULL,
-	"post_id" uuid NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "profile" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"username" varchar(30) NOT NULL,
+	"user_id" uuid NOT NULL,
+	"privacy" "privacy" DEFAULT 'public' NOT NULL,
+	"username" varchar(30),
 	"name" varchar(30),
-	"date_of_birth" date,
+	"date_of_birth" timestamp,
 	"bio" varchar(100),
 	"profile_picture_key" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "profile_username_unique" UNIQUE("username")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "profile_stats" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"profile_id" uuid NOT NULL,
-	"followers" integer DEFAULT 0 NOT NULL,
-	"following" integer DEFAULT 0 NOT NULL,
-	"friends" integer DEFAULT 0 NOT NULL,
-	"posts" integer DEFAULT 0 NOT NULL,
-	"views" integer DEFAULT 0 NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "push_token" (
@@ -184,7 +173,7 @@ CREATE TABLE IF NOT EXISTS "report_comment" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"comment_id" uuid NOT NULL,
 	"reporter_user_id" uuid NOT NULL,
-	"reason" "report_reason" NOT NULL,
+	"reason" "report_comment_reason" NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
@@ -192,28 +181,20 @@ CREATE TABLE IF NOT EXISTS "report_post" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"post_id" uuid NOT NULL,
 	"reporter_user_id" uuid NOT NULL,
-	"reason" "report_reason" NOT NULL,
+	"reason" "report_post_reason" NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "report_profile" (
+CREATE TABLE IF NOT EXISTS "report_user" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"target_user_id" uuid NOT NULL,
+	"reported_user_id" uuid NOT NULL,
 	"reporter_user_id" uuid NOT NULL,
 	"reason" "report_user_reason" NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "test" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"name" text NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"profile_id" uuid NOT NULL,
-	"notification_settings_id" uuid NOT NULL,
-	"privacy_setting" "privacy_setting" DEFAULT 'public' NOT NULL,
 	"phone_number" text NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -227,24 +208,37 @@ CREATE TABLE IF NOT EXISTS "user_contact" (
 	CONSTRAINT "user_contact_user_id_contact_id_pk" PRIMARY KEY("user_id","contact_id")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "user_stats" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"followers" integer DEFAULT 0 NOT NULL,
+	"following" integer DEFAULT 0 NOT NULL,
+	"friends" integer DEFAULT 0 NOT NULL,
+	"friend_requests" integer DEFAULT 0 NOT NULL,
+	"follow_requests" integer DEFAULT 0 NOT NULL,
+	"posts" integer DEFAULT 0 NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user_status" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
 	"is_on_app" boolean DEFAULT true NOT NULL,
-	"has_posted" boolean DEFAULT false NOT NULL,
+	"has_completed_tutorial" boolean DEFAULT false NOT NULL,
 	"has_completed_onboarding" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "blocked" ADD CONSTRAINT "blocked_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
+ ALTER TABLE "block" ADD CONSTRAINT "block_sender_user_id_user_id_fk" FOREIGN KEY ("sender_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "blocked" ADD CONSTRAINT "blocked_blocked_user_id_user_id_fk" FOREIGN KEY ("blocked_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
+ ALTER TABLE "block" ADD CONSTRAINT "block_recipient_user_id_user_id_fk" FOREIGN KEY ("recipient_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -262,49 +256,49 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "follow_request" ADD CONSTRAINT "follow_request_sender_id_user_id_fk" FOREIGN KEY ("sender_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "follow" ADD CONSTRAINT "follow_sender_user_id_user_id_fk" FOREIGN KEY ("sender_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "follow_request" ADD CONSTRAINT "follow_request_recipient_id_user_id_fk" FOREIGN KEY ("recipient_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "follow" ADD CONSTRAINT "follow_recipient_user_id_user_id_fk" FOREIGN KEY ("recipient_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "follower" ADD CONSTRAINT "follower_sender_id_user_id_fk" FOREIGN KEY ("sender_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "follow_request" ADD CONSTRAINT "follow_request_sender_user_id_user_id_fk" FOREIGN KEY ("sender_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "follower" ADD CONSTRAINT "follower_recipient_id_user_id_fk" FOREIGN KEY ("recipient_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "follow_request" ADD CONSTRAINT "follow_request_recipient_user_id_user_id_fk" FOREIGN KEY ("recipient_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "friend" ADD CONSTRAINT "friend_user_id_1_user_id_fk" FOREIGN KEY ("user_id_1") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "friend" ADD CONSTRAINT "friend_user_id_a_user_id_fk" FOREIGN KEY ("user_id_a") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "friend" ADD CONSTRAINT "friend_user_id_2_user_id_fk" FOREIGN KEY ("user_id_2") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "friend" ADD CONSTRAINT "friend_user_id_b_user_id_fk" FOREIGN KEY ("user_id_b") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "friend_request" ADD CONSTRAINT "friend_request_sender_id_user_id_fk" FOREIGN KEY ("sender_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "friend_request" ADD CONSTRAINT "friend_request_sender_user_id_user_id_fk" FOREIGN KEY ("sender_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "friend_request" ADD CONSTRAINT "friend_request_recipient_id_user_id_fk" FOREIGN KEY ("recipient_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "friend_request" ADD CONSTRAINT "friend_request_recipient_user_id_user_id_fk" FOREIGN KEY ("recipient_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -322,25 +316,31 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "notifications" ADD CONSTRAINT "notifications_sender_id_user_id_fk" FOREIGN KEY ("sender_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
+ ALTER TABLE "notification_settings" ADD CONSTRAINT "notification_settings_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "notifications" ADD CONSTRAINT "notifications_recipient_id_user_id_fk" FOREIGN KEY ("recipient_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
+ ALTER TABLE "notifications" ADD CONSTRAINT "notifications_sender_user_id_user_id_fk" FOREIGN KEY ("sender_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "post" ADD CONSTRAINT "post_author_id_user_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
+ ALTER TABLE "notifications" ADD CONSTRAINT "notifications_recipient_user_id_user_id_fk" FOREIGN KEY ("recipient_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "post" ADD CONSTRAINT "post_recipient_id_user_id_fk" FOREIGN KEY ("recipient_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
+ ALTER TABLE "post" ADD CONSTRAINT "post_author_user_id_user_id_fk" FOREIGN KEY ("author_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "post" ADD CONSTRAINT "post_recipient_user_id_user_id_fk" FOREIGN KEY ("recipient_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -352,19 +352,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "post_view" ADD CONSTRAINT "post_view_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "post_view" ADD CONSTRAINT "post_view_post_id_post_id_fk" FOREIGN KEY ("post_id") REFERENCES "public"."post"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "profile_stats" ADD CONSTRAINT "profile_stats_profile_id_profile_id_fk" FOREIGN KEY ("profile_id") REFERENCES "public"."profile"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "profile" ADD CONSTRAINT "profile_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -400,25 +388,13 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "report_profile" ADD CONSTRAINT "report_profile_target_user_id_user_id_fk" FOREIGN KEY ("target_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
+ ALTER TABLE "report_user" ADD CONSTRAINT "report_user_reported_user_id_user_id_fk" FOREIGN KEY ("reported_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "report_profile" ADD CONSTRAINT "report_profile_reporter_user_id_user_id_fk" FOREIGN KEY ("reporter_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "user" ADD CONSTRAINT "user_profile_id_profile_id_fk" FOREIGN KEY ("profile_id") REFERENCES "public"."profile"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "user" ADD CONSTRAINT "user_notification_settings_id_notification_settings_id_fk" FOREIGN KEY ("notification_settings_id") REFERENCES "public"."notification_settings"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "report_user" ADD CONSTRAINT "report_user_reporter_user_id_user_id_fk" FOREIGN KEY ("reporter_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -436,7 +412,51 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "user_stats" ADD CONSTRAINT "user_stats_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "user_status" ADD CONSTRAINT "user_status_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "block_sender_user_idx" ON "block" ("sender_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "block_recipient_user_idx" ON "block" ("recipient_user_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "block_unique_pair" ON "block" ("sender_user_id","recipient_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "comment_post_idx" ON "comment" ("post_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "comment_user_idx" ON "comment" ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "follow_sender_idx" ON "follow" ("sender_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "follow_recipient_idx" ON "follow" ("recipient_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "follow_request_sender_idx" ON "follow_request" ("sender_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "follow_request_recipient_idx" ON "follow_request" ("recipient_user_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "follow_request_sender_recipient_unique" ON "follow_request" ("sender_user_id","recipient_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "friend_user_a_idx" ON "friend" ("user_id_a");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "friend_user_b_idx" ON "friend" ("user_id_b");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "friend_user_pair_unique" ON "friend" ("user_id_a","user_id_b");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "friend_request_sender_idx" ON "friend_request" ("sender_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "friend_request_recipient_idx" ON "friend_request" ("recipient_user_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "friend_request_sender_recipient_unique" ON "friend_request" ("sender_user_id","recipient_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "like_post_idx" ON "like" ("post_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "like_user_idx" ON "like" ("user_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "like_post_user_unique" ON "like" ("post_id","user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notifications_recipient_idx" ON "notifications" ("recipient_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notifications_sender_idx" ON "notifications" ("sender_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notifications_read_idx" ON "notifications" ("read");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notifications_active_idx" ON "notifications" ("active");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notifications_event_type_idx" ON "notifications" ("event_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notifications_created_at_idx" ON "notifications" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "post_author_user_idx" ON "post" ("author_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "post_recipient_user_idx" ON "post" ("recipient_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "post_created_at_idx" ON "post" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "profile_name_idx" ON "profile" ("name");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "report_comment_comment_idx" ON "report_comment" ("comment_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "report_comment_reporter_idx" ON "report_comment" ("reporter_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "report_post_post_idx" ON "report_post" ("post_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "report_post_reporter_idx" ON "report_post" ("reporter_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "report_user_reported_idx" ON "report_user" ("reported_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "report_user_reporter_idx" ON "report_user" ("reporter_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_contact_user_idx" ON "user_contact" ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_contact_contact_idx" ON "user_contact" ("contact_id");
