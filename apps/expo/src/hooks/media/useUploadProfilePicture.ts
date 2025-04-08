@@ -16,7 +16,7 @@ export default function useUploadProfilePicture({
   const utils = api.useUtils();
 
   const generatePresignedUrl =
-    api.profile.createProfilePicturePresignedUrl.useMutation();
+    api.profile.generateProfilePicturePresignedUrl.useMutation();
 
   // Pick image mutation
   const pickImage = useMutation({
@@ -56,6 +56,10 @@ export default function useUploadProfilePicture({
         contentLength: profilePictureBlob.size,
       });
 
+      if (!presignedUrl) {
+        throw new Error("Failed to generate presigned url");
+      }
+
       const response = await fetch(presignedUrl, {
         method: "PUT",
         body: profilePictureBlob,
@@ -71,14 +75,14 @@ export default function useUploadProfilePicture({
       if (!optimisticallyUpdate) return;
 
       // Cancel outgoing fetches
-      await utils.profile.getProfileSelf.cancel();
+      await utils.profile.getProfile.cancel();
 
       // Get current data
-      const prevData = utils.profile.getProfileSelf.getData();
+      const prevData = utils.profile.getProfile.getData();
       if (!prevData) return;
 
       // Optimistically update
-      utils.profile.getProfileSelf.setData(undefined, {
+      utils.profile.getProfile.setData({ userId: prevData.userId }, {
         ...prevData,
         profilePictureUrl: newProfilePictureUrl,
       });
@@ -89,13 +93,13 @@ export default function useUploadProfilePicture({
       if (!optimisticallyUpdate || !ctx) return;
 
       // Revert optimistic update on error
-      utils.profile.getProfileSelf.setData(undefined, ctx.prevData);
+      utils.profile.getProfile.setData({ userId: ctx.prevData.userId }, ctx.prevData);
     },
     onSettled: () => {
       if (!optimisticallyUpdate) return;
 
       // Sync with server after delay
-      setTimeout(() => void utils.profile.getProfileSelf.invalidate(), 10000);
+      setTimeout(() => void utils.profile.getProfile.invalidate(), 10000);
     },
   });
 

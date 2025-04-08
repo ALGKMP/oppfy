@@ -1,6 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { validators } from "@oppfy/validators";
+
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -42,6 +44,29 @@ export const profileRouter = createTRPCRouter({
           }
         },
       );
+    }),
+
+  updateProfile: protectedProcedure
+    .input(
+      z.object({
+        name: z.string().optional(),
+        username: z.string().optional(),
+        bio: z.string().optional(),
+        dateOfBirth: validators.dateOfBirth.optional(),
+        profilePictureKey: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.services.profile.updateProfile({
+        userId: ctx.session.uid,
+        update: {
+          name: input.name,
+          username: input.username,
+          bio: input.bio,
+          profilePictureKey: input.profilePictureKey,
+          dateOfBirth: input.dateOfBirth,
+        },
+      });
     }),
 
   getProfileForSite: publicProcedure
@@ -124,10 +149,15 @@ export const profileRouter = createTRPCRouter({
         contentLength: z.number(),
       }),
     )
-    .query(async ({ ctx, input }) => {
-      await ctx.services.profile.generateProfilePicturePresignedUrl({
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.services.profile.generateProfilePicturePresignedUrl({
         userId: ctx.session.uid,
         contentLength: input.contentLength,
       });
+
+      return result.match(
+        (res) => res,
+        (_) => null,
+      );
     }),
 });
