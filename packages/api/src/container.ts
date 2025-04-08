@@ -1,13 +1,16 @@
 import "reflect-metadata";
 
 import { Container } from "inversify";
-import { Twilio } from "twilio";
 
-import { CloudFront } from "@oppfy/cloudfront";
+import { CloudFrontService } from "@oppfy/cloudfront";
 import { db, schema } from "@oppfy/db";
 import { MuxService } from "@oppfy/mux";
-import { S3 } from "@oppfy/s3";
+import { S3Service } from "@oppfy/s3";
+import { TwilioService } from "@oppfy/twilio";
 
+import type { ICommentRepository } from "./interfaces/repositories/content/comment.repository.interface";
+import type { ILikeRepository } from "./interfaces/repositories/content/like.repository.interface";
+import type { IPostRepository } from "./interfaces/repositories/content/post.repository.interface";
 import type { IBlockRepository } from "./interfaces/repositories/social/block.repository.interface";
 import type { IFollowRepository } from "./interfaces/repositories/social/follow.repository.interface";
 import type { IFriendRepository } from "./interfaces/repositories/social/friend.repository.interface";
@@ -22,8 +25,12 @@ import type { IBlockService } from "./interfaces/services/social/block.service.i
 import type { IFollowService } from "./interfaces/services/social/follow.service.interface";
 import type { IFriendService } from "./interfaces/services/social/friend.service.interface";
 import type { IReportService } from "./interfaces/services/social/report.service.interface";
+import type { IAuthService } from "./interfaces/services/user/auth.service.interface";
 import type { IProfileService } from "./interfaces/services/user/profile.service.interface";
 import type { IUserService } from "./interfaces/services/user/user.service.interface";
+import { CommentRepository } from "./repositories/content/comment.repository";
+import { LikeRepository } from "./repositories/content/like.repository";
+import { PostRepository } from "./repositories/content/post.repository";
 import { BlockRepository } from "./repositories/social/block.repository";
 import { FollowRepository } from "./repositories/social/follow.repository";
 import { FriendRepository } from "./repositories/social/friend.repository";
@@ -39,6 +46,7 @@ import { BlockService } from "./services/social/block.service";
 import { FollowService } from "./services/social/follow.service";
 import { FriendService } from "./services/social/friend.service";
 import { ReportService } from "./services/social/report.service";
+import { AuthService } from "./services/user/auth.service";
 import { ProfileService } from "./services/user/profile.service";
 import { UserService } from "./services/user/user.service";
 import { TYPES } from "./types";
@@ -51,9 +59,9 @@ container.bind(TYPES.Database).toConstantValue(db);
 container.bind(TYPES.Schema).toConstantValue(schema);
 
 // Bind sdk's
-container.bind<S3>(TYPES.S3).to(S3);
-container.bind<CloudFront>(TYPES.CloudFront).to(CloudFront);
-container.bind<Twilio>(TYPES.Twilio).to(Twilio);
+container.bind<S3Service>(TYPES.S3).to(S3Service);
+container.bind<CloudFrontService>(TYPES.CloudFront).to(CloudFrontService);
+container.bind<TwilioService>(TYPES.Twilio).to(TwilioService);
 container.bind<MuxService>(TYPES.Mux).to(MuxService);
 
 // Bind repositories
@@ -71,6 +79,11 @@ container
   .bind<IProfileRepository>(TYPES.ProfileRepository)
   .to(ProfileRepository);
 container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
+container.bind<IPostRepository>(TYPES.PostRepository).to(PostRepository);
+container
+  .bind<ICommentRepository>(TYPES.CommentRepository)
+  .to(CommentRepository);
+container.bind<ILikeRepository>(TYPES.LikeRepository).to(LikeRepository);
 
 // Bind services
 container.bind<IReportService>(TYPES.ReportService).to(ReportService);
@@ -83,6 +96,7 @@ container.bind<IPostService>(TYPES.PostService).to(PostService);
 container
   .bind<IPostInteractionService>(TYPES.PostInteractionService)
   .to(PostInteractionService);
+container.bind<IAuthService>(TYPES.AuthService).to(AuthService);
 
 container.bind<Services>(TYPES.Services).to(Services);
 
