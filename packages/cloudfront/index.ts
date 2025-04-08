@@ -18,7 +18,7 @@ type HydratedPost = Post & {
 
 const ONE_HOUR = 60 * 60 * 1000;
 
-export class CloudFront {
+export class CloudFrontService {
   private client: CloudFrontClient;
 
   constructor() {

@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFront } from "@oppfy/cloudfront";
+import { CloudFrontService } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
 import * as FollowErrors from "../../errors/social/follow.error";
@@ -36,7 +36,7 @@ export class FollowService implements IFollowService {
     @inject(TYPES.ProfileRepository)
     private readonly profileRepository: IProfileRepository,
     @inject(TYPES.CloudFront)
-    private readonly cloudfront: CloudFront,
+    private readonly cloudfront: CloudFrontService,
   ) {}
 
   /**

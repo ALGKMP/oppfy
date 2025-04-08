@@ -2,11 +2,11 @@ import { randomUUID } from "crypto";
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFront } from "@oppfy/cloudfront";
+import { CloudFrontService } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { env } from "@oppfy/env";
 import { MuxService } from "@oppfy/mux";
-import { S3 } from "@oppfy/s3";
+import { S3Service } from "@oppfy/s3";
 
 import * as PostErrors from "../../errors/content/post.error";
 import type { ICommentRepository } from "../../interfaces/repositories/content/comment.repository.interface";
@@ -51,9 +51,9 @@ export class PostService implements IPostService {
     @inject(TYPES.CommentRepository)
     private readonly commentRepository: ICommentRepository,
     @inject(TYPES.S3)
-    private readonly s3: S3,
+    private readonly s3: S3Service,
     @inject(TYPES.CloudFront)
-    private readonly cloudfront: CloudFront,
+    private readonly cloudfront: CloudFrontService,
     @inject(TYPES.Mux)
     private readonly mux: MuxService,
   ) {}

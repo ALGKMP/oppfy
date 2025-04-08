@@ -14,7 +14,7 @@ import { env } from "@oppfy/env";
 
 const FIVE_MINUTES = 300;
 
-export class S3 {
+export class S3Service {
   private client: S3Client;
 
   constructor() {

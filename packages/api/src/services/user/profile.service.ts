@@ -1,8 +1,8 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFront } from "@oppfy/cloudfront";
-import { S3 } from "@oppfy/s3";
+import { CloudFrontService } from "@oppfy/cloudfront";
+import { S3Service } from "@oppfy/s3";
 
 import * as ProfileErrors from "../../errors/user/profile.error";
 import type { IBlockRepository } from "../../interfaces/repositories/social/block.repository.interface";
@@ -31,9 +31,9 @@ import { TYPES } from "../../types";
 export class ProfileService implements IProfileService {
   constructor(
     @inject(TYPES.S3)
-    private readonly s3: S3,
+    private readonly s3: S3Service,
     @inject(TYPES.CloudFront)
-    private readonly cloudfront: CloudFront,
+    private readonly cloudfront: CloudFrontService,
     @inject(TYPES.ProfileRepository)
     private readonly profileRepository: IProfileRepository,
     @inject(TYPES.FollowRepository)
