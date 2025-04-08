@@ -9,7 +9,6 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
-import { TYPES } from "../../container";
 import {
   CreateUserParams,
   ExistingPhoneNumbersParams,
@@ -18,6 +17,7 @@ import {
 } from "../../interfaces/repositories/user/user.repository.interface";
 import { PhoneNumberParam, UserIdParam } from "../../interfaces/types";
 import type { User, UserStatus } from "../../models";
+import { TYPES } from "../../types";
 
 @injectable()
 export class UserRepository implements IUserRepository {

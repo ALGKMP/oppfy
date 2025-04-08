@@ -3,12 +3,12 @@ import { err, ok, Result } from "neverthrow";
 
 import type { Database } from "@oppfy/db";
 
-import { TYPES } from "../../container";
 import * as UserErrors from "../../errors/user/user.error";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type { IUserService } from "../../interfaces/services/user/user.service.interface";
 import type { UserIdParam } from "../../interfaces/types";
 import { UserStatus } from "../../models";
+import { TYPES } from "../../types";
 
 @injectable()
 export class UserService implements IUserService {

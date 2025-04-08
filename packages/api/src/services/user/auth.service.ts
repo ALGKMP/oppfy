@@ -7,7 +7,6 @@ import { env } from "@oppfy/env";
 import type { TwilioService } from "@oppfy/twilio";
 import { RestException } from "@oppfy/twilio";
 
-import { TYPES } from "../../container";
 import * as AuthErrors from "../../errors/user/auth.error";
 import * as UserErrors from "../../errors/user/user.error";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
@@ -19,6 +18,7 @@ import type {
   VerifyCodeResult,
 } from "../../interfaces/services/user/auth.service.interface";
 import { PhoneNumberParam } from "../../interfaces/types";
+import { TYPES } from "../../types";
 
 const ADMIN_PHONE_NUMBERS = [
   "+16478852142",

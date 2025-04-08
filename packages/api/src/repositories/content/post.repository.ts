@@ -8,7 +8,6 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
-import { TYPES } from "../../container";
 import {
   DeletePostParams,
   GetPostForSiteParams,
@@ -19,6 +18,7 @@ import {
   PostResultWithLike,
   UpdatePostParams,
 } from "../../interfaces/repositories/content/post.repository.interface";
+import { TYPES } from "../../types";
 
 @injectable()
 export class PostRepository implements IPostRepository {

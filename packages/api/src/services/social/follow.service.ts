@@ -1,10 +1,9 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { cloudfront } from "@oppfy/cloudfront";
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
-import { TYPES } from "../../container";
 import * as FollowErrors from "../../errors/social/follow.error";
 import * as FriendErrors from "../../errors/social/friend.error";
 import * as ProfileErrors from "../../errors/user/profile.error";
@@ -23,6 +22,7 @@ import {
   PaginatedResponse,
 } from "../../interfaces/types";
 import { Profile } from "../../models";
+import { TYPES } from "../../types";
 
 @injectable()
 export class FollowService implements IFollowService {
@@ -35,6 +35,8 @@ export class FollowService implements IFollowService {
     private readonly friendRepository: IFriendRepository,
     @inject(TYPES.ProfileRepository)
     private readonly profileRepository: IProfileRepository,
+    @inject(TYPES.CloudFront)
+    private readonly cloudfront: CloudFront,
   ) {}
 
   /**
@@ -340,7 +342,7 @@ export class FollowService implements IFollowService {
     });
 
     const hydratedProfiles = rawProfiles.map((profile) => ({
-      ...cloudfront.hydrateProfile(profile),
+      ...this.cloudfront.hydrateProfile(profile),
       followedAt: profile.followedAt,
       followStatus: profile.followStatus,
     }));
@@ -376,7 +378,7 @@ export class FollowService implements IFollowService {
     });
 
     const hydratedProfiles = rawProfiles.map((profile) => ({
-      ...cloudfront.hydrateProfile(profile),
+      ...this.cloudfront.hydrateProfile(profile),
       followedAt: profile.followedAt,
       followStatus: profile.followStatus,
     }));
@@ -411,7 +413,7 @@ export class FollowService implements IFollowService {
     });
 
     const hydratedProfiles = rawProfiles.map((profile) =>
-      cloudfront.hydrateProfile(profile),
+      this.cloudfront.hydrateProfile(profile),
     );
 
     const hasMore = rawProfiles.length > pageSize;

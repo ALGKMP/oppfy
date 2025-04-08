@@ -2,13 +2,12 @@ import { randomUUID } from "crypto";
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { cloudfront } from "@oppfy/cloudfront";
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { env } from "@oppfy/env";
-import { mux } from "@oppfy/mux";
-import { s3 } from "@oppfy/s3";
+import { MuxService } from "@oppfy/mux";
+import { S3 } from "@oppfy/s3";
 
-import { TYPES } from "../../container";
 import * as PostErrors from "../../errors/content/post.error";
 import type { ICommentRepository } from "../../interfaces/repositories/content/comment.repository.interface";
 import type {
@@ -36,6 +35,7 @@ import type {
   UploadVideoPostForUserOnAppUrlParams,
 } from "../../interfaces/services/content/post.service.interface";
 import type { PaginatedResponse } from "../../interfaces/types";
+import { TYPES } from "../../types";
 
 @injectable()
 export class PostService implements IPostService {
@@ -50,6 +50,12 @@ export class PostService implements IPostService {
     private readonly profileRepository: IProfileRepository,
     @inject(TYPES.CommentRepository)
     private readonly commentRepository: ICommentRepository,
+    @inject(TYPES.S3)
+    private readonly s3: S3,
+    @inject(TYPES.CloudFront)
+    private readonly cloudfront: CloudFront,
+    @inject(TYPES.Mux)
+    private readonly mux: MuxService,
   ) {}
 
   private async generatePresignedUrl(
@@ -58,7 +64,7 @@ export class PostService implements IPostService {
     contentType: string,
     metadata: Record<string, string>,
   ): Promise<string> {
-    return s3.putObjectPresignedUrl({
+    return this.s3.putObjectPresignedUrl({
       Bucket: env.S3_POST_BUCKET,
       Key: key,
       ContentLength: contentLength,
@@ -88,7 +94,7 @@ export class PostService implements IPostService {
       if ("recipient" in params) {
         const { recipient } = params;
         if (isVideo) {
-          const presignedUrl = await mux.getPresignedUrlForVideo({
+          const presignedUrl = await this.mux.getPresignedUrlForVideo({
             author,
             recipient,
             caption,
@@ -140,7 +146,7 @@ export class PostService implements IPostService {
 
           if (isVideo) {
             result = {
-              presignedUrl: await mux.getPresignedUrlForVideo({
+              presignedUrl: await this.mux.getPresignedUrlForVideo({
                 author,
                 recipient: recipientId,
                 caption,
@@ -183,9 +189,11 @@ export class PostService implements IPostService {
 
   // Hydration function for PostResult
   private hydrateAndProcessPost(raw: RawPostResult): HydratedAndProcessedPost {
-    const hydratedPost = cloudfront.hydratePost(raw.post);
-    const hydratedAuthorProfile = cloudfront.hydrateProfile(raw.authorProfile);
-    const hydratedRecipientProfile = cloudfront.hydrateProfile(
+    const hydratedPost = this.cloudfront.hydratePost(raw.post);
+    const hydratedAuthorProfile = this.cloudfront.hydrateProfile(
+      raw.authorProfile,
+    );
+    const hydratedRecipientProfile = this.cloudfront.hydrateProfile(
       raw.recipientProfile,
     );
 
@@ -209,9 +217,11 @@ export class PostService implements IPostService {
   private hydrateAndProcessPostResultWithoutLike(
     raw: RawPostResultWithoutLike,
   ): HydratedAndProcessedPostWithoutLike {
-    const hydratedPost = cloudfront.hydratePost(raw.post);
-    const hydratedAuthorProfile = cloudfront.hydrateProfile(raw.authorProfile);
-    const hydratedRecipientProfile = cloudfront.hydrateProfile(
+    const hydratedPost = this.cloudfront.hydratePost(raw.post);
+    const hydratedAuthorProfile = this.cloudfront.hydrateProfile(
+      raw.authorProfile,
+    );
+    const hydratedRecipientProfile = this.cloudfront.hydrateProfile(
       raw.recipientProfile,
     );
 
@@ -234,7 +244,7 @@ export class PostService implements IPostService {
   private hydrateAndProcessComment(
     raw: RawPaginatedComment,
   ): HydratedAndProcessedComment {
-    const hydratedProfile = cloudfront.hydrateProfile(raw.profile);
+    const hydratedProfile = this.cloudfront.hydrateProfile(raw.profile);
     return {
       comment: raw.comment,
       authorUserId: raw.profile.userId,

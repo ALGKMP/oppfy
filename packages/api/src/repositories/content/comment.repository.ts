@@ -8,7 +8,7 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
-import { TYPES } from "../../container";
+import { TYPES } from "../../types";
 import {
   CreateCommentParams,
   DeleteCommentParams,

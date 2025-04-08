@@ -3,7 +3,6 @@ import { err, ok, Result } from "neverthrow";
 
 import type { Database } from "@oppfy/db";
 
-import { TYPES } from "../../container";
 import * as PostInteractionErrors from "../../errors/content/postInteraction.error";
 import type { ICommentRepository } from "../../interfaces/repositories/content/comment.repository.interface";
 import type { ILikeRepository } from "../../interfaces/repositories/content/like.repository.interface";
@@ -15,6 +14,7 @@ import type {
   RemoveCommentParams,
   UnlikePostParams,
 } from "../../interfaces/services/content/postInteraction.service.interface";
+import { TYPES } from "../../types";
 
 @injectable()
 export class PostInteractionService implements IPostInteractionService {

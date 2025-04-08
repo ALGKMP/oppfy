@@ -8,7 +8,6 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
-import { TYPES } from "../../container";
 import {
   DeleteNotificationByIdParams,
   DeleteNotificationsBetweenUsersParams,
@@ -26,6 +25,7 @@ import {
   StorePushTokenParams,
   UpdateNotificationSettingsParams,
 } from "../../interfaces/repositories/user/notification.repository.interface";
+import { TYPES } from "../../types";
 
 @injectable()
 export class NotificationsRepository implements INotificationsRepository {

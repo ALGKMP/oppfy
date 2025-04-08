@@ -4,7 +4,6 @@ import { err, ok, Result } from "neverthrow";
 import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
-import { TYPES } from "../../container";
 import * as FriendErrors from "../../errors/social/friend.error";
 import { ProfileNotFound } from "../../errors/user/profile.error";
 import { UserNotFound } from "../../errors/user/user.error";
@@ -25,6 +24,7 @@ import {
   PaginatedResponse,
 } from "../../interfaces/types";
 import { Profile } from "../../models";
+import { TYPES } from "../../types";
 
 @injectable()
 export class FriendService implements IFriendService {

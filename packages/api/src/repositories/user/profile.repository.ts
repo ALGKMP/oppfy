@@ -7,7 +7,6 @@ import {
   withoutBlocked,
 } from "@oppfy/db/utils/query-helpers";
 
-import { TYPES } from "../../container";
 import type {
   IProfileRepository,
   ProfilesByIdsParams,
@@ -16,6 +15,7 @@ import type {
 } from "../../interfaces/repositories/user/profile.repository.interface";
 import { UserIdParam, UsernameParam } from "../../interfaces/types";
 import type { Profile, UserStats } from "../../models";
+import { TYPES } from "../../types";
 
 @injectable()
 export class ProfileRepository implements IProfileRepository {

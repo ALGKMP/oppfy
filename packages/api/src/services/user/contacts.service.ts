@@ -3,20 +3,20 @@ import { err, ok, Result } from "neverthrow";
 
 import type { Database, DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
-import { TYPES } from "../../container";
 import * as AwsErrors from "../../errors/aws.error";
 import * as UserErrors from "../../errors/user/user.error";
 import type { IContactsRepository } from "../../interfaces/repositories/user/contacts.repository.interface";
+import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import {
   ContactRecommendation,
   FilterPhoneNumbersOnAppParams,
   IContactsService,
   UpdateUserContactsParams,
 } from "../../interfaces/services/user/contacts.service.interface";
-import { HydratedProfile } from "../../models";
-import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
-import { UserIdParam } from "../../interfaces/types";
 import type { IProfileService } from "../../interfaces/services/user/profile.service.interface";
+import { UserIdParam } from "../../interfaces/types";
+import { HydratedProfile } from "../../models";
+import { TYPES } from "../../types";
 
 @injectable()
 export class ContactsService implements IContactsService {
@@ -44,9 +44,9 @@ export class ContactsService implements IContactsService {
     return this.userRepository.existingPhoneNumbers({ phoneNumbers });
   }
 
-  async getProfileRecommendations(
-    { userId }: UserIdParam,
-  ): Promise<Result<HydratedProfile[], UserErrors.UserNotFound>> {
+  async getProfileRecommendations({
+    userId,
+  }: UserIdParam): Promise<Result<HydratedProfile[], UserErrors.UserNotFound>> {
     const user = await this.userRepository.getUser({ userId });
 
     if (!user) {
@@ -54,10 +54,8 @@ export class ContactsService implements IContactsService {
     }
 
     // Get recommendations from Lambda function
-    const { tier1, tier2, tier3 } = await this.contactsRepository
-      .getRecommendationIds(
-        { userId },
-      );
+    const { tier1, tier2, tier3 } =
+      await this.contactsRepository.getRecommendationIds({ userId });
 
     // Combine all tiers
     const allRecommendedUserIds = [...tier1, ...tier2, ...tier3];

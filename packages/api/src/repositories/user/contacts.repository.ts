@@ -9,13 +9,13 @@ import type {
 } from "@oppfy/db";
 import { env } from "@oppfy/env";
 
-import { TYPES } from "../../container";
 import type {
   DeleteUserContactsParam,
   IContactsRepository,
   InsertUserContactsParam,
 } from "../../interfaces/repositories/user/contacts.repository.interface";
 import { UserIdParam } from "../../interfaces/types";
+import { TYPES } from "../../types";
 
 @injectable()
 export class ContactsRepository implements IContactsRepository {
@@ -75,9 +75,7 @@ export class ContactsRepository implements IContactsRepository {
       .onConflictDoNothing();
   }
 
-  async getRecommendationIds({
-    userId,
-  }: UserIdParam): Promise<{
+  async getRecommendationIds({ userId }: UserIdParam): Promise<{
     tier1: string[];
     tier2: string[];
     tier3: string[];

@@ -1,6 +1,5 @@
 import { inject } from "inversify";
 
-import { TYPES } from "../container";
 import type { IPostService } from "../interfaces/services/content/post.service.interface";
 import type { IPostInteractionService } from "../interfaces/services/content/postInteraction.service.interface";
 import type { IBlockService } from "../interfaces/services/social/block.service.interface";
@@ -10,6 +9,7 @@ import type { IReportService } from "../interfaces/services/social/report.servic
 import type { IAuthService } from "../interfaces/services/user/auth.service.interface";
 import type { IProfileService } from "../interfaces/services/user/profile.service.interface";
 import type { IUserService } from "../interfaces/services/user/user.service.interface";
+import { TYPES } from "../types";
 
 export class Services {
   constructor(

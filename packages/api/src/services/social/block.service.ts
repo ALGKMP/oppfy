@@ -4,7 +4,6 @@ import { err, ok, Result } from "neverthrow";
 import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
-import { TYPES } from "../../container";
 import * as BlockErrors from "../../errors/social/block.error";
 import type {
   IBlockRepository,
@@ -22,6 +21,7 @@ import type {
   DirectionalUserIdsParams,
   PaginatedResponse,
 } from "../../interfaces/types";
+import { TYPES } from "../../types";
 
 @injectable()
 export class BlockService implements IBlockService {

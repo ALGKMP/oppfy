@@ -8,12 +8,12 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
-import { TYPES } from "../../container";
 import type {
   ILikeRepository,
   LikeParams,
 } from "../../interfaces/repositories/content/like.repository.interface";
 import type { Like } from "../../models";
+import { TYPES } from "../../types";
 
 @injectable()
 export class LikeRepository implements ILikeRepository {

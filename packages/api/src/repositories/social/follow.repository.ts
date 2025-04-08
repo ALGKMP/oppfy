@@ -9,7 +9,6 @@ import type {
 } from "@oppfy/db";
 import { getFollowStatusSql } from "@oppfy/db/utils/query-helpers";
 
-import { TYPES } from "../../container";
 import {
   IFollowRepository,
   PaginateFollowParams,
@@ -20,6 +19,7 @@ import {
   DirectionalUserIdsParams,
 } from "../../interfaces/types";
 import { Follow, FollowRequest, Profile } from "../../models";
+import { TYPES } from "../../types";
 
 @injectable()
 export class FollowRepository implements IFollowRepository {

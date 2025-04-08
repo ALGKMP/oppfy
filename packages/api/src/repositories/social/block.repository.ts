@@ -3,7 +3,6 @@ import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 
-import { TYPES } from "../../container";
 import type {
   IBlockRepository,
   PaginateBlockedUsersParams,
@@ -11,6 +10,7 @@ import type {
 } from "../../interfaces/repositories/social/block.repository.interface";
 import type { DirectionalUserIdsParams } from "../../interfaces/types";
 import type { Block } from "../../models";
+import { TYPES } from "../../types";
 
 @injectable()
 export class BlockRepository implements IBlockRepository {

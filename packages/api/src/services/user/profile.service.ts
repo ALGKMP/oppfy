@@ -4,7 +4,6 @@ import { err, ok, Result } from "neverthrow";
 import { CloudFront } from "@oppfy/cloudfront";
 import { S3 } from "@oppfy/s3";
 
-import { TYPES } from "../../container";
 import * as ProfileErrors from "../../errors/user/profile.error";
 import type { IBlockRepository } from "../../interfaces/repositories/social/block.repository.interface";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
@@ -26,6 +25,7 @@ import {
   UsernameParam,
 } from "../../interfaces/types";
 import { HydratedProfile, Profile, UserStats } from "../../models";
+import { TYPES } from "../../types";
 
 @injectable()
 export class ProfileService implements IProfileService {
