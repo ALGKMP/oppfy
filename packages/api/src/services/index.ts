@@ -7,6 +7,7 @@ import type { IFollowService } from "../interfaces/services/social/follow.servic
 import type { IFriendService } from "../interfaces/services/social/friend.service.interface";
 import type { IReportService } from "../interfaces/services/social/report.service.interface";
 import type { IAuthService } from "../interfaces/services/user/auth.service.interface";
+import type { IContactsService } from "../interfaces/services/user/contacts.service.interface";
 import type { IProfileService } from "../interfaces/services/user/profile.service.interface";
 import type { IUserService } from "../interfaces/services/user/user.service.interface";
 import { TYPES } from "../types";
@@ -19,6 +20,8 @@ export class Services {
     public readonly follow: IFollowService,
     @inject(TYPES.FriendService)
     public readonly friend: IFriendService,
+    @inject(TYPES.ContactsService)
+    public readonly contacts: IContactsService,
     @inject(TYPES.ProfileService)
     public readonly profile: IProfileService,
     @inject(TYPES.ReportService)

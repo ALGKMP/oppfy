@@ -33,6 +33,7 @@ export const TYPES = {
   ProfileService: Symbol.for("ProfileService"),
   ReportService: Symbol.for("ReportService"),
   FriendService: Symbol.for("FriendService"),
+  ContactsService: Symbol.for("ContactsService"),
   FollowService: Symbol.for("FollowService"),
   BlockService: Symbol.for("BlockService"),
   PostService: Symbol.for("PostService"),

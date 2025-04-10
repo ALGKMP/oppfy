@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import * as Contacts from "expo-contacts";
 import type { Contact, PhoneNumber } from "expo-contacts";
 import { PermissionStatus } from "expo-contacts";

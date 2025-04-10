@@ -1,7 +1,5 @@
 import type { Result } from "neverthrow";
 
-import type * as AwsErrors from "../../../errors/cloud/aws.error";
-import type * as UserErrors from "../../../errors/user/user.error";
 import type { HydratedProfile } from "../../../models";
 import type { UserIdParam } from "../../types";
 
@@ -25,13 +23,13 @@ export interface ContactRecommendation {
 export interface IContactsService {
   updateUserContacts(
     params: UpdateUserContactsParams,
-  ): Promise<Result<void, UserErrors.UserNotFound | AwsErrors.SQSFailedToSend>>;
+  ): Promise<Result<void, never>>;
 
   filterPhoneNumbersOnApp(
     params: FilterPhoneNumbersOnAppParams,
-  ): Promise<string[]>;
+  ): Promise<Result<string[], never>>;
 
   getProfileRecommendations(
     params: UserIdParam,
-  ): Promise<Result<HydratedProfile[], UserErrors.UserNotFound>>;
+  ): Promise<Result<HydratedProfile[], never>>;
 }

@@ -37,22 +37,19 @@ export class ContactsService implements IContactsService {
     this.profileService = profileService;
   }
 
-  filterPhoneNumbersOnApp(
-    params: FilterPhoneNumbersOnAppParams,
-  ): Promise<string[]> {
-    const { phoneNumbers } = params;
-    return this.userRepository.existingPhoneNumbers({ phoneNumbers });
+  async filterPhoneNumbersOnApp({
+    phoneNumbers,
+  }: FilterPhoneNumbersOnAppParams): Promise<Result<string[], never>> {
+    const result = await this.userRepository.existingPhoneNumbers({
+      phoneNumbers,
+    });
+
+    return ok(result);
   }
 
   async getProfileRecommendations({
     userId,
-  }: UserIdParam): Promise<Result<HydratedProfile[], UserErrors.UserNotFound>> {
-    const user = await this.userRepository.getUser({ userId });
-
-    if (!user) {
-      return err(new UserErrors.UserNotFound(userId));
-    }
-
+  }: UserIdParam): Promise<Result<HydratedProfile[], never>> {
     // Get recommendations from Lambda function
     const { tier1, tier2, tier3 } =
       await this.contactsRepository.getRecommendationIds({ userId });
@@ -74,9 +71,7 @@ export class ContactsService implements IContactsService {
 
   async updateUserContacts(
     params: UpdateUserContactsParams,
-  ): Promise<
-    Result<void, UserErrors.UserNotFound | AwsErrors.SQSFailedToSend>
-  > {
+  ): Promise<Result<void, never>> {
     const { userId, hashedPhoneNumbers } = params;
 
     await this.db.transaction(async (tx) => {
