@@ -5,8 +5,8 @@ import { err, ok, Result } from "neverthrow";
 import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { env } from "@oppfy/env";
-import { MuxService } from "@oppfy/mux";
-import { S3Service } from "@oppfy/s3";
+import { Mux } from "@oppfy/mux";
+import { S3 } from "@oppfy/s3";
 
 import * as PostErrors from "../../errors/content/post.error";
 import type { ICommentRepository } from "../../interfaces/repositories/content/comment.repository.interface";
@@ -51,11 +51,11 @@ export class PostService implements IPostService {
     @inject(TYPES.CommentRepository)
     private readonly commentRepository: ICommentRepository,
     @inject(TYPES.S3)
-    private readonly s3: S3Service,
+    private readonly s3: S3,
     @inject(TYPES.CloudFront)
     private readonly cloudfront: CloudFront,
     @inject(TYPES.Mux)
-    private readonly mux: MuxService,
+    private readonly mux: Mux,
   ) {}
 
   private async generatePresignedUrl(

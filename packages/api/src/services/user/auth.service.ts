@@ -4,7 +4,7 @@ import { err, ok, Result } from "neverthrow";
 
 import type { Database } from "@oppfy/db";
 import { env } from "@oppfy/env";
-import type { TwilioService } from "@oppfy/twilio";
+import type { Twilio } from "@oppfy/twilio";
 import { RestException } from "@oppfy/twilio";
 
 import * as AuthErrors from "../../errors/user/auth.error";
@@ -38,7 +38,7 @@ export class AuthService implements IAuthService {
     @inject(TYPES.UserRepository)
     private readonly userRepository: IUserRepository,
     @inject(TYPES.Twilio)
-    private readonly twilio: TwilioService,
+    private readonly twilio: Twilio,
   ) {}
 
   async sendVerificationCode({
@@ -56,6 +56,7 @@ export class AuthService implements IAuthService {
       return ok();
     } catch (error: unknown) {
       if (error instanceof RestException) {
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (error.code) {
           case 21211: // Invalid phone number
             return err(new AuthErrors.InvalidPhoneNumber());
@@ -94,6 +95,7 @@ export class AuthService implements IAuthService {
         if (!isValid) return err(new AuthErrors.InvalidVerificationCode());
       } catch (error: unknown) {
         if (error instanceof RestException) {
+          // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
           switch (error.code) {
             case 60400:
               return err(new AuthErrors.InvalidVerificationCode());
