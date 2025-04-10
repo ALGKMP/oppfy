@@ -4,7 +4,7 @@ import type {
   reportCommentReasonEnum,
   reportPostReasonEnum,
   reportUserReasonEnum,
-} from "../../../../db/src/schema";
+} from "@oppfy/db";
 
 export type ReportUserReason = (typeof reportUserReasonEnum.enumValues)[number];
 export type ReportPostReason = (typeof reportPostReasonEnum.enumValues)[number];
