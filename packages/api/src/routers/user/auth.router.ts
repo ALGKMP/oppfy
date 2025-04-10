@@ -12,11 +12,7 @@ export const authRouter = createTRPCRouter({
       });
 
       return result.match(
-        (_) => {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-          });
-        },
+        (_) => _,
         (err) => {
           switch (err.name) {
             case "InvalidPhoneNumberError": {
