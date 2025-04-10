@@ -2,11 +2,11 @@ import "reflect-metadata";
 
 import { Container } from "inversify";
 
-import { CloudFrontService } from "@oppfy/cloudfront";
+import { CloudFront } from "@oppfy/cloudfront";
 import { db, schema } from "@oppfy/db";
-import { MuxService } from "@oppfy/mux";
-import { S3Service } from "@oppfy/s3";
-import { TwilioService } from "@oppfy/twilio";
+import { Mux } from "@oppfy/mux";
+import { S3 } from "@oppfy/s3";
+import { Twilio } from "@oppfy/twilio";
 
 import type { ICommentRepository } from "./interfaces/repositories/content/comment.repository.interface";
 import type { ILikeRepository } from "./interfaces/repositories/content/like.repository.interface";
@@ -59,10 +59,10 @@ container.bind(TYPES.Database).toConstantValue(db);
 container.bind(TYPES.Schema).toConstantValue(schema);
 
 // Bind sdk's
-container.bind<S3Service>(TYPES.S3).to(S3Service);
-container.bind<CloudFrontService>(TYPES.CloudFront).to(CloudFrontService);
-container.bind<TwilioService>(TYPES.Twilio).to(TwilioService);
-container.bind<MuxService>(TYPES.Mux).to(MuxService);
+container.bind<S3>(TYPES.S3).to(S3);
+container.bind<CloudFront>(TYPES.CloudFront).to(CloudFront);
+container.bind<Twilio>(TYPES.Twilio).to(Twilio);
+container.bind<Mux>(TYPES.Mux).to(Mux);
 
 // Bind repositories
 container.bind<IReportRepository>(TYPES.ReportRepository).to(ReportRepository);

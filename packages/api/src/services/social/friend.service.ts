@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFrontService } from "@oppfy/cloudfront";
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
 import * as FriendErrors from "../../errors/social/friend.error";
@@ -32,7 +32,7 @@ export class FriendService implements IFriendService {
     @inject(TYPES.Database)
     private readonly db: Database,
     @inject(TYPES.CloudFront)
-    private readonly cloudfront: CloudFrontService,
+    private readonly cloudfront: CloudFront,
     @inject(TYPES.FriendRepository)
     private readonly friendRepository: IFriendRepository,
     @inject(TYPES.FollowRepository)

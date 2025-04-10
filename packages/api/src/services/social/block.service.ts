@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFrontService } from "@oppfy/cloudfront";
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
 import * as BlockErrors from "../../errors/social/block.error";
@@ -29,7 +29,7 @@ export class BlockService implements IBlockService {
     @inject(TYPES.Database)
     private readonly db: Database,
     @inject(TYPES.CloudFront)
-    private readonly cloudfront: CloudFrontService,
+    private readonly cloudfront: CloudFront,
     @inject(TYPES.BlockRepository)
     private readonly blockRepository: IBlockRepository,
     @inject(TYPES.FriendRepository)

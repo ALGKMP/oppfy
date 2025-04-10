@@ -1,4 +1,4 @@
-import Mux from "@mux/mux-node";
+import { Mux as MuxClient } from "@mux/mux-node";
 
 import { env } from "@oppfy/env";
 
@@ -11,11 +11,11 @@ interface GetPresignedUrlForVideoOptions {
   postid: string;
 }
 
-export class MuxService {
-  private client: Mux;
+export class Mux {
+  private client: MuxClient;
 
   constructor() {
-    this.client = new Mux({
+    this.client = new MuxClient({
       tokenId: env.MUX_TOKEN_ID,
       tokenSecret: env.MUX_TOKEN_SECRET,
     });

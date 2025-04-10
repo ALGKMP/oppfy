@@ -1,4 +1,4 @@
-import { Twilio } from "twilio";
+import { Twilio as TwilioClient } from "twilio";
 import RestException from "twilio/lib/base/RestException";
 
 import { env } from "@oppfy/env";
@@ -12,11 +12,14 @@ type Status =
   | "failed"
   | "expired";
 
-export class TwilioService {
-  private client: Twilio;
+export class Twilio {
+  private client: TwilioClient;
 
   constructor() {
-    this.client = new Twilio(env.TWILIO_ACCOUNT_SID, env.TWILIO_AUTH_TOKEN);
+    this.client = new TwilioClient(
+      env.TWILIO_ACCOUNT_SID,
+      env.TWILIO_AUTH_TOKEN,
+    );
   }
 
   async sendVerificationCode({

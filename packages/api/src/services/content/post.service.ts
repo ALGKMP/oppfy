@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFrontService } from "@oppfy/cloudfront";
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { env } from "@oppfy/env";
 import { MuxService } from "@oppfy/mux";
@@ -53,7 +53,7 @@ export class PostService implements IPostService {
     @inject(TYPES.S3)
     private readonly s3: S3Service,
     @inject(TYPES.CloudFront)
-    private readonly cloudfront: CloudFrontService,
+    private readonly cloudfront: CloudFront,
     @inject(TYPES.Mux)
     private readonly mux: MuxService,
   ) {}

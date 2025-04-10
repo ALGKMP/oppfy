@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFrontService } from "@oppfy/cloudfront";
+import { CloudFront } from "@oppfy/cloudfront";
 import { S3Service } from "@oppfy/s3";
 
 import * as ProfileErrors from "../../errors/user/profile.error";
@@ -33,7 +33,7 @@ export class ProfileService implements IProfileService {
     @inject(TYPES.S3)
     private readonly s3: S3Service,
     @inject(TYPES.CloudFront)
-    private readonly cloudfront: CloudFrontService,
+    private readonly cloudfront: CloudFront,
     @inject(TYPES.ProfileRepository)
     private readonly profileRepository: IProfileRepository,
     @inject(TYPES.FollowRepository)
