@@ -47,7 +47,7 @@ export interface NotificationSettings {
   followRequests: boolean;
 }
 
-export class SNSService {
+export class SNS {
   private client: SNSClient;
 
   constructor() {
