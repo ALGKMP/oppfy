@@ -9,7 +9,7 @@ import {
 
 export const userRouter = createTRPCRouter({
   // TODO: We should be able to make these a protectedProcedure if the auth client is able to syncronously return token
-  getUserStatus: publicProcedure.mutation(async ({ ctx }) => {
+  getUserStatus: publicProcedure.query(async ({ ctx }) => {
     if (!ctx.session?.uid) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
