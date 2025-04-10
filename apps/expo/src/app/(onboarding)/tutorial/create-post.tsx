@@ -150,7 +150,7 @@ const CreatePost = () => {
   const { show, hide } = useBottomSheetController();
   const { sharePostToNewUser } = useShare();
 
-  const completedTutorial = api.user.setTutorialComplete.useMutation();
+  const completedTutorial = api.user.markTutorialComplete.useMutation();
 
   const [caption, setCaption] = useState("");
   const [isLoading, setIsLoading] = useState(false);

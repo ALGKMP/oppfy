@@ -59,8 +59,8 @@ const useUploadMedia = () => {
             })
           : await createVideoPresignedUrlForUserNotOnApp.mutateAsync({
               ...baseData,
-              number: input.number,
-              name: input.name,
+              recipientNotOnAppName: input.name,
+              recipientNotOnAppPhoneNumber: input.number,
             });
 
       const response = await fetch(presignedUrl, {
@@ -86,7 +86,7 @@ const useUploadMedia = () => {
 
       const photoBlob = await getMediaBlob(uri);
 
-      const parsedMediaType = validators.postContentType.safeParse(
+      const parsedMediaType = validators.imageContentType.safeParse(
         photoBlob.type,
       );
 
@@ -95,9 +95,9 @@ const useUploadMedia = () => {
       }
 
       const baseData = {
-        caption,
-        width: width.toString(),
-        height: height.toString(),
+        caption: caption ?? "",
+        width: width,
+        height: height,
         contentLength: photoBlob.size,
         contentType: parsedMediaType.data,
       };
@@ -110,8 +110,8 @@ const useUploadMedia = () => {
             })
           : await createImagePresignedUrlForUserNotOnApp.mutateAsync({
               ...baseData,
-              number: input.number,
-              name: input.name,
+              recipientNotOnAppName: input.name,
+              recipientNotOnAppPhoneNumber: input.number,
             });
 
       const response = await fetch(presignedUrl, {

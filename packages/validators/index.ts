@@ -44,4 +44,7 @@ export const validators = {
     ),
 
   phoneNumberOTP: z.string().length(6),
+
+  imageContentType: z.enum(["image/jpeg", "image/png", "image/heic"]),
+  videoContentType: z.enum(["video/mp4"]),
 };

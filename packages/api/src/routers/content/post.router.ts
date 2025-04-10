@@ -1,6 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { validators } from "@oppfy/validators";
+
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -16,7 +18,7 @@ export const postRouter = createTRPCRouter({
         height: z.number(),
         width: z.number(),
         contentLength: z.number(),
-        contentType: z.enum(["image/jpeg", "image/png", "image/heic"]),
+        contentType: validators.imageContentType,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -30,7 +32,6 @@ export const postRouter = createTRPCRouter({
         (_) => {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to upload video post",
           });
         },
       );
@@ -45,7 +46,7 @@ export const postRouter = createTRPCRouter({
         height: z.number(),
         width: z.number(),
         contentLength: z.number(),
-        contentType: z.enum(["image/jpeg", "image/png", "image/heic"]),
+        contentType: validators.imageContentType,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -59,7 +60,6 @@ export const postRouter = createTRPCRouter({
         (_) => {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to upload video post",
           });
         },
       );
@@ -85,7 +85,6 @@ export const postRouter = createTRPCRouter({
         (_) => {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to upload video post",
           });
         },
       );
@@ -112,7 +111,6 @@ export const postRouter = createTRPCRouter({
         (_) => {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to upload video post",
           });
         },
       );
@@ -166,7 +164,6 @@ export const postRouter = createTRPCRouter({
         (_) => {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to upload video post",
           });
         },
       );
@@ -197,7 +194,6 @@ export const postRouter = createTRPCRouter({
         (_) => {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to upload video post",
           });
         },
       );
@@ -228,7 +224,6 @@ export const postRouter = createTRPCRouter({
         (_) => {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to upload video post",
           });
         },
       );
@@ -250,7 +245,6 @@ export const postRouter = createTRPCRouter({
         (_) => {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to upload video post",
           });
         },
       );
@@ -282,7 +276,6 @@ export const postRouter = createTRPCRouter({
         (_) => {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to upload video post",
           });
         },
       );
