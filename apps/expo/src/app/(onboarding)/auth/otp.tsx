@@ -18,7 +18,7 @@ const PhoneNumberOTP = () => {
   const router = useRouter();
 
   const { verifyPhoneNumber } = useAuth();
-  const userStatusMutation = api.user.getUserStatus.useMutation();
+  const userStatusMutation = api.user.fetchUserStatus.useMutation();
 
   const [phoneNumberOTP, setPhoneNumberOTP] = useState("");
   const [error, setError] = useState<string | null>(null);
