@@ -40,6 +40,7 @@ export class NotificationsRepository implements INotificationsRepository {
     this.schema = schema;
   }
 
+
   // async storePushToken(
   //   params: StorePushTokenParams,
   //   tx: Transaction,

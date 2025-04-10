@@ -5,26 +5,29 @@ import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
 import * as BlockErrors from "../../errors/social/block.error";
-import type {
-  IBlockRepository,
-  SocialProfile,
-} from "../../interfaces/repositories/social/block.repository.interface";
+import type { IBlockRepository } from "../../interfaces/repositories/social/block.repository.interface";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type {
-  GetBlockedUsersParams,
-  IBlockService,
-} from "../../interfaces/services/social/block.service.interface";
-import type {
   DirectionalUserIdsParams,
   PaginatedResponse,
+  PaginationParams,
 } from "../../interfaces/types";
+import { Profile } from "../../models";
 import { TYPES } from "../../types";
 
+type SocialProfile = Profile & {
+  blockedAt: Date;
+};
+
+interface GetBlockedUsersParams extends PaginationParams {
+  userId: string;
+}
+
 @injectable()
-export class BlockService implements IBlockService {
+export class BlockService {
   constructor(
     @inject(TYPES.Database)
     private readonly db: Database,

@@ -18,27 +18,109 @@ import type {
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type {
-  DeletePostParams,
-  GetPostForNextJsParams,
-  GetPostParams,
-  HydratedAndProcessedComment,
-  HydratedAndProcessedPost,
-  HydratedAndProcessedPostWithoutLike,
-  IPostService,
-  PaginateCommentsParams,
-  PaginatePostsParams,
-  PaginatedComment as RawPaginatedComment,
-  UpdatePostParams,
-  UploadPostForUserNotOnAppUrlParams,
-  UploadPostForUserOnAppUrlParams,
-  UploadVideoPostForUserNotOnAppUrlParams,
-  UploadVideoPostForUserOnAppUrlParams,
-} from "../../interfaces/services/content/post.service.interface";
-import type { PaginatedResponse } from "../../interfaces/types";
+  PaginatedResponse,
+  PaginationParams,
+} from "../../interfaces/types";
+import { Comment, Post, PostStats } from "../../models";
 import { TYPES } from "../../types";
 
+interface HydratedAndProcessedPost {
+  post: Post;
+  assetUrl: string | null;
+  postStats: PostStats;
+  authorUserId: string;
+  authorUsername: string;
+  authorName: string | null;
+  authorProfilePictureUrl: string | null;
+  recipientUserId: string;
+  recipientUsername: string;
+  recipientName: string | null;
+  recipientProfilePictureUrl: string | null;
+  hasLiked: boolean;
+}
+
+type HydratedAndProcessedPostWithoutLike = Omit<
+  HydratedAndProcessedPost,
+  "hasLiked"
+>;
+
+interface HydratedAndProcessedComment {
+  comment: Comment;
+  authorUserId: string;
+  authorUsername: string;
+  authorName: string | null;
+  authorProfilePictureUrl: string | null;
+}
+
+interface UploadPostForUserOnAppUrlParams {
+  author: string;
+  recipient: string;
+  caption: string;
+  height: number;
+  width: number;
+  contentLength: number;
+  contentType: "image/jpeg" | "image/png" | "image/heic";
+}
+
+interface UploadPostForUserNotOnAppUrlParams {
+  author: string;
+  recipientNotOnAppPhoneNumber: string;
+  recipientNotOnAppName: string;
+  caption: string;
+  height: number;
+  width: number;
+  contentLength: number;
+  contentType: "image/jpeg" | "image/png" | "image/heic";
+}
+
+interface UploadVideoPostForUserOnAppUrlParams {
+  author: string;
+  recipient: string;
+  caption: string;
+  height: number;
+  width: number;
+}
+
+interface UploadVideoPostForUserNotOnAppUrlParams {
+  author: string;
+  recipientNotOnAppPhoneNumber: string;
+  recipientNotOnAppName: string;
+  caption: string;
+  height: number;
+  width: number;
+}
+
+interface UpdatePostParams {
+  userId: string;
+  postId: string;
+  content: string;
+  mediaUrls?: string[];
+}
+
+interface DeletePostParams {
+  userId: string;
+  postId: string;
+}
+
+interface GetPostParams {
+  postId: string;
+  userId: string;
+}
+
+interface GetPostForNextJsParams {
+  postId: string;
+}
+
+interface PaginatePostsParams extends PaginationParams {
+  userId: string;
+}
+
+interface PaginateCommentsParams extends PaginationParams {
+  postId: string;
+}
+
 @injectable()
-export class PostService implements IPostService {
+export class PostService {
   constructor(
     @inject(TYPES.Database)
     private readonly db: Database,

@@ -10,13 +10,6 @@ import { RestException } from "@oppfy/twilio";
 import * as AuthErrors from "../../errors/user/auth.error";
 import * as UserErrors from "../../errors/user/user.error";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
-import type {
-  AuthTokens,
-  IAuthService,
-  RefreshTokenParams,
-  VerifyCodeParams,
-  VerifyCodeResult,
-} from "../../interfaces/services/user/auth.service.interface";
 import { PhoneNumberParam } from "../../interfaces/types";
 import { TYPES } from "../../types";
 
@@ -30,8 +23,27 @@ const ADMIN_PHONE_NUMBERS = [
 
 const ADMIN_CODE = "123456";
 
+interface VerifyCodeParams {
+  phoneNumber: string;
+  code: string;
+}
+
+interface RefreshTokenParams {
+  refreshToken: string;
+}
+
+interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+interface VerifyCodeResult {
+  isNewUser: boolean;
+  tokens: AuthTokens;
+}
+
 @injectable()
-export class AuthService implements IAuthService {
+export class AuthService {
   constructor(
     @inject(TYPES.Database)
     private readonly db: Database,

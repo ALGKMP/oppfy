@@ -7,25 +7,29 @@ import type { Database } from "@oppfy/db";
 import * as FollowErrors from "../../errors/social/follow.error";
 import * as FriendErrors from "../../errors/social/friend.error";
 import * as ProfileErrors from "../../errors/user/profile.error";
-import type {
-  IFollowRepository,
-  SocialProfile,
-} from "../../interfaces/repositories/social/follow.repository.interface";
+import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import {
-  IFollowService,
-  PaginateByUserIdParams,
-} from "../../interfaces/services/social/follow.service.interface";
-import {
   DirectionalUserIdsParams,
+  FollowStatus,
   PaginatedResponse,
+  PaginationParams,
 } from "../../interfaces/types";
 import { Profile } from "../../models";
 import { TYPES } from "../../types";
 
+type SocialProfile = Profile & {
+  followedAt: Date;
+  followStatus: FollowStatus;
+};
+
+interface PaginateByUserIdParams extends PaginationParams {
+  userId: string;
+}
+
 @injectable()
-export class FollowService implements IFollowService {
+export class FollowService {
   constructor(
     @inject(TYPES.Database)
     private readonly db: Database,

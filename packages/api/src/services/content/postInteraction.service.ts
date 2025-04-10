@@ -7,17 +7,32 @@ import * as PostInteractionErrors from "../../errors/content/postInteraction.err
 import type { ICommentRepository } from "../../interfaces/repositories/content/comment.repository.interface";
 import type { ILikeRepository } from "../../interfaces/repositories/content/like.repository.interface";
 import type { IPostRepository } from "../../interfaces/repositories/content/post.repository.interface";
-import type {
-  AddCommentParams,
-  IPostInteractionService,
-  LikePostParams,
-  RemoveCommentParams,
-  UnlikePostParams,
-} from "../../interfaces/services/content/postInteraction.service.interface";
 import { TYPES } from "../../types";
 
+interface LikePostParams {
+  postId: string;
+  userId: string;
+}
+
+interface UnlikePostParams {
+  postId: string;
+  userId: string;
+}
+
+interface AddCommentParams {
+  postId: string;
+  userId: string;
+  body: string;
+}
+
+interface RemoveCommentParams {
+  commentId: string;
+  postId: string;
+  userId: string;
+}
+
 @injectable()
-export class PostInteractionService implements IPostInteractionService {
+export class PostInteractionService {
   constructor(
     @inject(TYPES.Database) private readonly db: Database,
     @inject(TYPES.PostRepository)
