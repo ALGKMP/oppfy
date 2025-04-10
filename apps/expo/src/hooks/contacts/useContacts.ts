@@ -48,7 +48,7 @@ export interface ContactFns {
 }
 
 const useContacts = (): ContactFns => {
-  const deleteContactsMutation = api.contacts.deleteContacts.useMutation();
+  const deleteContactsMutation = api..deleteContacts.useMutation();
   const syncContactsMutation = api.contacts.syncContacts.useMutation();
   const filterContactsOnApp =
     api.contacts.filterPhoneNumbersOnApp.useMutation();
