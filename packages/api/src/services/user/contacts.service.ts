@@ -3,7 +3,7 @@ import { err, ok, Result } from "neverthrow";
 
 import type { Database, DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
-import * as AwsErrors from "../../errors/aws.error";
+import * as AwsErrors from "../../errors/cloud/aws.error";
 import * as UserErrors from "../../errors/user/user.error";
 import type { IContactsRepository } from "../../interfaces/repositories/user/contacts.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";

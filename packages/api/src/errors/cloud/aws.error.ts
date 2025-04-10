@@ -1,4 +1,4 @@
-import { createBaseErrorClass } from "./errorFactory";
+import { createBaseErrorClass } from "../errorFactory";
 
 const AwsError = createBaseErrorClass("Aws");
 
