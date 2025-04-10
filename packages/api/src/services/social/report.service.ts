@@ -3,15 +3,34 @@ import { ok, Result } from "neverthrow";
 
 import type { IReportRepository } from "../../interfaces/repositories/social/report.repository.interface";
 import {
-  CreateCommentReportParams,
-  CreatePostReportParams,
-  CreateUserReportParams,
-  IReportService,
-} from "../../interfaces/services/social/report.service.interface";
+  ReportCommentReason,
+  ReportPostReason,
+  ReportUserReason,
+} from "../../models";
 import { TYPES } from "../../types";
 
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+type ReportReason = ReportUserReason | ReportPostReason | ReportCommentReason;
+
+export interface ReportParams<T extends ReportReason> {
+  reason: T;
+  userId: string;
+}
+
+export type CreateUserReportParams = ReportParams<ReportUserReason> & {
+  reportedUserId: string;
+};
+
+export type CreatePostReportParams = ReportParams<ReportPostReason> & {
+  reportedPostId: string;
+};
+
+export type CreateCommentReportParams = ReportParams<ReportCommentReason> & {
+  reportedCommentId: string;
+};
+
 @injectable()
-export class ReportService implements IReportService {
+export class ReportService {
   constructor(
     @inject(TYPES.ReportRepository)
     private readonly reportRepository: IReportRepository,

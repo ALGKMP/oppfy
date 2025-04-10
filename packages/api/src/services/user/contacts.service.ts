@@ -1,40 +1,45 @@
 import { inject, injectable } from "inversify";
-import { err, ok, Result } from "neverthrow";
+import { ok, Result } from "neverthrow";
 
-import type { Database, DatabaseOrTransaction, Transaction } from "@oppfy/db";
+import type { Database } from "@oppfy/db";
 
-import * as AwsErrors from "../../errors/cloud/aws.error";
-import * as UserErrors from "../../errors/user/user.error";
 import type { IContactsRepository } from "../../interfaces/repositories/user/contacts.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
-import {
-  ContactRecommendation,
-  FilterPhoneNumbersOnAppParams,
-  IContactsService,
-  UpdateUserContactsParams,
-} from "../../interfaces/services/user/contacts.service.interface";
-import type { IProfileService } from "../../interfaces/services/user/profile.service.interface";
 import { UserIdParam } from "../../interfaces/types";
 import { HydratedProfile } from "../../models";
 import { TYPES } from "../../types";
 
+export interface UpdateUserContactsParams {
+  userId: string;
+  hashedPhoneNumbers: string[];
+}
+
+export interface FilterPhoneNumbersOnAppParams {
+  phoneNumbers: string[];
+}
+
+export interface ContactRecommendation {
+  userId: string;
+  username: string | null;
+  name: string | null;
+  profilePictureUrl: string | null;
+  mutualContactsCount: number;
+}
+
 @injectable()
-export class ContactsService implements IContactsService {
+export class ContactsService {
   private db: Database;
   private contactsRepository: IContactsRepository;
   private userRepository: IUserRepository;
-  private profileService: IProfileService;
 
   constructor(
     @inject(TYPES.Database) db: Database,
     @inject(TYPES.ContactsRepository) contactsRepository: IContactsRepository,
     @inject(TYPES.UserRepository) userRepository: IUserRepository,
-    @inject(TYPES.ProfileService) profileService: IProfileService,
   ) {
     this.db = db;
     this.contactsRepository = contactsRepository;
     this.userRepository = userRepository;
-    this.profileService = profileService;
   }
 
   async filterPhoneNumbersOnApp({
