@@ -26,14 +26,8 @@ const Index = () => {
     return <Redirect href="/(onboarding)" />;
   }
 
-  if (userStatus !== undefined) {
-    if (!userStatus.hasCompletedOnboarding) {
-      return <Redirect href="/(onboarding)/user-info/name" />;
-    }
-
-    if (!userStatus.hasCompletedTutorial) {
-      return <Redirect href="/(onboarding)/tutorial/intro" />;
-    }
+  if (!userStatus?.hasCompletedOnboarding) {
+    return <Redirect href="/(onboarding)/user-info/name" />;
   }
 
   return <Redirect href="/(app)/(bottom-tabs)/(home)" />;

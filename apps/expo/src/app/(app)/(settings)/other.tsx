@@ -61,8 +61,7 @@ const Other = () => {
           text: "Sync Contacts",
           onPress: () => {
             void handleSyncContacts();
-            // invalidate query
-            utils.contacts.getProfileSuggestions.invalidate();
+            void utils.contacts.profileRecommendations.invalidate();
           },
         },
       ],
