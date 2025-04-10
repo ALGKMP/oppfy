@@ -26,6 +26,7 @@ import type { IFollowService } from "./interfaces/services/social/follow.service
 import type { IFriendService } from "./interfaces/services/social/friend.service.interface";
 import type { IReportService } from "./interfaces/services/social/report.service.interface";
 import type { IAuthService } from "./interfaces/services/user/auth.service.interface";
+import { IContactsService } from "./interfaces/services/user/contacts.service.interface";
 import type { IProfileService } from "./interfaces/services/user/profile.service.interface";
 import type { IUserService } from "./interfaces/services/user/user.service.interface";
 import { CommentRepository } from "./repositories/content/comment.repository";
@@ -47,6 +48,7 @@ import { FollowService } from "./services/social/follow.service";
 import { FriendService } from "./services/social/friend.service";
 import { ReportService } from "./services/social/report.service";
 import { AuthService } from "./services/user/auth.service";
+import { ContactsService } from "./services/user/contacts.service";
 import { ProfileService } from "./services/user/profile.service";
 import { UserService } from "./services/user/user.service";
 import { TYPES } from "./types";
@@ -91,6 +93,7 @@ container.bind<IUserService>(TYPES.UserService).to(UserService);
 container.bind<IProfileService>(TYPES.ProfileService).to(ProfileService);
 container.bind<IFriendService>(TYPES.FriendService).to(FriendService);
 container.bind<IFollowService>(TYPES.FollowService).to(FollowService);
+container.bind<IContactsService>(TYPES.ContactsService).to(ContactsService);
 container.bind<IBlockService>(TYPES.BlockService).to(BlockService);
 container.bind<IPostService>(TYPES.PostService).to(PostService);
 container

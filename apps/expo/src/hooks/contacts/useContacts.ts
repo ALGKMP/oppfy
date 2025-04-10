@@ -48,8 +48,8 @@ export interface ContactFns {
 }
 
 const useContacts = (): ContactFns => {
-  const deleteContactsMutation = api..deleteContacts.useMutation();
-  const syncContactsMutation = api.contacts.syncContacts.useMutation();
+  // const deleteContactsMutation = api.contacts.deleteContacts.useMutation();
+  const updateContactsMutation = api.contacts.updateUserContacts.useMutation();
   const filterContactsOnApp =
     api.contacts.filterPhoneNumbersOnApp.useMutation();
 
@@ -115,8 +115,10 @@ const useContacts = (): ContactFns => {
       }),
     );
 
-    void syncContactsMutation.mutateAsync(hashedNumbers);
-  }, [getContactE164Numbers, syncContactsMutation]);
+    void updateContactsMutation.mutateAsync({
+      hashedPhoneNumbers: hashedNumbers,
+    });
+  }, [getContactE164Numbers, updateContactsMutation]);
 
   const getDeviceContacts = async () => {
     const { data } = await Contacts.getContactsAsync();
@@ -272,7 +274,7 @@ const useContacts = (): ContactFns => {
   return {
     syncContacts,
     contactsPaginatedQuery,
-    deleteContacts: deleteContactsMutation.mutateAsync,
+    // deleteContacts: deleteContactsMutation.mutateAsync,
     getDeviceContacts,
     searchContacts,
     getRecomendedContacts,

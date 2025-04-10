@@ -26,13 +26,13 @@ export type UploadMediaInput = UploadMediaInputOnApp | UploadMediaInputNotOnApp;
 
 const useUploadMedia = () => {
   const createVideoPresignedUrlForUserOnApp =
-    api.post.createVideoPresignedUrlForUserOnApp.useMutation();
+    api.post.uploadVideoPostForUserOnAppUrl.useMutation();
   const createVideoPresignedUrlForUserNotOnApp =
-    api.post.createVideoPresignedUrlForUserNotOnApp.useMutation();
+    api.post.uploadVideoPostForUserNotOnAppUrl.useMutation();
   const createImagePresignedUrlForUserOnApp =
-    api.post.createImagePresignedUrlForUserOnApp.useMutation();
+    api.post.uploadPostForUserOnAppUrl.useMutation();
   const createImagePresignedUrlForUserNotOnApp =
-    api.post.createImagePresignedUrlForUserNotOnApp.useMutation();
+    api.post.uploadPostForUserNotOnAppUrl.useMutation();
 
   const getMediaBlob = async (uri: string) => {
     const response = await fetch(uri);
@@ -46,9 +46,9 @@ const useUploadMedia = () => {
       const videoBlob = await getMediaBlob(uri);
 
       const baseData = {
-        caption,
-        width: width.toString(),
-        height: height.toString(),
+        caption: caption ?? "",
+        width,
+        height,
       };
 
       const { presignedUrl, postId } =

@@ -211,7 +211,12 @@ export const followRouter = createTRPCRouter({
 
       return result.match(
         (res) => res,
-        (_) => _,
+        (_) => {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to upload video post",
+          });
+        },
       );
     }),
 
@@ -236,7 +241,12 @@ export const followRouter = createTRPCRouter({
 
       return result.match(
         (res) => res,
-        (_) => _,
+        (_) => {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to upload video post",
+          });
+        },
       );
     }),
 });

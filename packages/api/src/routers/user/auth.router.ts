@@ -12,7 +12,12 @@ export const authRouter = createTRPCRouter({
       });
 
       return result.match(
-        (_) => _,
+        (_) => {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to upload video post",
+          });
+        },
         (err) => {
           switch (err.name) {
             case "InvalidPhoneNumberError": {
