@@ -5,6 +5,7 @@ import type { User, UserStatus } from "../../../models";
 import type { PhoneNumberParam, UserIdParam } from "../../types";
 
 export interface CreateUserParams {
+  id?: string;
   phoneNumber: string;
   isOnApp?: boolean;
 }

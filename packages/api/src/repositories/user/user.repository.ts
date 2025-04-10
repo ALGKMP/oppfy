@@ -76,27 +76,25 @@ export class UserRepository implements IUserRepository {
   }
 
   async createUser(
-    { phoneNumber, isOnApp = true }: CreateUserParams,
+    { id = crypto.randomUUID(), phoneNumber, isOnApp = true }: CreateUserParams,
     tx: Transaction,
   ): Promise<void> {
-    const userId = crypto.randomUUID();
-
     await tx
       .insert(this.schema.user)
       .values({
-        id: userId,
+        id,
         phoneNumber,
       })
       .returning();
 
     await tx.insert(this.schema.profile).values({
-      userId,
+      userId: id,
     });
 
-    await tx.insert(this.schema.notificationSettings).values({ userId });
-    await tx.insert(this.schema.userStats).values({ userId });
+    await tx.insert(this.schema.notificationSettings).values({ userId: id });
+    await tx.insert(this.schema.userStats).values({ userId: id });
     await tx.insert(this.schema.userStatus).values({
-      userId,
+      userId: id,
       isOnApp,
     });
   }

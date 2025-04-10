@@ -133,15 +133,22 @@ export class PostService implements IPostService {
           const recipientId = recipient?.id ?? randomUUID();
 
           if (!recipient) {
-            await this.userRepository.createUserNotOnApp(
+            await this.userRepository.createUser(
               {
-                userId: recipientId,
-                name: recipientNotOnAppName,
+                id: recipientId,
                 phoneNumber: recipientNotOnAppPhoneNumber,
-                username: recipientNotOnAppName,
+                isOnApp: false,
               },
               tx,
             );
+
+            await this.profileRepository.updateProfile({
+              userId: recipientId,
+              update: {
+                name: recipientNotOnAppName,
+                username: recipientNotOnAppName,
+              },
+            });
           }
 
           if (isVideo) {
