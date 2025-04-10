@@ -15,7 +15,7 @@ import type {
 
 import { env } from "@oppfy/env";
 
-export class SQSService {
+export class SQS {
   private client: SQSClient;
 
   constructor() {
