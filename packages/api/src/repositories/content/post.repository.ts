@@ -7,21 +7,54 @@ import type {
   Schema,
   Transaction,
 } from "@oppfy/db";
-
-import {
-  DeletePostParams,
-  GetPostForSiteParams,
-  GetPostParams,
-  IPostRepository,
-  PaginatePostsParams,
-  PostResult,
-  PostResultWithLike,
-  UpdatePostParams,
-} from "../../interfaces/repositories/content/post.repository.interface";
 import { TYPES } from "../../types";
 
+import type { InferSelectModel } from "drizzle-orm";
+import type { schema } from "@oppfy/db";
+import { PaginationParams } from "../../interfaces/types";
+
+export interface GetPostParams {
+  postId: string;
+  userId: string;
+}
+
+export interface GetPostForSiteParams {
+  postId: string;
+}
+
+export interface GetPostFromCommentIdParams {
+  commentId: string;
+}
+
+export interface PaginatePostsParams extends PaginationParams {
+  userId: string;
+}
+
+export interface UpdatePostParams {
+  postId: string;
+  caption: string;
+}
+
+export interface DeletePostParams {
+  userId: string;
+  postId: string;
+}
+
+export interface PostResult {
+  post: InferSelectModel<typeof schema.post>;
+  postStats: InferSelectModel<typeof schema.postStats>;
+  authorProfile: InferSelectModel<typeof schema.profile>;
+  recipientProfile: InferSelectModel<typeof schema.profile>;
+  like: InferSelectModel<typeof schema.like> | null;
+}
+
+export interface PostResultWithLike extends PostResult {
+  like: InferSelectModel<typeof schema.like> | null;
+}
+
+
 @injectable()
-export class PostRepository implements IPostRepository {
+export class PostRepository {
   private readonly aliasedSchema;
 
   constructor(

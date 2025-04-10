@@ -9,18 +9,26 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
-import {
-  CreateUserParams,
-  ExistingPhoneNumbersParams,
-  GetRandomActiveUserIdsParams,
-  IUserRepository,
-} from "../../interfaces/repositories/user/user.repository.interface";
-import { PhoneNumberParam, UserIdParam } from "../../interfaces/types";
+import type { PhoneNumberParam, UserIdParam } from "../../interfaces/types";
 import type { User, UserStatus } from "../../models";
 import { TYPES } from "../../types";
 
+export interface CreateUserParams {
+  id?: string;
+  phoneNumber: string;
+  isOnApp?: boolean;
+}
+
+export interface GetRandomActiveUserIdsParams {
+  pageSize?: number;
+}
+
+export interface ExistingPhoneNumbersParams {
+  phoneNumbers: string[];
+}
+
 @injectable()
-export class UserRepository implements IUserRepository {
+export class UserRepository {
   private db: Database;
   private schema: Schema;
 

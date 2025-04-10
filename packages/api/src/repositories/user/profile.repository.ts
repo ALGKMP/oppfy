@@ -7,18 +7,27 @@ import {
   withoutBlocked,
 } from "@oppfy/db/utils/query-helpers";
 
-import type {
-  IProfileRepository,
-  ProfilesByIdsParams,
-  ProfilesByUsernameParams,
-  UpdateProfileParams,
-} from "../../interfaces/repositories/user/profile.repository.interface";
-import { UserIdParam, UsernameParam } from "../../interfaces/types";
-import type { Profile, UserStats } from "../../models";
+import type { UserIdParam, UsernameParam } from "../../interfaces/types";
+import type { Profile, ProfileInsert, UserStats } from "../../models";
 import { TYPES } from "../../types";
 
+export interface ProfilesByIdsParams {
+  userIds: string[];
+}
+
+export interface UpdateProfileParams {
+  userId: string;
+  update: Partial<ProfileInsert>;
+}
+
+export interface ProfilesByUsernameParams {
+  userId: string;
+  username: string;
+  limit?: number;
+}
+
 @injectable()
-export class ProfileRepository implements IProfileRepository {
+export class ProfileRepository {
   constructor(
     @inject(TYPES.Database)
     private readonly db: Database,
