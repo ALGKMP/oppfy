@@ -45,7 +45,7 @@ const ProfilePicture = () => {
         await Haptics.notificationAsync(
           Haptics.NotificationFeedbackType.Success,
         );
-        router.replace("/tutorial/intro");
+        router.replace("/(app)/(bottom-tabs)/(home)");
       } catch {
         setError(Error.UNKNOWN);
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -58,7 +58,7 @@ const ProfilePicture = () => {
       await uploadImage(selectedImageUri);
       await markOnboardingComplete.mutateAsync();
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.replace("/tutorial/intro");
+      router.replace("/(app)/(bottom-tabs)/(home)");
     } catch (err) {
       if (isTRPCClientError(err)) {
         switch (err.data?.code) {

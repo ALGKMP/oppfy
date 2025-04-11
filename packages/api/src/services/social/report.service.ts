@@ -9,7 +9,7 @@ import {
 } from "../../models";
 import { ReportRepository } from "../../repositories/social/report.repository";
 
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+// eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
 type ReportReason = ReportUserReason | ReportPostReason | ReportCommentReason;
 
 export interface ReportParams<T extends ReportReason> {

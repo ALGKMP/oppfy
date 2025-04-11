@@ -29,6 +29,7 @@ type SocialProfile = Profile & {
 interface PaginateByUserIdParams extends PaginationParams {
   userId: string;
 }
+
 @injectable()
 export class FriendService {
   constructor(
