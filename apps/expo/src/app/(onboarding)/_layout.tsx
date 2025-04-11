@@ -30,13 +30,6 @@ const OnboardingLayout = () => (
       }}
     />
 
-    <OnboardingStack.Screen
-      name="tutorial"
-      options={{
-        headerShown: false,
-      }}
-    />
-
     {/* Misc screens like permissions that can be accessed from anywhere */}
     <OnboardingStack.Screen
       name="misc/permissions"

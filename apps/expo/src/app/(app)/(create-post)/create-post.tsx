@@ -10,7 +10,7 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import { getToken, Theme, useTheme } from "tamagui";
+import { getToken, useTheme } from "tamagui";
 
 import PlayPause, {
   usePlayPauseAnimations,
@@ -29,14 +29,12 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
-import { OnboardingButton } from "~/components/ui/Onboarding";
 import { useUploadMedia } from "~/hooks/media";
 import type {
   UploadMediaInputNotOnApp,
   UploadMediaInputOnApp,
 } from "~/hooks/media/useUploadMedia";
 import useShare from "~/hooks/useShare";
-import { api } from "~/utils/api";
 
 interface CreatePostBaseParams extends Record<string, string> {
   uri: string;
@@ -151,8 +149,6 @@ const CreatePost = () => {
   const { show, hide } = useBottomSheetController();
   const { sharePostToNewUser } = useShare();
 
-  const markTutorialComplete = api.user.markTutorialComplete.useMutation();
-
   const [caption, setCaption] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -224,8 +220,6 @@ const CreatePost = () => {
           phoneNumber: params.number,
         });
       }
-
-      await markTutorialComplete.mutateAsync();
       router.dismissTo("/(app)/(bottom-tabs)/(camera)");
     } catch (error) {
       console.error(error);
