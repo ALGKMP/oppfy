@@ -8,7 +8,7 @@
     "./utils/query-helpers": "./src/utils/query-helpers.ts"
   },
   "scripts": {
-    "clean": "rm -rf .turbo node_modules",
+    "clean": "rimraf .turbo node_modules",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "generate": "pnpm with-env drizzle-kit generate",
     "lint": "eslint",

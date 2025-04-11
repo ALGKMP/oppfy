@@ -27,6 +27,7 @@
     "@oppfy/prettier-config": "workspace:*",
     "@turbo/gen": "^2.3.4",
     "prettier": "catalog:",
+    "rimraf": "^6.0.1",
     "sort-package-json": "^2.12.0",
     "turbo": "^2.3.4",
     "typescript": "catalog:"
