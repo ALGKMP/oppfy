@@ -175,6 +175,7 @@ export const friendRouter = createTRPCRouter({
         userId: input.userId ?? ctx.session.uid,
         cursor: input.cursor,
         pageSize: input.pageSize,
+        selfUserId: ctx.session.uid,
       });
 
       return result.match(

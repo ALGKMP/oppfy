@@ -26,6 +26,11 @@ type SocialProfile = HydratedProfile & {
   followStatus: FollowStatus;
 };
 
+interface PaginateByUserIdWithSelfUserIdParams extends PaginationParams {
+  selfUserId: string;
+  userId: string;
+}
+
 interface PaginateByUserIdParams extends PaginationParams {
   userId: string;
 }
@@ -357,13 +362,15 @@ export class FriendService {
     userId,
     cursor,
     pageSize = 10,
-  }: PaginateByUserIdParams): Promise<
+    selfUserId,
+  }: PaginateByUserIdWithSelfUserIdParams): Promise<
     Result<PaginatedResponse<SocialProfile>, never>
   > {
     const rawProfiles = await this.friendRepository.paginateFriends({
       userId,
       cursor,
       pageSize: pageSize + 1,
+      selfUserId,
     });
 
     const hydratedProfiles = rawProfiles.map((profile) => ({

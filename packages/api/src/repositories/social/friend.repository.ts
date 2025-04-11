@@ -25,6 +25,11 @@ export interface SocialProfile extends Profile {
 }
 
 export interface PaginateFriendParams extends PaginationParams {
+  selfUserId: string;
+  userId: string;
+}
+
+export interface PaginateFriendRequestsParams extends PaginationParams {
   userId: string;
 }
 
@@ -293,7 +298,7 @@ export class FriendRepository {
    * Uses cursor-based pagination with createdAt and userId.
    */
   async paginateFriends(
-    { userId, cursor, pageSize = 10 }: PaginateFriendParams,
+    { userId, cursor, pageSize = 10, selfUserId }: PaginateFriendParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<SocialProfile[]> {
     const friends = await db
@@ -301,7 +306,7 @@ export class FriendRepository {
         profile: this.schema.profile,
         followedAt: this.schema.follow.createdAt,
         friendedAt: this.schema.friend.createdAt,
-        followStatus: getFollowStatusSql(this.schema, userId),
+        followStatus: getFollowStatusSql(this.schema, selfUserId),
       })
       .from(this.schema.friend)
       .innerJoin(
@@ -345,7 +350,7 @@ export class FriendRepository {
    * Uses cursor-based pagination with createdAt and userId.
    */
   async paginateFriendRequests(
-    { userId, cursor, pageSize = 10 }: PaginateFriendParams,
+    { userId, cursor, pageSize = 10 }: PaginateFriendRequestsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile[]> {
     const requests = await db
