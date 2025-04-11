@@ -3,11 +3,11 @@ import { err, ok, Result } from "neverthrow";
 
 import type { Database } from "@oppfy/db";
 
-import { TYPES } from "../../container";
 import * as PostInteractionErrors from "../../errors/content/postInteraction.error";
 import { CommentRepository } from "../../repositories/content/comment.repository";
 import { LikeRepository } from "../../repositories/content/like.repository";
 import { PostRepository } from "../../repositories/content/post.repository";
+import { TYPES } from "../../symbols";
 
 interface LikePostParams {
   postId: string;

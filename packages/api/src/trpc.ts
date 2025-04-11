@@ -6,8 +6,9 @@ import { ZodError } from "zod";
 
 import { env } from "@oppfy/env";
 
-import { container, TYPES } from "./container";
+import { container } from "./container";
 import type { Services } from "./services/index";
+import { TYPES } from "./symbols";
 
 interface JWTPayload {
   uid: string;

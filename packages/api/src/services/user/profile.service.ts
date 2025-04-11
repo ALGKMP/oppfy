@@ -4,7 +4,6 @@ import { err, ok, Result } from "neverthrow";
 import { CloudFront } from "@oppfy/cloudfront";
 import { S3 } from "@oppfy/s3";
 
-import { TYPES } from "../../container";
 import * as ProfileErrors from "../../errors/user/profile.error";
 import {
   FollowStatus,
@@ -23,6 +22,7 @@ import { BlockRepository } from "../../repositories/social/block.repository";
 import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
+import { TYPES } from "../../symbols";
 
 interface RelationshipState {
   follow: FollowStatus;

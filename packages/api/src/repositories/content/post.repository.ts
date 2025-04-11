@@ -1,17 +1,17 @@
 import { aliasedTable, and, desc, eq, lt, or, sql } from "drizzle-orm";
+import type { InferSelectModel } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type {
   Database,
   DatabaseOrTransaction,
   Schema,
+  schema,
   Transaction,
 } from "@oppfy/db";
 
-import type { InferSelectModel } from "drizzle-orm";
-import type { schema } from "@oppfy/db";
 import { PaginationParams } from "../../interfaces/types";
-import { TYPES } from "../../container";
+import { TYPES } from "../../symbols";
 
 export interface GetPostParams {
   postId: string;
@@ -51,7 +51,6 @@ export interface PostResult {
 export interface PostResultWithLike extends PostResult {
   like: InferSelectModel<typeof schema.like> | null;
 }
-
 
 @injectable()
 export class PostRepository {

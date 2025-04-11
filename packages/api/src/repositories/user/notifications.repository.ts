@@ -8,9 +8,9 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
-import { TYPES } from "../../container";
 import { UserIdParam } from "../../interfaces/types";
 import type { NotificationSettings } from "../../models";
+import { TYPES } from "../../symbols";
 
 @injectable()
 export class NotificationsRepository {
