@@ -22,7 +22,7 @@ import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
 type FollowingItem =
-  RouterOutputs["follow"]["paginateFollowingOthers"]["items"][0];
+  RouterOutputs["follow"]["paginateFollowing"]["items"][0];
 
 const PAGE_SIZE = 20;
 
@@ -39,31 +39,31 @@ const Following = () => {
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
-      await utils.follow.paginateFollowingOthers.cancel({
+      await utils.follow.paginateFollowing.cancel({
         userId,
         pageSize: PAGE_SIZE,
       });
 
-      const prevData = utils.follow.paginateFollowingOthers.getInfiniteData({
+      const prevData = utils.follow.paginateFollowing.getInfiniteData({
         userId,
         pageSize: PAGE_SIZE,
       });
       if (prevData === undefined) return;
 
-      utils.follow.paginateFollowingOthers.setInfiniteData(
+      utils.follow.paginateFollowing.setInfiniteData(
         { userId, pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.map((item) =>
-              item.userId === newData.userId
+              item.userId === newData.recipientUserId
                 ? {
                     ...item,
-                    relationshipState:
+                    followStatus:
                       item.privacy === "private"
-                        ? "followRequestSent"
-                        : "following",
+                        ? "REQUESTED"
+                        : "FOLLOWING",
                   }
                 : item,
             ),
@@ -76,7 +76,7 @@ const Following = () => {
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
       // Refetch latest data since our optimistic update may be outdated
-      void utils.follow.paginateFollowingOthers.invalidate({
+      void utils.follow.paginateFollowing.invalidate({
         userId,
         pageSize: PAGE_SIZE,
       });
@@ -85,26 +85,26 @@ const Following = () => {
 
   const unfollowMutation = api.follow.unfollowUser.useMutation({
     onMutate: async (newData) => {
-      await utils.follow.paginateFollowingOthers.cancel({
+      await utils.follow.paginateFollowing.cancel({
         userId,
         pageSize: PAGE_SIZE,
       });
 
-      const prevData = utils.follow.paginateFollowingOthers.getInfiniteData({
+      const prevData = utils.follow.paginateFollowing.getInfiniteData({
         userId,
         pageSize: PAGE_SIZE,
       });
       if (prevData === undefined) return;
 
-      utils.follow.paginateFollowingOthers.setInfiniteData(
+      utils.follow.paginateFollowing.setInfiniteData(
         { userId, pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.map((item) =>
-              item.userId === newData.userId
-                ? { ...item, relationshipState: "notFollowing" }
+              item.userId === newData.recipientUserId
+                ? { ...item, followStatus: "NOT_FOLLOWING" }
                 : item,
             ),
           })),
@@ -116,7 +116,7 @@ const Following = () => {
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
       // Refetch latest data since our optimistic update may be outdated
-      void utils.follow.paginateFollowingOthers.invalidate({
+      void utils.follow.paginateFollowing.invalidate({
         userId,
         pageSize: PAGE_SIZE,
       });
@@ -125,26 +125,26 @@ const Following = () => {
 
   const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
     onMutate: async (newData) => {
-      await utils.follow.paginateFollowingOthers.cancel({
+      await utils.follow.paginateFollowing.cancel({
         userId,
         pageSize: PAGE_SIZE,
       });
 
-      const prevData = utils.follow.paginateFollowingOthers.getInfiniteData({
+      const prevData = utils.follow.paginateFollowing.getInfiniteData({
         userId,
         pageSize: PAGE_SIZE,
       });
       if (prevData === undefined) return;
 
-      utils.follow.paginateFollowingOthers.setInfiniteData(
+      utils.follow.paginateFollowing.setInfiniteData(
         { userId, pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.map((item) =>
-              item.userId === newData.recipientId
-                ? { ...item, relationshipState: "notFollowing" }
+              item.userId === newData.recipientUserId
+                ? { ...item, followStatus: "NOT_FOLLOWING" }
                 : item,
             ),
           })),
@@ -156,7 +156,7 @@ const Following = () => {
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
       // Refetch latest data since our optimistic update may be outdated
-      void utils.follow.paginateFollowingOthers.invalidate({
+      void utils.follow.paginateFollowing.invalidate({
         userId,
         pageSize: PAGE_SIZE,
       });
@@ -170,7 +170,7 @@ const Following = () => {
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = api.follow.paginateFollowingOthers.useInfiniteQuery(
+  } = api.follow.paginateFollowing.useInfiniteQuery(
     { userId, pageSize: PAGE_SIZE },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
@@ -194,15 +194,15 @@ const Following = () => {
   };
 
   const handleFollow = async (userId: string) => {
-    await followMutation.mutateAsync({ userId });
+    await followMutation.mutateAsync({ recipientUserId: userId });
   };
 
   const handleUnfollow = async (userId: string) => {
-    await unfollowMutation.mutateAsync({ userId });
+    await unfollowMutation.mutateAsync({ recipientUserId: userId });
   };
 
   const handleCancelFollowRequest = async (userId: string) => {
-    await cancelFollowRequest.mutateAsync({ recipientId: userId });
+    await cancelFollowRequest.mutateAsync({ recipientUserId: userId });
   };
 
   const handleRefresh = async () => {
@@ -216,8 +216,8 @@ const Following = () => {
   ): MediaListItemActionProps | undefined => {
     if (item.userId === user?.uid) return undefined;
 
-    switch (item.relationshipState) {
-      case "followRequestSent":
+    switch (item.followStatus) {
+      case "REQUESTED":
         return {
           label: "Sent",
           icon: Send,
@@ -235,7 +235,7 @@ const Following = () => {
               ],
             }),
         };
-      case "following":
+      case "FOLLOWING":
         return {
           label: "Unfollow",
           icon: UserRoundMinus,
@@ -253,7 +253,7 @@ const Following = () => {
               ],
             }),
         };
-      case "notFollowing":
+      case "NOT_FOLLOWING":
         return {
           label: "Follow",
           icon: UserRoundPlus,
@@ -271,8 +271,8 @@ const Following = () => {
       primaryAction={renderActionButton(item)}
       onPress={() =>
         routeProfile(item.userId, {
-          name: item.name,
-          username: item.username,
+          name: item.name ?? "",
+          username: item.username ?? "",
           profilePictureUrl: item.profilePictureUrl,
         })
       }

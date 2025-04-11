@@ -104,7 +104,7 @@ const Followers = () => {
             ...page,
             items: page.items.map((item) =>
               item.userId === newData.recipientUserId
-                ? { ...item, relationshipState: "notFollowing" }
+                ? { ...item, followStatus: "NOT_FOLLOWING" }
                 : item,
             ),
           })),
@@ -144,7 +144,7 @@ const Followers = () => {
             ...page,
             items: page.items.map((item) =>
               item.userId === newData.recipientUserId
-                ? { ...item, relationshipState: "notFollowing" }
+                ? { ...item, followStatus: "NOT_FOLLOWING" }
                 : item,
             ),
           })),
