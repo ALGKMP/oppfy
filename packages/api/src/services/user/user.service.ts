@@ -7,7 +7,8 @@ import * as UserErrors from "../../errors/user/user.error";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type { UserIdParam } from "../../interfaces/types";
 import { UserStatus } from "../../models";
-import { TYPES } from "../../types";
+// import { TYPES } from "../../types";
+
 
 @injectable()
 export class UserService {

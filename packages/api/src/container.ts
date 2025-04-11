@@ -35,7 +35,7 @@ import { ContactsService } from "./services/user/contacts.service";
 import { ProfileService } from "./services/user/profile.service";
 import { UserService } from "./services/user/user.service";
 
-export const TYPES = {
+const TYPES = {
   // DB and schema
   Database: Symbol.for("Database"),
   Schema: Symbol.for("Schema"),
@@ -120,4 +120,4 @@ container.bind<AuthService>(TYPES.AuthService).to(AuthService);
 
 container.bind<Services>(TYPES.Services).to(Services);
 
-export { container };
+export { TYPES, container };
