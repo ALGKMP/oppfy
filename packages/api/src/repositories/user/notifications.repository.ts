@@ -7,8 +7,9 @@ import type {
   Schema,
   Transaction,
 } from "@oppfy/db";
+import { getFollowStatusSql } from "@oppfy/db/utils/query-helpers";
 
-import { UserIdParam } from "../../interfaces/types";
+import { FollowStatus, UserIdParam } from "../../interfaces/types";
 import type { Notification, NotificationSettings, Profile } from "../../models";
 import { TYPES } from "../../symbols";
 
@@ -25,230 +26,23 @@ export class NotificationsRepository {
     this.schema = schema;
   }
 
-  // async storePushToken(
-  //   params: StorePushTokenParams,
-  //   tx: Transaction,
-  // ): Promise<void> {
-  //   const { userId, pushToken } = params;
-
-  //   const pushTokenData = await tx.query.pushToken.findFirst({
-  //     where: and(
-  //       eq(this.schema.pushToken.userId, userId),
-  //       eq(this.schema.pushToken.token, pushToken),
-  //     ),
-  //   });
-
-  //   if (pushTokenData === undefined) {
-  //     await tx
-  //       .insert(this.schema.pushToken)
-  //       .values({ userId, token: pushToken });
-  //     return;
-  //   }
-
-  //   await tx
-  //     .update(this.schema.pushToken)
-  //     .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
-  //     .where(
-  //       and(
-  //         eq(this.schema.pushToken.userId, userId),
-  //         eq(this.schema.pushToken.token, pushToken),
-  //       ),
-  //     );
-  // }
-
-  // async deletePushToken(
-  //   params: DeletePushTokenParams,
-  //   db: DatabaseOrTransaction = this.db,
-  // ): Promise<void> {
-  //   const { userId, pushToken } = params;
-
-  //   await db
-  //     .delete(this.schema.pushToken)
-  //     .where(
-  //       and(
-  //         eq(this.schema.pushToken.userId, userId),
-  //         eq(this.schema.pushToken.token, pushToken),
-  //       ),
-  //     );
-  // }
-
-  // async getNotificationSettings(
-  //   params: GetNotificationSettingsParams,
-  //   db: DatabaseOrTransaction = this.db,
-  // ): Promise<NotificationSettings | undefined> {
-  //   const { notificationSettingsId } = params;
-
-  //   const possibleNotificationSettings =
-  //     await db.query.notificationSettings.findFirst({
-  //       where: eq(this.schema.notificationSettings.id, notificationSettingsId),
-  //       columns: {
-  //         posts: true,
-  //         likes: true,
-  //         comments: true,
-  //         mentions: true,
-  //         friendRequests: true,
-  //         followRequests: true,
-  //       },
-  //     });
-
-  //   return possibleNotificationSettings;
-  // }
-
-  // async getUnreadNotificationsCount(
-  //   params: GetUnreadNotificationsCountParams,
-  //   db: DatabaseOrTransaction = this.db,
-  // ): Promise<number> {
-  //   const { userId } = params;
-
-  //   const result = await db
-  //     .select({ count: count() })
-  //     .from(this.schema.notifications)
-  //     .where(
-  //       and(
-  //         eq(this.schema.notifications.recipientUserId, userId),
-  //         eq(this.schema.notifications.read, false),
-  //       ),
-  //     );
-
-  //   const unreadNotificationsCount = result[0]?.count ?? 0;
-  //   return unreadNotificationsCount;
-  // }
-
-  // async getRecentNotifications(
-  //   params: GetRecentNotificationsParams,
-  //   db: DatabaseOrTransaction = this.db,
-  // ): Promise<NotificationResult[]> {
-  //   const {
-  //     senderId,
-  //     recipientId,
-  //     eventType,
-  //     entityId,
-  //     entityType,
-  //     minutesThreshold,
-  //     limit,
-  //   } = params;
-
-  //   let query = db.select().from(this.schema.notifications).$dynamic();
-
-  //   query = query.where(
-  //     gt(
-  //       this.schema.notifications.createdAt,
-  //       sql`NOW() - INTERVAL '${minutesThreshold} minutes'`,
-  //     ),
-  //   );
-
-  //   if (senderId)
-  //     query = query.where(eq(this.schema.notifications.senderUserId, senderId));
-  //   if (recipientId)
-  //     query = query.where(
-  //       eq(this.schema.notifications.recipientUserId, recipientId),
-  //     );
-  //   if (eventType)
-  //     query = query.where(eq(this.schema.notifications.eventType, eventType));
-  //   if (entityId)
-  //     query = query.where(eq(this.schema.notifications.entityId, entityId));
-  //   if (entityType)
-  //     query = query.where(eq(this.schema.notifications.entityType, entityType));
-
-  //   query = query
-  //     .orderBy(desc(this.schema.notifications.createdAt))
-  //     .limit(limit);
-
-  //   return await query;
-  // }
-
-  // async paginateNotifications(
-  //   params: PaginateNotificationsParams,
-  //   tx: Transaction,
-  // ): Promise<NotificationResult[]> {
-  //   const { userId, cursor = null, pageSize = 10 } = params;
-
-  //   const fetchedNotifications = await tx
-  //     .select({
-  //       id: this.schema.notifications.id,
-  //       senderId: this.schema.notifications.senderUserId,
-  //       recipientId: this.schema.notifications.recipientUserId,
-  //       userId: this.schema.user.id,
-  //       profileId: this.schema.profile.id,
-  //       name: this.schema.profile.name,
-  //       username: this.schema.profile.username,
-  //       profilePictureKey: this.schema.profile.profilePictureKey,
-  //       eventType: this.schema.notifications.eventType,
-  //       entityId: this.schema.notifications.entityId,
-  //       entityType: this.schema.notifications.entityType,
-  //       createdAt: this.schema.notifications.createdAt,
-  //       read: this.schema.notifications.read,
-  //       privacy: this.schema.profile.privacy,
-  //       relationshipState: sql<
-  //         "following" | "followRequestSent" | "notFollowing"
-  //       >`
-  //   CASE
-  //     WHEN EXISTS (
-  //       SELECT 1 FROM ${this.schema.follow}
-  //       WHERE ${this.schema.follow.senderUserId} = ${userId} AND ${this.schema.follow.recipientUserId} = ${this.schema.user.id}
-  //     ) THEN 'following'
-  //     WHEN EXISTS (
-  //       SELECT 1 FROM ${this.schema.followRequest}
-  //       WHERE ${this.schema.followRequest.senderUserId} = ${userId} AND ${this.schema.followRequest.recipientUserId} = ${this.schema.user.id}
-  //     ) THEN 'followRequestSent'
-  //     ELSE 'notFollowing'
-  //   END
-  // `,
-  //     })
-  //     .from(this.schema.notifications)
-  //     .innerJoin(
-  //       this.schema.user,
-  //       eq(this.schema.notifications.senderUserId, this.schema.user.id),
-  //     )
-  //     .innerJoin(
-  //       this.schema.profile,
-  //       eq(this.schema.user.id, this.schema.profile.userId),
-  //     )
-  //     .where(
-  //       and(
-  //         eq(this.schema.notifications.recipientUserId, userId),
-  //         cursor
-  //           ? or(
-  //               lt(this.schema.notifications.createdAt, cursor.createdAt),
-  //               and(
-  //                 eq(this.schema.notifications.createdAt, cursor.createdAt),
-  //                 lt(this.schema.notifications.id, cursor.id),
-  //               ),
-  //             )
-  //           : undefined,
-  //       ),
-  //     )
-  //     .orderBy(
-  //       desc(this.schema.notifications.createdAt),
-  //       desc(this.schema.notifications.id),
-  //     )
-  //     .limit(pageSize);
-
-  //   if (fetchedNotifications.length === 0) {
-  //     return [];
-  //   }
-
-  //   // Mark all notifications as read for this user
-  //   await tx
-  //     .update(this.schema.notifications)
-  //     .set({ read: true })
-  //     .where(eq(this.schema.notifications.recipientUserId, userId));
-
-  //   return fetchedNotifications.filter(
-  //     (notification) => notification.name !== null,
-  //   );
-  // }
-
-  async updateNotificationSettings(
-    params: UpdateNotificationSettingsParams,
+  async getUnreadNotificationsCount(
+    params: UserIdParam,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<void> {
-    const { notificationSettingsId, notificationSettings } = params;
+  ): Promise<number> {
+    const { userId } = params;
 
-    await db
-      .update(this.schema.notificationSettings)
-      .set({ ...notificationSettings })
-      .where(eq(this.schema.notificationSettings.id, notificationSettingsId));
+    const result = await db
+      .select({ count: count() })
+      .from(this.schema.notification)
+      .where(
+        and(
+          eq(this.schema.notification.recipientUserId, userId),
+          eq(this.schema.notification.read, false),
+        ),
+      );
+
+    return result[0]?.count ?? 0;
   }
 
   async getPushTokens(
@@ -265,12 +59,86 @@ export class NotificationsRepository {
     return results.map((result) => result.token);
   }
 
+  async addPushToken(
+    { userId, pushToken }: PushTokenParams,
+    tx: Transaction,
+  ): Promise<void> {
+    const pushTokenData = await tx.query.pushToken.findFirst({
+      where: and(
+        eq(this.schema.pushToken.userId, userId),
+        eq(this.schema.pushToken.token, pushToken),
+      ),
+    });
+
+    if (pushTokenData === undefined) {
+      await tx
+        .insert(this.schema.pushToken)
+        .values({ userId, token: pushToken });
+      return;
+    }
+
+    await tx
+      .update(this.schema.pushToken)
+      .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
+      .where(
+        and(
+          eq(this.schema.pushToken.userId, userId),
+          eq(this.schema.pushToken.token, pushToken),
+        ),
+      );
+  }
+
+  async deletePushToken(
+    params: PushTokenParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { userId, pushToken } = params;
+
+    await db
+      .delete(this.schema.pushToken)
+      .where(
+        and(
+          eq(this.schema.pushToken.userId, userId),
+          eq(this.schema.pushToken.token, pushToken),
+        ),
+      );
+  }
+
+  async getNotificationSettings(
+    params: UserIdParam,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<NotificationSettings | undefined> {
+    const { userId } = params;
+
+    const result = await db.query.notificationSettings.findFirst({
+      where: eq(this.schema.notificationSettings.userId, userId),
+    });
+
+    return result;
+  }
+
+  async updateNotificationSettings(
+    params: UpdateNotificationSettingsParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { notificationSettingsId, notificationSettings } = params;
+
+    await db
+      .update(this.schema.notificationSettings)
+      .set({ ...notificationSettings })
+      .where(eq(this.schema.notificationSettings.id, notificationSettingsId));
+  }
+
   async paginateNotifications(
     { userId, cursor, pageSize = 10 }: PaginateNotificationsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<NotificationAndProfile[]> {
     const notifications = await db
-      .select()
+      .select({
+        profile: this.schema.profile,
+        notification: this.schema.notification,
+        followStatus: getFollowStatusSql(this.schema, userId),
+      })
       .from(this.schema.notification)
       .innerJoin(
         this.schema.profile,
@@ -300,7 +168,6 @@ export class NotificationsRepository {
     return notifications;
   }
 }
-
 interface UpdateNotificationSettingsParams {
   notificationSettingsId: string;
   notificationSettings: NotificationSettings;
@@ -314,5 +181,11 @@ export interface PaginateNotificationsParams {
 
 export interface NotificationAndProfile {
   profile: Profile;
-  notifications: Notification;
+  notification: Notification;
+  followStatus: FollowStatus;
+}
+
+export interface PushTokenParams {
+  userId: string;
+  pushToken: string;
 }
