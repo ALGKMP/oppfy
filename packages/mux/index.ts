@@ -19,9 +19,7 @@ export class Mux {
   /**
    * Creates a presigned URL for video upload to Mux
    */
-  async getPresignedUrlForVideo({
-    postid,
-  }: GetPresignedUrlForVideoOptions) {
+  async getPresignedUrlForVideo({ postid }: GetPresignedUrlForVideoOptions) {
     const upload = await this.client.video.uploads.create({
       cors_origin: "*",
       new_asset_settings: {
@@ -36,6 +34,17 @@ export class Mux {
     });
 
     return upload.url;
+  }
+
+  async deleteAsset(assetId: string) {
+    await this.client.video.assets.delete(assetId);
+  }
+
+  verifyWebhookSignature(
+    payload: string,
+    headers: Record<string, string>,
+  ) {
+    return this.client.webhooks.verifySignature(payload, headers);
   }
 
   /**

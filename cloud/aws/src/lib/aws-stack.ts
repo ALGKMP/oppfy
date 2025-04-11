@@ -164,20 +164,10 @@ export class AwsStack extends cdk.Stack {
       environment,
     });
 
-    const profileLambda = new LambdaFunction(this, "ProfileLambda", {
-      entry: "src/res/lambdas/profile-picture/index.ts",
-      environment,
-    });
-
     this.setupBucketLambdaIntegration(
       postBucket.bucket,
       postLambda,
       "AllowPostS3Invocation",
-    );
-    this.setupBucketLambdaIntegration(
-      profileBucket.bucket,
-      profileLambda,
-      "AllowProfileS3Invocation",
     );
 
     const muxWebhookLambda = new LambdaFunction(this, "MuxWebhookLambda", {

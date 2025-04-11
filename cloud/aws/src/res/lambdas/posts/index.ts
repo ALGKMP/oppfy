@@ -5,45 +5,38 @@ import {
   HeadObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
-import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
+// import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
 import middy from "@middy/core";
-import { createEnv } from "@t3-oss/env-core";
+// import { createEnv } from "@t3-oss/env-core";
 import type { Context } from "aws-lambda";
 import { z } from "zod";
 
 import { db, eq, schema, sql } from "@oppfy/db";
-import { validators } from "@oppfy/validators";
 
-type SnsNotificationData = z.infer<typeof validators.snsNotificationData>;
+// import { validators } from "@oppfy/validators";
 
-type StoreNotificationData = z.infer<typeof validators.notificationData>;
+// type SnsNotificationData = z.infer<typeof validators.snsNotificationData>;
 
-type SendNotificationData = z.infer<typeof validators.sendNotificationData>;
+// type StoreNotificationData = z.infer<typeof validators.notificationData>;
+
+// type SendNotificationData = z.infer<typeof validators.sendNotificationData>;
 
 type S3ObjectLambdaEvent = z.infer<typeof S3Schema>;
 
-const env = createEnv({
-  server: {
-    SNS_PUSH_NOTIFICATION_TOPIC_ARN: z.string().min(1),
-  },
-  runtimeEnv: process.env,
-});
+// const env = createEnv({
+//   server: {
+//     SNS_PUSH_NOTIFICATION_TOPIC_ARN: z.string().min(1),
+//   },
+//   runtimeEnv: process.env,
+// });
 
 const s3 = new S3Client({
   region: "us-east-1",
 });
 
-const sns = new SNSClient({
-  region: "us-east-1",
-});
-
-const deleteS3Object = async (bucket: string, key: string) => {
-  const command = new DeleteObjectCommand({
-    Bucket: bucket,
-    Key: key,
-  });
-  await s3.send(command);
-};
+// const sns = new SNSClient({
+//   region: "us-east-1",
+// });
 
 const lambdaHandler = async (
   event: S3ObjectLambdaEvent,
@@ -72,164 +65,143 @@ const lambdaHandler = async (
       throw new Error("Metadata not provided");
     }
 
-    const metadata = validators.metadataSchema.parse(Metadata);
-    metadata.caption = decodeURIComponent(metadata.caption);
+    const metadataSchema = z.object({
+      postid: z.string(),
+    });
+
+    const metadata = metadataSchema.parse(Metadata);
 
     console.log("metadata", metadata);
     console.log("metadata.postid", metadata.postid);
     try {
-      const { insertId: postId } = await db.transaction(async (tx) => {
-        const [post] = await tx
-          .insert(schema.post)
-          .values({
-            id: metadata.postid,
-            authorId: metadata.author,
-            recipientId: metadata.recipient,
-            key: key,
-            mediaType: "image" as const,
-            height: parseInt(metadata.height),
-            width: parseInt(metadata.width),
-            caption: metadata.caption,
-          })
-          .returning({ insertId: schema.post.id });
-
+      // transaction to update post status and user stats
+      await db.transaction(async (tx) => {
+        const post = await tx.query.post.findFirst({
+          where: eq(schema.post.id, metadata.postid),
+        });
         if (post === undefined) {
           throw new Error("Failed to insert post");
         }
-        /* 
-        // force friendship between author and recipient if recipient is not on app
-        if (metadata.type === "notOnApp") {
-          await tx.insert(schema.friend).values({
-            userId1: metadata.author,
-            userId2: metadata.recipient,
-          });
-        } */
-
-        await tx.insert(schema.postStats).values({ postId: post.insertId });
 
         // Only increment recipient's profile stats post count since they're the one being posted about
-        const recipientStatsResult = await tx
-          .update(schema.profileStats)
-          .set({ posts: sql`${schema.profileStats.posts} + 1` })
+        await tx
+          .update(schema.userStats)
+          .set({ posts: sql`${schema.userStats.posts} + 1` })
           .where(
             eq(
-              schema.profileStats.profileId,
-              sql`(SELECT profile_id FROM "user" WHERE id = ${metadata.recipient})`,
+              schema.userStats.userId,
+              sql`(SELECT recipient_user_id FROM post WHERE id = ${post.id})`,
             ),
           );
-
-        return post;
       });
 
-      await storeNotification(metadata.author, metadata.recipient, {
-        eventType: "post",
-        entityType: "post",
-        entityId: postId.toString(),
-      });
+      // await storeNotification(metadata.author, metadata.recipient, {
+      //   eventType: "post",
+      //   entityType: "post",
+      //   entityId: postId.toString(),
+      // });
 
-      const { posts } = await getNotificationSettings(metadata.recipient);
-      if (posts) {
-        const pushTokens = await getPushTokens(metadata.recipient);
-        if (pushTokens.length > 0) {
-          const senderProfile = await getProfile(metadata.author);
-          await sendNotification(
-            pushTokens,
-            metadata.author,
-            metadata.recipient,
-            {
-              title: "You've been opped",
-              body: `${senderProfile.username} posted a picture of you`,
-              entityId: postId.toString(),
-              entityType: "post",
-            },
-          );
-        }
-      }
+      // const { posts } = await getNotificationSettings(metadata.recipient);
+      // if (posts) {
+      //   const pushTokens = await getPushTokens(metadata.recipient);
+      //   if (pushTokens.length > 0) {
+      //     const senderProfile = await getProfile(metadata.author);
+      //     await sendNotification(
+      //       pushTokens,
+      //       metadata.author,
+      //       metadata.recipient,
+      //       {
+      //         title: "You've been opped",
+      //         body: `${senderProfile.username} posted a picture of you`,
+      //         entityId: postId.toString(),
+      //         entityType: "post",
+      //       },
+      //     );
+      //   }
+      // }
     } catch (error) {
       console.log("error", error);
       // If the transaction fails, delete the S3 object
-      await deleteS3Object(objectBucket, key);
       throw error;
     }
   } catch (error) {
     console.error("Error processing post:", error);
     // Ensure S3 object is deleted in case of any error
-    await deleteS3Object(objectBucket, key);
     throw error;
   }
 };
 
-const sendNotification = async (
-  pushTokens: string[],
-  senderId: string,
-  recipientId: string,
-  notificationData: SendNotificationData,
-) => {
-  const message = {
-    senderId,
-    recipientId,
-    pushTokens,
-    ...notificationData,
-  } satisfies SnsNotificationData;
-  const params = {
-    Subject: "New notification",
-    TopicArn: env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
-    Message: JSON.stringify(message),
-  };
-  await sns.send(new PublishCommand(params));
-};
+// const sendNotification = async (
+//   pushTokens: string[],
+//   senderId: string,
+//   recipientId: string,
+//   notificationData: SendNotificationData,
+// ) => {
+//   const message = {
+//     senderId,
+//     recipientId,
+//     pushTokens,
+//     ...notificationData,
+//   } satisfies SnsNotificationData;
+//   const params = {
+//     Subject: "New notification",
+//     TopicArn: env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
+//     Message: JSON.stringify(message),
+//   };
+//   await sns.send(new PublishCommand(params));
+// };
 
-const storeNotification = async (
-  senderId: string,
-  recipientId: string,
-  notificationData: StoreNotificationData,
-) => {
-  await db.insert(schema.notifications).values({
-    senderId,
-    recipientId,
-    ...notificationData,
-  });
-};
+// const storeNotification = async (
+//   senderId: string,
+//   recipientId: string,
+//   notificationData: StoreNotificationData,
+// ) => {
+//   await db.insert(schema.notifications).values({
+//     senderId,
+//     recipientId,
+//     ...notificationData,
+//   });
+// };
 
-const getProfile = async (userId: string) => {
-  const user = await db.query.user.findFirst({
-    where: eq(schema.user.id, userId),
-    with: {
-      profile: true,
-    },
-  });
+// const getProfile = async (userId: string) => {
+//   const user = await db.query.user.findFirst({
+//     where: eq(schema.user.id, userId),
+//     with: {
+//       profile: true,
+//     },
+//   });
 
-  if (user === undefined) {
-    throw new Error("User not found");
-  }
+//   if (user === undefined) {
+//     throw new Error("User not found");
+//   }
 
-  return user.profile;
-};
+//   return user.profile;
+// };
 
-const getNotificationSettings = async (userId: string) => {
-  const user = await db.query.user.findFirst({
-    where: eq(schema.user.id, userId),
-    with: {
-      notificationSettings: true,
-    },
-  });
+// const getNotificationSettings = async (userId: string) => {
+//   const user = await db.query.user.findFirst({
+//     where: eq(schema.user.id, userId),
+//     with: {
+//       notificationSettings: true,
+//     },
+//   });
 
-  if (user === undefined) {
-    throw new Error("User not found");
-  }
+//   if (user === undefined) {
+//     throw new Error("User not found");
+//   }
 
-  return user.notificationSettings;
-};
+//   return user.notificationSettings;
+// };
 
-const getPushTokens = async (userId: string) => {
-  const possiblePushTokens = await db.query.pushToken.findMany({
-    where: eq(schema.pushToken.userId, userId),
-    columns: {
-      token: true,
-    },
-  });
+// const getPushTokens = async (userId: string) => {
+//   const possiblePushTokens = await db.query.pushToken.findMany({
+//     where: eq(schema.pushToken.userId, userId),
+//     columns: {
+//       token: true,
+//     },
+//   });
 
-  return possiblePushTokens.map((token) => token.token);
-};
+//   return possiblePushTokens.map((token) => token.token);
+// };
 
 export const handler = middy(lambdaHandler).use(parser({ schema: S3Schema }));
