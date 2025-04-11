@@ -8,15 +8,16 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
-import type {
-  ILikeRepository,
-  LikeParams,
-} from "../../interfaces/repositories/content/like.repository.interface";
 import type { Like } from "../../models";
 import { TYPES } from "../../types";
 
+export interface LikeParams {
+  userId: string;
+  postId: string;
+}
+
 @injectable()
-export class LikeRepository implements ILikeRepository {
+export class LikeRepository {
   constructor(
     @inject(TYPES.Database) private readonly db: Database,
     @inject(TYPES.Schema) private readonly schema: Schema,
