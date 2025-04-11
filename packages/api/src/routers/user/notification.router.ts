@@ -4,6 +4,19 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const notificationRouter = createTRPCRouter({
+  unreadNotificationsCount: protectedProcedure.query(async ({ ctx }) => {
+    const result = await ctx.services.notification.unreadNotificationsCount(
+      ctx.session.uid,
+    );
+
+    return result.match(
+      (res) => res,
+      (_) => {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      },
+    );
+  }),
+
   paginateNotifications: protectedProcedure
     .input(
       z.object({

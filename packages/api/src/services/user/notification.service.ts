@@ -4,7 +4,7 @@ import { ok, Result } from "neverthrow";
 import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
-import { PaginatedResponse } from "../../interfaces/types";
+import { FollowStatus, PaginatedResponse } from "../../interfaces/types";
 import { HydratedProfile, Notification } from "../../models";
 import {
   NotificationRepository,
@@ -17,6 +17,7 @@ import { TYPES } from "../../symbols";
 interface NotificationAndHydratedProfile {
   notification: Notification;
   profile: HydratedProfile;
+  followStatus: FollowStatus;
 }
 
 @injectable()
@@ -32,6 +33,18 @@ export class NotificationService {
     @inject(TYPES.NotificationRepository)
     private readonly notificationRepository: NotificationRepository,
   ) {}
+
+  async unreadNotificationsCount(
+    userId: string,
+  ): Promise<Result<number, never>> {
+    const count = await this.notificationRepository.getUnreadNotificationsCount(
+      {
+        userId,
+      },
+    );
+
+    return ok(count);
+  }
 
   async paginateNotifications({
     userId,

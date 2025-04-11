@@ -13,6 +13,28 @@ import { FollowStatus, UserIdParam } from "../../interfaces/types";
 import type { Notification, NotificationSettings, Profile } from "../../models";
 import { TYPES } from "../../symbols";
 
+export interface UpdateNotificationSettingsParams {
+  notificationSettingsId: string;
+  notificationSettings: NotificationSettings;
+}
+
+export interface PaginateNotificationsParams {
+  userId: string;
+  cursor?: { createdAt: Date; id: string };
+  pageSize?: number;
+}
+
+export interface NotificationAndProfile {
+  profile: Profile;
+  notification: Notification;
+  followStatus: FollowStatus;
+}
+
+export interface PushTokenParams {
+  userId: string;
+  pushToken: string;
+}
+
 @injectable()
 export class NotificationRepository {
   private db: Database;
@@ -167,25 +189,4 @@ export class NotificationRepository {
 
     return notifications;
   }
-}
-interface UpdateNotificationSettingsParams {
-  notificationSettingsId: string;
-  notificationSettings: NotificationSettings;
-}
-
-export interface PaginateNotificationsParams {
-  userId: string;
-  cursor?: { createdAt: Date; id: string };
-  pageSize?: number;
-}
-
-export interface NotificationAndProfile {
-  profile: Profile;
-  notification: Notification;
-  followStatus: FollowStatus;
-}
-
-export interface PushTokenParams {
-  userId: string;
-  pushToken: string;
 }

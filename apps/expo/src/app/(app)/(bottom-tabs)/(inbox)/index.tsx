@@ -26,10 +26,9 @@ import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
 type NotificationItem =
-  RouterOutputs["notifications"]["paginateNotifications"]["items"][0];
+  RouterOutputs["notification"]["paginateNotifications"]["items"][number];
 
-const REFETCH_INTERVAL = 1000 * 30;
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 20;
 
 const Inbox = () => {
   const router = useRouter();
@@ -41,23 +40,14 @@ const Inbox = () => {
   const listRef = useRef<FlashList<NotificationItem>>(null);
   useScrollToTop(listRef);
 
-  utils.notifications.getUnreadNotificationsCount.setData(undefined, 0);
+  utils.notification.unreadNotificationsCount.setData(undefined, 0);
 
-  const { data: followRequestCount, refetch: refetchFollowRequestCount } =
-    api.follow.getFollowRequestCount.useQuery(undefined, {
-      initialData: 0,
-      refetchInterval: REFETCH_INTERVAL,
-      refetchOnWindowFocus: true,
-    });
+  const { data: stats, refetch: refetchStats } = api.profile.getStats.useQuery(
+    {},
+  );
 
-  const { data: friendRequestCount, refetch: refetchFriendRequestCount } =
-    api.friend.getFriendRequestCount.useQuery(undefined, {
-      initialData: 0,
-      refetchInterval: REFETCH_INTERVAL,
-      refetchOnWindowFocus: true,
-    });
-
-  const pendingRequests = followRequestCount + friendRequestCount;
+  const pendingRequests =
+    (stats?.followRequests ?? 0) + (stats?.friendRequests ?? 0);
 
   const {
     data: notificationsData,
@@ -66,11 +56,10 @@ const Inbox = () => {
     fetchNextPage,
     hasNextPage,
     refetch: refetchNotifications,
-  } = api.notifications.paginateNotifications.useInfiniteQuery(
+  } = api.notification.paginateNotifications.useInfiniteQuery(
     { pageSize: PAGE_SIZE },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      refetchInterval: REFETCH_INTERVAL,
     },
   );
 
@@ -79,25 +68,26 @@ const Inbox = () => {
 
   const followUser = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
-      await utils.notifications.paginateNotifications.cancel();
-      const prevData =
-        utils.notifications.paginateNotifications.getInfiniteData({
+      await utils.notification.paginateNotifications.cancel();
+      const prevData = utils.notification.paginateNotifications.getInfiniteData(
+        {
           pageSize: PAGE_SIZE,
-        });
+        },
+      );
       if (prevData === undefined) return;
 
-      utils.notifications.paginateNotifications.setInfiniteData(
+      utils.notification.paginateNotifications.setInfiniteData(
         { pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.map((item) =>
-              item.userId === newData.userId
+              item.profile.userId === newData.recipientUserId
                 ? {
                     ...item,
                     relationshipState:
-                      item.privacySetting === "private"
+                      item.profile.privacy === "private"
                         ? "followRequestSent"
                         : "following",
                   }
@@ -111,13 +101,13 @@ const Inbox = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.notifications.paginateNotifications.setInfiniteData(
+      utils.notification.paginateNotifications.setInfiniteData(
         { pageSize: PAGE_SIZE },
         ctx.prevData,
       );
     },
     onSettled: async () => {
-      await utils.notifications.paginateNotifications.invalidate();
+      await utils.notification.paginateNotifications.invalidate();
     },
   });
 
@@ -129,16 +119,12 @@ const Inbox = () => {
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([
-      refetchNotifications(),
-      refetchFollowRequestCount(),
-      refetchFriendRequestCount(),
-    ]);
+    await Promise.all([refetchNotifications(), refetchStats()]);
     setRefreshing(false);
   };
 
   const getNotificationMessage = (item: NotificationItem) => {
-    switch (item.eventType) {
+    switch (item.notification.eventType) {
       case "like":
         return "liked your post";
       case "post":
@@ -157,22 +143,25 @@ const Inbox = () => {
   const renderActionButton = (
     item: NotificationItem,
   ): MediaListItemActionProps | undefined => {
-    if (!item.userId) return undefined;
-    switch (item.relationshipState) {
-      case "notFollowing":
+    if (!item.profile.userId) return undefined;
+    switch (item.followStatus) {
+      case "NOT_FOLLOWING":
         return {
           label: "Follow",
           icon: UserRoundPlus,
           variant: "primary",
-          onPress: () => void followUser.mutateAsync({ userId: item.userId }),
+          onPress: () =>
+            void followUser.mutateAsync({
+              recipientUserId: item.profile.userId,
+            }),
         };
-      case "following":
+      case "FOLLOWING":
         return {
           label: "Followed",
           icon: UserRoundCheck,
           disabled: true,
         };
-      case "followRequestSent":
+      case "REQUESTED":
         return {
           label: "Sent",
           icon: UserRoundCheck,
@@ -186,17 +175,19 @@ const Inbox = () => {
   const renderListItem = ({ item }: { item: NotificationItem }) => (
     <MediaListItem
       verticalText
-      recyclingKey={item.id}
-      title={item.username}
+      recyclingKey={item.notification.id}
+      title={item.profile.username}
       subtitle={getNotificationMessage(item)}
-      caption={<TimeAgo size="$2" suffix="ago" date={item.createdAt} />}
-      imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
+      caption={
+        <TimeAgo size="$2" suffix="ago" date={item.notification.createdAt} />
+      }
+      imageUrl={item.profile.profilePictureUrl ?? DefaultProfilePicture}
       primaryAction={renderActionButton(item)}
       onPress={() =>
-        routeProfile(item.userId, {
-          name: item.name ?? "",
-          username: item.username,
-          profilePictureUrl: item.profilePictureUrl,
+        routeProfile(item.profile.userId, {
+          name: item.profile.name ?? "",
+          username: item.profile.username ?? "",
+          profilePictureUrl: item.profile.profilePictureUrl,
         })
       }
     />
@@ -276,7 +267,7 @@ const Inbox = () => {
       ref={listRef}
       data={notificationItems}
       renderItem={renderListItem}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => item.notification.id}
       estimatedItemSize={18}
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}

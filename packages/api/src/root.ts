@@ -10,6 +10,7 @@ import { friendRouter } from "./routers/social/friend.router";
 import { reportRouter } from "./routers/social/report.router";
 import { authRouter } from "./routers/user/auth.router";
 import { contactsRouter } from "./routers/user/contacts.router";
+import { notificationRouter } from "./routers/user/notification.router";
 import { profileRouter } from "./routers/user/profile.router";
 import { userRouter } from "./routers/user/user.router";
 import { createCallerFactory, createTRPCRouter } from "./trpc";
@@ -25,6 +26,7 @@ export const appRouter = createTRPCRouter({
   block: blockRouter,
   report: reportRouter,
   contacts: contactsRouter,
+  notification: notificationRouter,
 });
 
 export const createCaller = createCallerFactory(appRouter);
