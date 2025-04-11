@@ -31,6 +31,7 @@ type Post = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
 const HomeScreen = () => {
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
+
   const router = useRouter();
 
   const insets = useSafeAreaInsets();
@@ -39,7 +40,7 @@ const HomeScreen = () => {
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
   const { data: profile, isLoading: isLoadingProfile } =
-    api.profile.getProfileSelf.useQuery();
+    api.profile.getProfile.useQuery({});
 
   const {
     data: postData,
@@ -81,7 +82,7 @@ const HomeScreen = () => {
   }) => {
     const visibleItemIds = viewableItems
       .filter((token) => token.isViewable)
-      .map((token) => (token.item as Post).postId);
+      .map((token) => (token.item as Post).post.id);
 
     setViewableItems(visibleItemIds);
   };
@@ -92,43 +93,43 @@ const HomeScreen = () => {
 
       return (
         <PostCard
-          postId={item.postId}
-          createdAt={item.createdAt}
-          caption={item.caption}
+          postId={item.post.id}
+          createdAt={item.post.createdAt}
+          caption={item.post.caption}
           endpoint="home-feed"
           author={{
-            id: item.authorId,
+            id: item.authorUserId,
             name: item.authorName ?? "",
             username: item.authorUsername ?? "",
-            profilePictureUrl: item.authorProfilePicture,
+            profilePictureUrl: item.authorProfilePictureUrl,
           }}
           recipient={{
-            id: item.recipientId,
+            id: item.recipientUserId,
             name: item.recipientName ?? "",
             username: item.recipientUsername ?? "",
-            profilePictureUrl: item.recipientProfilePicture,
+            profilePictureUrl: item.recipientProfilePictureUrl,
           }}
           media={{
-            id: item.postId,
+            id: item.post.id,
             recipient: {
-              id: item.recipientId,
+              id: item.recipientUserId,
               name: item.recipientName ?? "",
               username: item.recipientUsername ?? "",
-              profilePictureUrl: item.recipientProfilePicture,
+              profilePictureUrl: item.recipientProfilePictureUrl,
             },
-            type: item.mediaType,
-            url: item.imageUrl,
+            type: item.post.mediaType,
+            url: item.assetUrl,
             dimensions: {
-              width: item.width,
-              height: item.height,
+              width: item.post.width,
+              height: item.post.height,
             },
           }}
           stats={{
-            likes: item.likesCount,
-            comments: item.commentsCount,
+            likes: item.postStats.likes,
+            comments: item.postStats.comments,
             hasLiked: item.hasLiked,
           }}
-          isViewable={viewableItems.includes(item.postId)}
+          isViewable={viewableItems.includes(item.post.id)}
         />
       );
     },
@@ -244,7 +245,7 @@ const HomeScreen = () => {
       nestedScrollEnabled={false}
       showsVerticalScrollIndicator={false}
       numColumns={1}
-      keyExtractor={(item) => "home_post_" + item.postId}
+      keyExtractor={(item) => "home_post_" + item.post.id}
       renderItem={renderPost}
       estimatedItemSize={screenWidth}
       ListFooterComponent={renderFooter}
