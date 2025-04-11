@@ -24,6 +24,11 @@ export interface SocialProfile extends Profile {
 }
 
 export interface PaginateFollowParams extends PaginationParams {
+  selfUserId: string;
+  userId: string;
+}
+
+interface PaginateFollowRequestsParams extends PaginationParams {
   userId: string;
 }
 
@@ -289,14 +294,14 @@ export class FollowRepository {
   }
 
   async paginateFollowers(
-    { userId, cursor, pageSize = 10 }: PaginateFollowParams,
+    { userId, cursor, pageSize = 10, selfUserId }: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<SocialProfile[]> {
     const followers = await db
       .select({
         profile: this.schema.profile,
         followedAt: this.schema.follow.createdAt,
-        followStatus: getFollowStatusSql(this.schema, userId),
+        followStatus: getFollowStatusSql(this.schema, selfUserId),
       })
       .from(this.schema.follow)
       .innerJoin(
@@ -332,14 +337,14 @@ export class FollowRepository {
   }
 
   async paginateFollowing(
-    { userId, cursor, pageSize = 10 }: PaginateFollowParams,
+    { userId, cursor, pageSize = 10, selfUserId }: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<SocialProfile[]> {
     const following = await db
       .select({
         profile: this.schema.profile,
         followedAt: this.schema.follow.createdAt,
-        followStatus: getFollowStatusSql(this.schema, userId),
+        followStatus: getFollowStatusSql(this.schema, selfUserId),
       })
       .from(this.schema.follow)
       .innerJoin(
@@ -375,7 +380,7 @@ export class FollowRepository {
   }
 
   async paginateFollowRequests(
-    { userId, cursor, pageSize = 10 }: PaginateFollowParams,
+    { userId, cursor, pageSize = 10 }: PaginateFollowRequestsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile[]> {
     const requests = await db
