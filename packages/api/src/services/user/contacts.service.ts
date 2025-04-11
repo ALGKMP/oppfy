@@ -1,11 +1,13 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Database, DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
 import * as AwsErrors from "../../errors/cloud/aws.error";
 import * as UserErrors from "../../errors/user/user.error";
 import type { IContactsRepository } from "../../interfaces/repositories/user/contacts.repository.interface";
+import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import {
   ContactRecommendation,
@@ -13,29 +15,24 @@ import {
   IContactsService,
   UpdateUserContactsParams,
 } from "../../interfaces/services/user/contacts.service.interface";
-import type { IProfileService } from "../../interfaces/services/user/profile.service.interface";
 import { UserIdParam } from "../../interfaces/types";
 import { HydratedProfile } from "../../models";
 import { TYPES } from "../../types";
 
 @injectable()
 export class ContactsService implements IContactsService {
-  private db: Database;
-  private contactsRepository: IContactsRepository;
-  private userRepository: IUserRepository;
-  private profileService: IProfileService;
-
   constructor(
-    @inject(TYPES.Database) db: Database,
-    @inject(TYPES.ContactsRepository) contactsRepository: IContactsRepository,
-    @inject(TYPES.UserRepository) userRepository: IUserRepository,
-    @inject(TYPES.ProfileService) profileService: IProfileService,
-  ) {
-    this.db = db;
-    this.contactsRepository = contactsRepository;
-    this.userRepository = userRepository;
-    this.profileService = profileService;
-  }
+    @inject(TYPES.Database)
+    private readonly db: Database,
+    @inject(TYPES.CloudFront)
+    private readonly cloudfront: CloudFront,
+    @inject(TYPES.ProfileRepository)
+    private readonly profileRepository: IProfileRepository,
+    @inject(TYPES.UserRepository)
+    private readonly userRepository: IUserRepository,
+    @inject(TYPES.ContactsRepository)
+    private readonly contactsRepository: IContactsRepository,
+  ) {}
 
   async filterPhoneNumbersOnApp({
     phoneNumbers,
@@ -61,12 +58,15 @@ export class ContactsService implements IContactsService {
       return ok([]);
     }
 
-    // Get user profiles for recommendations
-    const userProfiles = await this.profileService.searchProfilesByIds({
+    const profiles = await this.profileRepository.getProfilesByIds({
       userIds: allRecommendedUserIds,
     });
 
-    return ok(userProfiles.unwrapOr([]));
+    const hydratedProfiles = profiles.map((profile) =>
+      this.cloudfront.hydrateProfile(profile),
+    );
+
+    return ok(hydratedProfiles);
   }
 
   async updateUserContacts(

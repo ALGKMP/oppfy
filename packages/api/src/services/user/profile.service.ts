@@ -127,19 +127,6 @@ export class ProfileService implements IProfileService {
     return ok(hydratedProfiles);
   }
 
-  /**
-   * Searches profiles by IDs, no filter for the blocked status.
-   */
-  async searchProfilesByIds(
-    params: SearchProfileByIdsParams,
-  ): Promise<Result<HydratedProfile[], never>> {
-    const profiles = await this.profileRepository.getProfilesByIds(params);
-    const hydratedProfiles = profiles.map((profile) =>
-      this.cloudfront.hydrateProfile(profile),
-    );
-
-    return ok(hydratedProfiles);
-  }
 
   /**
    * Determines relationship states (follow/friend) between users, considering blocks.
