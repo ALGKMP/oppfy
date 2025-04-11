@@ -83,7 +83,7 @@ const PostTo = () => {
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = api.friend.paginateFriendsSelf.useInfiniteQuery(
+  } = api.friend.paginateFriends.useInfiniteQuery(
     { pageSize: 20 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
@@ -102,7 +102,7 @@ const PostTo = () => {
     filteredItems: filteredFriends,
     searchQuery,
     setSearchQuery,
-  } = useSearch<Friend>({
+  } = useSearch({
     data: friendsList,
     fuseOptions: searchOptions,
   });
@@ -154,7 +154,7 @@ const PostTo = () => {
     if (friends.length > 0) {
       result.push({ type: "header", title: "Friends" });
       friends.forEach((friend) => {
-        result.push({ type: "friend", data: friend });
+        result.push({ type: "friend", data: friend as Friend });
       });
     }
 
