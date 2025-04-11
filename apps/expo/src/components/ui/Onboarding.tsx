@@ -1,11 +1,6 @@
 import React, { useEffect, useMemo } from "react";
-import type {
-  ImageSourcePropType} from "react-native";
-import {
-  Modal,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
+import type { ImageSourcePropType } from "react-native";
+import { Modal, TextInput, TouchableOpacity } from "react-native";
 import Animated, {
   FadeIn,
   interpolate,
@@ -19,11 +14,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { FlashList } from "@shopify/flash-list";
-import {
-  Camera,
-  CheckCircle2,
-  ChevronRight,
-} from "@tamagui/lucide-icons";
+import { Camera, CheckCircle2, ChevronRight } from "@tamagui/lucide-icons";
 import { AsYouType } from "libphonenumber-js";
 import { getToken, getTokens, useTheme } from "tamagui";
 

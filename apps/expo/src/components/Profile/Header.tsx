@@ -11,7 +11,8 @@ import ProfileInfo from "~/components/Profile/ProfileInfo";
 import QuickActions from "~/components/Profile/QuickActions";
 import Stats from "~/components/Profile/Stats";
 
-type NetworkRelationships = RouterOutputs["profile"]["getRelationshipStatesBetweenUsers"];
+type NetworkRelationships =
+  RouterOutputs["profile"]["getRelationshipStatesBetweenUsers"];
 
 interface User {
   id?: string;

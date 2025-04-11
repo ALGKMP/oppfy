@@ -175,7 +175,7 @@ const SelfProfile = () => {
           createdAt={profileData?.createdAt}
           isLoading={isLoadingProfile || isLoadingProfileStats}
         />
-        {(isLoadingProfile || isLoadingProfileStats) ? null : (
+        {isLoadingProfile || isLoadingProfileStats ? null : (
           <>
             {profileStats?.friends && profileStats.friends > 0 ? (
               <FriendCarousel paddingHorizontal="$2.5" />
