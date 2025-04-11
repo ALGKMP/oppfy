@@ -11,7 +11,7 @@ import type {
 
 import type { PhoneNumberParam, UserIdParam } from "../../interfaces/types";
 import type { User, UserStatus } from "../../models";
-import { TYPES } from "../../types";
+import { TYPES } from "../../container";
 
 export interface CreateUserParams {
   id?: string;

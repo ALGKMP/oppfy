@@ -10,7 +10,7 @@ import type {
 import { env } from "@oppfy/env";
 
 import type { UserIdParam } from "../../interfaces/types";
-import { TYPES } from "../../types";
+import { TYPES } from "../../container";
 
 export interface DeleteUserContactsParam {
   userId: string;

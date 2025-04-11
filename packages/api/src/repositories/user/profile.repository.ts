@@ -9,7 +9,7 @@ import {
 
 import type { UserIdParam, UsernameParam } from "../../interfaces/types";
 import type { Profile, ProfileInsert, UserStats } from "../../models";
-import { TYPES } from "../../types";
+import { TYPES } from "../../container";
 
 export interface ProfilesByIdsParams {
   userIds: string[];
