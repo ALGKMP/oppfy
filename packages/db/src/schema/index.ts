@@ -31,6 +31,8 @@ export const entityTypeEnum = pgEnum("entity_type", [
   "comment",
 ]);
 
+export const postStatusEnum = pgEnum("post_status", ["pending", "processed"]);
+
 export const mediaTypeEnum = pgEnum("media_type", ["image", "video"]);
 
 export const reportUserReasonEnum = pgEnum("report_user_reason", [
@@ -309,6 +311,7 @@ export const post = pgTable(
     width: integer("width").notNull().default(500),
     height: integer("height").notNull().default(500),
     mediaType: mediaTypeEnum("media_type").notNull(),
+    status: postStatusEnum("status").default("pending").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
