@@ -6,7 +6,7 @@ import type { RouterOutputs } from "@oppfy/api";
 import Bio from "~/components/Profile/Bio";
 import HeaderGradient from "~/components/Profile/HeaderGradient";
 import JoinDatePill from "~/components/Profile/JoinDatePill";
-import { OtherProfileActionButtons, SelfProfileActionButtons } from "~/components/Profile/ProfileActions";
+import ProfileActions from "~/components/Profile/ProfileActions";
 import ProfileInfo from "~/components/Profile/ProfileInfo";
 import QuickActions from "~/components/Profile/QuickActions";
 import Stats from "~/components/Profile/Stats";
@@ -83,12 +83,10 @@ const Header = ({
           />
         </XStack>
 
-        <Bio bio={user.bio} isLoading={isLoading} />
-        {user.id ? (
-          <OtherProfileActionButtons userId={user.id} />
-        ) : (
-          <SelfProfileActionButtons disabled={isDisabled} />
-        )}
+        <ProfileActions
+          userId={user.id}
+          networkRelationships={networkRelationships}
+        />
 
         <Stats
           userId={user.id}
