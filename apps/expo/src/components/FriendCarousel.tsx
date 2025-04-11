@@ -116,7 +116,7 @@ const FriendCarousel = ({
   );
 };
 
-type Friend = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][number];
+type Friend = RouterOutputs["friend"]["paginateFriends"]["items"][number];
 
 interface UseFriendsProps {
   userId?: string;
@@ -124,7 +124,7 @@ interface UseFriendsProps {
 }
 
 const useFriends = ({ userId, pageSize = 10 }: UseFriendsProps = {}) => {
-  const query = api.friend.paginateFriendsOthers.useInfiniteQuery(
+  const query = api.friend.paginateFriends.useInfiniteQuery(
     { userId: userId!, pageSize },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -132,7 +132,7 @@ const useFriends = ({ userId, pageSize = 10 }: UseFriendsProps = {}) => {
     },
   );
 
-  const selfQuery = api.friend.paginateFriendsSelf.useInfiniteQuery(
+  const selfQuery = api.friend.paginateFriends.useInfiniteQuery(
     { pageSize },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
