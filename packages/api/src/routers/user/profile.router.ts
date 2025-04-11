@@ -100,7 +100,7 @@ export const profileRouter = createTRPCRouter({
         username: z.string(),
       }),
     )
-    .query(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const result = await ctx.services.profile.searchProfilesByUsername({
         userId: ctx.session.uid,
         username: input.username,
@@ -108,7 +108,12 @@ export const profileRouter = createTRPCRouter({
 
       return result.match(
         (res) => res,
-        (_) => null,
+        (_) => {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to search profiles by username",
+          });
+        },
       );
     }),
 

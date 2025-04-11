@@ -29,6 +29,7 @@ const TYPES = {
   FriendService: Symbol.for("FriendService"),
   FollowService: Symbol.for("FollowService"),
   ContactsService: Symbol.for("ContactsService"),
+  NotificationService: Symbol.for("NotificationService"),
   BlockService: Symbol.for("BlockService"),
   PostService: Symbol.for("PostService"),
   PostInteractionService: Symbol.for("PostInteractionService"),

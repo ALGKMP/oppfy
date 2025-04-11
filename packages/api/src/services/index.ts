@@ -11,6 +11,7 @@ import { AuthService } from "./user/auth.service";
 import { ContactsService } from "./user/contacts.service";
 import { ProfileService } from "./user/profile.service";
 import { UserService } from "./user/user.service";
+import { NotificationService } from "./user/notification.service";
 
 export class Services {
   constructor(
@@ -34,5 +35,7 @@ export class Services {
     public readonly postInteraction: PostInteractionService,
     @inject(TYPES.AuthService)
     public readonly auth: AuthService,
+    @inject(TYPES.NotificationService)
+    public readonly notification: NotificationService,
   ) {}
 }

@@ -56,5 +56,5 @@ export interface PaginatedResponse<T> {
 
 export interface PaginationParams {
   cursor?: PaginationCursor;
-  pageSize: number;
+  pageSize?: number;
 }

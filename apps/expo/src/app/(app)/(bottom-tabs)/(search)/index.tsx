@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { Keyboard, RefreshControl } from "react-native";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { FlashList } from "@shopify/flash-list";
@@ -12,7 +12,8 @@ import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 
-type SearchResultItem = RouterOutputs["profile"]["searchByUsername"][number];
+type SearchResultItem =
+  RouterOutputs["profile"]["getProfilesByUsername"][number];
 
 const Search = () => {
   const { routeProfile } = useRouteProfile();
@@ -22,7 +23,7 @@ const Search = () => {
   const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
 
   const { mutateAsync: searchProfilesByUsername, isPending: isSearching } =
-    api.profile.searchByUsername.useMutation();
+    api.profile.getProfilesByUsername.useMutation();
 
   const performSearch = async (username: string) => {
     setSearchTerm(username);
@@ -55,8 +56,8 @@ const Search = () => {
       imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
       onPress={() =>
         routeProfile(item.userId, {
-          name: item.name,
-          username: item.username,
+          name: item.name ?? "",
+          username: item.username ?? "",
           profilePictureUrl: item.profilePictureUrl,
         })
       }

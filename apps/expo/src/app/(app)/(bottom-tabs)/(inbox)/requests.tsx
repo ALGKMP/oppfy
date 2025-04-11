@@ -66,8 +66,6 @@ const Requests = () => {
     onMutate: async (newData) => {
       await utils.friend.paginateFriendRequests.cancel();
       await utils.follow.paginateFollowRequests.cancel();
-      await utils.profile.getProfileSelf.cancel();
-      await utils.friend.paginateFriendsSelf.cancel();
 
       const prevFriendData =
         utils.friend.paginateFriendRequests.getInfiniteData({
@@ -87,7 +85,7 @@ const Requests = () => {
           pages: prevFriendData.pages.map((page) => ({
             ...page,
             items: page.items.filter(
-              (item) => item.userId !== newData.senderId,
+              (item) => item.userId !== newData.senderUserId,
             ),
           })),
         },
@@ -100,7 +98,7 @@ const Requests = () => {
           pages: prevFollowData.pages.map((page) => ({
             ...page,
             items: page.items.filter(
-              (item) => item.userId !== newData.senderId,
+              (item) => item.userId !== newData.senderUserId,
             ),
           })),
         },

@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gt, inArray, lt, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, lt, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type {
