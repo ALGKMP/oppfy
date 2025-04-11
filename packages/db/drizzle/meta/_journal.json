@@ -15,6 +15,13 @@
       "when": 1744333437642,
       "tag": "0001_colorful_jasper_sitwell",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1744351445798,
+      "tag": "0002_crazy_lockheed",
+      "breakpoints": true
     }
   ]
 }

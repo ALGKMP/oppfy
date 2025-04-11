@@ -30,6 +30,7 @@ import { FriendService } from "./services/social/friend.service";
 import { ReportService } from "./services/social/report.service";
 import { AuthService } from "./services/user/auth.service";
 import { ContactsService } from "./services/user/contacts.service";
+import { NotificationService } from "./services/user/notification.service";
 import { ProfileService } from "./services/user/profile.service";
 import { UserService } from "./services/user/user.service";
 import { TYPES } from "./symbols";
@@ -76,6 +77,9 @@ container
   .bind<PostInteractionService>(TYPES.PostInteractionService)
   .to(PostInteractionService);
 container.bind<AuthService>(TYPES.AuthService).to(AuthService);
+container
+  .bind<NotificationService>(TYPES.NotificationService)
+  .to(NotificationService);
 
 container.bind<Services>(TYPES.Services).to(Services);
 

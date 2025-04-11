@@ -156,13 +156,13 @@ const Settings = () => {
 
         <YStack alignItems="center" gap="$2">
           <XStack alignItems="center" gap="$2">
-            <Text fontSize="$3">Made with</Text>
+            <Text fontSize="$3">made with</Text>
             <Heart size={16} color="$red11" />
-            <Text fontSize="$3">by Oppfy</Text>
+            <Text fontSize="$3">by oppfy</Text>
           </XStack>
 
           <Text color="$gray11" fontSize="$2" fontWeight="400">
-            Version {Constants.expoConfig?.version ?? "1.0.0"}
+            v{Constants.expoConfig?.version ?? "1.0.0"}
           </Text>
         </YStack>
       </YStack>
