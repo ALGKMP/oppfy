@@ -17,7 +17,7 @@ import { FollowRepository } from "./repositories/social/follow.repository";
 import { FriendRepository } from "./repositories/social/friend.repository";
 import { ReportRepository } from "./repositories/social/report.repository";
 import { ContactsRepository } from "./repositories/user/contacts.repository";
-import { NotificationsRepository } from "./repositories/user/notifications.repository";
+import { NotificationRepository } from "./repositories/user/notifications.repository";
 import { ProfileRepository } from "./repositories/user/profile.repository";
 import { UserRepository } from "./repositories/user/user.repository";
 // Services
@@ -52,8 +52,8 @@ container
   .bind<ContactsRepository>(TYPES.ContactsRepository)
   .to(ContactsRepository);
 container
-  .bind<NotificationsRepository>(TYPES.NotificationsRepository)
-  .to(NotificationsRepository);
+  .bind<NotificationRepository>(TYPES.NotificationRepository)
+  .to(NotificationRepository);
 container
   .bind<ProfileRepository>(TYPES.ProfileRepository)
   .to(ProfileRepository);

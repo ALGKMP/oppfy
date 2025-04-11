@@ -15,7 +15,7 @@ const TYPES = {
   FollowRepository: Symbol.for("FollowRepository"),
   FriendRepository: Symbol.for("FriendRepository"),
   ContactsRepository: Symbol.for("ContactsRepository"),
-  NotificationsRepository: Symbol.for("NotificationsRepository"),
+  NotificationRepository: Symbol.for("NotificationRepository"),
   ProfileRepository: Symbol.for("ProfileRepository"),
   UserRepository: Symbol.for("UserRepository"),
   PostRepository: Symbol.for("PostRepository"),

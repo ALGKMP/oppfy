@@ -14,7 +14,7 @@ import type { Notification, NotificationSettings, Profile } from "../../models";
 import { TYPES } from "../../symbols";
 
 @injectable()
-export class NotificationsRepository {
+export class NotificationRepository {
   private db: Database;
   private schema: Schema;
 
