@@ -227,7 +227,7 @@ export class FriendService {
   > {
     return await this.db.transaction(async (tx) => {
       const isRequested = await this.friendRepository.getFriendRequest(
-        { senderUserId: recipientUserId, recipientUserId: senderUserId },
+        { senderUserId, recipientUserId },
         tx,
       );
       if (!isRequested) {
