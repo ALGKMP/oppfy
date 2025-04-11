@@ -44,10 +44,6 @@ interface GenerateProfilePicturePresignedUrlParams {
   contentLength: number;
 }
 
-interface SearchProfileByIdsParams {
-  userIds: string[];
-}
-
 @injectable()
 export class ProfileService {
   constructor(
@@ -147,7 +143,6 @@ export class ProfileService {
 
     return ok(hydratedProfiles);
   }
-
 
   /**
    * Determines relationship states (follow/friend) between users, considering blocks.

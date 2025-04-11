@@ -2,24 +2,13 @@ import { inject, injectable } from "inversify";
 import { ok, Result } from "neverthrow";
 
 import { CloudFront } from "@oppfy/cloudfront";
-import type { Database, DatabaseOrTransaction, Transaction } from "@oppfy/db";
+import type { Database } from "@oppfy/db";
 
-<<<<<<< HEAD
 import { TYPES } from "../../container";
-=======
-import type { IContactsRepository } from "../../interfaces/repositories/user/contacts.repository.interface";
-import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
-import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
-import {
-  ContactRecommendation,
-  FilterPhoneNumbersOnAppParams,
-  IContactsService,
-  UpdateUserContactsParams,
-} from "../../interfaces/services/user/contacts.service.interface";
->>>>>>> fb90d89965f6dc2b36a52fcaef1de4b498635e76
 import { UserIdParam } from "../../interfaces/types";
 import { HydratedProfile } from "../../models";
 import { ContactsRepository } from "../../repositories/user/contacts.repository";
+import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 
 export interface UpdateUserContactsParams {
@@ -40,36 +29,17 @@ export interface ContactRecommendation {
 }
 
 @injectable()
-<<<<<<< HEAD
 export class ContactsService {
-  private db: Database;
-  private contactsRepository: ContactsRepository;
-  private userRepository: UserRepository;
-
   constructor(
-    @inject(TYPES.Database) db: Database,
-    @inject(TYPES.ContactsRepository) contactsRepository: ContactsRepository,
-    @inject(TYPES.UserRepository) userRepository: UserRepository,
-  ) {
-    this.db = db;
-    this.contactsRepository = contactsRepository;
-    this.userRepository = userRepository;
-  }
-=======
-export class ContactsService implements IContactsService {
-  constructor(
-    @inject(TYPES.Database)
-    private readonly db: Database,
-    @inject(TYPES.CloudFront)
-    private readonly cloudfront: CloudFront,
-    @inject(TYPES.ProfileRepository)
-    private readonly profileRepository: IProfileRepository,
-    @inject(TYPES.UserRepository)
-    private readonly userRepository: IUserRepository,
+    @inject(TYPES.Database) private readonly db: Database,
     @inject(TYPES.ContactsRepository)
-    private readonly contactsRepository: IContactsRepository,
+    private readonly contactsRepository: ContactsRepository,
+    @inject(TYPES.UserRepository)
+    private readonly userRepository: UserRepository,
+    @inject(TYPES.ProfileRepository)
+    private readonly profileRepository: ProfileRepository,
+    @inject(TYPES.CloudFront) private readonly cloudfront: CloudFront,
   ) {}
->>>>>>> fb90d89965f6dc2b36a52fcaef1de4b498635e76
 
   async filterPhoneNumbersOnApp({
     phoneNumbers,
