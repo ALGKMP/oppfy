@@ -36,6 +36,12 @@ const SelfProfile = () => {
   } = api.profile.getProfile.useQuery({});
 
   const {
+    data: profileStats,
+    isLoading: isLoadingProfileStats,
+    refetch: refetchProfileStats,
+  } = api.profile.getProfileStats.useQuery({});
+
+  const {
     data: postsData,
     isLoading: isLoadingPostData,
     isFetchingNextPage,
@@ -161,17 +167,17 @@ const SelfProfile = () => {
             bio: profileData?.bio ?? null,
           }}
           stats={{
-            postCount: profileData?.postCount ?? 0,
-            followingCount: profileData?.followingCount ?? 0,
-            followerCount: profileData?.followerCount ?? 0,
-            friendCount: profileData?.friendCount ?? 0,
+            postCount: profileStats?.posts ?? 0,
+            followingCount: profileStats?.following ?? 0,
+            followerCount: profileStats?.followers ?? 0,
+            friendCount: profileStats?.friends ?? 0,
           }}
           createdAt={profileData?.createdAt}
-          isLoading={isLoadingProfile}
+          isLoading={isLoadingProfile || isLoadingProfileStats}
         />
-        {isLoadingProfile ? null : (
+        {(isLoadingProfile || isLoadingProfileStats) ? null : (
           <>
-            {profileData?.friendCount && profileData.friendCount > 0 ? (
+            {profileStats?.friends && profileStats.friends > 0 ? (
               <FriendCarousel paddingHorizontal="$2.5" />
             ) : (
               <RecommendationCarousel paddingHorizontal="$2.5" />
@@ -199,7 +205,9 @@ const SelfProfile = () => {
     ),
     [
       profileData,
+      profileStats,
       isLoadingProfile,
+      isLoadingProfileStats,
       isLoadingPostData,
       postItems.length,
       isFirstInStack,

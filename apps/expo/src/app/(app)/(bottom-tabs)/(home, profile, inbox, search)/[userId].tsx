@@ -36,6 +36,13 @@ const OtherProfile = () => {
     refetch: refetchProfile,
   } = api.profile.getProfile.useQuery({ userId });
 
+
+  const {
+    data: profileStats,
+    isLoading: isLoadingProfileStats,
+    refetch: refetchProfileStats,
+  } = api.profile.getProfileStats.useQuery({});
+
   const { data: networkRelationships, refetch: refetchNetworkRelationships } =
     api.profile.getRelationshipStatesBetweenUsers.useQuery({ userId });
 
