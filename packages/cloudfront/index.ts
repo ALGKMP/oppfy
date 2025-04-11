@@ -13,7 +13,7 @@ type HydratedProfile = Profile & {
 };
 type Post = InferSelectModel<typeof schema.post>;
 type HydratedPost = Post & {
-  postUrl: string | null;
+  postUrl: string;
 };
 
 const ONE_HOUR = 60 * 60 * 1000;
@@ -43,7 +43,7 @@ export class CloudFront {
   }
 
   hydratePost(post: Post): HydratedPost {
-    const postUrl = post.postKey ? this.getPublicPostUrl(post.postKey) : null;
+    const postUrl = this.getPublicPostUrl(post.postKey);
 
     return { ...post, postUrl };
   }

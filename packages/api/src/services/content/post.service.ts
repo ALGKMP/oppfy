@@ -27,7 +27,7 @@ import { UserRepository } from "../../repositories/user/user.repository";
 
 interface HydratedAndProcessedPost {
   post: Post;
-  assetUrl: string | null;
+  assetUrl: string;
   postStats: PostStats;
   authorUserId: string;
   authorUsername: string;

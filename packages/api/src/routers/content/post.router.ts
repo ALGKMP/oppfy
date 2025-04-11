@@ -172,6 +172,7 @@ export const postRouter = createTRPCRouter({
   paginatePosts: protectedProcedure
     .input(
       z.object({
+        userId: z.string().optional(),
         cursor: z
           .object({
             id: z.string(),
@@ -184,7 +185,7 @@ export const postRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const result = await ctx.services.post.paginatePosts({
-        userId: ctx.session.uid,
+        userId: input.userId ?? ctx.session.uid,
         cursor: input.cursor,
         pageSize: input.pageSize,
       });
