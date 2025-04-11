@@ -48,35 +48,35 @@ export const withoutBlocked = <T extends PgSelect>(
     .where(isNull(schema.block.id));
 };
 
-export const getFollowStatusSql = (schema: Schema, currentUserId: string) => {
+export const getFollowStatusSql = (schema: Schema, selfUserId: string) => {
   return sql<FollowStatus>`CASE
     WHEN EXISTS (
       SELECT 1 FROM ${schema.follow}
-      WHERE ${schema.follow.senderUserId} = ${currentUserId}
+      WHERE ${schema.follow.senderUserId} = ${selfUserId}
       AND ${schema.follow.recipientUserId} = ${schema.profile.userId}
     ) THEN 'FOLLOWING'
     WHEN EXISTS (
       SELECT 1 FROM ${schema.followRequest}
-      WHERE ${schema.followRequest.senderUserId} = ${currentUserId}
+      WHERE ${schema.followRequest.senderUserId} = ${selfUserId}
       AND ${schema.followRequest.recipientUserId} = ${schema.profile.userId}
     ) THEN 'REQUESTED'
     ELSE 'NOT_FOLLOWING'
   END`;
 };
 
-export const getFriendStatusSql = (schema: Schema, currentUserId: string) => {
+export const getFriendStatusSql = (schema: Schema, selfUserId: string) => {
   return sql<FriendStatus>`CASE
     WHEN EXISTS (
       SELECT 1 FROM ${schema.friend}
       WHERE (
-        ${schema.friend.userIdA} = ${currentUserId} AND ${schema.friend.userIdB} = ${schema.profile.userId}
+        ${schema.friend.userIdA} = ${selfUserId} AND ${schema.friend.userIdB} = ${schema.profile.userId}
       ) OR (
-        ${schema.friend.userIdA} = ${schema.profile.userId} AND ${schema.friend.userIdB} = ${currentUserId}
+        ${schema.friend.userIdA} = ${schema.profile.userId} AND ${schema.friend.userIdB} = ${selfUserId}
       )
     ) THEN 'FRIENDS'
     WHEN EXISTS (
       SELECT 1 FROM ${schema.friendRequest}
-      WHERE ${schema.friendRequest.senderUserId} = ${currentUserId}
+      WHERE ${schema.friendRequest.senderUserId} = ${selfUserId}
       AND ${schema.friendRequest.recipientUserId} = ${schema.profile.userId}
     ) THEN 'REQUESTED'
     ELSE 'NOT_FRIENDS'
