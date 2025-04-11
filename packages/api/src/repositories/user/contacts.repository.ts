@@ -9,8 +9,8 @@ import type {
 } from "@oppfy/db";
 import { env } from "@oppfy/env";
 
+import { TYPES } from "../../container";
 import type { UserIdParam } from "../../interfaces/types";
-import { TYPES } from "../../types";
 
 export interface DeleteUserContactsParam {
   userId: string;

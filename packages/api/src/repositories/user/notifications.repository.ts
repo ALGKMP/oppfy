@@ -8,27 +8,10 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
-import {
-  DeleteNotificationByIdParams,
-  DeleteNotificationsBetweenUsersParams,
-  DeleteNotificationsParams,
-  DeletePushTokenParams,
-  GetNotificationSettingsParams,
-  GetPushTokensParams,
-  GetRecentNotificationsParams,
-  GetUnreadNotificationsCountParams,
-  INotificationsRepository,
-  NotificationResult,
-  NotificationSettings,
-  PaginateNotificationsParams,
-  StoreNotificationParams,
-  StorePushTokenParams,
-  UpdateNotificationSettingsParams,
-} from "../../interfaces/repositories/user/notification.repository.interface";
-import { TYPES } from "../../types";
+import { TYPES } from "../../container";
 
 @injectable()
-export class NotificationsRepository implements INotificationsRepository {
+export class NotificationsRepository {
   private db: Database;
   private schema: Schema;
 
@@ -39,7 +22,6 @@ export class NotificationsRepository implements INotificationsRepository {
     this.db = db;
     this.schema = schema;
   }
-
 
   // async storePushToken(
   //   params: StorePushTokenParams,
