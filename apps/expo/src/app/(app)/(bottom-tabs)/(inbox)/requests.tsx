@@ -120,16 +120,12 @@ const Requests = () => {
     onSettled: async () => {
       await utils.friend.paginateFriendRequests.invalidate();
       await utils.follow.paginateFollowRequests.invalidate();
-      await utils.profile.getProfileSelf.invalidate();
-      await utils.friend.paginateFriendsSelf.invalidate();
     },
   });
 
   const acceptFollowRequest = api.follow.acceptFollowRequest.useMutation({
     onMutate: async (newData) => {
       await utils.follow.paginateFollowRequests.cancel();
-      await utils.follow.paginateFollowersSelf.cancel();
-      await utils.profile.getProfileSelf.cancel();
 
       const prevData = utils.follow.paginateFollowRequests.getInfiniteData({
         pageSize: PAGE_SIZE,
@@ -143,7 +139,7 @@ const Requests = () => {
           pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.filter(
-              (item) => item.userId !== newData.senderId,
+              (item) => item.userId !== newData.senderUserId,
             ),
           })),
         },
@@ -157,8 +153,6 @@ const Requests = () => {
     },
     onSettled: async () => {
       await utils.follow.paginateFollowRequests.invalidate();
-      await utils.follow.paginateFollowersSelf.invalidate();
-      await utils.profile.getProfileSelf.invalidate();
     },
   });
 
@@ -177,7 +171,7 @@ const Requests = () => {
           pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.filter(
-              (item) => item.userId !== newData.senderId,
+              (item) => item.userId !== newData.senderUserId,
             ),
           })),
         },
@@ -209,7 +203,7 @@ const Requests = () => {
           pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.filter(
-              (item) => item.userId !== newData.senderId,
+              (item) => item.userId !== newData.senderUserId,
             ),
           })),
         },
@@ -275,7 +269,7 @@ const Requests = () => {
             label: "Decline",
             onPress: () =>
               void declineFriendRequest.mutateAsync({
-                senderId: item.data.userId,
+                senderUserId: item.data.userId,
               }),
           }}
           secondaryAction={{
@@ -283,13 +277,13 @@ const Requests = () => {
             variant: "primary",
             onPress: () =>
               void acceptFriendRequest.mutateAsync({
-                senderId: item.data.userId,
+                senderUserId: item.data.userId,
               }),
           }}
           onPress={() =>
             routeProfile(item.data.userId, {
               name: item.data.name ?? "",
-              username: item.data.username,
+              username: item.data.username ?? "",
               profilePictureUrl: item.data.profilePictureUrl,
             })
           }
@@ -306,7 +300,7 @@ const Requests = () => {
           label: "Decline",
           onPress: () =>
             void declineFollowRequest.mutateAsync({
-              senderId: item.data.userId,
+              senderUserId: item.data.userId,
             }),
         }}
         secondaryAction={{
@@ -314,13 +308,13 @@ const Requests = () => {
           variant: "primary",
           onPress: () =>
             void acceptFollowRequest.mutateAsync({
-              senderId: item.data.userId,
+              senderUserId: item.data.userId,
             }),
         }}
         onPress={() =>
           routeProfile(item.data.userId, {
             name: item.data.name ?? "",
-            username: item.data.username,
+            username: item.data.username ?? "",
             profilePictureUrl: item.data.profilePictureUrl,
           })
         }

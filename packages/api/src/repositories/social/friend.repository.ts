@@ -351,7 +351,6 @@ export class FriendRepository {
     const requests = await db
       .select({
         profile: this.schema.profile,
-        friendedAt: this.schema.friendRequest.createdAt,
       })
       .from(this.schema.friendRequest)
       .innerJoin(

@@ -13,16 +13,16 @@ import {
   PaginatedResponse,
   PaginationParams,
 } from "../../interfaces/types";
-import { Profile } from "../../models";
-import { FollowRepository } from "../../repositories/social/follow.repository";
+import { HydratedProfile } from "../../models";
+import {
+  FollowRepository,
+  SocialProfile,
+} from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { TYPES } from "../../symbols";
 
-type SocialProfile = Profile & {
-  followedAt: Date;
-  followStatus: FollowStatus;
-};
+type HydratedSocialProfile = HydratedProfile & SocialProfile;
 
 interface PaginateByUserIdParams extends PaginationParams {
   userId: string;
@@ -337,7 +337,7 @@ export class FollowService {
     cursor,
     pageSize = 10,
   }: PaginateByUserIdParams): Promise<
-    Result<PaginatedResponse<SocialProfile>, never>
+    Result<PaginatedResponse<HydratedSocialProfile>, never>
   > {
     const rawProfiles = await this.followRepository.paginateFollowers({
       userId,
@@ -373,7 +373,7 @@ export class FollowService {
     cursor,
     pageSize = 10,
   }: PaginateByUserIdParams): Promise<
-    Result<PaginatedResponse<SocialProfile>, never>
+    Result<PaginatedResponse<HydratedSocialProfile>, never>
   > {
     const rawProfiles = await this.followRepository.paginateFollowing({
       userId,
@@ -408,7 +408,7 @@ export class FollowService {
     cursor,
     pageSize = 10,
   }: PaginateByUserIdParams): Promise<
-    Result<PaginatedResponse<Profile>, never>
+    Result<PaginatedResponse<HydratedProfile>, never>
   > {
     const rawProfiles = await this.followRepository.paginateFollowRequests({
       userId,

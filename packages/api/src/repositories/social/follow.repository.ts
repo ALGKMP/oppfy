@@ -381,8 +381,6 @@ export class FollowRepository {
     const requests = await db
       .select({
         profile: this.schema.profile,
-        followedAt: this.schema.followRequest.createdAt,
-        followStatus: getFollowStatusSql(this.schema, userId),
       })
       .from(this.schema.followRequest)
       .innerJoin(
