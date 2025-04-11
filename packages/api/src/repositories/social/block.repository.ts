@@ -8,7 +8,7 @@ import type {
   PaginationParams,
 } from "../../interfaces/types";
 import type { Block, Profile } from "../../models";
-import { TYPES } from "../../types";
+import { TYPES } from "../../container";
 
 export interface SocialProfile extends Profile {
   blockedAt: Date;

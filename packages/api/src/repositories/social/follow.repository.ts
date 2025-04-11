@@ -16,7 +16,7 @@ import type {
   PaginationParams,
 } from "../../interfaces/types";
 import type { Follow, FollowRequest, Profile } from "../../models";
-import { TYPES } from "../../types";
+import { TYPES } from "../../container";
 
 export interface SocialProfile extends Profile {
   followedAt: Date;

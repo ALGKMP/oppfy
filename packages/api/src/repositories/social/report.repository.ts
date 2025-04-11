@@ -7,7 +7,7 @@ import type {
   ReportPostReason,
   ReportUserReason,
 } from "../../models";
-import { TYPES } from "../../types";
+import { TYPES } from "../../container";
 
 // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
 type ReportReason = ReportUserReason | ReportPostReason | ReportCommentReason;

@@ -7,11 +7,11 @@ import type {
   Schema,
   Transaction,
 } from "@oppfy/db";
-import { TYPES } from "../../types";
 
 import type { InferSelectModel } from "drizzle-orm";
 import type { schema } from "@oppfy/db";
 import { PaginationParams } from "../../interfaces/types";
+import { TYPES } from "../../container";
 
 export interface GetPostParams {
   postId: string;
