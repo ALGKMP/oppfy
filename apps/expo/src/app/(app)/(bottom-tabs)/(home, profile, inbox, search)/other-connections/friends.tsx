@@ -21,7 +21,7 @@ import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
-type FriendItem = RouterOutputs["friend"]["paginateFriendsOthers"]["items"][0];
+type FriendItem = RouterOutputs["friend"]["paginateFriends"]["items"][0];
 
 const PAGE_SIZE = 20;
 
@@ -38,25 +38,25 @@ const Friends = () => {
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
-      await utils.friend.paginateFriendsOthers.cancel({
+      await utils.friend.paginateFriends.cancel({
         userId,
         pageSize: PAGE_SIZE,
       });
 
-      const prevData = utils.friend.paginateFriendsOthers.getInfiniteData({
+      const prevData = utils.friend.paginateFriends.getInfiniteData({
         userId,
         pageSize: PAGE_SIZE,
       });
       if (prevData === undefined) return;
 
-      utils.friend.paginateFriendsOthers.setInfiniteData(
+      utils.friend.paginateFriends.setInfiniteData(
         { userId, pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.map((item) =>
-              item.userId === newData.userId
+              item.userId === newData.recipientUserId
                 ? {
                     ...item,
                     relationshipState:
@@ -75,7 +75,7 @@ const Friends = () => {
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
       // Refetch latest data since our optimistic update may be outdated
-      void utils.friend.paginateFriendsOthers.invalidate({
+      void utils.friend.paginateFriends.invalidate({
         userId,
         pageSize: PAGE_SIZE,
       });
@@ -84,26 +84,26 @@ const Friends = () => {
 
   const unfollowMutation = api.follow.unfollowUser.useMutation({
     onMutate: async (newData) => {
-      await utils.friend.paginateFriendsOthers.cancel({
+      await utils.friend.paginateFriends.cancel({
         userId,
         pageSize: PAGE_SIZE,
       });
 
-      const prevData = utils.friend.paginateFriendsOthers.getInfiniteData({
+      const prevData = utils.friend.paginateFriends.getInfiniteData({
         userId,
         pageSize: PAGE_SIZE,
       });
       if (prevData === undefined) return;
 
-      utils.friend.paginateFriendsOthers.setInfiniteData(
+      utils.friend.paginateFriends.setInfiniteData(
         { userId, pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.map((item) =>
-              item.userId === newData.userId
-                ? { ...item, relationshipState: "notFollowing" }
+              item.userId === newData.recipientUserId
+                ? { ...item, followStatus: "NOT_FOLLOWING" }
                 : item,
             ),
           })),
@@ -115,7 +115,7 @@ const Friends = () => {
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
       // Refetch latest data since our optimistic update may be outdated
-      void utils.friend.paginateFriendsOthers.invalidate({
+      void utils.friend.paginateFriends.invalidate({
         userId,
         pageSize: PAGE_SIZE,
       });
@@ -124,26 +124,26 @@ const Friends = () => {
 
   const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
     onMutate: async (newData) => {
-      await utils.friend.paginateFriendsOthers.cancel({
+      await utils.friend.paginateFriends.cancel({
         userId,
         pageSize: PAGE_SIZE,
       });
 
-      const prevData = utils.friend.paginateFriendsOthers.getInfiniteData({
+      const prevData = utils.friend.paginateFriends.getInfiniteData({
         userId,
         pageSize: PAGE_SIZE,
       });
       if (prevData === undefined) return;
 
-      utils.friend.paginateFriendsOthers.setInfiniteData(
+      utils.friend.paginateFriends.setInfiniteData(
         { userId, pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.map((item) =>
-              item.userId === newData.recipientId
-                ? { ...item, relationshipState: "notFollowing" }
+              item.userId === newData.recipientUserId
+                ? { ...item, followStatus: "NOT_FOLLOWING" }
                 : item,
             ),
           })),
@@ -155,7 +155,7 @@ const Friends = () => {
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
       // Refetch latest data since our optimistic update may be outdated
-      void utils.friend.paginateFriendsOthers.invalidate({
+      void utils.friend.paginateFriends.invalidate({
         userId,
         pageSize: PAGE_SIZE,
       });
@@ -169,7 +169,7 @@ const Friends = () => {
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = api.friend.paginateFriendsOthers.useInfiniteQuery(
+  } = api.friend.paginateFriends.useInfiniteQuery(
     { userId, pageSize: PAGE_SIZE },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
@@ -191,15 +191,15 @@ const Friends = () => {
   };
 
   const handleFollow = async (userId: string) => {
-    await followMutation.mutateAsync({ userId });
+    await followMutation.mutateAsync({ recipientUserId: userId });
   };
 
   const handleUnfollow = async (userId: string) => {
-    await unfollowMutation.mutateAsync({ userId });
+    await unfollowMutation.mutateAsync({ recipientUserId: userId });
   };
 
   const handleCancelFollowRequest = async (userId: string) => {
-    await cancelFollowRequest.mutateAsync({ recipientId: userId });
+    await cancelFollowRequest.mutateAsync({ recipientUserId: userId });
   };
 
   const handleRefresh = async () => {
@@ -213,8 +213,8 @@ const Friends = () => {
   ): MediaListItemActionProps | undefined => {
     if (item.userId === user?.uid) return undefined;
 
-    switch (item.relationshipState) {
-      case "followRequestSent":
+    switch (item.followStatus) {
+      case "REQUESTED":
         return {
           label: "Sent",
           icon: Send,
@@ -232,7 +232,7 @@ const Friends = () => {
               ],
             }),
         };
-      case "following":
+      case "FOLLOWING":
         return {
           label: "Unfollow",
           icon: UserRoundMinus,
@@ -250,7 +250,7 @@ const Friends = () => {
               ],
             }),
         };
-      case "notFollowing":
+      case "NOT_FOLLOWING":
         return {
           label: "Follow",
           icon: UserRoundPlus,
@@ -268,8 +268,8 @@ const Friends = () => {
       primaryAction={renderActionButton(item)}
       onPress={() =>
         routeProfile(item.userId, {
-          name: item.name,
-          username: item.username,
+          name: item.name ?? "",
+          username: item.username ?? "",
           profilePictureUrl: item.profilePictureUrl,
         })
       }

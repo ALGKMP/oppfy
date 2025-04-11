@@ -24,6 +24,11 @@ import { TYPES } from "../../symbols";
 
 type HydratedSocialProfile = HydratedProfile & SocialProfile;
 
+interface PaginateByUserIdWithSelfUserIdParams extends PaginationParams {
+  selfUserId: string;
+  userId: string;
+}
+
 interface PaginateByUserIdParams extends PaginationParams {
   userId: string;
 }
@@ -336,13 +341,15 @@ export class FollowService {
     userId,
     cursor,
     pageSize = 10,
-  }: PaginateByUserIdParams): Promise<
+    selfUserId,
+  }: PaginateByUserIdWithSelfUserIdParams): Promise<
     Result<PaginatedResponse<HydratedSocialProfile>, never>
   > {
     const rawProfiles = await this.followRepository.paginateFollowers({
       userId,
       cursor,
       pageSize: pageSize + 1,
+      selfUserId,
     });
 
     const hydratedProfiles = rawProfiles.map((profile) => ({
@@ -372,13 +379,15 @@ export class FollowService {
     userId,
     cursor,
     pageSize = 10,
-  }: PaginateByUserIdParams): Promise<
+    selfUserId,
+  }: PaginateByUserIdWithSelfUserIdParams): Promise<
     Result<PaginatedResponse<HydratedSocialProfile>, never>
   > {
     const rawProfiles = await this.followRepository.paginateFollowing({
       userId,
       cursor,
       pageSize: pageSize + 1,
+      selfUserId,
     });
 
     const hydratedProfiles = rawProfiles.map((profile) => ({

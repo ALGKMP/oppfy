@@ -23,7 +23,7 @@ const Post = () => {
 
   const { postId } = useLocalSearchParams<{ postId: string }>();
 
-  const { data: post, isLoading: isPostLoading } = api.post.getPost.useQuery(
+  const { data, isLoading: isPostLoading } = api.post.getPost.useQuery(
     { postId },
     { enabled: !!postId },
   );
@@ -45,7 +45,7 @@ const Post = () => {
     );
   }
 
-  if (!post) {
+  if (!data) {
     return (
       <ScreenView padding={0}>
         <Header
@@ -81,41 +81,41 @@ const Post = () => {
         />
 
         <PostCard
-          postId={post.postId}
+          postId={data.post.id}
           endpoint="single-post"
-          createdAt={post.createdAt}
-          caption={post.caption}
+          createdAt={data.post.createdAt}
+          caption={data.post.caption}
           author={{
-            id: post.authorId,
-            name: post.authorName ?? "",
-            username: post.authorUsername ?? "",
-            profilePictureUrl: post.authorProfilePicture,
+            id: data.authorUserId,
+            name: data.authorName ?? "",
+            username: data.authorUsername ?? "",
+            profilePictureUrl: data.authorProfilePictureUrl,
           }}
           recipient={{
-            id: post.recipientId,
-            name: post.recipientName ?? "",
-            username: post.recipientUsername ?? "",
-            profilePictureUrl: post.recipientProfilePicture,
+            id: data.recipientUserId,
+            name: data.recipientName ?? "",
+            username: data.recipientUsername ?? "",
+            profilePictureUrl: data.recipientProfilePictureUrl,
           }}
           media={{
-            id: post.postId,
+            id: data.post.id,
             recipient: {
-              id: post.recipientId,
-              name: post.recipientName ?? "",
-              username: post.recipientUsername ?? "",
-              profilePictureUrl: post.recipientProfilePicture,
+              id: data.recipientUserId,
+              name: data.recipientName ?? "",
+              username: data.recipientUsername ?? "",
+              profilePictureUrl: data.recipientProfilePictureUrl,
             },
-            type: post.mediaType,
-            url: post.imageUrl,
+            type: data.post.mediaType,
+            url: data.assetUrl,
             dimensions: {
-              width: post.width,
-              height: post.height,
+              width: data.post.width,
+              height: data.post.height,
             },
           }}
           stats={{
-            likes: post.likesCount,
-            comments: post.commentsCount,
-            hasLiked: post.hasLiked,
+            likes: data.postStats.likes,
+            comments: data.postStats.comments,
+            hasLiked: data.hasLiked,
           }}
           isViewable={true}
         />

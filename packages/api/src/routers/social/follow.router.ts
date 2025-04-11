@@ -193,6 +193,7 @@ export const followRouter = createTRPCRouter({
   paginateFollowers: protectedProcedure
     .input(
       z.object({
+        userId: z.string().optional(),
         cursor: z
           .object({
             id: z.string(),
@@ -204,9 +205,41 @@ export const followRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const result = await ctx.services.follow.paginateFollowers({
-        userId: ctx.session.uid,
+        userId: input.userId ?? ctx.session.uid,
         cursor: input.cursor,
         pageSize: input.pageSize,
+        selfUserId: ctx.session.uid,
+      });
+
+      return result.match(
+        (res) => res,
+        (_) => {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+          });
+        },
+      );
+    }),
+
+  paginateFollowing: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string().optional(),
+        cursor: z
+          .object({
+            id: z.string(),
+            createdAt: z.date(),
+          })
+          .optional(),
+        pageSize: z.number().min(1).max(100).default(10),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.services.follow.paginateFollowing({
+        userId: input.userId ?? ctx.session.uid,
+        cursor: input.cursor,
+        pageSize: input.pageSize,
+        selfUserId: ctx.session.uid,
       });
 
       return result.match(
