@@ -2,6 +2,7 @@ import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
 import { CloudFront } from "@oppfy/cloudfront";
+import { env } from "@oppfy/env";
 import { S3 } from "@oppfy/s3";
 
 import * as ProfileErrors from "../../errors/user/profile.error";
@@ -23,7 +24,7 @@ import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { TYPES } from "../../symbols";
-import { env } from "@oppfy/env";
+
 interface RelationshipState {
   follow: FollowStatus;
   friend: FriendStatus;
@@ -298,10 +299,19 @@ export class ProfileService {
       contentLength,
     });
 
+    const key = `/profile-pictures/${userId}.jpg`;
+
     await this.cloudfront.createInvalidation(
-      env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
-      `/profile-pictures/${userId}.jpg`,
+      env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID,
+      key,
     );
+
+    await this.profileRepository.updateProfile({
+      userId,
+      update: {
+        profilePictureKey: key,
+      },
+    });
 
     return ok(presignedUrl);
   }
