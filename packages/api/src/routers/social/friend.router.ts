@@ -160,6 +160,7 @@ export const friendRouter = createTRPCRouter({
   paginateFriends: protectedProcedure
     .input(
       z.object({
+        userId: z.string().optional(),
         cursor: z
           .object({
             id: z.string(),
@@ -171,7 +172,7 @@ export const friendRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const result = await ctx.services.friend.paginateFriends({
-        userId: ctx.session.uid,
+        userId: input.userId ?? ctx.session.uid,
         cursor: input.cursor,
         pageSize: input.pageSize,
       });

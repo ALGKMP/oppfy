@@ -11,7 +11,7 @@ import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 
 type Icon = React.FC<IconProps>;
-type NetworkRelationships = RouterOutputs["profile"]["getNetworkRelationships"];
+type NetworkRelationships = RouterOutputs["profile"]["getRelationshipStatesBetweenUsers"]
 
 interface ActionButtonProps {
   userId?: string;

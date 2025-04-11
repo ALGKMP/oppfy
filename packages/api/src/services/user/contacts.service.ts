@@ -4,7 +4,7 @@ import { ok, Result } from "neverthrow";
 import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
-import { TYPES } from "../../container";
+import { TYPES } from "../../symbols";
 import { UserIdParam } from "../../interfaces/types";
 import { HydratedProfile } from "../../models";
 import { ContactsRepository } from "../../repositories/user/contacts.repository";

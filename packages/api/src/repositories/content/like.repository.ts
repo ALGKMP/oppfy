@@ -9,7 +9,7 @@ import type {
 } from "@oppfy/db";
 
 import type { Like } from "../../models";
-import { TYPES } from "../../container";
+import { TYPES } from "../../symbols";
 
 export interface LikeParams {
   userId: string;

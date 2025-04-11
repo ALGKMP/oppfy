@@ -1,6 +1,6 @@
 import { inject } from "inversify";
 
-import { TYPES } from "../container";
+import { TYPES } from "../symbols";
 import { PostService } from "./content/post.service";
 import { PostInteractionService } from "./content/postInteraction.service";
 import { BlockService } from "./social/block.service";

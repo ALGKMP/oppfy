@@ -8,7 +8,6 @@ import { env } from "@oppfy/env";
 import { Mux } from "@oppfy/mux";
 import { S3 } from "@oppfy/s3";
 
-import { TYPES } from "../../container";
 import * as PostErrors from "../../errors/content/post.error";
 import type {
   PaginatedResponse,
@@ -24,10 +23,11 @@ import type {
 } from "../../repositories/content/post.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
+import { TYPES } from "../../symbols";
 
 interface HydratedAndProcessedPost {
   post: Post;
-  assetUrl: string | null;
+  assetUrl: string;
   postStats: PostStats;
   authorUserId: string;
   authorUsername: string;

@@ -15,7 +15,7 @@ import { EmptyPlaceholder, HeaderTitle, Icon } from "~/components/ui";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
-type Post = RouterOutputs["post"]["paginatePostsOfUserOther"]["items"][number];
+type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
 
 const OtherProfile = () => {
   const router = useRouter();
@@ -34,10 +34,10 @@ const OtherProfile = () => {
     data: profileData,
     isLoading: isLoadingProfile,
     refetch: refetchProfile,
-  } = api.profile.getProfileOther.useQuery({ userId: userId });
+  } = api.profile.getProfile.useQuery({ userId });
 
   const { data: networkRelationships, refetch: refetchNetworkRelationships } =
-    api.profile.getNetworkRelationships.useQuery({ userId });
+    api.profile.getRelationshipStatesBetweenUsers.useQuery({ userId });
 
   const {
     data: postsData,
@@ -46,7 +46,7 @@ const OtherProfile = () => {
     fetchNextPage,
     refetch: refetchPosts,
     hasNextPage,
-  } = api.post.paginatePostsOfUserOther.useInfiniteQuery(
+  } = api.post.paginatePosts.useInfiniteQuery(
     { userId, pageSize: 10 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -81,7 +81,7 @@ const OtherProfile = () => {
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       const visibleItemIds = viewableItems
         .filter((token) => token.isViewable)
-        .map((token) => (token.item as Post).postId);
+        .map((token) => (token.item as Post).post.id);
 
       setViewableItems(visibleItemIds);
     },
@@ -96,43 +96,43 @@ const OtherProfile = () => {
   const renderPost = useCallback(
     ({ item }: { item: Post }) => (
       <PostCard
-        postId={item.postId}
+        postId={item.post.id}
         endpoint="other-profile"
-        createdAt={item.createdAt}
-        caption={item.caption}
+        createdAt={item.post.createdAt}
+        caption={item.post.caption}
         author={{
-          id: item.authorId,
+          id: item.authorUserId,
           name: item.authorName ?? "",
           username: item.authorUsername ?? "",
-          profilePictureUrl: item.authorProfilePicture,
+          profilePictureUrl: item.authorProfilePictureUrl,
         }}
         recipient={{
-          id: item.recipientId,
+          id: item.recipientUserId,
           name: item.recipientName ?? "",
           username: item.recipientUsername ?? "",
-          profilePictureUrl: item.recipientProfilePicture,
+          profilePictureUrl: item.recipientProfilePictureUrl,
         }}
         media={{
-          id: item.postId,
+          id: item.post.id,
           recipient: {
-            id: item.recipientId,
+            id: item.post.id,
             name: item.recipientName ?? "",
             username: item.recipientUsername ?? "",
-            profilePictureUrl: item.recipientProfilePicture,
+            profilePictureUrl: item.recipientProfilePictureUrl,
           },
-          type: item.mediaType,
-          url: item.imageUrl,
+          type: item.post.mediaType,
+          url: item.assetUrl,
           dimensions: {
-            width: item.width,
-            height: item.height,
+            width: item.post.width,
+            height: item.post.height,
           },
         }}
         stats={{
-          likes: item.likesCount,
-          comments: item.commentsCount,
+          likes: item.postStats.likes,
+          comments: item.postStats.comments,
           hasLiked: item.hasLiked,
         }}
-        isViewable={viewableItems.includes(item.postId)}
+        isViewable={viewableItems.includes(item.post.id)}
       />
     ),
     [viewableItems],
@@ -219,7 +219,7 @@ const OtherProfile = () => {
       );
     }
 
-    if (networkRelationships?.blocked) {
+    if (networkRelationships?.isBlocked) {
       return (
         <View paddingTop="$6">
           <EmptyPlaceholder
@@ -231,7 +231,7 @@ const OtherProfile = () => {
       );
     }
 
-    if (networkRelationships?.privacy === "private") {
+    if (profileData?.privacy === "private") {
       return (
         <View paddingTop="$6">
           <EmptyPlaceholder
@@ -259,7 +259,7 @@ const OtherProfile = () => {
       renderItem={renderPost}
       ListHeaderComponent={memoizedHeader}
       ListEmptyComponent={renderNoPosts}
-      keyExtractor={(item) => `other-profile-post-${item.postId}`}
+      keyExtractor={(item) => `other-profile-post-${item.post.id}`}
       estimatedItemSize={300}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}

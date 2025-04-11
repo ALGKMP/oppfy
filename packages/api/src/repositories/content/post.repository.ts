@@ -1,5 +1,6 @@
 import { aliasedTable, and, desc, eq, lt, or, sql } from "drizzle-orm";
 import type { InferSelectModel } from "drizzle-orm";
+import type { InferSelectModel } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type {
@@ -7,13 +8,12 @@ import type {
   DatabaseOrTransaction,
   Schema,
   schema,
+  schema,
   Transaction,
 } from "@oppfy/db";
 
-import { mediaTypeEnum, postStatusEnum } from "../../../../db/src/schema";
-import { TYPES } from "../../container";
-import { PaginationParams, PostIdParam } from "../../interfaces/types";
-import { Post } from "../../models";
+import { PaginationParams } from "../../interfaces/types";
+import { TYPES } from "../../symbols";
 
 export interface GetPostParams {
   postId: string;

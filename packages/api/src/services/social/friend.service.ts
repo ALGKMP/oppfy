@@ -4,7 +4,6 @@ import { err, ok, Result } from "neverthrow";
 import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
-import { TYPES } from "../../container";
 import * as FriendErrors from "../../errors/social/friend.error";
 import { ProfileNotFound } from "../../errors/user/profile.error";
 import {
@@ -14,13 +13,14 @@ import {
   PaginatedResponse,
   PaginationParams,
 } from "../../interfaces/types";
-import { Profile } from "../../models";
+import { HydratedProfile } from "../../models";
 import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
+import { TYPES } from "../../symbols";
 
-type SocialProfile = Profile & {
+type SocialProfile = HydratedProfile & {
   followedAt: Date;
   friendedAt: Date;
   followStatus: FollowStatus;
@@ -394,7 +394,7 @@ export class FriendService {
     cursor,
     pageSize = 10,
   }: PaginateByUserIdParams): Promise<
-    Result<PaginatedResponse<Profile>, never>
+    Result<PaginatedResponse<HydratedProfile>, never>
   > {
     const rawProfiles = await this.friendRepository.paginateFriendRequests({
       userId,

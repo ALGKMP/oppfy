@@ -128,11 +128,6 @@ export const profileRouter = createTRPCRouter({
         (res) => res,
         (err) => {
           switch (err.name) {
-            case "ProfileBlockedError":
-              throw new TRPCError({
-                code: "FORBIDDEN",
-                message: "Profile is blocked",
-              });
             case "CannotCheckRelationshipWithSelfError":
               throw new TRPCError({
                 code: "BAD_REQUEST",
@@ -150,10 +145,11 @@ export const profileRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.profile.generateProfilePicturePresignedUrl({
-        userId: ctx.session.uid,
-        contentLength: input.contentLength,
-      });
+      const result =
+        await ctx.services.profile.generateProfilePicturePresignedUrl({
+          userId: ctx.session.uid,
+          contentLength: input.contentLength,
+        });
 
       return result.match(
         (res) => res,

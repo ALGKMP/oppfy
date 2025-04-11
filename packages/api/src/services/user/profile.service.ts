@@ -4,7 +4,6 @@ import { err, ok, Result } from "neverthrow";
 import { CloudFront } from "@oppfy/cloudfront";
 import { S3 } from "@oppfy/s3";
 
-import { TYPES } from "../../container";
 import * as ProfileErrors from "../../errors/user/profile.error";
 import {
   FollowStatus,
@@ -23,10 +22,12 @@ import { BlockRepository } from "../../repositories/social/block.repository";
 import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
+import { TYPES } from "../../symbols";
 
 interface RelationshipState {
   follow: FollowStatus;
   friend: FriendStatus;
+  isBlocked: boolean;
 }
 
 interface SearchProfilesByUsernameParams {
@@ -151,7 +152,7 @@ export class ProfileService {
     params: SelfOtherUserIdsParams,
   ): Promise<
     Result<
-      RelationshipState[],
+      RelationshipState,
       | ProfileErrors.ProfileBlocked
       | ProfileErrors.CannotCheckRelationshipWithSelf
     >
@@ -162,15 +163,22 @@ export class ProfileService {
       return err(new ProfileErrors.CannotCheckRelationshipWithSelf());
     }
 
-    if (otherUserId) {
-      const isBlocked = await this.blockRepository.getBlock({
-        senderUserId: selfUserId,
-        recipientUserId: otherUserId,
-      });
+    const isBlockedOutgoing = await this.blockRepository.getBlock({
+      senderUserId: selfUserId,
+      recipientUserId: otherUserId,
+    });
 
-      if (isBlocked) {
-        return err(new ProfileErrors.ProfileBlocked(otherUserId));
-      }
+    const isBlockedIncoming = await this.blockRepository.getBlock({
+      senderUserId: otherUserId,
+      recipientUserId: selfUserId,
+    });
+
+    if (isBlockedIncoming) {
+      return ok({
+        follow: "NOT_FOLLOWING",
+        friend: "NOT_FRIENDS",
+        isBlocked: true,
+      });
     }
 
     const [isFollowing, isFollowRequested, isFriends, isFriendRequested] =
@@ -205,7 +213,11 @@ export class ProfileService {
       isFriends ? "FRIENDS" : isFriendRequested ? "REQUESTED" : "NOT_FRIENDS"
     ) satisfies FriendStatus;
 
-    return ok([{ follow: followState, friend: friendState }]);
+    return ok({
+      follow: followState,
+      friend: friendState,
+      isBlocked: isBlockedOutgoing != undefined,
+    });
   }
 
   /**
