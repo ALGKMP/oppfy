@@ -66,9 +66,10 @@ export class ProfileService {
   /**
    * Retrieves a user's profile, ensuring access control with privacy and block checks.
    */
-  async profile(
-    params: SelfOtherUserIdsParams<"optional">,
-  ): Promise<
+  async profile({
+    selfUserId,
+    otherUserId,
+  }: SelfOtherUserIdsParams<"optional">): Promise<
     Result<
       HydratedProfile,
       | ProfileErrors.ProfileBlocked
@@ -76,8 +77,6 @@ export class ProfileService {
       | ProfileErrors.ProfilePrivate
     >
   > {
-    const { selfUserId, otherUserId } = params;
-
     if (otherUserId) {
       const isBlocked = await this.blockRepository.getBlock({
         senderUserId: selfUserId,
