@@ -33,6 +33,10 @@ export interface BaseSelfOtherUserIdsParams {
   selfUserId: string;
 }
 
+export interface PostIdParam {
+  postId: string;
+}
+
 export type SelfOtherUserIdsParams<
   T extends "required" | "optional" = "required",
 > = BaseSelfOtherUserIdsParams &

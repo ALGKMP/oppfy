@@ -91,13 +91,6 @@ interface UploadVideoPostForUserNotOnAppUrlParams {
   width: number;
 }
 
-interface UpdatePostParams {
-  userId: string;
-  postId: string;
-  content: string;
-  mediaUrls?: string[];
-}
-
 interface DeletePostParams {
   userId: string;
   postId: string;
