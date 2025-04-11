@@ -23,7 +23,7 @@ import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { TYPES } from "../../symbols";
-
+import { env } from "@oppfy/env";
 interface RelationshipState {
   follow: FollowStatus;
   friend: FriendStatus;
@@ -297,6 +297,11 @@ export class ProfileService {
       userId,
       contentLength,
     });
+
+    await this.cloudfront.createInvalidation(
+      env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
+      `/profile-pictures/${userId}.jpg`,
+    );
 
     return ok(presignedUrl);
   }
