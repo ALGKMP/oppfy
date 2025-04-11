@@ -4,11 +4,8 @@ import { err, ok, Result } from "neverthrow";
 import { CloudFront } from "@oppfy/cloudfront";
 import { S3 } from "@oppfy/s3";
 
+import { TYPES } from "../../container";
 import * as ProfileErrors from "../../errors/user/profile.error";
-import type { IBlockRepository } from "../../interfaces/repositories/social/block.repository.interface";
-import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
-import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
-import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import {
   FollowStatus,
   FriendStatus,
@@ -22,7 +19,10 @@ import {
   ProfileInsert,
   UserStats,
 } from "../../models";
-import { TYPES } from "../../types";
+import { BlockRepository } from "../../repositories/social/block.repository";
+import { FollowRepository } from "../../repositories/social/follow.repository";
+import { FriendRepository } from "../../repositories/social/friend.repository";
+import { ProfileRepository } from "../../repositories/user/profile.repository";
 
 interface RelationshipState {
   follow: FollowStatus;
@@ -44,10 +44,6 @@ interface GenerateProfilePicturePresignedUrlParams {
   contentLength: number;
 }
 
-interface SearchProfileByIdsParams {
-  userIds: string[];
-}
-
 @injectable()
 export class ProfileService {
   constructor(
@@ -56,13 +52,13 @@ export class ProfileService {
     @inject(TYPES.CloudFront)
     private readonly cloudfront: CloudFront,
     @inject(TYPES.ProfileRepository)
-    private readonly profileRepository: IProfileRepository,
+    private readonly profileRepository: ProfileRepository,
     @inject(TYPES.FollowRepository)
-    private readonly followRepository: IFollowRepository,
+    private readonly followRepository: FollowRepository,
     @inject(TYPES.FriendRepository)
-    private readonly friendRepository: IFriendRepository,
+    private readonly friendRepository: FriendRepository,
     @inject(TYPES.BlockRepository)
-    private readonly blockRepository: IBlockRepository,
+    private readonly blockRepository: BlockRepository,
   ) {}
 
   /**
@@ -141,20 +137,6 @@ export class ProfileService {
     params: SearchProfilesByUsernameParams,
   ): Promise<Result<HydratedProfile[], never>> {
     const profiles = await this.profileRepository.getProfilesByUsername(params);
-    const hydratedProfiles = profiles.map((profile) =>
-      this.cloudfront.hydrateProfile(profile),
-    );
-
-    return ok(hydratedProfiles);
-  }
-
-  /**
-   * Searches profiles by IDs, no filter for the blocked status.
-   */
-  async searchProfilesByIds(
-    params: SearchProfileByIdsParams,
-  ): Promise<Result<HydratedProfile[], never>> {
-    const profiles = await this.profileRepository.getProfilesByIds(params);
     const hydratedProfiles = profiles.map((profile) =>
       this.cloudfront.hydrateProfile(profile),
     );

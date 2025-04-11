@@ -274,7 +274,8 @@ const useContacts = (): ContactFns => {
   return {
     syncContacts,
     contactsPaginatedQuery,
-    // deleteContacts: deleteContactsMutation.mutateAsync,
+    deleteContacts: () =>
+      updateContactsMutation.mutateAsync({ hashedPhoneNumbers: [] }),
     getDeviceContacts,
     searchContacts,
     getRecomendedContacts,

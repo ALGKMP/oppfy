@@ -3,12 +3,11 @@ import { err, ok, Result } from "neverthrow";
 
 import type { Database } from "@oppfy/db";
 
+import { TYPES } from "../../container";
 import * as UserErrors from "../../errors/user/user.error";
-import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type { UserIdParam } from "../../interfaces/types";
 import { UserStatus } from "../../models";
-// import { TYPES } from "../../types";
-
+import { UserRepository } from "../../repositories/user/user.repository";
 
 @injectable()
 export class UserService {
@@ -16,7 +15,7 @@ export class UserService {
     @inject(TYPES.Database)
     private db: Database,
     @inject(TYPES.UserRepository)
-    private userRepository: IUserRepository,
+    private userRepository: UserRepository,
   ) {}
 
   async deleteUser(params: UserIdParam): Promise<Result<void, never>> {

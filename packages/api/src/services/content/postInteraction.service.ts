@@ -3,11 +3,11 @@ import { err, ok, Result } from "neverthrow";
 
 import type { Database } from "@oppfy/db";
 
+import { TYPES } from "../../container";
 import * as PostInteractionErrors from "../../errors/content/postInteraction.error";
-import type { ICommentRepository } from "../../interfaces/repositories/content/comment.repository.interface";
-import type { ILikeRepository } from "../../interfaces/repositories/content/like.repository.interface";
-import type { IPostRepository } from "../../interfaces/repositories/content/post.repository.interface";
-import { TYPES } from "../../types";
+import { CommentRepository } from "../../repositories/content/comment.repository";
+import { LikeRepository } from "../../repositories/content/like.repository";
+import { PostRepository } from "../../repositories/content/post.repository";
 
 interface LikePostParams {
   postId: string;
@@ -36,11 +36,11 @@ export class PostInteractionService {
   constructor(
     @inject(TYPES.Database) private readonly db: Database,
     @inject(TYPES.PostRepository)
-    private readonly postRepository: IPostRepository,
+    private readonly postRepository: PostRepository,
     @inject(TYPES.CommentRepository)
-    private readonly commentRepository: ICommentRepository,
+    private readonly commentRepository: CommentRepository,
     @inject(TYPES.LikeRepository)
-    private readonly likeRepository: ILikeRepository,
+    private readonly likeRepository: LikeRepository,
   ) {}
 
   async likePost({

@@ -1,13 +1,15 @@
 import { inject, injectable } from "inversify";
 import { ok, Result } from "neverthrow";
 
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
-import type { IContactsRepository } from "../../interfaces/repositories/user/contacts.repository.interface";
-import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
+import { TYPES } from "../../container";
 import { UserIdParam } from "../../interfaces/types";
 import { HydratedProfile } from "../../models";
-import { TYPES } from "../../types";
+import { ContactsRepository } from "../../repositories/user/contacts.repository";
+import { ProfileRepository } from "../../repositories/user/profile.repository";
+import { UserRepository } from "../../repositories/user/user.repository";
 
 export interface UpdateUserContactsParams {
   userId: string;
@@ -28,19 +30,16 @@ export interface ContactRecommendation {
 
 @injectable()
 export class ContactsService {
-  private db: Database;
-  private contactsRepository: IContactsRepository;
-  private userRepository: IUserRepository;
-
   constructor(
-    @inject(TYPES.Database) db: Database,
-    @inject(TYPES.ContactsRepository) contactsRepository: IContactsRepository,
-    @inject(TYPES.UserRepository) userRepository: IUserRepository,
-  ) {
-    this.db = db;
-    this.contactsRepository = contactsRepository;
-    this.userRepository = userRepository;
-  }
+    @inject(TYPES.Database) private readonly db: Database,
+    @inject(TYPES.ContactsRepository)
+    private readonly contactsRepository: ContactsRepository,
+    @inject(TYPES.UserRepository)
+    private readonly userRepository: UserRepository,
+    @inject(TYPES.ProfileRepository)
+    private readonly profileRepository: ProfileRepository,
+    @inject(TYPES.CloudFront) private readonly cloudfront: CloudFront,
+  ) {}
 
   async filterPhoneNumbersOnApp({
     phoneNumbers,
@@ -66,12 +65,15 @@ export class ContactsService {
       return ok([]);
     }
 
-    // Get user profiles for recommendations
-    const userProfiles = await this.profileService.searchProfilesByIds({
+    const profiles = await this.profileRepository.getProfilesByIds({
       userIds: allRecommendedUserIds,
     });
 
-    return ok(userProfiles.unwrapOr([]));
+    const hydratedProfiles = profiles.map((profile) =>
+      this.cloudfront.hydrateProfile(profile),
+    );
+
+    return ok(hydratedProfiles);
   }
 
   async updateUserContacts(

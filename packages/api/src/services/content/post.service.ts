@@ -8,21 +8,22 @@ import { env } from "@oppfy/env";
 import { Mux } from "@oppfy/mux";
 import { S3 } from "@oppfy/s3";
 
+import { TYPES } from "../../container";
 import * as PostErrors from "../../errors/content/post.error";
-import type { ICommentRepository } from "../../interfaces/repositories/content/comment.repository.interface";
-import type {
-  IPostRepository,
-  PostResult as RawPostResult,
-  PostResultWithLike as RawPostResultWithoutLike,
-} from "../../interfaces/repositories/content/post.repository.interface";
-import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
-import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import type {
   PaginatedResponse,
   PaginationParams,
 } from "../../interfaces/types";
 import { Comment, Post, PostStats } from "../../models";
-import { TYPES } from "../../types";
+import { CommentRepository } from "../../repositories/content/comment.repository";
+import type { PaginatedCommentResult as RawPaginatedComment } from "../../repositories/content/comment.repository";
+import { PostRepository } from "../../repositories/content/post.repository";
+import type {
+  PostResult as RawPostResult,
+  PostResultWithLike as RawPostResultWithoutLike,
+} from "../../repositories/content/post.repository";
+import { ProfileRepository } from "../../repositories/user/profile.repository";
+import { UserRepository } from "../../repositories/user/user.repository";
 
 interface HydratedAndProcessedPost {
   post: Post;
@@ -125,13 +126,13 @@ export class PostService {
     @inject(TYPES.Database)
     private readonly db: Database,
     @inject(TYPES.PostRepository)
-    private readonly postRepository: IPostRepository,
+    private readonly postRepository: PostRepository,
     @inject(TYPES.UserRepository)
-    private readonly userRepository: IUserRepository,
+    private readonly userRepository: UserRepository,
     @inject(TYPES.ProfileRepository)
-    private readonly profileRepository: IProfileRepository,
+    private readonly profileRepository: ProfileRepository,
     @inject(TYPES.CommentRepository)
-    private readonly commentRepository: ICommentRepository,
+    private readonly commentRepository: CommentRepository,
     @inject(TYPES.S3)
     private readonly s3: S3,
     @inject(TYPES.CloudFront)

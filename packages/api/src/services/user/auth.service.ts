@@ -7,11 +7,11 @@ import { env } from "@oppfy/env";
 import type { Twilio } from "@oppfy/twilio";
 import { RestException } from "@oppfy/twilio";
 
+import { TYPES } from "../../container";
 import * as AuthErrors from "../../errors/user/auth.error";
 import * as UserErrors from "../../errors/user/user.error";
-import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import { PhoneNumberParam } from "../../interfaces/types";
-import { TYPES } from "../../types";
+import { UserRepository } from "../../repositories/user/user.repository";
 
 const ADMIN_PHONE_NUMBERS = [
   "+16478852142",
@@ -48,7 +48,7 @@ export class AuthService {
     @inject(TYPES.Database)
     private readonly db: Database,
     @inject(TYPES.UserRepository)
-    private readonly userRepository: IUserRepository,
+    private readonly userRepository: UserRepository,
     @inject(TYPES.Twilio)
     private readonly twilio: Twilio,
   ) {}

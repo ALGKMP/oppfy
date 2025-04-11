@@ -1,4 +1,3 @@
-// repositories/user.repository.ts
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
@@ -9,9 +8,9 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
+import { TYPES } from "../../container";
 import type { PhoneNumberParam, UserIdParam } from "../../interfaces/types";
 import type { User, UserStatus } from "../../models";
-import { TYPES } from "../../container";
 
 export interface CreateUserParams {
   id?: string;

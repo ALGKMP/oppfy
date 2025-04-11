@@ -7,10 +7,11 @@ import type {
   Schema,
   Transaction,
 } from "@oppfy/db";
+
 import { TYPES } from "../../container";
 
 @injectable()
-export class NotificationsRepository implements INotificationsRepository {
+export class NotificationsRepository {
   private db: Database;
   private schema: Schema;
 
@@ -21,7 +22,6 @@ export class NotificationsRepository implements INotificationsRepository {
     this.db = db;
     this.schema = schema;
   }
-
 
   // async storePushToken(
   //   params: StorePushTokenParams,
