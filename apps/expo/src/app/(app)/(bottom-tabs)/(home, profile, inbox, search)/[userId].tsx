@@ -219,7 +219,7 @@ const OtherProfile = () => {
       );
     }
 
-    if (networkRelationships?.blocked) {
+    if (networkRelationships?.isBlocked) {
       return (
         <View paddingTop="$6">
           <EmptyPlaceholder
@@ -231,7 +231,7 @@ const OtherProfile = () => {
       );
     }
 
-    if (networkRelationships?.privacy === "private") {
+    if (profileData?.privacy === "private") {
       return (
         <View paddingTop="$6">
           <EmptyPlaceholder
@@ -259,7 +259,7 @@ const OtherProfile = () => {
       renderItem={renderPost}
       ListHeaderComponent={memoizedHeader}
       ListEmptyComponent={renderNoPosts}
-      keyExtractor={(item) => `other-profile-post-${item.postId}`}
+      keyExtractor={(item) => `other-profile-post-${item.post.id}`}
       estimatedItemSize={300}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}
