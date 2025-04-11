@@ -9,6 +9,8 @@ import type {
 } from "@oppfy/db";
 
 import { TYPES } from "../../container";
+import { UserIdParam } from "../../interfaces/types";
+import type { NotificationSettings } from "../../models";
 
 @injectable()
 export class NotificationsRepository {
@@ -237,114 +239,34 @@ export class NotificationsRepository {
   //   );
   // }
 
-  // async updateNotificationSettings(
-  //   params: UpdateNotificationSettingsParams,
-  //   db: DatabaseOrTransaction = this.db,
-  // ): Promise<void> {
-  //   const { notificationSettingsId, notificationSettings } = params;
+  async updateNotificationSettings(
+    params: UpdateNotificationSettingsParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const { notificationSettingsId, notificationSettings } = params;
 
-  //   await db
-  //     .update(this.schema.notificationSettings)
-  //     .set({ ...notificationSettings })
-  //     .where(eq(this.schema.notificationSettings.id, notificationSettingsId));
-  // }
+    await db
+      .update(this.schema.notificationSettings)
+      .set({ ...notificationSettings })
+      .where(eq(this.schema.notificationSettings.id, notificationSettingsId));
+  }
 
-  // async storeNotification(
-  //   params: StoreNotificationParams,
-  //   db: DatabaseOrTransaction = this.db,
-  // ): Promise<void> {
-  //   const { senderId, recipientId, notificationData } = params;
+  async getPushTokens(
+    params: UserIdParam,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<string[]> {
+    const { userId } = params;
 
-  //   await db
-  //     .insert(this.schema.notifications)
-  //     .values({ senderId, recipientId, ...notificationData });
-  // }
+    const results = await db.query.pushToken.findMany({
+      where: eq(this.schema.pushToken.userId, userId),
+      columns: { token: true },
+    });
 
-  // async getPushTokens(
-  //   params: GetPushTokensParams,
-  //   db: DatabaseOrTransaction = this.db,
-  // ): Promise<string[]> {
-  //   const { userId } = params;
+    return results.map((result) => result.token);
+  }
+}
 
-  //   const pushTokens = await db.query.pushToken.findMany({
-  //     where: eq(this.schema.pushToken.userId, userId),
-  //     columns: { token: true },
-  //   });
-
-  //   return pushTokens.map((pushToken) => pushToken.token);
-  // }
-
-  // async deleteNotificationById(
-  //   params: DeleteNotificationByIdParams,
-  //   db: DatabaseOrTransaction = this.db,
-  // ): Promise<void> {
-  //   const { id } = params;
-
-  //   await db
-  //     .delete(this.schema.notifications)
-  //     .where(eq(this.schema.notifications.id, id));
-  // }
-
-  // async deleteNotifications(
-  //   params: DeleteNotificationsParams,
-  //   db: DatabaseOrTransaction = this.db,
-  // ): Promise<void> {
-  //   const { senderId, recipientId, eventType, entityType, entityId } = params;
-
-  //   let query = db.delete(this.schema.notifications).$dynamic();
-
-  //   const conditions = [];
-
-  //   if (senderId) {
-  //     conditions.push(eq(this.schema.notifications.senderUserId, senderId));
-  //   }
-  //   if (recipientId) {
-  //     conditions.push(
-  //       eq(this.schema.notifications.recipientUserId, recipientId),
-  //     );
-  //   }
-  //   if (eventType) {
-  //     if (Array.isArray(eventType)) {
-  //       conditions.push(
-  //         inArray(this.schema.notifications.eventType, eventType),
-  //       );
-  //     } else {
-  //       conditions.push(eq(this.schema.notifications.eventType, eventType));
-  //     }
-  //   }
-  //   if (entityType) {
-  //     conditions.push(eq(this.schema.notifications.entityType, entityType));
-  //   }
-  //   if (entityId) {
-  //     conditions.push(eq(this.schema.notifications.entityId, entityId));
-  //   }
-
-  //   if (conditions.length > 0) {
-  //     query = query.where(and(...conditions));
-  //   }
-
-  //   await query;
-  // }
-
-  // async deleteNotificationsBetweenUsers(
-  //   params: DeleteNotificationsBetweenUsersParams,
-  //   db: DatabaseOrTransaction = this.db,
-  // ): Promise<void> {
-  //   const { userIdA, userIdB } = params;
-
-  //   await db
-  //     .delete(this.schema.notifications)
-  //     .where(
-  //       or(
-  //         and(
-  //           eq(this.schema.notifications.senderUserId, userIdA),
-  //           eq(this.schema.notifications.recipientUserId, userIdB),
-  //         ),
-  //         and(
-  //           eq(this.schema.notifications.senderUserId, userIdB),
-  //           eq(this.schema.notifications.recipientUserId, userIdA),
-  //         ),
-  //       ),
-  //     );
-  // }
+interface UpdateNotificationSettingsParams {
+  notificationSettingsId: string;
+  notificationSettings: NotificationSettings;
 }

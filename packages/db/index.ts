@@ -28,19 +28,14 @@ const db = drizzle(queryClient, {
 });
 
 type Schema = typeof schema;
+
 type Database = PostgresJsDatabase<Schema>;
-
-type EntityType = (typeof entityTypeEnum.enumValues)[number];
-
-type EventType = (typeof eventTypeEnum.enumValues)[number];
-export type NotificationSettings =
-  typeof schema.notificationSettings.$inferSelect;
-
 type Transaction = PgTransaction<
   PostgresJsQueryResultHKT,
   Schema,
   ExtractTablesWithRelations<Schema>
 >;
+
 type DatabaseOrTransaction = Database | Transaction;
 
 export {
@@ -52,11 +47,4 @@ export {
   reportPostReasonEnum,
   reportUserReasonEnum,
 };
-export type {
-  Schema,
-  Database,
-  Transaction,
-  DatabaseOrTransaction,
-  EntityType,
-  EventType,
-};
+export type { Schema, Database, Transaction, DatabaseOrTransaction };
