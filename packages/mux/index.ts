@@ -3,11 +3,6 @@ import { Mux as MuxClient } from "@mux/mux-node";
 import { env } from "@oppfy/env";
 
 interface GetPresignedUrlForVideoOptions {
-  author: string;
-  recipient: string;
-  caption: string;
-  height: string;
-  width: string;
   postid: string;
 }
 
@@ -25,11 +20,6 @@ export class Mux {
    * Creates a presigned URL for video upload to Mux
    */
   async getPresignedUrlForVideo({
-    author,
-    recipient,
-    caption,
-    height,
-    width,
     postid,
   }: GetPresignedUrlForVideoOptions) {
     const upload = await this.client.video.uploads.create({
@@ -39,11 +29,6 @@ export class Mux {
         playback_policy: ["public"],
         mp4_support: "standard",
         passthrough: JSON.stringify({
-          author,
-          recipient,
-          caption,
-          height,
-          width,
           postid,
         }),
       },

@@ -155,6 +155,7 @@ export class PostRepository {
       postId,
     });
   }
+
   async getPost(
     { postId, userId }: GetPostParams,
     tx: DatabaseOrTransaction = this.db,
