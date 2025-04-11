@@ -128,40 +128,15 @@ export const profileRouter = createTRPCRouter({
         (res) => res,
         (err) => {
           switch (err.name) {
-            case "CannotCheckRelationshipWithSelfError":
-              throw new TRPCError({
-                code: "BAD_REQUEST",
-                message: "Cannot check relationship with self",
-              });
-          }
-        },
-      );
-    }),
-
-  getProfileStats: protectedProcedure
-    .input(
-      z.object({
-        userId: z.string().optional(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const result = await ctx.services.profile.stats({
-        selfUserId: ctx.session.uid,
-        otherUserId: input.userId,
-      });
-      return result.match(
-        (res) => res,
-        (err) => {
-          switch (err.name) {
             case "ProfileBlockedError":
               throw new TRPCError({
                 code: "FORBIDDEN",
                 message: "Profile is blocked",
               });
-            case "StatsNotFoundError":
+            case "CannotCheckRelationshipWithSelfError":
               throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "Profile stats not found",
+                code: "BAD_REQUEST",
+                message: "Cannot check relationship with self",
               });
           }
         },
