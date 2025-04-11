@@ -1,5 +1,3 @@
-// file: inversify.config.ts
-
 import "reflect-metadata";
 
 import { Container } from "inversify";
@@ -34,46 +32,7 @@ import { AuthService } from "./services/user/auth.service";
 import { ContactsService } from "./services/user/contacts.service";
 import { ProfileService } from "./services/user/profile.service";
 import { UserService } from "./services/user/user.service";
-
-const TYPES = {
-  // DB and schema
-  Database: Symbol.for("Database"),
-  Schema: Symbol.for("Schema"),
-
-  // SDKs
-  S3: Symbol.for("S3"),
-  CloudFront: Symbol.for("CloudFront"),
-  Twilio: Symbol.for("Twilio"),
-  Mux: Symbol.for("Mux"),
-
-  // Repositories
-  ReportRepository: Symbol.for("ReportRepository"),
-  BlockRepository: Symbol.for("BlockRepository"),
-  FollowRepository: Symbol.for("FollowRepository"),
-  FriendRepository: Symbol.for("FriendRepository"),
-  ContactsRepository: Symbol.for("ContactsRepository"),
-  NotificationsRepository: Symbol.for("NotificationsRepository"),
-  ProfileRepository: Symbol.for("ProfileRepository"),
-  UserRepository: Symbol.for("UserRepository"),
-  PostRepository: Symbol.for("PostRepository"),
-  CommentRepository: Symbol.for("CommentRepository"),
-  LikeRepository: Symbol.for("LikeRepository"),
-
-  // Services
-  ReportService: Symbol.for("ReportService"),
-  UserService: Symbol.for("UserService"),
-  ProfileService: Symbol.for("ProfileService"),
-  FriendService: Symbol.for("FriendService"),
-  FollowService: Symbol.for("FollowService"),
-  ContactsService: Symbol.for("ContactsService"),
-  BlockService: Symbol.for("BlockService"),
-  PostService: Symbol.for("PostService"),
-  PostInteractionService: Symbol.for("PostInteractionService"),
-  AuthService: Symbol.for("AuthService"),
-
-  // "Services" aggregator
-  Services: Symbol.for("Services"),
-} as const;
+import { TYPES } from "./symbols";
 
 const container = new Container();
 
@@ -120,4 +79,4 @@ container.bind<AuthService>(TYPES.AuthService).to(AuthService);
 
 container.bind<Services>(TYPES.Services).to(Services);
 
-export { TYPES, container };
+export { container };

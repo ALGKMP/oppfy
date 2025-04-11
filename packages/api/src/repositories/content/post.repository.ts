@@ -1,25 +1,23 @@
 import { aliasedTable, and, desc, eq, lt, or, sql } from "drizzle-orm";
+import type { InferSelectModel } from "drizzle-orm";
+import type { InferSelectModel } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type {
   Database,
   DatabaseOrTransaction,
   Schema,
+  schema,
+  schema,
   Transaction,
 } from "@oppfy/db";
 
-import type { InferSelectModel } from "drizzle-orm";
-import type { schema } from "@oppfy/db";
 import { PaginationParams } from "../../interfaces/types";
-import { TYPES } from "../../container";
+import { TYPES } from "../../symbols";
 
 export interface GetPostParams {
   postId: string;
   userId: string;
-}
-
-export interface GetPostForSiteParams {
-  postId: string;
 }
 
 export interface GetPostFromCommentIdParams {
@@ -40,6 +38,17 @@ export interface DeletePostParams {
   postId: string;
 }
 
+export interface CreatePostParams {
+  authorUserId: string;
+  recipientUserId: string;
+  caption: string;
+  postKey: string;
+  width: number;
+  height: number;
+  mediaType: (typeof mediaTypeEnum.enumValues)[number];
+  status: (typeof postStatusEnum.enumValues)[number];
+}
+
 export interface PostResult {
   post: InferSelectModel<typeof schema.post>;
   postStats: InferSelectModel<typeof schema.postStats>;
@@ -51,7 +60,6 @@ export interface PostResult {
 export interface PostResultWithLike extends PostResult {
   like: InferSelectModel<typeof schema.like> | null;
 }
-
 
 @injectable()
 export class PostRepository {
@@ -108,6 +116,45 @@ export class PostRepository {
     return query;
   }
 
+  async createPost(
+    {
+      authorUserId,
+      recipientUserId,
+      caption,
+      postKey,
+      width,
+      height,
+      mediaType,
+      status,
+    }: CreatePostParams,
+    tx: Transaction,
+  ): Promise<Post | undefined> {
+    // transaction to create post and post stats
+    const [post] = await tx
+      .insert(this.schema.post)
+      .values({
+        authorUserId,
+        recipientUserId,
+        caption,
+        postKey,
+        width,
+        height,
+        mediaType,
+        status,
+      })
+      .returning();
+
+    return post;
+  }
+
+  async createPostStats(
+    { postId }: PostIdParam,
+    tx: Transaction,
+  ): Promise<void> {
+    await tx.insert(this.schema.postStats).values({
+      postId,
+    });
+  }
   async getPost(
     { postId, userId }: GetPostParams,
     tx: DatabaseOrTransaction = this.db,
@@ -118,7 +165,7 @@ export class PostRepository {
   }
 
   async getPostForSite(
-    { postId }: GetPostForSiteParams,
+    { postId }: PostIdParam,
     tx: DatabaseOrTransaction = this.db,
   ): Promise<PostResultWithLike | undefined> {
     const query = this.baseQuery(undefined, tx);

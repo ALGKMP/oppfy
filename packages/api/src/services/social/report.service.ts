@@ -1,15 +1,15 @@
 import { inject, injectable } from "inversify";
 import { ok, Result } from "neverthrow";
 
-import { TYPES } from "../../container";
 import {
   ReportCommentReason,
   ReportPostReason,
   ReportUserReason,
 } from "../../models";
 import { ReportRepository } from "../../repositories/social/report.repository";
+import { TYPES } from "../../symbols";
 
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+// eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
 type ReportReason = ReportUserReason | ReportPostReason | ReportCommentReason;
 
 export interface ReportParams<T extends ReportReason> {

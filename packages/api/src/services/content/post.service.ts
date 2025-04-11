@@ -8,7 +8,6 @@ import { env } from "@oppfy/env";
 import { Mux } from "@oppfy/mux";
 import { S3 } from "@oppfy/s3";
 
-import { TYPES } from "../../container";
 import * as PostErrors from "../../errors/content/post.error";
 import type {
   PaginatedResponse,
@@ -24,6 +23,7 @@ import type {
 } from "../../repositories/content/post.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
+import { TYPES } from "../../symbols";
 
 interface HydratedAndProcessedPost {
   post: Post;
@@ -89,13 +89,6 @@ interface UploadVideoPostForUserNotOnAppUrlParams {
   caption: string;
   height: number;
   width: number;
-}
-
-interface UpdatePostParams {
-  userId: string;
-  postId: string;
-  content: string;
-  mediaUrls?: string[];
 }
 
 interface DeletePostParams {
