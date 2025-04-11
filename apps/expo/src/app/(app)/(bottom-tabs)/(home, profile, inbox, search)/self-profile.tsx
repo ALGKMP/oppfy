@@ -39,7 +39,7 @@ const SelfProfile = () => {
     data: profileStats,
     isLoading: isLoadingProfileStats,
     refetch: refetchProfileStats,
-  } = api.profile.getProfileStats.useQuery({});
+  } = api.profile.getStats.useQuery({});
 
   const {
     data: postsData,

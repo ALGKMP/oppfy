@@ -56,7 +56,7 @@ export class FriendService {
    * Initiates or completes a friend relationship. Sends a friend request if no prior relationship exists,
    * or accepts an incoming request if one is present.
    */
-  async friendUser({
+  async sendFriendRequest({
     senderUserId,
     recipientUserId,
   }: DirectionalUserIdsParams): Promise<

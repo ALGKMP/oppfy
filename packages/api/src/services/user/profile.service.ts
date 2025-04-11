@@ -181,7 +181,7 @@ export class ProfileService {
       });
     }
 
-    const [isFollowing, isFollowRequested, isFriends, isFriendRequested] =
+    const [isFollowing, isFollowRequested, isFriends, isFriendRequested, isPrivate] =
       await Promise.all([
         this.followRepository.getFollower({
           senderUserId: selfUserId,
@@ -199,6 +199,9 @@ export class ProfileService {
           senderUserId: selfUserId,
           recipientUserId: otherUserId,
         }),
+        this.profileRepository.getPrivacy({
+          userId: otherUserId,
+        }),
       ]);
 
     const followState = (
@@ -206,7 +209,9 @@ export class ProfileService {
         ? "FOLLOWING"
         : isFollowRequested
           ? "REQUESTED"
-          : "NOT_FOLLOWING"
+          : isPrivate
+            ? "PRIVATE_NOT_FOLLOWING"
+            : "NOT_FOLLOWING"
     ) satisfies FollowStatus;
 
     const friendState = (

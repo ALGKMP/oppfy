@@ -11,7 +11,8 @@ import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 
 type Icon = React.FC<IconProps>;
-type NetworkRelationships = RouterOutputs["profile"]["getRelationshipStatesBetweenUsers"]
+type NetworkRelationships =
+  RouterOutputs["profile"]["getRelationshipStatesBetweenUsers"];
 
 interface ActionButtonProps {
   userId?: string;
@@ -78,10 +79,7 @@ const ActionButton = ({
     );
   }
 
-  if (
-    networkRelationships.isTargetUserBlocked ||
-    networkRelationships.isOtherUserBlocked
-  ) {
+  if (networkRelationships.isBlocked) {
     return (
       <XStack gap="$3">
         <Button
@@ -97,8 +95,7 @@ const ActionButton = ({
     );
   }
 
-  const { privacy, targetUserFollowState, targetUserFriendState } =
-    networkRelationships;
+  const { follow, friend } = networkRelationships;
 
   const buttonConfigs: Record<string, ButtonConfig> = {
     follow: {
@@ -120,9 +117,7 @@ const ActionButton = ({
       action: "addFriend",
       icon: Users,
       iconSize: 18,
-      isPrimary:
-        targetUserFollowState === "Following" ||
-        targetUserFollowState === "OutboundRequest",
+      isPrimary: follow === "FOLLOWING" || follow === "REQUESTED",
     },
     removeFriend: {
       label: "Remove",
@@ -148,19 +143,17 @@ const ActionButton = ({
   };
 
   const buttonCombinations: Record<string, (keyof typeof buttonConfigs)[]> = {
-    public_NotFollowing_NotFriends: ["follow", "friend"],
-    public_Following_NotFriends: ["unfollow", "friend"],
-    public_Following_OutboundRequest: ["cancelFriendRequest"],
-    public_Following_Friends: ["removeFriend"],
-    private_NotFollowing_NotFriends: ["follow", "friend"],
-    private_OutboundRequest_NotFriends: ["cancelFollowRequest", "friend"],
-    private_Following_NotFriends: ["unfollow", "friend"],
-    private_OutboundRequest_OutboundRequest: ["cancelFriendRequest"],
-    private_Following_OutboundRequest: ["cancelFriendRequest"],
-    private_Following_Friends: ["removeFriend"],
+    NOT_FOLLOWING_NOT_FRIENDS: ["follow", "friend"],
+    FOLLOWING_NOT_FRIENDS: ["unfollow", "friend"],
+    FOLLOWING_REQUESTED: ["cancelFriendRequest"],
+    FOLLOWING_FRIENDS: ["removeFriend"],
+    PRIVATE_NOT_FOLLOWING_NOT_FRIENDS: ["follow", "friend"],
+    PRIVATE_REQUESTED_NOT_FRIENDS: ["cancelFollowRequest", "friend"],
+    PRIVATE_FOLLOWING_NOT_FRIENDS: ["unfollow", "friend"],
+    REQUESTED_REQUESTED: ["cancelFriendRequest"],
   };
 
-  const key = `${privacy}_${targetUserFollowState}_${targetUserFriendState}`;
+  const key = `${follow}_${friend}`;
   const buttonKeys = buttonCombinations[key] ?? [];
 
   return (
@@ -232,7 +225,7 @@ const useProfileActionButtons = (userId?: string) => {
     },
   });
 
-  const removeFriend = api.friend.removeFriend.useMutation({
+  const removeFriend = api.friend.unfriendUser.useMutation({
     onSettled: () => {
       void invalidateQueries("removeFriend");
     },
@@ -256,9 +249,9 @@ const useProfileActionButtons = (userId?: string) => {
 
     try {
       await Promise.all([
-        utils.profile.getNetworkRelationships.invalidate({ userId: userId }),
-        utils.profile.getProfileOther.invalidate({ userId }),
-        utils.contacts.getProfileSuggestions.invalidate(),
+        utils.profile.getRelationshipStatesBetweenUsers.invalidate({ userId }),
+        utils.profile.getProfile.invalidate({ userId }),
+        // utils.contacts.getProfileSuggestions.invalidate(),
       ]);
     } finally {
       setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: false }));
@@ -279,29 +272,30 @@ const useProfileActionButtons = (userId?: string) => {
   const actions = userId
     ? {
         follow: {
-          handler: () => void followUser.mutateAsync({ userId }),
+          handler: () => void followUser.mutateAsync({ recipientUserId: userId }),
           loading: followUser.isPending || isInvalidatingByAction.follow,
           disabled: isAnyActionLoading,
         },
         unfollow: {
-          handler: () => void unfollowUser.mutateAsync({ userId }),
+          handler: () => void unfollowUser.mutateAsync({ recipientUserId: userId }),
           loading: unfollowUser.isPending || isInvalidatingByAction.unfollow,
           disabled: isAnyActionLoading,
         },
         addFriend: {
-          handler: () => void addFriend.mutateAsync({ recipientId: userId }),
+          handler: () => void addFriend.mutateAsync({ recipientUserId: userId }),
           loading: addFriend.isPending || isInvalidatingByAction.addFriend,
           disabled: isAnyActionLoading,
         },
         removeFriend: {
-          handler: () => void removeFriend.mutateAsync({ recipientId: userId }),
+          handler: () =>
+            void removeFriend.mutateAsync({ recipientUserId: userId }),
           loading:
             removeFriend.isPending || isInvalidatingByAction.removeFriend,
           disabled: isAnyActionLoading,
         },
         cancelFollowRequest: {
           handler: () =>
-            void cancelFollowRequest.mutateAsync({ recipientId: userId }),
+            void cancelFollowRequest.mutateAsync({ recipientUserId: userId }),
           loading:
             cancelFollowRequest.isPending ||
             isInvalidatingByAction.cancelFollowRequest,
@@ -309,7 +303,7 @@ const useProfileActionButtons = (userId?: string) => {
         },
         cancelFriendRequest: {
           handler: () =>
-            void cancelFriendRequest.mutateAsync({ recipientId: userId }),
+            void cancelFriendRequest.mutateAsync({ recipientUserId: userId }),
           loading:
             cancelFriendRequest.isPending ||
             isInvalidatingByAction.cancelFriendRequest,

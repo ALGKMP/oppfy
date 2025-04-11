@@ -4,14 +4,14 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const friendRouter = createTRPCRouter({
-  friendUser: protectedProcedure
+  sendFriendRequest: protectedProcedure
     .input(
       z.object({
         recipientUserId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.friend.friendUser({
+      const result = await ctx.services.friend.sendFriendRequest({
         senderUserId: ctx.session.uid,
         recipientUserId: input.recipientUserId,
       });

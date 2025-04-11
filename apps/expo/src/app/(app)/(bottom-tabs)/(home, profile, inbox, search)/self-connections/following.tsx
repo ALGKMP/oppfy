@@ -240,7 +240,7 @@ const Following = () => {
               ],
             }),
         };
-      case "NOT_FOLLOWING":
+        default:
         return {
           label: "Follow",
           icon: UserRoundPlus,

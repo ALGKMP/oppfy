@@ -6,12 +6,13 @@ import type { RouterOutputs } from "@oppfy/api";
 import Bio from "~/components/Profile/Bio";
 import HeaderGradient from "~/components/Profile/HeaderGradient";
 import JoinDatePill from "~/components/Profile/JoinDatePill";
-import ProfileActions from "~/components/Profile/ProfileActions";
+import { OtherProfileActionButtons, SelfProfileActionButtons } from "~/components/Profile/ProfileActions";
 import ProfileInfo from "~/components/Profile/ProfileInfo";
 import QuickActions from "~/components/Profile/QuickActions";
 import Stats from "~/components/Profile/Stats";
 
-type NetworkRelationships = RouterOutputs["profile"]["getRelationshipStatesBetweenUsers"];
+type NetworkRelationships =
+  RouterOutputs["profile"]["getRelationshipStatesBetweenUsers"];
 
 interface User {
   id?: string;
@@ -43,11 +44,9 @@ const Header = ({
   networkRelationships,
   isLoading = false,
 }: HeaderProps) => {
-  const isBlocked = networkRelationships?.blocked ?? false;
-  const isPrivate = networkRelationships?.privacy === "private";
+  const isBlocked = networkRelationships?.isBlocked ?? false;
   const isDisabled =
-    isBlocked ||
-    (isPrivate && networkRelationships.targetUserFollowState !== "Following");
+    isBlocked || networkRelationships?.follow === "PRIVATE_NOT_FOLLOWING";
 
   // Generate a unique key for HeaderGradient based on username
   const headerKey = `header-gradient-${user.username ?? "default"}`;
@@ -85,12 +84,11 @@ const Header = ({
         </XStack>
 
         <Bio bio={user.bio} isLoading={isLoading} />
-
-        <ProfileActions
-          userId={user.id}
-          isDisabled={isBlocked}
-          networkRelationships={networkRelationships}
-        />
+        {user.id ? (
+          <OtherProfileActionButtons userId={user.id} />
+        ) : (
+          <SelfProfileActionButtons disabled={isDisabled} />
+        )}
 
         <Stats
           userId={user.id}
