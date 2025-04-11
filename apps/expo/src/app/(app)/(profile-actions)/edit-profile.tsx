@@ -337,10 +337,7 @@ const EditProfile = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx?.prevData) {
-        utils.profile.getProfile.setData(
-          { userId: undefined },
-          ctx.prevData,
-        );
+        utils.profile.getProfile.setData({ userId: undefined }, ctx.prevData);
       }
     },
     onSettled: async () => {

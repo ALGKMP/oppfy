@@ -21,8 +21,7 @@ import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
-type FollowerItem =
-  RouterOutputs["follow"]["paginateFollowers"]["items"][0];
+type FollowerItem = RouterOutputs["follow"]["paginateFollowers"]["items"][0];
 
 const PAGE_SIZE = 20;
 
@@ -61,9 +60,7 @@ const Followers = () => {
                 ? {
                     ...item,
                     followStatus:
-                      item.privacy === "private"
-                        ? "REQUESTED"
-                        : "FOLLOWING",
+                      item.privacy === "private" ? "REQUESTED" : "FOLLOWING",
                   }
                 : item,
             ),

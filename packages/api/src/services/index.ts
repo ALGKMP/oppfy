@@ -9,9 +9,9 @@ import { FriendService } from "./social/friend.service";
 import { ReportService } from "./social/report.service";
 import { AuthService } from "./user/auth.service";
 import { ContactsService } from "./user/contacts.service";
+import { NotificationService } from "./user/notification.service";
 import { ProfileService } from "./user/profile.service";
 import { UserService } from "./user/user.service";
-import { NotificationService } from "./user/notification.service";
 
 export class Services {
   constructor(

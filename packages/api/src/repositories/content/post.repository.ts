@@ -10,10 +10,10 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
-import { PaginationParams, PostIdParam } from "../../interfaces/types";
-import { TYPES } from "../../symbols";
-import { Post } from "../../models";
 import { mediaTypeEnum, postStatusEnum } from "../../../../db/src/schema";
+import { PaginationParams, PostIdParam } from "../../interfaces/types";
+import { Post } from "../../models";
+import { TYPES } from "../../symbols";
 
 export interface GetPostParams {
   postId: string;

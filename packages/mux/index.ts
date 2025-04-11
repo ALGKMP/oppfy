@@ -40,10 +40,7 @@ export class Mux {
     await this.client.video.assets.delete(assetId);
   }
 
-  verifyWebhookSignature(
-    payload: string,
-    headers: Record<string, string>,
-  ) {
+  verifyWebhookSignature(payload: string, headers: Record<string, string>) {
     return this.client.webhooks.verifySignature(payload, headers);
   }
 
