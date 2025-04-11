@@ -10,7 +10,7 @@ import type {
 
 import { PaginationParams } from "../../interfaces/types";
 import { Comment, Profile } from "../../models";
-import { TYPES } from "../../types";
+import { TYPES } from "../../container";
 
 export interface GetCommentParams {
   commentId: string;
