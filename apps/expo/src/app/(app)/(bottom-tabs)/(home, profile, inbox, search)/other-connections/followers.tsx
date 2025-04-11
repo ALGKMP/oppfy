@@ -60,10 +60,10 @@ const Followers = () => {
               item.userId === newData.recipientUserId
                 ? {
                     ...item,
-                    relationshipState:
+                    followStatus:
                       item.privacy === "private"
-                        ? "followRequestSent"
-                        : "following",
+                        ? "REQUESTED"
+                        : "FOLLOWING",
                   }
                 : item,
             ),
@@ -216,8 +216,8 @@ const Followers = () => {
   ): MediaListItemActionProps | undefined => {
     if (item.userId === user?.uid) return undefined;
 
-    switch (item.relationshipState) {
-      case "followRequestSent":
+    switch (item.followStatus) {
+      case "REQUESTED":
         return {
           label: "Sent",
           icon: Send,
@@ -235,7 +235,7 @@ const Followers = () => {
               ],
             }),
         };
-      case "following":
+      case "FOLLOWING":
         return {
           label: "Unfollow",
           icon: UserRoundMinus,
@@ -253,7 +253,7 @@ const Followers = () => {
               ],
             }),
         };
-      case "notFollowing":
+      case "NOT_FOLLOWING":
         return {
           label: "Follow",
           icon: UserRoundPlus,
@@ -271,9 +271,9 @@ const Followers = () => {
       primaryAction={renderActionButton(item)}
       onPress={() =>
         routeProfile(item.userId, {
-          name: item.name,
-          username: item.username,
-          profilePictureUrl: item.profilePictureUrl,
+          name: item.name ?? "",
+          username: item.username ?? "",
+          profilePictureUrl: item.profilePictureUrl ?? "",
         })
       }
     />
