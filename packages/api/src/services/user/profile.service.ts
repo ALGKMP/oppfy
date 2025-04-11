@@ -9,14 +9,6 @@ import type { IBlockRepository } from "../../interfaces/repositories/social/bloc
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
 import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
-import type {
-  GenerateProfilePicturePresignedUrlParams,
-  IProfileService,
-  RelationshipState,
-  SearchProfileByIdsParams,
-  SearchProfilesByUsernameParams,
-  UpdateProfileParams,
-} from "../../interfaces/services/user/profile.service.interface";
 import {
   FollowStatus,
   FriendStatus,
@@ -24,11 +16,40 @@ import {
   UserIdParam,
   UsernameParam,
 } from "../../interfaces/types";
-import { HydratedProfile, Profile, UserStats } from "../../models";
+import {
+  HydratedProfile,
+  Profile,
+  ProfileInsert,
+  UserStats,
+} from "../../models";
 import { TYPES } from "../../types";
 
+interface RelationshipState {
+  follow: FollowStatus;
+  friend: FriendStatus;
+}
+
+interface SearchProfilesByUsernameParams {
+  userId: string;
+  username: string;
+}
+
+interface UpdateProfileParams {
+  userId: string;
+  update: Partial<ProfileInsert>;
+}
+
+interface GenerateProfilePicturePresignedUrlParams {
+  userId: string;
+  contentLength: number;
+}
+
+interface SearchProfileByIdsParams {
+  userIds: string[];
+}
+
 @injectable()
-export class ProfileService implements IProfileService {
+export class ProfileService {
   constructor(
     @inject(TYPES.S3)
     private readonly s3: S3,

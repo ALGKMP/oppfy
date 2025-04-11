@@ -2,16 +2,35 @@ import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 
-import {
-  CreateCommentReportParams,
-  CreatePostReportParams,
-  CreateUserReportParams,
-  IReportRepository,
-} from "../../interfaces/repositories/social/report.repository.interface";
-import { TYPES } from "../../types";
+import type {
+  ReportCommentReason,
+  ReportPostReason,
+  ReportUserReason,
+} from "../../models";
+import { TYPES } from "../../container";
+
+// eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
+type ReportReason = ReportUserReason | ReportPostReason | ReportCommentReason;
+
+export interface ReportParams<T extends ReportReason> {
+  reason: T;
+  userId: string;
+}
+
+export type CreateUserReportParams = ReportParams<ReportUserReason> & {
+  reportedUserId: string;
+};
+
+export type CreatePostReportParams = ReportParams<ReportPostReason> & {
+  reportedPostId: string;
+};
+
+export type CreateCommentReportParams = ReportParams<ReportCommentReason> & {
+  reportedCommentId: string;
+};
 
 @injectable()
-export class ReportRepository implements IReportRepository {
+export class ReportRepository {
   private db: Database;
   private schema: Schema;
 

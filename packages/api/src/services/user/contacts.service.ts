@@ -1,11 +1,9 @@
 import { inject, injectable } from "inversify";
-import { err, ok, Result } from "neverthrow";
+import { ok, Result } from "neverthrow";
 
 import { CloudFront } from "@oppfy/cloudfront";
 import type { Database, DatabaseOrTransaction, Transaction } from "@oppfy/db";
 
-import * as AwsErrors from "../../errors/cloud/aws.error";
-import * as UserErrors from "../../errors/user/user.error";
 import type { IContactsRepository } from "../../interfaces/repositories/user/contacts.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
@@ -18,6 +16,23 @@ import {
 import { UserIdParam } from "../../interfaces/types";
 import { HydratedProfile } from "../../models";
 import { TYPES } from "../../types";
+
+export interface UpdateUserContactsParams {
+  userId: string;
+  hashedPhoneNumbers: string[];
+}
+
+export interface FilterPhoneNumbersOnAppParams {
+  phoneNumbers: string[];
+}
+
+export interface ContactRecommendation {
+  userId: string;
+  username: string | null;
+  name: string | null;
+  profilePictureUrl: string | null;
+  mutualContactsCount: number;
+}
 
 @injectable()
 export class ContactsService implements IContactsService {

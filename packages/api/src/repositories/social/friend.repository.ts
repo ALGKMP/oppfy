@@ -9,20 +9,27 @@ import type {
 } from "@oppfy/db";
 import { getFollowStatusSql } from "@oppfy/db/utils/query-helpers";
 
-import {
-  IFriendRepository,
-  PaginateFriendParams,
-  SocialProfile,
-} from "../../interfaces/repositories/social/friend.repository.interface";
-import {
+import type {
   BidirectionalUserIdsparams,
   DirectionalUserIdsParams,
+  FollowStatus,
+  PaginationParams,
 } from "../../interfaces/types";
-import { Friend, FriendRequest, Profile } from "../../models";
-import { TYPES } from "../../types";
+import type { Friend, FriendRequest, Profile } from "../../models";
+import { TYPES } from "../../container";
+
+export interface SocialProfile extends Profile {
+  followedAt: Date;
+  friendedAt: Date;
+  followStatus: FollowStatus;
+}
+
+export interface PaginateFriendParams extends PaginationParams {
+  userId: string;
+}
 
 @injectable()
-export class FriendRepository implements IFriendRepository {
+export class FriendRepository {
   private db: Database;
   private schema: Schema;
 

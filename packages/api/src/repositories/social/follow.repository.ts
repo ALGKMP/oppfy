@@ -9,20 +9,26 @@ import type {
 } from "@oppfy/db";
 import { getFollowStatusSql } from "@oppfy/db/utils/query-helpers";
 
-import {
-  IFollowRepository,
-  PaginateFollowParams,
-  SocialProfile,
-} from "../../interfaces/repositories/social/follow.repository.interface";
-import {
+import type {
   BidirectionalUserIdsparams,
   DirectionalUserIdsParams,
+  FollowStatus,
+  PaginationParams,
 } from "../../interfaces/types";
-import { Follow, FollowRequest, Profile } from "../../models";
-import { TYPES } from "../../types";
+import type { Follow, FollowRequest, Profile } from "../../models";
+import { TYPES } from "../../container";
+
+export interface SocialProfile extends Profile {
+  followedAt: Date;
+  followStatus: FollowStatus;
+}
+
+export interface PaginateFollowParams extends PaginationParams {
+  userId: string;
+}
 
 @injectable()
-export class FollowRepository implements IFollowRepository {
+export class FollowRepository {
   private db: Database;
   private schema: Schema;
 

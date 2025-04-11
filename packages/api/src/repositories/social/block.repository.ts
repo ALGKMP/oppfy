@@ -4,16 +4,22 @@ import { inject, injectable } from "inversify";
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 
 import type {
-  IBlockRepository,
-  PaginateBlockedUsersParams,
-  SocialProfile,
-} from "../../interfaces/repositories/social/block.repository.interface";
-import type { DirectionalUserIdsParams } from "../../interfaces/types";
-import type { Block } from "../../models";
-import { TYPES } from "../../types";
+  DirectionalUserIdsParams,
+  PaginationParams,
+} from "../../interfaces/types";
+import type { Block, Profile } from "../../models";
+import { TYPES } from "../../container";
+
+export interface SocialProfile extends Profile {
+  blockedAt: Date;
+}
+
+export interface PaginateBlockedUsersParams extends PaginationParams {
+  userId: string;
+}
 
 @injectable()
-export class BlockRepository implements IBlockRepository {
+export class BlockRepository {
   constructor(
     @inject(TYPES.Database)
     private readonly db: Database,

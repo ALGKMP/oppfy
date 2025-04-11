@@ -9,16 +9,21 @@ import type {
 } from "@oppfy/db";
 import { env } from "@oppfy/env";
 
-import type {
-  DeleteUserContactsParam,
-  IContactsRepository,
-  InsertUserContactsParam,
-} from "../../interfaces/repositories/user/contacts.repository.interface";
-import { UserIdParam } from "../../interfaces/types";
+import type { UserIdParam } from "../../interfaces/types";
 import { TYPES } from "../../types";
 
+export interface DeleteUserContactsParam {
+  userId: string;
+  contactIds: string[];
+}
+
+export interface InsertUserContactsParam {
+  userId: string;
+  contactIds: string[];
+}
+
 @injectable()
-export class ContactsRepository implements IContactsRepository {
+export class ContactsRepository {
   private db: Database;
   private schema: Schema;
 

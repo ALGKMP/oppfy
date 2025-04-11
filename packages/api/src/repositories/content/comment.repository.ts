@@ -8,19 +8,36 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
-import { TYPES } from "../../types";
-import {
-  CreateCommentParams,
-  DeleteCommentParams,
-  GetCommentParams,
-  ICommentRepository,
-  PaginateCommentsParams,
-  PaginatedCommentResult,
-} from "../../interfaces/repositories/content/comment.repository.interface";
-import { Comment } from "../../models";
+import { PaginationParams } from "../../interfaces/types";
+import { Comment, Profile } from "../../models";
+import { TYPES } from "../../container";
+
+export interface GetCommentParams {
+  commentId: string;
+}
+
+export interface DeleteCommentParams {
+  commentId: string;
+  postId: string;
+}
+
+export interface CreateCommentParams {
+  userId: string;
+  postId: string;
+  body: string;
+}
+
+export interface PaginateCommentsParams extends PaginationParams {
+  postId: string;
+}
+
+export interface PaginatedCommentResult {
+  comment: Comment;
+  profile: Profile;
+}
 
 @injectable()
-export class CommentRepository implements ICommentRepository {
+export class CommentRepository {
   private readonly db: Database;
   private readonly schema: Schema;
 

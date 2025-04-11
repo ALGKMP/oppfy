@@ -8,26 +8,30 @@ import * as FriendErrors from "../../errors/social/friend.error";
 import { ProfileNotFound } from "../../errors/user/profile.error";
 import { UserNotFound } from "../../errors/user/user.error";
 import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
-import type {
-  IFriendRepository,
-  SocialProfile,
-} from "../../interfaces/repositories/social/friend.repository.interface";
+import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
 import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
 import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
-import type {
-  IFriendService,
-  PaginateByUserIdParams,
-} from "../../interfaces/services/social/friend.service.interface";
 import {
   BidirectionalUserIdsparams,
   DirectionalUserIdsParams,
+  FollowStatus,
   PaginatedResponse,
+  PaginationParams,
 } from "../../interfaces/types";
 import { Profile } from "../../models";
 import { TYPES } from "../../types";
 
+type SocialProfile = Profile & {
+  followedAt: Date;
+  friendedAt: Date;
+  followStatus: FollowStatus;
+};
+
+interface PaginateByUserIdParams extends PaginationParams {
+  userId: string;
+}
 @injectable()
-export class FriendService implements IFriendService {
+export class FriendService {
   constructor(
     @inject(TYPES.Database)
     private readonly db: Database,
