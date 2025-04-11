@@ -193,6 +193,7 @@ export const followRouter = createTRPCRouter({
   paginateFollowers: protectedProcedure
     .input(
       z.object({
+        userId: z.string().optional(),
         cursor: z
           .object({
             id: z.string(),
@@ -204,7 +205,7 @@ export const followRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const result = await ctx.services.follow.paginateFollowers({
-        userId: ctx.session.uid,
+        userId: input.userId ?? ctx.session.uid,
         cursor: input.cursor,
         pageSize: input.pageSize,
       });
