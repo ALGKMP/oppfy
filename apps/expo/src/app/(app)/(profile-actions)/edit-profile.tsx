@@ -313,7 +313,7 @@ const EditProfile = () => {
   const { privacySetting, onPrivacyChange } = usePrivacySettings();
 
   const utils = api.useUtils();
-  const { data: defaultValues } = api.profile.getProfileSelf.useQuery();
+  const { data: defaultValues } = api.profile.getProfile.useQuery({});
 
   const handleProfilePictureUpdate = async () => {
     const imageUri = await pickImage();
@@ -322,23 +322,29 @@ const EditProfile = () => {
 
   const updateProfile = api.profile.updateProfile.useMutation({
     onMutate: async (newData) => {
-      await utils.profile.getProfileSelf.cancel();
-      const prevData = utils.profile.getProfileSelf.getData();
+      await utils.profile.getProfile.cancel();
+      const prevData = utils.profile.getProfile.getData();
       if (prevData) {
-        utils.profile.getProfileSelf.setData(undefined, {
-          ...prevData,
-          ...newData,
-        });
+        utils.profile.getProfile.setData(
+          { userId: undefined },
+          {
+            ...prevData,
+            ...newData,
+          },
+        );
       }
       return { prevData };
     },
     onError: (_err, _newData, ctx) => {
       if (ctx?.prevData) {
-        utils.profile.getProfileSelf.setData(undefined, ctx.prevData);
+        utils.profile.getProfile.setData(
+          { userId: undefined },
+          ctx.prevData,
+        );
       }
     },
     onSettled: async () => {
-      await utils.profile.getProfileSelf.invalidate();
+      await utils.profile.getProfile.invalidate();
     },
   });
 

@@ -178,9 +178,8 @@ export const postRouter = createTRPCRouter({
             id: z.string(),
             createdAt: z.date(),
           })
-          .nullable()
           .optional(),
-        pageSize: z.number().optional().default(10),
+        pageSize: z.number().min(1).max(100).default(10),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -208,9 +207,8 @@ export const postRouter = createTRPCRouter({
             id: z.string(),
             createdAt: z.date(),
           })
-          .nullable()
           .optional(),
-        pageSize: z.number().optional().default(10),
+        pageSize: z.number().min(1).max(100).default(10),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -260,9 +258,8 @@ export const postRouter = createTRPCRouter({
             id: z.string(),
             createdAt: z.date(),
           })
-          .nullable()
           .optional(),
-        pageSize: z.number().optional().default(10),
+        pageSize: z.number().min(1).max(100).default(10),
       }),
     )
     .query(async ({ ctx, input }) => {

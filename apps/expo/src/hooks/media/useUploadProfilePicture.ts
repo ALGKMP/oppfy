@@ -82,10 +82,13 @@ export default function useUploadProfilePicture({
       if (!prevData) return;
 
       // Optimistically update
-      utils.profile.getProfile.setData({ userId: prevData.userId }, {
-        ...prevData,
-        profilePictureUrl: newProfilePictureUrl,
-      });
+      utils.profile.getProfile.setData(
+        { userId: prevData.userId },
+        {
+          ...prevData,
+          profilePictureUrl: newProfilePictureUrl,
+        },
+      );
 
       return { prevData };
     },
@@ -93,7 +96,10 @@ export default function useUploadProfilePicture({
       if (!optimisticallyUpdate || !ctx) return;
 
       // Revert optimistic update on error
-      utils.profile.getProfile.setData({ userId: ctx.prevData.userId }, ctx.prevData);
+      utils.profile.getProfile.setData(
+        { userId: ctx.prevData.userId },
+        ctx.prevData,
+      );
     },
     onSettled: () => {
       if (!optimisticallyUpdate) return;
