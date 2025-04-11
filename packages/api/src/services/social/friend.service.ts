@@ -4,13 +4,9 @@ import { err, ok, Result } from "neverthrow";
 import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
+import { TYPES } from "../../container";
 import * as FriendErrors from "../../errors/social/friend.error";
 import { ProfileNotFound } from "../../errors/user/profile.error";
-import { UserNotFound } from "../../errors/user/user.error";
-import type { IFollowRepository } from "../../interfaces/repositories/social/follow.repository.interface";
-import type { IFriendRepository } from "../../interfaces/repositories/social/friend.repository.interface";
-import type { IProfileRepository } from "../../interfaces/repositories/user/profile.repository.interface";
-import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
 import {
   BidirectionalUserIdsparams,
   DirectionalUserIdsParams,
@@ -19,7 +15,10 @@ import {
   PaginationParams,
 } from "../../interfaces/types";
 import { Profile } from "../../models";
-import { TYPES } from "../../types";
+import { FollowRepository } from "../../repositories/social/follow.repository";
+import { FriendRepository } from "../../repositories/social/friend.repository";
+import { ProfileRepository } from "../../repositories/user/profile.repository";
+import { UserRepository } from "../../repositories/user/user.repository";
 
 type SocialProfile = Profile & {
   followedAt: Date;
@@ -38,13 +37,13 @@ export class FriendService {
     @inject(TYPES.CloudFront)
     private readonly cloudfront: CloudFront,
     @inject(TYPES.FriendRepository)
-    private readonly friendRepository: IFriendRepository,
+    private readonly friendRepository: FriendRepository,
     @inject(TYPES.FollowRepository)
-    private readonly followRepository: IFollowRepository,
+    private readonly followRepository: FollowRepository,
     @inject(TYPES.UserRepository)
-    private readonly userRepository: IUserRepository,
+    private readonly userRepository: UserRepository,
     @inject(TYPES.ProfileRepository)
-    private readonly profileRepository: IProfileRepository,
+    private readonly profileRepository: ProfileRepository,
   ) {}
 
   /**

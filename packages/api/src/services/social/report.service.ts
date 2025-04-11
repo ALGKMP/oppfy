@@ -1,13 +1,13 @@
 import { inject, injectable } from "inversify";
 import { ok, Result } from "neverthrow";
 
-import type { IReportRepository } from "../../interfaces/repositories/social/report.repository.interface";
+import { TYPES } from "../../container";
 import {
   ReportCommentReason,
   ReportPostReason,
   ReportUserReason,
 } from "../../models";
-import { TYPES } from "../../types";
+import { ReportRepository } from "../../repositories/social/report.repository";
 
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 type ReportReason = ReportUserReason | ReportPostReason | ReportCommentReason;
@@ -33,7 +33,7 @@ export type CreateCommentReportParams = ReportParams<ReportCommentReason> & {
 export class ReportService {
   constructor(
     @inject(TYPES.ReportRepository)
-    private readonly reportRepository: IReportRepository,
+    private readonly reportRepository: ReportRepository,
   ) {}
 
   async reportUser(

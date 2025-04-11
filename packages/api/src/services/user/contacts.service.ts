@@ -3,11 +3,11 @@ import { ok, Result } from "neverthrow";
 
 import type { Database } from "@oppfy/db";
 
-import type { IContactsRepository } from "../../interfaces/repositories/user/contacts.repository.interface";
-import type { IUserRepository } from "../../interfaces/repositories/user/user.repository.interface";
+import { TYPES } from "../../container";
 import { UserIdParam } from "../../interfaces/types";
 import { HydratedProfile } from "../../models";
-import { TYPES } from "../../types";
+import { ContactsRepository } from "../../repositories/user/contacts.repository";
+import { UserRepository } from "../../repositories/user/user.repository";
 
 export interface UpdateUserContactsParams {
   userId: string;
@@ -29,13 +29,13 @@ export interface ContactRecommendation {
 @injectable()
 export class ContactsService {
   private db: Database;
-  private contactsRepository: IContactsRepository;
-  private userRepository: IUserRepository;
+  private contactsRepository: ContactsRepository;
+  private userRepository: UserRepository;
 
   constructor(
     @inject(TYPES.Database) db: Database,
-    @inject(TYPES.ContactsRepository) contactsRepository: IContactsRepository,
-    @inject(TYPES.UserRepository) userRepository: IUserRepository,
+    @inject(TYPES.ContactsRepository) contactsRepository: ContactsRepository,
+    @inject(TYPES.UserRepository) userRepository: UserRepository,
   ) {
     this.db = db;
     this.contactsRepository = contactsRepository;
