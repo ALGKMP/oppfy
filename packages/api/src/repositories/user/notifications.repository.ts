@@ -9,7 +9,7 @@ import type {
 } from "@oppfy/db";
 
 import { UserIdParam } from "../../interfaces/types";
-import type { NotificationSettings } from "../../models";
+import type { Notification, NotificationSettings, Profile } from "../../models";
 import { TYPES } from "../../symbols";
 
 @injectable()
@@ -264,9 +264,55 @@ export class NotificationsRepository {
 
     return results.map((result) => result.token);
   }
+
+  async paginateNotifications(
+    { userId, cursor, pageSize = 10 }: PaginateNotificationsParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<NotificationAndProfile[]> {
+    const notifications = await db
+      .select()
+      .from(this.schema.notification)
+      .innerJoin(
+        this.schema.profile,
+        eq(this.schema.notification.senderUserId, this.schema.profile.userId),
+      )
+      .where(
+        and(
+          eq(this.schema.notification.recipientUserId, userId),
+          eq(this.schema.notification.active, true),
+          cursor
+            ? or(
+                lt(this.schema.notification.createdAt, cursor.createdAt),
+                and(
+                  eq(this.schema.notification.createdAt, cursor.createdAt),
+                  lt(this.schema.notification.id, cursor.id),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(
+        desc(this.schema.notification.createdAt),
+        desc(this.schema.notification.id),
+      )
+      .limit(pageSize);
+
+    return notifications;
+  }
 }
 
 interface UpdateNotificationSettingsParams {
   notificationSettingsId: string;
   notificationSettings: NotificationSettings;
+}
+
+export interface PaginateNotificationsParams {
+  userId: string;
+  cursor?: { createdAt: Date; id: string };
+  pageSize?: number;
+}
+
+export interface NotificationAndProfile {
+  profile: Profile;
+  notifications: Notification;
 }

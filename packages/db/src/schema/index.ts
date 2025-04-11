@@ -13,7 +13,6 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { z } from "zod";
 
 export const privacyEnum = pgEnum("privacy", ["public", "private"]);
 
@@ -115,10 +114,10 @@ export const userRelations = relations(user, ({ one, many }) => ({
     fields: [user.id],
     references: [userStatus.userId],
   }),
-  receivedNotifications: many(notifications, {
+  receivedNotifications: many(notification, {
     relationName: "notificationRecipient",
   }),
-  sentNotifications: many(notifications, {
+  sentNotifications: many(notification, {
     relationName: "notificationSender",
   }),
   pushTokens: many(pushToken),
@@ -230,8 +229,8 @@ export const pushTokenRelations = relations(pushToken, ({ one }) => ({
   }),
 }));
 
-export const notifications = pgTable(
-  "notifications",
+export const notification = pgTable(
+  "notification",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     senderUserId: uuid("sender_user_id")
@@ -253,25 +252,23 @@ export const notifications = pgTable(
       .notNull(),
   },
   (table) => ({
-    recipientIdx: index("notifications_recipient_idx").on(
-      table.recipientUserId,
-    ),
-    senderIdx: index("notifications_sender_idx").on(table.senderUserId),
-    readIdx: index("notifications_read_idx").on(table.read),
-    activeIdx: index("notifications_active_idx").on(table.active),
-    eventTypeIdx: index("notifications_event_type_idx").on(table.eventType),
-    createdAtIdx: index("notifications_created_at_idx").on(table.createdAt),
+    recipientIdx: index("notification_recipient_idx").on(table.recipientUserId),
+    senderIdx: index("notification_sender_idx").on(table.senderUserId),
+    readIdx: index("notification_read_idx").on(table.read),
+    activeIdx: index("notification_active_idx").on(table.active),
+    eventTypeIdx: index("notification_event_type_idx").on(table.eventType),
+    createdAtIdx: index("notification_created_at_idx").on(table.createdAt),
   }),
 );
 
-export const notificationsRelations = relations(notifications, ({ one }) => ({
+export const notificationRelations = relations(notification, ({ one }) => ({
   recipient: one(user, {
-    fields: [notifications.recipientUserId],
+    fields: [notification.recipientUserId],
     references: [user.id],
     relationName: "notificationRecipient",
   }),
   sender: one(user, {
-    fields: [notifications.senderUserId],
+    fields: [notification.senderUserId],
     references: [user.id],
     relationName: "notificationSender",
   }),

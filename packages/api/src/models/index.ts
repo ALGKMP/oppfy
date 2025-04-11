@@ -39,6 +39,7 @@ export type ReportUser = InferSelectModel<typeof schema.reportUser>;
 export type ReportPost = InferSelectModel<typeof schema.reportPost>;
 export type ReportComment = InferSelectModel<typeof schema.reportComment>;
 
+export type Notification = InferSelectModel<typeof schema.notification>;
 export type NotificationSettings = InferSelectModel<
   typeof schema.notificationSettings
 >;
