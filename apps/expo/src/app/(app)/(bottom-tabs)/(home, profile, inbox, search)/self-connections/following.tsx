@@ -20,8 +20,7 @@ import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
-type FollowingItem =
-  RouterOutputs["follow"]["paginateFollowingSelf"]["items"][0];
+type FollowingItem = RouterOutputs["follow"]["paginateFollowing"]["items"][0];
 
 const PAGE_SIZE = 20;
 
@@ -36,23 +35,23 @@ const Following = () => {
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.follow.paginateFollowingSelf.cancel({ pageSize: PAGE_SIZE });
+      await utils.follow.paginateFollowing.cancel({ pageSize: PAGE_SIZE });
 
       // Get the data from the queryCache
-      const prevData = utils.follow.paginateFollowingSelf.getInfiniteData({
+      const prevData = utils.follow.paginateFollowing.getInfiniteData({
         pageSize: PAGE_SIZE,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.follow.paginateFollowingSelf.setInfiniteData(
+      utils.follow.paginateFollowing.setInfiniteData(
         { pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.map((item) =>
-              item.userId === newData.userId
+              item.userId === newData.recipientUserId
                 ? {
                     ...item,
                     relationshipState:
@@ -71,7 +70,7 @@ const Following = () => {
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
       // Refetch latest data since our optimistic update may be outdated
-      void utils.follow.paginateFollowingSelf.invalidate({
+      void utils.follow.paginateFollowing.invalidate({
         pageSize: PAGE_SIZE,
       });
     },
@@ -80,23 +79,23 @@ const Following = () => {
   const unfollowMutation = api.follow.unfollowUser.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.follow.paginateFollowingSelf.cancel({ pageSize: PAGE_SIZE });
+      await utils.follow.paginateFollowing.cancel({ pageSize: PAGE_SIZE });
 
       // Get the data from the queryCache
-      const prevData = utils.follow.paginateFollowingSelf.getInfiniteData({
+      const prevData = utils.follow.paginateFollowing.getInfiniteData({
         pageSize: PAGE_SIZE,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.follow.paginateFollowingSelf.setInfiniteData(
+      utils.follow.paginateFollowing.setInfiniteData(
         { pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.map((item) =>
-              item.userId === newData.userId
+              item.userId === newData.recipientUserId
                 ? { ...item, relationshipState: "notFollowing" }
                 : item,
             ),
@@ -109,7 +108,7 @@ const Following = () => {
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
       // Refetch latest data since our optimistic update may be outdated
-      void utils.follow.paginateFollowingSelf.invalidate({
+      void utils.follow.paginateFollowing.invalidate({
         pageSize: PAGE_SIZE,
       });
     },
@@ -118,23 +117,23 @@ const Following = () => {
   const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.follow.paginateFollowingSelf.cancel({ pageSize: PAGE_SIZE });
+      await utils.follow.paginateFollowing.cancel({ pageSize: PAGE_SIZE });
 
       // Get the data from the queryCache
-      const prevData = utils.follow.paginateFollowingSelf.getInfiniteData({
+      const prevData = utils.follow.paginateFollowing.getInfiniteData({
         pageSize: PAGE_SIZE,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.follow.paginateFollowingSelf.setInfiniteData(
+      utils.follow.paginateFollowing.setInfiniteData(
         { pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.map((item) =>
-              item.userId === newData.recipientId
+              item.userId === newData.recipientUserId
                 ? { ...item, relationshipState: "notFollowing" }
                 : item,
             ),
@@ -147,7 +146,7 @@ const Following = () => {
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
       // Refetch latest data since our optimistic update may be outdated
-      void utils.follow.paginateFollowingSelf.invalidate({
+      void utils.follow.paginateFollowing.invalidate({
         pageSize: PAGE_SIZE,
       });
     },
@@ -160,7 +159,7 @@ const Following = () => {
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = api.follow.paginateFollowingSelf.useInfiniteQuery(
+  } = api.follow.paginateFollowing.useInfiniteQuery(
     { pageSize: PAGE_SIZE },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
@@ -184,15 +183,15 @@ const Following = () => {
   };
 
   const handleFollow = async (userId: string) => {
-    await followMutation.mutateAsync({ userId });
+    await followMutation.mutateAsync({ recipientUserId: userId });
   };
 
   const handleUnfollow = async (userId: string) => {
-    await unfollowMutation.mutateAsync({ userId });
+    await unfollowMutation.mutateAsync({ recipientUserId: userId });
   };
 
   const handleCancelFollowRequest = async (userId: string) => {
-    await cancelFollowRequest.mutateAsync({ recipientId: userId });
+    await cancelFollowRequest.mutateAsync({ recipientUserId: userId });
   };
 
   const handleRefresh = async () => {
@@ -204,8 +203,8 @@ const Following = () => {
   const renderActionButton = (
     item: FollowingItem,
   ): MediaListItemActionProps => {
-    switch (item.relationshipState) {
-      case "followRequestSent":
+    switch (item.followStatus) {
+      case "REQUESTED":
         return {
           label: "Sent",
           icon: Send,
@@ -223,7 +222,7 @@ const Following = () => {
               ],
             }),
         };
-      case "following":
+      case "FOLLOWING":
         return {
           label: "Unfollow",
           icon: UserRoundMinus,
@@ -241,7 +240,7 @@ const Following = () => {
               ],
             }),
         };
-      case "notFollowing":
+      case "NOT_FOLLOWING":
         return {
           label: "Follow",
           icon: UserRoundPlus,
@@ -258,8 +257,8 @@ const Following = () => {
       primaryAction={renderActionButton(item)}
       onPress={() =>
         routeProfile(item.userId, {
-          name: item.name,
-          username: item.username,
+          name: item.name ?? "",
+          username: item.username ?? "",
           profilePictureUrl: item.profilePictureUrl,
         })
       }

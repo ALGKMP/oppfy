@@ -18,7 +18,7 @@ import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
-type FriendItem = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][0];
+type FriendItem = RouterOutputs["friend"]["paginateFriends"]["items"][0];
 
 const PAGE_SIZE = 20;
 
@@ -30,26 +30,26 @@ const Friends = () => {
 
   const [refreshing, setRefreshing] = useState(false);
 
-  const removeFriend = api.friend.removeFriend.useMutation({
+  const removeFriend = api.friend.unfriendUser.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.friend.paginateFriendsSelf.cancel({ pageSize: PAGE_SIZE });
+      await utils.friend.paginateFriends.cancel({ pageSize: PAGE_SIZE });
 
       // Get the data from the queryCache
-      const prevData = utils.friend.paginateFriendsSelf.getInfiniteData({
+      const prevData = utils.friend.paginateFriends.getInfiniteData({
         pageSize: PAGE_SIZE,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.friend.paginateFriendsSelf.setInfiniteData(
+      utils.friend.paginateFriends.setInfiniteData(
         { pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.filter(
-              (item) => item.userId !== newData.recipientId,
+              (item) => item.userId !== newData.recipientUserId,
             ),
           })),
         },
@@ -60,13 +60,13 @@ const Friends = () => {
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
       // Refetch latest data since our optimistic update may be outdated
-      void utils.friend.paginateFriendsSelf.invalidate({
+      void utils.friend.paginateFriends.invalidate({
         pageSize: PAGE_SIZE,
       });
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.friend.paginateFriendsSelf.invalidate({
+      await utils.friend.paginateFriends.invalidate({
         pageSize: PAGE_SIZE,
       });
     },
@@ -79,7 +79,7 @@ const Friends = () => {
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = api.friend.paginateFriendsSelf.useInfiniteQuery(
+  } = api.friend.paginateFriends.useInfiniteQuery(
     { pageSize: PAGE_SIZE },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
@@ -101,7 +101,7 @@ const Friends = () => {
   };
 
   const handleRemoveFriend = async (userId: string) => {
-    await removeFriend.mutateAsync({ recipientId: userId });
+    await removeFriend.mutateAsync({ recipientUserId: userId });
   };
 
   const handleRefresh = async () => {
@@ -134,8 +134,8 @@ const Friends = () => {
       }}
       onPress={() =>
         routeProfile(item.userId, {
-          name: item.name,
-          username: item.username,
+          name: item.name ?? "",
+          username: item.username ?? "",
           profilePictureUrl: item.profilePictureUrl,
         })
       }

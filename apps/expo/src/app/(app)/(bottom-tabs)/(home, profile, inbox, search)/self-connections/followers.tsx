@@ -19,7 +19,7 @@ import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
 type FollowerItem =
-  RouterOutputs["follow"]["paginateFollowersSelf"]["items"][0];
+  RouterOutputs["follow"]["paginateFollowers"]["items"][0];
 
 const PAGE_SIZE = 20;
 
@@ -34,22 +34,24 @@ const Followers = () => {
   const removeFollower = api.follow.removeFollower.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.follow.paginateFollowersSelf.cancel({ pageSize: PAGE_SIZE });
+      await utils.follow.paginateFollowers.cancel({ pageSize: PAGE_SIZE });
 
       // Get the data from the queryCache
-      const prevData = utils.follow.paginateFollowersSelf.getInfiniteData({
+      const prevData = utils.follow.paginateFollowers.getInfiniteData({
         pageSize: PAGE_SIZE,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.follow.paginateFollowersSelf.setInfiniteData(
+      utils.follow.paginateFollowers.setInfiniteData(
         { pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
-            items: page.items.filter((item) => item.userId !== newData.userId),
+            items: page.items.filter(
+              (item) => item.userId !== newData.recipientUserId,
+            ),
           })),
         },
       );
@@ -59,13 +61,13 @@ const Followers = () => {
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
       // Refetch latest data since our optimistic update may be outdated
-      void utils.follow.paginateFollowersSelf.invalidate({
+      void utils.follow.paginateFollowers.invalidate({
         pageSize: PAGE_SIZE,
       });
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.follow.paginateFollowersSelf.invalidate({
+      await utils.follow.paginateFollowers.invalidate({
         pageSize: PAGE_SIZE,
       });
     },
@@ -78,7 +80,7 @@ const Followers = () => {
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = api.follow.paginateFollowersSelf.useInfiniteQuery(
+  } = api.follow.paginateFollowers.useInfiniteQuery(
     { pageSize: PAGE_SIZE },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
@@ -102,7 +104,7 @@ const Followers = () => {
   };
 
   const handleRemoveFollower = async (userId: string) => {
-    await removeFollower.mutateAsync({ userId });
+    await removeFollower.mutateAsync({ recipientUserId: userId });
   };
 
   const handleRefresh = async () => {
@@ -135,8 +137,8 @@ const Followers = () => {
       }}
       onPress={() =>
         routeProfile(item.userId, {
-          name: item.name,
-          username: item.username,
+          name: item.name ?? "",
+          username: item.username ?? "",
           profilePictureUrl: item.profilePictureUrl,
         })
       }
