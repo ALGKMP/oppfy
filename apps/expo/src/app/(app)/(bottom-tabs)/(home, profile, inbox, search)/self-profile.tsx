@@ -16,7 +16,7 @@ import { EmptyPlaceholder, HeaderTitle, Icon } from "~/components/ui";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
-type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
+type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
 
 const SelfProfile = () => {
   const scrollRef = useRef(null);
@@ -33,7 +33,13 @@ const SelfProfile = () => {
     data: profileData,
     isLoading: isLoadingProfile,
     refetch: refetchProfile,
-  } = api.profile.getProfileSelf.useQuery(undefined, {});
+  } = api.profile.getProfile.useQuery({});
+
+  const {
+    data: profileStats,
+    isLoading: isLoadingProfileStats,
+    refetch: refetchProfileStats,
+  } = api.profile.getProfileStats.useQuery({});
 
   const {
     data: postsData,
@@ -42,7 +48,7 @@ const SelfProfile = () => {
     fetchNextPage,
     refetch: refetchPosts,
     hasNextPage,
-  } = api.post.paginatePostsOfUserSelf.useInfiniteQuery(
+  } = api.post.paginatePosts.useInfiniteQuery(
     { pageSize: 10 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -77,7 +83,7 @@ const SelfProfile = () => {
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       const visibleItemIds = viewableItems
         .filter((token) => token.isViewable)
-        .map((token) => (token.item as Post).postId);
+        .map((token) => (token.item as Post).post.id);
 
       setViewableItems(visibleItemIds);
     },
@@ -87,43 +93,43 @@ const SelfProfile = () => {
   const renderPost = useCallback(
     ({ item }: { item: Post }) => (
       <PostCard
-        postId={item.postId}
+        postId={item.post.id}
         endpoint="self-profile"
-        createdAt={item.createdAt}
-        caption={item.caption}
+        createdAt={item.post.createdAt}
+        caption={item.post.caption}
         author={{
-          id: item.authorId,
+          id: item.authorUserId,
           name: item.authorName ?? "",
           username: item.authorUsername ?? "",
-          profilePictureUrl: item.authorProfilePicture,
+          profilePictureUrl: item.authorProfilePictureUrl,
         }}
         recipient={{
-          id: item.recipientId,
+          id: item.recipientUserId,
           name: item.recipientName ?? "",
-          username: item.recipientUsername ?? "",
-          profilePictureUrl: item.recipientProfilePicture,
+          username: item.recipientUsername,
+          profilePictureUrl: item.recipientProfilePictureUrl,
         }}
         media={{
-          id: item.postId,
-          type: item.mediaType,
-          url: item.imageUrl,
+          id: item.post.id,
+          type: item.post.mediaType,
+          url: item.assetUrl,
           dimensions: {
-            width: item.width,
-            height: item.height,
+            width: item.post.width,
+            height: item.post.height,
           },
           recipient: {
-            id: item.recipientId,
+            id: item.recipientUserId,
             name: item.recipientName ?? "",
             username: item.recipientUsername ?? "",
-            profilePictureUrl: item.recipientProfilePicture,
+            profilePictureUrl: item.recipientProfilePictureUrl,
           },
         }}
         stats={{
-          likes: item.likesCount,
-          comments: item.commentsCount,
+          likes: item.postStats.likes,
+          comments: item.postStats.comments,
           hasLiked: item.hasLiked,
         }}
-        isViewable={viewableItems.includes(item.postId)}
+        isViewable={viewableItems.includes(item.post.id)}
       />
     ),
     [viewableItems],
@@ -161,17 +167,17 @@ const SelfProfile = () => {
             bio: profileData?.bio ?? null,
           }}
           stats={{
-            postCount: profileData?.postCount ?? 0,
-            followingCount: profileData?.followingCount ?? 0,
-            followerCount: profileData?.followerCount ?? 0,
-            friendCount: profileData?.friendCount ?? 0,
+            postCount: profileStats?.posts ?? 0,
+            followingCount: profileStats?.following ?? 0,
+            followerCount: profileStats?.followers ?? 0,
+            friendCount: profileStats?.friends ?? 0,
           }}
           createdAt={profileData?.createdAt}
-          isLoading={isLoadingProfile}
+          isLoading={isLoadingProfile || isLoadingProfileStats}
         />
-        {isLoadingProfile ? null : (
+        {(isLoadingProfile || isLoadingProfileStats) ? null : (
           <>
-            {profileData?.friendCount && profileData.friendCount > 0 ? (
+            {profileStats?.friends && profileStats.friends > 0 ? (
               <FriendCarousel paddingHorizontal="$2.5" />
             ) : (
               <RecommendationCarousel paddingHorizontal="$2.5" />
@@ -199,7 +205,9 @@ const SelfProfile = () => {
     ),
     [
       profileData,
+      profileStats,
       isLoadingProfile,
+      isLoadingProfileStats,
       isLoadingPostData,
       postItems.length,
       isFirstInStack,
@@ -214,7 +222,7 @@ const SelfProfile = () => {
       renderItem={renderPost}
       ListHeaderComponent={memoizedHeader}
       ListEmptyComponent={renderEmptyList}
-      keyExtractor={(item) => `self-profile-post-${item.postId}`}
+      keyExtractor={(item) => `self-profile-post-${item.post.id}`}
       estimatedItemSize={664}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}

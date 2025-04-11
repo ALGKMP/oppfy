@@ -36,6 +36,13 @@ const OtherProfile = () => {
     refetch: refetchProfile,
   } = api.profile.getProfile.useQuery({ userId });
 
+
+  const {
+    data: profileStats,
+    isLoading: isLoadingProfileStats,
+    refetch: refetchProfileStats,
+  } = api.profile.getProfileStats.useQuery({});
+
   const { data: networkRelationships, refetch: refetchNetworkRelationships } =
     api.profile.getRelationshipStatesBetweenUsers.useQuery({ userId });
 
@@ -153,10 +160,10 @@ const OtherProfile = () => {
             bio: profileData?.bio ?? null,
           }}
           stats={{
-            postCount: profileData?.postCount ?? 0,
-            followingCount: profileData?.followingCount ?? 0,
-            followerCount: profileData?.followerCount ?? 0,
-            friendCount: profileData?.friendCount ?? 0,
+            postCount: profileStats?.posts ?? 0,
+            followingCount: profileStats?.following ?? 0,
+            followerCount: profileStats?.followers ?? 0,
+            friendCount: profileStats?.friends ?? 0,
           }}
           createdAt={profileData?.createdAt}
           isLoading={isLoadingProfile}
@@ -164,12 +171,12 @@ const OtherProfile = () => {
         />
         {isLoadingProfile ? null : (
           <>
-            {profileData?.friendCount &&
-            profileData.friendCount > 0 &&
-            !networkRelationships?.blocked ? (
+            {profileStats?.friends &&
+            profileStats.friends > 0 &&
+            !networkRelationships?.isBlocked ? (
               <FriendCarousel
                 userId={userId}
-                username={profileData.username}
+                username={profileData?.username ?? ""}
                 paddingHorizontal="$2.5"
               />
             ) : (
@@ -196,7 +203,9 @@ const OtherProfile = () => {
     ),
     [
       profileData,
+      profileStats,
       isLoadingProfile,
+      isLoadingProfileStats,
       isLoadingPostData,
       postItems.length,
       networkRelationships,
