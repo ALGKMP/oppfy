@@ -15,26 +15,26 @@ const GridSuggestions = () => {
   const utils = api.useUtils();
   const { routeProfile } = useRouteProfile();
 
-  const { data } = api.contacts.getProfileSuggestions.useQuery(undefined, {
+  const { data } = api.contacts.profileRecommendations.useQuery(undefined, {
     staleTime: STALE_TIME,
   });
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
-      await utils.contacts.getProfileSuggestions.cancel();
-      const prevData = utils.contacts.getProfileSuggestions.getData();
+      await utils.contacts.profileRecommendations.cancel();
+      const prevData = utils.contacts.profileRecommendations.getData();
       if (!prevData) return { prevData: undefined };
 
-      utils.contacts.getProfileSuggestions.setData(
+      utils.contacts.profileRecommendations.setData(
         undefined,
-        prevData.filter((item) => item.userId !== newData.userId),
+        prevData.filter((item) => item.userId !== newData.recipientUserId),
       );
 
       return { prevData };
     },
     onError: (_err, _newData, ctx) => {
       if (ctx?.prevData === undefined) return;
-      void utils.contacts.getProfileSuggestions.invalidate();
+      void utils.contacts.profileRecommendations.invalidate();
     },
   });
 
@@ -52,21 +52,21 @@ const GridSuggestions = () => {
       renderItem={({ item, index }) => (
         <UserCard
           userId={item.userId}
-          username={item.username}
+          username={item.username ?? ""}
           profilePictureUrl={item.profilePictureUrl}
           width={TILE_WIDTH}
           index={index}
           onPress={() =>
             routeProfile(item.userId, {
               name: item.name ?? "",
-              username: item.username,
+              username: item.username ?? "",
               profilePictureUrl: item.profilePictureUrl,
             })
           }
           actionButton={{
             label: "Follow",
             onPress: () =>
-              void followMutation.mutateAsync({ userId: item.userId }),
+              void followMutation.mutateAsync({ recipientUserId: item.userId }),
           }}
         />
       )}
