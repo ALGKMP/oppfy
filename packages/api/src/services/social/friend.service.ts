@@ -237,7 +237,7 @@ export class FriendService {
       }
 
       await this.friendRepository.deleteFriendRequest(
-        { senderUserId: recipientUserId, recipientUserId: senderUserId },
+        { senderUserId, recipientUserId },
         tx,
       );
       await this.friendRepository.createFriend(
@@ -252,7 +252,7 @@ export class FriendService {
             tx,
           ),
           this.followRepository.getFollowRequest(
-            { senderUserId: recipientUserId, recipientUserId: senderUserId },
+            { senderUserId, recipientUserId },
             tx,
           ),
         ],
@@ -265,7 +265,7 @@ export class FriendService {
       }
       if (isRecipientFollowRequested) {
         await this.followRepository.deleteFollowRequest(
-          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          { senderUserId, recipientUserId },
           tx,
         );
       }
@@ -276,7 +276,7 @@ export class FriendService {
           tx,
         ),
         this.followRepository.getFollower(
-          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          { senderUserId, recipientUserId },
           tx,
         ),
       ]);
@@ -288,7 +288,7 @@ export class FriendService {
       }
       if (!isRecipientFollowing) {
         await this.followRepository.createFollower(
-          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          { senderUserId, recipientUserId },
           tx,
         );
       }
