@@ -2,12 +2,13 @@ import { and, asc, eq, gt, or } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
+import { withOnboardingCompleted } from "@oppfy/db/utils/query-helpers";
 
 import type {
   DirectionalUserIdsParams,
   PaginationParams,
 } from "../../interfaces/types";
-import type { Block, Profile } from "../../models";
+import type { Block, OnboardedProfile, Profile } from "../../models";
 import { TYPES } from "../../symbols";
 
 export interface PaginateBlockedUsersParams extends PaginationParams {
@@ -64,8 +65,8 @@ export class BlockRepository {
   async paginateBlockedProfiles(
     { userId, cursor, pageSize = 10 }: PaginateBlockedUsersParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Profile[]> {
-    const blockedUsers = await db
+  ): Promise<OnboardedProfile[]> {
+    let query = db
       .select({
         profile: this.schema.profile,
       })
@@ -92,8 +93,13 @@ export class BlockRepository {
         asc(this.schema.block.createdAt),
         asc(this.schema.profile.userId),
       )
-      .limit(pageSize);
+      .limit(pageSize)
+      .$dynamic();
 
-    return blockedUsers.map(({ profile }) => profile);
+    query = withOnboardingCompleted(query);
+
+    const blockedUsers = await query;
+
+    return blockedUsers.map(({ profile }) => profile as OnboardedProfile);
   }
 }
