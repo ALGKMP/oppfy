@@ -186,8 +186,8 @@ export class ProfileService {
       isFollowRequested,
       isFriends,
       isFriendRequested,
-      isPrivate,
-    ] = await Promise.all([
+
+      ] = await Promise.all([
       this.followRepository.getFollower({
         senderUserId: selfUserId,
         recipientUserId: otherUserId,
@@ -309,7 +309,6 @@ export class ProfileService {
     const key = `/profile-pictures/${userId}.jpg`;
 
     await this.cloudfront.createInvalidation(
-      env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
       env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
       key,
     );
