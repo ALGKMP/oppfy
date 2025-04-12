@@ -308,7 +308,7 @@ export class ProfileService {
       contentLength,
     });
 
-    const key = `profile-pictures/${userId}.jpg`;
+    const key = `/profile-pictures/${userId}.jpg`;
 
     await this.cloudfront.createInvalidation(
       env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
