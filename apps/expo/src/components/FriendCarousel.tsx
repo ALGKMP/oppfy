@@ -96,15 +96,15 @@ const FriendCarousel = ({
           return (
             <UserCard
               userId={item.userId}
-              username={item.username}
+              username={item.username ?? ""}
               profilePictureUrl={item.profilePictureUrl}
               size="small"
               width={CARD_WIDTH}
               index={index}
               onPress={() =>
                 routeProfile(item.userId, {
-                  name: item.name,
-                  username: item.username,
+                  name: item.name ?? "",
+                  username: item.username ?? "",
                   profilePictureUrl: item.profilePictureUrl,
                 })
               }

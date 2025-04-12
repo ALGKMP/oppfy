@@ -14,12 +14,15 @@ import Stats from "~/components/Profile/Stats";
 type NetworkRelationships =
   RouterOutputs["profile"]["getRelationshipStatesBetweenUsers"];
 
+type Privacy = RouterOutputs["profile"]["getProfile"]["privacy"];
+
 interface User {
   id?: string;
   name: string | null;
   username: string;
   profilePictureUrl: string | null;
   bio: string | null;
+  privacy: Privacy;
 }
 
 interface Stats {
@@ -46,17 +49,15 @@ const Header = ({
 }: HeaderProps) => {
   const isBlocked = networkRelationships?.isBlocked ?? false;
   const isDisabled =
-    isBlocked || networkRelationships?.follow === "PRIVATE_NOT_FOLLOWING";
-
-  // Generate a unique key for HeaderGradient based on username
-  const headerKey = `header-gradient-${user.username ?? "default"}`;
+    isBlocked ||
+    (user.privacy === "private" &&
+      networkRelationships?.follow !== "FOLLOWING");
 
   return (
     <YStack>
       {/* Cover Image Area */}
       <YStack height={140} overflow="hidden" borderRadius="$6">
         <HeaderGradient
-          key={headerKey}
           username={user.username}
           profilePictureUrl={user.profilePictureUrl}
         />

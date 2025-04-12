@@ -21,8 +21,6 @@ import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
 
 type SocialProfile = HydratedProfile & {
-  followedAt: Date;
-  friendedAt: Date;
   followStatus: FollowStatus;
 };
 
@@ -227,7 +225,7 @@ export class FriendService {
   > {
     return await this.db.transaction(async (tx) => {
       const isRequested = await this.friendRepository.getFriendRequest(
-        { senderUserId: recipientUserId, recipientUserId: senderUserId },
+        { senderUserId, recipientUserId },
         tx,
       );
       if (!isRequested) {
@@ -237,7 +235,7 @@ export class FriendService {
       }
 
       await this.friendRepository.deleteFriendRequest(
-        { senderUserId: recipientUserId, recipientUserId: senderUserId },
+        { senderUserId, recipientUserId },
         tx,
       );
       await this.friendRepository.createFriend(
@@ -252,7 +250,7 @@ export class FriendService {
             tx,
           ),
           this.followRepository.getFollowRequest(
-            { senderUserId: recipientUserId, recipientUserId: senderUserId },
+            { senderUserId, recipientUserId },
             tx,
           ),
         ],
@@ -265,7 +263,7 @@ export class FriendService {
       }
       if (isRecipientFollowRequested) {
         await this.followRepository.deleteFollowRequest(
-          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          { senderUserId, recipientUserId },
           tx,
         );
       }
@@ -276,7 +274,7 @@ export class FriendService {
           tx,
         ),
         this.followRepository.getFollower(
-          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          { senderUserId, recipientUserId },
           tx,
         ),
       ]);
@@ -288,7 +286,7 @@ export class FriendService {
       }
       if (!isRecipientFollowing) {
         await this.followRepository.createFollower(
-          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          { senderUserId, recipientUserId },
           tx,
         );
       }
@@ -375,8 +373,6 @@ export class FriendService {
 
     const hydratedProfiles = rawProfiles.map((profile) => ({
       ...this.cloudfront.hydrateProfile(profile),
-      followedAt: profile.followedAt,
-      friendedAt: profile.friendedAt,
       followStatus: profile.followStatus,
     }));
 

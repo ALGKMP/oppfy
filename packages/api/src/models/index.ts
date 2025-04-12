@@ -14,6 +14,11 @@ export type ReportCommentReason =
 
 export type User = InferSelectModel<typeof schema.user>;
 export type Profile = InferSelectModel<typeof schema.profile>;
+export type OnboardedProfile = {
+  [K in keyof Profile]: K extends "profilePictureKey"
+    ? Profile[K]
+    : NonNullable<Profile[K]>;
+};
 export type HydratedProfile = Profile & {
   profilePictureUrl: string | null;
 };

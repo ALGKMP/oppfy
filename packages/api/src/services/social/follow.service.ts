@@ -354,7 +354,6 @@ export class FollowService {
 
     const hydratedProfiles = rawProfiles.map((profile) => ({
       ...this.cloudfront.hydrateProfile(profile),
-      followedAt: profile.followedAt,
       followStatus: profile.followStatus,
     }));
 
@@ -392,7 +391,6 @@ export class FollowService {
 
     const hydratedProfiles = rawProfiles.map((profile) => ({
       ...this.cloudfront.hydrateProfile(profile),
-      followedAt: profile.followedAt,
       followStatus: profile.followStatus,
     }));
 

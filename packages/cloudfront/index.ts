@@ -102,14 +102,14 @@ export class CloudFront {
   }
 
   private getPublicPostDistributionDomainUrl(objectKey: string): string {
-    return `https://${env.CLOUDFRONT_PUBLIC_POSTS_DISTRIBUTION_DOMAIN}/${objectKey}`;
+    return `https://${env.CLOUDFRONT_PUBLIC_POSTS_DISTRIBUTION_DOMAIN}${objectKey}`;
   }
 
   private getPrivatePostDistributionDomainUrl(objectKey: string): string {
-    return `https://${env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_DOMAIN}/${objectKey}`;
+    return `https://${env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_DOMAIN}${objectKey}`;
   }
 
   private getProfilePictureDistributionDomainUrl(objectKey: string): string {
-    return `https://${env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_DOMAIN}/${objectKey}`;
+    return `https://${env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_DOMAIN}${objectKey}`;
   }
 }

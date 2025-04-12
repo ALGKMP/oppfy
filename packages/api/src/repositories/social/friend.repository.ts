@@ -19,8 +19,6 @@ import type { Friend, FriendRequest, Profile } from "../../models";
 import { TYPES } from "../../symbols";
 
 export interface SocialProfile extends Profile {
-  followedAt: Date;
-  friendedAt: Date;
   followStatus: FollowStatus;
 }
 
@@ -304,9 +302,7 @@ export class FriendRepository {
     const friends = await db
       .select({
         profile: this.schema.profile,
-        followedAt: this.schema.follow.createdAt,
-        friendedAt: this.schema.friend.createdAt,
-        followStatus: getFollowStatusSql(this.schema, selfUserId),
+        followStatus: getFollowStatusSql(selfUserId),
       })
       .from(this.schema.friend)
       .innerJoin(
@@ -339,8 +335,6 @@ export class FriendRepository {
 
     return friends.map((friend) => ({
       ...friend.profile,
-      followedAt: friend.followedAt,
-      friendedAt: friend.friendedAt,
       followStatus: friend.followStatus,
     }));
   }

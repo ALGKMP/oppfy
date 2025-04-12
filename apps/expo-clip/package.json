@@ -8,7 +8,6 @@
     "build:ios": "BUILDING_FOR_APP_CLIP=1 eas build --platform ios --profile clip",
     "clean": "git clean -xdf .expo .turbo node_modules",
     "clip": "npx expo run:ios --configuration Release --scheme OppfyClip --port 8082",
-    "dev": "expo start --port 8082",
     "ios": "expo run:ios --scheme --port 8082 -- --device",
     "prebuild": "expo prebuild"
   },

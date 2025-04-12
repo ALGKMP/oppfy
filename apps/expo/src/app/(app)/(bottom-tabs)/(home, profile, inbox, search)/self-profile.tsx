@@ -165,6 +165,7 @@ const SelfProfile = () => {
             username: profileData?.username ?? "",
             profilePictureUrl: profileData?.profilePictureUrl ?? null,
             bio: profileData?.bio ?? null,
+            privacy: profileData?.privacy ?? "public",
           }}
           stats={{
             postCount: profileStats?.posts ?? 0,
@@ -203,8 +204,11 @@ const SelfProfile = () => {
         )}
       </YStack>
     ),
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       profileData,
+      profileData?.profilePictureUrl,
       profileStats,
       isLoadingProfile,
       isLoadingProfileStats,

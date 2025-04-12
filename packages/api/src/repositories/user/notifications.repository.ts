@@ -159,7 +159,7 @@ export class NotificationRepository {
       .select({
         profile: this.schema.profile,
         notification: this.schema.notification,
-        followStatus: getFollowStatusSql(this.schema, userId),
+        followStatus: getFollowStatusSql(userId),
       })
       .from(this.schema.notification)
       .innerJoin(

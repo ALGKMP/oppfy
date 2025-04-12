@@ -214,9 +214,7 @@ export class ProfileService {
         ? "FOLLOWING"
         : isFollowRequested
           ? "REQUESTED"
-          : isPrivate
-            ? "PRIVATE_NOT_FOLLOWING"
-            : "NOT_FOLLOWING"
+          : "NOT_FOLLOWING"
     ) satisfies FollowStatus;
 
     const friendState = (
@@ -311,6 +309,7 @@ export class ProfileService {
     const key = `/profile-pictures/${userId}.jpg`;
 
     await this.cloudfront.createInvalidation(
+      env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
       env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
       key,
     );
