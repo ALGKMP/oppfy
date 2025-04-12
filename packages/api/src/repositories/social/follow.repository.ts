@@ -19,7 +19,6 @@ import type { Follow, FollowRequest, Profile } from "../../models";
 import { TYPES } from "../../symbols";
 
 export interface SocialProfile extends Profile {
-  followedAt: Date;
   followStatus: FollowStatus;
 }
 
@@ -300,7 +299,6 @@ export class FollowRepository {
     const followers = await db
       .select({
         profile: this.schema.profile,
-        followedAt: this.schema.follow.createdAt,
         followStatus: getFollowStatusSql(this.schema, selfUserId),
       })
       .from(this.schema.follow)
@@ -331,7 +329,6 @@ export class FollowRepository {
 
     return followers.map((follower) => ({
       ...follower.profile,
-      followedAt: follower.followedAt,
       followStatus: follower.followStatus,
     }));
   }
@@ -343,7 +340,6 @@ export class FollowRepository {
     const following = await db
       .select({
         profile: this.schema.profile,
-        followedAt: this.schema.follow.createdAt,
         followStatus: getFollowStatusSql(this.schema, selfUserId),
       })
       .from(this.schema.follow)
@@ -374,7 +370,6 @@ export class FollowRepository {
 
     return following.map((following) => ({
       ...following.profile,
-      followedAt: following.followedAt,
       followStatus: following.followStatus,
     }));
   }

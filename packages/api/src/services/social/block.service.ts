@@ -16,10 +16,6 @@ import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
 import { TYPES } from "../../symbols";
 
-type SocialProfile = Profile & {
-  blockedAt: Date;
-};
-
 interface GetBlockedUsersParams extends PaginationParams {
   userId: string;
 }
@@ -117,7 +113,7 @@ export class BlockService {
     cursor,
     pageSize = 10,
   }: GetBlockedUsersParams): Promise<
-    Result<PaginatedResponse<SocialProfile>, never>
+    Result<PaginatedResponse<Profile>, never>
   > {
     const rawBlockedProfiles =
       await this.blockRepository.paginateBlockedProfiles({
@@ -126,10 +122,9 @@ export class BlockService {
         pageSize: pageSize + 1,
       });
 
-    const hydratedProfiles = rawBlockedProfiles.map((profile) => ({
-      ...this.cloudfront.hydrateProfile(profile),
-      blockedAt: profile.blockedAt,
-    }));
+    const hydratedProfiles = rawBlockedProfiles.map((profile) =>
+      this.cloudfront.hydrateProfile(profile),
+    );
 
     const hasMore = rawBlockedProfiles.length > pageSize;
     const items = hydratedProfiles.slice(0, pageSize);

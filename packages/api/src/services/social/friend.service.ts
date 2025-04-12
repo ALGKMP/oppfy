@@ -21,8 +21,6 @@ import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
 
 type SocialProfile = HydratedProfile & {
-  followedAt: Date;
-  friendedAt: Date;
   followStatus: FollowStatus;
 };
 
@@ -375,8 +373,6 @@ export class FriendService {
 
     const hydratedProfiles = rawProfiles.map((profile) => ({
       ...this.cloudfront.hydrateProfile(profile),
-      followedAt: profile.followedAt,
-      friendedAt: profile.friendedAt,
       followStatus: profile.followStatus,
     }));
 

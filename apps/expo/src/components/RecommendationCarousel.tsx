@@ -13,7 +13,7 @@ import { HeaderTitle } from "./ui/Headings";
 import { UserCard } from "./ui/UserCard";
 
 type Recommendation =
-  RouterOutputs["contacts"]["getProfileSuggestions"][number];
+  RouterOutputs["contacts"]["profileRecommendations"][number];
 
 interface RecommendationCarouselProps {
   paddingHorizontal?: SpaceTokens;
@@ -41,7 +41,7 @@ const RecommendationCarousel = ({
   const { routeProfile } = useRouteProfile();
 
   const { data: recommendationsData, isLoading } =
-    api.contacts.getProfileSuggestions.useQuery(undefined, {
+    api.contacts.profileRecommendations.useQuery(undefined, {
       staleTime: 60 * 5000, // 5 minutes
     });
 
@@ -49,20 +49,20 @@ const RecommendationCarousel = ({
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
-      await utils.contacts.getProfileSuggestions.cancel();
-      const prevData = utils.contacts.getProfileSuggestions.getData();
+      await utils.contacts.profileRecommendations.cancel();
+      const prevData = utils.contacts.profileRecommendations.getData();
       if (!prevData) return { prevData: undefined };
 
-      utils.contacts.getProfileSuggestions.setData(
+      utils.contacts.profileRecommendations.setData(
         undefined,
-        prevData.filter((item) => item.userId !== newData.userId),
+        prevData.filter((item) => item.userId !== newData.recipientUserId),
       );
 
       return { prevData };
     },
     onError: (_err, _newData, ctx) => {
       if (ctx?.prevData === undefined) return;
-      void utils.contacts.getProfileSuggestions.invalidate();
+      void utils.contacts.profileRecommendations.invalidate();
     },
   });
 
@@ -109,7 +109,7 @@ const RecommendationCarousel = ({
           return (
             <UserCard
               userId={item.userId}
-              username={item.username}
+              username={item.username ?? ""}
               profilePictureUrl={item.profilePictureUrl}
               size="small"
               width={CARD_WIDTH}
@@ -117,14 +117,16 @@ const RecommendationCarousel = ({
               onPress={() =>
                 routeProfile(item.userId, {
                   name: item.name ?? "",
-                  username: item.username,
+                  username: item.username ?? "",
                   profilePictureUrl: item.profilePictureUrl,
                 })
               }
               actionButton={{
                 label: "Follow",
                 onPress: () =>
-                  void followMutation.mutateAsync({ userId: item.userId }),
+                  void followMutation.mutateAsync({
+                    recipientUserId: item.userId,
+                  }),
                 variant: "primary",
                 icon: "follow",
               }}

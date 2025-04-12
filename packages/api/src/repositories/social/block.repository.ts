@@ -10,10 +10,6 @@ import type {
 import type { Block, Profile } from "../../models";
 import { TYPES } from "../../symbols";
 
-export interface SocialProfile extends Profile {
-  blockedAt: Date;
-}
-
 export interface PaginateBlockedUsersParams extends PaginationParams {
   userId: string;
 }
@@ -68,11 +64,10 @@ export class BlockRepository {
   async paginateBlockedProfiles(
     { userId, cursor, pageSize = 10 }: PaginateBlockedUsersParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<SocialProfile[]> {
+  ): Promise<Profile[]> {
     const blockedUsers = await db
       .select({
         profile: this.schema.profile,
-        blockedAt: this.schema.block.createdAt,
       })
       .from(this.schema.block)
       .innerJoin(
@@ -99,9 +94,6 @@ export class BlockRepository {
       )
       .limit(pageSize);
 
-    return blockedUsers.map(({ profile, blockedAt }) => ({
-      ...profile,
-      blockedAt,
-    }));
+    return blockedUsers.map(({ profile }) => profile);
   }
 }
