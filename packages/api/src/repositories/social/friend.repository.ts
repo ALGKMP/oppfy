@@ -302,7 +302,7 @@ export class FriendRepository {
     const friends = await db
       .select({
         profile: this.schema.profile,
-        followStatus: getFollowStatusSql(this.schema, selfUserId),
+        followStatus: getFollowStatusSql(selfUserId),
       })
       .from(this.schema.friend)
       .innerJoin(

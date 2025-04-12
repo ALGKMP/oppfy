@@ -299,7 +299,7 @@ export class FollowRepository {
     const followers = await db
       .select({
         profile: this.schema.profile,
-        followStatus: getFollowStatusSql(this.schema, selfUserId),
+        followStatus: getFollowStatusSql(selfUserId),
       })
       .from(this.schema.follow)
       .innerJoin(
@@ -340,7 +340,7 @@ export class FollowRepository {
     const following = await db
       .select({
         profile: this.schema.profile,
-        followStatus: getFollowStatusSql(this.schema, selfUserId),
+        followStatus: getFollowStatusSql(selfUserId),
       })
       .from(this.schema.follow)
       .innerJoin(

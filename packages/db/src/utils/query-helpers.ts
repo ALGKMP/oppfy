@@ -1,7 +1,7 @@
-import { and, eq, isNull, or, sql } from "drizzle-orm";
+import { and, eq, isNotNull, isNull, or, sql } from "drizzle-orm";
 import type { PgSelect } from "drizzle-orm/pg-core";
 
-import type { Schema } from "../..";
+import { schema } from "../..";
 
 export type FollowStatus = "FOLLOWING" | "REQUESTED" | "NOT_FOLLOWING";
 export type FriendStatus = "FRIENDS" | "REQUESTED" | "NOT_FRIENDS";
@@ -11,26 +11,28 @@ export type Privacy = "PUBLIC" | "PRIVATE";
 /**
  * Only include profiles of users who have completed onboarding
  */
-export const withOnboardingCompleted = <T extends PgSelect>(
-  qb: T,
-  schema: Schema,
-) => {
+export const withOnboardingCompleted = <T extends PgSelect>(qb: T) => {
   return qb
     .innerJoin(
       schema.userStatus,
       eq(schema.userStatus.userId, schema.profile.userId),
     )
-    .where(eq(schema.userStatus.hasCompletedOnboarding, true));
+    .where(
+      and(
+        eq(schema.userStatus.hasCompletedOnboarding, true),
+        isNotNull(schema.profile.name),
+        isNotNull(schema.profile.username),
+        isNotNull(schema.profile.dateOfBirth),
+        isNotNull(schema.profile.bio),
+        isNotNull(schema.profile.profilePictureKey),
+      ),
+    );
 };
 
 /**
  * Exclude profiles that have blocked or been blocked by the given user
  */
-export const withoutBlocked = <T extends PgSelect>(
-  qb: T,
-  schema: Schema,
-  userId: string,
-) => {
+export const withoutBlocked = <T extends PgSelect>(qb: T, userId: string) => {
   return qb
     .leftJoin(
       schema.block,
@@ -48,7 +50,7 @@ export const withoutBlocked = <T extends PgSelect>(
     .where(isNull(schema.block.id));
 };
 
-export const getFollowStatusSql = (schema: Schema, selfUserId: string) => {
+export const getFollowStatusSql = (selfUserId: string) => {
   return sql<FollowStatus>`CASE
     WHEN EXISTS (
       SELECT 1 FROM ${schema.follow}
@@ -64,7 +66,7 @@ export const getFollowStatusSql = (schema: Schema, selfUserId: string) => {
   END`;
 };
 
-export const getFriendStatusSql = (schema: Schema, selfUserId: string) => {
+export const getFriendStatusSql = (selfUserId: string) => {
   return sql<FriendStatus>`CASE
     WHEN EXISTS (
       SELECT 1 FROM ${schema.friend}
