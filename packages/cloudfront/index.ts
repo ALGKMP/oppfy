@@ -69,7 +69,7 @@ export class CloudFront {
   }
 
   async invalidateProfilePicture(userId: string): Promise<void> {
-    const distributionId = env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID;
+    const distributionId = env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID;
     const objectPattern = `/profile-pictures/${userId}.jpg`;
     await this.createInvalidation(distributionId, objectPattern);
   }

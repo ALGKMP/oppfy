@@ -181,28 +181,33 @@ export class ProfileService {
       });
     }
 
-    const [isFollowing, isFollowRequested, isFriends, isFriendRequested, isPrivate] =
-      await Promise.all([
-        this.followRepository.getFollower({
-          senderUserId: selfUserId,
-          recipientUserId: otherUserId,
-        }),
-        this.followRepository.getFollowRequest({
-          senderUserId: selfUserId,
-          recipientUserId: otherUserId,
-        }),
-        this.friendRepository.getFriendRequest({
-          senderUserId: selfUserId,
-          recipientUserId: otherUserId,
-        }),
-        this.friendRepository.getFriendRequest({
-          senderUserId: selfUserId,
-          recipientUserId: otherUserId,
-        }),
-        this.profileRepository.getPrivacy({
-          userId: otherUserId,
-        }),
-      ]);
+    const [
+      isFollowing,
+      isFollowRequested,
+      isFriends,
+      isFriendRequested,
+      isPrivate,
+    ] = await Promise.all([
+      this.followRepository.getFollower({
+        senderUserId: selfUserId,
+        recipientUserId: otherUserId,
+      }),
+      this.followRepository.getFollowRequest({
+        senderUserId: selfUserId,
+        recipientUserId: otherUserId,
+      }),
+      this.friendRepository.getFriendRequest({
+        senderUserId: selfUserId,
+        recipientUserId: otherUserId,
+      }),
+      this.friendRepository.getFriendRequest({
+        senderUserId: selfUserId,
+        recipientUserId: otherUserId,
+      }),
+      this.profileRepository.getPrivacy({
+        userId: otherUserId,
+      }),
+    ]);
 
     const followState = (
       isFollowing
@@ -303,10 +308,10 @@ export class ProfileService {
       contentLength,
     });
 
-    const key = `/profile-pictures/${userId}.jpg`;
+    const key = `profile-pictures/${userId}.jpg`;
 
     await this.cloudfront.createInvalidation(
-      env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID,
+      env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
       key,
     );
 
