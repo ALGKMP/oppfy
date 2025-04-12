@@ -157,6 +157,7 @@ const OtherProfile = () => {
               params.profilePictureUrl ??
               null,
             bio: profileData?.bio ?? null,
+            privacy: profileData?.privacy ?? "public",
           }}
           stats={{
             postCount: profileStats?.posts ?? 0,

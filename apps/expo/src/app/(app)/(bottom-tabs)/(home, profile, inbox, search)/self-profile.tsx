@@ -165,6 +165,7 @@ const SelfProfile = () => {
             username: profileData?.username ?? "",
             profilePictureUrl: profileData?.profilePictureUrl ?? null,
             bio: profileData?.bio ?? null,
+            privacy: profileData?.privacy ?? "public",
           }}
           stats={{
             postCount: profileStats?.posts ?? 0,
