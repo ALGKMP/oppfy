@@ -130,7 +130,9 @@ export class ProfileService {
    */
   async searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,
-  ): Promise<Result<Hydrate<Profile>[], never>> {
+  ): Promise<
+    Result<Hydrate<Profile<"notOnApp"> | Profile<"onboarded">>[], never>
+  > {
     const profiles = await this.profileRepository.getProfilesByUsername(params);
     const hydratedProfiles = profiles.map((profile) =>
       this.cloudfront.hydrateProfile(profile),
