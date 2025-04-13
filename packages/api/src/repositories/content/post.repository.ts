@@ -7,7 +7,10 @@ import type {
   Schema,
   Transaction,
 } from "@oppfy/db";
-import { withOnboardingCompleted } from "@oppfy/db/utils/query-helpers";
+import {
+  withMultipleProfilesOnboardingCompleted,
+  withOnboardingCompleted,
+} from "@oppfy/db/utils/query-helpers";
 
 import { PaginationParams, PostIdParam } from "../../interfaces/types";
 import {
@@ -287,6 +290,10 @@ export class PostRepository {
       );
     }
 
-    return withOnboardingCompleted(query);
+    // Apply onboarding filter to both author and recipient profiles
+    return withMultipleProfilesOnboardingCompleted(query, [
+      this.aliasedSchema.authorProfile,
+      this.aliasedSchema.recipientProfile,
+    ]);
   }
 }
