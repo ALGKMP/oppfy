@@ -42,7 +42,7 @@ const Blocked = () => {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
-            items: page.items.filter((item) => item.userId !== newData.userId),
+            items: page.items.filter((item) => item.userId !== newData.recipientUserId),
           })),
         },
       );
@@ -94,7 +94,7 @@ const Blocked = () => {
   };
 
   const handleUnblock = async (userId: string) => {
-    await unblockUser.mutateAsync({ userId });
+    await unblockUser.mutateAsync({ recipientUserId: userId });
   };
 
   const handleRefresh = async () => {
