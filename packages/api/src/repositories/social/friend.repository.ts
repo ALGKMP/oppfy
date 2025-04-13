@@ -1,4 +1,4 @@
-import { and, asc, eq, exists, gt, not, or, sql } from "drizzle-orm";
+import { and, asc, eq, exists, gt, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type {
@@ -8,6 +8,7 @@ import type {
   Transaction,
 } from "@oppfy/db";
 import {
+  FollowStatus,
   getFollowStatusSql,
   withOnboardingCompleted,
 } from "@oppfy/db/utils/query-helpers";
@@ -15,15 +16,10 @@ import {
 import type {
   BidirectionalUserIdsparams,
   DirectionalUserIdsParams,
-  FollowStatus,
   PaginationParams,
 } from "../../interfaces/types";
-import type { Friend, FriendRequest, OnboardedProfile } from "../../models";
+import type { Friend, FriendRequest, Profile } from "../../models";
 import { TYPES } from "../../symbols";
-
-export interface SocialProfile extends OnboardedProfile {
-  followStatus: FollowStatus;
-}
 
 export interface PaginateFriendParams extends PaginationParams {
   selfUserId: string;
@@ -301,7 +297,7 @@ export class FriendRepository {
   async paginateFriends(
     { userId, cursor, pageSize = 10, selfUserId }: PaginateFriendParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<SocialProfile[]> {
+  ): Promise<(Profile<"onboarded"> & { followStatus: FollowStatus })[]> {
     let query = db
       .select({
         profile: this.schema.profile,
@@ -344,7 +340,7 @@ export class FriendRepository {
     const friends = await query;
 
     return friends.map(({ profile, followStatus }) => ({
-      ...(profile as OnboardedProfile),
+      ...(profile as Profile<"onboarded">),
       followStatus,
     }));
   }
@@ -356,7 +352,7 @@ export class FriendRepository {
   async paginateFriendRequests(
     { userId, cursor, pageSize = 10 }: PaginateFriendRequestsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<OnboardedProfile[]> {
+  ): Promise<Profile<"onboarded">[]> {
     let query = db
       .select({
         profile: this.schema.profile,
@@ -395,6 +391,6 @@ export class FriendRepository {
 
     const friendRequests = await query;
 
-    return friendRequests.map(({ profile }) => profile as OnboardedProfile);
+    return friendRequests.map(({ profile }) => profile as Profile<"onboarded">);
   }
 }

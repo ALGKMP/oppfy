@@ -8,6 +8,7 @@ import type {
   Transaction,
 } from "@oppfy/db";
 import {
+  FollowStatus,
   getFollowStatusSql,
   withOnboardingCompleted,
 } from "@oppfy/db/utils/query-helpers";
@@ -15,15 +16,10 @@ import {
 import type {
   BidirectionalUserIdsparams,
   DirectionalUserIdsParams,
-  FollowStatus,
   PaginationParams,
 } from "../../interfaces/types";
-import type { Follow, FollowRequest, OnboardedProfile } from "../../models";
+import type { Follow, FollowRequest, Profile } from "../../models";
 import { TYPES } from "../../symbols";
-
-export interface SocialProfile extends OnboardedProfile {
-  followStatus: FollowStatus;
-}
 
 export interface PaginateFollowParams extends PaginationParams {
   selfUserId: string;
@@ -298,7 +294,7 @@ export class FollowRepository {
   async paginateFollowers(
     { userId, cursor, pageSize = 10, selfUserId }: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<SocialProfile[]> {
+  ): Promise<(Profile<"onboarded"> & { followStatus: FollowStatus })[]> {
     let query = db
       .select({
         profile: this.schema.profile,
@@ -339,7 +335,7 @@ export class FollowRepository {
     const followers = await query;
 
     return followers.map(({ profile, followStatus }) => ({
-      ...(profile as OnboardedProfile),
+      ...(profile as Profile<"onboarded">),
       followStatus,
     }));
   }
@@ -347,7 +343,7 @@ export class FollowRepository {
   async paginateFollowing(
     { userId, cursor, pageSize = 10, selfUserId }: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<SocialProfile[]> {
+  ): Promise<(Profile<"onboarded"> & { followStatus: FollowStatus })[]> {
     let query = db
       .select({
         profile: this.schema.profile,
@@ -388,7 +384,7 @@ export class FollowRepository {
     const following = await query;
 
     return following.map(({ profile, followStatus }) => ({
-      ...(profile as OnboardedProfile),
+      ...(profile as Profile<"onboarded">),
       followStatus,
     }));
   }
@@ -396,7 +392,7 @@ export class FollowRepository {
   async paginateFollowRequests(
     { userId, cursor, pageSize = 10 }: PaginateFollowRequestsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<OnboardedProfile[]> {
+  ): Promise<Profile<"onboarded">[]> {
     let query = db
       .select({
         profile: this.schema.profile,
@@ -435,6 +431,6 @@ export class FollowRepository {
 
     const followRequests = await query;
 
-    return followRequests.map(({ profile }) => profile as OnboardedProfile);
+    return followRequests.map(({ profile }) => profile as Profile<"onboarded">);
   }
 }

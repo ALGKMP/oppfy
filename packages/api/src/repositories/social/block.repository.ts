@@ -8,7 +8,7 @@ import type {
   DirectionalUserIdsParams,
   PaginationParams,
 } from "../../interfaces/types";
-import type { Block, OnboardedProfile } from "../../models";
+import type { Block, Profile } from "../../models";
 import { TYPES } from "../../symbols";
 
 export interface PaginateBlockedUsersParams extends PaginationParams {
@@ -65,7 +65,7 @@ export class BlockRepository {
   async paginateBlockedProfiles(
     { userId, cursor, pageSize = 10 }: PaginateBlockedUsersParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<OnboardedProfile[]> {
+  ): Promise<Profile<"onboarded">[]> {
     let query = db
       .select({
         profile: this.schema.profile,
@@ -100,6 +100,6 @@ export class BlockRepository {
 
     const blockedUsers = await query;
 
-    return blockedUsers.map(({ profile }) => profile as OnboardedProfile);
+    return blockedUsers.map(({ profile }) => profile as Profile<"onboarded">);
   }
 }

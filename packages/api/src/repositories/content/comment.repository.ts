@@ -34,7 +34,7 @@ export interface PaginateCommentsParams extends PaginationParams {
 
 export interface PaginatedCommentResult {
   comment: Comment;
-  profile: Profile;
+  profile: Profile<"onboarded">;
 }
 
 @injectable()
@@ -138,6 +138,9 @@ export class CommentRepository {
 
     const commentsAndProfiles = await query;
 
-    return commentsAndProfiles;
+    return commentsAndProfiles.map(({ comment, profile }) => ({
+      comment,
+      profile: profile as Profile<"onboarded">,
+    }));
   }
 }

@@ -8,16 +8,13 @@ import type {
   Transaction,
 } from "@oppfy/db";
 import {
+  FollowStatus,
   getFollowStatusSql,
   withOnboardingCompleted,
 } from "@oppfy/db/utils/query-helpers";
 
-import { FollowStatus, UserIdParam } from "../../interfaces/types";
-import type {
-  Notification,
-  NotificationSettings,
-  OnboardedProfile,
-} from "../../models";
+import { UserIdParam } from "../../interfaces/types";
+import type { Notification, NotificationSettings, Profile } from "../../models";
 import { TYPES } from "../../symbols";
 
 export interface UpdateNotificationSettingsParams {
@@ -32,7 +29,7 @@ export interface PaginateNotificationsParams {
 }
 
 export interface NotificationAndProfile {
-  profile: OnboardedProfile;
+  profile: Profile<"onboarded">;
   notification: Notification;
   followStatus: FollowStatus;
 }
@@ -200,7 +197,7 @@ export class NotificationRepository {
     const notifications = await query;
 
     return notifications.map(({ profile, notification, followStatus }) => ({
-      profile: profile as OnboardedProfile,
+      profile: profile as Profile<"onboarded">,
       notification,
       followStatus,
     }));

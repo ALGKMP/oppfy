@@ -8,12 +8,7 @@ import {
 } from "@oppfy/db/utils/query-helpers";
 
 import type { UserIdParam, UsernameParam } from "../../interfaces/types";
-import type {
-  OnboardedProfile,
-  Profile,
-  ProfileInsert,
-  UserStats,
-} from "../../models";
+import type { Profile, ProfileInsert, UserStats } from "../../models";
 import { TYPES } from "../../symbols";
 
 export interface ProfilesByIdsParams {
@@ -65,18 +60,26 @@ export class ProfileRepository {
   async getProfilesByIds(
     { userIds }: ProfilesByIdsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Profile[]> {
-    const profiles = await db.query.profile.findMany({
-      where: inArray(this.schema.profile.userId, userIds),
-    });
+  ): Promise<Profile<"onboarded">[]> {
+    let query = db
+      .select({
+        profile: this.schema.profile,
+      })
+      .from(this.schema.profile)
+      .where(inArray(this.schema.profile.userId, userIds))
+      .$dynamic();
 
-    return profiles;
+    query = withOnboardingCompleted(query);
+
+    const profiles = await query;
+
+    return profiles.map(({ profile }) => profile as Profile<"onboarded">);
   }
 
   async getProfilesByUsername(
     { userId, username, limit = 10 }: ProfilesByUsernameParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<OnboardedProfile[]> {
+  ): Promise<Profile[]> {
     let query = db
       .select({
         profile: this.schema.profile,
@@ -85,15 +88,13 @@ export class ProfileRepository {
       .where(ilike(this.schema.profile.username, `%${username}%`))
       .$dynamic();
 
-    query = withOnboardingCompleted(query);
     query = withoutBlocked(query, userId);
 
-    // Add final conditions and execute
     const results = await query
       .where(ne(this.schema.profile.userId, userId))
       .limit(limit);
 
-    return results.map((result) => result.profile as OnboardedProfile);
+    return results.map((result) => result.profile);
   }
 
   async getStats(

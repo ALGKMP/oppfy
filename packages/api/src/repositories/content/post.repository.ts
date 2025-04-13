@@ -9,15 +9,14 @@ import type {
 } from "@oppfy/db";
 import { withOnboardingCompleted } from "@oppfy/db/utils/query-helpers";
 
-import { mediaTypeEnum, postStatusEnum } from "../../../../db/src/schema";
 import { PaginationParams, PostIdParam } from "../../interfaces/types";
 import {
   Like,
   MediaType,
-  OnboardedProfile,
   Post,
   PostStats,
   PostStatus,
+  Profile,
 } from "../../models";
 import { TYPES } from "../../symbols";
 
@@ -54,8 +53,8 @@ export interface CreatePostParams {
 export interface PostResult {
   post: Post;
   postStats: PostStats;
-  authorProfile: OnboardedProfile;
-  recipientProfile: OnboardedProfile;
+  authorProfile: Profile<"onboarded">;
+  recipientProfile: Profile<"onboarded">;
   like: Like;
 }
 
@@ -127,8 +126,8 @@ export class PostRepository {
     if (results[0] === undefined) return undefined;
     return {
       ...results[0],
-      authorProfile: results[0].authorProfile as OnboardedProfile,
-      recipientProfile: results[0].recipientProfile as OnboardedProfile,
+      authorProfile: results[0].authorProfile as Profile<"onboarded">,
+      recipientProfile: results[0].recipientProfile as Profile<"onboarded">,
     };
   }
 
@@ -142,8 +141,8 @@ export class PostRepository {
     if (results[0] === undefined) return undefined;
     return {
       ...results[0],
-      authorProfile: results[0].authorProfile as OnboardedProfile,
-      recipientProfile: results[0].recipientProfile as OnboardedProfile,
+      authorProfile: results[0].authorProfile as Profile<"onboarded">,
+      recipientProfile: results[0].recipientProfile as Profile<"onboarded">,
     };
   }
 
@@ -183,8 +182,8 @@ export class PostRepository {
 
     return results.map((result) => ({
       ...result,
-      authorProfile: result.authorProfile as OnboardedProfile,
-      recipientProfile: result.recipientProfile as OnboardedProfile,
+      authorProfile: result.authorProfile as Profile<"onboarded">,
+      recipientProfile: result.recipientProfile as Profile<"onboarded">,
     }));
   }
 
@@ -214,8 +213,8 @@ export class PostRepository {
 
     return results.map((result) => ({
       ...result,
-      authorProfile: result.authorProfile as OnboardedProfile,
-      recipientProfile: result.recipientProfile as OnboardedProfile,
+      authorProfile: result.authorProfile as Profile<"onboarded">,
+      recipientProfile: result.recipientProfile as Profile<"onboarded">,
     }));
   }
 
