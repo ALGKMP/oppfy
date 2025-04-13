@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFront } from "@oppfy/cloudfront";
+import { CloudFront, Hydrate } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
 import * as BlockErrors from "../../errors/social/block.error";
@@ -10,7 +10,7 @@ import type {
   PaginatedResponse,
   PaginationParams,
 } from "../../interfaces/types";
-import { HydratedOnboardedProfile } from "../../models";
+import { Profile } from "../../models";
 import { BlockRepository } from "../../repositories/social/block.repository";
 import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
@@ -113,7 +113,7 @@ export class BlockService {
     cursor,
     pageSize = 10,
   }: GetBlockedUsersParams): Promise<
-    Result<PaginatedResponse<HydratedOnboardedProfile>, never>
+    Result<PaginatedResponse<Hydrate<Profile<"onboarded">>>, never>
   > {
     const rawBlockedProfiles =
       await this.blockRepository.paginateBlockedProfiles({

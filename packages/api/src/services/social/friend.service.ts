@@ -1,28 +1,24 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFront } from "@oppfy/cloudfront";
+import { CloudFront, Hydrate } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
+import { FollowStatus } from "@oppfy/db/utils/query-helpers";
 
 import * as FriendErrors from "../../errors/social/friend.error";
 import { ProfileNotFound } from "../../errors/user/profile.error";
 import {
   BidirectionalUserIdsparams,
   DirectionalUserIdsParams,
-  FollowStatus,
   PaginatedResponse,
   PaginationParams,
 } from "../../interfaces/types";
-import { HydratedOnboardedProfile } from "../../models";
+import { Profile } from "../../models";
 import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
-
-type SocialProfile = HydratedOnboardedProfile & {
-  followStatus: FollowStatus;
-};
 
 interface PaginateByUserIdWithSelfUserIdParams extends PaginationParams {
   selfUserId: string;
@@ -362,7 +358,14 @@ export class FriendService {
     pageSize = 10,
     selfUserId,
   }: PaginateByUserIdWithSelfUserIdParams): Promise<
-    Result<PaginatedResponse<SocialProfile>, never>
+    Result<
+      PaginatedResponse<
+        Hydrate<Profile<"onboarded">> & {
+          followStatus: FollowStatus;
+        }
+      >,
+      never
+    >
   > {
     const rawProfiles = await this.friendRepository.paginateFriends({
       userId,
@@ -397,7 +400,7 @@ export class FriendService {
     cursor,
     pageSize = 10,
   }: PaginateByUserIdParams): Promise<
-    Result<PaginatedResponse<HydratedOnboardedProfile>, never>
+    Result<PaginatedResponse<Hydrate<Profile<"onboarded">>>, never>
   > {
     const rawProfiles = await this.friendRepository.paginateFriendRequests({
       userId,

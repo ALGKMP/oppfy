@@ -1,11 +1,11 @@
 import { inject, injectable } from "inversify";
 import { ok, Result } from "neverthrow";
 
-import { CloudFront } from "@oppfy/cloudfront";
+import { CloudFront, Hydrate } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
 import { UserIdParam } from "../../interfaces/types";
-import { HydratedProfile } from "../../models";
+import { Profile } from "../../models";
 import { ContactsRepository } from "../../repositories/user/contacts.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
@@ -53,7 +53,7 @@ export class ContactsService {
 
   async getProfileRecommendations({
     userId,
-  }: UserIdParam): Promise<Result<HydratedProfile[], never>> {
+  }: UserIdParam): Promise<Result<Hydrate<Profile<"onboarded">>[], never>> {
     // Get recommendations from Lambda function
     const { tier1, tier2, tier3 } =
       await this.contactsRepository.getRecommendationIds({ userId });

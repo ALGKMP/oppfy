@@ -1,8 +1,9 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFront } from "@oppfy/cloudfront";
+import { CloudFront, Hydrate } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
+import { FollowStatus } from "@oppfy/db/utils/query-helpers";
 
 import * as FollowErrors from "../../errors/social/follow.error";
 import * as FriendErrors from "../../errors/social/friend.error";
@@ -12,16 +13,11 @@ import {
   PaginatedResponse,
   PaginationParams,
 } from "../../interfaces/types";
-import { HydratedOnboardedProfile } from "../../models";
-import {
-  FollowRepository,
-  SocialProfile,
-} from "../../repositories/social/follow.repository";
+import { Profile } from "../../models";
+import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { TYPES } from "../../symbols";
-
-type HydratedSocialOnboardedProfile = HydratedOnboardedProfile & SocialProfile;
 
 interface PaginateByUserIdWithSelfUserIdParams extends PaginationParams {
   selfUserId: string;
@@ -342,7 +338,12 @@ export class FollowService {
     pageSize = 10,
     selfUserId,
   }: PaginateByUserIdWithSelfUserIdParams): Promise<
-    Result<PaginatedResponse<HydratedSocialOnboardedProfile>, never>
+    Result<
+      PaginatedResponse<
+        Hydrate<Profile<"onboarded">> & { followStatus: FollowStatus }
+      >,
+      never
+    >
   > {
     const rawProfiles = await this.followRepository.paginateFollowers({
       userId,
@@ -379,7 +380,12 @@ export class FollowService {
     pageSize = 10,
     selfUserId,
   }: PaginateByUserIdWithSelfUserIdParams): Promise<
-    Result<PaginatedResponse<HydratedSocialOnboardedProfile>, never>
+    Result<
+      PaginatedResponse<
+        Hydrate<Profile<"onboarded">> & { followStatus: FollowStatus }
+      >,
+      never
+    >
   > {
     const rawProfiles = await this.followRepository.paginateFollowing({
       userId,
@@ -414,7 +420,7 @@ export class FollowService {
     cursor,
     pageSize = 10,
   }: PaginateByUserIdParams): Promise<
-    Result<PaginatedResponse<HydratedOnboardedProfile>, never>
+    Result<PaginatedResponse<Hydrate<Profile<"onboarded">>>, never>
   > {
     const rawProfiles = await this.followRepository.paginateFollowRequests({
       userId,

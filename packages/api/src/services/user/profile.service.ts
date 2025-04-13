@@ -1,25 +1,18 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFront } from "@oppfy/cloudfront";
+import { CloudFront, Hydrate } from "@oppfy/cloudfront";
+import { FollowStatus, FriendStatus } from "@oppfy/db/utils/query-helpers";
 import { env } from "@oppfy/env";
 import { S3 } from "@oppfy/s3";
 
 import * as ProfileErrors from "../../errors/user/profile.error";
 import {
-  FollowStatus,
-  FriendStatus,
   SelfOtherUserIdsParams,
   UserIdParam,
   UsernameParam,
 } from "../../interfaces/types";
-import {
-  HydratedOnboardedProfile,
-  HydratedProfile,
-  Profile,
-  ProfileInsert,
-  UserStats,
-} from "../../models";
+import { Profile, ProfileInsert, UserStats } from "../../models";
 import { BlockRepository } from "../../repositories/social/block.repository";
 import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
@@ -72,7 +65,7 @@ export class ProfileService {
     otherUserId,
   }: SelfOtherUserIdsParams<"optional">): Promise<
     Result<
-      HydratedProfile,
+      Hydrate<Profile>,
       | ProfileErrors.ProfileBlocked
       | ProfileErrors.ProfileNotFound
       | ProfileErrors.ProfilePrivate
@@ -118,7 +111,7 @@ export class ProfileService {
    */
   async profileForSite(
     params: UsernameParam,
-  ): Promise<Result<HydratedProfile, ProfileErrors.ProfileNotFound>> {
+  ): Promise<Result<Hydrate<Profile>, ProfileErrors.ProfileNotFound>> {
     const { username } = params;
 
     const profileData = await this.profileRepository.getProfileByUsername({
@@ -137,7 +130,7 @@ export class ProfileService {
    */
   async searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,
-  ): Promise<Result<HydratedOnboardedProfile[], never>> {
+  ): Promise<Result<Hydrate<Profile>[], never>> {
     const profiles = await this.profileRepository.getProfilesByUsername(params);
     const hydratedProfiles = profiles.map((profile) =>
       this.cloudfront.hydrateProfile(profile),

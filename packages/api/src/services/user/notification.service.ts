@@ -1,11 +1,12 @@
 import { inject, injectable } from "inversify";
 import { ok, Result } from "neverthrow";
 
-import { CloudFront } from "@oppfy/cloudfront";
+import { CloudFront, Hydrate } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
+import { FollowStatus } from "@oppfy/db/utils/query-helpers";
 
-import { FollowStatus, PaginatedResponse } from "../../interfaces/types";
-import { HydratedProfile, Notification } from "../../models";
+import { PaginatedResponse } from "../../interfaces/types";
+import { Notification, Profile } from "../../models";
 import {
   NotificationRepository,
   PaginateNotificationsParams,
@@ -15,8 +16,8 @@ import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
 
 interface NotificationAndHydratedProfile {
+  profile: Hydrate<Profile>;
   notification: Notification;
-  profile: HydratedProfile;
   followStatus: FollowStatus;
 }
 
