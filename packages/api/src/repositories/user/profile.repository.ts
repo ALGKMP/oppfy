@@ -1,4 +1,4 @@
-import { eq, ilike, inArray, ne } from "drizzle-orm";
+import { and, eq, ilike, inArray, isNotNull, ne, or } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
@@ -79,13 +79,28 @@ export class ProfileRepository {
   async getProfilesByUsername(
     { userId, username, limit = 10 }: ProfilesByUsernameParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Profile[]> {
+  ): Promise<Profile<"notOnApp">[] & Profile<"onboarded">[]> {
     let query = db
       .select({
         profile: this.schema.profile,
       })
       .from(this.schema.profile)
-      .where(ilike(this.schema.profile.username, `%${username}%`))
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.userStatus.userId, this.schema.profile.userId),
+      )
+      // Only return either (A) fully onboarded or (B) isOnApp=false
+      .where(
+        and(
+          ilike(this.schema.profile.username, `%${username}%`),
+          or(
+            eq(this.schema.userStatus.hasCompletedOnboarding, true),
+            eq(this.schema.userStatus.isOnApp, false),
+          ),
+          isNotNull(this.schema.profile.name),
+          isNotNull(this.schema.profile.username),
+        ),
+      )
       .$dynamic();
 
     query = withoutBlocked(query, userId);
@@ -94,7 +109,9 @@ export class ProfileRepository {
       .where(ne(this.schema.profile.userId, userId))
       .limit(limit);
 
-    return results.map((result) => result.profile);
+    return results.map(
+      (result) => result.profile as Profile<"notOnApp"> & Profile<"onboarded">,
+    );
   }
 
   async getStats(

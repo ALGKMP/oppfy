@@ -240,7 +240,7 @@ const Following = () => {
               ],
             }),
         };
-        default:
+      default:
         return {
           label: "Follow",
           icon: UserRoundPlus,

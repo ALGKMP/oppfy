@@ -56,8 +56,8 @@ const Search = () => {
       imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
       onPress={() =>
         routeProfile(item.userId, {
-          name: item.name ?? "",
-          username: item.username ?? "",
+          name: item.name,
+          username: item.username,
           profilePictureUrl: item.profilePictureUrl,
         })
       }
