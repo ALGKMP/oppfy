@@ -1,16 +1,14 @@
-import type {
-  InferInsertModel,
-  InferSelectModel,
-  reportCommentReasonEnum,
-  reportPostReasonEnum,
-  reportUserReasonEnum,
-  schema,
-} from "@oppfy/db";
+import type { InferInsertModel, InferSelectModel, schema } from "@oppfy/db";
 
-export type ReportUserReason = (typeof reportUserReasonEnum.enumValues)[number];
-export type ReportPostReason = (typeof reportPostReasonEnum.enumValues)[number];
+export type MediaType = (typeof schema.mediaTypeEnum.enumValues)[number];
+export type PostStatus = (typeof schema.postStatusEnum.enumValues)[number];
+
+export type ReportUserReason =
+  (typeof schema.reportUserReasonEnum.enumValues)[number];
+export type ReportPostReason =
+  (typeof schema.reportPostReasonEnum.enumValues)[number];
 export type ReportCommentReason =
-  (typeof reportCommentReasonEnum.enumValues)[number];
+  (typeof schema.reportCommentReasonEnum.enumValues)[number];
 
 export type User = InferSelectModel<typeof schema.user>;
 export type Profile = InferSelectModel<typeof schema.profile>;

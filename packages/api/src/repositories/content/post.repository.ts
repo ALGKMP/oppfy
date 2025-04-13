@@ -1,27 +1,29 @@
 import { aliasedTable, and, desc, eq, lt, or, sql } from "drizzle-orm";
-import type { InferSelectModel } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type {
   Database,
   DatabaseOrTransaction,
   Schema,
-  schema,
   Transaction,
 } from "@oppfy/db";
+import { withOnboardingCompleted } from "@oppfy/db/utils/query-helpers";
 
 import { mediaTypeEnum, postStatusEnum } from "../../../../db/src/schema";
 import { PaginationParams, PostIdParam } from "../../interfaces/types";
-import { Post } from "../../models";
+import {
+  Like,
+  MediaType,
+  OnboardedProfile,
+  Post,
+  PostStats,
+  PostStatus,
+} from "../../models";
 import { TYPES } from "../../symbols";
 
 export interface GetPostParams {
   postId: string;
   userId: string;
-}
-
-export interface GetPostFromCommentIdParams {
-  commentId: string;
 }
 
 export interface PaginatePostsParams extends PaginationParams {
@@ -45,20 +47,20 @@ export interface CreatePostParams {
   postKey: string;
   width: number;
   height: number;
-  mediaType: (typeof mediaTypeEnum.enumValues)[number];
-  status: (typeof postStatusEnum.enumValues)[number];
+  mediaType: MediaType;
+  status: PostStatus;
 }
 
 export interface PostResult {
-  post: InferSelectModel<typeof schema.post>;
-  postStats: InferSelectModel<typeof schema.postStats>;
-  authorProfile: InferSelectModel<typeof schema.profile>;
-  recipientProfile: InferSelectModel<typeof schema.profile>;
-  like: InferSelectModel<typeof schema.like> | null;
+  post: Post;
+  postStats: PostStats;
+  authorProfile: OnboardedProfile;
+  recipientProfile: OnboardedProfile;
+  like: Like;
 }
 
 export interface PostResultWithLike extends PostResult {
-  like: InferSelectModel<typeof schema.like> | null;
+  like: Like;
 }
 
 @injectable()
@@ -73,47 +75,6 @@ export class PostRepository {
       authorProfile: aliasedTable(this.schema.profile, "authorProfile"),
       recipientProfile: aliasedTable(this.schema.profile, "recipientProfile"),
     };
-  }
-
-  private baseQuery(userId?: string, tx: DatabaseOrTransaction = this.db) {
-    const query = tx
-      .select({
-        authorProfile: this.aliasedSchema.authorProfile,
-        recipientProfile: this.aliasedSchema.recipientProfile,
-        post: this.schema.post,
-        postStats: this.schema.postStats,
-        like: this.schema.like,
-      })
-      .from(this.schema.post)
-      .innerJoin(
-        this.schema.postStats,
-        eq(this.schema.postStats.postId, this.schema.post.id),
-      )
-      .innerJoin(
-        this.aliasedSchema.authorProfile,
-        eq(
-          this.schema.post.authorUserId,
-          this.aliasedSchema.authorProfile.userId,
-        ),
-      )
-      .innerJoin(
-        this.aliasedSchema.recipientProfile,
-        eq(
-          this.schema.post.recipientUserId,
-          this.aliasedSchema.recipientProfile.userId,
-        ),
-      );
-    if (userId) {
-      query.leftJoin(
-        this.schema.like,
-        and(
-          eq(this.schema.like.postId, this.schema.post.id),
-          eq(this.schema.like.userId, userId),
-        ),
-      );
-    }
-
-    return query;
   }
 
   async createPost(
@@ -162,7 +123,13 @@ export class PostRepository {
   ): Promise<PostResult | undefined> {
     const query = this.baseQuery(userId, tx);
     const results = await query.where(eq(this.schema.post.id, postId)).limit(1);
-    return results[0];
+
+    if (results[0] === undefined) return undefined;
+    return {
+      ...results[0],
+      authorProfile: results[0].authorProfile as OnboardedProfile,
+      recipientProfile: results[0].recipientProfile as OnboardedProfile,
+    };
   }
 
   async getPostForSite(
@@ -171,7 +138,13 @@ export class PostRepository {
   ): Promise<PostResultWithLike | undefined> {
     const query = this.baseQuery(undefined, tx);
     const results = await query.where(eq(this.schema.post.id, postId)).limit(1);
-    return results[0];
+
+    if (results[0] === undefined) return undefined;
+    return {
+      ...results[0],
+      authorProfile: results[0].authorProfile as OnboardedProfile,
+      recipientProfile: results[0].recipientProfile as OnboardedProfile,
+    };
   }
 
   async paginatePostsOfFollowing(
@@ -208,7 +181,11 @@ export class PostRepository {
       .orderBy(desc(this.schema.post.createdAt), desc(this.schema.post.id))
       .limit(pageSize);
 
-    return results;
+    return results.map((result) => ({
+      ...result,
+      authorProfile: result.authorProfile as OnboardedProfile,
+      recipientProfile: result.recipientProfile as OnboardedProfile,
+    }));
   }
 
   async paginatePostsOfUser(
@@ -235,7 +212,11 @@ export class PostRepository {
       .orderBy(desc(this.schema.post.createdAt), desc(this.schema.post.id))
       .limit(pageSize);
 
-    return results;
+    return results.map((result) => ({
+      ...result,
+      authorProfile: result.authorProfile as OnboardedProfile,
+      recipientProfile: result.recipientProfile as OnboardedProfile,
+    }));
   }
 
   async updatePost(
@@ -265,5 +246,48 @@ export class PostRepository {
         })
         .where(eq(this.schema.userStats.userId, userId)),
     ]);
+  }
+
+  private baseQuery(userId?: string, tx: DatabaseOrTransaction = this.db) {
+    const query = tx
+      .select({
+        authorProfile: this.aliasedSchema.authorProfile,
+        recipientProfile: this.aliasedSchema.recipientProfile,
+        post: this.schema.post,
+        postStats: this.schema.postStats,
+        like: this.schema.like,
+      })
+      .from(this.schema.post)
+      .innerJoin(
+        this.schema.postStats,
+        eq(this.schema.postStats.postId, this.schema.post.id),
+      )
+      .innerJoin(
+        this.aliasedSchema.authorProfile,
+        eq(
+          this.schema.post.authorUserId,
+          this.aliasedSchema.authorProfile.userId,
+        ),
+      )
+      .innerJoin(
+        this.aliasedSchema.recipientProfile,
+        eq(
+          this.schema.post.recipientUserId,
+          this.aliasedSchema.recipientProfile.userId,
+        ),
+      )
+      .$dynamic();
+
+    if (userId) {
+      query.leftJoin(
+        this.schema.like,
+        and(
+          eq(this.schema.like.postId, this.schema.post.id),
+          eq(this.schema.like.userId, userId),
+        ),
+      );
+    }
+
+    return withOnboardingCompleted(query);
   }
 }
