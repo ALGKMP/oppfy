@@ -7,6 +7,7 @@ import type {
   Schema,
   Transaction,
 } from "@oppfy/db";
+import { withOnboardingCompleted } from "@oppfy/db/utils/query-helpers";
 
 import { PaginationParams } from "../../interfaces/types";
 import { Comment, Profile } from "../../models";
@@ -98,7 +99,7 @@ export class CommentRepository {
     { postId, cursor, pageSize = 10 }: PaginateCommentsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<PaginatedCommentResult[]> {
-    const commentsAndProfiles = await db
+    let query = db
       .select({
         comment: this.schema.comment,
         profile: this.schema.profile,
@@ -130,7 +131,12 @@ export class CommentRepository {
         desc(this.schema.comment.createdAt),
         desc(this.schema.comment.id),
       )
-      .limit(pageSize);
+      .limit(pageSize)
+      .$dynamic();
+
+    query = withOnboardingCompleted(query);
+
+    const commentsAndProfiles = await query;
 
     return commentsAndProfiles;
   }

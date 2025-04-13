@@ -7,7 +7,10 @@ import type {
   Schema,
   Transaction,
 } from "@oppfy/db";
-import { getFollowStatusSql } from "@oppfy/db/utils/query-helpers";
+import {
+  getFollowStatusSql,
+  withOnboardingCompleted,
+} from "@oppfy/db/utils/query-helpers";
 
 import type {
   BidirectionalUserIdsparams,
@@ -299,7 +302,7 @@ export class FriendRepository {
     { userId, cursor, pageSize = 10, selfUserId }: PaginateFriendParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<SocialProfile[]> {
-    const friends = await db
+    let query = db
       .select({
         profile: this.schema.profile,
         followStatus: getFollowStatusSql(selfUserId),
@@ -318,24 +321,31 @@ export class FriendRepository {
       )
       .where(
         and(
-          not(eq(this.schema.user.id, userId)), // Exclude the user itself
           cursor
             ? or(
                 gt(this.schema.friend.createdAt, cursor.createdAt),
                 and(
                   eq(this.schema.friend.createdAt, cursor.createdAt),
-                  gt(this.schema.user.id, cursor.id),
+                  gt(this.schema.profile.userId, cursor.id),
                 ),
               )
             : undefined,
         ),
       )
-      .orderBy(asc(this.schema.friend.createdAt), asc(this.schema.user.id))
-      .limit(pageSize);
+      .orderBy(
+        asc(this.schema.friend.createdAt),
+        asc(this.schema.profile.userId),
+      )
+      .limit(pageSize)
+      .$dynamic();
 
-    return friends.map((friend) => ({
-      ...friend.profile,
-      followStatus: friend.followStatus,
+    query = withOnboardingCompleted(query);
+
+    const friends = await query;
+
+    return friends.map(({ profile, followStatus }) => ({
+      ...profile,
+      followStatus,
     }));
   }
 
@@ -347,7 +357,7 @@ export class FriendRepository {
     { userId, cursor, pageSize = 10 }: PaginateFriendRequestsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile[]> {
-    const requests = await db
+    let query = db
       .select({
         profile: this.schema.profile,
       })
@@ -368,7 +378,7 @@ export class FriendRepository {
                 gt(this.schema.friendRequest.createdAt, cursor.createdAt),
                 and(
                   eq(this.schema.friendRequest.createdAt, cursor.createdAt),
-                  gt(this.schema.user.id, cursor.id),
+                  gt(this.schema.profile.userId, cursor.id),
                 ),
               )
             : undefined,
@@ -376,10 +386,15 @@ export class FriendRepository {
       )
       .orderBy(
         asc(this.schema.friendRequest.createdAt),
-        asc(this.schema.user.id),
+        asc(this.schema.profile.userId),
       )
-      .limit(pageSize);
+      .limit(pageSize)
+      .$dynamic();
 
-    return requests.map((request) => request.profile);
+    query = withOnboardingCompleted(query);
+
+    const friendRequests = await query;
+
+    return friendRequests.map(({ profile }) => profile);
   }
 }

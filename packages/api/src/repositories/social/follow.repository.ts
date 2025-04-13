@@ -7,7 +7,10 @@ import type {
   Schema,
   Transaction,
 } from "@oppfy/db";
-import { getFollowStatusSql } from "@oppfy/db/utils/query-helpers";
+import {
+  getFollowStatusSql,
+  withOnboardingCompleted,
+} from "@oppfy/db/utils/query-helpers";
 
 import type {
   BidirectionalUserIdsparams,
@@ -296,7 +299,7 @@ export class FollowRepository {
     { userId, cursor, pageSize = 10, selfUserId }: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<SocialProfile[]> {
-    const followers = await db
+    let query = db
       .select({
         profile: this.schema.profile,
         followStatus: getFollowStatusSql(selfUserId),
@@ -318,18 +321,26 @@ export class FollowRepository {
                 gt(this.schema.follow.createdAt, cursor.createdAt),
                 and(
                   eq(this.schema.follow.createdAt, cursor.createdAt),
-                  gt(this.schema.user.id, cursor.id),
+                  gt(this.schema.profile.userId, cursor.id),
                 ),
               )
             : undefined,
         ),
       )
-      .orderBy(asc(this.schema.follow.createdAt), asc(this.schema.user.id))
-      .limit(pageSize);
+      .orderBy(
+        asc(this.schema.follow.createdAt),
+        asc(this.schema.profile.userId),
+      )
+      .limit(pageSize)
+      .$dynamic();
 
-    return followers.map((follower) => ({
-      ...follower.profile,
-      followStatus: follower.followStatus,
+    query = withOnboardingCompleted(query);
+
+    const followers = await query;
+
+    return followers.map(({ profile, followStatus }) => ({
+      ...profile,
+      followStatus,
     }));
   }
 
@@ -337,7 +348,7 @@ export class FollowRepository {
     { userId, cursor, pageSize = 10, selfUserId }: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<SocialProfile[]> {
-    const following = await db
+    let query = db
       .select({
         profile: this.schema.profile,
         followStatus: getFollowStatusSql(selfUserId),
@@ -359,18 +370,26 @@ export class FollowRepository {
                 gt(this.schema.follow.createdAt, cursor.createdAt),
                 and(
                   eq(this.schema.follow.createdAt, cursor.createdAt),
-                  gt(this.schema.user.id, cursor.id),
+                  gt(this.schema.profile.userId, cursor.id),
                 ),
               )
             : undefined,
         ),
       )
-      .orderBy(asc(this.schema.follow.createdAt), asc(this.schema.user.id))
-      .limit(pageSize);
+      .orderBy(
+        asc(this.schema.follow.createdAt),
+        asc(this.schema.profile.userId),
+      )
+      .limit(pageSize)
+      .$dynamic();
 
-    return following.map((following) => ({
-      ...following.profile,
-      followStatus: following.followStatus,
+    query = withOnboardingCompleted(query);
+
+    const following = await query;
+
+    return following.map(({ profile, followStatus }) => ({
+      ...profile,
+      followStatus,
     }));
   }
 
@@ -378,7 +397,7 @@ export class FollowRepository {
     { userId, cursor, pageSize = 10 }: PaginateFollowRequestsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile[]> {
-    const requests = await db
+    let query = db
       .select({
         profile: this.schema.profile,
       })
@@ -399,7 +418,7 @@ export class FollowRepository {
                 gt(this.schema.followRequest.createdAt, cursor.createdAt),
                 and(
                   eq(this.schema.followRequest.createdAt, cursor.createdAt),
-                  gt(this.schema.user.id, cursor.id),
+                  gt(this.schema.profile.userId, cursor.id),
                 ),
               )
             : undefined,
@@ -407,10 +426,15 @@ export class FollowRepository {
       )
       .orderBy(
         asc(this.schema.followRequest.createdAt),
-        asc(this.schema.user.id),
+        asc(this.schema.profile.userId),
       )
-      .limit(pageSize);
+      .limit(pageSize)
+      .$dynamic();
 
-    return requests.map((request) => request.profile);
+    query = withOnboardingCompleted(query);
+
+    const followRequests = await query;
+
+    return followRequests.map(({ profile }) => profile);
   }
 }

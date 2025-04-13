@@ -7,7 +7,10 @@ import type {
   Schema,
   Transaction,
 } from "@oppfy/db";
-import { getFollowStatusSql } from "@oppfy/db/utils/query-helpers";
+import {
+  getFollowStatusSql,
+  withOnboardingCompleted,
+} from "@oppfy/db/utils/query-helpers";
 
 import { FollowStatus, UserIdParam } from "../../interfaces/types";
 import type { Notification, NotificationSettings, Profile } from "../../models";
@@ -155,7 +158,7 @@ export class NotificationRepository {
     { userId, cursor, pageSize = 10 }: PaginateNotificationsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<NotificationAndProfile[]> {
-    const notifications = await db
+    let query = db
       .select({
         profile: this.schema.profile,
         notification: this.schema.notification,
@@ -185,7 +188,12 @@ export class NotificationRepository {
         desc(this.schema.notification.createdAt),
         desc(this.schema.notification.id),
       )
-      .limit(pageSize);
+      .limit(pageSize)
+      .$dynamic();
+
+    query = withOnboardingCompleted(query);
+
+    const notifications = await query;
 
     return notifications;
   }
