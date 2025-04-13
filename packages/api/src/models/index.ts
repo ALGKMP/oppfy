@@ -20,6 +20,9 @@ export type OnboardedProfile = {
 export type HydratedProfile = Profile & {
   profilePictureUrl: string | null;
 };
+export type HydratedOnboardedProfile = OnboardedProfile & {
+  profilePictureUrl: string | null;
+};
 
 export type Block = InferSelectModel<typeof schema.block>;
 

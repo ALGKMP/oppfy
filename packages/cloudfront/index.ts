@@ -8,13 +8,7 @@ import type { InferSelectModel, schema } from "@oppfy/db";
 import { env } from "@oppfy/env";
 
 type Profile = InferSelectModel<typeof schema.profile>;
-type HydratedProfile = Profile & {
-  profilePictureUrl: string | null;
-};
 type Post = InferSelectModel<typeof schema.post>;
-type HydratedPost = Post & {
-  postUrl: string;
-};
 
 const ONE_HOUR = 60 * 60 * 1000;
 
@@ -31,7 +25,9 @@ export class CloudFront {
     });
   }
 
-  hydrateProfile(profile: Profile): HydratedProfile {
+  hydrateProfile<T extends Profile>(
+    profile: T,
+  ): T & { profilePictureUrl: string | null } {
     const profilePictureUrl = profile.profilePictureKey
       ? this.getProfilePictureUrl(profile.profilePictureKey)
       : null;
@@ -42,7 +38,7 @@ export class CloudFront {
     };
   }
 
-  hydratePost(post: Post): HydratedPost {
+  hydratePost<T extends Post>(post: T): T & { postUrl: string } {
     const postUrl = this.getPublicPostUrl(post.postKey);
 
     return { ...post, postUrl };

@@ -8,7 +8,7 @@ import type {
   DirectionalUserIdsParams,
   PaginationParams,
 } from "../../interfaces/types";
-import type { Block, OnboardedProfile, Profile } from "../../models";
+import type { Block, OnboardedProfile } from "../../models";
 import { TYPES } from "../../symbols";
 
 export interface PaginateBlockedUsersParams extends PaginationParams {
