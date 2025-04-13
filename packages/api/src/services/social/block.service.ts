@@ -10,7 +10,7 @@ import type {
   PaginatedResponse,
   PaginationParams,
 } from "../../interfaces/types";
-import { Profile } from "../../models";
+import { HydratedOnboardedProfile } from "../../models";
 import { BlockRepository } from "../../repositories/social/block.repository";
 import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
@@ -113,7 +113,7 @@ export class BlockService {
     cursor,
     pageSize = 10,
   }: GetBlockedUsersParams): Promise<
-    Result<PaginatedResponse<Profile>, never>
+    Result<PaginatedResponse<HydratedOnboardedProfile>, never>
   > {
     const rawBlockedProfiles =
       await this.blockRepository.paginateBlockedProfiles({

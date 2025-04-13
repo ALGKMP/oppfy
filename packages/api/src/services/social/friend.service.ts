@@ -13,14 +13,14 @@ import {
   PaginatedResponse,
   PaginationParams,
 } from "../../interfaces/types";
-import { HydratedProfile } from "../../models";
+import { HydratedOnboardedProfile } from "../../models";
 import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
 
-type SocialProfile = HydratedProfile & {
+type SocialProfile = HydratedOnboardedProfile & {
   followStatus: FollowStatus;
 };
 
@@ -397,7 +397,7 @@ export class FriendService {
     cursor,
     pageSize = 10,
   }: PaginateByUserIdParams): Promise<
-    Result<PaginatedResponse<HydratedProfile>, never>
+    Result<PaginatedResponse<HydratedOnboardedProfile>, never>
   > {
     const rawProfiles = await this.friendRepository.paginateFriendRequests({
       userId,

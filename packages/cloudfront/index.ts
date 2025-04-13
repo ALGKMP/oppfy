@@ -10,6 +10,12 @@ import { env } from "@oppfy/env";
 type Profile = InferSelectModel<typeof schema.profile>;
 type Post = InferSelectModel<typeof schema.post>;
 
+export type Hydrate<T> = T extends Profile
+  ? T & { profilePictureUrl: string | null }
+  : T extends Post
+    ? T & { assetUrl: string | null }
+    : never;
+
 const ONE_HOUR = 60 * 60 * 1000;
 
 export class CloudFront {

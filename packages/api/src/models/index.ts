@@ -11,18 +11,18 @@ export type ReportCommentReason =
   (typeof schema.reportCommentReasonEnum.enumValues)[number];
 
 export type User = InferSelectModel<typeof schema.user>;
-export type Profile = InferSelectModel<typeof schema.profile>;
-export type OnboardedProfile = {
-  [K in keyof Profile]: K extends "profilePictureKey"
-    ? Profile[K]
-    : NonNullable<Profile[K]>;
-};
-export type HydratedProfile = Profile & {
-  profilePictureUrl: string | null;
-};
-export type HydratedOnboardedProfile = OnboardedProfile & {
-  profilePictureUrl: string | null;
-};
+
+type BaseProfile = InferSelectModel<typeof schema.profile>;
+export type ProfileState = "onboarded" | undefined;
+
+export type Profile<TState extends ProfileState = undefined> =
+  TState extends "onboarded"
+    ? {
+        [K in keyof BaseProfile]: K extends "profilePictureKey"
+          ? BaseProfile[K]
+          : NonNullable<BaseProfile[K]>;
+      }
+    : BaseProfile;
 
 export type Block = InferSelectModel<typeof schema.block>;
 

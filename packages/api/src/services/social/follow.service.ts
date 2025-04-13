@@ -9,11 +9,10 @@ import * as FriendErrors from "../../errors/social/friend.error";
 import * as ProfileErrors from "../../errors/user/profile.error";
 import {
   DirectionalUserIdsParams,
-  FollowStatus,
   PaginatedResponse,
   PaginationParams,
 } from "../../interfaces/types";
-import { HydratedProfile } from "../../models";
+import { HydratedOnboardedProfile } from "../../models";
 import {
   FollowRepository,
   SocialProfile,
@@ -22,7 +21,7 @@ import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { TYPES } from "../../symbols";
 
-type HydratedSocialProfile = HydratedProfile & SocialProfile;
+type HydratedSocialOnboardedProfile = HydratedOnboardedProfile & SocialProfile;
 
 interface PaginateByUserIdWithSelfUserIdParams extends PaginationParams {
   selfUserId: string;
@@ -343,7 +342,7 @@ export class FollowService {
     pageSize = 10,
     selfUserId,
   }: PaginateByUserIdWithSelfUserIdParams): Promise<
-    Result<PaginatedResponse<HydratedSocialProfile>, never>
+    Result<PaginatedResponse<HydratedSocialOnboardedProfile>, never>
   > {
     const rawProfiles = await this.followRepository.paginateFollowers({
       userId,
@@ -380,7 +379,7 @@ export class FollowService {
     pageSize = 10,
     selfUserId,
   }: PaginateByUserIdWithSelfUserIdParams): Promise<
-    Result<PaginatedResponse<HydratedSocialProfile>, never>
+    Result<PaginatedResponse<HydratedSocialOnboardedProfile>, never>
   > {
     const rawProfiles = await this.followRepository.paginateFollowing({
       userId,
@@ -415,7 +414,7 @@ export class FollowService {
     cursor,
     pageSize = 10,
   }: PaginateByUserIdParams): Promise<
-    Result<PaginatedResponse<HydratedProfile>, never>
+    Result<PaginatedResponse<HydratedOnboardedProfile>, never>
   > {
     const rawProfiles = await this.followRepository.paginateFollowRequests({
       userId,

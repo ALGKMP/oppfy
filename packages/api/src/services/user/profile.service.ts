@@ -14,6 +14,7 @@ import {
   UsernameParam,
 } from "../../interfaces/types";
 import {
+  HydratedOnboardedProfile,
   HydratedProfile,
   Profile,
   ProfileInsert,
@@ -136,7 +137,7 @@ export class ProfileService {
    */
   async searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,
-  ): Promise<Result<HydratedProfile[], never>> {
+  ): Promise<Result<HydratedOnboardedProfile[], never>> {
     const profiles = await this.profileRepository.getProfilesByUsername(params);
     const hydratedProfiles = profiles.map((profile) =>
       this.cloudfront.hydrateProfile(profile),
@@ -181,33 +182,28 @@ export class ProfileService {
       });
     }
 
-    const [
-      isFollowing,
-      isFollowRequested,
-      isFriends,
-      isFriendRequested,
-
-      ] = await Promise.all([
-      this.followRepository.getFollower({
-        senderUserId: selfUserId,
-        recipientUserId: otherUserId,
-      }),
-      this.followRepository.getFollowRequest({
-        senderUserId: selfUserId,
-        recipientUserId: otherUserId,
-      }),
-      this.friendRepository.getFriendRequest({
-        senderUserId: selfUserId,
-        recipientUserId: otherUserId,
-      }),
-      this.friendRepository.getFriendRequest({
-        senderUserId: selfUserId,
-        recipientUserId: otherUserId,
-      }),
-      this.profileRepository.getPrivacy({
-        userId: otherUserId,
-      }),
-    ]);
+    const [isFollowing, isFollowRequested, isFriends, isFriendRequested] =
+      await Promise.all([
+        this.followRepository.getFollower({
+          senderUserId: selfUserId,
+          recipientUserId: otherUserId,
+        }),
+        this.followRepository.getFollowRequest({
+          senderUserId: selfUserId,
+          recipientUserId: otherUserId,
+        }),
+        this.friendRepository.getFriendRequest({
+          senderUserId: selfUserId,
+          recipientUserId: otherUserId,
+        }),
+        this.friendRepository.getFriendRequest({
+          senderUserId: selfUserId,
+          recipientUserId: otherUserId,
+        }),
+        this.profileRepository.getPrivacy({
+          userId: otherUserId,
+        }),
+      ]);
 
     const followState = (
       isFollowing
