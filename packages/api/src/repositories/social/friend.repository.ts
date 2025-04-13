@@ -18,10 +18,10 @@ import type {
   FollowStatus,
   PaginationParams,
 } from "../../interfaces/types";
-import type { Friend, FriendRequest, Profile } from "../../models";
+import type { Friend, FriendRequest, OnboardedProfile } from "../../models";
 import { TYPES } from "../../symbols";
 
-export interface SocialProfile extends Profile {
+export interface SocialProfile extends OnboardedProfile {
   followStatus: FollowStatus;
 }
 
@@ -344,7 +344,7 @@ export class FriendRepository {
     const friends = await query;
 
     return friends.map(({ profile, followStatus }) => ({
-      ...profile,
+      ...(profile as OnboardedProfile),
       followStatus,
     }));
   }
@@ -356,7 +356,7 @@ export class FriendRepository {
   async paginateFriendRequests(
     { userId, cursor, pageSize = 10 }: PaginateFriendRequestsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Profile[]> {
+  ): Promise<OnboardedProfile[]> {
     let query = db
       .select({
         profile: this.schema.profile,
@@ -395,6 +395,6 @@ export class FriendRepository {
 
     const friendRequests = await query;
 
-    return friendRequests.map(({ profile }) => profile);
+    return friendRequests.map(({ profile }) => profile as OnboardedProfile);
   }
 }

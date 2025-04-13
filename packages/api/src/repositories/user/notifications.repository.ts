@@ -13,7 +13,11 @@ import {
 } from "@oppfy/db/utils/query-helpers";
 
 import { FollowStatus, UserIdParam } from "../../interfaces/types";
-import type { Notification, NotificationSettings, Profile } from "../../models";
+import type {
+  Notification,
+  NotificationSettings,
+  OnboardedProfile,
+} from "../../models";
 import { TYPES } from "../../symbols";
 
 export interface UpdateNotificationSettingsParams {
@@ -28,7 +32,7 @@ export interface PaginateNotificationsParams {
 }
 
 export interface NotificationAndProfile {
-  profile: Profile;
+  profile: OnboardedProfile;
   notification: Notification;
   followStatus: FollowStatus;
 }
@@ -195,6 +199,10 @@ export class NotificationRepository {
 
     const notifications = await query;
 
-    return notifications;
+    return notifications.map(({ profile, notification, followStatus }) => ({
+      profile: profile as OnboardedProfile,
+      notification,
+      followStatus,
+    }));
   }
 }

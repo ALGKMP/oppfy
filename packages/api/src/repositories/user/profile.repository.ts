@@ -8,7 +8,12 @@ import {
 } from "@oppfy/db/utils/query-helpers";
 
 import type { UserIdParam, UsernameParam } from "../../interfaces/types";
-import type { Profile, ProfileInsert, UserStats } from "../../models";
+import type {
+  OnboardedProfile,
+  Profile,
+  ProfileInsert,
+  UserStats,
+} from "../../models";
 import { TYPES } from "../../symbols";
 
 export interface ProfilesByIdsParams {
@@ -71,7 +76,7 @@ export class ProfileRepository {
   async getProfilesByUsername(
     { userId, username, limit = 10 }: ProfilesByUsernameParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Profile[]> {
+  ): Promise<OnboardedProfile[]> {
     let query = db
       .select({
         profile: this.schema.profile,
@@ -80,15 +85,15 @@ export class ProfileRepository {
       .where(ilike(this.schema.profile.username, `%${username}%`))
       .$dynamic();
 
-    query = withOnboardingCompleted(query, this.schema);
-    query = withoutBlocked(query, this.schema, userId);
+    query = withOnboardingCompleted(query);
+    query = withoutBlocked(query, userId);
 
     // Add final conditions and execute
     const results = await query
       .where(ne(this.schema.profile.userId, userId))
       .limit(limit);
 
-    return results.map((result) => result.profile);
+    return results.map((result) => result.profile as OnboardedProfile);
   }
 
   async getStats(

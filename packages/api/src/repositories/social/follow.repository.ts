@@ -18,10 +18,10 @@ import type {
   FollowStatus,
   PaginationParams,
 } from "../../interfaces/types";
-import type { Follow, FollowRequest, Profile } from "../../models";
+import type { Follow, FollowRequest, OnboardedProfile } from "../../models";
 import { TYPES } from "../../symbols";
 
-export interface SocialProfile extends Profile {
+export interface SocialProfile extends OnboardedProfile {
   followStatus: FollowStatus;
 }
 
@@ -339,7 +339,7 @@ export class FollowRepository {
     const followers = await query;
 
     return followers.map(({ profile, followStatus }) => ({
-      ...profile,
+      ...(profile as OnboardedProfile),
       followStatus,
     }));
   }
@@ -388,7 +388,7 @@ export class FollowRepository {
     const following = await query;
 
     return following.map(({ profile, followStatus }) => ({
-      ...profile,
+      ...(profile as OnboardedProfile),
       followStatus,
     }));
   }
@@ -396,7 +396,7 @@ export class FollowRepository {
   async paginateFollowRequests(
     { userId, cursor, pageSize = 10 }: PaginateFollowRequestsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Profile[]> {
+  ): Promise<OnboardedProfile[]> {
     let query = db
       .select({
         profile: this.schema.profile,
@@ -435,6 +435,6 @@ export class FollowRepository {
 
     const followRequests = await query;
 
-    return followRequests.map(({ profile }) => profile);
+    return followRequests.map(({ profile }) => profile as OnboardedProfile);
   }
 }
