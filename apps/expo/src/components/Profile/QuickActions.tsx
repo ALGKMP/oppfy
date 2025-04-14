@@ -10,7 +10,7 @@ import { Button, useActionSheetController } from "~/components/ui";
 import { useBlockUser } from "~/hooks/useBlockUser";
 import useShare from "~/hooks/useShare";
 
-type relationshipState =
+type RelationshipState =
   RouterOutputs["profile"]["getRelationshipStatesBetweenUsers"];
 
 interface QuickActionsSelfProps {
@@ -27,7 +27,7 @@ interface QuickActionsOtherProps {
   username: string;
   profilePictureUrl: string | null;
   isLoading: boolean;
-  relationshipState: relationshipState;
+  relationshipState: RelationshipState;
 }
 
 type QuickActionsProps = QuickActionsSelfProps | QuickActionsOtherProps;
