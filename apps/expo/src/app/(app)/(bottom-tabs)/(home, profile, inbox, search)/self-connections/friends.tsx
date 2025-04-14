@@ -195,9 +195,11 @@ const Friends = () => {
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ItemSeparatorComponent={Spacer}
-      ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
+      ListHeaderComponentStyle={
+        { marginBottom: getToken("$4", "space") } as number
+      }
       contentContainerStyle={{
-        padding: getToken("$4", "space"),
+        padding: getToken("$4", "space") as number,
       }}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}

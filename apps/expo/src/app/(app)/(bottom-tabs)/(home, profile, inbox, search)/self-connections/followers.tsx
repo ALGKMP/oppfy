@@ -3,7 +3,7 @@ import { RefreshControl } from "react-native";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { getToken, H6, YStack } from "tamagui";
+import { getToken, YStack } from "tamagui";
 
 import {
   EmptyPlaceholder,

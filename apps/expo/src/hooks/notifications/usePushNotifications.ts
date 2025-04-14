@@ -13,7 +13,7 @@ export interface PushNotificationState {
 }
 
 const usePushNotifications = (): PushNotificationState => {
-  const storePushToken = api.notifications.storePushToken.useMutation();
+  const storePushToken = api.notification.storePushToken.useMutation();
 
   Notifications.setNotificationHandler({
     // ! expo typed this promise incorrectly
