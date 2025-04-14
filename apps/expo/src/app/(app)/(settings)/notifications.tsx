@@ -16,9 +16,15 @@ import {
   YStack,
 } from "~/components/ui";
 import { api } from "~/utils/api";
-import type { RouterOutputs } from "~/utils/api";
 
-type SwitchState = RouterOutputs["notification"]["notificationSettings"];
+interface SwitchState {
+  likes: boolean;
+  posts: boolean;
+  comments: boolean;
+  mentions: boolean;
+  friendRequests: boolean;
+  followRequests: boolean;
+}
 
 const Notifications = () => {
   const utils = api.useUtils();
@@ -60,10 +66,17 @@ const Notifications = () => {
       },
     });
 
-  const [switchState, setSwitchState] =
-    useState<SwitchState>(notificationSettings);
+  const [switchState, setSwitchState] = useState<SwitchState>({
+    friendRequests: false,
+    followRequests: false,
+    posts: false,
+    likes: false,
+    comments: false,
+    mentions: false,
+  });
 
   const hasChanges = () => {
+    if (!notificationSettings) return false;
     return Object.keys(switchState).some(
       (key) =>
         switchState[key as keyof SwitchState] !==
@@ -79,7 +92,9 @@ const Notifications = () => {
   };
 
   useEffect(() => {
-    setSwitchState(notificationSettings);
+    if (notificationSettings) {
+      setSwitchState(notificationSettings);
+    }
   }, [notificationSettings]);
 
   const onSubmit = async () => {
