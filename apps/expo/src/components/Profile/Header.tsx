@@ -4,7 +4,6 @@ import { View, XStack, YStack } from "tamagui";
 import type { RouterOutputs } from "@oppfy/api";
 
 import Bio from "~/components/Profile/Bio";
-import HeaderGradient from "~/components/Profile/HeaderGradient";
 import JoinDatePill from "~/components/Profile/JoinDatePill";
 import ProfileActions from "~/components/Profile/ProfileActions";
 import ProfileInfo from "~/components/Profile/ProfileInfo";
@@ -56,11 +55,12 @@ const Header = ({
   return (
     <YStack>
       {/* Cover Image Area */}
-      <YStack height={140} overflow="hidden" borderRadius="$6">
-        <HeaderGradient
-          username={user.username}
-          profilePictureUrl={user.profilePictureUrl}
-        />
+      <YStack
+        height={100}
+        overflow="hidden"
+        borderRadius="$6"
+        backgroundColor="$background"
+      >
         <View position="absolute" bottom={12} right={12}>
           <JoinDatePill createdAt={createdAt} />
         </View>
