@@ -13,7 +13,7 @@ import Stats from "~/components/Profile/Stats";
 type Profile = RouterOutputs["profile"]["getProfile"];
 type ProfileStats = RouterOutputs["profile"]["getStats"];
 
-type relationshipState =
+type RelationshipState =
   RouterOutputs["profile"]["getRelationshipStatesBetweenUsers"];
 
 interface HeaderSelfProps {
@@ -27,7 +27,7 @@ interface HeaderOtherProps {
   type: "other";
   profile: Profile | undefined;
   stats: ProfileStats | undefined;
-  networkRelationships: relationshipState | undefined;
+  relationshipState: RelationshipState | undefined;
   isLoading: boolean;
 }
 
@@ -62,7 +62,7 @@ const Header = (props: HeaderProps) => (
           <QuickActions
             type="other"
             profile={props.profile}
-            relationshipState={props.networkRelationships}
+            relationshipState={props.relationshipState}
             isLoading={props.isLoading}
           />
         )}
@@ -76,7 +76,7 @@ const Header = (props: HeaderProps) => (
         <ProfileActions
           type="other"
           userId={props.profile?.userId}
-          relationshipState={props.networkRelationships}
+          relationshipState={props.relationshipState}
         />
       )}
 
@@ -93,7 +93,7 @@ const Header = (props: HeaderProps) => (
           profile={props.profile}
           stats={props.stats}
           isLoading={props.isLoading}
-          relationshipState={props.networkRelationships}
+          relationshipState={props.relationshipState}
         />
       )}
     </YStack>

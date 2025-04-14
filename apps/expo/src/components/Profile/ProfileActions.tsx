@@ -136,15 +136,17 @@ const ActionButton = (props: ActionButtonProps) => {
     },
   };
 
+  console.log("RELATIONSHIP STATE", props.relationshipState);
+
   const buttonCombinations: Record<string, (keyof typeof buttonConfigs)[]> = {
-    NOT_FOLLOWING_NOT_FRIENDS: ["follow", "friend"],
-    FOLLOWING_NOT_FRIENDS: ["unfollow", "friend"],
-    FOLLOWING_REQUESTED: ["cancelFriendRequest"],
-    FOLLOWING_FRIENDS: ["removeFriend"],
+    PUBLIC_NOT_FOLLOWING_NOT_FRIENDS: ["follow", "friend"],
+    PUBLIC_FOLLOWING_NOT_FRIENDS: ["unfollow", "friend"],
+    PUBLIC_FOLLOWING_REQUESTED: ["cancelFriendRequest"],
+    PUBLIC_FOLLOWING_FRIENDS: ["removeFriend"],
     PRIVATE_NOT_FOLLOWING_NOT_FRIENDS: ["follow", "friend"],
     PRIVATE_REQUESTED_NOT_FRIENDS: ["cancelFollowRequest", "friend"],
     PRIVATE_FOLLOWING_NOT_FRIENDS: ["unfollow", "friend"],
-    REQUESTED_REQUESTED: ["cancelFriendRequest"],
+    PRIVATE_REQUESTED_REQUESTED: ["cancelFriendRequest"],
   };
 
   const key = `${privacy}_${follow}_${friend}`;

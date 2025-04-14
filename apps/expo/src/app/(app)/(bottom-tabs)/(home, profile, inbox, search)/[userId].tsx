@@ -43,8 +43,8 @@ const OtherProfile = () => {
   } = api.profile.getStats.useQuery({ userId });
 
   const {
-    data: networkRelationships,
-    refetch: refetchNetworkRelationships,
+    data: relationshipState,
+    refetch: refetchRelationshipState,
     isLoading: isLoadingRelationshipStates,
   } = api.profile.getRelationshipStatesBetweenUsers.useQuery({ userId });
 
@@ -78,10 +78,10 @@ const OtherProfile = () => {
     await Promise.all([
       refetchPosts(),
       refetchProfile(),
-      refetchNetworkRelationships(),
+      refetchRelationshipState(),
     ]);
     setIsRefreshing(false);
-  }, [refetchPosts, refetchProfile, refetchNetworkRelationships]);
+  }, [refetchPosts, refetchProfile, refetchRelationshipState]);
 
   const handleOnEndReached = useCallback(async () => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -153,9 +153,10 @@ const OtherProfile = () => {
   const memoizedHeader = () => (
     <YStack gap="$2" position="relative">
       <Header
-        type="self"
+        type="other"
         profile={profileData}
         stats={profileStats}
+        relationshipState={relationshipState}
         isLoading={isLoading}
       />
       {/* <Header
@@ -184,7 +185,7 @@ const OtherProfile = () => {
         <>
           {profileStats?.friends &&
           profileStats.friends > 0 &&
-          !networkRelationships?.isBlocked ? (
+          !relationshipState?.isBlocked ? (
             <FriendCarousel
               userId={userId}
               username={profileData?.username ?? ""}
@@ -224,7 +225,7 @@ const OtherProfile = () => {
       );
     }
 
-    if (networkRelationships?.isBlocked) {
+    if (relationshipState?.isBlocked) {
       return (
         <View paddingTop="$6">
           <EmptyPlaceholder
@@ -256,7 +257,7 @@ const OtherProfile = () => {
         />
       </View>
     );
-  }, [isLoadingPostData, networkRelationships]);
+  }, [isLoadingPostData, relationshipState]);
 
   return (
     <FlashList

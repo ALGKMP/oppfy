@@ -202,9 +202,9 @@ export class ProfileService {
           senderUserId: selfUserId,
           recipientUserId: otherUserId,
         }),
-        this.friendRepository.getFriendRequest({
-          senderUserId: selfUserId,
-          recipientUserId: otherUserId,
+        this.friendRepository.getFriend({
+          userIdA: selfUserId,
+          userIdB: otherUserId,
         }),
         this.friendRepository.getFriendRequest({
           senderUserId: selfUserId,
