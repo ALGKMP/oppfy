@@ -78,7 +78,7 @@ export default function useUploadProfilePicture({
       await utils.profile.getProfile.cancel();
 
       // Get current data
-      const prevData = utils.profile.getProfile.getData();
+      const prevData = utils.profile.getProfile.getData({});
       if (!prevData) return;
 
       // Optimistically update

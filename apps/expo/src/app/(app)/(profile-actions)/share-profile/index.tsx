@@ -19,9 +19,9 @@ const ShareProfile = () => {
   const toast = useToastController();
   const { shareProfile, isSharing } = useShare();
 
-  const username = utils.profile.getProfileSelf.getData()?.username ?? "";
+  const username = utils.profile.getProfile.getData({})?.username ?? "";
   const profilePictureUrl =
-    utils.profile.getProfileSelf.getData()?.profilePictureUrl ?? "";
+    utils.profile.getProfile.getData({})?.profilePictureUrl ?? "";
   const profileUrl = `https://www.oppfy.app/profile/${username}`;
 
   const handleShare = async () => {

@@ -323,7 +323,7 @@ const EditProfile = () => {
   const updateProfile = api.profile.updateProfile.useMutation({
     onMutate: async (newData) => {
       await utils.profile.getProfile.cancel();
-      const prevData = utils.profile.getProfile.getData();
+      const prevData = utils.profile.getProfile.getData({});
       if (prevData) {
         utils.profile.getProfile.setData(
           { userId: undefined },
