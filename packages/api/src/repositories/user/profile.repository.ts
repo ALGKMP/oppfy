@@ -38,12 +38,12 @@ export class ProfileRepository {
   async getProfile(
     { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<Profile | undefined> {
+  ): Promise<(Profile<"notOnApp"> & Profile<"onboarded">) | undefined> {
     const profile = await db.query.profile.findFirst({
       where: eq(this.schema.profile.userId, userId),
     });
 
-    return profile;
+    return profile as Profile<"notOnApp"> & Profile<"onboarded">;
   }
 
   async getProfileByUsername(

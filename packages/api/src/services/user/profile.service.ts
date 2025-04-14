@@ -70,7 +70,7 @@ export class ProfileService {
     otherUserId,
   }: SelfOtherUserIdsParams<"optional">): Promise<
     Result<
-      Hydrate<Profile>,
+      Hydrate<Profile<"notOnApp"> | Profile<"onboarded">>,
       | ProfileErrors.ProfileBlocked
       | ProfileErrors.ProfileNotFound
       | ProfileErrors.ProfilePrivate
