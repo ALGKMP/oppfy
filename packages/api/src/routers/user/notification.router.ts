@@ -58,10 +58,6 @@ export const notificationRouter = createTRPCRouter({
               code: "NOT_FOUND",
               message: error.message,
             });
-          default:
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-            });
         }
       },
     );
