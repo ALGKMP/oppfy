@@ -10,98 +10,109 @@ import ProfileInfo from "~/components/Profile/ProfileInfo";
 import QuickActions from "~/components/Profile/QuickActions";
 import Stats from "~/components/Profile/Stats";
 
-type NetworkRelationships =
+type Profile = RouterOutputs["profile"]["getProfile"];
+type Stats = RouterOutputs["profile"]["getStats"];
+
+type relationshipState =
   RouterOutputs["profile"]["getRelationshipStatesBetweenUsers"];
 
-type Privacy = RouterOutputs["profile"]["getProfile"]["privacy"];
-
-interface User {
-  id?: string;
-  name: string | null;
-  username: string;
-  profilePictureUrl: string | null;
-  bio: string | null;
-  privacy: Privacy;
-}
-
-interface Stats {
-  postCount: number;
-  followingCount: number;
-  followerCount: number;
-  friendCount: number;
-}
-
-interface HeaderProps {
-  user: User;
+interface HeaderSelfProps {
+  type: "self";
+  profile: Profile;
   stats: Stats;
-  createdAt?: Date;
-  networkRelationships?: NetworkRelationships;
-  isLoading?: boolean;
+  isLoading: boolean;
 }
 
-const Header = ({
-  user,
-  stats,
-  createdAt,
-  networkRelationships,
-  isLoading = false,
-}: HeaderProps) => {
-  const isBlocked = networkRelationships?.isBlocked ?? false;
-  const isDisabled =
-    isBlocked ||
-    (user.privacy === "private" &&
-      networkRelationships?.follow !== "FOLLOWING");
+interface HeaderOtherProps {
+  type: "other";
+  profile: Profile;
+  stats: Stats;
+  networkRelationships: relationshipState;
+  isLoading: boolean;
+}
 
-  return (
-    <YStack>
-      {/* Cover Image Area */}
-      <YStack
-        height={100}
-        overflow="hidden"
-        borderRadius="$6"
-        backgroundColor="$background"
-      >
-        <View position="absolute" bottom={12} right={12}>
-          <JoinDatePill createdAt={createdAt} />
-        </View>
-      </YStack>
+type HeaderProps = HeaderSelfProps | HeaderOtherProps;
 
-      {/* Profile Info Section */}
-      <YStack marginTop={-60} paddingHorizontal="$4" gap="$4">
-        <XStack justifyContent="space-between" alignItems="flex-end">
-          <ProfileInfo
-            name={user.name}
-            username={user.username}
-            profilePictureUrl={user.profilePictureUrl}
-            isLoading={isLoading}
-          />
-          <QuickActions
-            userId={user.id}
-            username={user.username}
-            profilePictureUrl={user.profilePictureUrl}
-            isLoading={isLoading}
-            networkRelationships={networkRelationships}
-          />
-        </XStack>
-
-        <ProfileActions
-          userId={user.id}
-          networkRelationships={networkRelationships}
-        />
-
-        <Stats
-          userId={user.id}
-          username={user.username}
-          postCount={stats.postCount}
-          followingCount={stats.followingCount}
-          followerCount={stats.followerCount}
-          friendCount={stats.friendCount}
-          isLoading={isLoading}
-          disabled={isDisabled}
-        />
-      </YStack>
+const Header = (props: HeaderProps) => (
+  <YStack>
+    {/* Cover Image Area */}
+    <YStack
+      height={100}
+      overflow="hidden"
+      borderRadius="$6"
+      backgroundColor="$background"
+    >
+      <View position="absolute" bottom={12} right={12}>
+        <JoinDatePill createdAt={props.profile.createdAt} />
+      </View>
     </YStack>
-  );
-};
+
+    {/* Profile Info Section */}
+    <YStack marginTop={-60} paddingHorizontal="$4" gap="$4">
+      <XStack justifyContent="space-between" alignItems="flex-end">
+        <ProfileInfo
+          name={props.profile.name}
+          username={props.profile.username}
+          profilePictureUrl={props.profile.profilePictureUrl}
+          isLoading={props.isLoading}
+        />
+
+        {props.type === "self" ? (
+          <QuickActions
+            type="self"
+            userId={props.profile.userId}
+            username={props.profile.username}
+            profilePictureUrl={props.profile.profilePictureUrl}
+            isLoading={props.isLoading}
+          />
+        ) : (
+          <QuickActions
+            type="other"
+            userId={props.profile.userId}
+            relationshipState={props.networkRelationships}
+            username={props.profile.username}
+            profilePictureUrl={props.profile.profilePictureUrl}
+            isLoading={props.isLoading}
+          />
+        )}
+      </XStack>
+
+      {props.type === "self" ? (
+        <ProfileActions type="self" userId={props.profile.userId} />
+      ) : (
+        <ProfileActions
+          type="other"
+          userId={props.profile.userId}
+          relationshipState={props.networkRelationships}
+        />
+      )}
+
+      {props.type === "self" ? (
+        <Stats
+          type="self"
+          userId={props.profile.userId}
+          username={props.profile.username}
+          postCount={props.stats.posts}
+          followingCount={props.stats.following}
+          followerCount={props.stats.followers}
+          friendCount={props.stats.friends}
+          isLoading={props.isLoading}
+        />
+      ) : (
+        <Stats
+          type="other"
+          userId={props.profile.userId}
+          username={props.profile.username}
+          postCount={props.stats.posts}
+          followingCount={props.stats.following}
+          followerCount={props.stats.followers}
+          friendCount={props.stats.friends}
+          isLoading={props.isLoading}
+          relationshipState={props.networkRelationships}
+        />
+      )}
+    </YStack>
+  </YStack>
+);
 
 export default Header;
