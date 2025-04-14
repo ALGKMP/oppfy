@@ -4,6 +4,29 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const notificationRouter = createTRPCRouter({
+  notificationSettings: protectedProcedure.query(async ({ ctx }) => {
+    const result = await ctx.services.notification.notificationSettings(
+      ctx.session.uid,
+    );
+
+    return result.match(
+      (res) => res,
+      (error) => {
+        switch (error.name) {
+          case "NotificationSettingsNotFoundError":
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: error.message,
+            });
+          default:
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+            });
+        }
+      },
+    );
+  }),
+
   unreadNotificationsCount: protectedProcedure.query(async ({ ctx }) => {
     const result = await ctx.services.notification.unreadNotificationsCount(
       ctx.session.uid,

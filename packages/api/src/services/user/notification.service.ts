@@ -1,12 +1,14 @@
 import { inject, injectable } from "inversify";
-import { ok, Result } from "neverthrow";
+import { err, ok, Result } from "neverthrow";
 
 import { CloudFront, Hydrate } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { FollowStatus } from "@oppfy/db/utils/query-helpers";
 
+import { NotificationSettingsNotFound } from "../../errors/user/notifications.error";
+import * as NotificationErrors from "../../errors/user/notifications.error";
 import { PaginatedResponse } from "../../interfaces/types";
-import { Notification, Profile } from "../../models";
+import { Notification, NotificationSettings, Profile } from "../../models";
 import {
   NotificationRepository,
   PaginateNotificationsParams,
@@ -34,6 +36,25 @@ export class NotificationService {
     @inject(TYPES.NotificationRepository)
     private readonly notificationRepository: NotificationRepository,
   ) {}
+
+  async notificationSettings(
+    userId: string,
+  ): Promise<
+    Result<
+      NotificationSettings,
+      NotificationErrors.NotificationSettingsNotFound
+    >
+  > {
+    const settings = await this.notificationRepository.getNotificationSettings({
+      userId,
+    });
+
+    if (settings === undefined) {
+      return err(new NotificationSettingsNotFound(userId));
+    }
+
+    return ok(settings);
+  }
 
   async unreadNotificationsCount(
     userId: string,

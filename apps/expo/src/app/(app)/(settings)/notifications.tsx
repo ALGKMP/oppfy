@@ -18,7 +18,7 @@ import {
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 
-type SwitchState = RouterOutputs["notifications"]["getNotificationSettings"];
+type SwitchState = RouterOutputs["notification"]["notificationSettings"];
 
 const Notifications = () => {
   const utils = api.useUtils();
