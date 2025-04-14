@@ -106,7 +106,7 @@ export class ContactsService {
       );
 
       // Ensure new contact IDs exist in the contact table
-      // await this.contactsRepository.ensureContactsExist(contactsToAdd, tx);
+      await this.contactsRepository.ensureContactsExist(contactsToAdd, tx);
 
       await this.contactsRepository.insertUserContacts(
         { userId, contactIds: contactsToAdd },

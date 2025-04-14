@@ -80,6 +80,22 @@ export class ContactsRepository {
       .onConflictDoNothing();
   }
 
+  async ensureContactsExist(
+    contactIds: string[],
+    tx: Transaction,
+  ): Promise<void> {
+    if (contactIds.length === 0) {
+      return;
+    }
+    const mappings = contactIds.map((contactId) => ({
+      id: contactId,
+    }));
+    await tx
+     .insert(this.schema.contact)
+     .values(mappings)
+     .onConflictDoNothing();
+  }
+
   async getRecommendationIds({ userId }: UserIdParam): Promise<{
     tier1: string[];
     tier2: string[];
