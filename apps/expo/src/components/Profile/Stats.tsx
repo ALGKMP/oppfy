@@ -1,21 +1,119 @@
-import { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import type { Href } from "expo-router";
 import { useRouter } from "expo-router";
 import { Text, XStack, YStack } from "tamagui";
 
 import { Skeleton } from "~/components/ui/Skeleton";
+import type { RouterOutputs } from "~/utils/api";
 
-interface StatsProps {
-  userId?: string;
+type RelationshipState =
+  RouterOutputs["profile"]["getRelationshipStatesBetweenUsers"];
+
+interface StatsSelfProps {
+  type: "self";
+  userId: string;
   username: string | null | undefined;
   postCount: number;
   followingCount: number;
   followerCount: number;
   friendCount: number;
   isLoading: boolean;
-  disabled?: boolean;
 }
+
+interface StatsOtherProps {
+  type: "other";
+  userId: string;
+  username: string | null | undefined;
+  postCount: number;
+  followingCount: number;
+  followerCount: number;
+  friendCount: number;
+  isLoading: boolean;
+  relationshipState: RelationshipState;
+}
+
+type StatsProps = StatsSelfProps | StatsOtherProps;
+
+const Stats = (props: StatsProps) => {
+  const router = useRouter();
+  const isDisabled =
+    props.type === "other" &&
+    (props.relationshipState.isBlocked ||
+      (props.relationshipState.privacy === "PRIVATE" &&
+        props.relationshipState.follow !== "FOLLOWING"));
+
+  const navigateToSection = (section: string) => {
+    const basePath =
+      props.type === "self" ? "/self-connections" : "/other-connections";
+
+    router.push({
+      pathname: `${basePath}/${section}`,
+      ...(props.type === "other" && {
+        params: { userId: props.userId, username: props.username },
+      }),
+    } as Href);
+  };
+
+  return (
+    <XStack
+      paddingVertical="$4"
+      marginHorizontal="$-2"
+      justifyContent="space-around"
+      backgroundColor="$background"
+      borderRadius="$8"
+      borderWidth={1}
+      borderColor="$borderColor"
+      shadowColor="$shadowColor"
+      shadowOffset={{ width: 0, height: 2 }}
+      shadowOpacity={0.05}
+      shadowRadius={8}
+      elevation={2}
+      opacity={props.isLoading ? 0.8 : 1}
+    >
+      <TouchableOpacity disabled={true}>
+        <StatItem
+          label="Posts"
+          value={props.postCount}
+          isLoading={props.isLoading}
+          disabled={isDisabled}
+        />
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => navigateToSection("following")}
+        disabled={props.isLoading || isDisabled}
+      >
+        <StatItem
+          label="Following"
+          value={props.followingCount}
+          isLoading={props.isLoading}
+          disabled={isDisabled}
+        />
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => navigateToSection("followers")}
+        disabled={props.isLoading || isDisabled}
+      >
+        <StatItem
+          label="Followers"
+          value={props.followerCount}
+          isLoading={props.isLoading}
+          disabled={isDisabled}
+        />
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => navigateToSection("friends")}
+        disabled={props.isLoading || isDisabled}
+      >
+        <StatItem
+          label="Friends"
+          value={props.friendCount}
+          isLoading={props.isLoading}
+          disabled={isDisabled}
+        />
+      </TouchableOpacity>
+    </XStack>
+  );
+};
 
 const StatItem = ({
   label,
@@ -46,89 +144,6 @@ const StatItem = ({
         {label}
       </Text>
     </YStack>
-  );
-};
-
-const Stats = ({
-  userId,
-  username,
-  postCount,
-  followingCount,
-  followerCount,
-  friendCount,
-  isLoading,
-  disabled = false,
-}: StatsProps) => {
-  const router = useRouter();
-
-  const navigateToSection = (section: string) => {
-    if (isLoading || disabled) return;
-
-    const basePath = userId ? "/other-connections" : "/self-connections";
-    router.push({
-      pathname: `${basePath}/${section}`,
-      ...(userId && { params: { userId, username } }),
-    } as Href);
-  };
-
-  return (
-    <XStack
-      paddingVertical="$4"
-      marginHorizontal="$-2"
-      justifyContent="space-around"
-      backgroundColor="$background"
-      borderRadius="$8"
-      borderWidth={1}
-      borderColor="$borderColor"
-      shadowColor="$shadowColor"
-      shadowOffset={{ width: 0, height: 2 }}
-      shadowOpacity={0.05}
-      shadowRadius={8}
-      elevation={2}
-      opacity={isLoading ? 0.8 : 1}
-    >
-      <TouchableOpacity disabled={true}>
-        <StatItem
-          label="Posts"
-          value={postCount}
-          isLoading={isLoading}
-          disabled={disabled}
-        />
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => navigateToSection("following")}
-        disabled={isLoading || disabled}
-      >
-        <StatItem
-          label="Following"
-          value={followingCount}
-          isLoading={isLoading}
-          disabled={disabled}
-        />
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => navigateToSection("followers")}
-        disabled={isLoading || disabled}
-      >
-        <StatItem
-          label="Followers"
-          value={followerCount}
-          isLoading={isLoading}
-          disabled={disabled}
-        />
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => navigateToSection("friends")}
-        disabled={isLoading || disabled}
-      >
-        <StatItem
-          label="Friends"
-          value={friendCount}
-          isLoading={isLoading}
-          disabled={disabled}
-        />
-      </TouchableOpacity>
-    </XStack>
   );
 };
 
