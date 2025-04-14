@@ -11,14 +11,8 @@ import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 
 type Icon = React.FC<IconProps>;
-type NetworkRelationships =
+type relationshipState =
   RouterOutputs["profile"]["getRelationshipStatesBetweenUsers"];
-
-interface ActionButtonProps {
-  userId?: string;
-  isDisabled?: boolean;
-  networkRelationships?: NetworkRelationships;
-}
 
 interface ButtonConfig {
   label: string;
@@ -28,16 +22,26 @@ interface ButtonConfig {
   isPrimary?: boolean;
 }
 
-const ActionButton = ({
-  userId,
-  isDisabled,
-  networkRelationships,
-}: ActionButtonProps) => {
-  const router = useRouter();
-  const { actions } = useProfileActionButtons(userId);
+interface ActionButtonSelfProps {
+  type: "self";
+  userId: string;
+  isDisabled?: boolean;
+}
 
-  // Handle self-profile case
-  if (!userId) {
+interface ActionButtonOtherProps {
+  type: "other";
+  userId: string;
+  relationshipState: relationshipState;
+  isDisabled?: boolean;
+}
+
+type ActionButtonProps = ActionButtonSelfProps | ActionButtonOtherProps;
+
+const ActionButton = (props: ActionButtonProps) => {
+  const router = useRouter();
+  const { actions } = useProfileActionButtons(props.userId);
+
+  if (props.type === "self") {
     return (
       <XStack gap="$3">
         <Button
@@ -48,8 +52,8 @@ const ActionButton = ({
           borderWidth={1.5}
           borderRadius="$6"
           onPress={() => router.push("/edit-profile")}
-          disabled={isDisabled}
-          opacity={isDisabled ? 0.5 : 1}
+          disabled={props.isDisabled}
+          opacity={props.isDisabled ? 0.5 : 1}
         >
           Edit Profile
         </Button>
@@ -61,8 +65,8 @@ const ActionButton = ({
           color="white"
           borderRadius="$6"
           onPress={() => router.push("/share-profile")}
-          disabled={isDisabled}
-          opacity={isDisabled ? 0.5 : 1}
+          disabled={props.isDisabled}
+          opacity={props.isDisabled ? 0.5 : 1}
         >
           Share Profile
         </Button>
@@ -70,16 +74,7 @@ const ActionButton = ({
     );
   }
 
-  if (!networkRelationships) {
-    return (
-      <XStack gap="$3">
-        <Skeleton width="48%" height={44} radius="$6" />
-        <Skeleton width="48%" height={44} radius="$6" />
-      </XStack>
-    );
-  }
-
-  if (networkRelationships.isBlocked) {
+  if (props.relationshipState.isBlocked) {
     return (
       <XStack gap="$3">
         <Button
@@ -95,7 +90,7 @@ const ActionButton = ({
     );
   }
 
-  const { follow, friend } = networkRelationships;
+  const { follow, friend, privacy } = props.relationshipState;
 
   const buttonConfigs: Record<string, ButtonConfig> = {
     follow: {
@@ -153,7 +148,7 @@ const ActionButton = ({
     REQUESTED_REQUESTED: ["cancelFriendRequest"],
   };
 
-  const key = `${follow}_${friend}`;
+  const key = `${privacy}_${follow}_${friend}`;
   const buttonKeys = buttonCombinations[key] ?? [];
 
   return (
@@ -243,16 +238,14 @@ const useProfileActionButtons = (userId?: string) => {
     },
   });
 
-  const invalidateQueries = async (actionKey: string) => {
+  const invalidateQueries = (actionKey: string) => {
     if (!userId) return;
     setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: true }));
 
     try {
-      await Promise.all([
-        utils.profile.getRelationshipStatesBetweenUsers.invalidate({ userId }),
-        utils.profile.getProfile.invalidate({ userId }),
-        // utils.contacts.getProfileSuggestions.invalidate(),
-      ]);
+      void utils.profile.getRelationshipStatesBetweenUsers.invalidate({
+        userId,
+      });
     } finally {
       setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: false }));
     }
@@ -272,17 +265,20 @@ const useProfileActionButtons = (userId?: string) => {
   const actions = userId
     ? {
         follow: {
-          handler: () => void followUser.mutateAsync({ recipientUserId: userId }),
+          handler: () =>
+            void followUser.mutateAsync({ recipientUserId: userId }),
           loading: followUser.isPending || isInvalidatingByAction.follow,
           disabled: isAnyActionLoading,
         },
         unfollow: {
-          handler: () => void unfollowUser.mutateAsync({ recipientUserId: userId }),
+          handler: () =>
+            void unfollowUser.mutateAsync({ recipientUserId: userId }),
           loading: unfollowUser.isPending || isInvalidatingByAction.unfollow,
           disabled: isAnyActionLoading,
         },
         addFriend: {
-          handler: () => void addFriend.mutateAsync({ recipientUserId: userId }),
+          handler: () =>
+            void addFriend.mutateAsync({ recipientUserId: userId }),
           loading: addFriend.isPending || isInvalidatingByAction.addFriend,
           disabled: isAnyActionLoading,
         },
