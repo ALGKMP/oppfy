@@ -12,6 +12,7 @@ import { Notification, NotificationSettings, Profile } from "../../models";
 import {
   NotificationRepository,
   PaginateNotificationsParams,
+  PushTokenParams,
   UpdateNotificationSettingsParams,
 } from "../../repositories/user/notifications.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
@@ -37,6 +38,22 @@ export class NotificationService {
     @inject(TYPES.NotificationRepository)
     private readonly notificationRepository: NotificationRepository,
   ) {}
+
+  async storePushToken(params: PushTokenParams): Promise<Result<void, never>> {
+    await this.db.transaction(async (tx) => {
+      await this.notificationRepository.addPushToken(params, tx);
+    });
+
+    return ok();
+  }
+
+  async deletePushToken(params: PushTokenParams): Promise<Result<void, never>> {
+    await this.db.transaction(async (tx) => {
+      await this.notificationRepository.deletePushToken(params, tx);
+    });
+
+    return ok();
+  }
 
   async notificationSettings(
     userId: string,
