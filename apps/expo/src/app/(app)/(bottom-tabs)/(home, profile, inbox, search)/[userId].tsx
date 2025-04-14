@@ -32,18 +32,24 @@ const OtherProfile = () => {
 
   const {
     data: profileData,
-    isLoading: isLoadingProfile,
     refetch: refetchProfile,
+    isLoading: isLoadingProfile,
   } = api.profile.getProfile.useQuery({ userId: userId });
 
   const {
     data: profileStats,
-    isLoading: isLoadingProfileStats,
     refetch: refetchProfileStats,
+    isLoading: isLoadingProfileStats,
   } = api.profile.getStats.useQuery({ userId });
 
-  const { data: networkRelationships, refetch: refetchNetworkRelationships } =
-    api.profile.getRelationshipStatesBetweenUsers.useQuery({ userId });
+  const {
+    data: networkRelationships,
+    refetch: refetchNetworkRelationships,
+    isLoading: isLoadingRelationshipStates,
+  } = api.profile.getRelationshipStatesBetweenUsers.useQuery({ userId });
+
+  const isLoading =
+    isLoadingProfile || isLoadingProfileStats || isLoadingRelationshipStates;
 
   const {
     data: postsData,
@@ -144,10 +150,15 @@ const OtherProfile = () => {
     [viewableItems],
   );
 
-  const memoizedHeader = useMemo(
-    () => (
-      <YStack gap="$2" position="relative">
-        <Header
+  const memoizedHeader = () => (
+    <YStack gap="$2" position="relative">
+      <Header
+        type="self"
+        profile={profileData}
+        stats={profileStats}
+        isLoading={isLoading}
+      />
+      {/* <Header
           user={{
             id: userId,
             name: profileData?.name ?? params.name ?? null,
@@ -168,53 +179,38 @@ const OtherProfile = () => {
           createdAt={profileData?.createdAt}
           isLoading={isLoadingProfile}
           networkRelationships={networkRelationships}
-        />
-        {isLoadingProfile ? null : (
-          <>
-            {profileStats?.friends &&
-            profileStats.friends > 0 &&
-            !networkRelationships?.isBlocked ? (
-              <FriendCarousel
-                userId={userId}
-                username={profileData?.username ?? ""}
-                paddingHorizontal="$2.5"
-              />
-            ) : (
-              <RecommendationCarousel paddingHorizontal="$2.5" />
-            )}
-          </>
-        )}
-        {(isLoadingPostData || postItems.length > 0) && (
-          <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
-            Posts
-          </HeaderTitle>
-        )}
-        <Icon
-          name="chevron-back"
-          onPress={() => router.back()}
-          blurred
-          style={{
-            position: "absolute",
-            top: 12,
-            left: 12,
-          }}
-        />
-      </YStack>
-    ),
-    [
-      profileData,
-      profileStats,
-      isLoadingProfile,
-      isLoadingProfileStats,
-      isLoadingPostData,
-      postItems.length,
-      networkRelationships,
-      params.name,
-      params.username,
-      params.profilePictureUrl,
-      userId,
-      router,
-    ],
+        /> */}
+      {isLoadingProfile ? null : (
+        <>
+          {profileStats?.friends &&
+          profileStats.friends > 0 &&
+          !networkRelationships?.isBlocked ? (
+            <FriendCarousel
+              userId={userId}
+              username={profileData?.username ?? ""}
+              paddingHorizontal="$2.5"
+            />
+          ) : (
+            <RecommendationCarousel paddingHorizontal="$2.5" />
+          )}
+        </>
+      )}
+      {(isLoadingPostData || postItems.length > 0) && (
+        <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
+          Posts
+        </HeaderTitle>
+      )}
+      <Icon
+        name="chevron-back"
+        onPress={() => router.back()}
+        blurred
+        style={{
+          position: "absolute",
+          top: 12,
+          left: 12,
+        }}
+      />
+    </YStack>
   );
 
   const renderNoPosts = useCallback(() => {

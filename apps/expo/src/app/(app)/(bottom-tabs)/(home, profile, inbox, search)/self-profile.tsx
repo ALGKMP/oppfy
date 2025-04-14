@@ -31,22 +31,24 @@ const SelfProfile = () => {
 
   const {
     data: profileData,
-    isLoading: isLoadingProfile,
     refetch: refetchProfile,
+    isLoading: isLoadingProfile,
   } = api.profile.getProfile.useQuery({});
 
   const {
     data: profileStats,
-    isLoading: isLoadingProfileStats,
     refetch: refetchProfileStats,
+    isLoading: isLoadingProfileStats,
   } = api.profile.getStats.useQuery({});
+
+  const isLoading = isLoadingProfile || isLoadingProfileStats;
 
   const {
     data: postsData,
-    isLoading: isLoadingPostData,
     isFetchingNextPage,
     fetchNextPage,
     refetch: refetchPosts,
+    isLoading: isLoadingPostData,
     hasNextPage,
   } = api.post.paginatePosts.useInfiniteQuery(
     { pageSize: 10 },
@@ -69,9 +71,13 @@ const SelfProfile = () => {
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await Promise.all([refetchPosts(), refetchProfile()]);
+    await Promise.all([
+      refetchPosts(),
+      refetchProfile(),
+      refetchProfileStats(),
+    ]);
     setIsRefreshing(false);
-  }, [refetchPosts, refetchProfile]);
+  }, [refetchPosts, refetchProfile, refetchProfileStats]);
 
   const handleOnEndReached = useCallback(async () => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -156,67 +162,41 @@ const SelfProfile = () => {
     );
   }, [isLoadingPostData]);
 
-  const memoizedHeader = useMemo(
-    () => (
-      <YStack gap="$2" position="relative">
-        <Header
-          user={{
-            name: profileData?.name ?? null,
-            username: profileData?.username ?? "",
-            profilePictureUrl: profileData?.profilePictureUrl ?? null,
-            bio: profileData?.bio ?? null,
-            privacy: profileData?.privacy ?? "public",
+  const memoizedHeader = () => (
+    <YStack gap="$2" position="relative">
+      <Header
+        type="self"
+        profile={profileData}
+        stats={profileStats}
+        isLoading={isLoading}
+      />
+      {isLoadingProfile || isLoadingProfileStats ? null : (
+        <>
+          {profileStats?.friends && profileStats.friends > 0 ? (
+            <FriendCarousel paddingHorizontal="$2.5" />
+          ) : (
+            <RecommendationCarousel paddingHorizontal="$2.5" />
+          )}
+        </>
+      )}
+      {(isLoadingPostData || postItems.length > 0) && (
+        <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
+          Posts
+        </HeaderTitle>
+      )}
+      {isFirstInStack !== "yes" && (
+        <Icon
+          name="chevron-back"
+          onPress={() => router.back()}
+          blurred
+          style={{
+            position: "absolute",
+            top: 12,
+            left: 12,
           }}
-          stats={{
-            postCount: profileStats?.posts ?? 0,
-            followingCount: profileStats?.following ?? 0,
-            followerCount: profileStats?.followers ?? 0,
-            friendCount: profileStats?.friends ?? 0,
-          }}
-          createdAt={profileData?.createdAt}
-          isLoading={isLoadingProfile || isLoadingProfileStats}
         />
-        {isLoadingProfile || isLoadingProfileStats ? null : (
-          <>
-            {profileStats?.friends && profileStats.friends > 0 ? (
-              <FriendCarousel paddingHorizontal="$2.5" />
-            ) : (
-              <RecommendationCarousel paddingHorizontal="$2.5" />
-            )}
-          </>
-        )}
-        {(isLoadingPostData || postItems.length > 0) && (
-          <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
-            Posts
-          </HeaderTitle>
-        )}
-        {isFirstInStack !== "yes" && (
-          <Icon
-            name="chevron-back"
-            onPress={() => router.back()}
-            blurred
-            style={{
-              position: "absolute",
-              top: 12,
-              left: 12,
-            }}
-          />
-        )}
-      </YStack>
-    ),
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      profileData,
-      profileData?.profilePictureUrl,
-      profileStats,
-      isLoadingProfile,
-      isLoadingProfileStats,
-      isLoadingPostData,
-      postItems.length,
-      isFirstInStack,
-      router,
-    ],
+      )}
+    </YStack>
   );
 
   return (

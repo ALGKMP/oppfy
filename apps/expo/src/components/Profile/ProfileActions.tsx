@@ -5,7 +5,6 @@ import { Edit3, Share2, UserPlus, Users } from "@tamagui/lucide-icons";
 import { XStack } from "tamagui";
 
 import { Button } from "~/components/ui";
-import { Skeleton } from "~/components/ui/Skeleton";
 import { Spinner } from "~/components/ui/Spinner";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
@@ -24,14 +23,14 @@ interface ButtonConfig {
 
 interface ActionButtonSelfProps {
   type: "self";
-  userId: string;
+  userId: string | undefined;
   isDisabled?: boolean;
 }
 
 interface ActionButtonOtherProps {
   type: "other";
-  userId: string;
-  relationshipState: relationshipState;
+  userId: string | undefined;
+  relationshipState: relationshipState | undefined;
   isDisabled?: boolean;
 }
 
@@ -74,7 +73,7 @@ const ActionButton = (props: ActionButtonProps) => {
     );
   }
 
-  if (props.relationshipState.isBlocked) {
+  if (props.relationshipState?.isBlocked) {
     return (
       <XStack gap="$3">
         <Button
@@ -90,7 +89,7 @@ const ActionButton = (props: ActionButtonProps) => {
     );
   }
 
-  const { follow, friend, privacy } = props.relationshipState;
+  const { follow, friend, privacy } = props.relationshipState ?? {};
 
   const buttonConfigs: Record<string, ButtonConfig> = {
     follow: {

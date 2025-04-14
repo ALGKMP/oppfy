@@ -6,30 +6,24 @@ import { Text, XStack, YStack } from "tamagui";
 import { Skeleton } from "~/components/ui/Skeleton";
 import type { RouterOutputs } from "~/utils/api";
 
+type Profile = RouterOutputs["profile"]["getProfile"];
+type Stats = RouterOutputs["profile"]["getStats"];
 type RelationshipState =
   RouterOutputs["profile"]["getRelationshipStatesBetweenUsers"];
 
 interface StatsSelfProps {
   type: "self";
-  userId: string;
-  username: string | null | undefined;
-  postCount: number;
-  followingCount: number;
-  followerCount: number;
-  friendCount: number;
+  profile: Profile | undefined;
+  stats: Stats | undefined;
   isLoading: boolean;
 }
 
 interface StatsOtherProps {
   type: "other";
-  userId: string;
-  username: string | null | undefined;
-  postCount: number;
-  followingCount: number;
-  followerCount: number;
-  friendCount: number;
+  profile: Profile | undefined;
+  stats: Stats | undefined;
+  relationshipState: RelationshipState | undefined;
   isLoading: boolean;
-  relationshipState: RelationshipState;
 }
 
 type StatsProps = StatsSelfProps | StatsOtherProps;
@@ -38,9 +32,9 @@ const Stats = (props: StatsProps) => {
   const router = useRouter();
   const isDisabled =
     props.type === "other" &&
-    (props.relationshipState.isBlocked ||
-      (props.relationshipState.privacy === "PRIVATE" &&
-        props.relationshipState.follow !== "FOLLOWING"));
+    (props.relationshipState?.isBlocked ??
+      (props.relationshipState?.privacy === "PRIVATE" &&
+        props.relationshipState?.follow !== "FOLLOWING"));
 
   const navigateToSection = (section: string) => {
     const basePath =
@@ -49,7 +43,10 @@ const Stats = (props: StatsProps) => {
     router.push({
       pathname: `${basePath}/${section}`,
       ...(props.type === "other" && {
-        params: { userId: props.userId, username: props.username },
+        params: {
+          userId: props.profile?.userId,
+          username: props.profile?.username,
+        },
       }),
     } as Href);
   };
@@ -73,7 +70,7 @@ const Stats = (props: StatsProps) => {
       <TouchableOpacity disabled={true}>
         <StatItem
           label="Posts"
-          value={props.postCount}
+          value={props.stats?.posts ?? 0}
           isLoading={props.isLoading}
           disabled={isDisabled}
         />
@@ -84,7 +81,7 @@ const Stats = (props: StatsProps) => {
       >
         <StatItem
           label="Following"
-          value={props.followingCount}
+          value={props.stats?.following ?? 0}
           isLoading={props.isLoading}
           disabled={isDisabled}
         />
@@ -95,7 +92,7 @@ const Stats = (props: StatsProps) => {
       >
         <StatItem
           label="Followers"
-          value={props.followerCount}
+          value={props.stats?.followers ?? 0}
           isLoading={props.isLoading}
           disabled={isDisabled}
         />
@@ -106,7 +103,7 @@ const Stats = (props: StatsProps) => {
       >
         <StatItem
           label="Friends"
-          value={props.friendCount}
+          value={props.stats?.friends ?? 0}
           isLoading={props.isLoading}
           disabled={isDisabled}
         />

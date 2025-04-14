@@ -10,24 +10,21 @@ import { Button, useActionSheetController } from "~/components/ui";
 import { useBlockUser } from "~/hooks/useBlockUser";
 import useShare from "~/hooks/useShare";
 
+type Profile = RouterOutputs["profile"]["getProfile"];
 type RelationshipState =
   RouterOutputs["profile"]["getRelationshipStatesBetweenUsers"];
 
 interface QuickActionsSelfProps {
   type: "self";
-  userId: string;
-  username: string;
-  profilePictureUrl: string | null;
+  profile: Profile | undefined;
   isLoading: boolean;
 }
 
 interface QuickActionsOtherProps {
   type: "other";
-  userId: string;
-  username: string;
-  profilePictureUrl: string | null;
+  profile: Profile | undefined;
+  relationshipState: RelationshipState | undefined;
   isLoading: boolean;
-  relationshipState: RelationshipState;
 }
 
 type QuickActionsProps = QuickActionsSelfProps | QuickActionsOtherProps;
@@ -41,7 +38,7 @@ const QuickActions = (props: QuickActionsProps) => {
     handleBlockUser,
     handleUnblockUser,
     isLoading: isBlockActionLoading,
-  } = useBlockUser(props.userId);
+  } = useBlockUser(props.profile?.userId ?? "");
 
   if (props.type === "self") {
     return (
@@ -64,9 +61,9 @@ const QuickActions = (props: QuickActionsProps) => {
     void actionSheet.show({
       title: props.relationshipState?.isBlocked ? "Unblock User" : "Block User",
       subtitle: props.relationshipState?.isBlocked
-        ? `Are you sure you want to unblock ${props.username}?`
-        : `Are you sure you want to block ${props.username}?`,
-      imageUrl: props.profilePictureUrl ?? DefaultProfilePicture,
+        ? `Are you sure you want to unblock ${props.profile?.username}?`
+        : `Are you sure you want to block ${props.profile?.username}?`,
+      imageUrl: props.profile?.profilePictureUrl ?? DefaultProfilePicture,
       buttonOptions: [
         {
           text: props.relationshipState?.isBlocked ? "Unblock" : "Block",
@@ -91,7 +88,7 @@ const QuickActions = (props: QuickActionsProps) => {
         opacity={
           props.isLoading || props.relationshipState?.isBlocked ? 0.5 : 1
         }
-        onPress={() => shareProfile(props.username)}
+        onPress={() => shareProfile(props.profile?.username ?? "")}
       />
       <Button
         icon={<Ban size={20} color="$red11" />}
