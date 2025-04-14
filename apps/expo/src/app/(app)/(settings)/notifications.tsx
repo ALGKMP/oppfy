@@ -24,29 +24,20 @@ const Notifications = () => {
   const utils = api.useUtils();
 
   const { data: notificationSettings } =
-    api.notifications.getNotificationSettings.useQuery(undefined, {
-      initialData: {
-        likes: false,
-        posts: false,
-        comments: false,
-        mentions: false,
-        friendRequests: false,
-        followRequests: false,
-      },
-    });
+    api.notification.notificationSettings.useQuery();
 
   const updateNotificationSettings =
-    api.notifications.updateNotificationSettings.useMutation({
+    api.notification.updateNotificationSettings.useMutation({
       onMutate: async (newNotificationSettings) => {
         // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-        await utils.notifications.getNotificationSettings.cancel();
+        await utils.notification.notificationSettings.cancel();
 
         // Get the data from the queryCache
-        const prevData = utils.notifications.getNotificationSettings.getData();
+        const prevData = utils.notification.notificationSettings.getData();
         if (prevData === undefined) return;
 
         // Optimistically update the data
-        utils.notifications.getNotificationSettings.setData(undefined, {
+        utils.notification.notificationSettings.setData(undefined, {
           ...prevData,
           ...newNotificationSettings,
         });
@@ -58,14 +49,14 @@ const Notifications = () => {
         if (ctx === undefined) return;
 
         // If the mutation fails, use the context-value from onMutate
-        utils.notifications.getNotificationSettings.setData(
+        utils.notification.notificationSettings.setData(
           undefined,
           ctx.prevData,
         );
       },
       onSettled: async () => {
         // Sync with server once mutation has settled
-        await utils.notifications.getNotificationSettings.invalidate();
+        await utils.notification.notificationSettings.invalidate();
       },
     });
 

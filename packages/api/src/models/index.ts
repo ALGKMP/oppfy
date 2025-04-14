@@ -66,3 +66,6 @@ export type ProfileInsert = InferInsertModel<typeof schema.profile>;
 export type ProfileStatsInsert = InferInsertModel<typeof schema.userStats>;
 export type PostInsert = InferInsertModel<typeof schema.post>;
 export type PostStatsInsert = InferInsertModel<typeof schema.postStats>;
+export type NotificationSettingsInsert = InferInsertModel<
+  typeof schema.notificationSettings
+>;

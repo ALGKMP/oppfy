@@ -27,6 +27,33 @@ export const notificationRouter = createTRPCRouter({
     );
   }),
 
+  updateNotificationSettings: protectedProcedure
+    .input(
+      z.object({
+        likes: z.boolean(),
+        posts: z.boolean(),
+        comments: z.boolean(),
+        mentions: z.boolean(),
+        friendRequests: z.boolean(),
+        followRequests: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.services.notification.updateNotificationSettings(
+        {
+          userId: ctx.session.uid,
+          settings: input,
+        },
+      );
+
+      return result.match(
+        (res) => res,
+        (_) => {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        },
+      );
+    }),
+
   unreadNotificationsCount: protectedProcedure.query(async ({ ctx }) => {
     const result = await ctx.services.notification.unreadNotificationsCount(
       ctx.session.uid,

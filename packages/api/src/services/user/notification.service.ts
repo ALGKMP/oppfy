@@ -12,6 +12,7 @@ import { Notification, NotificationSettings, Profile } from "../../models";
 import {
   NotificationRepository,
   PaginateNotificationsParams,
+  UpdateNotificationSettingsParams,
 } from "../../repositories/user/notifications.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
@@ -54,6 +55,13 @@ export class NotificationService {
     }
 
     return ok(settings);
+  }
+
+  async updateNotificationSettings(
+    params: UpdateNotificationSettingsParams,
+  ): Promise<Result<void, never>> {
+    await this.notificationRepository.updateNotificationSettings(params);
+    return ok();
   }
 
   async unreadNotificationsCount(

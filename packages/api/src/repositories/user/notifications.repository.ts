@@ -17,11 +17,6 @@ import { UserIdParam } from "../../interfaces/types";
 import type { Notification, NotificationSettings, Profile } from "../../models";
 import { TYPES } from "../../symbols";
 
-export interface UpdateNotificationSettingsParams {
-  notificationSettingsId: string;
-  notificationSettings: NotificationSettings;
-}
-
 export interface PaginateNotificationsParams {
   userId: string;
   cursor?: { createdAt: Date; id: string };
@@ -37,6 +32,18 @@ export interface NotificationAndProfile {
 export interface PushTokenParams {
   userId: string;
   pushToken: string;
+}
+
+export interface UpdateNotificationSettingsParams {
+  userId: string;
+  settings: {
+    likes: boolean;
+    posts: boolean;
+    comments: boolean;
+    mentions: boolean;
+    friendRequests: boolean;
+    followRequests: boolean;
+  };
 }
 
 @injectable()
@@ -147,12 +154,12 @@ export class NotificationRepository {
     params: UpdateNotificationSettingsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const { notificationSettingsId, notificationSettings } = params;
+    const { userId, settings } = params;
 
     await db
       .update(this.schema.notificationSettings)
-      .set({ ...notificationSettings })
-      .where(eq(this.schema.notificationSettings.id, notificationSettingsId));
+      .set({ ...settings })
+      .where(eq(this.schema.notificationSettings.userId, userId));
   }
 
   async paginateNotifications(
