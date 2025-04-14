@@ -195,9 +195,9 @@ const Friends = () => {
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ItemSeparatorComponent={Spacer}
-      ListHeaderComponentStyle={
-        { marginBottom: getToken("$4", "space") } as number
-      }
+      ListHeaderComponentStyle={{
+        marginBottom: getToken("$4", "space") as number,
+      }}
       contentContainerStyle={{
         padding: getToken("$4", "space") as number,
       }}
