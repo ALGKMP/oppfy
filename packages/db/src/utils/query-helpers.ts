@@ -26,8 +26,6 @@ export const withOnboardingCompleted = <T extends PgSelect>(
         isNotNull(profileTable.name),
         isNotNull(profileTable.username),
         isNotNull(profileTable.dateOfBirth),
-        isNotNull(profileTable.bio),
-        isNotNull(profileTable.profilePictureKey),
       ),
     );
 };
@@ -55,9 +53,6 @@ export const withMultipleProfilesOnboardingCompleted = <T extends PgSelect>(
   const conditions = profileTables.flatMap((profileTable) => [
     isNotNull(profileTable.name),
     isNotNull(profileTable.username),
-    isNotNull(profileTable.dateOfBirth),
-    isNotNull(profileTable.bio),
-    isNotNull(profileTable.profilePictureKey),
   ]);
 
   // Add the onboarding completed condition once

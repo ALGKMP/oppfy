@@ -60,11 +60,6 @@ export const profileRouter = createTRPCRouter({
                 code: "NOT_FOUND",
                 message: "Profile not found",
               });
-            case "ProfilePrivateError":
-              throw new TRPCError({
-                code: "FORBIDDEN",
-                message: "Profile is private",
-              });
             case "ProfileBlockedError":
               throw new TRPCError({
                 code: "FORBIDDEN",

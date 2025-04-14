@@ -12,6 +12,7 @@ import {
   DirectionalUserIdsParams,
   PaginatedResponse,
   PaginationParams,
+  SelfOtherUserIdsParams,
 } from "../../interfaces/types";
 import { Profile } from "../../models";
 import { FollowRepository } from "../../repositories/social/follow.repository";
@@ -241,28 +242,26 @@ export class FollowService {
    * senderUserId is the user accepting (recipient of the request), recipientUserId is the requester.
    */
   async acceptFollowRequest({
-    senderUserId,
-    recipientUserId,
-  }: DirectionalUserIdsParams): Promise<
+    selfUserId,
+    otherUserId,
+  }: SelfOtherUserIdsParams): Promise<
     Result<void, FollowErrors.RequestNotFound>
   > {
     await this.db.transaction(async (tx) => {
       const isRequested = await this.followRepository.getFollowRequest(
-        { senderUserId: recipientUserId, recipientUserId: senderUserId },
+        { senderUserId: otherUserId, recipientUserId: selfUserId },
         tx,
       );
       if (!isRequested)
-        return err(
-          new FollowErrors.RequestNotFound(recipientUserId, senderUserId),
-        );
+        return err(new FollowErrors.RequestNotFound(selfUserId, otherUserId));
 
       await Promise.all([
         this.followRepository.deleteFollowRequest(
-          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          { senderUserId: otherUserId, recipientUserId: selfUserId },
           tx,
         ),
         this.followRepository.createFollower(
-          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          { senderUserId: otherUserId, recipientUserId: selfUserId },
           tx,
         ),
       ]);

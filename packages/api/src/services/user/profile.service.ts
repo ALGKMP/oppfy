@@ -73,7 +73,6 @@ export class ProfileService {
       Hydrate<Profile<"notOnApp"> | Profile<"onboarded">>,
       | ProfileErrors.ProfileBlocked
       | ProfileErrors.ProfileNotFound
-      | ProfileErrors.ProfilePrivate
     >
   > {
     if (otherUserId) {
@@ -94,18 +93,6 @@ export class ProfileService {
 
     if (profileData === undefined) {
       return err(new ProfileErrors.ProfileNotFound(otherUserId ?? selfUserId));
-    }
-
-    // Check privacy settings if its another profile
-    if (otherUserId && profileData.privacy === "private") {
-      const isFollowing = await this.followRepository.getFollower({
-        senderUserId: otherUserId,
-        recipientUserId: selfUserId,
-      });
-
-      if (!isFollowing) {
-        return err(new ProfileErrors.ProfilePrivate(otherUserId));
-      }
     }
 
     return ok(this.cloudfront.hydrateProfile(profileData));

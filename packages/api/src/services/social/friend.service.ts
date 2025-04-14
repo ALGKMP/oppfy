@@ -12,6 +12,7 @@ import {
   DirectionalUserIdsParams,
   PaginatedResponse,
   PaginationParams,
+  SelfOtherUserIdsParams,
 } from "../../interfaces/types";
 import { Profile } from "../../models";
 import { FollowRepository } from "../../repositories/social/follow.repository";
@@ -214,75 +215,77 @@ export class FriendService {
    * Accepts an incoming friend request, establishing a friendship and ensuring mutual follows.
    */
   async acceptFriendRequest({
-    senderUserId,
-    recipientUserId,
-  }: DirectionalUserIdsParams): Promise<
+    selfUserId,
+    otherUserId,
+  }: SelfOtherUserIdsParams): Promise<
     Result<void, FriendErrors.RequestNotFound>
   > {
     return await this.db.transaction(async (tx) => {
+      // Check that a friend request exists from `otherUserId` -> `selfUserId`
       const isRequested = await this.friendRepository.getFriendRequest(
-        { senderUserId, recipientUserId },
+        { senderUserId: otherUserId, recipientUserId: selfUserId },
         tx,
       );
       if (!isRequested) {
-        return err(
-          new FriendErrors.RequestNotFound(recipientUserId, senderUserId),
-        );
+        return err(new FriendErrors.RequestNotFound(selfUserId, otherUserId));
       }
 
+      // Delete that friend request and create the friend record
       await this.friendRepository.deleteFriendRequest(
-        { senderUserId, recipientUserId },
+        { senderUserId: otherUserId, recipientUserId: selfUserId },
         tx,
       );
       await this.friendRepository.createFriend(
-        { userIdA: senderUserId, userIdB: recipientUserId },
+        { userIdA: otherUserId, userIdB: selfUserId },
         tx,
       );
 
+      // Check if there are any follow requests both ways and remove them
       const [isFollowRequested, isRecipientFollowRequested] = await Promise.all(
         [
           this.followRepository.getFollowRequest(
-            { senderUserId, recipientUserId },
+            { senderUserId: otherUserId, recipientUserId: selfUserId },
             tx,
           ),
           this.followRepository.getFollowRequest(
-            { senderUserId, recipientUserId },
+            { senderUserId: selfUserId, recipientUserId: otherUserId },
             tx,
           ),
         ],
       );
       if (isFollowRequested) {
         await this.followRepository.deleteFollowRequest(
-          { senderUserId, recipientUserId },
+          { senderUserId: otherUserId, recipientUserId: selfUserId },
           tx,
         );
       }
       if (isRecipientFollowRequested) {
         await this.followRepository.deleteFollowRequest(
-          { senderUserId, recipientUserId },
+          { senderUserId: selfUserId, recipientUserId: otherUserId },
           tx,
         );
       }
 
+      // Ensure both are now following each other
       const [isFollowing, isRecipientFollowing] = await Promise.all([
         this.followRepository.getFollower(
-          { senderUserId, recipientUserId },
+          { senderUserId: otherUserId, recipientUserId: selfUserId },
           tx,
         ),
         this.followRepository.getFollower(
-          { senderUserId, recipientUserId },
+          { senderUserId: selfUserId, recipientUserId: otherUserId },
           tx,
         ),
       ]);
       if (!isFollowing) {
         await this.followRepository.createFollower(
-          { senderUserId, recipientUserId },
+          { senderUserId: otherUserId, recipientUserId: selfUserId },
           tx,
         );
       }
       if (!isRecipientFollowing) {
         await this.followRepository.createFollower(
-          { senderUserId, recipientUserId },
+          { senderUserId: selfUserId, recipientUserId: otherUserId },
           tx,
         );
       }
