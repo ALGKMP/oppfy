@@ -11,22 +11,59 @@ export type Privacy = "PUBLIC" | "PRIVATE";
 /**
  * Only include profiles of users who have completed onboarding
  */
-export const withOnboardingCompleted = <T extends PgSelect>(qb: T) => {
+export const withOnboardingCompleted = <T extends PgSelect>(
+  qb: T,
+  profileTable = schema.profile,
+) => {
   return qb
     .innerJoin(
       schema.userStatus,
-      eq(schema.userStatus.userId, schema.profile.userId),
+      eq(schema.userStatus.userId, profileTable.userId),
     )
     .where(
       and(
         eq(schema.userStatus.hasCompletedOnboarding, true),
-        isNotNull(schema.profile.name),
-        isNotNull(schema.profile.username),
-        isNotNull(schema.profile.dateOfBirth),
-        isNotNull(schema.profile.bio),
-        isNotNull(schema.profile.profilePictureKey),
+        isNotNull(profileTable.name),
+        isNotNull(profileTable.username),
+        isNotNull(profileTable.dateOfBirth),
+        isNotNull(profileTable.bio),
+        isNotNull(profileTable.profilePictureKey),
       ),
     );
+};
+
+/**
+ * Apply onboarding completed filter for multiple profile tables
+ * This is a specialized version that handles multiple profile tables
+ * without joining userStatus multiple times
+ */
+export const withMultipleProfilesOnboardingCompleted = <T extends PgSelect>(
+  qb: T,
+  profileTables: (typeof schema.profile)[],
+) => {
+  if (profileTables.length === 0) {
+    return qb;
+  }
+
+  // Join userStatus once with the first profile table
+  const result = qb.innerJoin(
+    schema.userStatus,
+    eq(schema.userStatus.userId, profileTables[0]!.userId),
+  );
+
+  // Add conditions for all profile tables
+  const conditions = profileTables.flatMap((profileTable) => [
+    isNotNull(profileTable.name),
+    isNotNull(profileTable.username),
+    isNotNull(profileTable.dateOfBirth),
+    isNotNull(profileTable.bio),
+    isNotNull(profileTable.profilePictureKey),
+  ]);
+
+  // Add the onboarding completed condition once
+  conditions.push(eq(schema.userStatus.hasCompletedOnboarding, true));
+
+  return result.where(and(...conditions));
 };
 
 /**

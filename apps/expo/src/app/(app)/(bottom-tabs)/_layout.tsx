@@ -8,9 +8,9 @@ import { Avatar, Icon, Text, View } from "~/components/ui";
 import { api } from "~/utils/api";
 
 const BottomTabsLayout = () => {
-  const { data: profileData } = api.profile.getProfileSelf.useQuery();
+  const { data: profileData } = api.profile.getProfile.useQuery({});
   const { data: unreadCount } =
-    api.notifications.getUnreadNotificationsCount.useQuery();
+    api.notification.unreadNotificationsCount.useQuery();
 
   const showBadge = (unreadCount ?? 0) > 0;
 
