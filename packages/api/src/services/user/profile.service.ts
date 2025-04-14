@@ -2,7 +2,11 @@ import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
 import { CloudFront, Hydrate } from "@oppfy/cloudfront";
-import { FollowStatus, FriendStatus } from "@oppfy/db/utils/query-helpers";
+import {
+  FollowStatus,
+  FriendStatus,
+  Privacy,
+} from "@oppfy/db/utils/query-helpers";
 import { env } from "@oppfy/env";
 import { S3 } from "@oppfy/s3";
 
@@ -22,6 +26,7 @@ import { TYPES } from "../../symbols";
 interface RelationshipState {
   follow: FollowStatus;
   friend: FriendStatus;
+  privacy: Privacy;
   isBlocked: boolean;
 }
 
@@ -149,6 +154,7 @@ export class ProfileService {
   ): Promise<
     Result<
       RelationshipState,
+      | ProfileErrors.ProfileNotFound
       | ProfileErrors.ProfileBlocked
       | ProfileErrors.CannotCheckRelationshipWithSelf
     >
@@ -159,20 +165,29 @@ export class ProfileService {
       return err(new ProfileErrors.CannotCheckRelationshipWithSelf());
     }
 
-    const isBlockedOutgoing = await this.blockRepository.getBlock({
-      senderUserId: selfUserId,
-      recipientUserId: otherUserId,
-    });
+    const [isBlockedOutgoing, isBlockedIncoming, privacy] = await Promise.all([
+      this.blockRepository.getBlock({
+        senderUserId: selfUserId,
+        recipientUserId: otherUserId,
+      }),
+      this.blockRepository.getBlock({
+        senderUserId: otherUserId,
+        recipientUserId: selfUserId,
+      }),
+      this.profileRepository.getPrivacy({
+        userId: otherUserId,
+      }),
+    ]);
 
-    const isBlockedIncoming = await this.blockRepository.getBlock({
-      senderUserId: otherUserId,
-      recipientUserId: selfUserId,
-    });
+    if (privacy === undefined) {
+      return err(new ProfileErrors.ProfileNotFound(otherUserId));
+    }
 
     if (isBlockedIncoming) {
       return ok({
         follow: "NOT_FOLLOWING",
         friend: "NOT_FRIENDS",
+        privacy: privacy === "private" ? "PRIVATE" : "PUBLIC",
         isBlocked: true,
       });
     }
@@ -195,9 +210,6 @@ export class ProfileService {
           senderUserId: selfUserId,
           recipientUserId: otherUserId,
         }),
-        this.profileRepository.getPrivacy({
-          userId: otherUserId,
-        }),
       ]);
 
     const followState = (
@@ -215,6 +227,7 @@ export class ProfileService {
     return ok({
       follow: followState,
       friend: friendState,
+      privacy: privacy === "private" ? "PRIVATE" : "PUBLIC",
       isBlocked: isBlockedOutgoing != undefined,
     });
   }

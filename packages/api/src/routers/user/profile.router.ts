@@ -162,6 +162,12 @@ export const profileRouter = createTRPCRouter({
         (res) => res,
         (err) => {
           switch (err.name) {
+            case "ProfileNotFoundError": {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Profile not found",
+              });
+            }
             case "ProfileBlockedError":
               throw new TRPCError({
                 code: "FORBIDDEN",
