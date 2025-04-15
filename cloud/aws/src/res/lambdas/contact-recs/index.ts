@@ -106,6 +106,7 @@ export const handler = async (
       ...requested,
       ...friend1s,
       ...friend2s,
+      userId
     ];
 
     console.log("People IDontWantToRecommend", peopleIDontWantToRecommend);

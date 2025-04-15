@@ -66,10 +66,13 @@ export class ProfileRepository {
         profile: this.schema.profile,
       })
       .from(this.schema.profile)
-      .where(inArray(this.schema.profile.userId, userIds))
-      .$dynamic();
+      .$dynamic()
 
-    query = withOnboardingCompleted(query);
+    // Use the withOnboardingCompleted helper function
+    query = withOnboardingCompleted(query, this.schema.profile);
+
+    // Apply the userIds filter
+    query = query.where(inArray(this.schema.profile.userId, userIds));
 
     const profiles = await query;
 
