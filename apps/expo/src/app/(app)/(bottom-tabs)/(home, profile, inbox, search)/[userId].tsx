@@ -149,7 +149,13 @@ const OtherProfile = () => {
     <YStack gap="$2" position="relative">
       <Header
         type="other"
-        profile={profile}
+        profile={{
+          ...profile,
+          username: profile?.username ?? params.username,
+          name: profile?.name ?? params.name,
+          profilePictureUrl:
+            profile?.profilePictureUrl ?? params.profilePictureUrl,
+        }}
         stats={profileStats}
         relationshipState={relationshipState}
         isLoading={isLoading}

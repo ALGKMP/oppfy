@@ -25,7 +25,7 @@ interface HeaderSelfProps {
 
 interface HeaderOtherProps {
   type: "other";
-  profile: Profile | undefined;
+  profile: Partial<Profile> | undefined;
   stats: ProfileStats | undefined;
   relationshipState: RelationshipState | undefined;
   isLoading: boolean;

@@ -16,13 +16,13 @@ type RelationshipState =
 
 interface QuickActionsSelfProps {
   type: "self";
-  profile: Profile | undefined;
+  profile: Partial<Profile> | undefined;
   isLoading: boolean;
 }
 
 interface QuickActionsOtherProps {
   type: "other";
-  profile: Profile | undefined;
+  profile: Partial<Profile> | undefined;
   relationshipState: RelationshipState | undefined;
   isLoading: boolean;
 }

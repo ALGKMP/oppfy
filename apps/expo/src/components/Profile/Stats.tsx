@@ -13,14 +13,14 @@ type RelationshipState =
 
 interface StatsSelfProps {
   type: "self";
-  profile: Profile | undefined;
+  profile: Partial<Profile> | undefined;
   stats: Stats | undefined;
   isLoading: boolean;
 }
 
 interface StatsOtherProps {
   type: "other";
-  profile: Profile | undefined;
+  profile: Partial<Profile> | undefined;
   stats: Stats | undefined;
   relationshipState: RelationshipState | undefined;
   isLoading: boolean;

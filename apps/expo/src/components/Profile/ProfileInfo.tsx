@@ -8,7 +8,7 @@ import type { RouterOutputs } from "~/utils/api";
 type Profile = RouterOutputs["profile"]["getProfile"];
 
 interface ProfileInfoProps {
-  profile: Profile | undefined;
+  profile: Partial<Profile> | undefined;
   isLoading: boolean;
 }
 
