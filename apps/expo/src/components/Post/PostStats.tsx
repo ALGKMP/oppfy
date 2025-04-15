@@ -11,7 +11,7 @@ import { Circle, getTokens, Text, XStack, YStack } from "tamagui";
 
 import CommentsBottomSheet from "~/components/Post/Comment/CommentsBottomSheet";
 import { useBottomSheetController } from "~/components/ui/BottomSheet";
-import { useLikePost } from "~/hooks/post/useLikePost";
+import { usePostInteractions } from "~/hooks/post/usePostInteractions";
 import useShare from "~/hooks/useShare";
 import { Icon } from "../ui";
 
@@ -92,20 +92,15 @@ const StatButton = ({
 
 const LikeAction = ({
   postId,
-  endpoint,
-  initialHasLiked,
-  count,
+  initialPostStats,
 }: {
   postId: string;
-  endpoint: PostStatsProps["endpoint"];
-  initialHasLiked: boolean;
-  count: number;
+  initialPostStats: PostStatsProps["stats"];
 }) => {
   const { buttonScale, animate } = useButtonAnimation();
-  const { handleLikePressed, hasLiked } = useLikePost({
+  const { handleLikePressed, postStats } = usePostInteractions({
     postId,
-    endpoint,
-    initialHasLiked,
+    initialPostStats,
   });
 
   const handlePress = () => {
@@ -114,12 +109,12 @@ const LikeAction = ({
   };
 
   return (
-    <StatButton count={count}>
+    <StatButton count={postStats.likes}>
       <Animated.View style={buttonScale}>
         <Icon
           name="heart"
           onPress={handlePress}
-          color={hasLiked ? "#ff3b30" : "white"}
+          color={postStats.hasLiked ? "#ff3b30" : "white"}
         />
       </Animated.View>
     </StatButton>
@@ -199,12 +194,7 @@ export const PostStats = ({
       zIndex={3}
       alignItems="flex-end"
     >
-      <LikeAction
-        postId={postId}
-        endpoint={endpoint}
-        initialHasLiked={stats.hasLiked}
-        count={stats.likes}
-      />
+      <LikeAction postId={postId} initialPostStats={stats} />
       <CommentAction
         postId={postId}
         endpoint={endpoint}

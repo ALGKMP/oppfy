@@ -8,17 +8,12 @@ import { getToken } from "tamagui";
 
 import { Circle, View } from "~/components/ui";
 import { useAudio } from "~/contexts/AudioContext";
-import { useLikePost } from "~/hooks/post/useLikePost";
+import { usePostInteractions } from "~/hooks/post/usePostInteractions";
 import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../Icons/Mute";
 import type { PostMediaProps } from "./types";
 
-export const PostVideo = ({
-  endpoint,
-  media,
-  stats,
-  isViewable,
-}: PostMediaProps) => {
+export const PostVideo = ({ media, stats, isViewable }: PostMediaProps) => {
   const videoRef = useRef<Video>(null);
   const { isMuted, toggleMute } = useAudio();
   const { muteIcons, addMute } = useMuteAnimations();
@@ -28,11 +23,9 @@ export const PostVideo = ({
   const [isPaused, setIsPaused] = useState(false);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
 
-  const { handleLikeDoubleTapped } = useLikePost({
+  const { handleLikeDoubleTapped } = usePostInteractions({
     postId: media.id,
-    endpoint,
-    userId: media.recipient.id,
-    initialHasLiked: stats.hasLiked,
+    initialPostStats: stats,
   });
 
   useFocusEffect(

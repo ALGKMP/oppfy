@@ -13,8 +13,9 @@ export interface PostMediaProps {
     };
   };
   stats: {
+    likes: number;
+    comments: number;
     hasLiked: boolean;
   };
-  endpoint: Endpoint;
   isViewable: boolean;
 }

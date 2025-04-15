@@ -7,7 +7,11 @@ import { Mux } from "@oppfy/mux";
 import { ImageContentType, S3 } from "@oppfy/s3";
 
 import * as PostErrors from "../../errors/content/post.error";
-import { Comment, Post, PostStats, Profile, User } from "../../models";
+import type {
+  PaginatedResponse,
+  PaginationParams,
+} from "../../interfaces/types";
+import { Comment, Post, PostStats } from "../../models";
 import { CommentRepository } from "../../repositories/content/comment.repository";
 import {
   PostRepository,
@@ -170,6 +174,34 @@ export class PostService {
       return err(new PostErrors.PostNotFound(params.postId));
 
     return ok(this.hydratePost(post));
+  }
+
+  async getPostStats(
+    params: GetPostParams,
+  ): Promise<Result<Omit<PostStats, "id" | "createdAt" | "updatedAt" | "postId"> & {
+    hasLiked: boolean;
+  }, PostErrors.PostNotFound>> {
+    const rawPost = await this.postRepository.getPost(params);
+    if (!rawPost) return err(new PostErrors.PostNotFound(params.postId));
+    return ok({
+      likes: rawPost.postStats.likes,
+      comments: rawPost.postStats.comments,
+      hasLiked: !!rawPost.like,
+    });
+  }
+
+  async getPostStats(
+    params: GetPostParams,
+  ): Promise<Result<Omit<PostStats, "id" | "createdAt" | "updatedAt" | "postId"> & {
+    hasLiked: boolean;
+  }, PostErrors.PostNotFound>> {
+    const rawPost = await this.postRepository.getPost(params);
+    if (!rawPost) return err(new PostErrors.PostNotFound(params.postId));
+    return ok({
+      likes: rawPost.postStats.likes,
+      comments: rawPost.postStats.comments,
+      hasLiked: !!rawPost.like,
+    });
   }
 
   async paginatePosts({

@@ -76,7 +76,7 @@ export const postInteractionRouter = createTRPCRouter({
       );
     }),
 
-  addComment: protectedProcedure
+  createComment: protectedProcedure
     .input(
       z.object({
         postId: z.string(),
@@ -109,7 +109,7 @@ export const postInteractionRouter = createTRPCRouter({
       );
     }),
 
-  removeComment: protectedProcedure
+  deleteComment: protectedProcedure
     .input(
       z.object({
         commentId: z.string(),
