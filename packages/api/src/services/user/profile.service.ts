@@ -2,6 +2,7 @@ import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
 import { CloudFront, Hydrate } from "@oppfy/cloudfront";
+import type { Database } from "@oppfy/db";
 import {
   FollowStatus,
   FriendStatus,
@@ -15,7 +16,7 @@ import { Profile, ProfileInsert, UserStats } from "../../models";
 import { BlockRepository } from "../../repositories/social/block.repository";
 import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
-import {../../types/typesrom "../../repositories/user/profile.repository";
+import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { TYPES } from "../../symbols";
 import {
   SelfOtherUserIdsParams,
@@ -48,6 +49,8 @@ interface GenerateProfilePicturePresignedUrlParams {
 @injectable()
 export class ProfileService {
   constructor(
+    @inject(TYPES.Database)
+    private readonly database: Database,
     @inject(TYPES.S3)
     private readonly s3: S3,
     @inject(TYPES.CloudFront)
@@ -286,30 +289,38 @@ export class ProfileService {
   /**
    * Generates a presigned URL for profile picture upload, restricted to the owner.
    */
-  async generateProfilePicturePresignedUrl(
-    params: GenerateProfilePicturePresignedUrlParams,
-  ): Promise<Result<string, never>> {
-    const { userId, contentLength } = params;
+  async generateProfilePicturePresignedUrl({
+    userId,
+    contentLength,
+  }: GenerateProfilePicturePresignedUrlParams): Promise<Result<string, never>> {
+    return await this.database.transaction(async (tx) => {
+      const key = `/profile-pictures/${userId}.jpg`;
 
-    const presignedUrl = await this.s3.createProfilePicturePresignedUrl({
-      userId,
-      contentLength,
+      await this.profileRepository.updateProfile(
+        {
+          userId,
+          update: {
+            profilePictureKey: key,
+          },
+        },
+        tx,
+      );
+
+      const presignedUrl = await this.s3.createProfilePicturePresignedUrl({
+        key,
+        contentLength,
+        contentType: "image/jpeg",
+        metadata: {
+          user: userId,
+        },
+      });
+
+      await this.cloudfront.createInvalidation(
+        env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
+        key,
+      );
+
+      return ok(presignedUrl);
     });
-
-    const key = `/profile-pictures/${userId}.jpg`;
-
-    await this.cloudfront.createInvalidation(
-      env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
-      key,
-    );
-
-    await this.profileRepository.updateProfile({
-      userId,
-      update: {
-        profilePictureKey: key,
-      },
-    });
-
-    return ok(presignedUrl);
   }
 }
