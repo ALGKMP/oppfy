@@ -26,7 +26,6 @@
   },
   "prettier": "@oppfy/prettier-config",
   "dependencies": {
-    "@config-plugins/ffmpeg-kit-react-native": "^9.0.0",
     "@expo-google-fonts/inter": "^0.2.3",
     "@expo-google-fonts/modak": "^0.2.3",
     "@expo/metro-config": "~0.19.0",
@@ -90,7 +89,6 @@
     "expo-video": "~2.0.2",
     "expo-video-thumbnails": "~9.0.2",
     "expo-web-browser": "~14.0.1",
-    "ffmpeg-kit-react-native": "^6.0.2",
     "fuse.js": "^7.0.0",
     "jwt-decode": "^4.0.0",
     "libphonenumber-js": "^1.10.61",
