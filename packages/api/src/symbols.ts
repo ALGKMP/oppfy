@@ -8,6 +8,7 @@ const TYPES = {
   CloudFront: Symbol.for("CloudFront"),
   Twilio: Symbol.for("Twilio"),
   Mux: Symbol.for("Mux"),
+  SQS: Symbol.for("SQS"),
 
   // Repositories
   ReportRepository: Symbol.for("ReportRepository"),

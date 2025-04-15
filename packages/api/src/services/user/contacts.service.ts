@@ -1,8 +1,10 @@
+import { createHash } from "crypto";
 import { inject, injectable } from "inversify";
 import { ok, Result } from "neverthrow";
 
 import { CloudFront, Hydrate } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
+import { SQS } from "@oppfy/sqs";
 
 import { UserIdParam } from "../../interfaces/types";
 import { Profile } from "../../models";
@@ -39,6 +41,7 @@ export class ContactsService {
     @inject(TYPES.ProfileRepository)
     private readonly profileRepository: ProfileRepository,
     @inject(TYPES.CloudFront) private readonly cloudfront: CloudFront,
+    @inject(TYPES.SQS) private readonly sqs: SQS,
   ) {}
 
   async filterPhoneNumbersOnApp({
@@ -81,6 +84,21 @@ export class ContactsService {
   ): Promise<Result<void, never>> {
     const { userId, hashedPhoneNumbers } = params;
 
+    const user = await this.userRepository.getUser({ userId });
+
+    if (!user) {
+      return ok(undefined);
+    }
+
+    const userPhoneNumber = user.phoneNumber;
+    const userPhoneNumberHash = createHash("sha512")
+      .update(userPhoneNumber)
+      .digest("hex");
+
+    const filteredContacts = params.hashedPhoneNumbers.filter(
+      (contact) => contact !== userPhoneNumberHash,
+    );
+
     await this.db.transaction(async (tx) => {
       // 1. Get current contacts
       const oldContacts = await this.contactsRepository.findUserContacts(
@@ -112,6 +130,13 @@ export class ContactsService {
         { userId, contactIds: contactsToAdd },
         tx,
       );
+
+      // 4. Send SQS message
+      await this.sqs.sendContactSyncMessage({
+        userId,
+        userPhoneNumberHash,
+        contacts: filteredContacts,
+      });
     });
 
     return ok(undefined);
