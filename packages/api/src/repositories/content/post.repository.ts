@@ -92,7 +92,6 @@ export class PostRepository {
     }: CreatePostParams,
     tx: Transaction,
   ): Promise<Post | undefined> {
-    // transaction to create post and post stats
     const [post] = await tx
       .insert(this.schema.post)
       .values({

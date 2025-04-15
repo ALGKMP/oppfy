@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Dimensions, FlatList } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { getToken, Text } from "tamagui";
+import { getToken } from "tamagui";
 
 import { UserCard } from "~/components/ui/UserCard";
 import useRouteProfile from "~/hooks/useRouteProfile";

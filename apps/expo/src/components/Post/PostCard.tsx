@@ -6,6 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import { Avatar, Skeleton, Text, View, XStack, YStack } from "~/components/ui";
 import useRouteProfile from "~/hooks/useRouteProfile";
+import { RouterOutputs } from "~/utils/api";
 import { FloatingComments } from "./FloatingComments";
 import MorePostOptionsButton from "./MorePostOptionsButton";
 import PostCaption from "./PostCaption";
@@ -14,51 +15,61 @@ import { PostImage } from "./PostImage";
 import { PostStats } from "./PostStats";
 import { PostVideo } from "./PostVideo";
 
-export interface Author {
-  id: string;
-  name: string;
-  username: string;
-  profilePictureUrl: string | null | undefined;
-}
+// export interface Author {
+//   id: string;
+//   name: string;
+//   username: string;
+//   profilePictureUrl: string | null | undefined;
+// }
 
-export interface Recipient {
-  id: string;
-  name: string;
-  username: string;
-  profilePictureUrl: string | null | undefined;
-}
+// export interface Recipient {
+//   id: string;
+//   name: string;
+//   username: string;
+//   profilePictureUrl: string | null | undefined;
+// }
 
-interface MediaDimensions {
-  width: number;
-  height: number;
-}
+// interface MediaDimensions {
+//   width: number;
+//   height: number;
+// }
 
-interface Media {
-  id: string;
-  type: "image" | "video";
-  url: string;
-  dimensions: MediaDimensions;
-  recipient: Recipient;
-}
+// interface Media {
+//   id: string;
+//   type: "image" | "video";
+//   url: string;
+//   dimensions: MediaDimensions;
+//   recipient: Recipient;
+// }
 
-interface Stats {
-  likes: number;
-  comments: number;
-  hasLiked: boolean;
-}
+// interface Stats {
+//   likes: number;
+//   comments: number;
+//   hasLiked: boolean;
+// }
 
-type Endpoint = "self-profile" | "other-profile" | "single-post" | "home-feed";
+// type Endpoint = "self-profile" | "other-profile" | "single-post" | "home-feed";
 
-export interface PostCardProps {
-  postId: string;
-  createdAt: Date;
-  caption: string;
-  author: Author;
-  recipient: Recipient;
-  media: Media;
-  stats: Stats;
-  endpoint: Endpoint;
-  isViewable: boolean;
+// export interface PostCardProps {
+//   postId: string;
+//   createdAt: Date;
+//   caption: string;
+//   author: Author;
+//   recipient: Recipient;
+//   media: Media;
+//   stats: Stats;
+//   endpoint: Endpoint;
+//   isViewable: boolean;
+// }
+
+type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
+type Profile = RouterOutputs["profile"]["getProfile"];
+type ProfileStats = RouterOutputs["profile"]["getStats"];
+
+interface PostCardProps {
+  post: Post;
+  authorProfile: Profile;
+  recipientProfile: Profile;
 }
 
 const PostCard = (props: PostCardProps) => {
@@ -66,7 +77,7 @@ const PostCard = (props: PostCardProps) => {
 
   return (
     <View borderRadius="$8" overflow="hidden">
-      {props.media.type === "image" ? (
+      {props.post.post.mediaType === "image" ? (
         <PostImage
           endpoint={props.endpoint}
           media={props.media}
