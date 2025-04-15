@@ -1,21 +1,16 @@
-import type { StyleProp, ViewStyle } from "react-native";
-import { TouchableOpacity } from "react-native";
-import { MoreHorizontal } from "@tamagui/lucide-icons";
-
 import {
   Icon,
   useActionSheetController,
   useAlertDialogController,
 } from "~/components/ui";
-import { usePostInteractions } from "~/hooks/post/usePostInteractions";
 import { useSaveMedia } from "~/hooks/post/useSaveMedia";
 import { useAuth } from "~/hooks/useAuth";
 import { useDeletePost } from "../../hooks/post/useDeletePost";
 import type { Author, Recipient } from "./PostCard";
+import { useReport } from "~/hooks/post/useReport";
 
 interface MorePostOptionsButtonProps {
   postId: string;
-  author: Author;
   recipient: Recipient;
   mediaUrl: string;
 }
@@ -23,12 +18,11 @@ interface MorePostOptionsButtonProps {
 const MorePostOptionsButton = ({
   mediaUrl,
   postId,
-  author,
   recipient,
 }: MorePostOptionsButtonProps) => {
   const { handleSavePost, isSaving } = useSaveMedia();
   const { handleDeletePost, isDeleting } = useDeletePost();
-  const { handleReportPost } = useReportPost(postId);
+  const { handleReportPost } = useReport({ postId });
 
   const { user } = useAuth();
   const { show: showAlert } = useAlertDialogController();
@@ -46,7 +40,7 @@ const MorePostOptionsButton = ({
         color: "$red9",
       },
       onPress: () => {
-        show({
+        void show({
           title: "Report Post",
           titleProps: {
             color: "$red9",
@@ -135,7 +129,7 @@ const MorePostOptionsButton = ({
     <Icon
       name="ellipsis-horizontal"
       onPress={() => {
-        show({
+        void show({
           title: "More Options",
           buttonOptions:
             user?.uid === recipient.id ? buttonOptionsSelf : buttonOptionsOther,

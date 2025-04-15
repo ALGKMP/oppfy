@@ -297,10 +297,6 @@ export const usePostInteractions = ({
     },
   });
 
-  const reportPost = api.report.reportPost.useMutation();
-
-  const reportCommentMutation = api.report.reportComment.useMutation();
-
   const loadMoreComments = async () => {
     if (commentsHasNextPage && !commentsIsFetchingNextPage) {
       await fetchNextCommentsPage();
@@ -313,16 +309,6 @@ export const usePostInteractions = ({
 
   const deleteComment = async (commentId: string) => {
     await deleteCommentMutation.mutateAsync({ postId, commentId });
-  };
-
-  const reportComment = async (commentId: string) => {
-    await reportCommentMutation.mutateAsync({ commentId, reason: "Other" });
-    toast.show("Comment Reported");
-  };
-
-  const handleReportPost = async (reason: ReportPostReason) => {
-    await reportPost.mutateAsync({ postId, reason });
-    toast.show("Post Reported");
   };
 
   const handleLikePressed = async () => {
@@ -371,7 +357,5 @@ export const usePostInteractions = ({
     loadMoreComments,
     postComment,
     deleteComment,
-    reportComment,
-    handleReportPost,
   };
 };
