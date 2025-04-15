@@ -65,9 +65,9 @@ const SelfProfile = () => {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await Promise.all([
-      refetchPosts(),
       refetchProfile(),
       refetchProfileStats(),
+      refetchPosts(),
     ]);
     setIsRefreshing(false);
   };

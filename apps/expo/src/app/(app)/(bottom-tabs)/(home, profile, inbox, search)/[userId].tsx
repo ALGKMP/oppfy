@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -77,9 +77,10 @@ const OtherProfile = () => {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await Promise.all([
-      refetchPosts(),
       refetchProfile(),
+      refetchProfileStats(),
       refetchRelationshipState(),
+      refetchPosts(),
     ]);
     setIsRefreshing(false);
   };
