@@ -5,7 +5,7 @@ import { Image } from "expo-image";
 import { getToken } from "tamagui";
 
 import { Circle, View } from "~/components/ui";
-import { usePostInteractions } from "~/hooks/post/useInteractWithPost";
+import { usePostInteractions } from "~/hooks/post/usePostInteractions";
 import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 import type { PostMediaProps } from "./types";
 

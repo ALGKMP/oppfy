@@ -11,7 +11,7 @@ import { Circle, getTokens, Text, XStack, YStack } from "tamagui";
 
 import CommentsBottomSheet from "~/components/Post/Comment/CommentsBottomSheet";
 import { useBottomSheetController } from "~/components/ui/BottomSheet";
-import { usePostInteractions } from "~/hooks/post/useInteractWithPost";
+import { usePostInteractions } from "~/hooks/post/usePostInteractions";
 import useShare from "~/hooks/useShare";
 import { Icon } from "../ui";
 

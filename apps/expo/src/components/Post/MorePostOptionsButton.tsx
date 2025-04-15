@@ -7,7 +7,7 @@ import {
   useActionSheetController,
   useAlertDialogController,
 } from "~/components/ui";
-import { usePostInteractions } from "~/hooks/post/useInteractWithPost";
+import { usePostInteractions } from "~/hooks/post/usePostInteractions";
 import { useSaveMedia } from "~/hooks/post/useSaveMedia";
 import { useAuth } from "~/hooks/useAuth";
 import { useDeletePost } from "../../hooks/post/useDeletePost";
