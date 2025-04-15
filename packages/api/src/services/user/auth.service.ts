@@ -7,11 +7,11 @@ import { env } from "@oppfy/env";
 import type { Twilio } from "@oppfy/twilio";
 import { RestException } from "@oppfy/twilio";
 
-import { UserRepository } from "..../../types/typesuser.repository";
 import * as AuthErrors from "../../errors/user/auth.error";
 import * as UserErrors from "../../errors/user/user.error";
+import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
-import { PhoneNumberParam } from "../../types";
+import type { PhoneNumberParam } from "../../types";
 
 const ADMIN_PHONE_NUMBERS = [
   "+16478852142",
@@ -19,7 +19,7 @@ const ADMIN_PHONE_NUMBERS = [
   "+16478852144",
   "+16475504668",
   "+14107628976",
-  "+14434104494"
+  "+14434104494",
 ];
 
 const ADMIN_CODE = "123456";

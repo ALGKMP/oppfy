@@ -7,7 +7,7 @@ import { FollowStatus } from "@oppfy/db/utils/query-helpers";
 
 import { NotificationSettingsNotFound } from "../../errors/user/notifications.error";
 import * as NotificationErrors from "../../errors/user/notifications.error";
-import { Notification, Notification../../types/typesom "../../models";
+import { Notification, NotificationSettings, Profile } from "../../models";
 import {
   NotificationRepository,
   PaginateNotificationsParams,
