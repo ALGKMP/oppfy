@@ -22,7 +22,7 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.post.uploadImagePost({
+      const result = await ctx.services.post.uploadImagePostForUserOnApp({
         authorUserId: ctx.session.uid,
         ...input,
       });
@@ -50,7 +50,7 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.post.uploadImagePostForUserNotOnAppUrl({
+      const result = await ctx.services.post.uploadImagePostForUserNotOnApp({
         authorUserId: ctx.session.uid,
         ...input,
       });
@@ -75,7 +75,7 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.post.uploadVideoPostForUserOnAppUrl({
+      const result = await ctx.services.post.uploadVideoPostForUserOnApp({
         authorUserId: ctx.session.uid,
         ...input,
       });
@@ -101,7 +101,7 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.post.uploadVideoPostForUserNotOnAppUrl({
+      const result = await ctx.services.post.uploadVideoPostForUserNotOnApp({
         authorUserId: ctx.session.uid,
         ...input,
       });
