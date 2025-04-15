@@ -5,21 +5,14 @@ import { Image } from "expo-image";
 import { getToken } from "tamagui";
 
 import { Circle, View } from "~/components/ui";
-import { useInteractWithPost } from "~/hooks/post/useInteractWithPost";
+import { usePostInteractions } from "~/hooks/post/useInteractWithPost";
 import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 import type { PostMediaProps } from "./types";
 
-export const PostImage = ({
-  endpoint,
-  media,
-  stats,
-  isViewable,
-}: PostMediaProps) => {
-  const { handleLikeDoubleTapped } = useInteractWithPost({
+export const PostImage = ({ media, stats }: PostMediaProps) => {
+  const { handleLikeDoubleTapped } = usePostInteractions({
     postId: media.id,
-    endpoint,
-    userId: media.recipient.id,
-    initialHasLiked: stats.hasLiked,
+    initialPostStats: stats,
   });
   const { hearts, addHeart } = useHeartAnimations();
   const [isImageLoading, setIsImageLoading] = useState(false);
@@ -34,7 +27,7 @@ export const PostImage = ({
   const handleDoubleTap = useCallback(
     (x: number, y: number) => {
       addHeart(x, y);
-      handleLikeDoubleTapped();
+      void handleLikeDoubleTapped();
     },
     [addHeart, handleLikeDoubleTapped],
   );

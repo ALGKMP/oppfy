@@ -7,10 +7,10 @@ import {
   useActionSheetController,
   useAlertDialogController,
 } from "~/components/ui";
+import { usePostInteractions } from "~/hooks/post/useInteractWithPost";
 import { useSaveMedia } from "~/hooks/post/useSaveMedia";
 import { useAuth } from "~/hooks/useAuth";
 import { useDeletePost } from "../../hooks/post/useDeletePost";
-import { useReportPost } from "../../hooks/post/useReportPost";
 import type { Author, Recipient } from "./PostCard";
 
 interface MorePostOptionsButtonProps {

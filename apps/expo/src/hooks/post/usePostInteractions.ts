@@ -1,9 +1,9 @@
 import { useRef } from "react";
 import { useToastController } from "@tamagui/toast";
+import type { ReportPostReason } from "node_modules/@oppfy/api/src/models";
 
 import { api } from "~/utils/api";
 import { useThrottleWithIncreaseDelay } from "./useThrottleWithIncreaseDelay";
-import type { ReportPostReason } from "node_modules/@oppfy/api/src/models";
 
 interface PostStats {
   likes: number;
@@ -16,7 +16,7 @@ interface InteractWithPostProps {
   initialPostStats: PostStats;
 }
 
-export const useInteractWithPost = ({
+export const usePostInteractions = ({
   postId,
   initialPostStats,
 }: InteractWithPostProps) => {
@@ -324,7 +324,6 @@ export const useInteractWithPost = ({
     await reportPost.mutateAsync({ postId, reason });
     toast.show("Post Reported");
   };
-
 
   const handleLikePressed = async () => {
     isLikingRef.current = true;
