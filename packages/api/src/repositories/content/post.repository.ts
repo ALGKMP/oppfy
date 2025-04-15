@@ -9,20 +9,11 @@ import type {
 } from "@oppfy/db";
 import {
   isLikedSql,
-  withMultipleProfilesOnboardingCompleted,
   withOnboardingCompleted,
 } from "@oppfy/db/utils/query-helpers";
 
 import { PaginationParams, PostIdParam } from "../../interfaces/types";
-import {
-  Like,
-  MediaType,
-  Post,
-  PostInsert,
-  PostStats,
-  PostStatus,
-  Profile,
-} from "../../models";
+import { Post, PostInsert, PostStats, Profile } from "../../models";
 import { TYPES } from "../../symbols";
 import { invariant } from "../../utils";
 
