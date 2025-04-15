@@ -22,18 +22,13 @@ export interface GetPostParams {
   userId: string;
 }
 
-export interface PaginatePostsParams extends PaginationParams {
-  userId: string;
-}
-
-export interface UpdatePostParams {
-  postId: string;
-  caption: string;
-}
-
 export interface DeletePostParams {
   userId: string;
   postId: string;
+}
+
+export interface PaginatePostsParams extends PaginationParams {
+  userId: string;
 }
 
 export interface PostResult<
@@ -197,16 +192,16 @@ export class PostRepository {
   }
 
   async updatePost(
-    { postId, caption }: UpdatePostParams,
+    values: PostInsert & { id: string },
     tx: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     await tx
       .update(this.schema.post)
       .set({
-        caption,
+        ...values,
         updatedAt: new Date(),
       })
-      .where(eq(this.schema.post.id, postId));
+      .where(eq(this.schema.post.id, values.id));
   }
 
   async deletePost(
