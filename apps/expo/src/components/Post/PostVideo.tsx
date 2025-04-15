@@ -8,7 +8,7 @@ import { getToken } from "tamagui";
 
 import { Circle, View } from "~/components/ui";
 import { useAudio } from "~/contexts/AudioContext";
-import { useLikePost } from "~/hooks/post/useLikePost";
+import { useInteractWithPost } from "~/hooks/post/useInteractWithPost";
 import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../Icons/Mute";
 import type { PostMediaProps } from "./types";
@@ -28,7 +28,7 @@ export const PostVideo = ({
   const [isPaused, setIsPaused] = useState(false);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
 
-  const { handleLikeDoubleTapped } = useLikePost({
+  const { handleLikeDoubleTapped } = useInteractWithPost({
     postId: media.id,
     endpoint,
     userId: media.recipient.id,

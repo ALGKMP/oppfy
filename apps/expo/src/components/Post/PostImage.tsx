@@ -5,7 +5,7 @@ import { Image } from "expo-image";
 import { getToken } from "tamagui";
 
 import { Circle, View } from "~/components/ui";
-import { useLikePost } from "~/hooks/post/useLikePost";
+import { useInteractWithPost } from "~/hooks/post/useInteractWithPost";
 import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 import type { PostMediaProps } from "./types";
 
@@ -15,7 +15,7 @@ export const PostImage = ({
   stats,
   isViewable,
 }: PostMediaProps) => {
-  const { handleLikeDoubleTapped } = useLikePost({
+  const { handleLikeDoubleTapped } = useInteractWithPost({
     postId: media.id,
     endpoint,
     userId: media.recipient.id,
