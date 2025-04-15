@@ -57,7 +57,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-font",
     "expo-router",
     "react-native-image-marker",
-    "@config-plugins/ffmpeg-kit-react-native",
     [
       "expo-splash-screen",
       {

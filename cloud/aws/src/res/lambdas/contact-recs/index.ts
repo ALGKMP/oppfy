@@ -63,28 +63,28 @@ export const handler = async (
 
     const requested = await db
       .select({
-        userId: schema.followRequest.recipientId,
+        userId: schema.followRequest.recipientUserId,
       })
       .from(schema.followRequest)
-      .where(eq(schema.followRequest.senderId, userId))
+      .where(eq(schema.followRequest.senderUserId, userId))
       .then((res) => res.map((r) => r.userId));
 
     const following = await db
-      .select({ userId: schema.follow.recipientId })
+      .select({ userId: schema.follow.recipientUserId })
       .from(schema.follow)
-      .where(eq(schema.follow.senderId, userId))
+      .where(eq(schema.follow.senderUserId, userId))
       .then((res) => res.map((r) => r.userId));
 
     const blocked = await db
-      .select({ userId: schema.block.blockedUserId })
+      .select({ userId: schema.block.recipientUserId })
       .from(schema.block)
-      .where(eq(schema.block.blockedByUserId, userId))
+      .where(eq(schema.block.senderUserId, userId))
       .then((res) => res.map((r) => r.userId));
 
     const blockedBy = await db
-      .select({ userId: schema.block.blockedByUserId })
+      .select({ userId: schema.block.senderUserId })
       .from(schema.block)
-      .where(eq(schema.block.blockedUserId, userId))
+      .where(eq(schema.block.recipientUserId, userId))
       .then((res) => res.map((r) => r.userId));
 
     const friend1s = await db
