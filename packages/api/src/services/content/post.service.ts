@@ -6,13 +6,13 @@ import { CloudFront, Hydrate } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { env } from "@oppfy/env";
 import { Mux } from "@oppfy/mux";
-import { S3 } from "@oppfy/s3";
+import { PostObjectKey, S3 } from "@oppfy/s3";
 
 import * as PostErrors from "../../errors/content/post.error";
 import { Comment, Post, PostStats, Profile } from "../../models";
 import { CommentRepository } from "../../repositories/content/comment.repository";
 import type { PaginatedCommentResult as RawPaginatedComment } from "../../repositories/content/comment.repository";
-import {../../types/types
+import {
   PostRepository,
   PostResult,
 } from "../../repositories/content/post.repository";
@@ -199,7 +199,8 @@ export class PostService {
         } else {
           const { contentLength, contentType } =
             params as UploadPostForUserOnAppUrlParams;
-          const objectKey = `posts/${currentDate}-${params.recipientUserId}-${params.authorUserId}.jpg`;
+          const objectKey =
+            `posts/${currentDate}-${params.recipientUserId}-${params.authorUserId}.jpg` satisfies PostObjectKey;
           const presignedUrl = await this.s3.putObjectPresignedUrl({
             Bucket: env.S3_POST_BUCKET,
             Key: objectKey,
@@ -263,7 +264,8 @@ export class PostService {
           } else {
             const { contentLength, contentType } =
               params as UploadPostForUserNotOnAppUrlParams;
-            const objectKey = `posts/${currentDate}-${recipientId}-${params.authorUserId}.jpg`;
+            const objectKey =
+              `posts/${currentDate}-${recipientId}-${params.authorUserId}.jpg` satisfies PostObjectKey;
             result = {
               presignedUrl: await this.s3.putObjectPresignedUrl({
                 Bucket: env.S3_POST_BUCKET,

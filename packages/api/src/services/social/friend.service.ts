@@ -13,7 +13,7 @@ import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
-import {../../types/types
+import {
   BidirectionalUserIdsparams,
   DirectionalUserIdsParams,
   PaginatedResponse,

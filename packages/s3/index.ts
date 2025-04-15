@@ -1,18 +1,14 @@
-import {
-  DeleteObjectCommand,
-  GetObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from "@aws-sdk/client-s3";
-import type {
-  GetObjectCommandInput,
-  PutObjectCommandInput,
-} from "@aws-sdk/client-s3/dist-types/commands";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { env } from "@oppfy/env";
 
 const FIVE_MINUTES = 300;
+
+export type ImageContentType = "image/jpeg" | "image/png" | "image/heic";
+export type VideoContentType = "video/mp4";
+
+export type PostObjectKey = `posts/${number}-${string}-${string}.jpg`;
 
 export class S3 {
   private client: S3Client;
@@ -27,67 +23,62 @@ export class S3 {
     });
   }
 
-  async putObjectPresignedUrl(
-    putObjectCommandInput: PutObjectCommandInput,
-  ): Promise<string> {
-    const command = new PutObjectCommand(putObjectCommandInput);
-    return await getSignedUrl(this.client, command, {
-      expiresIn: FIVE_MINUTES,
-    });
-  }
-
-  async getObjectPresignedUrl(
-    getObjectCommandInput: GetObjectCommandInput,
-  ): Promise<string> {
-    const command = new GetObjectCommand(getObjectCommandInput);
-    return await getSignedUrl(this.client, command, {
-      expiresIn: FIVE_MINUTES,
-    });
-  }
-
-  async deleteObject(bucket: string, key: string): Promise<void> {
-    const command = new DeleteObjectCommand({ Bucket: bucket, Key: key });
-    await this.client.send(command);
-  }
-
   async createPostPresignedUrl({
-    bucket,
-    objectKey,
+    authorUserId,
+    recipientUserId,
     contentLength,
     contentType,
     metadata,
   }: {
-    bucket: string;
-    objectKey: string;
+    authorUserId: string;
+    recipientUserId: string;
     contentLength: number;
-    contentType: "image/jpeg" | "image/png" | "image/heic";
-    metadata: Record<string, string>;
-  }): Promise<string> {
-    return await this.putObjectPresignedUrl({
-      Bucket: bucket,
-      Key: objectKey,
+    contentType: ImageContentType;
+    metadata: { postid: string };
+  }): Promise<{ presignedUrl: string; key: string }> {
+    const key =
+      `posts/${Date.now()}-${recipientUserId}-${authorUserId}.jpg` satisfies PostObjectKey;
+
+    const command = new PutObjectCommand({
+      Key: key,
+      Bucket: env.S3_POST_BUCKET,
       ContentLength: contentLength,
       ContentType: contentType,
       Metadata: metadata,
     });
+
+    const presignedUrl = await getSignedUrl(this.client, command, {
+      expiresIn: FIVE_MINUTES,
+    });
+
+    return { presignedUrl, key };
   }
 
   async createProfilePicturePresignedUrl({
     userId,
     contentLength,
+    contentType,
+    metadata,
   }: {
     userId: string;
+    metadata: { user: string };
     contentLength: number;
-  }): Promise<string> {
+    contentType: ImageContentType;
+  }): Promise<{ presignedUrl: string; key: string }> {
     const key = `profile-pictures/${userId}.jpg`;
-    const metadata = { user: userId };
 
-    return await this.putObjectPresignedUrl({
+    const command = new PutObjectCommand({
       Key: key,
       Bucket: env.S3_PROFILE_BUCKET,
       ContentLength: contentLength,
-      ContentType: "image/jpeg",
+      ContentType: contentType,
       Metadata: metadata,
     });
+
+    const presignedUrl = await getSignedUrl(this.client, command, {
+      expiresIn: FIVE_MINUTES,
+    });
+
+    return { presignedUrl, key };
   }
 }
