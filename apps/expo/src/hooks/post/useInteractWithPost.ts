@@ -3,6 +3,7 @@ import { useToastController } from "@tamagui/toast";
 
 import { api } from "~/utils/api";
 import { useThrottleWithIncreaseDelay } from "./useThrottleWithIncreaseDelay";
+import { ReportPostReason } from "node_modules/@oppfy/api/src/models";
 
 interface PostStats {
   likes: number;
@@ -298,6 +299,8 @@ export const useInteractWithPost = ({
     },
   });
 
+  const reportPost = api.report.reportPost.useMutation();
+
   const reportCommentMutation = api.report.reportComment.useMutation();
 
   const loadMoreComments = async () => {
@@ -318,6 +321,12 @@ export const useInteractWithPost = ({
     await reportCommentMutation.mutateAsync({ commentId, reason: "Other" });
     toast.show("Comment Reported");
   };
+
+  const handleReportPost = async (reason: ReportPostReason) => {
+    await reportPost.mutateAsync({ postId, reason });
+    toast.show("Post Reported");
+  };
+
 
   const handleLikePressed = async () => {
     isLikingRef.current = true;
@@ -366,5 +375,6 @@ export const useInteractWithPost = ({
     postComment,
     deleteComment,
     reportComment,
+    handleReportPost,
   };
 };
