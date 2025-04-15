@@ -13,7 +13,6 @@ const ProfileLayout = () => {
         options={{
           headerShown: false,
         }}
-        initialParams={{ isFirstInStack: "yes" }}
       />
     </Stack>
   );

@@ -1,7 +1,6 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
@@ -12,7 +11,7 @@ import FriendCarousel from "~/components/FriendCarousel";
 import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
-import { EmptyPlaceholder, HeaderTitle, Icon } from "~/components/ui";
+import { EmptyPlaceholder, HeaderTitle } from "~/components/ui";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -22,12 +21,7 @@ const SelfProfile = () => {
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
 
-  const router = useRouter();
   const insets = useSafeAreaInsets();
-
-  const { isFirstInStack } = useLocalSearchParams<{
-    isFirstInStack: "yes" | "no";
-  }>();
 
   const {
     data: profileData,
@@ -40,8 +34,6 @@ const SelfProfile = () => {
     refetch: refetchProfileStats,
     isLoading: isLoadingProfileStats,
   } = api.profile.getStats.useQuery({});
-
-  const isLoading = isLoadingProfile || isLoadingProfileStats;
 
   const {
     data: postsData,
@@ -60,16 +52,10 @@ const SelfProfile = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
-  const viewabilityConfig = useMemo(
-    () => ({ itemVisiblePercentThreshold: 40 }),
-    [],
-  );
-  const postItems = useMemo(
-    () => postsData?.pages.flatMap((page) => page.items) ?? [],
-    [postsData],
-  );
+  const isLoading = isLoadingProfile || isLoadingProfileStats;
+  const postItems = postsData?.pages.flatMap((page) => page.items) ?? [];
 
-  const handleRefresh = useCallback(async () => {
+  const handleRefresh = async () => {
     setIsRefreshing(true);
     await Promise.all([
       refetchPosts(),
@@ -77,71 +63,69 @@ const SelfProfile = () => {
       refetchProfileStats(),
     ]);
     setIsRefreshing(false);
-  }, [refetchPosts, refetchProfile, refetchProfileStats]);
+  };
 
-  const handleOnEndReached = useCallback(async () => {
+  const handleOnEndReached = async () => {
     if (hasNextPage && !isFetchingNextPage) {
       await fetchNextPage();
     }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  };
 
-  const onViewableItemsChanged = useCallback(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      const visibleItemIds = viewableItems
-        .filter((token) => token.isViewable)
-        .map((token) => (token.item as Post).post.id);
+  const onViewableItemsChanged = ({
+    viewableItems,
+  }: {
+    viewableItems: ViewToken[];
+  }) => {
+    const visibleItemIds = viewableItems
+      .filter((token) => token.isViewable)
+      .map((token) => (token.item as Post).post.id);
 
-      setViewableItems(visibleItemIds);
-    },
-    [],
-  );
+    setViewableItems(visibleItemIds);
+  };
 
-  const renderPost = useCallback(
-    ({ item }: { item: Post }) => (
-      <PostCard
-        postId={item.post.id}
-        endpoint="self-profile"
-        createdAt={item.post.createdAt}
-        caption={item.post.caption}
-        author={{
-          id: item.authorUserId,
-          name: item.authorName ?? "",
-          username: item.authorUsername ?? "",
-          profilePictureUrl: item.authorProfilePictureUrl,
-        }}
-        recipient={{
+  const renderPost = ({ item }: { item: Post }) => (
+    <PostCard
+      postId={item.post.id}
+      endpoint="self-profile"
+      createdAt={item.post.createdAt}
+      caption={item.post.caption}
+      author={{
+        id: item.authorUserId,
+        name: item.authorName ?? "",
+        username: item.authorUsername ?? "",
+        profilePictureUrl: item.authorProfilePictureUrl,
+      }}
+      recipient={{
+        id: item.recipientUserId,
+        name: item.recipientName ?? "",
+        username: item.recipientUsername,
+        profilePictureUrl: item.recipientProfilePictureUrl,
+      }}
+      media={{
+        id: item.post.id,
+        type: item.post.mediaType,
+        url: item.assetUrl,
+        dimensions: {
+          width: item.post.width,
+          height: item.post.height,
+        },
+        recipient: {
           id: item.recipientUserId,
           name: item.recipientName ?? "",
-          username: item.recipientUsername,
+          username: item.recipientUsername ?? "",
           profilePictureUrl: item.recipientProfilePictureUrl,
-        }}
-        media={{
-          id: item.post.id,
-          type: item.post.mediaType,
-          url: item.assetUrl,
-          dimensions: {
-            width: item.post.width,
-            height: item.post.height,
-          },
-          recipient: {
-            id: item.recipientUserId,
-            name: item.recipientName ?? "",
-            username: item.recipientUsername ?? "",
-            profilePictureUrl: item.recipientProfilePictureUrl,
-          },
-        }}
-        stats={{
-          likes: item.postStats.likes,
-          comments: item.postStats.comments,
-          hasLiked: item.hasLiked,
-        }}
-        isViewable={viewableItems.includes(item.post.id)}
-      />
-    ),
-    [viewableItems],
+        },
+      }}
+      stats={{
+        likes: item.postStats.likes,
+        comments: item.postStats.comments,
+        hasLiked: item.hasLiked,
+      }}
+      isViewable={viewableItems.includes(item.post.id)}
+    />
   );
 
-  const renderEmptyList = useCallback(() => {
+  const renderEmptyList = () => {
     if (isLoadingPostData) {
       return (
         <YStack gap="$4">
@@ -160,9 +144,9 @@ const SelfProfile = () => {
         />
       </View>
     );
-  }, [isLoadingPostData]);
+  };
 
-  const memoizedHeader = () => (
+  const renderHeader = () => (
     <YStack gap="$2" position="relative">
       <Header
         type="self"
@@ -170,6 +154,7 @@ const SelfProfile = () => {
         stats={profileStats}
         isLoading={isLoading}
       />
+
       {isLoadingProfile || isLoadingProfileStats ? null : (
         <>
           {profileStats?.friends && profileStats.friends > 0 ? (
@@ -179,22 +164,11 @@ const SelfProfile = () => {
           )}
         </>
       )}
+
       {(isLoadingPostData || postItems.length > 0) && (
         <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
           Posts
         </HeaderTitle>
-      )}
-      {isFirstInStack !== "yes" && (
-        <Icon
-          name="chevron-back"
-          onPress={() => router.back()}
-          blurred
-          style={{
-            position: "absolute",
-            top: 12,
-            left: 12,
-          }}
-        />
       )}
     </YStack>
   );
@@ -204,14 +178,14 @@ const SelfProfile = () => {
       ref={scrollRef}
       data={postItems}
       renderItem={renderPost}
-      ListHeaderComponent={memoizedHeader}
+      ListHeaderComponent={renderHeader}
       ListEmptyComponent={renderEmptyList}
       keyExtractor={(item) => `self-profile-post-${item.post.id}`}
       estimatedItemSize={664}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}
       onViewableItemsChanged={onViewableItemsChanged}
-      viewabilityConfig={viewabilityConfig}
+      viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
       extraData={viewableItems}
       ItemSeparatorComponent={() => <Spacer size="$4" />}
       ListHeaderComponentStyle={{

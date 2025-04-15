@@ -100,54 +100,48 @@ const OtherProfile = () => {
     [],
   );
 
-  const viewabilityConfig = useMemo(
-    () => ({ itemVisiblePercentThreshold: 40 }),
-    [],
-  );
+  const viewabilityConfig = () => ({ itemVisiblePercentThreshold: 40 });
 
-  const renderPost = useCallback(
-    ({ item }: { item: Post }) => (
-      <PostCard
-        postId={item.post.id}
-        endpoint="other-profile"
-        createdAt={item.post.createdAt}
-        caption={item.post.caption}
-        author={{
-          id: item.authorUserId,
-          name: item.authorName ?? "",
-          username: item.authorUsername ?? "",
-          profilePictureUrl: item.authorProfilePictureUrl,
-        }}
-        recipient={{
-          id: item.recipientUserId,
+  const renderPost = ({ item }: { item: Post }) => (
+    <PostCard
+      postId={item.post.id}
+      endpoint="other-profile"
+      createdAt={item.post.createdAt}
+      caption={item.post.caption}
+      author={{
+        id: item.authorUserId,
+        name: item.authorName ?? "",
+        username: item.authorUsername ?? "",
+        profilePictureUrl: item.authorProfilePictureUrl,
+      }}
+      recipient={{
+        id: item.recipientUserId,
+        name: item.recipientName ?? "",
+        username: item.recipientUsername ?? "",
+        profilePictureUrl: item.recipientProfilePictureUrl,
+      }}
+      media={{
+        id: item.post.id,
+        recipient: {
+          id: item.post.id,
           name: item.recipientName ?? "",
           username: item.recipientUsername ?? "",
           profilePictureUrl: item.recipientProfilePictureUrl,
-        }}
-        media={{
-          id: item.post.id,
-          recipient: {
-            id: item.post.id,
-            name: item.recipientName ?? "",
-            username: item.recipientUsername ?? "",
-            profilePictureUrl: item.recipientProfilePictureUrl,
-          },
-          type: item.post.mediaType,
-          url: item.assetUrl,
-          dimensions: {
-            width: item.post.width,
-            height: item.post.height,
-          },
-        }}
-        stats={{
-          likes: item.postStats.likes,
-          comments: item.postStats.comments,
-          hasLiked: item.hasLiked,
-        }}
-        isViewable={viewableItems.includes(item.post.id)}
-      />
-    ),
-    [viewableItems],
+        },
+        type: item.post.mediaType,
+        url: item.assetUrl,
+        dimensions: {
+          width: item.post.width,
+          height: item.post.height,
+        },
+      }}
+      stats={{
+        likes: item.postStats.likes,
+        comments: item.postStats.comments,
+        hasLiked: item.hasLiked,
+      }}
+      isViewable={viewableItems.includes(item.post.id)}
+    />
   );
 
   const memoizedHeader = () => (
@@ -159,28 +153,7 @@ const OtherProfile = () => {
         relationshipState={relationshipState}
         isLoading={isLoading}
       />
-      {/* <Header
-          user={{
-            id: userId,
-            name: profileData?.name ?? params.name ?? null,
-            username: profileData?.username ?? params.username ?? "",
-            profilePictureUrl:
-              profileData?.profilePictureUrl ??
-              params.profilePictureUrl ??
-              null,
-            bio: profileData?.bio ?? null,
-            privacy: profileData?.privacy ?? "public",
-          }}
-          stats={{
-            postCount: profileStats?.posts ?? 0,
-            followingCount: profileStats?.following ?? 0,
-            followerCount: profileStats?.followers ?? 0,
-            friendCount: profileStats?.friends ?? 0,
-          }}
-          createdAt={profileData?.createdAt}
-          isLoading={isLoadingProfile}
-          networkRelationships={networkRelationships}
-        /> */}
+
       {isLoadingProfile ? null : (
         <>
           {profileStats?.friends &&
@@ -196,11 +169,13 @@ const OtherProfile = () => {
           )}
         </>
       )}
+
       {(isLoadingPostData || postItems.length > 0) && (
         <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
           Posts
         </HeaderTitle>
       )}
+
       <Icon
         name="chevron-back"
         onPress={() => router.back()}
@@ -214,7 +189,7 @@ const OtherProfile = () => {
     </YStack>
   );
 
-  const renderNoPosts = useCallback(() => {
+  const renderNoPosts = () => {
     if (isLoadingPostData) {
       return (
         <YStack gap="$4">
@@ -257,7 +232,7 @@ const OtherProfile = () => {
         />
       </View>
     );
-  }, [isLoadingPostData, relationshipState]);
+  };
 
   return (
     <FlashList
