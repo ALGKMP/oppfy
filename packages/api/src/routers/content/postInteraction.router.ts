@@ -76,6 +76,34 @@ export const postInteractionRouter = createTRPCRouter({
       );
     }),
 
+  hasLiked: protectedProcedure
+    .input(z.object({ postId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.services.postInteraction.hasLiked({
+        postId: input.postId,
+        userId: ctx.session.uid,
+      });
+
+      return result.match(
+        (hasLiked) => hasLiked,
+        (err) => {
+          switch (err.name) {
+            case "PostNotFoundError":
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Post not found",
+              });
+            case "NotLikedError":
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Post not liked",
+              });
+          }
+        },
+      );
+    }),
+
+
   addComment: protectedProcedure
     .input(
       z.object({

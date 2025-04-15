@@ -97,6 +97,19 @@ export class PostInteractionService {
     return ok();
   }
 
+  async hasLiked({
+    postId,
+    userId,
+  }: LikePostParams): Promise<
+    Result<
+      boolean,
+      PostInteractionErrors.PostNotFound | PostInteractionErrors.NotLiked
+    >
+  > {
+    const existingLike = await this.likeRepository.getLike({ postId, userId });
+    return ok(existingLike !== null);
+  }
+
   async addComment({
     postId,
     userId,
