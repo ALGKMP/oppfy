@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFront } from "@oppfy/cloudfront";
+import { CloudFront, Hydrate } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { env } from "@oppfy/env";
 import { Mux } from "@oppfy/mux";
@@ -13,45 +13,16 @@ import type {
   PaginatedResponse,
   PaginationParams,
 } from "../../interfaces/types";
-import { Comment, Post, PostStats } from "../../models";
+import { Comment, Post, PostStats, Profile } from "../../models";
 import { CommentRepository } from "../../repositories/content/comment.repository";
 import type { PaginatedCommentResult as RawPaginatedComment } from "../../repositories/content/comment.repository";
-import { PostRepository } from "../../repositories/content/post.repository";
-import type {
-  PostResult as RawPostResult,
-  PostResultWithLike as RawPostResultWithoutLike,
+import {
+  PostRepository,
+  PostResult,
 } from "../../repositories/content/post.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
-
-interface HydratedAndProcessedPost {
-  post: Post;
-  assetUrl: string;
-  postStats: PostStats;
-  authorUserId: string;
-  authorUsername: string;
-  authorName: string | null;
-  authorProfilePictureUrl: string | null;
-  recipientUserId: string;
-  recipientUsername: string;
-  recipientName: string | null;
-  recipientProfilePictureUrl: string | null;
-  hasLiked: boolean;
-}
-
-type HydratedAndProcessedPostWithoutLike = Omit<
-  HydratedAndProcessedPost,
-  "hasLiked"
->;
-
-interface HydratedAndProcessedComment {
-  comment: Comment;
-  authorUserId: string;
-  authorUsername: string;
-  authorName: string | null;
-  authorProfilePictureUrl: string | null;
-}
 
 interface UploadPostForUserOnAppUrlParams {
   authorUserId: string;
@@ -120,6 +91,16 @@ interface PaginatePostsParams extends PaginationParams {
 
 interface PaginateCommentsParams extends PaginationParams {
   postId: string;
+}
+
+interface HydratedPostResult<
+  T extends "withIsLiked" | "withoutIsLiked" | undefined = undefined,
+> {
+  post: Hydrate<Post>;
+  postStats: PostStats;
+  authorProfile: Hydrate<Profile<"onboarded">>;
+  recipientProfile: Hydrate<Profile<"notOnApp">>;
+  isLiked: T extends "withIsLiked" ? boolean : undefined;
 }
 
 @injectable()
@@ -520,20 +501,18 @@ export class PostService {
 
   async getPostForNextJs(
     params: GetPostForNextJsParams,
-  ): Promise<
-    Result<HydratedAndProcessedPostWithoutLike, PostErrors.PostNotFound>
-  > {
-    const rawPost = await this.postRepository.getPostForSite(params);
-    if (!rawPost) return err(new PostErrors.PostNotFound(params.postId));
+  ): Promise<Result<HydratedPostResult, PostErrors.PostNotFound>> {
+    const post = await this.postRepository.getPostForSite(params);
 
-    const profile = await this.profileRepository.getProfile({
-      userId: rawPost.post.authorUserId,
-    });
-    if (!profile || profile.privacy !== "public") {
+    if (post === undefined)
       return err(new PostErrors.PostNotFound(params.postId));
-    }
 
-    return ok(this.hydrateAndProcessPostResultWithoutLike(rawPost));
+    if (post.recipientProfile.privacy === "private")
+      return err(new PostErrors.PostNotFound(params.postId));
+
+    const hydratedPost = this.hydratePost(post);
+
+    return ok(hydratedPost);
   }
 
   async paginateComments({
@@ -541,27 +520,43 @@ export class PostService {
     cursor,
     pageSize = 10,
   }: PaginateCommentsParams): Promise<
-    Result<PaginatedResponse<HydratedAndProcessedComment>, never>
+    Result<
+      PaginatedResponse<{ comment: Comment; profile: Profile<"onboarded"> }>,
+      never
+    >
   > {
-    const rawComments = await this.commentRepository.paginateComments({
+    const commentsAndProfiles = await this.commentRepository.paginateComments({
       postId,
       cursor,
       pageSize,
     });
-    const hydratedComments = rawComments.map((comment) =>
-      this.hydrateAndProcessComment(comment),
+
+    const hydratedCommentsAndProfiles = commentsAndProfiles.map(
+      ({ comment, profile }) => ({
+        comment,
+        profile: this.cloudfront.hydrateProfile(profile),
+      }),
     );
-    const lastComment = hydratedComments[pageSize - 1];
+
+    const hasMore = hydratedCommentsAndProfiles.length > pageSize;
+    const items = hydratedCommentsAndProfiles.slice(0, pageSize);
+    const lastItem = items[items.length - 1];
 
     return ok({
-      items: hydratedComments.slice(0, pageSize),
+      items,
       nextCursor:
-        rawComments.length > pageSize && lastComment
-          ? {
-              id: lastComment.comment.id,
-              createdAt: lastComment.comment.createdAt,
-            }
+        hasMore && lastItem
+          ? { id: lastItem.comment.id, createdAt: lastItem.comment.createdAt }
           : null,
     });
+  }
+
+  private hydratePost(post: PostResult): HydratedPostResult {
+    return {
+      ...post,
+      post: this.cloudfront.hydratePost(post.post),
+      authorProfile: this.cloudfront.hydrateProfile(post.authorProfile),
+      recipientProfile: this.cloudfront.hydrateProfile(post.recipientProfile),
+    };
   }
 }

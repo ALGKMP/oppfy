@@ -44,10 +44,10 @@ export class CloudFront {
     };
   }
 
-  hydratePost<T extends Post>(post: T): T & { postUrl: string } {
-    const postUrl = this.getPublicPostUrl(post.postKey);
+  hydratePost<T extends Post>(post: T): T & { assetUrl: string } {
+    const assetUrl = this.getPublicPostUrl(post.postKey);
 
-    return { ...post, postUrl };
+    return { ...post, assetUrl };
   }
 
   getProfilePictureUrl(objectKey: string): string {
