@@ -81,7 +81,7 @@ interface GetPostParams {
   userId: string;
 }
 
-interface GetPostForNextJsParams {
+interface GetPostForSiteParams {
   postId: string;
 }
 
@@ -499,8 +499,8 @@ export class PostService {
     });
   }
 
-  async getPostForNextJs(
-    params: GetPostForNextJsParams,
+  async getPostForSite(
+    params: GetPostForSiteParams,
   ): Promise<Result<HydratedPostResult, PostErrors.PostNotFound>> {
     const post = await this.postRepository.getPostForSite(params);
 

@@ -235,7 +235,7 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const result = await ctx.services.post.getPostForNextJs({
+      const result = await ctx.services.post.getPostForSite({
         postId: input.postId,
       });
 
