@@ -4,6 +4,7 @@ import { ok, Result } from "neverthrow";
 
 import { CloudFront, Hydrate } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
+import { FollowStatus } from "@oppfy/db/utils/query-helpers";
 import { SQS } from "@oppfy/sqs";
 
 import { UserIdParam } from "../../interfaces/types";
@@ -54,9 +55,16 @@ export class ContactsService {
     return ok(result);
   }
 
-  async getProfileRecommendations({
-    userId,
-  }: UserIdParam): Promise<Result<Hydrate<Profile<"onboarded">>[], never>> {
+  async getProfileRecommendations({ userId }: UserIdParam): Promise<
+    Result<
+      Hydrate<
+        Profile<"onboarded"> & {
+          followStatus: FollowStatus;
+        }
+      >[],
+      never
+    >
+  > {
     // Get recommendations from Lambda function
     const { tier1, tier2, tier3 } =
       await this.contactsRepository.getRecommendationIds({ userId });
@@ -72,7 +80,13 @@ export class ContactsService {
       userIds: allRecommendedUserIds,
     });
 
-    const hydratedProfiles = profiles.map((profile) =>
+    // set all to not following by default
+    const profilesWithFollowStatus = profiles.map((profile) => ({
+      ...profile,
+      followStatus: "NOT_FOLLOWING" as const satisfies FollowStatus,
+    }));
+
+    const hydratedProfiles = profilesWithFollowStatus.map((profile) =>
       this.cloudfront.hydrateProfile(profile),
     );
 

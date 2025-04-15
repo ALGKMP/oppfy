@@ -38,8 +38,8 @@ const Recommendations = () => {
           item.userId === newData.recipientUserId
             ? {
                 ...item,
-                relationshipStatus:
-                  item.privacy === "private" ? "requested" : "following",
+                followStatus:
+                  item.privacy === "public" ? "FOLLOWING" : "REQUESTED",
               }
             : item,
         ),
@@ -97,16 +97,18 @@ const Recommendations = () => {
           }
           actionButton={{
             label:
-              item.relationshipStatus === "following"
+              item.followStatus === "FOLLOWING"
                 ? "Following"
-                : item.relationshipStatus === "requested"
+                : item.followStatus === "REQUESTED"
                   ? "Requested"
                   : "Follow",
             onPress: () =>
-              void followMutation.mutateAsync({ userId: item.userId }),
+              void followMutation.mutateAsync({
+                recipientUserId: item.userId,
+              }),
             variant:
-              item.relationshipStatus === "following" ||
-              item.relationshipStatus === "requested"
+              item.followStatus === "FOLLOWING" ||
+              item.followStatus === "REQUESTED"
                 ? "outlined"
                 : "primary",
           }}
