@@ -10,6 +10,77 @@ import {
 } from "../../trpc";
 
 export const postRouter = createTRPCRouter({
+  getPostStats: protectedProcedure
+    .input(z.object({ postId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.services.post.getPostStats({
+        userId: ctx.session.uid,
+        postId: input.postId,
+      });
+
+      return result.match(
+        (res) => res,
+        (_) => {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+          });
+        },
+      );
+    }),
+
+  getPost: protectedProcedure
+    .input(
+      z.object({
+        postId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.services.post.getPost({
+        userId: ctx.session.uid,
+        postId: input.postId,
+      });
+
+      return result.match(
+        (res) => res,
+        (_) => {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+          });
+        },
+      );
+    }),
+
+  deletePost: protectedProcedure
+    .input(
+      z.object({
+        postId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.services.post.deletePost({
+        userId: ctx.session.uid,
+        postId: input.postId,
+      });
+
+      return result.match(
+        () => undefined,
+        (err) => {
+          switch (err.name) {
+            case "NotPostOwnerError":
+              throw new TRPCError({
+                code: "FORBIDDEN",
+                message: "You are not the owner of this post",
+              });
+            case "PostNotFoundError":
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Post not found",
+              });
+          }
+        },
+      );
+    }),
+
   uploadPostForUserOnAppUrl: protectedProcedure
     .input(
       z.object({
@@ -104,77 +175,6 @@ export const postRouter = createTRPCRouter({
       const result = await ctx.services.post.uploadVideoPostForUserNotOnApp({
         authorUserId: ctx.session.uid,
         ...input,
-      });
-
-      return result.match(
-        (res) => res,
-        (_) => {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-          });
-        },
-      );
-    }),
-
-  deletePost: protectedProcedure
-    .input(
-      z.object({
-        postId: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.post.deletePost({
-        userId: ctx.session.uid,
-        postId: input.postId,
-      });
-
-      return result.match(
-        () => undefined,
-        (err) => {
-          switch (err.name) {
-            case "NotPostOwnerError":
-              throw new TRPCError({
-                code: "FORBIDDEN",
-                message: "You are not the owner of this post",
-              });
-            case "PostNotFoundError":
-              throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "Post not found",
-              });
-          }
-        },
-      );
-    }),
-
-  getPost: protectedProcedure
-    .input(
-      z.object({
-        postId: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const result = await ctx.services.post.getPost({
-        userId: ctx.session.uid,
-        postId: input.postId,
-      });
-
-      return result.match(
-        (res) => res,
-        (_) => {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-          });
-        },
-      );
-    }),
-  
-  getPostStats: protectedProcedure
-    .input(z.object({ postId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const result = await ctx.services.post.getPostStats({
-        userId: ctx.session.uid,
-        postId: input.postId,
       });
 
       return result.match(
