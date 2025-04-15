@@ -7,11 +7,7 @@ import { Mux } from "@oppfy/mux";
 import { ImageContentType, S3 } from "@oppfy/s3";
 
 import * as PostErrors from "../../errors/content/post.error";
-import type {
-  PaginatedResponse,
-  PaginationParams,
-} from "../../interfaces/types";
-import { Comment, Post, PostStats } from "../../models";
+import { Comment, Post, PostStats, Profile } from "../../models";
 import { CommentRepository } from "../../repositories/content/comment.repository";
 import {
   PostRepository,
@@ -96,48 +92,52 @@ export class PostService {
     private readonly mux: Mux,
   ) {}
 
-  async uploadImagePostForUserOnApp(
-    params: BaseImagePostParams & BaseUserOnAppParams,
-  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
-    return ok(await this.uploadImagePost(params));
+  async getPostStats(params: GetPostParams): Promise<
+    Result<
+      PostStats & {
+        hasLiked: boolean;
+      },
+      PostErrors.PostNotFound
+    >
+  > {
+    const post = await this.postRepository.getPost(params);
+
+    if (post === undefined)
+      return err(new PostErrors.PostNotFound(params.postId));
+
+    return ok({
+      ...post.postStats,
+      hasLiked: !!post.isLiked,
+    });
   }
 
-  async uploadImagePostForUserNotOnApp(
-    params: BaseImagePostParams & BaseUserNotOnAppParams,
-  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
-    const recipientUser = await this.ensureRecipientUserExists(
-      params.recipientNotOnAppPhoneNumber,
-      params.recipientNotOnAppName,
-    );
+  async getPost(
+    params: GetPostParams,
+  ): Promise<
+    Result<HydratedPostResult<"withIsLiked">, PostErrors.PostNotFound>
+  > {
+    const post = await this.postRepository.getPost(params);
 
-    return ok(
-      await this.uploadImagePost({
-        ...params,
-        recipientUserId: recipientUser.id,
-      }),
-    );
+    if (post === undefined)
+      return err(new PostErrors.PostNotFound(params.postId));
+
+    return ok(this.hydratePost(post));
   }
 
-  async uploadVideoPostForUserOnApp(
-    params: BasePostParams & BaseUserOnAppParams,
-  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
-    return ok(await this.uploadVideoPost(params));
-  }
+  async getPostForSite(
+    params: GetPostForSiteParams,
+  ): Promise<Result<HydratedPostResult, PostErrors.PostNotFound>> {
+    const post = await this.postRepository.getPostForSite(params);
 
-  async uploadVideoPostForUserNotOnApp(
-    params: BasePostParams & BaseUserNotOnAppParams,
-  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
-    const recipientUser = await this.ensureRecipientUserExists(
-      params.recipientNotOnAppPhoneNumber,
-      params.recipientNotOnAppName,
-    );
+    if (post === undefined)
+      return err(new PostErrors.PostNotFound(params.postId));
 
-    return ok(
-      await this.uploadVideoPost({
-        ...params,
-        recipientUserId: recipientUser.id,
-      }),
-    );
+    if (post.recipientProfile.privacy === "private")
+      return err(new PostErrors.PostNotFound(params.postId));
+
+    const hydratedPost = this.hydratePost(post);
+
+    return ok(hydratedPost);
   }
 
   async deletePost(
@@ -163,44 +163,107 @@ export class PostService {
     return ok();
   }
 
-  async getPost(
-    params: GetPostParams,
-  ): Promise<
-    Result<HydratedPostResult<"withIsLiked">, PostErrors.PostNotFound>
-  > {
-    const post = await this.postRepository.getPost(params);
-
-    if (post === undefined)
-      return err(new PostErrors.PostNotFound(params.postId));
-
-    return ok(this.hydratePost(post));
+  async uploadImagePostForUserOnApp(
+    params: BaseImagePostParams & BaseUserOnAppParams,
+  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
+    return ok(await this.uploadImagePost(params));
   }
 
-  async getPostStats(
-    params: GetPostParams,
-  ): Promise<Result<Omit<PostStats, "id" | "createdAt" | "updatedAt" | "postId"> & {
-    hasLiked: boolean;
-  }, PostErrors.PostNotFound>> {
-    const rawPost = await this.postRepository.getPost(params);
-    if (!rawPost) return err(new PostErrors.PostNotFound(params.postId));
-    return ok({
-      likes: rawPost.postStats.likes,
-      comments: rawPost.postStats.comments,
-      hasLiked: !!rawPost.like,
+  async uploadImagePostForUserNotOnApp(
+    params: BaseImagePostParams & BaseUserNotOnAppParams,
+  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
+    return await this.db.transaction(async (tx) => {
+      const recipientUser = await this.userRepository.getUserByPhoneNumber({
+        phoneNumber: params.recipientNotOnAppPhoneNumber,
+      });
+
+      if (recipientUser) {
+        return ok(
+          await this.uploadImagePost({
+            ...params,
+            recipientUserId: recipientUser.id,
+          }),
+        );
+      }
+
+      const { user: createdRecipientUser } =
+        await this.userRepository.createUser(
+          {
+            phoneNumber: params.recipientNotOnAppPhoneNumber,
+            isOnApp: false,
+          },
+          tx,
+        );
+
+      await this.profileRepository.updateProfile(
+        {
+          userId: createdRecipientUser.id,
+          update: {
+            name: params.recipientNotOnAppName,
+            username: `${params.recipientNotOnAppName}-${Math.random().toString(36).substring(2, 15)}`,
+          },
+        },
+        tx,
+      );
+
+      return ok(
+        await this.uploadImagePost({
+          ...params,
+          recipientUserId: createdRecipientUser.id,
+        }),
+      );
     });
   }
 
-  async getPostStats(
-    params: GetPostParams,
-  ): Promise<Result<Omit<PostStats, "id" | "createdAt" | "updatedAt" | "postId"> & {
-    hasLiked: boolean;
-  }, PostErrors.PostNotFound>> {
-    const rawPost = await this.postRepository.getPost(params);
-    if (!rawPost) return err(new PostErrors.PostNotFound(params.postId));
-    return ok({
-      likes: rawPost.postStats.likes,
-      comments: rawPost.postStats.comments,
-      hasLiked: !!rawPost.like,
+  async uploadVideoPostForUserOnApp(
+    params: BasePostParams & BaseUserOnAppParams,
+  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
+    return ok(await this.uploadVideoPost(params));
+  }
+
+  async uploadVideoPostForUserNotOnApp(
+    params: BasePostParams & BaseUserNotOnAppParams,
+  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
+    return await this.db.transaction(async (tx) => {
+      const recipientUser = await this.userRepository.getUserByPhoneNumber({
+        phoneNumber: params.recipientNotOnAppPhoneNumber,
+      });
+
+      if (recipientUser) {
+        return ok(
+          await this.uploadVideoPost({
+            ...params,
+            recipientUserId: recipientUser.id,
+          }),
+        );
+      }
+
+      const { user: createdRecipientUser } =
+        await this.userRepository.createUser(
+          {
+            phoneNumber: params.recipientNotOnAppPhoneNumber,
+            isOnApp: false,
+          },
+          tx,
+        );
+
+      await this.profileRepository.updateProfile(
+        {
+          userId: createdRecipientUser.id,
+          update: {
+            name: params.recipientNotOnAppName,
+            username: `${params.recipientNotOnAppName}-${Math.random().toString(36).substring(2, 15)}`,
+          },
+        },
+        tx,
+      );
+
+      return ok(
+        await this.uploadVideoPost({
+          ...params,
+          recipientUserId: createdRecipientUser.id,
+        }),
+      );
     });
   }
 
@@ -260,22 +323,6 @@ export class PostService {
           ? { id: lastItem.post.id, createdAt: lastItem.post.createdAt }
           : null,
     });
-  }
-
-  async getPostForSite(
-    params: GetPostForSiteParams,
-  ): Promise<Result<HydratedPostResult, PostErrors.PostNotFound>> {
-    const post = await this.postRepository.getPostForSite(params);
-
-    if (post === undefined)
-      return err(new PostErrors.PostNotFound(params.postId));
-
-    if (post.recipientProfile.privacy === "private")
-      return err(new PostErrors.PostNotFound(params.postId));
-
-    const hydratedPost = this.hydratePost(post);
-
-    return ok(hydratedPost);
   }
 
   async paginateComments({
@@ -339,40 +386,6 @@ export class PostService {
       });
 
       return { presignedUrl, postId: post.id };
-    });
-  }
-
-  private async ensureRecipientUserExists(
-    phoneNumber: string,
-    name: string,
-  ): Promise<User> {
-    return await this.db.transaction(async (tx) => {
-      const user = await this.userRepository.getUserByPhoneNumber(
-        { phoneNumber },
-        tx,
-      );
-
-      if (user) return user;
-
-      const { user: createdUser } = await this.userRepository.createUser(
-        {
-          phoneNumber,
-          isOnApp: false,
-        },
-        tx,
-      );
-      await this.profileRepository.updateProfile(
-        {
-          userId: createdUser.id,
-          update: {
-            name,
-            username: `${name}-${Math.random().toString(36).substring(2, 15)}`,
-          },
-        },
-        tx,
-      );
-
-      return createdUser;
     });
   }
 
