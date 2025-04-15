@@ -459,13 +459,14 @@ export class PostService {
 
   async getPostStats(
     params: GetPostParams,
-  ): Promise<Result<PostStats & {
+  ): Promise<Result<Omit<PostStats, "id" | "createdAt" | "updatedAt" | "postId"> & {
     hasLiked: boolean;
   }, PostErrors.PostNotFound>> {
     const rawPost = await this.postRepository.getPost(params);
     if (!rawPost) return err(new PostErrors.PostNotFound(params.postId));
     return ok({
-      ...rawPost.postStats,
+      likes: rawPost.postStats.likes,
+      comments: rawPost.postStats.comments,
       hasLiked: !!rawPost.like,
     });
   }
