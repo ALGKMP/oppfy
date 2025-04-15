@@ -197,7 +197,7 @@ export class PostRepository {
     const query = this.baseQuery(userId, tx);
 
     const whereClause = and(
-      eq(this.schema.post.authorUserId, userId),
+      eq(this.schema.post.recipientUserId, userId),
       cursor
         ? or(
             lt(this.schema.post.createdAt, cursor.createdAt),
