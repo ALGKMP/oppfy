@@ -55,7 +55,7 @@ const useUploadMedia = () => {
         input.type === "onApp"
           ? await createVideoPresignedUrlForUserOnApp.mutateAsync({
               ...baseData,
-              recipient: input.recipient,
+              recipientUserId: input.recipient,
             })
           : await createVideoPresignedUrlForUserNotOnApp.mutateAsync({
               ...baseData,
@@ -106,7 +106,7 @@ const useUploadMedia = () => {
         input.type === "onApp"
           ? await createImagePresignedUrlForUserOnApp.mutateAsync({
               ...baseData,
-              recipient: input.recipient,
+              recipientUserId: input.recipient,
             })
           : await createImagePresignedUrlForUserNotOnApp.mutateAsync({
               ...baseData,
