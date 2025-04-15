@@ -24,20 +24,20 @@ export const useOptimisticUpdatePost = () => {
   }: IncrementLikeCountProps) => {
     switch (endpoint) {
       case "self-profile": {
-        await utils.post.paginatePostsOfUserSelf.cancel();
-        const prevData = utils.post.paginatePostsOfUserSelf.getInfiniteData({
+        await utils.post.paginatePosts.cancel();
+        const prevData = utils.post.paginatePosts.getInfiniteData({
           pageSize: 10,
         });
         if (!prevData) return;
-        utils.post.paginatePostsOfUserSelf.setInfiniteData(
+        utils.post.paginatePosts.setInfiniteData(
           { pageSize: 10 },
           {
             ...prevData,
             pages: prevData.pages.map((page) => ({
               ...page,
               items: page.items.map((item) =>
-                item.postId === postId
-                  ? { ...item, likesCount: item.likesCount + changeCountBy }
+                item.post.id === postId
+                  ? { ...item, likesCount: item.postStats.likes + changeCountBy }
                   : item,
               ),
             })),
@@ -48,21 +48,27 @@ export const useOptimisticUpdatePost = () => {
 
       case "other-profile": {
         if (!userId) return;
-        await utils.post.paginatePostsOfUserOther.cancel();
-        const prevData = utils.post.paginatePostsOfUserOther.getInfiniteData({
+        await utils.post.paginatePosts.cancel();
+        const prevData = utils.post.paginatePosts.getInfiniteData({
           userId,
           pageSize: 10,
         });
         if (!prevData) return;
-        utils.post.paginatePostsOfUserOther.setInfiniteData(
+        utils.post.paginatePosts.setInfiniteData(
           { userId, pageSize: 10 },
           {
             ...prevData,
             pages: prevData.pages.map((page) => ({
               ...page,
               items: page.items.map((item) =>
-                item.postId === postId
-                  ? { ...item, likesCount: item.likesCount + changeCountBy }
+                item.post.id === postId
+                    ? {
+                      ...item,
+                      postStats: {
+                        ...item.postStats,
+                        likes: item.postStats.likes + changeCountBy,
+                      },
+                    }
                   : item,
               ),
             })),
@@ -77,7 +83,13 @@ export const useOptimisticUpdatePost = () => {
         if (!prevData) return;
         utils.post.getPost.setData(
           { postId },
-          { ...prevData, likesCount: prevData.likesCount + changeCountBy },
+          {
+            ...prevData,
+            postStats: {
+              ...prevData.postStats,
+              likes: prevData.postStats.likes + changeCountBy,
+            },
+          },
         );
         break;
       }
@@ -95,8 +107,14 @@ export const useOptimisticUpdatePost = () => {
             pages: prevData.pages.map((page) => ({
               ...page,
               items: page.items.map((item) =>
-                item.postId === postId
-                  ? { ...item, likesCount: item.likesCount + changeCountBy }
+                item.post.id === postId
+                  ? {
+                      ...item,
+                      postStats: {
+                        ...item.postStats,
+                        likes: item.postStats.likes + changeCountBy,
+                      },
+                    }
                   : item,
               ),
             })),
@@ -114,22 +132,25 @@ export const useOptimisticUpdatePost = () => {
   }: IncrementLikeCountProps) => {
     switch (endpoint) {
       case "self-profile": {
-        await utils.post.paginatePostsOfUserSelf.cancel();
-        const prevData = utils.post.paginatePostsOfUserSelf.getInfiniteData({
+        await utils.post.paginatePosts.cancel();
+        const prevData = utils.post.paginatePosts.getInfiniteData({
           pageSize: 10,
         });
         if (!prevData) return;
-        utils.post.paginatePostsOfUserSelf.setInfiniteData(
+        utils.post.paginatePosts.setInfiniteData(
           { pageSize: 10 },
           {
             ...prevData,
             pages: prevData.pages.map((page) => ({
               ...page,
               items: page.items.map((item) =>
-                item.postId === postId
+                item.post.id === postId
                   ? {
                       ...item,
-                      commentsCount: item.commentsCount + changeCountBy,
+                      postStats: {
+                        ...item.postStats,
+                        comments: item.postStats.comments + changeCountBy,
+                      },
                     }
                   : item,
               ),
@@ -140,23 +161,26 @@ export const useOptimisticUpdatePost = () => {
       }
       case "other-profile": {
         if (!userId) return;
-        await utils.post.paginatePostsOfUserOther.cancel();
-        const prevData = utils.post.paginatePostsOfUserOther.getInfiniteData({
+        await utils.post.paginatePosts.cancel();
+        const prevData = utils.post.paginatePosts.getInfiniteData({
           userId,
           pageSize: 10,
         });
         if (!prevData) return;
-        utils.post.paginatePostsOfUserOther.setInfiniteData(
+        utils.post.paginatePosts.setInfiniteData(
           { userId, pageSize: 10 },
           {
             ...prevData,
             pages: prevData.pages.map((page) => ({
               ...page,
               items: page.items.map((item) =>
-                item.postId === postId
+                item.post.id === postId
                   ? {
                       ...item,
-                      commentsCount: item.commentsCount + changeCountBy,
+                      postStats: {
+                        ...item.postStats,
+                        comments: item.postStats.comments + changeCountBy,
+                      },
                     }
                   : item,
               ),
@@ -174,7 +198,10 @@ export const useOptimisticUpdatePost = () => {
           { postId },
           {
             ...prevData,
-            commentsCount: prevData.commentsCount + changeCountBy,
+            postStats: {
+              ...prevData.postStats,
+              comments: prevData.postStats.comments + changeCountBy,
+            },
           },
         );
         break;
@@ -192,10 +219,13 @@ export const useOptimisticUpdatePost = () => {
             pages: prevData.pages.map((page) => ({
               ...page,
               items: page.items.map((item) =>
-                item.postId === postId
+                item.post.id === postId
                   ? {
                       ...item,
-                      commentsCount: item.commentsCount + changeCountBy,
+                      postStats: {
+                        ...item.postStats,
+                        comments: item.postStats.comments + changeCountBy,
+                      },
                     }
                   : item,
               ),
@@ -217,13 +247,13 @@ export const useOptimisticUpdatePost = () => {
   }) => {
     switch (endpoint) {
       case "self-profile":
-        await utils.post.paginatePostsOfUserSelf.invalidate({
+        await utils.post.paginatePosts.invalidate({
           pageSize: 10,
         });
         break;
       case "other-profile":
         if (!userId) return;
-        await utils.post.paginatePostsOfUserOther.invalidate({
+        await utils.post.paginatePosts.invalidate({
           userId,
           pageSize: 10,
         });

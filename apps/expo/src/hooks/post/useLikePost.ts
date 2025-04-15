@@ -19,7 +19,7 @@ export const useLikePost = ({
   initialHasLiked,
 }: LikePostProps) => {
   const utils = api.useUtils();
-  const { data: hasLiked } = api.post.hasliked.useQuery(
+  const { data: hasLiked } = api.postInteraction.hasLiked.useQuery(
     { postId },
     { initialData: initialHasLiked },
   );
@@ -27,33 +27,34 @@ export const useLikePost = ({
   const clickCount = useRef(0);
   const isLikingRef = useRef(false);
   const { changeLikeCount } = useOptimisticUpdatePost();
+
   const throttledLikeRequest = useRef(
     useThrottleWithIncreaseDelay(async (currentHasLiked: boolean) => {
       if (clickCount.current % 2 === 0) {
         clickCount.current = 0;
         return;
       }
-      currentHasLiked
-        ? await unlikePost.mutateAsync({ postId })
-        : await likePost.mutateAsync({ postId });
+      void (currentHasLiked
+        ? unlikePost.mutateAsync({ postId })
+        : likePost.mutateAsync({ postId }));
       clickCount.current = 0;
       isLikingRef.current = false;
     }, 5000),
   );
 
-  const likePost = api.post.likePost.useMutation({
+  const likePost = api.postInteraction.likePost.useMutation({
     onMutate: async (newHasLikedData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.post.hasliked.cancel();
+      await utils.postInteraction.hasLiked.cancel();
 
       // Get the data from the query cache
-      const prevData = utils.post.hasliked.getData({
+      const prevData = utils.postInteraction.hasLiked.getData({
         postId: newHasLikedData.postId,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.post.hasliked.setData({ postId: newHasLikedData.postId }, true);
+      utils.postInteraction.hasLiked.setData({ postId: newHasLikedData.postId }, true);
 
       // Return the previous data so we can revert if something goes wrong
       return { prevData };
@@ -62,7 +63,7 @@ export const useLikePost = ({
       if (ctx === undefined) return;
 
       // If the mutation fails, use the context-value from onMutate
-      utils.post.hasliked.setData(
+      utils.postInteraction.hasLiked.setData(
         { postId: newHasLikedData.postId },
         ctx.prevData,
       );
@@ -74,23 +75,23 @@ export const useLikePost = ({
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.post.hasliked.invalidate();
+      await utils.postInteraction.hasLiked.invalidate();
     },
   });
 
-  const unlikePost = api.post.unlikePost.useMutation({
+  const unlikePost = api.postInteraction.unlikePost.useMutation({
     onMutate: async (newHasLikedData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.post.hasliked.cancel();
+      await utils.postInteraction.hasLiked.cancel();
 
       // Get the data from the query cache
-      const prevData = utils.post.hasliked.getData({
+      const prevData = utils.postInteraction.hasLiked.getData({
         postId: newHasLikedData.postId,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.post.hasliked.setData({ postId: newHasLikedData.postId }, false);
+      utils.postInteraction.hasLiked.setData({ postId: newHasLikedData.postId }, false);
 
       // Return the previous data so we can revert if something goes wrong
       return { prevData };
@@ -99,7 +100,7 @@ export const useLikePost = ({
       if (ctx === undefined) return;
 
       // If the mutation fails, use the context-value from onMutate
-      utils.post.hasliked.setData(
+      utils.postInteraction.hasLiked.setData(
         { postId: newHasLikedData.postId },
         ctx.prevData,
       );
@@ -111,7 +112,7 @@ export const useLikePost = ({
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.post.hasliked.invalidate();
+      await utils.postInteraction.hasLiked.invalidate();
     },
   });
 
@@ -119,8 +120,8 @@ export const useLikePost = ({
     isLikingRef.current = true;
 
     // Optimistically update the UI
-    await utils.post.hasliked.cancel();
-    utils.post.hasliked.setData({ postId }, !hasLiked);
+    await utils.postInteraction.hasLiked.cancel();
+    utils.postInteraction.hasLiked.setData({ postId }, !hasLiked);
     await changeLikeCount({
       postId,
       changeCountBy: hasLiked ? -1 : 1,
@@ -135,8 +136,8 @@ export const useLikePost = ({
 
   const handleLikeDoubleTapped = async () => {
     if (!hasLiked) {
-      await utils.post.hasliked.cancel();
-      utils.post.hasliked.setData({ postId }, !hasLiked);
+      await utils.postInteraction.hasLiked.cancel();
+      utils.postInteraction.hasLiked.setData({ postId }, !hasLiked);
       await changeLikeCount({
         postId,
         changeCountBy: 1,
