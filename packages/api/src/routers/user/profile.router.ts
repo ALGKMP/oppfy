@@ -46,7 +46,7 @@ export const profileRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const result = await ctx.services.profile.profile({
+      const result = await ctx.services.profile.getProfile({
         selfUserId: ctx.session.uid,
         otherUserId: input.userId,
       });

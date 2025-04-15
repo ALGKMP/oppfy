@@ -11,7 +11,7 @@ import { Circle, getTokens, Text, XStack, YStack } from "tamagui";
 
 import CommentsBottomSheet from "~/components/Post/Comment/CommentsBottomSheet";
 import { useBottomSheetController } from "~/components/ui/BottomSheet";
-import { useLikePost } from "~/hooks/post/useLikePost";
+import { useInteractWithPost } from "~/hooks/post/useInteractWithPost";
 import useShare from "~/hooks/useShare";
 import { Icon } from "../ui";
 
@@ -102,7 +102,7 @@ const LikeAction = ({
   count: number;
 }) => {
   const { buttonScale, animate } = useButtonAnimation();
-  const { handleLikePressed, hasLiked } = useLikePost({
+  const { handleLikePressed, hasLiked } = useInteractWithPost({
     postId,
     endpoint,
     initialHasLiked,

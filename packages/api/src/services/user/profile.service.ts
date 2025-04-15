@@ -65,14 +65,13 @@ export class ProfileService {
   /**
    * Retrieves a user's profile, ensuring access control with privacy and block checks.
    */
-  async profile({
+  async getProfile({
     selfUserId,
     otherUserId,
   }: SelfOtherUserIdsParams<"optional">): Promise<
     Result<
       Hydrate<Profile<"notOnApp"> | Profile<"onboarded">>,
-      | ProfileErrors.ProfileBlocked
-      | ProfileErrors.ProfileNotFound
+      ProfileErrors.ProfileBlocked | ProfileErrors.ProfileNotFound
     >
   > {
     if (otherUserId) {
