@@ -2,7 +2,6 @@ import React, { useRef, useState } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useScrollToTop } from "@react-navigation/native";
-import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { CameraOff } from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
@@ -16,6 +15,13 @@ import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
 type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
+interface ViewToken {
+  item: Post;
+  key: string;
+  index: number | null;
+  isViewable: boolean;
+  timestamp: number;
+}
 
 const SelfProfile = () => {
   const scrollRef = useRef(null);
@@ -24,7 +30,7 @@ const SelfProfile = () => {
   const insets = useSafeAreaInsets();
 
   const {
-    data: profileData,
+    data: profile,
     refetch: refetchProfile,
     isLoading: isLoadingProfile,
   } = api.profile.getProfile.useQuery({});
@@ -36,12 +42,12 @@ const SelfProfile = () => {
   } = api.profile.getStats.useQuery({});
 
   const {
-    data: postsData,
-    isFetchingNextPage,
-    fetchNextPage,
+    data: posts,
     refetch: refetchPosts,
     isLoading: isLoadingPostData,
     hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
   } = api.post.paginatePosts.useInfiniteQuery(
     { pageSize: 10 },
     {
@@ -53,7 +59,8 @@ const SelfProfile = () => {
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
   const isLoading = isLoadingProfile || isLoadingProfileStats;
-  const postItems = postsData?.pages.flatMap((page) => page.items) ?? [];
+
+  const postItems = posts?.pages.flatMap((page) => page.items) ?? [];
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -78,7 +85,7 @@ const SelfProfile = () => {
   }) => {
     const visibleItemIds = viewableItems
       .filter((token) => token.isViewable)
-      .map((token) => (token.item as Post).post.id);
+      .map((token) => token.item.post.id);
 
     setViewableItems(visibleItemIds);
   };
@@ -150,7 +157,7 @@ const SelfProfile = () => {
     <YStack gap="$2" position="relative">
       <Header
         type="self"
-        profile={profileData}
+        profile={profile}
         stats={profileStats}
         isLoading={isLoading}
       />

@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, useState } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { CameraOff, Lock, UserX } from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
@@ -16,22 +15,27 @@ import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
 type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
+interface ViewToken {
+  item: Post;
+  key: string;
+  index: number | null;
+  isViewable: boolean;
+  timestamp: number;
+}
 
 const OtherProfile = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const params = useLocalSearchParams<{
+  const { userId, ...params } = useLocalSearchParams<{
     userId: string;
     username?: string;
     name?: string;
     profilePictureUrl?: string;
   }>();
 
-  const { userId } = params;
-
   const {
-    data: profileData,
+    data: profile,
     refetch: refetchProfile,
     isLoading: isLoadingProfile,
   } = api.profile.getProfile.useQuery({ userId: userId });
@@ -47,9 +51,6 @@ const OtherProfile = () => {
     refetch: refetchRelationshipState,
     isLoading: isLoadingRelationshipStates,
   } = api.profile.getRelationshipStatesBetweenUsers.useQuery({ userId });
-
-  const isLoading =
-    isLoadingProfile || isLoadingProfileStats || isLoadingRelationshipStates;
 
   const {
     data: postsData,
@@ -68,12 +69,12 @@ const OtherProfile = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
-  const postItems = useMemo(
-    () => postsData?.pages.flatMap((page) => page.items) ?? [],
-    [postsData],
-  );
+  const isLoading =
+    isLoadingProfile || isLoadingProfileStats || isLoadingRelationshipStates;
 
-  const handleRefresh = useCallback(async () => {
+  const postItems = postsData?.pages.flatMap((page) => page.items) ?? [];
+
+  const handleRefresh = async () => {
     setIsRefreshing(true);
     await Promise.all([
       refetchPosts(),
@@ -81,26 +82,25 @@ const OtherProfile = () => {
       refetchRelationshipState(),
     ]);
     setIsRefreshing(false);
-  }, [refetchPosts, refetchProfile, refetchRelationshipState]);
+  };
 
-  const handleOnEndReached = useCallback(async () => {
+  const handleOnEndReached = async () => {
     if (hasNextPage && !isFetchingNextPage) {
       await fetchNextPage();
     }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  };
 
-  const onViewableItemsChanged = useCallback(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      const visibleItemIds = viewableItems
-        .filter((token) => token.isViewable)
-        .map((token) => (token.item as Post).post.id);
+  const onViewableItemsChanged = ({
+    viewableItems,
+  }: {
+    viewableItems: ViewToken[];
+  }) => {
+    const visibleItemIds = viewableItems
+      .filter((token) => token.isViewable)
+      .map((token) => token.item.post.id);
 
-      setViewableItems(visibleItemIds);
-    },
-    [],
-  );
-
-  const viewabilityConfig = () => ({ itemVisiblePercentThreshold: 40 });
+    setViewableItems(visibleItemIds);
+  };
 
   const renderPost = ({ item }: { item: Post }) => (
     <PostCard
@@ -144,11 +144,11 @@ const OtherProfile = () => {
     />
   );
 
-  const memoizedHeader = () => (
+  const renderHeader = () => (
     <YStack gap="$2" position="relative">
       <Header
         type="other"
-        profile={profileData}
+        profile={profile}
         stats={profileStats}
         relationshipState={relationshipState}
         isLoading={isLoading}
@@ -161,7 +161,7 @@ const OtherProfile = () => {
           !relationshipState?.isBlocked ? (
             <FriendCarousel
               userId={userId}
-              username={profileData?.username ?? ""}
+              username={profile?.username ?? ""}
               paddingHorizontal="$2.5"
             />
           ) : (
@@ -212,7 +212,7 @@ const OtherProfile = () => {
       );
     }
 
-    if (profileData?.privacy === "private") {
+    if (profile?.privacy === "private") {
       return (
         <View paddingTop="$6">
           <EmptyPlaceholder
@@ -238,14 +238,14 @@ const OtherProfile = () => {
     <FlashList
       data={postItems}
       renderItem={renderPost}
-      ListHeaderComponent={memoizedHeader}
+      ListHeaderComponent={renderHeader}
       ListEmptyComponent={renderNoPosts}
       keyExtractor={(item) => `other-profile-post-${item.post.id}`}
-      estimatedItemSize={300}
+      estimatedItemSize={664}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}
       onViewableItemsChanged={onViewableItemsChanged}
-      viewabilityConfig={viewabilityConfig}
+      viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
       extraData={viewableItems}
       ItemSeparatorComponent={() => <Spacer size="$4" />}
       ListHeaderComponentStyle={{
