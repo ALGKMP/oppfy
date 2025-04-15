@@ -7,7 +7,7 @@ import { Mux } from "@oppfy/mux";
 import { ImageContentType, S3 } from "@oppfy/s3";
 
 import * as PostErrors from "../../errors/content/post.error";
-import { Comment, Post, PostStats, Profile } from "../../models";
+import { Comment, Post, PostStats, Profile, User } from "../../models";
 import { CommentRepository } from "../../repositories/content/comment.repository";
 import {
   PostRepository,
@@ -101,47 +101,17 @@ export class PostService {
   async uploadImagePostForUserNotOnApp(
     params: BaseImagePostParams & BaseUserNotOnAppParams,
   ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
-    return await this.db.transaction(async (tx) => {
-      const recipientUser = await this.userRepository.getUserByPhoneNumber({
-        phoneNumber: params.recipientNotOnAppPhoneNumber,
-      });
+    const recipientUser = await this.ensureRecipientUserExists(
+      params.recipientNotOnAppPhoneNumber,
+      params.recipientNotOnAppName,
+    );
 
-      if (recipientUser) {
-        return ok(
-          await this.uploadImagePost({
-            ...params,
-            recipientUserId: recipientUser.id,
-          }),
-        );
-      }
-
-      const { user: createdRecipientUser } =
-        await this.userRepository.createUser(
-          {
-            phoneNumber: params.recipientNotOnAppPhoneNumber,
-            isOnApp: false,
-          },
-          tx,
-        );
-
-      await this.profileRepository.updateProfile(
-        {
-          userId: createdRecipientUser.id,
-          update: {
-            name: params.recipientNotOnAppName,
-            username: `${params.recipientNotOnAppName}-${Math.random().toString(36).substring(2, 15)}`,
-          },
-        },
-        tx,
-      );
-
-      return ok(
-        await this.uploadImagePost({
-          ...params,
-          recipientUserId: createdRecipientUser.id,
-        }),
-      );
-    });
+    return ok(
+      await this.uploadImagePost({
+        ...params,
+        recipientUserId: recipientUser.id,
+      }),
+    );
   }
 
   async uploadVideoPostForUserOnApp(
@@ -153,47 +123,17 @@ export class PostService {
   async uploadVideoPostForUserNotOnApp(
     params: BasePostParams & BaseUserNotOnAppParams,
   ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
-    return await this.db.transaction(async (tx) => {
-      const recipientUser = await this.userRepository.getUserByPhoneNumber({
-        phoneNumber: params.recipientNotOnAppPhoneNumber,
-      });
+    const recipientUser = await this.ensureRecipientUserExists(
+      params.recipientNotOnAppPhoneNumber,
+      params.recipientNotOnAppName,
+    );
 
-      if (recipientUser) {
-        return ok(
-          await this.uploadVideoPost({
-            ...params,
-            recipientUserId: recipientUser.id,
-          }),
-        );
-      }
-
-      const { user: createdRecipientUser } =
-        await this.userRepository.createUser(
-          {
-            phoneNumber: params.recipientNotOnAppPhoneNumber,
-            isOnApp: false,
-          },
-          tx,
-        );
-
-      await this.profileRepository.updateProfile(
-        {
-          userId: createdRecipientUser.id,
-          update: {
-            name: params.recipientNotOnAppName,
-            username: `${params.recipientNotOnAppName}-${Math.random().toString(36).substring(2, 15)}`,
-          },
-        },
-        tx,
-      );
-
-      return ok(
-        await this.uploadVideoPost({
-          ...params,
-          recipientUserId: createdRecipientUser.id,
-        }),
-      );
-    });
+    return ok(
+      await this.uploadVideoPost({
+        ...params,
+        recipientUserId: recipientUser.id,
+      }),
+    );
   }
 
   async deletePost(
@@ -367,6 +307,40 @@ export class PostService {
       });
 
       return { presignedUrl, postId: post.id };
+    });
+  }
+
+  private async ensureRecipientUserExists(
+    phoneNumber: string,
+    name: string,
+  ): Promise<User> {
+    return await this.db.transaction(async (tx) => {
+      const user = await this.userRepository.getUserByPhoneNumber(
+        { phoneNumber },
+        tx,
+      );
+
+      if (user) return user;
+
+      const { user: createdUser } = await this.userRepository.createUser(
+        {
+          phoneNumber,
+          isOnApp: false,
+        },
+        tx,
+      );
+      await this.profileRepository.updateProfile(
+        {
+          userId: createdUser.id,
+          update: {
+            name,
+            username: `${name}-${Math.random().toString(36).substring(2, 15)}`,
+          },
+        },
+        tx,
+      );
+
+      return createdUser;
     });
   }
 
