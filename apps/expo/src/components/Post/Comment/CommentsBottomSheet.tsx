@@ -5,7 +5,8 @@ import { FlashList } from "@shopify/flash-list";
 import { MessageCircleOff } from "@tamagui/lucide-icons";
 
 import { EmptyPlaceholder, View } from "~/components/ui";
-import { useComments } from "~/hooks/post/useComments";
+import { usePostInteractions } from "~/hooks/post/usePostInteractions";
+import { useReport } from "~/hooks/post/useReport";
 import { useAuth } from "~/hooks/useAuth";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import Comment from "./Comment";
@@ -20,33 +21,32 @@ interface CommentsBottomSheetProps {
 }
 
 const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
-  const {
-    commentItems,
-    loadMoreComments,
-    postComment,
-    reportComment,
-    deleteComment,
-  } = useComments({
-    postId: props.postId,
-    endpoint: props.endpoint,
-    userId: props.postRecipientUserId,
-  });
+  const { comments, loadMoreComments, postComment, deleteComment } =
+    usePostInteractions({
+      postId: props.postId,
+      initialPostStats: {
+        likes: 0,
+        comments: 0,
+        hasLiked: false,
+      },
+    });
+  const { handleReportComment } = useReport({ postId: props.postId });
 
   const listRef = useRef<FlashList<CommentItem> | null>(null);
   const { user } = useAuth();
   const selfUserId = user?.uid;
   const { routeProfile } = useRouteProfile();
 
-  const handlePostCommentWithAnimation = (comment: string) => {
+  const handlePostCommentWithAnimation = async (comment: string) => {
     listRef.current?.prepareForLayoutAnimationRender();
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    postComment(comment);
+    await postComment(comment);
   };
 
-  const handleDeleteWithAnimation = (commentId: string) => {
+  const handleDeleteWithAnimation = async (commentId: string) => {
     listRef.current?.prepareForLayoutAnimationRender();
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    deleteComment(commentId);
+    await deleteComment(commentId);
   };
 
   const renderComment = ({ item }: { item: CommentItem }) => (
@@ -55,17 +55,17 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
       comment={item}
       isPostRecipient={selfUserId === props.postRecipientUserId}
       isCommentAuthor={item.userId === selfUserId}
-      onDelete={() => {
+      onDelete={async () => {
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        handleDeleteWithAnimation(item.id);
+        await handleDeleteWithAnimation(item.id);
       }}
-      onReport={() => {
+      onReport={async () => {
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        reportComment(item.id);
+        await handleReportComment(item.id);
       }}
       onPressProfile={() => {
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        routeProfile({ userId: item.userId });
+        routeProfile(item.userId);
         props.onHideBottomSheet();
       }}
     />
@@ -73,12 +73,23 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
 
   return (
     <>
-      {commentItems.length === 0 ? (
+      {comments?.pages.length === 0 ? (
         <ListEmptyComponent />
       ) : (
         <FlashList
           ref={listRef}
-          data={commentItems}
+          data={
+            comments?.pages.flatMap((page) =>
+              page.items.map((item) => ({
+                id: item.comment.id,
+                userId: item.authorUserId,
+                body: item.comment.body,
+                username: item.authorUsername,
+                profilePictureUrl: item.authorProfilePictureUrl,
+                createdAt: item.comment.createdAt,
+              })),
+            ) ?? []
+          }
           renderItem={renderComment}
           estimatedItemSize={83}
           onEndReached={loadMoreComments}

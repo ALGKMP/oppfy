@@ -68,14 +68,12 @@ const PostCard = (props: PostCardProps) => {
     <View borderRadius="$8" overflow="hidden">
       {props.media.type === "image" ? (
         <PostImage
-          endpoint={props.endpoint}
           media={props.media}
           stats={props.stats}
           isViewable={props.isViewable}
         />
       ) : (
         <PostVideo
-          endpoint={props.endpoint}
           media={props.media}
           stats={props.stats}
           isViewable={props.isViewable}
@@ -204,7 +202,6 @@ const PostCard = (props: PostCardProps) => {
         <XStack alignItems="center" justifyContent="flex-end" width="$5">
           <MorePostOptionsButton
             postId={props.postId}
-            author={props.author}
             recipient={props.recipient}
             mediaUrl={props.media.url}
           />
