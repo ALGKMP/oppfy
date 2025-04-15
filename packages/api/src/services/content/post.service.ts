@@ -292,73 +292,6 @@ export class PostService {
     }
   }
 
-  // Hydration function for PostResult
-  private hydrateAndProcessPost(raw: RawPostResult): HydratedAndProcessedPost {
-    const hydratedPost = this.cloudfront.hydratePost(raw.post);
-    const hydratedAuthorProfile = this.cloudfront.hydrateProfile(
-      raw.authorProfile,
-    );
-    const hydratedRecipientProfile = this.cloudfront.hydrateProfile(
-      raw.recipientProfile,
-    );
-
-    return {
-      post: hydratedPost,
-      assetUrl: hydratedPost.postUrl,
-      postStats: raw.postStats,
-      authorUserId: raw.authorProfile.userId,
-      authorUsername: raw.authorProfile.username ?? "",
-      authorName: raw.authorProfile.name ?? null,
-      authorProfilePictureUrl: hydratedAuthorProfile.profilePictureUrl,
-      recipientUserId: raw.recipientProfile.userId,
-      recipientUsername: raw.recipientProfile.username ?? "",
-      recipientName: raw.recipientProfile.name ?? null,
-      recipientProfilePictureUrl: hydratedRecipientProfile.profilePictureUrl,
-      hasLiked: !!raw.like,
-    };
-  }
-
-  // Hydration function for PostResultWithoutLike
-  private hydrateAndProcessPostResultWithoutLike(
-    raw: RawPostResultWithoutLike,
-  ): HydratedAndProcessedPostWithoutLike {
-    const hydratedPost = this.cloudfront.hydratePost(raw.post);
-    const hydratedAuthorProfile = this.cloudfront.hydrateProfile(
-      raw.authorProfile,
-    );
-    const hydratedRecipientProfile = this.cloudfront.hydrateProfile(
-      raw.recipientProfile,
-    );
-
-    return {
-      post: hydratedPost,
-      assetUrl: hydratedPost.postUrl,
-      postStats: raw.postStats,
-      authorUserId: raw.authorProfile.userId,
-      authorUsername: raw.authorProfile.username ?? "",
-      authorName: raw.authorProfile.name ?? null,
-      authorProfilePictureUrl: hydratedAuthorProfile.profilePictureUrl,
-      recipientUserId: raw.recipientProfile.userId,
-      recipientUsername: raw.recipientProfile.username ?? "",
-      recipientName: raw.recipientProfile.name ?? null,
-      recipientProfilePictureUrl: hydratedRecipientProfile.profilePictureUrl,
-    };
-  }
-
-  // Hydration function for PaginatedComment
-  private hydrateAndProcessComment(
-    raw: RawPaginatedComment,
-  ): HydratedAndProcessedComment {
-    const hydratedProfile = this.cloudfront.hydrateProfile(raw.profile);
-    return {
-      comment: raw.comment,
-      authorUserId: raw.profile.userId,
-      authorUsername: raw.profile.username ?? "",
-      authorName: raw.profile.name ?? null,
-      authorProfilePictureUrl: hydratedProfile.profilePictureUrl,
-    };
-  }
-
   async uploadPostForUserOnAppUrl(
     params: UploadPostForUserOnAppUrlParams,
   ): Promise<
@@ -405,36 +338,38 @@ export class PostService {
 
   async deletePost(
     params: DeletePostParams,
-  ): Promise<Result<void, PostErrors.NotPostOwner | PostErrors.PostNotFound>> {
-    try {
-      await this.db.transaction(async (tx) => {
-        const post = await this.postRepository.getPost(
-          { postId: params.postId, userId: params.userId },
-          tx,
-        );
-        if (!post) throw new PostErrors.PostNotFound(params.postId);
-        if (post.post.authorUserId !== params.userId)
-          throw new PostErrors.NotPostOwner(params.userId, params.postId);
-        await this.postRepository.deletePost(params, tx);
-      });
-      return ok();
-    } catch (error) {
-      if (
-        error instanceof PostErrors.PostNotFound ||
-        error instanceof PostErrors.NotPostOwner
-      ) {
-        return err(error);
-      }
-      throw error; // Unexpected errors bubble up
+  ): Promise<Result<void, PostErrors.PostNotFound | PostErrors.NotPostOwner>> {
+    const post = await this.postRepository.getPost({
+      postId: params.postId,
+      userId: params.userId,
+    });
+
+    if (post === undefined) {
+      return err(new PostErrors.PostNotFound(params.postId));
     }
+
+    if (post.post.authorUserId !== params.userId) {
+      return err(new PostErrors.NotPostOwner(params.userId, params.postId));
+    }
+
+    await this.db.transaction(async (tx) => {
+      await this.postRepository.deletePost(params, tx);
+    });
+
+    return ok();
   }
 
   async getPost(
     params: GetPostParams,
-  ): Promise<Result<HydratedAndProcessedPost, PostErrors.PostNotFound>> {
-    const rawPost = await this.postRepository.getPost(params);
-    if (!rawPost) return err(new PostErrors.PostNotFound(params.postId));
-    return ok(this.hydrateAndProcessPost(rawPost));
+  ): Promise<
+    Result<HydratedPostResult<"withIsLiked">, PostErrors.PostNotFound>
+  > {
+    const post = await this.postRepository.getPost(params);
+
+    if (post === undefined)
+      return err(new PostErrors.PostNotFound(params.postId));
+
+    return ok(this.hydratePost(post));
   }
 
   async paginatePosts({
@@ -442,26 +377,24 @@ export class PostService {
     cursor,
     pageSize = 20,
   }: PaginatePostsParams): Promise<
-    Result<PaginatedResponse<HydratedAndProcessedPost>, never>
+    Result<PaginatedResponse<HydratedPostResult<"withIsLiked">>, never>
   > {
-    const rawPosts = await this.postRepository.paginatePostsOfUser({
+    const posts = await this.postRepository.paginatePostsOfUser({
       userId,
       cursor,
       pageSize,
     });
-    const hydratedPosts = rawPosts.map((post) =>
-      this.hydrateAndProcessPost(post),
-    );
-    const lastPost = hydratedPosts[pageSize - 1];
+    const hydratedPosts = posts.map((post) => this.hydratePost(post));
+
+    const hasMore = hydratedPosts.length > pageSize;
+    const items = hydratedPosts.slice(0, pageSize);
+    const lastItem = items[items.length - 1];
 
     return ok({
-      items: hydratedPosts.slice(0, pageSize),
+      items,
       nextCursor:
-        rawPosts.length > pageSize && lastPost
-          ? {
-              id: lastPost.post.id,
-              createdAt: lastPost.post.createdAt,
-            }
+        hasMore && lastItem
+          ? { id: lastItem.post.id, createdAt: lastItem.post.createdAt }
           : null,
     });
   }
@@ -471,30 +404,28 @@ export class PostService {
     cursor,
     pageSize = 10,
   }: PaginatePostsParams): Promise<
-    Result<PaginatedResponse<HydratedAndProcessedPost>, PostErrors.PostNotFound>
+    Result<
+      PaginatedResponse<HydratedPostResult<"withIsLiked">>,
+      PostErrors.PostNotFound
+    >
   > {
-    const rawPosts = await this.postRepository.paginatePostsOfFollowing({
+    const posts = await this.postRepository.paginatePostsOfFollowing({
       userId,
       cursor,
       pageSize,
     });
-    if (!rawPosts.length && cursor)
-      return err(new PostErrors.PostNotFound(cursor.id));
 
-    const hydratedPosts = rawPosts.map((post) =>
-      this.hydrateAndProcessPost(post),
-    );
-    const lastPost = hydratedPosts[pageSize - 1];
+    const hydratedPosts = posts.map((post) => this.hydratePost(post));
 
-    // TODO: userId not returned here anymore (Might die from react query)
+    const hasMore = hydratedPosts.length > pageSize;
+    const items = hydratedPosts.slice(0, pageSize);
+    const lastItem = items[items.length - 1];
+
     return ok({
-      items: hydratedPosts.slice(0, pageSize),
+      items,
       nextCursor:
-        rawPosts.length > pageSize && lastPost
-          ? {
-              id: lastPost.post.id,
-              createdAt: lastPost.post.createdAt,
-            }
+        hasMore && lastItem
+          ? { id: lastItem.post.id, createdAt: lastItem.post.createdAt }
           : null,
     });
   }
@@ -551,7 +482,9 @@ export class PostService {
     });
   }
 
-  private hydratePost(post: PostResult): HydratedPostResult {
+  private hydratePost<T extends "withIsLiked" | "withoutIsLiked" | undefined>(
+    post: PostResult<T>,
+  ): HydratedPostResult<T> {
     return {
       ...post,
       post: this.cloudfront.hydratePost(post.post),

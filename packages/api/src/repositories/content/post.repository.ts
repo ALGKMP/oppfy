@@ -120,7 +120,7 @@ export class PostRepository {
   async paginatePostsOfFollowing(
     { userId, cursor, pageSize = 10 }: PaginatePostsParams,
     tx: DatabaseOrTransaction = this.db,
-  ): Promise<PostResult[]> {
+  ): Promise<PostResult<"withIsLiked">[]> {
     const query = this.baseQuery(userId, tx);
 
     let whereClause = or(
@@ -155,14 +155,14 @@ export class PostRepository {
       ...result,
       authorProfile: result.authorProfile as Profile<"onboarded">,
       recipientProfile: result.recipientProfile as Profile<"notOnApp">,
-      isLiked: undefined,
+      isLiked: result.isLiked ?? false,
     }));
   }
 
   async paginatePostsOfUser(
     { userId, cursor, pageSize = 10 }: PaginatePostsParams,
     tx: DatabaseOrTransaction = this.db,
-  ): Promise<PostResult[]> {
+  ): Promise<PostResult<"withIsLiked">[]> {
     const query = this.baseQuery(userId, tx);
 
     const whereClause = and(
@@ -187,7 +187,7 @@ export class PostRepository {
       ...result,
       authorProfile: result.authorProfile as Profile<"onboarded">,
       recipientProfile: result.recipientProfile as Profile<"onboarded">,
-      isLiked: undefined,
+      isLiked: result.isLiked ?? false,
     }));
   }
 
