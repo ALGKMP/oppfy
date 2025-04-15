@@ -9,20 +9,17 @@ import { Mux } from "@oppfy/mux";
 import { S3 } from "@oppfy/s3";
 
 import * as PostErrors from "../../errors/content/post.error";
-import type {
-  PaginatedResponse,
-  PaginationParams,
-} from "../../interfaces/types";
 import { Comment, Post, PostStats, Profile } from "../../models";
 import { CommentRepository } from "../../repositories/content/comment.repository";
 import type { PaginatedCommentResult as RawPaginatedComment } from "../../repositories/content/comment.repository";
-import {
+import {../../types/types
   PostRepository,
   PostResult,
 } from "../../repositories/content/post.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
+import type { PaginatedResponse, PaginationParams } from "../../types";
 
 interface UploadPostForUserOnAppUrlParams {
   authorUserId: string;

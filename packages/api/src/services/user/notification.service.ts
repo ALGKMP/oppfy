@@ -7,8 +7,7 @@ import { FollowStatus } from "@oppfy/db/utils/query-helpers";
 
 import { NotificationSettingsNotFound } from "../../errors/user/notifications.error";
 import * as NotificationErrors from "../../errors/user/notifications.error";
-import { PaginatedResponse } from "../../interfaces/types";
-import { Notification, NotificationSettings, Profile } from "../../models";
+import { Notification, Notification../../types/typesom "../../models";
 import {
   NotificationRepository,
   PaginateNotificationsParams,
@@ -18,6 +17,7 @@ import {
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
+import { PaginatedResponse } from "../../types";
 
 interface NotificationAndHydratedProfile {
   profile: Hydrate<Profile>;

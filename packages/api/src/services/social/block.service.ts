@@ -5,16 +5,16 @@ import { CloudFront, Hydrate } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
 import * as BlockErrors from "../../errors/social/block.error";
-import type {
-  DirectionalUserIdsParams,
-  PaginatedResponse,
-  PaginationParams,
-} from "../../interfaces/types";
 import { Profile } from "../../models";
 import { BlockRepository } from "../../repositories/social/block.repository";
 import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
 import { TYPES } from "../../symbols";
+import type {
+  DirectionalUserIdsParams,
+  PaginatedResponse,
+  PaginationParams,
+} from "../../types";
 
 interface GetBlockedUsersParams extends PaginationParams {
   userId: string;

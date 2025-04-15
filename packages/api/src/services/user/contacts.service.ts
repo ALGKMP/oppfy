@@ -7,12 +7,12 @@ import type { Database } from "@oppfy/db";
 import { FollowStatus } from "@oppfy/db/utils/query-helpers";
 import { SQS } from "@oppfy/sqs";
 
-import { UserIdParam } from "../../interfaces/types";
-import { Profile } from "../../models";
+import { Profile } from "../.../../types/types
 import { ContactsRepository } from "../../repositories/user/contacts.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
+import { UserIdParam } from "../../types";
 
 export interface UpdateUserContactsParams {
   userId: string;

@@ -4,13 +4,10 @@ import { inject, injectable } from "inversify";
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 import { withOnboardingCompleted } from "@oppfy/db/utils/query-helpers";
 
-import type {
-  DirectionalUserIdsParams,
-  PaginationParams,
-} from "../../interfaces/types";
 import type { Block, Profile } from "../../models";
 import { TYPES } from "../../symbols";
-
+import type { DirectionalUserIdsParams, PaginationParams } from "../../types";
+../../types/types
 export interface PaginateBlockedUsersParams extends PaginationParams {
   userId: string;
 }

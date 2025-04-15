@@ -8,9 +8,9 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
-import type { PhoneNumberParam, UserIdParam } from "../../interfaces/types";
-import type { User, UserStatus } from "../../models";
+import type { User, UserStatus } from "../../models"../../types/types
 import { TYPES } from "../../symbols";
+import type { PhoneNumberParam, UserIdParam } from "../../types";
 
 export interface CreateUserParams {
   id?: string;

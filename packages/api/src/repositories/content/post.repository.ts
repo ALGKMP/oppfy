@@ -12,9 +12,9 @@ import {
   withOnboardingCompleted,
 } from "@oppfy/db/utils/query-helpers";
 
-import { PaginationParams, PostIdParam } from "../../interfaces/types";
-import { Post, PostInsert, PostStats, Profile } from "../../models";
+import { Post, PostInsert, PostStats, Profile }../../types/types
 import { TYPES } from "../../symbols";
+import { PaginationParams, PostIdParam } from "../../types";
 import { invariant } from "../../utils";
 
 export interface GetPostParams {

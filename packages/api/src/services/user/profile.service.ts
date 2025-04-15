@@ -11,17 +11,17 @@ import { env } from "@oppfy/env";
 import { S3 } from "@oppfy/s3";
 
 import * as ProfileErrors from "../../errors/user/profile.error";
-import {
-  SelfOtherUserIdsParams,
-  UserIdParam,
-  UsernameParam,
-} from "../../interfaces/types";
 import { Profile, ProfileInsert, UserStats } from "../../models";
 import { BlockRepository } from "../../repositories/social/block.repository";
 import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
-import { ProfileRepository } from "../../repositories/user/profile.repository";
+import {../../types/typesrom "../../repositories/user/profile.repository";
 import { TYPES } from "../../symbols";
+import {
+  SelfOtherUserIdsParams,
+  UserIdParam,
+  UsernameParam,
+} from "../../types";
 
 interface RelationshipState {
   follow: FollowStatus;
@@ -71,8 +71,7 @@ export class ProfileService {
   }: SelfOtherUserIdsParams<"optional">): Promise<
     Result<
       Hydrate<Profile<"notOnApp"> | Profile<"onboarded">>,
-      | ProfileErrors.ProfileBlocked
-      | ProfileErrors.ProfileNotFound
+      ProfileErrors.ProfileBlocked | ProfileErrors.ProfileNotFound
     >
   > {
     if (otherUserId) {

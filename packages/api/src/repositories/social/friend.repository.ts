@@ -13,13 +13,13 @@ import {
   withOnboardingCompleted,
 } from "@oppfy/db/utils/query-helpers";
 
-import type {
-  BidirectionalUserIdsparams,
-  DirectionalUserIdsParams,
-  PaginationParams,
-} from "../../interfaces/types";
 import type { Friend, FriendRequest, Profile } from "../../models";
 import { TYPES } from "../../symbols";
+import type {
+  BidirectionalUserIdsparams,
+  Direct../../types/types
+  PaginationParams,
+} from "../../types";
 
 export interface PaginateFriendParams extends PaginationParams {
   selfUserId: string;

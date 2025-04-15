@@ -7,9 +7,9 @@ import {
   withoutBlocked,
 } from "@oppfy/db/utils/query-helpers";
 
-import type { UserIdParam, UsernameParam } from "../../interfaces/types";
-import type { Profile, ProfileInsert, UserStats } from "../../models";
+import type { Profile, ProfileInsert, UserStats }../../types/types
 import { TYPES } from "../../symbols";
+import type { UserIdParam, UsernameParam } from "../../types";
 
 export interface ProfilesByIdsParams {
   userIds: string[];

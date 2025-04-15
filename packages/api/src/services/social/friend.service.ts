@@ -7,19 +7,19 @@ import { FollowStatus } from "@oppfy/db/utils/query-helpers";
 
 import * as FriendErrors from "../../errors/social/friend.error";
 import { ProfileNotFound } from "../../errors/user/profile.error";
-import {
-  BidirectionalUserIdsparams,
-  DirectionalUserIdsParams,
-  PaginatedResponse,
-  PaginationParams,
-  SelfOtherUserIdsParams,
-} from "../../interfaces/types";
 import { Profile } from "../../models";
 import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
+import {../../types/types
+  BidirectionalUserIdsparams,
+  DirectionalUserIdsParams,
+  PaginatedResponse,
+  PaginationParams,
+  SelfOtherUserIdsParams,
+} from "../../types";
 
 interface PaginateByUserIdWithSelfUserIdParams extends PaginationParams {
   selfUserId: string;

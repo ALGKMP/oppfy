@@ -8,17 +8,17 @@ import { FollowStatus } from "@oppfy/db/utils/query-helpers";
 import * as FollowErrors from "../../errors/social/follow.error";
 import * as FriendErrors from "../../errors/social/friend.error";
 import * as ProfileErrors from "../../errors/user/profile.error";
-import {
-  DirectionalUserIdsParams,
-  PaginatedResponse,
-  PaginationParams,
-  SelfOtherUserIdsParams,
-} from "../../interfaces/types";
 import { Profile } from "../../models";
 import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { TYPES } from "../../symbols";
+import {../../types/types
+  DirectionalUserIdsParams,
+  PaginatedResponse,
+  PaginationParams,
+  SelfOtherUserIdsParams,
+} from "../../types";
 
 interface PaginateByUserIdWithSelfUserIdParams extends PaginationParams {
   selfUserId: string;
