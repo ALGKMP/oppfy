@@ -8,6 +8,7 @@ import type {
   Transaction,
 } from "@oppfy/db";
 import {
+  isLikedSql,
   withMultipleProfilesOnboardingCompleted,
   withOnboardingCompleted,
 } from "@oppfy/db/utils/query-helpers";
@@ -17,11 +18,13 @@ import {
   Like,
   MediaType,
   Post,
+  PostInsert,
   PostStats,
   PostStatus,
   Profile,
 } from "../../models";
 import { TYPES } from "../../symbols";
+import { invariant } from "../../utils";
 
 export interface GetPostParams {
   postId: string;
@@ -42,27 +45,14 @@ export interface DeletePostParams {
   postId: string;
 }
 
-export interface CreatePostParams {
-  authorUserId: string;
-  recipientUserId: string;
-  caption: string;
-  postKey: string;
-  width: number;
-  height: number;
-  mediaType: MediaType;
-  status: PostStatus;
-}
-
-export interface PostResult {
+export interface PostResult<
+  T extends "withIsLiked" | "withoutIsLiked" | undefined = undefined,
+> {
   post: Post;
   postStats: PostStats;
   authorProfile: Profile<"onboarded">;
-  recipientProfile: Profile<"onboarded">;
-  like: Like;
-}
-
-export interface PostResultWithLike extends PostResult {
-  like: Like;
+  recipientProfile: Profile<"notOnApp">;
+  isLiked: T extends "withIsLiked" ? boolean : undefined;
 }
 
 @injectable()
@@ -80,71 +70,64 @@ export class PostRepository {
   }
 
   async createPost(
-    {
-      authorUserId,
-      recipientUserId,
-      caption,
-      postKey,
-      width,
-      height,
-      mediaType,
-      status,
-    }: CreatePostParams,
+    values: PostInsert,
     tx: Transaction,
-  ): Promise<Post | undefined> {
-    const [post] = await tx
-      .insert(this.schema.post)
+  ): Promise<{ post: Post; postStats: PostStats }> {
+    const [post] = await tx.insert(this.schema.post).values(values).returning();
+
+    invariant(post);
+
+    const [postStats] = await tx
+      .insert(this.schema.postStats)
       .values({
-        authorUserId,
-        recipientUserId,
-        caption,
-        postKey,
-        width,
-        height,
-        mediaType,
-        status,
+        postId: post.id,
       })
       .returning();
 
-    return post;
-  }
+    invariant(postStats);
 
-  async createPostStats(
-    { postId }: PostIdParam,
-    tx: Transaction,
-  ): Promise<void> {
-    await tx.insert(this.schema.postStats).values({
-      postId,
-    });
+    return { post, postStats };
   }
 
   async getPost(
-    { postId, userId }: GetPostParams,
-    tx: DatabaseOrTransaction = this.db,
-  ): Promise<PostResult | undefined> {
-    const query = this.baseQuery(userId, tx);
-    const results = await query.where(eq(this.schema.post.id, postId)).limit(1);
+    { userId, postId }: GetPostParams,
+    db: Database = this.db,
+  ): Promise<PostResult<"withIsLiked"> | undefined> {
+    let query = this.baseQuery(userId, db);
+    query = query.where(eq(this.schema.post.id, postId)).limit(1);
 
-    if (results[0] === undefined) return undefined;
+    const [result] = await query;
+
+    if (result === undefined) {
+      return undefined;
+    }
+
     return {
-      ...results[0],
-      authorProfile: results[0].authorProfile as Profile<"onboarded">,
-      recipientProfile: results[0].recipientProfile as Profile<"onboarded">,
+      ...result,
+      authorProfile: result.authorProfile as Profile<"onboarded">,
+      recipientProfile: result.recipientProfile as Profile<"notOnApp">,
+      isLiked: result.isLiked ?? false,
     };
   }
 
   async getPostForSite(
     { postId }: PostIdParam,
     tx: DatabaseOrTransaction = this.db,
-  ): Promise<PostResultWithLike | undefined> {
-    const query = this.baseQuery(undefined, tx);
-    const results = await query.where(eq(this.schema.post.id, postId)).limit(1);
+  ): Promise<PostResult | undefined> {
+    let query = this.baseQuery(undefined, tx);
+    query = query.where(eq(this.schema.post.id, postId)).limit(1);
 
-    if (results[0] === undefined) return undefined;
+    const [result] = await query;
+
+    if (result === undefined) {
+      return undefined;
+    }
+
     return {
-      ...results[0],
-      authorProfile: results[0].authorProfile as Profile<"onboarded">,
-      recipientProfile: results[0].recipientProfile as Profile<"onboarded">,
+      ...result,
+      authorProfile: result.authorProfile as Profile<"onboarded">,
+      recipientProfile: result.recipientProfile as Profile<"notOnApp">,
+      isLiked: undefined,
     };
   }
 
@@ -185,7 +168,8 @@ export class PostRepository {
     return results.map((result) => ({
       ...result,
       authorProfile: result.authorProfile as Profile<"onboarded">,
-      recipientProfile: result.recipientProfile as Profile<"onboarded">,
+      recipientProfile: result.recipientProfile as Profile<"notOnApp">,
+      isLiked: undefined,
     }));
   }
 
@@ -217,6 +201,7 @@ export class PostRepository {
       ...result,
       authorProfile: result.authorProfile as Profile<"onboarded">,
       recipientProfile: result.recipientProfile as Profile<"onboarded">,
+      isLiked: undefined,
     }));
   }
 
@@ -250,13 +235,13 @@ export class PostRepository {
   }
 
   private baseQuery(userId?: string, tx: DatabaseOrTransaction = this.db) {
-    const query = tx
+    let query = tx
       .select({
         authorProfile: this.aliasedSchema.authorProfile,
         recipientProfile: this.aliasedSchema.recipientProfile,
         post: this.schema.post,
         postStats: this.schema.postStats,
-        like: this.schema.like,
+        ...(userId ? { isLiked: isLikedSql(userId) } : {}),
       })
       .from(this.schema.post)
       .innerJoin(
@@ -279,20 +264,8 @@ export class PostRepository {
       )
       .$dynamic();
 
-    if (userId) {
-      query.leftJoin(
-        this.schema.like,
-        and(
-          eq(this.schema.like.postId, this.schema.post.id),
-          eq(this.schema.like.userId, userId),
-        ),
-      );
-    }
+    query = withOnboardingCompleted(query, this.aliasedSchema.authorProfile);
 
-    // Apply onboarding filter to both author and recipient profiles
-    return withMultipleProfilesOnboardingCompleted(query, [
-      this.aliasedSchema.authorProfile,
-      this.aliasedSchema.recipientProfile,
-    ]);
+    return query;
   }
 }

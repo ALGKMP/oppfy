@@ -3,10 +3,11 @@ import type { PgSelect } from "drizzle-orm/pg-core";
 
 import { schema } from "../..";
 
+export type Privacy = "PUBLIC" | "PRIVATE";
+export type MediaType = "IMAGE" | "VIDEO";
 export type FollowStatus = "FOLLOWING" | "REQUESTED" | "NOT_FOLLOWING";
 export type FriendStatus = "FRIENDS" | "REQUESTED" | "NOT_FRIENDS";
 export type BlockStatus = "BLOCKED" | "NOT_BLOCKED";
-export type Privacy = "PUBLIC" | "PRIVATE";
 
 /**
  * Only include profiles of users who have completed onboarding
@@ -28,37 +29,6 @@ export const withOnboardingCompleted = <T extends PgSelect>(
         isNotNull(profileTable.dateOfBirth),
       ),
     );
-};
-
-/**
- * Apply onboarding completed filter for multiple profile tables
- * This is a specialized version that handles multiple profile tables
- * without joining userStatus multiple times
- */
-export const withMultipleProfilesOnboardingCompleted = <T extends PgSelect>(
-  qb: T,
-  profileTables: (typeof schema.profile)[],
-) => {
-  if (profileTables.length === 0) {
-    return qb;
-  }
-
-  // Join userStatus once with the first profile table
-  const result = qb.innerJoin(
-    schema.userStatus,
-    eq(schema.userStatus.userId, profileTables[0]!.userId),
-  );
-
-  // Add conditions for all profile tables
-  const conditions = profileTables.flatMap((profileTable) => [
-    isNotNull(profileTable.name),
-    isNotNull(profileTable.username),
-  ]);
-
-  // Add the onboarding completed condition once
-  conditions.push(eq(schema.userStatus.hasCompletedOnboarding, true));
-
-  return result.where(and(...conditions));
 };
 
 /**
@@ -115,4 +85,12 @@ export const getFriendStatusSql = (selfUserId: string) => {
     ) THEN 'REQUESTED'
     ELSE 'NOT_FRIENDS'
   END`;
+};
+
+export const isLikedSql = (userId: string) => {
+  return sql<boolean>`EXISTS (
+    SELECT 1 FROM ${schema.like}
+    WHERE ${schema.like.postId} = ${schema.post.id}
+    AND ${schema.like.userId} = ${userId}
+  )`;
 };
