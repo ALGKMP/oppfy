@@ -92,20 +92,15 @@ const StatButton = ({
 
 const LikeAction = ({
   postId,
-  endpoint,
-  initialHasLiked,
-  count,
+  initialPostStats,
 }: {
   postId: string;
-  endpoint: PostStatsProps["endpoint"];
-  initialHasLiked: boolean;
-  count: number;
+  initialPostStats: PostStatsProps["stats"];
 }) => {
   const { buttonScale, animate } = useButtonAnimation();
-  const { handleLikePressed, hasLiked } = useInteractWithPost({
+  const { handleLikePressed, postStats } = useInteractWithPost({
     postId,
-    endpoint,
-    initialHasLiked,
+    initialPostStats,
   });
 
   const handlePress = () => {
@@ -114,12 +109,12 @@ const LikeAction = ({
   };
 
   return (
-    <StatButton count={count}>
+    <StatButton count={postStats.likes}>
       <Animated.View style={buttonScale}>
         <Icon
           name="heart"
           onPress={handlePress}
-          color={hasLiked ? "#ff3b30" : "white"}
+          color={postStats.hasLiked ? "#ff3b30" : "white"}
         />
       </Animated.View>
     </StatButton>
@@ -201,9 +196,7 @@ export const PostStats = ({
     >
       <LikeAction
         postId={postId}
-        endpoint={endpoint}
-        initialHasLiked={stats.hasLiked}
-        count={stats.likes}
+        initialPostStats={stats}
       />
       <CommentAction
         postId={postId}

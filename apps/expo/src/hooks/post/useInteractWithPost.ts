@@ -3,7 +3,7 @@ import { useToastController } from "@tamagui/toast";
 
 import { api } from "~/utils/api";
 import { useThrottleWithIncreaseDelay } from "./useThrottleWithIncreaseDelay";
-import { ReportPostReason } from "node_modules/@oppfy/api/src/models";
+import type { ReportPostReason } from "node_modules/@oppfy/api/src/models";
 
 interface PostStats {
   likes: number;
@@ -11,17 +11,15 @@ interface PostStats {
   hasLiked: boolean;
 }
 
-interface LikePostProps {
+interface InteractWithPostProps {
   postId: string;
-  userId?: string;
   initialPostStats: PostStats;
 }
 
 export const useInteractWithPost = ({
   postId,
-  userId,
   initialPostStats,
-}: LikePostProps) => {
+}: InteractWithPostProps) => {
   const toast = useToastController();
   const utils = api.useUtils();
   const { data: postStats } = api.post.getPostStats.useQuery(
