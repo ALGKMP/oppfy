@@ -6,9 +6,9 @@ import { env } from "@oppfy/env";
 const FIVE_MINUTES = 300;
 
 export type ImageContentType = "image/jpeg" | "image/png" | "image/heic";
-export type VideoContentType = "video/mp4";
 
 export type PostObjectKey = `posts/${number}-${string}-${string}.jpg`;
+export type ProfileObjectKey = `profile-pictures/${string}.jpg`;
 
 export class S3 {
   private client: S3Client;
@@ -24,21 +24,16 @@ export class S3 {
   }
 
   async createPostPresignedUrl({
-    authorUserId,
-    recipientUserId,
+    key,
     contentLength,
     contentType,
     metadata,
   }: {
-    authorUserId: string;
-    recipientUserId: string;
+    key: PostObjectKey;
     contentLength: number;
     contentType: ImageContentType;
     metadata: { postid: string };
-  }): Promise<{ presignedUrl: string; key: string }> {
-    const key =
-      `posts/${Date.now()}-${recipientUserId}-${authorUserId}.jpg` satisfies PostObjectKey;
-
+  }): Promise<string> {
     const command = new PutObjectCommand({
       Key: key,
       Bucket: env.S3_POST_BUCKET,
@@ -51,22 +46,20 @@ export class S3 {
       expiresIn: FIVE_MINUTES,
     });
 
-    return { presignedUrl, key };
+    return presignedUrl;
   }
 
   async createProfilePicturePresignedUrl({
-    userId,
+    key,
     contentLength,
     contentType,
     metadata,
   }: {
-    userId: string;
+    key: ProfileObjectKey;
     metadata: { user: string };
     contentLength: number;
     contentType: ImageContentType;
-  }): Promise<{ presignedUrl: string; key: string }> {
-    const key = `profile-pictures/${userId}.jpg`;
-
+  }): Promise<string> {
     const command = new PutObjectCommand({
       Key: key,
       Bucket: env.S3_PROFILE_BUCKET,
@@ -79,6 +72,6 @@ export class S3 {
       expiresIn: FIVE_MINUTES,
     });
 
-    return { presignedUrl, key };
+    return presignedUrl;
   }
 }

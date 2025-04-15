@@ -13,6 +13,7 @@ import { Comment, Post, PostStats, Profile } from "../../models";
 import { CommentRepository } from "../../repositories/content/comment.repository";
 import type { PaginatedCommentResult as RawPaginatedComment } from "../../repositories/content/comment.repository";
 import {
+  CreatePostParams,
   PostRepository,
   PostResult,
 } from "../../repositories/content/post.repository";
@@ -57,15 +58,6 @@ interface UploadVideoPostForUserNotOnAppUrlParams {
   caption: string;
   height: number;
   width: number;
-}
-
-interface CreatePostParams {
-  authorUserId: string;
-  recipientUserId: string;
-  caption: string;
-  height: number;
-  width: number;
-  mediaType: "image" | "video";
 }
 
 interface DeletePostParams {
@@ -120,44 +112,6 @@ export class PostService {
     @inject(TYPES.Mux)
     private readonly mux: Mux,
   ) {}
-
-  private async createPost(
-    params: CreatePostParams,
-  ): Promise<Result<Post, PostErrors.FailedToCreatePost>> {
-    // transaction to create post and post stats
-    const currentDate = Date.now();
-    const postKey = `posts/${currentDate}-${params.recipientUserId}-${params.authorUserId}.jpg`;
-
-    const result = await this.db.transaction(async (tx) => {
-      const post = await this.postRepository.createPost(
-        {
-          authorUserId: params.authorUserId,
-          recipientUserId: params.recipientUserId,
-          caption: params.caption,
-          width: params.width,
-          height: params.height,
-          mediaType: params.mediaType,
-          postKey,
-          status: "pending",
-        },
-        tx,
-      );
-
-      if (!post) {
-        return err(new PostErrors.FailedToCreatePost(params.authorUserId));
-      }
-
-      await this.postRepository.createPostStats(
-        {
-          postId: post.id,
-        },
-        tx,
-      );
-      return ok(post);
-    });
-
-    return result;
-  }
 
   private async handleUpload(
     params:
@@ -293,24 +247,92 @@ export class PostService {
 
   async uploadPostForUserOnAppUrl(
     params: UploadPostForUserOnAppUrlParams,
-  ): Promise<
-    Result<
-      { presignedUrl: string; postId: string },
-      PostErrors.FailedToCreatePost
-    >
-  > {
-    return this.handleUpload(params, false);
+  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
+    return await this.db.transaction(async (tx) => {
+      const { key, post } = await this.postRepository.createPost(
+        {
+          authorUserId: params.authorUserId,
+          recipientUserId: params.recipientUserId,
+          caption: params.caption,
+          height: params.height,
+          width: params.width,
+          mediaType: "image",
+        },
+        tx,
+      );
+
+      const presignedUrl = await this.s3.createPostPresignedUrl({
+        key,
+        contentLength: params.contentLength,
+        contentType: params.contentType,
+        metadata: {
+          postid: post.id,
+        },
+      });
+
+      return ok({ presignedUrl, postId: post.id });
+    });
   }
 
   async uploadPostForUserNotOnAppUrl(
     params: UploadPostForUserNotOnAppUrlParams,
-  ): Promise<
-    Result<
-      { presignedUrl: string; postId: string },
-      PostErrors.FailedToCreatePost
-    >
-  > {
-    return this.handleUpload(params, false);
+  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
+    return await this.db.transaction(async (tx) => {
+      const { recipientNotOnAppPhoneNumber, recipientNotOnAppName } = params;
+
+      // Check if recipient exists
+      let recipient = await this.userRepository.getUserByPhoneNumber({
+        phoneNumber: recipientNotOnAppPhoneNumber,
+      });
+
+      if (recipient === undefined) {
+        const recipientUserId = randomUUID();
+
+        await this.userRepository.createUser(
+          {
+            id: recipientUserId,
+            phoneNumber: recipientNotOnAppPhoneNumber,
+            isOnApp: false,
+          },
+          tx,
+        );
+
+        await this.profileRepository.updateProfile(
+          {
+            userId: recipientUserId,
+            update: {
+              name: recipientNotOnAppName,
+              username: recipientNotOnAppName,
+            },
+          },
+          tx,
+        );
+        recipient = { id: recipientUserId };
+      }
+
+      const { key, post } = await this.postRepository.createPost(
+        {
+          authorUserId: params.authorUserId,
+          recipientUserId: recipient.id,
+          caption: params.caption,
+          height: params.height,
+          width: params.width,
+          mediaType: "image",
+        },
+        tx,
+      );
+
+      const presignedUrl = await this.s3.createPostPresignedUrl({
+        key,
+        contentLength: params.contentLength,
+        contentType: params.contentType,
+        metadata: {
+          postid: post.id,
+        },
+      });
+
+      return ok({ presignedUrl, postId: post.id });
+    });
   }
 
   async uploadVideoPostForUserOnAppUrl(

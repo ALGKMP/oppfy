@@ -8,12 +8,18 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
-import type { User, UserStatus } from "../../models"../../types/types
+import type {
+  NotificationSettings,
+  Profile,
+  User,
+  UserStats,
+  UserStatus,
+} from "../../models";
 import { TYPES } from "../../symbols";
 import type { PhoneNumberParam, UserIdParam } from "../../types";
+import { invariant } from "../../utils";
 
 export interface CreateUserParams {
-  id?: string;
   phoneNumber: string;
   isOnApp?: boolean;
 }
@@ -24,6 +30,14 @@ export interface GetRandomActiveUserIdsParams {
 
 export interface ExistingPhoneNumbersParams {
   phoneNumbers: string[];
+}
+
+export interface CreateUserResult {
+  user: User;
+  profile: Profile;
+  notificationSettings: NotificationSettings;
+  userStats: UserStats;
+  userStatus: UserStatus;
 }
 
 @injectable()
@@ -83,28 +97,51 @@ export class UserRepository {
   }
 
   async createUser(
-    { id = crypto.randomUUID(), phoneNumber, isOnApp = true }: CreateUserParams,
+    { phoneNumber, isOnApp = true }: CreateUserParams,
     tx: Transaction,
-  ): Promise<void> {
-    await tx
+  ): Promise<CreateUserResult> {
+    const [user] = await tx
       .insert(this.schema.user)
       .values({
-        id,
         phoneNumber,
       })
       .returning();
 
-    await tx.insert(this.schema.profile).values({
-      userId: id,
-    });
+    invariant(user);
 
-    await tx.insert(this.schema.notificationSettings).values({ userId: id });
-    await tx.insert(this.schema.userStats).values({ userId: id });
-    await tx.insert(this.schema.userStatus).values({
-      userId: id,
-      isOnApp,
-    });
+    const [profile] = await tx
+      .insert(this.schema.profile)
+      .values({
+        userId: user.id,
+      })
+      .returning();
+
+    const [notificationSettings] = await tx
+      .insert(this.schema.notificationSettings)
+      .values({ userId: user.id })
+      .returning();
+
+    const [userStats] = await tx
+      .insert(this.schema.userStats)
+      .values({ userId: user.id })
+      .returning();
+
+    const [userStatus] = await tx
+      .insert(this.schema.userStatus)
+      .values({
+        userId: user.id,
+        isOnApp,
+      })
+      .returning();
+
+    invariant(profile);
+    invariant(notificationSettings);
+    invariant(userStats);
+    invariant(userStatus);
+
+    return { user, profile, notificationSettings, userStats, userStatus };
   }
+
   async deleteUser(
     { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,

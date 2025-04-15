@@ -11,8 +11,9 @@ import {
   isLikedSql,
   withOnboardingCompleted,
 } from "@oppfy/db/utils/query-helpers";
+import { PostObjectKey } from "@oppfy/s3";
 
-import { Post, PostInsert, PostStats, Profile }../../types/types
+import { Post, PostStats, Profile } from "../../models";
 import { TYPES } from "../../symbols";
 import { PaginationParams, PostIdParam } from "../../types";
 import { invariant } from "../../utils";
@@ -20,6 +21,15 @@ import { invariant } from "../../utils";
 export interface GetPostParams {
   postId: string;
   userId: string;
+}
+
+export interface CreatePostParams {
+  authorUserId: string;
+  recipientUserId: string;
+  caption: string;
+  height: number;
+  width: number;
+  mediaType: "image" | "video";
 }
 
 export interface DeletePostParams {
@@ -56,10 +66,20 @@ export class PostRepository {
   }
 
   async createPost(
-    values: PostInsert,
+    params: CreatePostParams,
     tx: Transaction,
-  ): Promise<{ post: Post; postStats: PostStats }> {
-    const [post] = await tx.insert(this.schema.post).values(values).returning();
+  ): Promise<{ post: Post; postStats: PostStats; key: PostObjectKey }> {
+    const postKey =
+      `posts/${Date.now()}-${params.recipientUserId}-${params.authorUserId}.jpg` satisfies PostObjectKey;
+
+    const [post] = await tx
+      .insert(this.schema.post)
+      .values({
+        ...params,
+        postKey,
+        status: "pending",
+      })
+      .returning();
 
     invariant(post);
 
@@ -72,7 +92,7 @@ export class PostRepository {
 
     invariant(postStats);
 
-    return { post, postStats };
+    return { post, postStats, key: postKey };
   }
 
   async getPost(
