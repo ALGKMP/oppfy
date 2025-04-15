@@ -12,6 +12,7 @@ import * as PostErrors from "../../errors/content/post.error";
 import type {
   PaginatedResponse,
   PaginationParams,
+  PostIdParam,
 } from "../../interfaces/types";
 import { Comment, Post, PostStats } from "../../models";
 import { CommentRepository } from "../../repositories/content/comment.repository";
@@ -454,6 +455,19 @@ export class PostService {
     const rawPost = await this.postRepository.getPost(params);
     if (!rawPost) return err(new PostErrors.PostNotFound(params.postId));
     return ok(this.hydrateAndProcessPost(rawPost));
+  }
+
+  async getPostStats(
+    params: GetPostParams,
+  ): Promise<Result<PostStats & {
+    hasLiked: boolean;
+  }, PostErrors.PostNotFound>> {
+    const rawPost = await this.postRepository.getPost(params);
+    if (!rawPost) return err(new PostErrors.PostNotFound(params.postId));
+    return ok({
+      ...rawPost.postStats,
+      hasLiked: !!rawPost.like,
+    });
   }
 
   async paginatePosts({

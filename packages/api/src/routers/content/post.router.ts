@@ -168,6 +168,24 @@ export const postRouter = createTRPCRouter({
         },
       );
     }),
+  
+  getPostStats: protectedProcedure
+    .input(z.object({ postId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.services.post.getPostStats({
+        userId: ctx.session.uid,
+        postId: input.postId,
+      });
+
+      return result.match(
+        (res) => res,
+        (_) => {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+          });
+        },
+      );
+    }),
 
   paginatePosts: protectedProcedure
     .input(
