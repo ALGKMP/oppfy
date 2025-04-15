@@ -1,19 +1,15 @@
-import { randomUUID } from "crypto";
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
 import { CloudFront, Hydrate } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
-import { env } from "@oppfy/env";
 import { Mux } from "@oppfy/mux";
-import { PostObjectKey, S3 } from "@oppfy/s3";
+import { ImageContentType, S3 } from "@oppfy/s3";
 
 import * as PostErrors from "../../errors/content/post.error";
 import { Comment, Post, PostStats, Profile } from "../../models";
 import { CommentRepository } from "../../repositories/content/comment.repository";
-import type { PaginatedCommentResult as RawPaginatedComment } from "../../repositories/content/comment.repository";
 import {
-  CreatePostParams,
   PostRepository,
   PostResult,
 } from "../../repositories/content/post.repository";
@@ -22,47 +18,25 @@ import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
 import type { PaginatedResponse, PaginationParams } from "../../types";
 
-interface UploadPostForUserOnAppUrlParams {
+interface BasePostParams {
   authorUserId: string;
-  recipientUserId: string;
   caption: string;
   height: number;
   width: number;
-  contentLength: number;
-  contentType: "image/jpeg" | "image/png" | "image/heic";
 }
 
-interface UploadPostForUserNotOnAppUrlParams {
-  authorUserId: string;
+interface BaseImagePostParams extends BasePostParams {
+  contentLength: number;
+  contentType: ImageContentType;
+}
+
+interface BaseUserOnAppParams {
+  recipientUserId: string;
+}
+
+interface BaseUserNotOnAppParams {
   recipientNotOnAppPhoneNumber: string;
   recipientNotOnAppName: string;
-  caption: string;
-  height: number;
-  width: number;
-  contentLength: number;
-  contentType: "image/jpeg" | "image/png" | "image/heic";
-}
-
-interface UploadVideoPostForUserOnAppUrlParams {
-  authorUserId: string;
-  recipientUserId: string;
-  caption: string;
-  height: number;
-  width: number;
-}
-
-interface UploadVideoPostForUserNotOnAppUrlParams {
-  authorUserId: string;
-  recipientNotOnAppPhoneNumber: string;
-  recipientNotOnAppName: string;
-  caption: string;
-  height: number;
-  width: number;
-}
-
-interface DeletePostParams {
-  userId: string;
-  postId: string;
 }
 
 interface GetPostParams {
@@ -71,6 +45,11 @@ interface GetPostParams {
 }
 
 interface GetPostForSiteParams {
+  postId: string;
+}
+
+interface DeletePostParams {
+  userId: string;
   postId: string;
 }
 
@@ -113,248 +92,108 @@ export class PostService {
     private readonly mux: Mux,
   ) {}
 
-  private async handleUpload(
-    params:
-      | UploadPostForUserOnAppUrlParams
-      | UploadPostForUserNotOnAppUrlParams
-      | UploadVideoPostForUserOnAppUrlParams
-      | UploadVideoPostForUserNotOnAppUrlParams,
-    isVideo: boolean,
-  ): Promise<
-    Result<
-      { presignedUrl: string; postId: string },
-      PostErrors.FailedToCreatePost
-    >
-  > {
-    const currentDate = Date.now();
+  async uploadImagePostForUserOnApp(
+    params: BaseImagePostParams & BaseUserOnAppParams,
+  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
+    return ok(await this.uploadImagePost(params));
+  }
 
-    try {
-      if ("recipientUserId" in params) {
-        const result = await this.createPost({
-          authorUserId: params.authorUserId,
-          recipientUserId: params.recipientUserId,
-          caption: params.caption,
-          height: params.height,
-          width: params.width,
-          mediaType: isVideo ? "video" : "image",
-        });
+  async uploadImagePostForUserNotOnApp(
+    params: BaseImagePostParams & BaseUserNotOnAppParams,
+  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
+    return await this.db.transaction(async (tx) => {
+      const recipientUser = await this.userRepository.getUserByPhoneNumber({
+        phoneNumber: params.recipientNotOnAppPhoneNumber,
+      });
 
-        if (result.isErr()) {
-          return err(result.error);
-        }
-
-        const post = result.value;
-
-        if (isVideo) {
-          const presignedUrl = await this.mux.getPresignedUrlForVideo({
-            postid: post.id,
-          });
-          return ok({ presignedUrl, postId: post.id });
-        } else {
-          const { contentLength, contentType } =
-            params as UploadPostForUserOnAppUrlParams;
-          const objectKey =
-            `posts/${currentDate}-${params.recipientUserId}-${params.authorUserId}.jpg` satisfies PostObjectKey;
-          const presignedUrl = await this.s3.putObjectPresignedUrl({
-            Bucket: env.S3_POST_BUCKET,
-            Key: objectKey,
-            ContentLength: contentLength,
-            ContentType: contentType,
-            Metadata: {
-              postid: post.id,
-            },
-          });
-          return ok({ presignedUrl, postId: post.id });
-        }
-      } else {
-        const { recipientNotOnAppPhoneNumber, recipientNotOnAppName } = params;
-        let result: { presignedUrl: string; postId: string } | undefined;
-
-        await this.db.transaction(async (tx) => {
-          const recipient = await this.userRepository.getUserByPhoneNumber({
-            phoneNumber: recipientNotOnAppPhoneNumber,
-          });
-          const recipientId = recipient?.id ?? randomUUID();
-
-          if (!recipient) {
-            await this.userRepository.createUser(
-              {
-                id: recipientId,
-                phoneNumber: recipientNotOnAppPhoneNumber,
-                isOnApp: false,
-              },
-              tx,
-            );
-
-            await this.profileRepository.updateProfile({
-              userId: recipientId,
-              update: {
-                name: recipientNotOnAppName,
-                username: recipientNotOnAppName,
-              },
-            });
-          }
-
-          const post = await this.createPost({
-            authorUserId: params.authorUserId,
-            recipientUserId: recipientId,
-            caption: params.caption,
-            height: params.height,
-            width: params.width,
-            mediaType: isVideo ? "video" : "image",
-          });
-
-          if (post.isErr()) {
-            return err(post.error);
-          }
-
-          if (isVideo) {
-            result = {
-              presignedUrl: await this.mux.getPresignedUrlForVideo({
-                postid: post.value.id,
-              }),
-              postId: post.value.id,
-            };
-          } else {
-            const { contentLength, contentType } =
-              params as UploadPostForUserNotOnAppUrlParams;
-            const objectKey =
-              `posts/${currentDate}-${recipientId}-${params.authorUserId}.jpg` satisfies PostObjectKey;
-            result = {
-              presignedUrl: await this.s3.putObjectPresignedUrl({
-                Bucket: env.S3_POST_BUCKET,
-                Key: objectKey,
-                ContentLength: contentLength,
-                ContentType: contentType,
-                Metadata: {
-                  postid: post.value.id,
-                },
-              }),
-              postId: post.value.id,
-            };
-          }
-        });
-
-        if (!result) {
-          return err(new PostErrors.FailedToCreatePost(params.authorUserId));
-        }
-        return ok(result);
+      if (recipientUser) {
+        return ok(
+          await this.uploadImagePost({
+            ...params,
+            recipientUserId: recipientUser.id,
+          }),
+        );
       }
-    } catch (error) {
-      return err(new PostErrors.FailedToCreatePost(params.authorUserId));
-    }
-  }
 
-  async uploadPostForUserOnAppUrl(
-    params: UploadPostForUserOnAppUrlParams,
-  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
-    return await this.db.transaction(async (tx) => {
-      const { key, post } = await this.postRepository.createPost(
-        {
-          authorUserId: params.authorUserId,
-          recipientUserId: params.recipientUserId,
-          caption: params.caption,
-          height: params.height,
-          width: params.width,
-          mediaType: "image",
-        },
-        tx,
-      );
-
-      const presignedUrl = await this.s3.createPostPresignedUrl({
-        key,
-        contentLength: params.contentLength,
-        contentType: params.contentType,
-        metadata: {
-          postid: post.id,
-        },
-      });
-
-      return ok({ presignedUrl, postId: post.id });
-    });
-  }
-
-  async uploadPostForUserNotOnAppUrl(
-    params: UploadPostForUserNotOnAppUrlParams,
-  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
-    return await this.db.transaction(async (tx) => {
-      const { recipientNotOnAppPhoneNumber, recipientNotOnAppName } = params;
-
-      // Check if recipient exists
-      let recipient = await this.userRepository.getUserByPhoneNumber({
-        phoneNumber: recipientNotOnAppPhoneNumber,
-      });
-
-      if (recipient === undefined) {
-        const recipientUserId = randomUUID();
-
+      const { user: createdRecipientUser } =
         await this.userRepository.createUser(
           {
-            id: recipientUserId,
-            phoneNumber: recipientNotOnAppPhoneNumber,
+            phoneNumber: params.recipientNotOnAppPhoneNumber,
             isOnApp: false,
           },
           tx,
         );
 
-        await this.profileRepository.updateProfile(
-          {
-            userId: recipientUserId,
-            update: {
-              name: recipientNotOnAppName,
-              username: recipientNotOnAppName,
-            },
-          },
-          tx,
-        );
-        recipient = { id: recipientUserId };
-      }
-
-      const { key, post } = await this.postRepository.createPost(
+      await this.profileRepository.updateProfile(
         {
-          authorUserId: params.authorUserId,
-          recipientUserId: recipient.id,
-          caption: params.caption,
-          height: params.height,
-          width: params.width,
-          mediaType: "image",
+          userId: createdRecipientUser.id,
+          update: {
+            name: params.recipientNotOnAppName,
+            username: `${params.recipientNotOnAppName}-${Math.random().toString(36).substring(2, 15)}`,
+          },
         },
         tx,
       );
 
-      const presignedUrl = await this.s3.createPostPresignedUrl({
-        key,
-        contentLength: params.contentLength,
-        contentType: params.contentType,
-        metadata: {
-          postid: post.id,
-        },
-      });
-
-      return ok({ presignedUrl, postId: post.id });
+      return ok(
+        await this.uploadImagePost({
+          ...params,
+          recipientUserId: createdRecipientUser.id,
+        }),
+      );
     });
   }
 
-  async uploadVideoPostForUserOnAppUrl(
-    params: UploadVideoPostForUserOnAppUrlParams,
-  ): Promise<
-    Result<
-      { presignedUrl: string; postId: string },
-      PostErrors.FailedToCreatePost
-    >
-  > {
-    return this.handleUpload(params, true);
+  async uploadVideoPostForUserOnApp(
+    params: BasePostParams & BaseUserOnAppParams,
+  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
+    return ok(await this.uploadVideoPost(params));
   }
 
-  async uploadVideoPostForUserNotOnAppUrl(
-    params: UploadVideoPostForUserNotOnAppUrlParams,
-  ): Promise<
-    Result<
-      { presignedUrl: string; postId: string },
-      PostErrors.FailedToCreatePost
-    >
-  > {
-    return this.handleUpload(params, true);
+  async uploadVideoPostForUserNotOnApp(
+    params: BasePostParams & BaseUserNotOnAppParams,
+  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
+    return await this.db.transaction(async (tx) => {
+      const recipientUser = await this.userRepository.getUserByPhoneNumber({
+        phoneNumber: params.recipientNotOnAppPhoneNumber,
+      });
+
+      if (recipientUser) {
+        return ok(
+          await this.uploadVideoPost({
+            ...params,
+            recipientUserId: recipientUser.id,
+          }),
+        );
+      }
+
+      const { user: createdRecipientUser } =
+        await this.userRepository.createUser(
+          {
+            phoneNumber: params.recipientNotOnAppPhoneNumber,
+            isOnApp: false,
+          },
+          tx,
+        );
+
+      await this.profileRepository.updateProfile(
+        {
+          userId: createdRecipientUser.id,
+          update: {
+            name: params.recipientNotOnAppName,
+            username: `${params.recipientNotOnAppName}-${Math.random().toString(36).substring(2, 15)}`,
+          },
+        },
+        tx,
+      );
+
+      return ok(
+        await this.uploadVideoPost({
+          ...params,
+          recipientUserId: createdRecipientUser.id,
+        }),
+      );
+    });
   }
 
   async deletePost(
@@ -500,6 +339,59 @@ export class PostService {
         hasMore && lastItem
           ? { id: lastItem.comment.id, createdAt: lastItem.comment.createdAt }
           : null,
+    });
+  }
+
+  private async uploadImagePost(
+    params: BaseImagePostParams & BaseUserOnAppParams,
+  ): Promise<{ presignedUrl: string; postId: string }> {
+    return await this.db.transaction(async (tx) => {
+      const key = `posts/${Date.now()}-${params.recipientUserId}-${params.authorUserId}.jpg`;
+
+      const { post } = await this.postRepository.createPost(
+        {
+          ...params,
+          postKey: key,
+          mediaType: "image",
+        },
+        tx,
+      );
+
+      const presignedUrl = await this.s3.createPostPresignedUrl({
+        key,
+        contentLength: params.contentLength,
+        contentType: params.contentType,
+        metadata: {
+          postid: post.id,
+        },
+      });
+
+      return { presignedUrl, postId: post.id };
+    });
+  }
+
+  private async uploadVideoPost(
+    params: BasePostParams & BaseUserOnAppParams,
+  ): Promise<{ presignedUrl: string; postId: string }> {
+    return await this.db.transaction(async (tx) => {
+      const key = `processing`;
+
+      const { post } = await this.postRepository.createPost(
+        {
+          ...params,
+          postKey: key,
+          mediaType: "image",
+        },
+        tx,
+      );
+
+      const presignedUrl = await this.mux.getPresignedUrlForVideo({
+        metadata: {
+          postid: post.id,
+        },
+      });
+
+      return { presignedUrl, postId: post.id };
     });
   }
 

@@ -7,9 +7,6 @@ const FIVE_MINUTES = 300;
 
 export type ImageContentType = "image/jpeg" | "image/png" | "image/heic";
 
-export type PostObjectKey = `posts/${number}-${string}-${string}.jpg`;
-export type ProfileObjectKey = `profile-pictures/${string}.jpg`;
-
 export class S3 {
   private client: S3Client;
 
@@ -29,7 +26,7 @@ export class S3 {
     contentType,
     metadata,
   }: {
-    key: PostObjectKey;
+    key: string;
     contentLength: number;
     contentType: ImageContentType;
     metadata: { postid: string };
@@ -55,7 +52,7 @@ export class S3 {
     contentType,
     metadata,
   }: {
-    key: ProfileObjectKey;
+    key: string;
     metadata: { user: string };
     contentLength: number;
     contentType: ImageContentType;
