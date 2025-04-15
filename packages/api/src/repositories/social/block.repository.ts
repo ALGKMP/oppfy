@@ -7,7 +7,7 @@ import { withOnboardingCompleted } from "@oppfy/db/utils/query-helpers";
 import type { Block, Profile } from "../../models";
 import { TYPES } from "../../symbols";
 import type { DirectionalUserIdsParams, PaginationParams } from "../../types";
-../../types/types
+
 export interface PaginateBlockedUsersParams extends PaginationParams {
   userId: string;
 }

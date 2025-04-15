@@ -17,7 +17,7 @@ import type { Friend, FriendRequest, Profile } from "../../models";
 import { TYPES } from "../../symbols";
 import type {
   BidirectionalUserIdsparams,
-  Direct../../types/types
+  DirectionalUserIdsParams,
   PaginationParams,
 } from "../../types";
 

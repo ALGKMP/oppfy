@@ -9,9 +9,9 @@ import type {
 } from "@oppfy/db";
 import { withOnboardingCompleted } from "@oppfy/db/utils/query-helpers";
 
-import { Comment, Profile } from "../../types/types
+import { Comment, Profile } from "../../models";
 import { TYPES } from "../../symbols";
-import { PaginationParams } from "../../types";
+import type { PaginationParams } from "../../types";
 
 export interface GetCommentParams {
   commentId: string;

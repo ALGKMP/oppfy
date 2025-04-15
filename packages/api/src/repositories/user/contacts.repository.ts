@@ -9,7 +9,7 @@ import type {
 } from "@oppfy/db";
 import { env } from "@oppfy/env";
 
-import { TYPES } from "../../symbo../../types/types
+import { TYPES } from "../../symbols";
 import type { UserIdParam } from "../../types";
 
 export interface DeleteUserContactsParam {

@@ -7,7 +7,7 @@ import {
   withoutBlocked,
 } from "@oppfy/db/utils/query-helpers";
 
-import type { Profile, ProfileInsert, UserStats }../../types/types
+import type { Profile, ProfileInsert, UserStats } from "../../models";
 import { TYPES } from "../../symbols";
 import type { UserIdParam, UsernameParam } from "../../types";
 
@@ -66,7 +66,7 @@ export class ProfileRepository {
         profile: this.schema.profile,
       })
       .from(this.schema.profile)
-      .$dynamic()
+      .$dynamic();
 
     // Use the withOnboardingCompleted helper function
     query = withOnboardingCompleted(query, this.schema.profile);

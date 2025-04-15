@@ -13,9 +13,9 @@ import {
   withOnboardingCompleted,
 } from "@oppfy/db/utils/query-helpers";
 
-import type { Notification, N../../types/typesrofile } from "../../models";
+import type { Notification, NotificationSettings, Profile } from "../../models";
 import { TYPES } from "../../symbols";
-import { UserIdParam } from "../../types";
+import type { UserIdParam } from "../../types";
 
 export interface PaginateNotificationsParams {
   userId: string;
