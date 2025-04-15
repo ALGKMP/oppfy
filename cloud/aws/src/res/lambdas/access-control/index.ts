@@ -6,7 +6,7 @@ import type {
 import { Client } from "pg";
 
 interface Post {
-  privacy_setting: string;
+  privacy: string;
 }
 
 interface DbConfig {
@@ -23,8 +23,8 @@ const isPost = (row: unknown): row is Post => {
   return (
     typeof row === "object" &&
     row !== null &&
-    "privacy_setting" in row &&
-    typeof row.privacy_setting === "string"
+    "privacy" in row &&
+    typeof row.privacy === "string"
   );
 };
 
@@ -53,10 +53,10 @@ const checkIfPublic = async (postKey: string): Promise<boolean> => {
 
   try {
     const query = `
-      SELECT u."privacy_setting"
+      SELECT p."privacy"
       FROM "post" p
-      JOIN "user" u ON p."recipient_id" = u."id"
-      WHERE p."key" = $1
+      JOIN "profile" pr ON p."recipientUserId" = pr."userId"
+      WHERE p."postKey" = $1
     `;
 
     const result = await client.query(query, [`${postKey}`]);
@@ -66,7 +66,7 @@ const checkIfPublic = async (postKey: string): Promise<boolean> => {
       return false;
     }
 
-    return row.privacy_setting === "public";
+    return row.privacy === "public";
   } catch (error) {
     console.error("Database query error:", error);
     throw error;
