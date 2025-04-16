@@ -97,23 +97,15 @@ export class PostService {
     private readonly mux: Mux,
   ) {}
 
-  async getPostStats(params: GetPostParams): Promise<
-    Result<
-      PostStats & {
-        hasLiked: boolean;
-      },
-      PostErrors.PostNotFound
-    >
-  > {
+  async getPostStats(
+    params: GetPostParams,
+  ): Promise<Result<PostStats, PostErrors.PostNotFound>> {
     const post = await this.postRepository.getPost(params);
 
     if (post === undefined)
       return err(new PostErrors.PostNotFound(params.postId));
 
-    return ok({
-      ...post.postStats,
-      hasLiked: !!post.isLiked,
-    });
+    return ok(post.postStats);
   }
 
   async getHasLiked(
