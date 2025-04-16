@@ -243,7 +243,9 @@ export class PostRepository {
         recipientProfile: this.aliasedSchema.recipientProfile,
         post: this.schema.post,
         postStats: this.schema.postStats,
-        ...(userId ? { isLiked: isLikedSql(userId) } : {}),
+        ...(userId
+          ? { isLiked: isLikedSql(userId) }
+          : { isLiked: sql<boolean>`false` }),
       })
       .from(this.schema.post)
       .innerJoin(
