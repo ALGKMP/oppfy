@@ -15,6 +15,7 @@ import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
 type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
+
 interface ViewToken {
   item: Post;
   key: string;

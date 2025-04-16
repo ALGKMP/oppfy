@@ -13,7 +13,7 @@ type Post = InferSelectModel<typeof schema.post>;
 export type Hydrate<T> = T extends Profile
   ? T & { profilePictureUrl: string | null }
   : T extends Post
-    ? T & { assetUrl: string | null }
+    ? T & { assetUrl: string }
     : never;
 
 const ONE_HOUR = 60 * 60 * 1000;

@@ -3,26 +3,21 @@ import {
   useActionSheetController,
   useAlertDialogController,
 } from "~/components/ui";
+import { useReport } from "~/hooks/post/useReport";
 import { useSaveMedia } from "~/hooks/post/useSaveMedia";
 import { useAuth } from "~/hooks/useAuth";
 import { useDeletePost } from "../../hooks/post/useDeletePost";
-import type { Author, Recipient } from "./PostCard";
-import { useReport } from "~/hooks/post/useReport";
 
 interface MorePostOptionsButtonProps {
   postId: string;
-  recipient: Recipient;
-  mediaUrl: string;
+  recipientUserId: string;
+  assetUrl: string;
 }
 
-const MorePostOptionsButton = ({
-  mediaUrl,
-  postId,
-  recipient,
-}: MorePostOptionsButtonProps) => {
+const MorePostOptionsButton = (props: MorePostOptionsButtonProps) => {
   const { handleSavePost, isSaving } = useSaveMedia();
   const { handleDeletePost, isDeleting } = useDeletePost();
-  const { handleReportPost } = useReport({ postId });
+  const { handleReportPost } = useReport({ postId: props.postId });
 
   const { user } = useAuth();
   const { show: showAlert } = useAlertDialogController();
@@ -31,7 +26,7 @@ const MorePostOptionsButton = ({
   const buttonOptionsOther = [
     {
       text: "Save Post",
-      onPress: () => void handleSavePost(mediaUrl),
+      onPress: () => void handleSavePost(props.assetUrl),
       autoClose: true,
     },
     {
@@ -98,7 +93,7 @@ const MorePostOptionsButton = ({
         color: isSaving ? "$gray9" : undefined,
       },
       disabled: isSaving,
-      onPress: () => void handleSavePost(mediaUrl),
+      onPress: () => void handleSavePost(props.assetUrl),
       autoClose: true,
     },
     {
@@ -118,7 +113,7 @@ const MorePostOptionsButton = ({
         });
 
         if (shouldDelete) {
-          void handleDeletePost(postId);
+          void handleDeletePost(props.postId);
         }
       },
       autoClose: false,
@@ -132,7 +127,9 @@ const MorePostOptionsButton = ({
         void show({
           title: "More Options",
           buttonOptions:
-            user?.uid === recipient.id ? buttonOptionsSelf : buttonOptionsOther,
+            user?.uid === props.recipientUserId
+              ? buttonOptionsSelf
+              : buttonOptionsOther,
         });
       }}
     />

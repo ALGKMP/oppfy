@@ -1,75 +1,26 @@
 import React from "react";
 import { TouchableOpacity } from "react-native";
-import type { ImageSourcePropType } from "react-native";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { Avatar, Skeleton, Text, View, XStack, YStack } from "~/components/ui";
 import useRouteProfile from "~/hooks/useRouteProfile";
-import { RouterOutputs } from "~/utils/api";
-import { FloatingComments } from "./FloatingComments";
+import type { RouterOutputs } from "~/utils/api";
 import MorePostOptionsButton from "./MorePostOptionsButton";
 import PostCaption from "./PostCaption";
 import PostDate from "./PostDate";
 import { PostImage } from "./PostImage";
-import { PostStats } from "./PostStats";
 import { PostVideo } from "./PostVideo";
 
-// export interface Author {
-//   id: string;
-//   name: string;
-//   username: string;
-//   profilePictureUrl: string | null | undefined;
-// }
-
-// export interface Recipient {
-//   id: string;
-//   name: string;
-//   username: string;
-//   profilePictureUrl: string | null | undefined;
-// }
-
-// interface MediaDimensions {
-//   width: number;
-//   height: number;
-// }
-
-// interface Media {
-//   id: string;
-//   type: "image" | "video";
-//   url: string;
-//   dimensions: MediaDimensions;
-//   recipient: Recipient;
-// }
-
-// interface Stats {
-//   likes: number;
-//   comments: number;
-//   hasLiked: boolean;
-// }
-
-// type Endpoint = "self-profile" | "other-profile" | "single-post" | "home-feed";
-
-// export interface PostCardProps {
-//   postId: string;
-//   createdAt: Date;
-//   caption: string;
-//   author: Author;
-//   recipient: Recipient;
-//   media: Media;
-//   stats: Stats;
-//   endpoint: Endpoint;
-//   isViewable: boolean;
-// }
-
 type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
-type Profile = RouterOutputs["profile"]["getProfile"];
-type ProfileStats = RouterOutputs["profile"]["getStats"];
 
 interface PostCardProps {
-  post: Post;
-  authorProfile: Profile;
-  recipientProfile: Profile;
+  post: Post["post"];
+  postStats: Post["postStats"];
+  authorProfile: Post["authorProfile"];
+  recipientProfile: Post["recipientProfile"];
+  isLiked: Post["isLiked"];
+  isViewable: boolean;
 }
 
 const PostCard = (props: PostCardProps) => {
@@ -77,16 +28,16 @@ const PostCard = (props: PostCardProps) => {
 
   return (
     <View borderRadius="$8" overflow="hidden">
-      {props.post.post.mediaType === "image" ? (
+      {props.post.mediaType === "image" ? (
         <PostImage
-          media={props.media}
-          stats={props.stats}
+          post={props.post}
+          stats={props.postStats}
           isViewable={props.isViewable}
         />
       ) : (
         <PostVideo
-          media={props.media}
-          stats={props.stats}
+          post={props.post}
+          stats={props.postStats}
           isViewable={props.isViewable}
         />
       )}
@@ -135,15 +86,15 @@ const PostCard = (props: PostCardProps) => {
           <TouchableOpacity
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              routeProfile(props.recipient.id, {
-                name: props.recipient.name,
-                username: props.recipient.username,
-                profilePictureUrl: props.recipient.profilePictureUrl,
+              routeProfile(props.recipientProfile.id, {
+                name: props.recipientProfile.name,
+                username: props.recipientProfile.username,
+                profilePictureUrl: props.recipientProfile.profilePictureUrl,
               });
             }}
           >
             <Avatar
-              source={props.recipient.profilePictureUrl}
+              source={props.recipientProfile.profilePictureUrl}
               size={44}
               bordered
             />
@@ -153,10 +104,10 @@ const PostCard = (props: PostCardProps) => {
             <TouchableOpacity
               onPress={() => {
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                routeProfile(props.recipient.id, {
-                  name: props.recipient.name,
-                  username: props.recipient.username,
-                  profilePictureUrl: props.recipient.profilePictureUrl,
+                routeProfile(props.recipientProfile.id, {
+                  name: props.recipientProfile.name,
+                  username: props.recipientProfile.username,
+                  profilePictureUrl: props.recipientProfile.profilePictureUrl,
                 });
               }}
             >
@@ -169,17 +120,17 @@ const PostCard = (props: PostCardProps) => {
                 shadowOpacity={0.4}
                 shadowRadius={3}
               >
-                {props.recipient.username}
+                {props.recipientProfile.username}
               </Text>
             </TouchableOpacity>
             <XStack gap="$1" alignItems="center">
               <TouchableOpacity
                 onPress={() => {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  routeProfile(props.author.id, {
-                    name: props.author.name,
-                    username: props.author.username,
-                    profilePictureUrl: props.author.profilePictureUrl,
+                  routeProfile(props.authorProfile.id, {
+                    name: props.authorProfile.name,
+                    username: props.authorProfile.username,
+                    profilePictureUrl: props.authorProfile.profilePictureUrl,
                   });
                 }}
               >
@@ -192,7 +143,7 @@ const PostCard = (props: PostCardProps) => {
                   shadowOpacity={0.4}
                   shadowRadius={3}
                 >
-                  opped by {props.author.username}
+                  opped by {props.authorProfile.username}
                 </Text>
               </TouchableOpacity>
               <Text
@@ -204,7 +155,7 @@ const PostCard = (props: PostCardProps) => {
                 shadowOpacity={0.4}
                 shadowRadius={3}
               >
-                • <PostDate createdAt={props.createdAt} />
+                • <PostDate createdAt={props.post.createdAt} />
               </Text>
             </XStack>
           </YStack>

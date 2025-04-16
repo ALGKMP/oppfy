@@ -15,6 +15,7 @@ import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
 type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
+
 interface ViewToken {
   item: Post;
   key: string;
@@ -104,45 +105,7 @@ const OtherProfile = () => {
   };
 
   const renderPost = ({ item }: { item: Post }) => (
-    <PostCard
-      postId={item.post.id}
-      endpoint="other-profile"
-      createdAt={item.post.createdAt}
-      caption={item.post.caption}
-      author={{
-        id: item.authorUserId,
-        name: item.authorName ?? "",
-        username: item.authorUsername ?? "",
-        profilePictureUrl: item.authorProfilePictureUrl,
-      }}
-      recipient={{
-        id: item.recipientUserId,
-        name: item.recipientName ?? "",
-        username: item.recipientUsername ?? "",
-        profilePictureUrl: item.recipientProfilePictureUrl,
-      }}
-      media={{
-        id: item.post.id,
-        recipient: {
-          id: item.post.id,
-          name: item.recipientName ?? "",
-          username: item.recipientUsername ?? "",
-          profilePictureUrl: item.recipientProfilePictureUrl,
-        },
-        type: item.post.mediaType,
-        url: item.assetUrl,
-        dimensions: {
-          width: item.post.width,
-          height: item.post.height,
-        },
-      }}
-      stats={{
-        likes: item.postStats.likes,
-        comments: item.postStats.comments,
-        hasLiked: item.hasLiked,
-      }}
-      isViewable={viewableItems.includes(item.post.id)}
-    />
+    <PostCard {...item} isViewable={viewableItems.includes(item.post.id)} />
   );
 
   const renderHeader = () => (
