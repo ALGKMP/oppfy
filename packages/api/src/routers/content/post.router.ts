@@ -20,10 +20,14 @@ export const postRouter = createTRPCRouter({
 
       return result.match(
         (res) => res,
-        (_) => {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-          });
+        (err) => {
+          switch (err.name) {
+            case "PostNotFoundError":
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Post not found",
+              });
+          }
         },
       );
     }),
@@ -42,10 +46,36 @@ export const postRouter = createTRPCRouter({
 
       return result.match(
         (res) => res,
-        (_) => {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-          });
+        (err) => {
+          switch (err.name) {
+            case "PostNotFoundError":
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Post not found",
+              });
+          }
+        },
+      );
+    }),
+
+  getHasLiked: protectedProcedure
+    .input(z.object({ postId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.services.post.getHasLiked({
+        userId: ctx.session.uid,
+        postId: input.postId,
+      });
+
+      return result.match(
+        (res) => res,
+        (err) => {
+          switch (err.name) {
+            case "PostNotFoundError":
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Post not found",
+              });
+          }
         },
       );
     }),

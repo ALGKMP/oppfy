@@ -40,8 +40,13 @@ interface BaseUserNotOnAppParams {
 }
 
 interface GetPostParams {
-  postId: string;
   userId: string;
+  postId: string;
+}
+
+interface GetHasLikedParams {
+  userId: string;
+  postId: string;
 }
 
 interface GetPostForSiteParams {
@@ -109,6 +114,17 @@ export class PostService {
       ...post.postStats,
       hasLiked: !!post.isLiked,
     });
+  }
+
+  async getHasLiked(
+    params: GetHasLikedParams,
+  ): Promise<Result<boolean, PostErrors.PostNotFound>> {
+    const post = await this.postRepository.getPost(params);
+
+    if (post === undefined)
+      return err(new PostErrors.PostNotFound(params.postId));
+
+    return ok(post.isLiked);
   }
 
   async getPost(

@@ -18,8 +18,8 @@ import { PaginationParams, PostIdParam } from "../../types";
 import { invariant } from "../../utils";
 
 export interface GetPostParams {
-  postId: string;
   userId: string;
+  postId: string;
 }
 
 export interface CreatePostParams {
@@ -65,32 +65,6 @@ export class PostRepository {
     };
   }
 
-  async createPost(
-    params: CreatePostParams,
-    tx: Transaction,
-  ): Promise<{ post: Post; postStats: PostStats }> {
-    const [post] = await tx
-      .insert(this.schema.post)
-      .values({
-        ...params,
-        status: "pending",
-      })
-      .returning();
-
-    invariant(post);
-
-    const [postStats] = await tx
-      .insert(this.schema.postStats)
-      .values({
-        postId: post.id,
-      })
-      .returning();
-
-    invariant(postStats);
-
-    return { post, postStats };
-  }
-
   async getPost(
     { userId, postId }: GetPostParams,
     db: Database = this.db,
@@ -131,6 +105,32 @@ export class PostRepository {
       recipientProfile: result.recipientProfile as Profile<"notOnApp">,
       isLiked: undefined,
     };
+  }
+
+  async createPost(
+    params: CreatePostParams,
+    tx: Transaction,
+  ): Promise<{ post: Post; postStats: PostStats }> {
+    const [post] = await tx
+      .insert(this.schema.post)
+      .values({
+        ...params,
+        status: "pending",
+      })
+      .returning();
+
+    invariant(post);
+
+    const [postStats] = await tx
+      .insert(this.schema.postStats)
+      .values({
+        postId: post.id,
+      })
+      .returning();
+
+    invariant(postStats);
+
+    return { post, postStats };
   }
 
   async paginatePostsOfFollowing(

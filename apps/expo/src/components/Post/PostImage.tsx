@@ -8,6 +8,7 @@ import { Circle, View } from "~/components/ui";
 import { usePostInteractions } from "~/hooks/post/usePostInteractions";
 import type { RouterOutputs } from "~/utils/api";
 import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
+import { useLike } from "./hooks/useLike";
 
 type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
 
@@ -22,6 +23,10 @@ export const PostImage = (props: PostImageProps) => {
   //   postId: props.post.id,
   //   initialPostStats: props.stats,
   // });
+
+  const {} = useLike({
+    postId: props.post.id,
+  });
 
   const { hearts, addHeart } = useHeartAnimations();
 
