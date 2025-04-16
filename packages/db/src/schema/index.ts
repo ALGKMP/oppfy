@@ -303,7 +303,7 @@ export const post = pgTable(
     recipientUserId: uuid("recipient_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    caption: text("caption").notNull().default(""),
+    caption: text("caption"),
     postKey: text("post_key").unique().notNull(),
     width: integer("width").notNull().default(500),
     height: integer("height").notNull().default(500),

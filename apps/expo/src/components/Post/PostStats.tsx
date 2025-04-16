@@ -13,18 +13,38 @@ import CommentsBottomSheet from "~/components/Post/Comment/CommentsBottomSheet";
 import { useBottomSheetController } from "~/components/ui/BottomSheet";
 import { usePostInteractions } from "~/hooks/post/usePostInteractions";
 import useShare from "~/hooks/useShare";
+import type { RouterOutputs } from "~/utils/api";
 import { Icon } from "../ui";
+
+type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
 
 interface PostStatsProps {
   postId: string;
   recipientUserId: string;
-  endpoint: "self-profile" | "other-profile" | "home-feed" | "single-post";
-  stats: {
-    likes: number;
-    comments: number;
-    hasLiked: boolean;
-  };
+  postStats: Post["postStats"];
 }
+
+export const PostStats = (props: PostStatsProps) => {
+  return (
+    <YStack
+      position="absolute"
+      right={0}
+      bottom={24}
+      paddingRight="$4"
+      gap="$5"
+      zIndex={3}
+      alignItems="flex-end"
+    >
+      {/* <LikeAction postId={props.postId} initialPostStats={props.postStats} /> */}
+      {/* <CommentAction
+        postId={props.postId}
+        recipientUserId={props.recipientUserId}
+        count={props.postStats.comments}
+      /> */}
+      <ShareAction postId={props.postId} />
+    </YStack>
+  );
+};
 
 const useButtonAnimation = () => {
   const scale = useSharedValue(1);
@@ -51,6 +71,93 @@ const useButtonAnimation = () => {
   }, [scale]);
 
   return { buttonScale, animate };
+};
+
+interface LikeActionProps {
+  postId: string;
+  initialPostStats: PostStatsProps["postStats"];
+}
+
+// const LikeAction = ({postId, initialPostStats}: LikeActionProps) => {
+//   const { buttonScale, animate } = useButtonAnimation();
+//   const { handleLikePressed, postStats } = usePostInteractions({
+//     postId: props.postId,
+//     initialPostStats: props.initialPostStats,
+//   });
+
+//   const handlePress = () => {
+//     void handleLikePressed();
+//     animate();
+//   };
+
+//   return (
+//     <StatButton count={postStats.likes}>
+//       <Animated.View style={buttonScale}>
+//         <Icon
+//           name="heart"
+//           onPress={handlePress}
+//           color={postStats.hasLiked ? "#ff3b30" : "white"}
+//         />
+//       </Animated.View>
+//     </StatButton>
+//   );
+// };
+
+// const CommentAction = ({
+//   postId,
+//   endpoint,
+//   recipientUserId,
+//   count,
+// }: {
+//   postId: string;
+//   endpoint: PostStatsProps["endpoint"];
+//   recipientUserId: string;
+//   count: number;
+// }) => {
+//   const { buttonScale, animate } = useButtonAnimation();
+//   const { show, hide } = useBottomSheetController();
+
+//   const handlePress = () => {
+//     animate();
+//     show({
+//       snapPoints: ["100%"],
+//       title: "Comments",
+//       children: (
+//         <CommentsBottomSheet
+//           postId={postId}
+//           endpoint={endpoint}
+//           postRecipientUserId={recipientUserId}
+//           onHideBottomSheet={hide}
+//         />
+//       ),
+//     });
+//   };
+
+//   return (
+//     <StatButton count={count}>
+//       <Animated.View style={buttonScale}>
+//         <Icon name="chatbubble-outline" onPress={handlePress} color="white" />
+//       </Animated.View>
+//     </StatButton>
+//   );
+// };
+
+const ShareAction = ({ postId }: { postId: string }) => {
+  const { buttonScale, animate } = useButtonAnimation();
+  const { sharePost } = useShare();
+
+  const handlePress = async () => {
+    animate();
+    await sharePost(postId);
+  };
+
+  return (
+    <StatButton>
+      <Animated.View style={buttonScale}>
+        <Icon name="share-outline" onPress={handlePress} color="white" />
+      </Animated.View>
+    </StatButton>
+  );
 };
 
 const StatButton = ({
@@ -87,121 +194,5 @@ const StatButton = ({
         {children}
       </XStack>
     </BlurView>
-  );
-};
-
-const LikeAction = ({
-  postId,
-  initialPostStats,
-}: {
-  postId: string;
-  initialPostStats: PostStatsProps["stats"];
-}) => {
-  const { buttonScale, animate } = useButtonAnimation();
-  const { handleLikePressed, postStats } = usePostInteractions({
-    postId,
-    initialPostStats,
-  });
-
-  const handlePress = () => {
-    void handleLikePressed();
-    animate();
-  };
-
-  return (
-    <StatButton count={postStats.likes}>
-      <Animated.View style={buttonScale}>
-        <Icon
-          name="heart"
-          onPress={handlePress}
-          color={postStats.hasLiked ? "#ff3b30" : "white"}
-        />
-      </Animated.View>
-    </StatButton>
-  );
-};
-
-const CommentAction = ({
-  postId,
-  endpoint,
-  recipientUserId,
-  count,
-}: {
-  postId: string;
-  endpoint: PostStatsProps["endpoint"];
-  recipientUserId: string;
-  count: number;
-}) => {
-  const { buttonScale, animate } = useButtonAnimation();
-  const { show, hide } = useBottomSheetController();
-
-  const handlePress = () => {
-    animate();
-    show({
-      snapPoints: ["100%"],
-      title: "Comments",
-      children: (
-        <CommentsBottomSheet
-          postId={postId}
-          endpoint={endpoint}
-          postRecipientUserId={recipientUserId}
-          onHideBottomSheet={hide}
-        />
-      ),
-    });
-  };
-
-  return (
-    <StatButton count={count}>
-      <Animated.View style={buttonScale}>
-        <Icon name="chatbubble-outline" onPress={handlePress} color="white" />
-      </Animated.View>
-    </StatButton>
-  );
-};
-
-const ShareAction = ({ postId }: { postId: string }) => {
-  const { buttonScale, animate } = useButtonAnimation();
-  const { sharePost } = useShare();
-
-  const handlePress = async () => {
-    animate();
-    await sharePost(postId);
-  };
-
-  return (
-    <StatButton>
-      <Animated.View style={buttonScale}>
-        <Icon name="share-outline" onPress={handlePress} color="white" />
-      </Animated.View>
-    </StatButton>
-  );
-};
-
-export const PostStats = ({
-  postId,
-  recipientUserId,
-  endpoint,
-  stats,
-}: PostStatsProps) => {
-  return (
-    <YStack
-      position="absolute"
-      right={0}
-      bottom={24}
-      paddingRight="$4"
-      gap="$5"
-      zIndex={3}
-      alignItems="flex-end"
-    >
-      <LikeAction postId={postId} initialPostStats={stats} />
-      <CommentAction
-        postId={postId}
-        endpoint={endpoint}
-        recipientUserId={recipientUserId}
-        count={stats.comments}
-      />
-      <ShareAction postId={postId} />
-    </YStack>
   );
 };

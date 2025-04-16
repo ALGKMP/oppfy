@@ -10,6 +10,7 @@ import MorePostOptionsButton from "./MorePostOptionsButton";
 import PostCaption from "./PostCaption";
 import PostDate from "./PostDate";
 import { PostImage } from "./PostImage";
+import { PostStats } from "./PostStats";
 import { PostVideo } from "./PostVideo";
 
 type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
@@ -163,19 +164,22 @@ const PostCard = (props: PostCardProps) => {
 
         <XStack alignItems="center" justifyContent="flex-end" width="$5">
           <MorePostOptionsButton
-            postId={props.postId}
-            recipient={props.recipient}
-            mediaUrl={props.media.url}
+            postId={props.post.id}
+            recipientUserId={props.recipientProfile.userId}
+            assetUrl={props.post.assetUrl}
           />
         </XStack>
       </XStack>
 
       {/* Floating Action Buttons - Vertical Stack on Right side */}
       <PostStats
-        postId={props.postId}
-        recipientUserId={props.recipient.id}
-        endpoint={props.endpoint}
-        stats={props.stats}
+        // postId={props.postId}
+        // recipientUserId={props.recipient.id}
+        // endpoint={props.endpoint}
+        // stats={props.stats}
+        postId={props.post.id}
+        recipientUserId={props.recipientProfile.userId}
+        postStats={props.postStats}
       />
 
       {/* Bottom Content Overlay */}
@@ -204,7 +208,7 @@ const PostCard = (props: PostCardProps) => {
           />
         )} */}
         <View maxWidth="80%">
-          <PostCaption caption={props.caption} />
+          <PostCaption caption={props.post.caption} />
         </View>
       </YStack>
     </View>

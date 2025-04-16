@@ -20,8 +20,8 @@ export const usePostInteractions = ({
   postId,
   initialPostStats,
 }: InteractWithPostProps) => {
-  const toast = useToastController();
   const utils = api.useUtils();
+
   const { data: postStats } = api.post.getPostStats.useQuery(
     { postId },
     { initialData: initialPostStats },
