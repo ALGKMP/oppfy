@@ -63,7 +63,7 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         await handleReportComment(item.id);
       }}
-      onPressProfile={() => {
+      onProfilePress={() => {
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         routeProfile(item.userId);
         props.onHideBottomSheet();

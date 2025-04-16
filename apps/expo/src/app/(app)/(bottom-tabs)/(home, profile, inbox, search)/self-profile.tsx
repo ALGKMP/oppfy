@@ -92,45 +92,7 @@ const SelfProfile = () => {
   };
 
   const renderPost = ({ item }: { item: Post }) => (
-    <PostCard
-      postId={item.post.id}
-      endpoint="self-profile"
-      createdAt={item.post.createdAt}
-      caption={item.post.caption}
-      author={{
-        id: item.authorUserId,
-        name: item.authorName ?? "",
-        username: item.authorUsername ?? "",
-        profilePictureUrl: item.authorProfilePictureUrl,
-      }}
-      recipient={{
-        id: item.recipientUserId,
-        name: item.recipientName ?? "",
-        username: item.recipientUsername,
-        profilePictureUrl: item.recipientProfilePictureUrl,
-      }}
-      media={{
-        id: item.post.id,
-        type: item.post.mediaType,
-        url: item.assetUrl,
-        dimensions: {
-          width: item.post.width,
-          height: item.post.height,
-        },
-        recipient: {
-          id: item.recipientUserId,
-          name: item.recipientName ?? "",
-          username: item.recipientUsername ?? "",
-          profilePictureUrl: item.recipientProfilePictureUrl,
-        },
-      }}
-      stats={{
-        likes: item.postStats.likes,
-        comments: item.postStats.comments,
-        hasLiked: item.hasLiked,
-      }}
-      isViewable={viewableItems.includes(item.post.id)}
-    />
+    <PostCard {...item} isViewable={viewableItems.includes(item.post.id)} />
   );
 
   const renderEmptyList = () => {

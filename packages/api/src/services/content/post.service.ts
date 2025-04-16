@@ -135,9 +135,7 @@ export class PostService {
     if (post.recipientProfile.privacy === "private")
       return err(new PostErrors.PostNotFound(params.postId));
 
-    const hydratedPost = this.hydratePost(post);
-
-    return ok(hydratedPost);
+    return ok(this.hydratePost(post));
   }
 
   async deletePost(

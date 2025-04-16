@@ -27,7 +27,7 @@ interface CommentProps {
   isCommentAuthor: boolean;
   onDelete: () => void;
   onReport: () => void;
-  onPressProfile: () => void;
+  onProfilePress: () => void;
 }
 
 const Comment = ({
@@ -36,7 +36,7 @@ const Comment = ({
   isCommentAuthor,
   onDelete,
   onReport,
-  onPressProfile,
+  onProfilePress,
 }: CommentProps) => {
   const contextMenuOptions = () => {
     const options = [];
@@ -88,16 +88,15 @@ const Comment = ({
     <BlurContextMenuWrapper options={contextMenuOptions()}>
       <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
         <XStack gap="$3" alignItems="flex-start">
-          <TouchableOpacity onPress={onPressProfile}>
+          <TouchableOpacity onPress={onProfilePress}>
             <Avatar
               source={comment.profilePictureUrl}
               size={46}
-              recyclingKey={comment.id}
             />
           </TouchableOpacity>
           <YStack gap="$2" width="100%" flex={1}>
             <XStack gap="$2">
-              <TouchableOpacity onPress={onPressProfile}>
+              <TouchableOpacity onPress={onProfilePress}>
                 <Text fontWeight="bold">{comment.username}</Text>
               </TouchableOpacity>
               <TimeAgo
