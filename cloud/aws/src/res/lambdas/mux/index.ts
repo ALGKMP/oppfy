@@ -84,6 +84,7 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
       await tx
         .update(schema.post)
         .set({
+          postKey: body.data.playback_ids[0].id,
           status: "processed",
         })
         .where(eq(schema.post.id, postId));
