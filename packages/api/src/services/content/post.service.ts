@@ -44,7 +44,7 @@ interface GetPostParams {
   postId: string;
 }
 
-interface GetHasLikedParams {
+interface GetIsLikedParams {
   userId: string;
   postId: string;
 }
@@ -108,8 +108,8 @@ export class PostService {
     return ok(post.postStats);
   }
 
-  async getHasLiked(
-    params: GetHasLikedParams,
+  async getIsLiked(
+    params: GetIsLikedParams,
   ): Promise<Result<boolean, PostErrors.PostNotFound>> {
     const post = await this.postRepository.getPost(params);
 

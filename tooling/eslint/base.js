@@ -70,6 +70,10 @@ export default tseslint.config(
       "@typescript-eslint/no-unnecessary-condition": "off",
       "@typescript-eslint/no-non-null-assertion": "error",
       "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
+      "no-unused-expressions": [
+        "error",
+        { allowTernary: true, allowShortCircuit: true, allowVoid: true },
+      ],
     },
   },
   {

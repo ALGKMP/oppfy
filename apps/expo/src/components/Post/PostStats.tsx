@@ -15,6 +15,7 @@ import { usePostInteractions } from "~/hooks/post/usePostInteractions";
 import useShare from "~/hooks/useShare";
 import type { RouterOutputs } from "~/utils/api";
 import { Icon } from "../ui";
+import { useLike } from "./hooks/useLike";
 
 type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
 
@@ -22,6 +23,7 @@ interface PostStatsProps {
   postId: string;
   recipientUserId: string;
   postStats: Post["postStats"];
+  isLiked: boolean;
 }
 
 export const PostStats = (props: PostStatsProps) => {
@@ -35,7 +37,11 @@ export const PostStats = (props: PostStatsProps) => {
       zIndex={3}
       alignItems="flex-end"
     >
-      {/* <LikeAction postId={props.postId} initialPostStats={props.postStats} /> */}
+      <LikeAction
+        postId={props.postId}
+        postStats={props.postStats}
+        isLiked={props.isLiked}
+      />
       {/* <CommentAction
         postId={props.postId}
         recipientUserId={props.recipientUserId}
@@ -75,33 +81,34 @@ const useButtonAnimation = () => {
 
 interface LikeActionProps {
   postId: string;
-  initialPostStats: PostStatsProps["postStats"];
+  postStats: PostStatsProps["postStats"];
+  isLiked: boolean;
 }
 
-// const LikeAction = ({postId, initialPostStats}: LikeActionProps) => {
-//   const { buttonScale, animate } = useButtonAnimation();
-//   const { handleLikePressed, postStats } = usePostInteractions({
-//     postId: props.postId,
-//     initialPostStats: props.initialPostStats,
-//   });
+const LikeAction = ({ postId, postStats, isLiked }: LikeActionProps) => {
+  const { buttonScale, animate } = useButtonAnimation();
 
-//   const handlePress = () => {
-//     void handleLikePressed();
-//     animate();
-//   };
+  const { likePost, unlikePost } = useLike({
+    postId,
+  });
 
-//   return (
-//     <StatButton count={postStats.likes}>
-//       <Animated.View style={buttonScale}>
-//         <Icon
-//           name="heart"
-//           onPress={handlePress}
-//           color={postStats.hasLiked ? "#ff3b30" : "white"}
-//         />
-//       </Animated.View>
-//     </StatButton>
-//   );
-// };
+  const handlePress = async () => {
+    animate();
+    isLiked ? void unlikePost() : void likePost();
+  };
+
+  return (
+    <StatButton count={postStats.likes}>
+      <Animated.View style={buttonScale}>
+        <Icon
+          name="heart"
+          onPress={handlePress}
+          color={isLiked ? "#ff3b30" : "white"}
+        />
+      </Animated.View>
+    </StatButton>
+  );
+};
 
 // const CommentAction = ({
 //   postId,

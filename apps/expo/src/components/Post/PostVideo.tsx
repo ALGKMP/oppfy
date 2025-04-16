@@ -8,20 +8,25 @@ import { getToken } from "tamagui";
 
 import { Circle, View } from "~/components/ui";
 import { useAudio } from "~/contexts/AudioContext";
-import { usePostInteractions } from "~/hooks/post/usePostInteractions";
-import { RouterOutputs } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
 import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../Icons/Mute";
+import { useLike } from "./hooks/useLike";
 
 type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
 
 interface PostVideoProps {
   post: Post["post"];
   stats: Post["postStats"];
+  isLiked: boolean;
   isViewable: boolean;
 }
 
 export const PostVideo = (props: PostVideoProps) => {
+  const { likePost } = useLike({
+    postId: props.post.id,
+  });
+
   const videoRef = useRef<Video>(null);
 
   const { isMuted, toggleMute } = useAudio();
@@ -31,11 +36,6 @@ export const PostVideo = (props: PostVideoProps) => {
   const [isPaused, setIsPaused] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
-
-  // const { handleLikeDoubleTapped } = usePostInteractions({
-  //   postId: media.id,
-  //   initialPostStats: stats,
-  // });
 
   useFocusEffect(
     useCallback(() => {
@@ -76,9 +76,9 @@ export const PostVideo = (props: PostVideoProps) => {
   const handleDoubleTap = useCallback(
     (x: number, y: number) => {
       addHeart(x, y);
-      // handleLikeDoubleTapped();
+      if (!props.isLiked) void likePost();
     },
-    [addHeart],
+    [addHeart, props.isLiked, likePost],
   );
 
   const handleHold = useCallback(() => {

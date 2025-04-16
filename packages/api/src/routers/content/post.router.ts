@@ -58,10 +58,10 @@ export const postRouter = createTRPCRouter({
       );
     }),
 
-  getHasLiked: protectedProcedure
+  getIsLiked: protectedProcedure
     .input(z.object({ postId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const result = await ctx.services.post.getHasLiked({
+      const result = await ctx.services.post.getIsLiked({
         userId: ctx.session.uid,
         postId: input.postId,
       });

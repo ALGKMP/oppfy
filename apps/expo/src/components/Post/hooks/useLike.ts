@@ -10,22 +10,22 @@ export const useLike = ({ postId }: UseLikeParams) => {
   const likePostMutation = api.postInteraction.likePost.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.post.getHasLiked.cancel();
+      await utils.post.getIsLiked.cancel();
       await utils.post.getPostStats.cancel();
 
       // Get the data from the query cache
-      const prevHasLikedData = utils.post.getHasLiked.getData({
+      const prevIsLikedData = utils.post.getIsLiked.getData({
         postId: newData.postId,
       });
       const prevPostStatsData = utils.post.getPostStats.getData({
         postId: newData.postId,
       });
 
-      if (prevHasLikedData === undefined) return;
+      if (prevIsLikedData === undefined) return;
       if (prevPostStatsData === undefined) return;
 
       // Optimistically update the data
-      utils.post.getHasLiked.setData({ postId: newData.postId }, true);
+      utils.post.getIsLiked.setData({ postId: newData.postId }, true);
       utils.post.getPostStats.setData(
         { postId: newData.postId },
         {
@@ -35,15 +35,15 @@ export const useLike = ({ postId }: UseLikeParams) => {
       );
 
       // Return the previous data so we can revert if something goes wrong
-      return { prevData: { prevPostStatsData, prevHasLikedData } };
+      return { prevData: { prevPostStatsData, prevIsLikedData } };
     },
     onError: async (_err, newData, ctx) => {
       if (ctx === undefined) return;
 
       // If the mutation fails, use the context-value from onMutate
-      utils.post.getHasLiked.setData(
+      utils.post.getIsLiked.setData(
         { postId: newData.postId },
-        ctx.prevData.prevHasLikedData,
+        ctx.prevData.prevIsLikedData,
       );
       utils.post.getPostStats.setData(
         { postId: newData.postId },
@@ -51,29 +51,29 @@ export const useLike = ({ postId }: UseLikeParams) => {
       );
 
       await utils.post.getPostStats.invalidate({ postId });
-      await utils.post.getHasLiked.invalidate({ postId });
+      await utils.post.getIsLiked.invalidate({ postId });
     },
   });
 
   const unlikePostMutation = api.postInteraction.unlikePost.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.post.getHasLiked.cancel();
+      await utils.post.getIsLiked.cancel();
       await utils.post.getPostStats.cancel();
 
       // Get the data from the query cache
-      const prevHasLikedData = utils.post.getHasLiked.getData({
+      const prevIsLikedData = utils.post.getIsLiked.getData({
         postId: newData.postId,
       });
       const prevPostStatsData = utils.post.getPostStats.getData({
         postId: newData.postId,
       });
 
-      if (prevHasLikedData === undefined) return;
+      if (prevIsLikedData === undefined) return;
       if (prevPostStatsData === undefined) return;
 
       // Optimistically update the data
-      utils.post.getHasLiked.setData({ postId: newData.postId }, false);
+      utils.post.getIsLiked.setData({ postId: newData.postId }, false);
       utils.post.getPostStats.setData(
         { postId: newData.postId },
         {
@@ -83,15 +83,15 @@ export const useLike = ({ postId }: UseLikeParams) => {
       );
 
       // Return the previous data so we can revert if something goes wrong
-      return { prevData: { prevPostStatsData, prevHasLikedData } };
+      return { prevData: { prevPostStatsData, prevIsLikedData } };
     },
     onError: async (_err, newData, ctx) => {
       if (ctx === undefined) return;
 
       // If the mutation fails, use the context-value from onMutate
-      utils.post.getHasLiked.setData(
+      utils.post.getIsLiked.setData(
         { postId: newData.postId },
-        ctx.prevData.prevHasLikedData,
+        ctx.prevData.prevIsLikedData,
       );
       utils.post.getPostStats.setData(
         { postId: newData.postId },
@@ -99,16 +99,16 @@ export const useLike = ({ postId }: UseLikeParams) => {
       );
 
       await utils.post.getPostStats.invalidate({ postId });
-      await utils.post.getHasLiked.invalidate({ postId });
+      await utils.post.getIsLiked.invalidate({ postId });
     },
   });
 
-  const likePost = () => {
-    likePostMutation.mutate({ postId });
+  const likePost = async () => {
+    await likePostMutation.mutateAsync({ postId });
   };
 
-  const unlikePost = () => {
-    unlikePostMutation.mutate({ postId });
+  const unlikePost = async () => {
+    await unlikePostMutation.mutateAsync({ postId });
   };
 
   return {

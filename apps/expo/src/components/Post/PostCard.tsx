@@ -6,6 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Avatar, Skeleton, Text, View, XStack, YStack } from "~/components/ui";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
+import { api } from "~/utils/api";
 import MorePostOptionsButton from "./MorePostOptionsButton";
 import PostCaption from "./PostCaption";
 import PostDate from "./PostDate";
@@ -26,19 +27,43 @@ interface PostCardProps {
 
 const PostCard = (props: PostCardProps) => {
   const { routeProfile } = useRouteProfile();
+  const utils = api.useUtils();
+
+  // Get the current isLiked status from the cache, falling back to the post's isLiked value
+  const { data: currentIsLiked } = api.post.getIsLiked.useQuery(
+    { postId: props.post.id },
+    {
+      enabled: false, // Disabled by default
+      initialData: props.isLiked,
+    },
+  );
+
+  // Get the current postStats from the cache, falling back to the post's postStats
+  const { data: currentPostStats } = api.post.getPostStats.useQuery(
+    { postId: props.post.id },
+    {
+      enabled: false, // Disabled by default
+      initialData: props.postStats,
+    },
+  );
+
+  console.log("currentIsLiked", currentIsLiked);
+  console.log("currentPostStats", currentPostStats);
 
   return (
     <View borderRadius="$8" overflow="hidden">
       {props.post.mediaType === "image" ? (
         <PostImage
           post={props.post}
-          stats={props.postStats}
+          stats={currentPostStats}
+          isLiked={currentIsLiked}
           isViewable={props.isViewable}
         />
       ) : (
         <PostVideo
           post={props.post}
-          stats={props.postStats}
+          stats={currentPostStats}
+          isLiked={currentIsLiked}
           isViewable={props.isViewable}
         />
       )}
@@ -173,13 +198,10 @@ const PostCard = (props: PostCardProps) => {
 
       {/* Floating Action Buttons - Vertical Stack on Right side */}
       <PostStats
-        // postId={props.postId}
-        // recipientUserId={props.recipient.id}
-        // endpoint={props.endpoint}
-        // stats={props.stats}
         postId={props.post.id}
         recipientUserId={props.recipientProfile.userId}
-        postStats={props.postStats}
+        postStats={currentPostStats}
+        isLiked={currentIsLiked}
       />
 
       {/* Bottom Content Overlay */}

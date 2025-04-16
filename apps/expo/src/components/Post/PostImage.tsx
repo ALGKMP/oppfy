@@ -1,11 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { Image } from "expo-image";
 import { getToken } from "tamagui";
 
 import { Circle, View } from "~/components/ui";
-import { usePostInteractions } from "~/hooks/post/usePostInteractions";
 import type { RouterOutputs } from "~/utils/api";
 import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 import { useLike } from "./hooks/useLike";
@@ -15,16 +14,12 @@ type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
 interface PostImageProps {
   post: Post["post"];
   stats: Post["postStats"];
+  isLiked: boolean;
   isViewable: boolean;
 }
 
 export const PostImage = (props: PostImageProps) => {
-  // const { handleLikeDoubleTapped } = usePostInteractions({
-  //   postId: props.post.id,
-  //   initialPostStats: props.stats,
-  // });
-
-  const {} = useLike({
+  const { likePost } = useLike({
     postId: props.post.id,
   });
 
@@ -39,13 +34,10 @@ export const PostImage = (props: PostImageProps) => {
     };
   }, []);
 
-  const handleDoubleTap = useCallback(
-    (x: number, y: number) => {
-      addHeart(x, y);
-      // void handleLikeDoubleTapped();
-    },
-    [addHeart],
-  );
+  const handleDoubleTap = (x: number, y: number) => {
+    addHeart(x, y);
+    if (!props.isLiked) void likePost();
+  };
 
   const doubleTap = Gesture.Tap()
     .numberOfTaps(2)
