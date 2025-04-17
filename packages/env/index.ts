@@ -16,7 +16,7 @@ declare global {
       SQS_CONTACT_QUEUE: string;
 
       S3_POST_BUCKET: string;
-      S3_PROFILE_BUCKET: string;
+      S3_PROFILE_PICTURE_BUCKET: string;
 
       MUX_TOKEN_ID: string;
       MUX_TOKEN_SECRET: string;

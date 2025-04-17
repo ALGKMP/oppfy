@@ -24,7 +24,7 @@ const environment = {
   SNS_PUSH_NOTIFICATION_TOPIC_ARN: env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
 
   S3_POST_BUCKET: env.S3_POST_BUCKET,
-  S3_PROFILE_BUCKET: env.S3_PROFILE_BUCKET,
+  S3_PROFILE_PICTURE_BUCKET: env.S3_PROFILE_PICTURE_BUCKET,
 
   MUX_TOKEN_ID: env.MUX_TOKEN_ID,
   MUX_TOKEN_SECRET: env.MUX_TOKEN_SECRET,
@@ -101,7 +101,7 @@ export class AwsStack extends cdk.Stack {
     });
  */
     const postBucket = new Bucket(this, "PostBucket");
-    const profileBucket = new Bucket(this, "ProfileBucket");
+    const profileBucket = new Bucket(this, "ProfilePictureBucket");
 
     const accessControlLambda = new LambdaFunction(
       this,

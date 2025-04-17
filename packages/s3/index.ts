@@ -59,7 +59,7 @@ export class S3 {
   }): Promise<string> {
     const command = new PutObjectCommand({
       Key: key,
-      Bucket: env.S3_PROFILE_BUCKET,
+      Bucket: env.S3_PROFILE_PICTURE_BUCKET,
       ContentLength: contentLength,
       ContentType: contentType,
       Metadata: metadata,
