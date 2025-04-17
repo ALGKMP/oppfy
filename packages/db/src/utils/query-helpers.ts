@@ -21,23 +21,23 @@ export const onboardingCompletedCondition = (profileTable = schema.profile) => {
 /**
  * Exclude profiles that have blocked or been blocked by the given user
  */
-export const withoutBlocked = <T extends PgSelect>(qb: T, userId: string) => {
-  return qb
-    .leftJoin(
-      schema.block,
-      or(
-        and(
-          eq(schema.block.senderUserId, userId),
-          eq(schema.block.recipientUserId, schema.profile.userId),
-        ),
-        and(
-          eq(schema.block.recipientUserId, userId),
-          eq(schema.block.senderUserId, schema.profile.userId),
-        ),
-      ),
-    )
-    .where(isNull(schema.block.id));
-};
+// export const withoutBlocked = <T extends PgSelect>(qb: T, userId: string) => {
+//   return qb
+//     .leftJoin(
+//       schema.block,
+//       or(
+//         and(
+//           eq(schema.block.senderUserId, userId),
+//           eq(schema.block.recipientUserId, schema.profile.userId),
+//         ),
+//         and(
+//           eq(schema.block.recipientUserId, userId),
+//           eq(schema.block.senderUserId, schema.profile.userId),
+//         ),
+//       ),
+//     )
+//     .where(isNull(schema.block.id));
+// };
 
 export const getFollowStatusSql = (selfUserId: string) => {
   return sql<FollowStatus>`CASE
