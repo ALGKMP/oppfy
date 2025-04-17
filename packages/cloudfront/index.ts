@@ -44,8 +44,10 @@ export class CloudFront {
     };
   }
 
-  hydratePost<T extends Post>(post: T): T & { assetUrl: string } {
-    const assetUrl = this.getPublicPostUrl(post.postKey);
+  async hydratePost<T extends Post>(
+    post: T,
+  ): Promise<T & { assetUrl: string }> {
+    const assetUrl = await this.getSignedPrivatePostUrl(post.postKey);
 
     return { ...post, assetUrl };
   }
@@ -104,11 +106,11 @@ export class CloudFront {
   }
 
   private getPublicPostDistributionDomainUrl(objectKey: string): string {
-    return `https://${env.CLOUDFRONT_PUBLIC_POSTS_DISTRIBUTION_DOMAIN}${objectKey}`;
+    return `https://${env.CLOUDFRONT_PUBLIC_POSTS_DISTRIBUTION_DOMAIN}/${objectKey}`;
   }
 
   private getPrivatePostDistributionDomainUrl(objectKey: string): string {
-    return `https://${env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_DOMAIN}${objectKey}`;
+    return `https://${env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_DOMAIN}/${objectKey}`;
   }
 
   private getProfilePictureDistributionDomainUrl(objectKey: string): string {

@@ -129,7 +129,7 @@ export class PostService {
     if (post === undefined)
       return err(new PostErrors.PostNotFound(params.postId));
 
-    return ok(this.hydratePost(post));
+    return ok(await this.hydratePost(post));
   }
 
   async getPostForSite(
@@ -143,7 +143,7 @@ export class PostService {
     if (post.recipientProfile.privacy === "private")
       return err(new PostErrors.PostNotFound(params.postId));
 
-    return ok(this.hydratePost(post));
+    return ok(await this.hydratePost(post));
   }
 
   async deletePost(
@@ -285,7 +285,9 @@ export class PostService {
       cursor,
       pageSize,
     });
-    const hydratedPosts = posts.map((post) => this.hydratePost(post));
+    const hydratedPosts = await Promise.all(
+      posts.map((post) => this.hydratePost(post)),
+    );
 
     const hasMore = hydratedPosts.length > pageSize;
     const items = hydratedPosts.slice(0, pageSize);
@@ -316,7 +318,9 @@ export class PostService {
       pageSize,
     });
 
-    const hydratedPosts = posts.map((post) => this.hydratePost(post));
+    const hydratedPosts = await Promise.all(
+      posts.map((post) => this.hydratePost(post)),
+    );
 
     const hasMore = hydratedPosts.length > pageSize;
     const items = hydratedPosts.slice(0, pageSize);
@@ -423,12 +427,12 @@ export class PostService {
     });
   }
 
-  private hydratePost<T extends "withIsLiked" | "withoutIsLiked" | undefined>(
-    post: PostResult<T>,
-  ): HydratedPostResult<T> {
+  private async hydratePost<
+    T extends "withIsLiked" | "withoutIsLiked" | undefined,
+  >(post: PostResult<T>): Promise<HydratedPostResult<T>> {
     return {
       ...post,
-      post: this.cloudfront.hydratePost(post.post),
+      post: await this.cloudfront.hydratePost(post.post),
       authorProfile: this.cloudfront.hydrateProfile(post.authorProfile),
       recipientProfile: this.cloudfront.hydrateProfile(post.recipientProfile),
     };
