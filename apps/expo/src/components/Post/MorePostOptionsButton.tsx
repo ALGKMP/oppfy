@@ -6,7 +6,7 @@ import {
 import { useReport } from "~/hooks/post/useReport";
 import { useSaveMedia } from "~/hooks/post/useSaveMedia";
 import { useAuth } from "~/hooks/useAuth";
-import { useDeletePost } from "../../hooks/post/useDeletePost";
+import { useDeletePost } from "./hooks/useDeletePost";
 
 interface MorePostOptionsButtonProps {
   postId: string;
@@ -15,8 +15,7 @@ interface MorePostOptionsButtonProps {
 }
 
 const MorePostOptionsButton = (props: MorePostOptionsButtonProps) => {
-  const { handleSavePost, isSaving } = useSaveMedia();
-  const { handleDeletePost, isDeleting } = useDeletePost();
+  const { deletePost, isDeleting } = useDeletePost();
   const { handleReportPost } = useReport({ postId: props.postId });
 
   const { user } = useAuth();
@@ -24,11 +23,6 @@ const MorePostOptionsButton = (props: MorePostOptionsButtonProps) => {
   const { show, hide } = useActionSheetController();
 
   const buttonOptionsOther = [
-    {
-      text: "Save Post",
-      onPress: () => void handleSavePost(props.assetUrl),
-      autoClose: true,
-    },
     {
       text: "Report Post",
       textProps: {
@@ -88,15 +82,6 @@ const MorePostOptionsButton = (props: MorePostOptionsButtonProps) => {
 
   const buttonOptionsSelf = [
     {
-      text: isSaving ? "Saving..." : "Save Post",
-      textProps: {
-        color: isSaving ? "$gray9" : undefined,
-      },
-      disabled: isSaving,
-      onPress: () => void handleSavePost(props.assetUrl),
-      autoClose: true,
-    },
-    {
       text: "Delete Post",
       textProps: {
         color: "$red9",
@@ -113,7 +98,7 @@ const MorePostOptionsButton = (props: MorePostOptionsButtonProps) => {
         });
 
         if (shouldDelete) {
-          void handleDeletePost(props.postId);
+          void deletePost(props.postId);
         }
       },
       autoClose: false,

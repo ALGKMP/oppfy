@@ -47,9 +47,6 @@ const PostCard = (props: PostCardProps) => {
     },
   );
 
-  console.log("currentIsLiked", currentIsLiked);
-  console.log("currentPostStats", currentPostStats);
-
   return (
     <View borderRadius="$8" overflow="hidden">
       {props.post.mediaType === "image" ? (
