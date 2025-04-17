@@ -98,8 +98,8 @@ export class PostInteractionService {
   }
 
   async addComment({
-    postId,
     userId,
+    postId,
     body,
   }: AddCommentParams): Promise<
     Result<
@@ -117,31 +117,44 @@ export class PostInteractionService {
   }
 
   async removeComment({
-    commentId,
-    postId,
     userId,
+    postId,
+    commentId,
   }: RemoveCommentParams): Promise<
     Result<
       void,
+      | PostInteractionErrors.PostNotFound
       | PostInteractionErrors.CommentNotFound
       | PostInteractionErrors.NotCommentOwner
-      | PostInteractionErrors.FailedToDeleteComment
+      | PostInteractionErrors.NotPostOwner
     >
   > {
-    await this.db.transaction(async (tx) => {
+    return await this.db.transaction(async (tx) => {
+      const post = await this.postRepository.getPost({ postId, userId }, tx);
       const comment = await this.commentRepository.getComment(
         { commentId },
         tx,
       );
-      if (!comment)
+
+      if (post === undefined)
+        return err(new PostInteractionErrors.PostNotFound(postId));
+      if (comment === undefined)
         return err(new PostInteractionErrors.CommentNotFound(commentId));
-      if (comment.userId !== userId)
-        return err(
-          new PostInteractionErrors.NotCommentOwner(commentId, userId),
-        );
+
+      // if not comment owner or post owner
+      if (comment.userId !== userId && post.post.recipientUserId !== userId) {
+        if (comment.userId !== userId)
+          return err(
+            new PostInteractionErrors.NotCommentOwner(commentId, userId),
+          );
+
+        if (post.post.authorUserId !== userId)
+          return err(new PostInteractionErrors.NotPostOwner(postId, userId));
+      }
 
       await this.commentRepository.deleteComment({ commentId, postId }, tx);
+
+      return ok();
     });
-    return ok();
   }
 }

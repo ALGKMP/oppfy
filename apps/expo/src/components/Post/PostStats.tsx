@@ -7,11 +7,10 @@ import Animated, {
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
-import { Circle, getTokens, Text, XStack, YStack } from "tamagui";
+import { getTokens, Text, XStack, YStack } from "tamagui";
 
 import CommentsBottomSheet from "~/components/Post/Comment/CommentsBottomSheet";
 import { useBottomSheetController } from "~/components/ui/BottomSheet";
-import { usePostInteractions } from "~/hooks/post/usePostInteractions";
 import useShare from "~/hooks/useShare";
 import type { RouterOutputs } from "~/utils/api";
 import { Icon } from "../ui";
@@ -21,7 +20,8 @@ type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
 
 interface PostStatsProps {
   postId: string;
-  recipientUserId: string;
+  postAuthorUserId: string;
+  postRecipientUserId: string;
   postStats: Post["postStats"];
   isLiked: boolean;
 }
@@ -42,11 +42,12 @@ export const PostStats = (props: PostStatsProps) => {
         postStats={props.postStats}
         isLiked={props.isLiked}
       />
-      {/* <CommentAction
+      <CommentAction
         postId={props.postId}
-        recipientUserId={props.recipientUserId}
+        postAuthorUserId={props.postAuthorUserId}
+        postRecipientUserId={props.postRecipientUserId}
         count={props.postStats.comments}
-      /> */}
+      />
       <ShareAction postId={props.postId} />
     </YStack>
   );
@@ -110,44 +111,46 @@ const LikeAction = ({ postId, postStats, isLiked }: LikeActionProps) => {
   );
 };
 
-// const CommentAction = ({
-//   postId,
-//   endpoint,
-//   recipientUserId,
-//   count,
-// }: {
-//   postId: string;
-//   endpoint: PostStatsProps["endpoint"];
-//   recipientUserId: string;
-//   count: number;
-// }) => {
-//   const { buttonScale, animate } = useButtonAnimation();
-//   const { show, hide } = useBottomSheetController();
+interface CommentActionProps {
+  postId: string;
+  postAuthorUserId: string;
+  postRecipientUserId: string;
+  count: number;
+}
 
-//   const handlePress = () => {
-//     animate();
-//     show({
-//       snapPoints: ["100%"],
-//       title: "Comments",
-//       children: (
-//         <CommentsBottomSheet
-//           postId={postId}
-//           endpoint={endpoint}
-//           postRecipientUserId={recipientUserId}
-//           onHideBottomSheet={hide}
-//         />
-//       ),
-//     });
-//   };
+const CommentAction = ({
+  postId,
+  postAuthorUserId,
+  postRecipientUserId,
+  count,
+}: CommentActionProps) => {
+  const { buttonScale, animate } = useButtonAnimation();
+  const { show, hide } = useBottomSheetController();
 
-//   return (
-//     <StatButton count={count}>
-//       <Animated.View style={buttonScale}>
-//         <Icon name="chatbubble-outline" onPress={handlePress} color="white" />
-//       </Animated.View>
-//     </StatButton>
-//   );
-// };
+  const handlePress = () => {
+    animate();
+    show({
+      snapPoints: ["100%"],
+      title: "Comments",
+      children: (
+        <CommentsBottomSheet
+          postId={postId}
+          postAuthorId={postAuthorUserId}
+          postRecipientId={postRecipientUserId}
+          onHide={hide}
+        />
+      ),
+    });
+  };
+
+  return (
+    <StatButton count={count}>
+      <Animated.View style={buttonScale}>
+        <Icon name="chatbubble-outline" onPress={handlePress} color="white" />
+      </Animated.View>
+    </StatButton>
+  );
+};
 
 const ShareAction = ({ postId }: { postId: string }) => {
   const { buttonScale, animate } = useButtonAnimation();

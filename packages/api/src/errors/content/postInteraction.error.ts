@@ -44,6 +44,13 @@ export class NotCommentOwner extends PostInteractionError {
   }
 }
 
+export class NotPostOwner extends PostInteractionError {
+  name = "NotPostOwnerError" as const;
+  constructor(postId: string, userId: string) {
+    super(`User ${userId} is not the owner of post ${postId}`);
+  }
+}
+
 export class PostNotFound extends PostInteractionError {
   name = "PostNotFoundError" as const;
   constructor(postId: string) {

@@ -6,8 +6,6 @@ import { MessageCircleOff } from "@tamagui/lucide-icons";
 
 import { useReport } from "~/components/Post/hooks/useReport";
 import { EmptyPlaceholder, View } from "~/components/ui";
-import { usePostInteractions } from "~/hooks/post/usePostInteractions";
-import { useAuth } from "~/hooks/useAuth";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api, RouterOutputs } from "~/utils/api";
 import { useComment } from "../hooks/useComment";
@@ -94,7 +92,7 @@ const CommentsBottomSheet = (props: CommentsBottomSheetProps) => {
 
   return (
     <>
-      {comments?.pages.length === 0 ? (
+      {commentItems.length === 0 ? (
         <View flex={1} justifyContent="center" alignItems="center" flexGrow={1}>
           <EmptyPlaceholder
             title="No comments yet"

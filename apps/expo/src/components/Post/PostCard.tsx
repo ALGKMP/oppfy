@@ -27,7 +27,6 @@ interface PostCardProps {
 
 const PostCard = (props: PostCardProps) => {
   const { routeProfile } = useRouteProfile();
-  const utils = api.useUtils();
 
   // Get the current isLiked status from the cache, falling back to the post's isLiked value
   const { data: currentIsLiked } = api.post.getIsLiked.useQuery(
@@ -196,7 +195,8 @@ const PostCard = (props: PostCardProps) => {
       {/* Floating Action Buttons - Vertical Stack on Right side */}
       <PostStats
         postId={props.post.id}
-        recipientUserId={props.recipientProfile.userId}
+        postAuthorUserId={props.authorProfile.userId}
+        postRecipientUserId={props.recipientProfile.userId}
         postStats={currentPostStats}
         isLiked={currentIsLiked}
       />
