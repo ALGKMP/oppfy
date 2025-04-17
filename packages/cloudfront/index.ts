@@ -66,34 +66,14 @@ export class CloudFront {
     });
   }
 
-  async invalidateUserPosts(userId: string): Promise<void> {
+  async invalidateUserPosts(key: string): Promise<void> {
     const distributionId = env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_ID;
-    const objectPattern = `/posts/*-${userId}-*.jpg`;
-    await this.createInvalidation(distributionId, objectPattern);
+    await this.createInvalidation(distributionId, key);
   }
 
-  async invalidateProfilePicture(userId: string): Promise<void> {
+  async invalidateProfilePicture(key: string): Promise<void> {
     const distributionId = env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID;
-    const objectPattern = `/profile-pictures/${userId}.jpg`;
-    await this.createInvalidation(distributionId, objectPattern);
-  }
-
-  async createInvalidation(
-    distributionId: string,
-    objectPattern: string,
-  ): Promise<void> {
-    const command = new CreateInvalidationCommand({
-      DistributionId: distributionId,
-      InvalidationBatch: {
-        CallerReference: Date.now().toString(),
-        Paths: {
-          Quantity: 1,
-          Items: [objectPattern],
-        },
-      },
-    });
-
-    await this.client.send(command);
+    await this.createInvalidation(distributionId, key);
   }
 
   private async getSignedUrl({ url }: { url: string }): Promise<string> {
@@ -114,6 +94,24 @@ export class CloudFront {
   }
 
   private getProfilePictureDistributionDomainUrl(objectKey: string): string {
-    return `https://${env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_DOMAIN}${objectKey}`;
+    return `https://${env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_DOMAIN}/${objectKey}`;
+  }
+
+  private async createInvalidation(
+    distributionId: string,
+    objectPattern: string,
+  ): Promise<void> {
+    const command = new CreateInvalidationCommand({
+      DistributionId: distributionId,
+      InvalidationBatch: {
+        CallerReference: Date.now().toString(),
+        Paths: {
+          Quantity: 1,
+          Items: [`/${objectPattern}`],
+        },
+      },
+    });
+
+    await this.client.send(command);
   }
 }

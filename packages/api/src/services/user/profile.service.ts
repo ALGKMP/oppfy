@@ -294,7 +294,7 @@ export class ProfileService {
     contentLength,
   }: GenerateProfilePicturePresignedUrlParams): Promise<Result<string, never>> {
     return await this.database.transaction(async (tx) => {
-      const key = `/profile-pictures/${userId}.jpg`;
+      const key = `profile-pictures/${userId}.jpg`;
 
       await this.profileRepository.updateProfile(
         {
@@ -315,10 +315,7 @@ export class ProfileService {
         },
       });
 
-      await this.cloudfront.createInvalidation(
-        env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
-        key,
-      );
+      await this.cloudfront.invalidateProfilePicture(key);
 
       return ok(presignedUrl);
     });
