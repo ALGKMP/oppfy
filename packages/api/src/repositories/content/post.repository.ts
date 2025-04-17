@@ -9,7 +9,7 @@ import type {
 } from "@oppfy/db";
 import {
   isLikedSql,
-  withOnboardingCompleted,
+  onboardingCompletedCondition,
 } from "@oppfy/db/utils/query-helpers";
 
 import { Post, PostInsert, PostStats, Profile } from "../../models";
@@ -268,7 +268,9 @@ export class PostRepository {
       )
       .$dynamic();
 
-    query = withOnboardingCompleted(query, this.aliasedSchema.authorProfile);
+    query = query.where(
+      onboardingCompletedCondition(this.aliasedSchema.authorProfile),
+    );
 
     return query;
   }

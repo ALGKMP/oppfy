@@ -3,7 +3,7 @@ import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 import {
-  withOnboardingCompleted,
+  onboardingCompletedCondition,
   withoutBlocked,
 } from "@oppfy/db/utils/query-helpers";
 
@@ -61,18 +61,21 @@ export class ProfileRepository {
     { userIds }: ProfilesByIdsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile<"onboarded">[]> {
-    let query = db
-      .select({
-        profile: this.schema.profile,
-      })
-      .from(this.schema.profile)
-      .$dynamic();
+    const profileTable = this.schema.profile;
 
-    // Use the withOnboardingCompleted helper function
-    query = withOnboardingCompleted(query, this.schema.profile);
-
-    // Apply the userIds filter
-    query = query.where(inArray(this.schema.profile.userId, userIds));
+    const query = db
+      .select({ profile: profileTable })
+      .from(profileTable)
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.userStatus.userId, profileTable.userId),
+      )
+      .where(
+        and(
+          inArray(profileTable.userId, userIds),
+          onboardingCompletedCondition(profileTable),
+        ),
+      );
 
     const profiles = await query;
 

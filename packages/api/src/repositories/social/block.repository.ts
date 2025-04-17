@@ -2,7 +2,7 @@ import { and, asc, eq, gt, or } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
-import { withOnboardingCompleted } from "@oppfy/db/utils/query-helpers";
+import { onboardingCompletedCondition } from "@oppfy/db/utils/query-helpers";
 
 import type { Block, Profile } from "../../models";
 import { TYPES } from "../../symbols";
@@ -72,6 +72,10 @@ export class BlockRepository {
         this.schema.profile,
         eq(this.schema.profile.userId, this.schema.block.recipientUserId),
       )
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.userStatus.userId, this.schema.profile.userId),
+      )
       .where(
         and(
           eq(this.schema.block.senderUserId, userId),
@@ -84,16 +88,14 @@ export class BlockRepository {
                 ),
               )
             : undefined,
+            onboardingCompletedCondition(this.schema.profile)
         ),
       )
       .orderBy(
         asc(this.schema.block.createdAt),
         asc(this.schema.profile.userId),
       )
-      .limit(pageSize)
-      .$dynamic();
-
-    query = withOnboardingCompleted(query);
+      .limit(pageSize);
 
     const blockedUsers = await query;
 

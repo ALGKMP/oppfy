@@ -10,7 +10,7 @@ import type {
 import {
   FollowStatus,
   getFollowStatusSql,
-  withOnboardingCompleted,
+  onboardingCompletedCondition,
 } from "@oppfy/db/utils/query-helpers";
 
 import type { Follow, FollowRequest, Profile } from "../../models";
@@ -309,6 +309,10 @@ export class FollowRepository {
         this.schema.profile,
         eq(this.schema.user.id, this.schema.profile.userId),
       )
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.userStatus.userId, this.schema.profile.userId),
+      )
       .where(
         and(
           eq(this.schema.follow.recipientUserId, userId),
@@ -321,16 +325,14 @@ export class FollowRepository {
                 ),
               )
             : undefined,
+          onboardingCompletedCondition(this.schema.profile),
         ),
       )
       .orderBy(
         asc(this.schema.follow.createdAt),
         asc(this.schema.profile.userId),
       )
-      .limit(pageSize)
-      .$dynamic();
-
-    query = withOnboardingCompleted(query);
+      .limit(pageSize);
 
     const followers = await query;
 
@@ -358,6 +360,10 @@ export class FollowRepository {
         this.schema.profile,
         eq(this.schema.user.id, this.schema.profile.userId),
       )
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.userStatus.userId, this.schema.profile.userId),
+      )
       .where(
         and(
           eq(this.schema.follow.senderUserId, userId),
@@ -370,16 +376,14 @@ export class FollowRepository {
                 ),
               )
             : undefined,
+          onboardingCompletedCondition(this.schema.profile),
         ),
       )
       .orderBy(
         asc(this.schema.follow.createdAt),
         asc(this.schema.profile.userId),
       )
-      .limit(pageSize)
-      .$dynamic();
-
-    query = withOnboardingCompleted(query);
+      .limit(pageSize);
 
     const following = await query;
 
@@ -424,10 +428,7 @@ export class FollowRepository {
         asc(this.schema.followRequest.createdAt),
         asc(this.schema.profile.userId),
       )
-      .limit(pageSize)
-      .$dynamic();
-
-    query = withOnboardingCompleted(query);
+      .limit(pageSize);
 
     const followRequests = await query;
 

@@ -10,7 +10,7 @@ import type {
 import {
   FollowStatus,
   getFollowStatusSql,
-  withOnboardingCompleted,
+  onboardingCompletedCondition,
 } from "@oppfy/db/utils/query-helpers";
 
 import type { Notification, NotificationSettings, Profile } from "../../models";
@@ -177,6 +177,10 @@ export class NotificationRepository {
         this.schema.profile,
         eq(this.schema.notification.senderUserId, this.schema.profile.userId),
       )
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.userStatus.userId, this.schema.profile.userId),
+      )
       .where(
         and(
           eq(this.schema.notification.recipientUserId, userId),
@@ -190,16 +194,14 @@ export class NotificationRepository {
                 ),
               )
             : undefined,
+          onboardingCompletedCondition(this.schema.profile),
         ),
       )
       .orderBy(
         desc(this.schema.notification.createdAt),
         desc(this.schema.notification.id),
       )
-      .limit(pageSize)
-      .$dynamic();
-
-    query = withOnboardingCompleted(query);
+      .limit(pageSize);
 
     const notifications = await query;
 

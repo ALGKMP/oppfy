@@ -10,7 +10,7 @@ import type {
 import {
   FollowStatus,
   getFollowStatusSql,
-  withOnboardingCompleted,
+  onboardingCompletedCondition,
 } from "@oppfy/db/utils/query-helpers";
 
 import type { Friend, FriendRequest, Profile } from "../../models";
@@ -315,6 +315,10 @@ export class FriendRepository {
         this.schema.profile,
         eq(this.schema.user.id, this.schema.profile.userId),
       )
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.userStatus.userId, this.schema.profile.userId),
+      )
       .where(
         and(
           cursor
@@ -326,6 +330,7 @@ export class FriendRepository {
                 ),
               )
             : undefined,
+            onboardingCompletedCondition(this.schema.profile),
         ),
       )
       .orderBy(
@@ -333,10 +338,7 @@ export class FriendRepository {
         asc(this.schema.profile.userId),
       )
       .limit(pageSize)
-      .$dynamic();
-
-    query = withOnboardingCompleted(query);
-
+    
     const friends = await query;
 
     return friends.map(({ profile, followStatus }) => ({
@@ -366,6 +368,10 @@ export class FriendRepository {
         this.schema.profile,
         eq(this.schema.user.id, this.schema.profile.userId),
       )
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.userStatus.userId, this.schema.profile.userId),
+      )
       .where(
         and(
           eq(this.schema.friendRequest.recipientUserId, userId),
@@ -378,16 +384,14 @@ export class FriendRepository {
                 ),
               )
             : undefined,
+          onboardingCompletedCondition(this.schema.profile),
         ),
       )
       .orderBy(
         asc(this.schema.friendRequest.createdAt),
         asc(this.schema.profile.userId),
       )
-      .limit(pageSize)
-      .$dynamic();
-
-    query = withOnboardingCompleted(query);
+      .limit(pageSize);
 
     const friendRequests = await query;
 
