@@ -9,116 +9,117 @@ import { EmptyPlaceholder, View } from "~/components/ui";
 import { usePostInteractions } from "~/hooks/post/usePostInteractions";
 import { useAuth } from "~/hooks/useAuth";
 import useRouteProfile from "~/hooks/useRouteProfile";
+import { api, RouterOutputs } from "~/utils/api";
+import { useComment } from "../hooks/useComment";
 import Comment from "./Comment";
-import type { CommentItem } from "./Comment";
 import TextInputWithAvatar from "./TextInputWithAvatar";
+
+type CommentItem = RouterOutputs["post"]["paginateComments"]["items"][number];
 
 interface CommentsBottomSheetProps {
   postId: string;
-  postRecipientUserId: string;
-  endpoint: "self-profile" | "other-profile" | "single-post" | "home-feed";
-  onHideBottomSheet: () => void;
+  postAuthorId: string;
+  postRecipientId: string;
+  onHide: () => void;
 }
 
-const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
-  const { comments, loadMoreComments, postComment, deleteComment } =
-    usePostInteractions({
-      postId: props.postId,
-      initialPostStats: {
-        likes: 0,
-        comments: 0,
-        hasLiked: false,
-      },
-    });
-  const { handleReportComment } = useReport({ postId: props.postId });
+const PAGE_SIZE = 10;
 
-  const listRef = useRef<FlashList<CommentItem> | null>(null);
-  const { user } = useAuth();
-  const selfUserId = user?.uid;
+const CommentsBottomSheet = (props: CommentsBottomSheetProps) => {
   const { routeProfile } = useRouteProfile();
 
-  const handlePostCommentWithAnimation = async (comment: string) => {
+  const { reportComment } = useReport();
+  const { createComment, deleteComment } = useComment({ postId: props.postId });
+
+  const listRef = useRef<FlashList<CommentItem> | null>(null);
+
+  const {
+    data: comments,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = api.post.paginateComments.useInfiniteQuery(
+    {
+      postId: props.postId,
+      pageSize: PAGE_SIZE,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
+
+  const commentItems = comments?.pages.flatMap((page) => page.items) ?? [];
+
+  const handleCreateCommentWithAnimation = async (comment: string) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     listRef.current?.prepareForLayoutAnimationRender();
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    await postComment(comment);
+    await createComment(comment);
   };
 
-  const handleDeleteWithAnimation = async (commentId: string) => {
+  const handleDeleteCommentWithAnimation = async (commentId: string) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     listRef.current?.prepareForLayoutAnimationRender();
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     await deleteComment(commentId);
   };
 
+  const handleReportComment = async (commentId: string) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await reportComment({ commentId, reason: "Other" });
+  };
+
+  const handleProfilePress = (userId: string) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    routeProfile(userId);
+    props.onHide();
+  };
+
+  const loadMoreComments = async () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      await fetchNextPage();
+    }
+  };
+
   const renderComment = ({ item }: { item: CommentItem }) => (
     <Comment
-      key={item.id}
-      comment={item}
-      isPostRecipient={selfUserId === props.postRecipientUserId}
-      isCommentAuthor={item.userId === selfUserId}
-      onDelete={async () => {
-        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        await handleDeleteWithAnimation(item.id);
-      }}
-      onReport={async () => {
-        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        await handleReportComment(item.id);
-      }}
-      onProfilePress={() => {
-        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        routeProfile(item.userId);
-        props.onHideBottomSheet();
-      }}
+      {...item}
+      postAuthorId={props.postAuthorId}
+      postRecipientId={props.postRecipientId}
+      onReportComment={() => handleReportComment(item.comment.id)}
+      onDeleteComment={() => handleDeleteCommentWithAnimation(item.comment.id)}
+      onProfilePress={() => handleProfilePress(item.profile.userId)}
     />
   );
 
   return (
     <>
       {comments?.pages.length === 0 ? (
-        <ListEmptyComponent />
+        <View flex={1} justifyContent="center" alignItems="center" flexGrow={1}>
+          <EmptyPlaceholder
+            title="No comments yet"
+            subtitle="Be the first to comment"
+            icon={<MessageCircleOff />}
+          />
+        </View>
       ) : (
         <FlashList
           ref={listRef}
-          data={
-            comments?.pages.flatMap((page) =>
-              page.items.map((item) => ({
-                id: item.comment.id,
-                userId: item.authorUserId,
-                body: item.comment.body,
-                username: item.authorUsername,
-                profilePictureUrl: item.authorProfilePictureUrl,
-                createdAt: item.comment.createdAt,
-              })),
-            ) ?? []
-          }
+          keyExtractor={(item) => item.comment.id}
+          data={commentItems}
           renderItem={renderComment}
-          estimatedItemSize={83}
+          estimatedItemSize={80}
           onEndReached={loadMoreComments}
           showsVerticalScrollIndicator={false}
-          keyExtractor={(item) => item.id.toString()}
           removeClippedSubviews={true}
           maintainVisibleContentPosition={{
             minIndexForVisible: 0,
           }}
         />
       )}
-      <TextInputWithAvatar onPostComment={handlePostCommentWithAnimation} />
+      <TextInputWithAvatar onPostComment={handleCreateCommentWithAnimation} />
     </>
   );
-});
-
-const ListEmptyComponent = () => (
-  <View flex={1} justifyContent="center" alignItems="center" flexGrow={1}>
-    <EmptyPlaceholder
-      title="No comments yet"
-      subtitle="Be the first to comment"
-      icon={<MessageCircleOff />}
-    />
-  </View>
-);
-/*
- * ==========================================
- * ============== Hooks =====================
- * ==========================================
- */
+};
 
 export default CommentsBottomSheet;

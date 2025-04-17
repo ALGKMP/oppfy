@@ -169,8 +169,8 @@ export const FloatingComments = ({
         <CommentsBottomSheet
           postId={postId}
           endpoint={endpoint}
-          postRecipientUserId={postRecipientUserId}
-          onHideBottomSheet={hide}
+          recipientUserId={postRecipientUserId}
+          onHide={hide}
         />
       ),
     });

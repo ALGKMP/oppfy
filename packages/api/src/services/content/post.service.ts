@@ -337,7 +337,10 @@ export class PostService {
     pageSize = 10,
   }: PaginateCommentsParams): Promise<
     Result<
-      PaginatedResponse<{ comment: Comment; profile: Profile<"onboarded"> }>,
+      PaginatedResponse<{
+        comment: Comment;
+        profile: Hydrate<Profile<"onboarded">>;
+      }>,
       never
     >
   > {
