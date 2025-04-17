@@ -1,10 +1,9 @@
+import { useReport } from "~/components/Post/hooks/useReport";
 import {
   Icon,
   useActionSheetController,
   useAlertDialogController,
 } from "~/components/ui";
-import { useReport } from "~/hooks/post/useReport";
-import { useSaveMedia } from "~/hooks/post/useSaveMedia";
 import { useAuth } from "~/hooks/useAuth";
 import { useDeletePost } from "./hooks/useDeletePost";
 
@@ -15,8 +14,8 @@ interface MorePostOptionsButtonProps {
 }
 
 const MorePostOptionsButton = (props: MorePostOptionsButtonProps) => {
+  const { reportPost } = useReport();
   const { deletePost, isDeleting } = useDeletePost();
-  const { handleReportPost } = useReport({ postId: props.postId });
 
   const { user } = useAuth();
   const { show: showAlert } = useAlertDialogController();
@@ -38,39 +37,61 @@ const MorePostOptionsButton = (props: MorePostOptionsButtonProps) => {
             {
               text: "Violent or abusive",
               textProps: { color: "$blue9" },
-              onPress: () => void handleReportPost("Violent or abusive"),
+              onPress: () =>
+                void reportPost({
+                  postId: props.postId,
+                  reason: "Violent or abusive",
+                }),
               autoClose: true,
             },
             {
               text: "Sexually explicit or predatory",
               textProps: { color: "$blue9" },
               onPress: () =>
-                void handleReportPost("Sexually explicit or predatory"),
+                void reportPost({
+                  postId: props.postId,
+                  reason: "Sexually explicit or predatory",
+                }),
               autoClose: true,
             },
             {
               text: "Hate, harassment, or bullying",
               textProps: { color: "$blue9" },
               onPress: () =>
-                void handleReportPost("Hate, harassment or bullying"),
+                void reportPost({
+                  postId: props.postId,
+                  reason: "Hate, harassment or bullying",
+                }),
               autoClose: true,
             },
             {
               text: "Suicide and self-harm",
               textProps: { color: "$blue9" },
-              onPress: () => void handleReportPost("Suicide and self-harm"),
+              onPress: () =>
+                void reportPost({
+                  postId: props.postId,
+                  reason: "Suicide and self-harm",
+                }),
               autoClose: true,
             },
             {
               text: "Scam or spam",
               textProps: { color: "$blue9" },
-              onPress: () => void handleReportPost("Spam or scam"),
+              onPress: () =>
+                void reportPost({
+                  postId: props.postId,
+                  reason: "Spam or scam",
+                }),
               autoClose: true,
             },
             {
               text: "Other",
               textProps: { color: "$blue9" },
-              onPress: () => void handleReportPost("Other"),
+              onPress: () =>
+                void reportPost({
+                  postId: props.postId,
+                  reason: "Other",
+                }),
               autoClose: true,
             },
           ],

@@ -3,7 +3,7 @@ import { api } from "~/utils/api";
 
 const PAGE_SIZE = 10;
 
-export const useDeletePost = () => {
+const useDeletePost = () => {
   const utils = api.useUtils();
   const { user } = useAuth();
 
@@ -79,3 +79,5 @@ export const useDeletePost = () => {
     isDeleting,
   };
 };
+
+export { useDeletePost };

@@ -4,7 +4,7 @@ interface UseLikeParams {
   postId: string;
 }
 
-export const useLike = ({ postId }: UseLikeParams) => {
+const useLike = ({ postId }: UseLikeParams) => {
   const utils = api.useUtils();
 
   const likePostMutation = api.postInteraction.likePost.useMutation({
@@ -116,3 +116,5 @@ export const useLike = ({ postId }: UseLikeParams) => {
     unlikePost,
   };
 };
+
+export { useLike };
