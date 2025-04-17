@@ -314,6 +314,7 @@ const EditProfile = () => {
 
   const utils = api.useUtils();
   const { data: defaultValues } = api.profile.getProfile.useQuery({});
+  console.log("DEFAULT PFP KEY: ", defaultValues?.profilePictureKey);
 
   const handleProfilePictureUpdate = async () => {
     const imageUri = await pickImage();
@@ -324,15 +325,16 @@ const EditProfile = () => {
     onMutate: async (newData) => {
       await utils.profile.getProfile.cancel();
       const prevData = utils.profile.getProfile.getData({});
-      if (prevData) {
-        utils.profile.getProfile.setData(
-          { userId: undefined },
-          {
-            ...prevData,
-            ...newData,
-          },
-        );
-      }
+      if (prevData === undefined) return;
+
+      utils.profile.getProfile.setData(
+        { userId: undefined },
+        {
+          ...prevData,
+          ...newData,
+        },
+      );
+
       return { prevData };
     },
     onError: (_err, _newData, ctx) => {
@@ -411,7 +413,9 @@ const EditProfile = () => {
             <View position="relative">
               <Image
                 source={
-                  defaultValues?.profilePictureUrl ?? DefaultProfilePicture
+                  selectedImageUri ??
+                  defaultValues?.profilePictureUrl ??
+                  DefaultProfilePicture
                 }
                 style={{
                   width: 160,
