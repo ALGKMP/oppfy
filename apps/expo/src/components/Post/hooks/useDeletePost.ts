@@ -1,6 +1,8 @@
 import { useAuth } from "~/hooks/useAuth";
 import { api } from "~/utils/api";
 
+const PAGE_SIZE = 10;
+
 export const useDeletePost = () => {
   const utils = api.useUtils();
   const { user } = useAuth();
@@ -12,18 +14,29 @@ export const useDeletePost = () => {
 
         await utils.post.paginatePosts.invalidate({
           userId: user.uid,
+          pageSize: PAGE_SIZE,
+        });
+        await utils.post.paginatePostsForFeed.invalidate({
+          pageSize: PAGE_SIZE,
         });
 
-        const prevData = utils.post.paginatePosts.getInfiniteData({
+        const prevPostsData = utils.post.paginatePosts.getInfiniteData({
           userId: user.uid,
+          pageSize: PAGE_SIZE,
         });
-        if (prevData === undefined) return;
+        const prevPostsForFeedData =
+          utils.post.paginatePostsForFeed.getInfiniteData({
+            pageSize: PAGE_SIZE,
+          });
+
+        if (prevPostsData === undefined) return;
+        if (prevPostsForFeedData === undefined) return;
 
         utils.post.paginatePosts.setInfiniteData(
-          { userId: user.uid },
+          { userId: user.uid, pageSize: PAGE_SIZE },
           {
-            ...prevData,
-            pages: prevData.pages.map((page) => ({
+            ...prevPostsData,
+            pages: prevPostsData.pages.map((page) => ({
               ...page,
               items: page.items.filter(
                 (item) => item.post.id != newData.postId,
@@ -31,15 +44,28 @@ export const useDeletePost = () => {
             })),
           },
         );
-        return { prevData };
+        utils.post.paginatePostsForFeed.setInfiniteData(
+          { pageSize: PAGE_SIZE },
+          {
+            ...prevPostsForFeedData,
+            pages: prevPostsForFeedData.pages.map((page) => ({
+              ...page,
+            })),
+          },
+        );
+        return { prevData: { prevPostsData, prevPostsForFeedData } };
       },
       onError: (_err, _newData, ctx) => {
         if (user === null) return;
         if (ctx === undefined) return;
 
         utils.post.paginatePosts.setInfiniteData(
-          { userId: user.uid },
-          ctx.prevData,
+          { userId: user.uid, pageSize: PAGE_SIZE },
+          ctx.prevData.prevPostsData,
+        );
+        utils.post.paginatePostsForFeed.setInfiniteData(
+          { pageSize: PAGE_SIZE },
+          ctx.prevData.prevPostsForFeedData,
         );
       },
     });
