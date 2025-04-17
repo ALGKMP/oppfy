@@ -83,6 +83,10 @@ const lambdaHandler = async (
           throw new Error("Failed to insert post");
         }
 
+        await tx.update(schema.post).set({
+          status: "processed",
+        }).where(eq(schema.post.id, post.id));
+
         // Only increment recipient's profile stats post count since they're the one being posted about
         await tx
           .update(schema.userStats)
