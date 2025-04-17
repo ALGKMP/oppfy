@@ -13,6 +13,7 @@ import { getToken, useTheme } from "tamagui";
 import { validators } from "@oppfy/validators";
 
 import {
+  Avatar,
   Button,
   CardContainer,
   HeaderTitle,
@@ -314,7 +315,6 @@ const EditProfile = () => {
 
   const utils = api.useUtils();
   const { data: defaultValues } = api.profile.getProfile.useQuery({});
-  console.log("DEFAULT PFP KEY: ", defaultValues?.profilePictureKey);
 
   const handleProfilePictureUpdate = async () => {
     const imageUri = await pickImage();
@@ -411,19 +411,13 @@ const EditProfile = () => {
         >
           <YStack alignItems="center" gap="$3">
             <View position="relative">
-              <Image
+              <Avatar
                 source={
                   selectedImageUri ??
                   defaultValues?.profilePictureUrl ??
                   DefaultProfilePicture
                 }
-                style={{
-                  width: 160,
-                  height: 160,
-                  borderRadius: 80,
-                  borderColor: "#F214FF",
-                  borderWidth: 2,
-                }}
+                size={160}
               />
               <View
                 position="absolute"
