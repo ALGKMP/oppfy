@@ -151,6 +151,9 @@ export default function HomePage() {
     // Ensure we're in browser environment before using window
     if (typeof window === "undefined") return;
 
+    // Check if we're on mobile
+    const isMobile = window.innerWidth < 768; // 768px is the md breakpoint
+
     // Animate gradient background
     const interval = setInterval(() => {
       gradientAngle.set(135 + Math.sin(Date.now() / 10000) * 30);
@@ -161,28 +164,30 @@ export default function HomePage() {
       setIsLoaded(true);
       phoneScale.set(1);
 
-      // Auto-play video after staggered animation sequence
-      setTimeout(() => {
-        if (videoRef.current) {
-          try {
-            videoRef.current.muted = false;
-            videoRef.current.volume = 0.2;
-            const playPromise = videoRef.current.play();
+      // Auto-play video after staggered animation sequence, but only on desktop
+      if (!isMobile) {
+        setTimeout(() => {
+          if (videoRef.current) {
+            try {
+              videoRef.current.muted = false;
+              videoRef.current.volume = 0.2;
+              const playPromise = videoRef.current.play();
 
-            if (playPromise !== undefined) {
-              playPromise
-                .then(() => {
-                  setIsVideoPlaying(true);
-                })
-                .catch((error) => {
-                  console.error("Video autoplay failed:", error);
-                });
+              if (playPromise !== undefined) {
+                playPromise
+                  .then(() => {
+                    setIsVideoPlaying(true);
+                  })
+                  .catch((error) => {
+                    console.error("Video autoplay failed:", error);
+                  });
+              }
+            } catch (err) {
+              console.error("Error playing video:", err);
             }
-          } catch (err) {
-            console.error("Error playing video:", err);
           }
-        }
-      }, 1500);
+        }, 1500);
+      }
     };
 
     sequence();
@@ -369,154 +374,8 @@ export default function HomePage() {
         animate={containerControls}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
-        {/* LEFT SIDE - Enhanced 3D iPhone with video - hidden on mobile */}
-        <motion.div
-          className="relative mb-8 hidden w-full max-w-[500px] justify-center md:mb-0 md:flex md:w-1/2"
-          variants={phoneVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.div
-            ref={phoneRef}
-            className="relative"
-            style={{
-              rotateX: rotateX,
-              rotateY: rotateY,
-              transformStyle: "preserve-3d",
-              transformPerspective: 1000,
-              scale: phoneScale,
-            }}
-          >
-            {/* Premium light effects around phone */}
-            <motion.div
-              className="absolute -right-[15%] -top-[15%] -z-10 h-[130%] w-[130%] rounded-full opacity-60 blur-[80px]"
-              animate={{
-                background: [
-                  "radial-gradient(circle at center, rgba(242, 20, 255, 0.4), rgba(242, 20, 255, 0))",
-                  "radial-gradient(circle at center, rgba(98, 0, 234, 0.4), rgba(98, 0, 234, 0))",
-                  "radial-gradient(circle at center, rgba(242, 20, 255, 0.4), rgba(242, 20, 255, 0))",
-                ],
-              }}
-              transition={{
-                duration: 8,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-
-            {/* Ultra-realistic 3D iPhone Pro - modern proportions */}
-            <div className="relative h-[620px] w-[300px]">
-              {/* 3D phone structure with premium shadow */}
-              <div className="absolute -bottom-6 -left-2 -right-6 -top-2 -z-10 translate-x-2 rotate-[-5deg] scale-[0.95] transform-gpu rounded-[50px] bg-black/20 blur-lg"></div>
-
-              {/* Phone outer frame with realistic metallic finish */}
-              <div className="absolute inset-0 transform-gpu rounded-[50px] bg-[#0a0a0a] shadow-lg">
-                {/* Subtle curved edge highlight */}
-                <div className="absolute inset-0 rounded-[50px] bg-gradient-to-tr from-[#2a2a2f] via-transparent to-[#2a2a2f]/80 opacity-50"></div>
-
-                {/* Metallic rim with subtle reflection */}
-                <div
-                  className="absolute inset-1 transform-gpu rounded-[46px] bg-[#0a0a0a]"
-                  style={{
-                    boxShadow: "inset 0 0 0 1.5px rgba(60, 60, 70, 0.4)",
-                  }}
-                >
-                  {/* Side buttons with realistic rendering */}
-                  <div className="absolute -left-[1px] top-[120px] h-[12px] w-[2px] rounded-l-full bg-[#2a2a2c]"></div>
-                  <div className="absolute -left-[1px] top-[140px] h-[12px] w-[2px] rounded-l-full bg-[#2a2a2c]"></div>
-                  <div className="absolute -left-[1px] top-[160px] h-[40px] w-[2px] rounded-l-full bg-[#2a2a2c]"></div>
-                  <div className="absolute -right-[1px] top-[140px] h-[30px] w-[2px] rounded-r-full bg-[#2a2a2c]"></div>
-
-                  {/* Ultra-realistic screen with minimal bezel */}
-                  <div className="absolute inset-[3px] transform-gpu overflow-hidden rounded-[44px] bg-black">
-                    {/* Dynamic Island - minimal pill */}
-                    <div className="absolute left-1/2 top-[10px] z-10 -translate-x-1/2">
-                      <div className="h-[8px] w-[60px] rounded-full bg-black">
-                        {/* Tiny camera dot */}
-                        <div className="absolute right-[15px] top-[2px] h-[4px] w-[4px] rounded-full bg-[#0c0c0c]"></div>
-                      </div>
-                    </div>
-
-                    {/* Premium video content with letterboxing */}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black">
-                      <video
-                        ref={videoRef}
-                        className="h-full w-full object-contain"
-                        playsInline
-                        muted
-                        onClick={toggleVideoPlayback}
-                      >
-                        <source src="/vid.mp4" type="video/mp4" />
-                      </video>
-                    </div>
-
-                    {/* Premium glass reflections */}
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/10 opacity-70"></div>
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20 opacity-30"></div>
-                    <div className="pointer-events-none absolute inset-0 rounded-[44px] shadow-inner"></div>
-
-                    {/* Glass glare effect */}
-                    <motion.div
-                      className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-30"
-                      animate={{
-                        backgroundPosition: ["0% 0%", "100% 100%"],
-                      }}
-                      transition={{
-                        duration: 5,
-                        repeat: Infinity,
-                        repeatType: "reverse",
-                      }}
-                    />
-
-                    {/* Play/pause overlay */}
-                    <motion.div
-                      className="absolute inset-0 flex items-center justify-center bg-black/0"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: isVideoPlaying ? 0 : 0.5 }}
-                      transition={{ duration: 0.3 }}
-                      onClick={toggleVideoPlayback}
-                    >
-                      {!isVideoPlaying && (
-                        <motion.div
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 20,
-                            delay: 0.1,
-                          }}
-                          className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-black/20 backdrop-blur-md"
-                        >
-                          <div className="flex h-[60px] w-[60px] items-center justify-center rounded-full bg-gradient-to-br from-[#F214FF] to-[#FF14F0] shadow-lg">
-                            <svg
-                              viewBox="0 0 24 24"
-                              width="26"
-                              height="26"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M6.5 4.5L18.5 12L6.5 19.5V4.5Z"
-                                fill="white"
-                                stroke="white"
-                                strokeWidth="1"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </div>
-                        </motion.div>
-                      )}
-                    </motion.div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-
         {/* RIGHT SIDE - Content with premium design */}
-        <div className="w-full max-w-[600px] md:w-1/2 md:pl-4 lg:pl-8">
+        <div className="w-full max-w-[600px] md:w-1/2 md:pr-4 lg:pr-8">
           <motion.div
             className="max-w-lg"
             variants={contentVariants}
@@ -681,6 +540,152 @@ export default function HomePage() {
             </motion.div>
           </motion.div>
         </div>
+
+        {/* LEFT SIDE - Enhanced 3D iPhone with video - hidden on mobile */}
+        <motion.div
+          className="relative mb-8 hidden w-full max-w-[500px] justify-center md:mb-0 md:flex md:w-1/2"
+          variants={phoneVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div
+            ref={phoneRef}
+            className="relative"
+            style={{
+              rotateX: rotateX,
+              rotateY: rotateY,
+              transformStyle: "preserve-3d",
+              transformPerspective: 1000,
+              scale: phoneScale,
+            }}
+          >
+            {/* Premium light effects around phone */}
+            <motion.div
+              className="absolute -right-[15%] -top-[15%] -z-10 h-[130%] w-[130%] rounded-full opacity-60 blur-[80px]"
+              animate={{
+                background: [
+                  "radial-gradient(circle at center, rgba(242, 20, 255, 0.4), rgba(242, 20, 255, 0))",
+                  "radial-gradient(circle at center, rgba(98, 0, 234, 0.4), rgba(98, 0, 234, 0))",
+                  "radial-gradient(circle at center, rgba(242, 20, 255, 0.4), rgba(242, 20, 255, 0))",
+                ],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+
+            {/* Ultra-realistic 3D iPhone Pro - modern proportions */}
+            <div className="relative h-[620px] w-[300px]">
+              {/* 3D phone structure with premium shadow */}
+              <div className="absolute -bottom-6 -left-2 -right-6 -top-2 -z-10 translate-x-2 rotate-[-5deg] scale-[0.95] transform-gpu rounded-[50px] bg-black/20 blur-lg"></div>
+
+              {/* Phone outer frame with realistic metallic finish */}
+              <div className="absolute inset-0 transform-gpu rounded-[50px] bg-[#0a0a0a] shadow-lg">
+                {/* Subtle curved edge highlight */}
+                <div className="absolute inset-0 rounded-[50px] bg-gradient-to-tr from-[#2a2a2f] via-transparent to-[#2a2a2f]/80 opacity-50"></div>
+
+                {/* Metallic rim with subtle reflection */}
+                <div
+                  className="absolute inset-1 transform-gpu rounded-[46px] bg-[#0a0a0a]"
+                  style={{
+                    boxShadow: "inset 0 0 0 1.5px rgba(60, 60, 70, 0.4)",
+                  }}
+                >
+                  {/* Side buttons with realistic rendering */}
+                  <div className="absolute -left-[1px] top-[120px] h-[12px] w-[2px] rounded-l-full bg-[#2a2a2c]"></div>
+                  <div className="absolute -left-[1px] top-[140px] h-[12px] w-[2px] rounded-l-full bg-[#2a2a2c]"></div>
+                  <div className="absolute -left-[1px] top-[160px] h-[40px] w-[2px] rounded-l-full bg-[#2a2a2c]"></div>
+                  <div className="absolute -right-[1px] top-[140px] h-[30px] w-[2px] rounded-r-full bg-[#2a2a2c]"></div>
+
+                  {/* Ultra-realistic screen with minimal bezel */}
+                  <div className="absolute inset-[3px] transform-gpu overflow-hidden rounded-[44px] bg-black">
+                    {/* Dynamic Island - minimal pill */}
+                    <div className="absolute left-1/2 top-[10px] z-10 -translate-x-1/2">
+                      <div className="h-[8px] w-[60px] rounded-full bg-black">
+                        {/* Tiny camera dot */}
+                        <div className="absolute right-[15px] top-[2px] h-[4px] w-[4px] rounded-full bg-[#0c0c0c]"></div>
+                      </div>
+                    </div>
+
+                    {/* Premium video content with letterboxing */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black">
+                      <video
+                        ref={videoRef}
+                        className="h-full w-full object-contain"
+                        playsInline
+                        muted
+                        onClick={toggleVideoPlayback}
+                      >
+                        <source src="/vid.mp4" type="video/mp4" />
+                      </video>
+                    </div>
+
+                    {/* Premium glass reflections */}
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/10 opacity-70"></div>
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20 opacity-30"></div>
+                    <div className="pointer-events-none absolute inset-0 rounded-[44px] shadow-inner"></div>
+
+                    {/* Glass glare effect */}
+                    <motion.div
+                      className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-30"
+                      animate={{
+                        backgroundPosition: ["0% 0%", "100% 100%"],
+                      }}
+                      transition={{
+                        duration: 5,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                      }}
+                    />
+
+                    {/* Play/pause overlay */}
+                    <motion.div
+                      className="absolute inset-0 flex items-center justify-center bg-black/0"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: isVideoPlaying ? 0 : 0.5 }}
+                      transition={{ duration: 0.3 }}
+                      onClick={toggleVideoPlayback}
+                    >
+                      {!isVideoPlaying && (
+                        <motion.div
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 20,
+                            delay: 0.1,
+                          }}
+                          className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-black/20 backdrop-blur-md"
+                        >
+                          <div className="flex h-[60px] w-[60px] items-center justify-center rounded-full bg-gradient-to-br from-[#F214FF] to-[#FF14F0] shadow-lg">
+                            <svg
+                              viewBox="0 0 24 24"
+                              width="26"
+                              height="26"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M6.5 4.5L18.5 12L6.5 19.5V4.5Z"
+                                fill="white"
+                                stroke="white"
+                                strokeWidth="1"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </div>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
       </motion.div>
     </main>
   );
