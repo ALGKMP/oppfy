@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Keyboard, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Contact } from "expo-contacts";
@@ -71,10 +71,7 @@ const PostTo = () => {
     parsePhoneNumberEntry,
   } = useContacts();
 
-  const contacts = useMemo(
-    () => contactsData?.pages.flatMap((page) => page.items) ?? [],
-    [contactsData],
-  );
+  const contacts = contactsData?.pages.flatMap((page) => page.items) ?? [];
 
   const {
     data: friendsData,
@@ -88,10 +85,7 @@ const PostTo = () => {
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
-  const friendsList = useMemo(
-    () => friendsData?.pages.flatMap((page) => page.items) ?? [],
-    [friendsData],
-  );
+  const friendsList = friendsData?.pages.flatMap((page) => page.items) ?? [];
 
   const searchOptions: IFuseOptions<Friend> = {
     keys: ["username", "name"],
@@ -107,46 +101,39 @@ const PostTo = () => {
     fuseOptions: searchOptions,
   });
 
-  const debouncedSearchContacts = useMemo(
-    () =>
-      debounce(async (text: string) => {
-        const contacts = await searchContacts(text);
-        setSearchedContacts(contacts);
-      }, 100),
-    [],
-  );
+  const debouncedSearchContacts = debounce(async (text: string) => {
+    const contacts = await searchContacts(text);
+    setSearchedContacts(contacts);
+  }, 100);
 
   useEffect(() => {
     return () => debouncedSearchContacts.cancel();
-  }, [debouncedSearchContacts]);
+  }, []);
 
-  const handleSearchChange = useCallback(
-    (text: string) => {
-      setSearchQuery(text);
-      void debouncedSearchContacts(text);
-    },
-    [debouncedSearchContacts, setSearchQuery],
-  );
+  const handleSearchChange = (text: string) => {
+    setSearchQuery(text);
+    void debouncedSearchContacts(text);
+  };
 
-  const formatPhoneNumber = useCallback(
-    (phoneNumber: string | undefined, countryCode: string | undefined) => {
-      if (phoneNumber === undefined || countryCode === undefined) return;
-      try {
-        const parsedNumber = parsePhoneNumberWithError(
-          phoneNumber,
-          countryCode.toUpperCase() as CountryCode,
-        );
-        return parsedNumber.isValid()
-          ? parsedNumber.formatNational()
-          : phoneNumber;
-      } catch {
-        return phoneNumber;
-      }
-    },
-    [],
-  );
+  const formatPhoneNumber = (
+    phoneNumber: string | undefined,
+    countryCode: string | undefined,
+  ) => {
+    if (phoneNumber === undefined || countryCode === undefined) return;
+    try {
+      const parsedNumber = parsePhoneNumberWithError(
+        phoneNumber,
+        countryCode.toUpperCase() as CountryCode,
+      );
+      return parsedNumber.isValid()
+        ? parsedNumber.formatNational()
+        : phoneNumber;
+    } catch {
+      return phoneNumber;
+    }
+  };
 
-  const displayItems = useMemo(() => {
+  const displayItems = () => {
     const result: ListItem[] = [];
     const friends = searchQuery ? filteredFriends : friendsList;
     const contactsToShow = searchQuery ? searchedContacts : contacts;
@@ -170,7 +157,7 @@ const PostTo = () => {
     }
 
     return result;
-  }, [searchQuery, filteredFriends, friendsList, searchedContacts, contacts]);
+  };
 
   useEffect(() => {
     if (__DEV__) storage.set(HAS_SEEN_SHARE_TIP_KEY, false);
@@ -189,172 +176,144 @@ const PostTo = () => {
 
       return () => clearTimeout(timer);
     }
-  }, [infoDialog]);
+  }, []);
 
-  const handleRefresh = useCallback(async () => {
+  const handleRefresh = async () => {
     setRefreshing(true);
     await Promise.all([refetchContacts(), refetch()]);
     setRefreshing(false);
-  }, [refetchContacts, refetch]);
+  };
 
-  const handleOnEndReached = useCallback(async () => {
+  const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage && !searchQuery) {
       await fetchNextPage();
     }
     if (!isFetchingNextContacts && hasNextContacts && !searchQuery) {
       await fetchNextContacts();
     }
-  }, [
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextContacts,
-    hasNextContacts,
-    fetchNextContacts,
-    searchQuery,
-  ]);
+  };
 
-  const onContactSelected = useCallback(
-    (contact: Contact) => {
-      const formattedPhoneNumber = parsePhoneNumberEntry(
-        contact.phoneNumbers?.[0],
-      );
+  const onContactSelected = (contact: Contact) => {
+    const formattedPhoneNumber = parsePhoneNumberEntry(
+      contact.phoneNumbers?.[0],
+    );
 
-      if (!formattedPhoneNumber) return;
+    if (!formattedPhoneNumber) return;
 
-      router.navigate({
-        pathname: "/create-post",
-        params: {
-          uri,
-          type,
-          width,
-          height,
-          name: contact.name,
-          number: formattedPhoneNumber,
-          userType: "notOnApp",
-          recipientName: contact.name,
-          recipientImage: contact.imageAvailable
-            ? contact.image?.uri
-            : undefined,
-        },
-      });
-    },
-    [router, uri, type, width, height],
-  );
+    router.navigate({
+      pathname: "/create-post",
+      params: {
+        uri,
+        type,
+        width,
+        height,
+        name: contact.name,
+        number: formattedPhoneNumber,
+        userType: "notOnApp",
+        recipientName: contact.name,
+        recipientImage: contact.imageAvailable ? contact.image?.uri : undefined,
+      },
+    });
+  };
 
-  const onFriendSelected = useCallback(
-    (friend: Friend) => {
-      router.navigate({
-        pathname: "/create-post",
-        params: {
-          uri,
-          type,
-          width,
-          height,
-          recipient: friend.userId,
-          userType: "onApp",
-          recipientName: friend.name,
-          recipientUsername: friend.username,
-          recipientImage: friend.profilePictureUrl ?? undefined,
-        },
-      });
-    },
-    [router, uri, type, width, height],
-  );
+  const onFriendSelected = (friend: Friend) => {
+    router.navigate({
+      pathname: "/create-post",
+      params: {
+        uri,
+        type,
+        width,
+        height,
+        recipient: friend.userId,
+        userType: "onApp",
+        recipientName: friend.name,
+        recipientUsername: friend.username,
+        recipientImage: friend.profilePictureUrl ?? undefined,
+      },
+    });
+  };
 
-  const renderItem = useCallback(
-    ({ item }: { item: ListItem }) => {
-      if (item.type === "header") {
-        return (
-          <XStack alignItems="center" gap="$1">
-            <HeaderTitle
-              iconSize={18}
-              iconColor={theme.primary.val as string}
-              iconAfter={item.isContact ? "information-circle" : undefined}
-              onPress={() =>
-                void infoDialog.show({
-                  title: "Post for Anyone",
-                  subtitle:
-                    "You can share posts with friends who aren't on Oppfy yet! They'll get a text invite to join and see your post when they do. It's a great way to bring your friends into the fun.",
-                  acceptText: "Got it",
-                })
-              }
-            >
-              {item.title}
-            </HeaderTitle>
-          </XStack>
-        );
-      }
-
-      if (item.type === "friend") {
-        return (
-          <MediaListItem
-            title={item.data.username}
-            subtitle={item.data.name}
-            imageUrl={
-              item.data.profilePictureUrl
-                ? { uri: item.data.profilePictureUrl }
-                : DefaultProfilePicture
+  const renderItem = ({ item }: { item: ListItem }) => {
+    if (item.type === "header") {
+      return (
+        <XStack alignItems="center" gap="$1">
+          <HeaderTitle
+            iconSize={18}
+            iconColor={theme.primary.val as string}
+            iconAfter={item.isContact ? "information-circle" : undefined}
+            onPress={() =>
+              void infoDialog.show({
+                title: "Post for Anyone",
+                subtitle:
+                  "You can share posts with friends who aren't on Oppfy yet! They'll get a text invite to join and see your post when they do. It's a great way to bring your friends into the fun.",
+                acceptText: "Got it",
+              })
             }
-            primaryAction={{
-              label: "Select",
-              iconAfter: ChevronRight,
-              onPress: () => onFriendSelected(item.data),
-            }}
-            onPress={() => onFriendSelected(item.data)}
-          />
-        );
-      }
+          >
+            {item.title}
+          </HeaderTitle>
+        </XStack>
+      );
+    }
 
+    if (item.type === "friend") {
       return (
         <MediaListItem
-          title={item.data.name}
-          subtitle={formatPhoneNumber(
-            item.data.phoneNumbers?.[0]?.number,
-            item.data.phoneNumbers?.[0]?.countryCode,
-          )}
+          title={item.data.username}
+          subtitle={item.data.name}
           imageUrl={
-            item.data.imageAvailable
-              ? { uri: item.data.image?.uri }
+            item.data.profilePictureUrl
+              ? { uri: item.data.profilePictureUrl }
               : DefaultProfilePicture
           }
           primaryAction={{
             label: "Select",
             iconAfter: ChevronRight,
-            onPress: () => onContactSelected(item.data),
+            onPress: () => onFriendSelected(item.data),
           }}
-          onPress={() => onContactSelected(item.data)}
+          onPress={() => onFriendSelected(item.data)}
         />
       );
-    },
-    [
-      formatPhoneNumber,
-      infoDialog,
-      onContactSelected,
-      onFriendSelected,
-      theme.primary.val,
-    ],
+    }
+
+    return (
+      <MediaListItem
+        title={item.data.name}
+        subtitle={formatPhoneNumber(
+          item.data.phoneNumbers?.[0]?.number,
+          item.data.phoneNumbers?.[0]?.countryCode,
+        )}
+        imageUrl={
+          item.data.imageAvailable
+            ? { uri: item.data.image?.uri }
+            : DefaultProfilePicture
+        }
+        primaryAction={{
+          label: "Select",
+          iconAfter: ChevronRight,
+          onPress: () => onContactSelected(item.data),
+        }}
+        onPress={() => onContactSelected(item.data)}
+      />
+    );
+  };
+
+  const ListHeaderComponent = (
+    <YStack gap="$4">
+      <SearchInput
+        placeholder="Search..."
+        value={searchQuery}
+        onChangeText={handleSearchChange}
+        onClear={() => {
+          debouncedSearchContacts.cancel();
+          setSearchQuery("");
+          setSearchedContacts([]);
+        }}
+      />
+    </YStack>
   );
 
-  const ListHeaderComponent = useMemo(
-    () => (
-      <YStack gap="$4">
-        <SearchInput
-          placeholder="Search..."
-          value={searchQuery}
-          onChangeText={handleSearchChange}
-          onClear={() => {
-            debouncedSearchContacts.cancel();
-            setSearchQuery("");
-            setSearchedContacts([]);
-          }}
-        />
-      </YStack>
-    ),
-    [searchQuery, handleSearchChange, debouncedSearchContacts, setSearchQuery],
-  );
-
-  const ListEmptyComponent = useCallback(() => {
+  const ListEmptyComponent = () => {
     const isLoading =
       isLoadingFriends || isLoadingContacts || isSearchingContacts;
 
@@ -380,7 +339,7 @@ const PostTo = () => {
       );
     }
 
-    if (searchQuery && displayItems.length === 0) {
+    if (searchQuery && displayItems().length === 0) {
       return (
         <YStack flex={1}>
           <HeaderTitle>No Results Found</HeaderTitle>
@@ -389,21 +348,13 @@ const PostTo = () => {
     }
 
     return null;
-  }, [
-    isLoadingFriends,
-    isLoadingContacts,
-    isSearchingContacts,
-    friendsList.length,
-    contacts.length,
-    searchQuery,
-    displayItems.length,
-  ]);
+  };
 
-  const getItemType = useCallback((item: ListItem) => {
+  const getItemType = (item: ListItem) => {
     return item.type;
-  }, []);
+  };
 
-  const keyExtractor = useCallback((item: ListItem) => {
+  const keyExtractor = (item: ListItem) => {
     switch (item.type) {
       case "header":
         return `header-${item.title}`;
@@ -412,11 +363,11 @@ const PostTo = () => {
       case "contact":
         return `contact-${item.data.id ?? item.data.phoneNumbers?.[0]?.number}`;
     }
-  }, []);
+  };
 
   return (
     <FlashList
-      data={displayItems}
+      data={displayItems()}
       renderItem={renderItem}
       keyExtractor={keyExtractor}
       estimatedItemSize={75}
