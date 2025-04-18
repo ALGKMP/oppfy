@@ -1,10 +1,18 @@
-import { and, eq, ilike, inArray, isNotNull, ne, or } from "drizzle-orm";
+import {
+  and,
+  eq,
+  ilike,
+  inArray,
+  isNotNull,
+  isNull,
+  ne,
+  or,
+} from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
 import {
   onboardingCompletedCondition,
-  withoutBlocked,
 } from "@oppfy/db/utils/query-helpers";
 
 import type { Profile, ProfileInsert, UserStats } from "../../models";
@@ -86,37 +94,51 @@ export class ProfileRepository {
     { userId, username, limit = 10 }: ProfilesByUsernameParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile<"notOnApp">[] & Profile<"onboarded">[]> {
-    let query = db
-      .select({
-        profile: this.schema.profile,
-      })
+    const rows = await db
+      .select({ profile: this.schema.profile })
       .from(this.schema.profile)
+      // join in userStatus so we can test onboarding / isOnApp
       .innerJoin(
         this.schema.userStatus,
         eq(this.schema.userStatus.userId, this.schema.profile.userId),
       )
-      // Only return either (A) fully onboarded or (B) isOnApp=false
+      // left‐join block to weed out any mutual blocks
+      .leftJoin(
+        this.schema.block,
+        or(
+          and(
+            eq(this.schema.block.senderUserId, userId),
+            eq(this.schema.block.recipientUserId, this.schema.profile.userId),
+          ),
+          and(
+            eq(this.schema.block.recipientUserId, userId),
+            eq(this.schema.block.senderUserId, this.schema.profile.userId),
+          ),
+        ),
+      )
+      // now apply *all* of your filters in one or more .where() calls
       .where(
         and(
+          // username match
           ilike(this.schema.profile.username, `%${username}%`),
+          // either fully onboarded or not-on-app
           or(
             eq(this.schema.userStatus.hasCompletedOnboarding, true),
             eq(this.schema.userStatus.isOnApp, false),
           ),
+          // must have name & username set
           isNotNull(this.schema.profile.name),
           isNotNull(this.schema.profile.username),
+          // no block record means block.id IS NULL
+          isNull(this.schema.block.id),
+          // don’t return yourself
+          ne(this.schema.profile.userId, userId),
         ),
       )
-      .$dynamic();
-
-    query = withoutBlocked(query, userId);
-
-    const results = await query
-      .where(ne(this.schema.profile.userId, userId))
       .limit(limit);
 
-    return results.map(
-      (result) => result.profile as Profile<"notOnApp"> & Profile<"onboarded">,
+    return rows.map(
+      (r) => r.profile as Profile<"notOnApp"> & Profile<"onboarded">,
     );
   }
 
