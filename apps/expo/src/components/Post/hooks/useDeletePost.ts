@@ -13,7 +13,6 @@ const useDeletePost = () => {
         if (user === null) return;
 
         await utils.post.paginatePosts.invalidate({
-          userId: user.uid,
           pageSize: PAGE_SIZE,
         });
         await utils.post.paginatePostsForFeed.invalidate({
@@ -21,7 +20,6 @@ const useDeletePost = () => {
         });
 
         const prevPostsData = utils.post.paginatePosts.getInfiniteData({
-          userId: user.uid,
           pageSize: PAGE_SIZE,
         });
         const prevPostsForFeedData =
@@ -33,7 +31,7 @@ const useDeletePost = () => {
         if (prevPostsForFeedData === undefined) return;
 
         utils.post.paginatePosts.setInfiniteData(
-          { userId: user.uid, pageSize: PAGE_SIZE },
+          { pageSize: PAGE_SIZE },
           {
             ...prevPostsData,
             pages: prevPostsData.pages.map((page) => ({
@@ -60,13 +58,17 @@ const useDeletePost = () => {
         if (ctx === undefined) return;
 
         utils.post.paginatePosts.setInfiniteData(
-          { userId: user.uid, pageSize: PAGE_SIZE },
+          { pageSize: PAGE_SIZE },
           ctx.prevData.prevPostsData,
         );
         utils.post.paginatePostsForFeed.setInfiniteData(
           { pageSize: PAGE_SIZE },
           ctx.prevData.prevPostsForFeedData,
         );
+      },
+      onSettled: () => {
+        void utils.post.paginatePosts.invalidate();
+        void utils.post.paginatePostsForFeed.invalidate();
       },
     });
 
