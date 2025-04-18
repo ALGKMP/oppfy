@@ -1,5 +1,6 @@
 import React from "react";
-import { View, XStack, YStack } from "tamagui";
+import { Text, View, XStack, YStack } from "tamagui";
+import { LinearGradient } from "tamagui/linear-gradient";
 
 import type { RouterOutputs } from "@oppfy/api";
 
@@ -41,14 +42,35 @@ const Header = (props: HeaderProps) => (
       overflow="hidden"
       borderRadius="$6"
       backgroundColor="$primary"
+      position="relative"
     >
-      <View position="absolute" bottom={12} right={12}>
+      <LinearGradient
+        colors={["$primary", "$background"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+      />
+
+      {/* Profile Highlights */}
+      <XStack
+        position="absolute"
+        bottom={12}
+        right={12}
+        justifyContent="space-between"
+        alignItems="center"
+      >
         <JoinDatePill createdAt={props.profile?.createdAt} />
-      </View>
+      </XStack>
     </YStack>
 
     {/* Profile Info Section */}
-    <YStack marginTop={-60} paddingHorizontal="$4" gap="$4">
+    <YStack marginTop={-70} paddingHorizontal="$4" gap="$4">
       <XStack justifyContent="space-between" alignItems="flex-end">
         <ProfileInfo profile={props.profile} isLoading={props.isLoading} />
 
