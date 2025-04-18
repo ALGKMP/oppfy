@@ -86,7 +86,7 @@ const useUploadProfilePicture = ({
 
       // Optimistically update
       utils.profile.getProfile.setData(
-        { userId: prevData.userId },
+        {},
         {
           ...prevData,
           profilePictureUrl: newProfilePictureUrl,
@@ -100,10 +100,7 @@ const useUploadProfilePicture = ({
       if (ctx === undefined) return;
 
       // Revert optimistic update on error
-      utils.profile.getProfile.setData(
-        { userId: ctx.prevData.userId },
-        ctx.prevData,
-      );
+      utils.profile.getProfile.setData({}, ctx.prevData);
     },
   });
 

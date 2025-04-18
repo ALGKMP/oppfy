@@ -37,13 +37,17 @@ export class CloudFront {
   }
 
   async invalidatePost(key: string): Promise<void> {
-    const distributionId = env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_ID;
-    await this.createInvalidation(distributionId, key);
+    await this.createInvalidation(
+      env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_ID,
+      key,
+    );
   }
 
   async invalidateProfilePicture(key: string): Promise<void> {
-    const distributionId = env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID;
-    await this.createInvalidation(distributionId, key);
+    await this.createInvalidation(
+      env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
+      key,
+    );
   }
 
   private async getSignedUrl({ url }: { url: string }): Promise<string> {

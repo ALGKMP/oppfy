@@ -1,3 +1,4 @@
+import { AppState } from "react-native";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { jwtDecode } from "jwt-decode";
 import superjson from "superjson";
@@ -5,7 +6,7 @@ import superjson from "superjson";
 import type { AppRouter } from "@oppfy/api";
 
 import { storage } from "~/utils/storage";
-import { getBaseUrl } from "./api";
+import { getBaseUrl, isTRPCClientError } from "./api";
 
 export const vanillaClient = createTRPCClient<AppRouter>({
   links: [
@@ -38,6 +39,12 @@ class AuthService {
 
   constructor() {
     void this.initialize();
+
+    AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "active" && this.tokens) {
+        void this.handleTokenRefresh(this.tokens);
+      }
+    });
   }
 
   // Initialize auth state from storage
@@ -96,11 +103,11 @@ class AuthService {
       storage.set("auth_tokens", JSON.stringify(newTokens));
       this.emitUpdate();
       return true;
-    } catch (err) {
-      console.log("################################")
-      console.error("Error refreshing tokens: ", err);
-      console.log("################################")
-      this.signOut();
+    } catch (error) {
+      if (isTRPCClientError(error) && error.data?.code === "UNAUTHORIZED") {
+        this.signOut();
+      }
+
       return false;
     }
   }
@@ -111,8 +118,8 @@ class AuthService {
       () => {
         if (this.tokens) void this.handleTokenRefresh(this.tokens);
       },
-      60 * 1000 * 1,
-    ); // Check every 1 minute
+      5 * 60 * 1000, // Every 5 minutes
+    );
   }
 
   // Sign out
