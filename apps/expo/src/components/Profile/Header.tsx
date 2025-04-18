@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View, XStack, YStack } from "tamagui";
+import { XStack, YStack } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 
 import type { RouterOutputs } from "@oppfy/api";
