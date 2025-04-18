@@ -13,7 +13,7 @@ interface Props {
 // Generate metadata for the page
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
-    const profile = await api.profile.getProfileForNextJs({
+    const profile = await api.profile.getProfileForSite({
       username: params.username,
     });
 
@@ -112,7 +112,7 @@ export default async function ProfilePage({ params }: Props) {
   let profile;
 
   try {
-    profile = await api.profile.getProfileForNextJs({
+    profile = await api.profile.getProfileForSite({
       username: params.username,
     });
   } catch (error) {

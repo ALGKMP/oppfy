@@ -3,17 +3,9 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 
-interface Profile {
-  profilePictureUrl: string | null;
-  id: string;
-  name: string | null;
-  username: string;
-  dateOfBirth: Date | null;
-  bio: string | null;
-  profilePictureKey: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { RouterOutputs } from "@oppfy/api";
+
+type Profile = RouterOutputs["profile"]["getProfileForSite"];
 
 interface ProfilePageProps {
   profile: Profile;

@@ -70,29 +70,6 @@ export const profileRouter = createTRPCRouter({
       );
     }),
 
-  updateProfile: protectedProcedure
-    .input(
-      z.object({
-        name: z.string().optional(),
-        username: z.string().optional(),
-        bio: z.string().optional(),
-        dateOfBirth: validators.dateOfBirth.optional(),
-        profilePictureKey: z.string().optional(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      await ctx.services.profile.updateProfile({
-        userId: ctx.session.uid,
-        update: {
-          name: input.name,
-          username: input.username,
-          bio: input.bio,
-          profilePictureKey: input.profilePictureKey,
-          dateOfBirth: input.dateOfBirth,
-        },
-      });
-    }),
-
   getProfileForSite: publicProcedure
     .input(
       z.object({
@@ -116,6 +93,29 @@ export const profileRouter = createTRPCRouter({
           }
         },
       );
+    }),
+
+  updateProfile: protectedProcedure
+    .input(
+      z.object({
+        name: z.string().optional(),
+        username: z.string().optional(),
+        bio: z.string().optional(),
+        dateOfBirth: validators.dateOfBirth.optional(),
+        profilePictureKey: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.services.profile.updateProfile({
+        userId: ctx.session.uid,
+        update: {
+          name: input.name,
+          username: input.username,
+          bio: input.bio,
+          profilePictureKey: input.profilePictureKey,
+          dateOfBirth: input.dateOfBirth,
+        },
+      });
     }),
 
   getProfilesByUsername: protectedProcedure
