@@ -92,10 +92,6 @@ export default function AnimatedPostPage({ post }: PostPageProps) {
                       playsInline
                       streamType="on-demand"
                       primaryColor="#F214FF"
-                      style={{
-                        "--controls": "none",
-                        "--media-object-fit": "contain",
-                      }}
                     />
                   )}
                 </div>
@@ -269,10 +265,6 @@ export default function AnimatedPostPage({ post }: PostPageProps) {
                   playsInline
                   streamType="on-demand"
                   primaryColor="#F214FF"
-                  style={{
-                    "--controls": "none",
-                    "--media-object-fit": "contain",
-                  }}
                 />
               )}
             </div>
