@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Share } from "react-native";
+import { Share, TouchableOpacity } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -99,13 +99,9 @@ const LikeAction = ({ postId, postStats, isLiked }: LikeActionProps) => {
   };
 
   return (
-    <StatButton count={postStats.likes}>
+    <StatButton count={postStats.likes} onPress={handlePress}>
       <Animated.View style={buttonScale}>
-        <Icon
-          name="heart"
-          onPress={handlePress}
-          color={isLiked ? "#ff3b30" : "white"}
-        />
+        <Icon name="heart" color={isLiked ? "#ff3b30" : "white"} disabled />
       </Animated.View>
     </StatButton>
   );
@@ -144,9 +140,9 @@ const CommentAction = ({
   };
 
   return (
-    <StatButton count={count}>
+    <StatButton count={count} onPress={handlePress}>
       <Animated.View style={buttonScale}>
-        <Icon name="chatbubble-outline" onPress={handlePress} color="white" />
+        <Icon name="chatbubble-outline" color="white" disabled />
       </Animated.View>
     </StatButton>
   );
@@ -162,9 +158,9 @@ const ShareAction = ({ postId }: { postId: string }) => {
   };
 
   return (
-    <StatButton>
+    <StatButton onPress={handlePress}>
       <Animated.View style={buttonScale}>
-        <Icon name="share-outline" onPress={handlePress} color="white" />
+        <Icon name="share-outline" color="white" disabled />
       </Animated.View>
     </StatButton>
   );
@@ -173,9 +169,11 @@ const ShareAction = ({ postId }: { postId: string }) => {
 const StatButton = ({
   count,
   children,
+  onPress,
 }: {
   count?: number;
   children: React.ReactNode;
+  onPress?: () => void;
 }) => {
   const formatCount = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -184,25 +182,34 @@ const StatButton = ({
   };
 
   return (
-    <BlurView
-      intensity={30}
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
       style={{
-        padding: 12,
         borderRadius: 20,
         overflow: "hidden",
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: `${getTokens().color.$primary.val}90`,
       }}
     >
-      <XStack justifyContent="center" alignItems="center" gap="$2">
-        {count !== undefined && count > 0 && (
-          <Text color="white" fontWeight="500">
-            {formatCount(count)}
-          </Text>
-        )}
-        {children}
-      </XStack>
-    </BlurView>
+      <BlurView
+        intensity={30}
+        style={{
+          padding: 12,
+          borderRadius: 20,
+          overflow: "hidden",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: `${getTokens().color.$primary.val}90`,
+        }}
+      >
+        <XStack justifyContent="center" alignItems="center" gap="$2">
+          {count !== undefined && count > 0 && (
+            <Text color="white" fontWeight="500">
+              {formatCount(count)}
+            </Text>
+          )}
+          {children}
+        </XStack>
+      </BlurView>
+    </TouchableOpacity>
   );
 };
