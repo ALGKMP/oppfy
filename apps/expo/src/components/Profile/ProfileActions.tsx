@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { useRouter } from "expo-router";
 import type { IconProps } from "@tamagui/helpers-icon";
-import { Edit3, Share2, UserPlus, Users } from "@tamagui/lucide-icons";
+import {
+  Edit3,
+  Share2,
+  UserMinus,
+  UserPlus,
+  UserRoundX,
+  Users,
+} from "@tamagui/lucide-icons";
 import { XStack } from "tamagui";
 
 import { Button } from "~/components/ui";
@@ -102,7 +109,7 @@ const ActionButton = (props: ActionButtonProps) => {
     unfollow: {
       label: "Unfollow",
       action: "unfollow",
-      icon: UserPlus,
+      icon: UserRoundX,
       iconSize: 18,
       isPrimary: false,
     },
@@ -121,16 +128,16 @@ const ActionButton = (props: ActionButtonProps) => {
       isPrimary: false,
     },
     cancelFollowRequest: {
-      label: "Requested",
+      label: "Cancel Follow Request",
       action: "cancelFollowRequest",
-      icon: UserPlus,
+      icon: UserRoundX,
       iconSize: 18,
       isPrimary: false,
     },
     cancelFriendRequest: {
-      label: "Requested",
+      label: "Cancel Friend Request",
       action: "cancelFriendRequest",
-      icon: Users,
+      icon: UserRoundX,
       iconSize: 18,
       isPrimary: false,
     },
