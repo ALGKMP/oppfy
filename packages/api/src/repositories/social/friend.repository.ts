@@ -306,9 +306,9 @@ export class FriendRepository {
       .from(this.schema.friend)
       .innerJoin(
         this.schema.user,
-        or(
-          eq(this.schema.friend.userIdA, userId),
-          eq(this.schema.friend.userIdB, userId),
+        eq(
+          this.schema.user.id,
+          sql`CASE WHEN ${this.schema.friend.userIdA} = ${userId} THEN ${this.schema.friend.userIdB} ELSE ${this.schema.friend.userIdA} END`,
         ),
       )
       .innerJoin(
@@ -321,6 +321,10 @@ export class FriendRepository {
       )
       .where(
         and(
+          or(
+            eq(this.schema.friend.userIdA, userId),
+            eq(this.schema.friend.userIdB, userId),
+          ),
           cursor
             ? or(
                 gt(this.schema.friend.createdAt, cursor.createdAt),
@@ -330,15 +334,15 @@ export class FriendRepository {
                 ),
               )
             : undefined,
-            onboardingCompletedCondition(this.schema.profile),
+          onboardingCompletedCondition(this.schema.profile),
         ),
       )
       .orderBy(
         asc(this.schema.friend.createdAt),
         asc(this.schema.profile.userId),
       )
-      .limit(pageSize)
-    
+      .limit(pageSize);
+
     const friends = await query;
 
     return friends.map(({ profile, followStatus }) => ({
