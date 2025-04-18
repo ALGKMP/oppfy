@@ -1,4 +1,3 @@
-import { AppState } from "react-native";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { jwtDecode } from "jwt-decode";
 import superjson from "superjson";
@@ -6,30 +5,18 @@ import superjson from "superjson";
 import type { AppRouter } from "@oppfy/api";
 
 import { storage } from "~/utils/storage";
-import { getBaseUrl, isTRPCClientError } from "./api";
-
-export const vanillaClient = createTRPCClient<AppRouter>({
-  links: [
-    httpBatchLink({
-      url: `${getBaseUrl()}/api/trpc`,
-      headers: () => {
-        const headers = new Map<string, string>();
-        headers.set("x-trpc-source", "expo-react");
-
-        return Object.fromEntries(headers);
-      },
-      transformer: superjson,
-    }),
-  ],
-});
+import { getBaseUrl } from "./api";
 
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
 }
+
 interface User {
   uid: string;
 }
+
+const ACCESS_REFRESH_BUFFER_MS = 2 * 60 * 1000; // refresh 2 min before expiry
 
 class AuthService {
   private user: User | null = null;
@@ -37,28 +24,25 @@ class AuthService {
   private listeners: (() => void)[] = [];
   private refreshTimer: NodeJS.Timeout | null = null;
 
+  private readonly client = createTRPCClient<AppRouter>({
+    links: [
+      httpBatchLink({
+        transformer: superjson,
+        url: `${getBaseUrl()}/api/trpc`,
+        headers: () => ({
+          "x-trpc-source": "expo-react",
+        }),
+      }),
+    ],
+  });
+
   constructor() {
     void this.initialize();
-
-    AppState.addEventListener("change", (nextAppState) => {
-      if (nextAppState === "active" && this.tokens) {
-        void this.handleTokenRefresh(this.tokens);
-      }
-    });
   }
 
-  // Initialize auth state from storage
-  private async initialize() {
-    const storedTokens = storage.getString("auth_tokens");
-    if (storedTokens)
-      await this.handleTokenRefresh(JSON.parse(storedTokens) as AuthTokens);
-    this.scheduleTokenRefresh();
-  }
-
-  // State management
-  private emitUpdate() {
-    this.listeners.forEach((listener) => listener());
-  }
+  // ---------------------------------------------------------------------------
+  // Public API
+  // ---------------------------------------------------------------------------
 
   public subscribe(listener: () => void) {
     this.listeners.push(listener);
@@ -67,75 +51,110 @@ class AuthService {
     };
   }
 
-  // Core auth methods
   public async sendVerificationCode(phoneNumber: string) {
-    await vanillaClient.auth.sendVerificationCode.mutate({ phoneNumber });
+    await this.client.auth.sendVerificationCode.mutate({ phoneNumber });
   }
 
   public async verifyPhoneNumber(phoneNumber: string, code: string) {
-    const result = await vanillaClient.auth.verifyCode.mutate({
+    const result = await this.client.auth.verifyCode.mutate({
       phoneNumber,
       code,
     });
-    this.tokens = result.tokens;
-    this.user = {
-      uid: jwtDecode<{ uid: string }>(result.tokens.accessToken).uid,
-    };
-    storage.set("auth_tokens", JSON.stringify(result.tokens));
-    this.scheduleTokenRefresh();
-    this.emitUpdate();
 
-    return {
-      isNewUser: result.isNewUser,
-    };
+    this.setTokens(result.tokens);
+
+    return { isNewUser: result.isNewUser };
   }
 
-  // Token management
-  private async handleTokenRefresh(tokens: AuthTokens) {
+  public signOut() {
+    console.log("SIGNING OUT - IN AUTH SERVICE");
+    storage.delete("auth_tokens");
+    this.clearTimer();
+    this.user = null;
+    this.tokens = null;
+    this.emitUpdate();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Private helpers
+  // ---------------------------------------------------------------------------
+
+  private async initialize() {
+    const persisted = storage.getString("auth_tokens");
+    if (persisted) {
+      const parsed = JSON.parse(persisted) as AuthTokens;
+      // If access token is still fresh, reuse it; otherwise attempt refresh.
+      if (this.isAccessTokenValid(parsed.accessToken)) {
+        this.setTokens(parsed);
+      } else {
+        const refreshed = await this.handleTokenRefresh(parsed);
+        if (!refreshed) this.signOut();
+      }
+    }
+  }
+
+  private setTokens(tokens: AuthTokens) {
+    this.tokens = tokens;
+    this.user = { uid: jwtDecode<{ uid: string }>(tokens.accessToken).uid };
+    storage.set("auth_tokens", JSON.stringify(tokens));
+    this.scheduleTokenRefresh();
+    this.emitUpdate();
+  }
+
+  private emitUpdate() {
+    this.listeners.forEach((listener) => listener());
+  }
+
+  private clearTimer() {
+    if (this.refreshTimer) clearTimeout(this.refreshTimer);
+    this.refreshTimer = null;
+  }
+
+  private scheduleTokenRefresh() {
+    this.clearTimer();
+    if (!this.tokens) return;
+
+    const { exp } = jwtDecode<{ exp: number }>(this.tokens.accessToken);
+    const msUntilExpiry = exp * 1000 - Date.now();
+    const msUntilRefresh = Math.max(
+      msUntilExpiry - ACCESS_REFRESH_BUFFER_MS,
+      0,
+    );
+
+    this.refreshTimer = setTimeout(() => {
+      if (this.tokens) void this.handleTokenRefresh(this.tokens);
+    }, msUntilRefresh);
+  }
+
+  private async handleTokenRefresh(tokens: AuthTokens): Promise<boolean> {
     try {
-      const newTokens = await vanillaClient.auth.refreshToken.mutate({
+      const newTokens = await this.client.auth.refreshToken.mutate({
         refreshToken: tokens.refreshToken,
       });
-      this.tokens = newTokens;
-      this.user = {
-        uid: jwtDecode<{ uid: string }>(newTokens.accessToken).uid,
-      };
-      storage.set("auth_tokens", JSON.stringify(newTokens));
-      this.emitUpdate();
+      this.setTokens(newTokens);
       return true;
-    } catch (error) {
-      if (isTRPCClientError(error) && error.data?.code === "UNAUTHORIZED") {
-        this.signOut();
-      }
-
+    } catch (err) {
       return false;
     }
   }
 
-  private scheduleTokenRefresh() {
-    if (this.refreshTimer) clearInterval(this.refreshTimer);
-    this.refreshTimer = setInterval(
-      () => {
-        if (this.tokens) void this.handleTokenRefresh(this.tokens);
-      },
-      5 * 60 * 1000, // Every 5 minutes
-    );
+  private isAccessTokenValid(token: string): boolean {
+    try {
+      const { exp } = jwtDecode<{ exp: number }>(token);
+      return exp * 1000 > Date.now() + ACCESS_REFRESH_BUFFER_MS;
+    } catch {
+      return false;
+    }
   }
 
-  // Sign out
-  public signOut() {
-    console.log("SIGNING OUT - IN AUTH SERVICE");
-    storage.delete("auth_tokens");
-    this.user = null;
-    this.tokens = null;
-    if (this.refreshTimer) clearInterval(this.refreshTimer);
-    this.emitUpdate();
-  }
-
+  // ---------------------------------------------------------------------------
   // Getters
+  // ---------------------------------------------------------------------------
+
   public get currentUser() {
     return this.user;
   }
+
   public get isSignedIn() {
     return !!this.user;
   }

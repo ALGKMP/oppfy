@@ -43,41 +43,40 @@ interface VerifyCodeResult {
   tokens: AuthTokens;
 }
 
+// Token lifetimes — tweak as desired
+const ACCESS_TOKEN_TTL = "15m"; // shorter‑lived access tokens
+const REFRESH_TOKEN_TTL = "30d";
+
 @injectable()
 export class AuthService {
   constructor(
-    @inject(TYPES.Database)
-    private readonly db: Database,
+    @inject(TYPES.Database) private readonly db: Database,
     @inject(TYPES.UserRepository)
     private readonly userRepository: UserRepository,
-    @inject(TYPES.Twilio)
-    private readonly twilio: Twilio,
+    @inject(TYPES.Twilio) private readonly twilio: Twilio,
   ) {}
+
+  // ------------------------------ SMS Flow ---------------------------------
 
   async sendVerificationCode({
     phoneNumber,
   }: PhoneNumberParam): Promise<
     Result<void, AuthErrors.InvalidPhoneNumber | AuthErrors.RateLimitExceeded>
   > {
-    // Skip sending for admin phone numbers
-    if (ADMIN_PHONE_NUMBERS.includes(phoneNumber)) {
-      return ok();
-    }
+    if (ADMIN_PHONE_NUMBERS.includes(phoneNumber)) return ok();
 
     try {
       await this.twilio.sendVerificationCode({ phoneNumber });
       return ok();
     } catch (error: unknown) {
       if (error instanceof RestException) {
-        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (error.code) {
-          case 21211: // Invalid phone number
+          case 21211:
             return err(new AuthErrors.InvalidPhoneNumber());
-          case 20429: // Rate limit
+          case 20429:
             return err(new AuthErrors.RateLimitExceeded());
         }
       }
-
       throw error;
     }
   }
@@ -95,50 +94,38 @@ export class AuthService {
   > {
     let isNewUser = false;
 
-    // 1) Check if admin phone number
+    // 1 — Verify code (admin shortcut or Twilio)
     if (ADMIN_PHONE_NUMBERS.includes(phoneNumber)) {
-      if (code !== ADMIN_CODE) {
+      if (code !== ADMIN_CODE)
         return err(new AuthErrors.InvalidVerificationCode());
-      }
-    }
-    // 2) Call Twilio to verify the code
-    else {
+    } else {
       try {
         const isValid = await this.twilio.verifyCode({ phoneNumber, code });
         if (!isValid) return err(new AuthErrors.InvalidVerificationCode());
       } catch (error: unknown) {
-        if (error instanceof RestException) {
-          // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
-          switch (error.code) {
-            case 60400:
-              return err(new AuthErrors.InvalidVerificationCode());
-          }
+        if (error instanceof RestException && error.code === 60400) {
+          return err(new AuthErrors.InvalidVerificationCode());
         }
         throw error;
       }
     }
 
-    // 3) Look up user and create if necessary
+    // 2 — Ensure user exists / on‑app
     const possibleUser = await this.userRepository.getUserByPhoneNumber({
       phoneNumber,
     });
 
-    // If user not found, create them
-    if (possibleUser === undefined) {
+    if (!possibleUser) {
       await this.db.transaction(async (tx) => {
         await this.userRepository.createUser({ phoneNumber }, tx);
       });
       isNewUser = true;
-    }
-    // If user exists but isn't marked "on app," update them
-    else {
+    } else {
       const userStatus = await this.userRepository.getUserStatus({
         userId: possibleUser.id,
       });
-
-      if (userStatus === undefined) {
+      if (!userStatus)
         return err(new UserErrors.UserStatusNotFound(possibleUser.id));
-      }
 
       if (!userStatus.isOnApp) {
         await this.userRepository.updateUserOnAppStatus({
@@ -152,36 +139,53 @@ export class AuthService {
     const user = await this.userRepository.getUserByPhoneNumber({
       phoneNumber,
     });
-    if (user === undefined)
-      return err(new UserErrors.UserNotFound(phoneNumber));
+    if (!user) return err(new UserErrors.UserNotFound(phoneNumber));
 
-    // 4) Generate tokens, return success
+    // 3 — Issue tokens
     const tokens = this.generateTokens(user.id);
     return ok({ isNewUser, tokens });
   }
+
+  // ------------------------------ JWT Flow ----------------------------------
 
   refreshToken({
     refreshToken,
   }: RefreshTokenParams): Result<AuthTokens, AuthErrors.InvalidRefreshToken> {
     try {
-      const { uid } = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET) as {
+      const { uid, exp } = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET) as {
         uid: string;
+        exp: number;
       };
-      const tokens = this.generateTokens(uid);
-      return ok(tokens);
+
+      // Optionally: rotate refresh tokens only if < 7 days remaining
+      const msLeft = exp * 1000 - Date.now();
+      const rotate = msLeft < 7 * 24 * 60 * 60 * 1000;
+
+      const newAccess = this.createAccessToken(uid);
+      const newRefresh = rotate ? this.createRefreshToken(uid) : refreshToken;
+
+      return ok({ accessToken: newAccess, refreshToken: newRefresh });
     } catch {
       return err(new AuthErrors.InvalidRefreshToken());
     }
   }
 
   private generateTokens(uid: string): AuthTokens {
-    const accessToken = jwt.sign({ uid }, env.JWT_ACCESS_SECRET, {
-      expiresIn: "30m",
-    });
-    const refreshToken = jwt.sign({ uid }, env.JWT_REFRESH_SECRET, {
-      expiresIn: "30d",
-    });
+    return {
+      accessToken: this.createAccessToken(uid),
+      refreshToken: this.createRefreshToken(uid),
+    };
+  }
 
-    return { accessToken, refreshToken };
+  private createAccessToken(uid: string): string {
+    return jwt.sign({ uid }, env.JWT_ACCESS_SECRET, {
+      expiresIn: ACCESS_TOKEN_TTL,
+    });
+  }
+
+  private createRefreshToken(uid: string): string {
+    return jwt.sign({ uid }, env.JWT_REFRESH_SECRET, {
+      expiresIn: REFRESH_TOKEN_TTL,
+    });
   }
 }
