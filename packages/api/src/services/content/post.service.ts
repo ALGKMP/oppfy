@@ -159,10 +159,11 @@ export class PostService {
       return err(new PostErrors.PostNotFound(params.postId));
     }
 
-    if (post.post.authorUserId !== params.userId) {
+    if (post.post.recipientUserId !== params.userId) {
       return err(new PostErrors.NotPostOwner(params.userId, params.postId));
     }
 
+    // TODO: we should delete the actual post from s3/mux
     await this.db.transaction(async (tx) => {
       await this.postRepository.deletePost(params, tx);
     });
