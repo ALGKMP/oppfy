@@ -58,6 +58,31 @@ export const postRouter = createTRPCRouter({
       );
     }),
 
+  getPostForSite: publicProcedure
+    .input(
+      z.object({
+        postId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.services.post.getPostForSite({
+        postId: input.postId,
+      });
+
+      return result.match(
+        (res) => res,
+        (err) => {
+          switch (err.name) {
+            case "PostNotFoundError":
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Post not found",
+              });
+          }
+        },
+      );
+    }),
+
   getIsLiked: protectedProcedure
     .input(z.object({ postId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -264,27 +289,6 @@ export const postRouter = createTRPCRouter({
         userId: ctx.session.uid,
         cursor: input.cursor,
         pageSize: input.pageSize,
-      });
-
-      return result.match(
-        (res) => res,
-        (_) => {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-          });
-        },
-      );
-    }),
-
-  getPostForNextJs: publicProcedure
-    .input(
-      z.object({
-        postId: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const result = await ctx.services.post.getPostForSite({
-        postId: input.postId,
       });
 
       return result.match(

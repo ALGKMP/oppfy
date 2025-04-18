@@ -15,13 +15,15 @@ interface Props {
 // Generate metadata for the page
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
-    const post = await api.post.getPostForNextJs({ postId: params.id });
+    const postData = await api.post.getPostForSite({ postId: params.id });
 
     // Calculate dimensions maintaining aspect ratio with max height of 1200px for vertical images
     // and max width of 1200px for horizontal images
     const maxDimension = 1200;
     const aspectRatio =
-      post.height && post.width ? post.height / post.width : 1;
+      postData.post.height && postData.post.width
+        ? postData.post.height / postData.post.width
+        : 1;
 
     let width: number;
     let height: number;
@@ -41,34 +43,35 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     height = Math.max(height, 600);
 
     return {
-      title: `${post.authorName} opped ${post.recipientName} | Oppfy`,
-      description: post.caption.length === 0 ? "No caption" : post.caption,
+      title: `${postData.authorProfile.name} opped ${postData.recipientProfile.name} | Oppfy`,
+      description:
+        postData.post.caption === null ? "No caption" : postData.post.caption,
       themeColor: "#F214FF",
       openGraph: {
-        title: `${post.authorName} opped ${post.recipientName}`,
-        description: post.caption,
+        title: `${postData.authorProfile.name} opped ${postData.recipientProfile.name}`,
+        description: postData.post.caption ?? undefined,
         images: [
           {
-            url: post.imageUrl,
+            url: postData.post.assetUrl,
             width,
             height,
-            alt: `${post.authorName} opped ${post.recipientName}`,
+            alt: `${postData.authorProfile.name} opped ${postData.recipientProfile.name}`,
           },
         ],
         type: "article",
-        url: `https://www.oppfy.app/post/${post.postId}`,
+        url: `https://www.oppfy.app/post/${postData.post.id}`,
         siteName: "Oppfy",
       },
       twitter: {
         card: "summary_large_image",
-        title: `${post.authorName} opped ${post.recipientName}`,
-        description: post.caption,
+        title: `${postData.authorProfile.name} opped ${postData.recipientProfile.name}`,
+        description: postData.post.caption ?? undefined,
         images: [
           {
-            url: post.imageUrl,
+            url: postData.post.assetUrl,
             width,
             height,
-            alt: `${post.authorName} opped ${post.recipientName}`,
+            alt: `${postData.authorProfile.name} opped ${postData.recipientProfile.name}`,
           },
         ],
         site: "@oppfyapp",
@@ -126,7 +129,7 @@ export default async function PostPage({ params }: Props) {
   let post;
 
   try {
-    post = await api.post.getPostForNextJs({ postId: params.id });
+    post = await api.post.getPostForSite({ postId: params.id });
   } catch (error) {
     post = null;
   }
@@ -139,10 +142,9 @@ export default async function PostPage({ params }: Props) {
     );
   }
 
-  const aspectRatio = post.height && post.width ? post.height / post.width : 1;
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-black">
-      <AnimatedPostPage post={post} aspectRatio={aspectRatio} />
+      <AnimatedPostPage post={post} />
     </main>
   );
 }
