@@ -7,15 +7,6 @@ import { getSignedUrl } from "@aws-sdk/cloudfront-signer";
 import type { InferSelectModel, schema } from "@oppfy/db";
 import { env } from "@oppfy/env";
 
-type Profile = InferSelectModel<typeof schema.profile>;
-type Post = InferSelectModel<typeof schema.post>;
-
-export type Hydrate<T> = T extends Profile
-  ? T & { profilePictureUrl: string | null }
-  : T extends Post
-    ? T & { assetUrl: string }
-    : never;
-
 const ONE_HOUR = 60 * 60 * 1000;
 
 export class CloudFront {
@@ -29,27 +20,6 @@ export class CloudFront {
         secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
       },
     });
-  }
-
-  hydrateProfile<T extends Profile>(
-    profile: T,
-  ): T & { profilePictureUrl: string | null } {
-    const profilePictureUrl = profile.profilePictureKey
-      ? this.getProfilePictureUrl(profile.profilePictureKey)
-      : null;
-
-    return {
-      ...profile,
-      profilePictureUrl,
-    };
-  }
-
-  async hydratePost<T extends Post>(
-    post: T,
-  ): Promise<T & { assetUrl: string }> {
-    const assetUrl = await this.getSignedPrivatePostUrl(post.postKey);
-
-    return { ...post, assetUrl };
   }
 
   getProfilePictureUrl(objectKey: string): string {
@@ -66,7 +36,7 @@ export class CloudFront {
     });
   }
 
-  async invalidateUserPosts(key: string): Promise<void> {
+  async invalidatePost(key: string): Promise<void> {
     const distributionId = env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_ID;
     await this.createInvalidation(distributionId, key);
   }
@@ -85,16 +55,16 @@ export class CloudFront {
     }) as unknown as Promise<string>;
   }
 
+  private getProfilePictureDistributionDomainUrl(objectKey: string): string {
+    return `https://${env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_DOMAIN}/${objectKey}`;
+  }
+
   private getPublicPostDistributionDomainUrl(objectKey: string): string {
     return `https://${env.CLOUDFRONT_PUBLIC_POSTS_DISTRIBUTION_DOMAIN}/${objectKey}`;
   }
 
   private getPrivatePostDistributionDomainUrl(objectKey: string): string {
     return `https://${env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_DOMAIN}/${objectKey}`;
-  }
-
-  private getProfilePictureDistributionDomainUrl(objectKey: string): string {
-    return `https://${env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_DOMAIN}/${objectKey}`;
   }
 
   private async createInvalidation(

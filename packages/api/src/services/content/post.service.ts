@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFront, Hydrate } from "@oppfy/cloudfront";
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { Mux } from "@oppfy/mux";
 import { ImageContentType, S3 } from "@oppfy/s3";
@@ -17,6 +17,7 @@ import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
 import type { PaginatedResponse, PaginationParams } from "../../types";
+import { Hydrate, hydratePost, hydrateProfile } from "../../utils";
 
 interface BasePostParams {
   authorUserId: string;
@@ -357,7 +358,7 @@ export class PostService {
     const hydratedCommentsAndProfiles = commentsAndProfiles.map(
       ({ comment, profile }) => ({
         comment,
-        profile: this.cloudfront.hydrateProfile(profile),
+        profile: hydrateProfile(profile),
       }),
     );
 
@@ -412,12 +413,12 @@ export class PostService {
         {
           ...params,
           postKey: key,
-          mediaType: "image",
+          mediaType: "video",
         },
         tx,
       );
 
-      const presignedUrl = await this.mux.getPresignedUrlForVideo({
+      const presignedUrl = await this.mux.getPresignedUrlForVideoUpload({
         metadata: {
           postid: post.id,
         },
@@ -432,9 +433,9 @@ export class PostService {
   >(post: PostResult<T>): Promise<HydratedPostResult<T>> {
     return {
       ...post,
-      post: await this.cloudfront.hydratePost(post.post),
-      authorProfile: this.cloudfront.hydrateProfile(post.authorProfile),
-      recipientProfile: this.cloudfront.hydrateProfile(post.recipientProfile),
+      post: await hydratePost(post.post),
+      authorProfile: hydrateProfile(post.authorProfile),
+      recipientProfile: hydrateProfile(post.recipientProfile),
     };
   }
 }

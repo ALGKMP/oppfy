@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFront, Hydrate } from "@oppfy/cloudfront";
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 
 import * as BlockErrors from "../../errors/social/block.error";
@@ -15,6 +15,7 @@ import type {
   PaginatedResponse,
   PaginationParams,
 } from "../../types";
+import { Hydrate, hydrateProfile } from "../../utils";
 
 interface GetBlockedUsersParams extends PaginationParams {
   userId: string;
@@ -123,7 +124,7 @@ export class BlockService {
       });
 
     const hydratedProfiles = rawBlockedProfiles.map((profile) =>
-      this.cloudfront.hydrateProfile(profile),
+      hydrateProfile(profile),
     );
 
     const hasMore = rawBlockedProfiles.length > pageSize;

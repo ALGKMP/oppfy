@@ -2,7 +2,7 @@ import { createHash } from "crypto";
 import { inject, injectable } from "inversify";
 import { ok, Result } from "neverthrow";
 
-import { CloudFront, Hydrate } from "@oppfy/cloudfront";
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { FollowStatus } from "@oppfy/db/utils/query-helpers";
 import { SQS } from "@oppfy/sqs";
@@ -13,6 +13,7 @@ import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
 import type { UserIdParam } from "../../types";
+import { Hydrate, hydrateProfile } from "../../utils";
 
 export interface UpdateUserContactsParams {
   userId: string;
@@ -87,7 +88,7 @@ export class ContactsService {
     }));
 
     const hydratedProfiles = profilesWithFollowStatus.map((profile) =>
-      this.cloudfront.hydrateProfile(profile),
+      hydrateProfile(profile),
     );
 
     return ok(hydratedProfiles);

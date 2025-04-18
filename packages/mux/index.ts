@@ -16,7 +16,17 @@ export class Mux {
     });
   }
 
-  async getPresignedUrlForVideo({ metadata }: GetPresignedUrlForVideoParams) {
+  getStreamUrl(assetId: string): string {
+    return `https://stream.mux.com/${assetId}.m3u8`;
+  }
+
+  getThumbnailUrl(assetId: string): string {
+    return `https://image.mux.com/${assetId}/thumbnail.jpg`;
+  }
+
+  async getPresignedUrlForVideoUpload({
+    metadata,
+  }: GetPresignedUrlForVideoParams) {
     const upload = await this.client.video.uploads.create({
       cors_origin: "*",
       new_asset_settings: {
@@ -33,14 +43,6 @@ export class Mux {
 
   async deleteAsset(assetId: string) {
     await this.client.video.assets.delete(assetId);
-  }
-
-  getStreamUrl(assetId: string): string {
-    return `https://stream.mux.com/${assetId}.m3u8`;
-  }
-
-  getThumbnailUrl(assetId: string): string {
-    return `https://image.mux.com/${assetId}/thumbnail.jpg`;
   }
 
   verifyWebhookSignature(payload: string, headers: Record<string, string>) {

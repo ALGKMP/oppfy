@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFront, Hydrate } from "@oppfy/cloudfront";
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { FollowStatus } from "@oppfy/db/utils/query-helpers";
 
@@ -18,6 +18,7 @@ import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
 import { PaginatedResponse } from "../../types";
+import { Hydrate, hydrateProfile } from "../../utils";
 
 interface NotificationAndHydratedProfile {
   profile: Hydrate<Profile>;
@@ -109,7 +110,7 @@ export class NotificationService {
 
     const notificationsAndHydratedProfiles = notifications.map((data) => ({
       ...data,
-      profile: this.cloudfront.hydrateProfile(data.profile),
+      profile: hydrateProfile(data.profile),
     }));
 
     const hasMore = notifications.length > pageSize;

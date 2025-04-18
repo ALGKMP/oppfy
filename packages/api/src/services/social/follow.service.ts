@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFront, Hydrate } from "@oppfy/cloudfront";
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { FollowStatus } from "@oppfy/db/utils/query-helpers";
 
@@ -19,6 +19,7 @@ import {
   PaginationParams,
   SelfOtherUserIdsParams,
 } from "../../types";
+import { Hydrate, hydrateProfile } from "../../utils";
 
 interface PaginateByUserIdWithSelfUserIdParams extends PaginationParams {
   selfUserId: string;
@@ -352,7 +353,7 @@ export class FollowService {
     });
 
     const hydratedProfiles = rawProfiles.map((profile) => ({
-      ...this.cloudfront.hydrateProfile(profile),
+      ...hydrateProfile(profile),
       followStatus: profile.followStatus,
     }));
 
@@ -394,7 +395,7 @@ export class FollowService {
     });
 
     const hydratedProfiles = rawProfiles.map((profile) => ({
-      ...this.cloudfront.hydrateProfile(profile),
+      ...hydrateProfile(profile),
       followStatus: profile.followStatus,
     }));
 
@@ -428,7 +429,7 @@ export class FollowService {
     });
 
     const hydratedProfiles = rawProfiles.map((profile) =>
-      this.cloudfront.hydrateProfile(profile),
+      hydrateProfile(profile),
     );
 
     const hasMore = rawProfiles.length > pageSize;

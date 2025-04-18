@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
-import { CloudFront, Hydrate } from "@oppfy/cloudfront";
+import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import {
   FollowStatus,
@@ -23,6 +23,7 @@ import {
   UserIdParam,
   UsernameParam,
 } from "../../types";
+import { Hydrate, hydrateProfile } from "../../utils";
 
 interface RelationshipState {
   follow: FollowStatus;
@@ -97,7 +98,7 @@ export class ProfileService {
       return err(new ProfileErrors.ProfileNotFound(otherUserId ?? selfUserId));
     }
 
-    return ok(this.cloudfront.hydrateProfile(profileData));
+    return ok(hydrateProfile(profileData));
   }
 
   /**
@@ -116,7 +117,7 @@ export class ProfileService {
       return err(new ProfileErrors.ProfileNotFound(username));
     }
 
-    return ok(this.cloudfront.hydrateProfile(profileData));
+    return ok(hydrateProfile(profileData));
   }
 
   /**
@@ -128,9 +129,7 @@ export class ProfileService {
     Result<Hydrate<Profile<"notOnApp"> | Profile<"onboarded">>[], never>
   > {
     const profiles = await this.profileRepository.getProfilesByUsername(params);
-    const hydratedProfiles = profiles.map((profile) =>
-      this.cloudfront.hydrateProfile(profile),
-    );
+    const hydratedProfiles = profiles.map((profile) => hydrateProfile(profile));
 
     return ok(hydratedProfiles);
   }
