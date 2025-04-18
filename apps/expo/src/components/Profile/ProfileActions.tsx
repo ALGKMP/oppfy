@@ -136,8 +136,6 @@ const ActionButton = (props: ActionButtonProps) => {
     },
   };
 
-  console.log("RELATIONSHIP STATE", props.relationshipState);
-
   const buttonCombinations: Record<string, (keyof typeof buttonConfigs)[]> = {
     PUBLIC_NOT_FOLLOWING_NOT_FRIENDS: ["follow", "friend"],
     PUBLIC_FOLLOWING_NOT_FRIENDS: ["unfollow", "friend"],

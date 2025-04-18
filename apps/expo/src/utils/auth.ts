@@ -96,7 +96,10 @@ class AuthService {
       storage.set("auth_tokens", JSON.stringify(newTokens));
       this.emitUpdate();
       return true;
-    } catch {
+    } catch (err) {
+      console.log("################################")
+      console.error("Error refreshing tokens: ", err);
+      console.log("################################")
       this.signOut();
       return false;
     }

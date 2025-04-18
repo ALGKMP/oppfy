@@ -94,6 +94,9 @@ const useComment = ({ postId }: UseCommentParams) => {
         pageSize: PAGE_SIZE,
       });
     },
+    onSettled: () => {
+      void utils.post.paginateComments.invalidate({ pageSize: PAGE_SIZE });
+    },
   });
 
   const deleteCommentMutation = api.postInteraction.deleteComment.useMutation({
@@ -158,6 +161,9 @@ const useComment = ({ postId }: UseCommentParams) => {
       );
 
       await utils.post.paginateComments.invalidate();
+    },
+    onSettled: () => {
+      void utils.post.paginateComments.invalidate({ pageSize: PAGE_SIZE });
     },
   });
 
