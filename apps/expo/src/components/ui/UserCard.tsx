@@ -10,7 +10,6 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
-import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import {
@@ -21,7 +20,7 @@ import {
   Sparkles,
   UserPlus,
 } from "@tamagui/lucide-icons";
-import { getTokens } from "tamagui";
+import { getTokens, Image } from "tamagui";
 
 import { Button } from "./Buttons";
 import { Circle } from "./Shapes";
@@ -176,11 +175,12 @@ export const UserCard = ({
         <Animated.View style={contentStyle}>
           {/* Profile Image */}
           <Image
-            recyclingKey={userId}
-            source={profilePictureUrl ?? DefaultProfilePicture}
+            source={
+              typeof profilePictureUrl === "string"
+                ? { uri: profilePictureUrl }
+                : DefaultProfilePicture
+            }
             style={{ width: "100%", aspectRatio }}
-            contentFit="cover"
-            transition={200}
           />
 
           {/* Gradient Overlay */}
