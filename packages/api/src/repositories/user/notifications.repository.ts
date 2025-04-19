@@ -46,6 +46,26 @@ export interface UpdateNotificationSettingsParams {
   };
 }
 
+export type NotificationType =
+  | "like"
+  | "comment"
+  | "follow"
+  | "friend"
+  | "followRequest"
+  | "friendRequest";
+
+export type EntityType = "post" | "profile";
+
+export interface SendNotificationParams {
+  senderId: string;
+  recipientId: string;
+  title: string;
+  body: string;
+  entityId?: string;
+  entityType?: EntityType;
+  notificationType?: NotificationType;
+}
+
 @injectable()
 export class NotificationRepository {
   private db: Database;
@@ -210,5 +230,10 @@ export class NotificationRepository {
       notification,
       followStatus,
     }));
+  }
+
+  async sendNotification(params: SendNotificationParams) {
+
+  
   }
 }

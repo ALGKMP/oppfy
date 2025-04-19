@@ -2,7 +2,6 @@ import { createHash } from "crypto";
 import { inject, injectable } from "inversify";
 import { ok, Result } from "neverthrow";
 
-import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { FollowStatus } from "@oppfy/db/utils/query-helpers";
 import { SQS } from "@oppfy/sqs";
@@ -42,7 +41,6 @@ export class ContactsService {
     private readonly userRepository: UserRepository,
     @inject(TYPES.ProfileRepository)
     private readonly profileRepository: ProfileRepository,
-    @inject(TYPES.CloudFront) private readonly cloudfront: CloudFront,
     @inject(TYPES.SQS) private readonly sqs: SQS,
   ) {}
 

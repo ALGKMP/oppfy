@@ -49,6 +49,7 @@ export class SQS {
     return await this.client.send(command);
   }
 
+
   // New method for sending contact sync messages
   async sendContactSyncMessage({
     userId,
