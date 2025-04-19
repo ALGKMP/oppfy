@@ -110,7 +110,7 @@ export class SNS {
     }
   }
 
-  // Helper methods for common notification types
+/*   // Helper methods for common notification types
   async sendLikeNotification(
     pushTokens: string[],
     senderId: string,
@@ -219,5 +219,5 @@ export class SNS {
       entityId: senderId,
       notificationType: "friend",
     });
-  }
+  } */
 }

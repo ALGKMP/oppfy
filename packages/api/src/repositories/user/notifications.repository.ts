@@ -1,5 +1,6 @@
 import { and, count, desc, eq, lt, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
+import { z } from "zod";
 
 import type {
   Database,
@@ -7,11 +8,21 @@ import type {
   Schema,
   Transaction,
 } from "@oppfy/db";
+// export type NotificationType =
+//   | "like"
+//   | "comment"
+//   | "follow"
+//   | "friend"
+
+// export type EntityType = "post" | "profile";
+
+import { entityTypeEnum, eventTypeEnum } from "@oppfy/db";
 import {
   FollowStatus,
   getFollowStatusSql,
   onboardingCompletedCondition,
 } from "@oppfy/db/utils/query-helpers";
+import { SQS } from "@oppfy/sqs";
 
 import type { Notification, NotificationSettings, Profile } from "../../models";
 import { TYPES } from "../../symbols";
@@ -23,6 +34,15 @@ export interface PaginateNotificationsParams {
   pageSize?: number;
 }
 
+export interface GetRecentNotificationsParams {
+  senderId: string;
+  recipientId: string;
+  eventType: NotificationType;
+  entityId: string;
+  entityType: EntityType;
+  minutesThreshold: number;
+  limit: number;
+}
 export interface NotificationAndProfile {
   profile: Profile<"onboarded">;
   notification: Notification;
@@ -46,38 +66,26 @@ export interface UpdateNotificationSettingsParams {
   };
 }
 
-export type NotificationType =
-  | "like"
-  | "comment"
-  | "follow"
-  | "friend"
-  | "followRequest"
-  | "friendRequest";
-
-export type EntityType = "post" | "profile";
+type NotificationType = (typeof eventTypeEnum.enumValues)[number];
+type EntityType = (typeof entityTypeEnum.enumValues)[number];
 
 export interface SendNotificationParams {
   senderId: string;
   recipientId: string;
   title: string;
   body: string;
-  entityId?: string;
-  entityType?: EntityType;
-  notificationType?: NotificationType;
+  notificationType: NotificationType;
+  entityId: string;
+  entityType: EntityType;
 }
 
 @injectable()
 export class NotificationRepository {
-  private db: Database;
-  private schema: Schema;
-
   constructor(
-    @inject(TYPES.Database) db: Database,
-    @inject(TYPES.Schema) schema: Schema,
-  ) {
-    this.db = db;
-    this.schema = schema;
-  }
+    @inject(TYPES.Database) private readonly db: Database,
+    @inject(TYPES.Schema) private readonly schema: Schema,
+    @inject(TYPES.SQS) private readonly sqs: SQS,
+  ) {}
 
   async getUnreadNotificationsCount(
     params: UserIdParam,
@@ -96,6 +104,19 @@ export class NotificationRepository {
       );
 
     return result[0]?.count ?? 0;
+  }
+
+  async storeNotification(
+    params: SendNotificationParams,
+    db: DatabaseOrTransaction = this.db,
+  ) {
+    db.insert(this.schema.notification).values({
+      senderUserId: params.senderId,
+      recipientUserId: params.recipientId,
+      eventType: params.notificationType,
+      entityId: params.entityId,
+      entityType: params.entityType,
+    });
   }
 
   async getPushTokens(
@@ -232,8 +253,75 @@ export class NotificationRepository {
     }));
   }
 
-  async sendNotification(params: SendNotificationParams) {
+  async sendNotification({
+    recipientId,
+    notificationType,
+  }: SendNotificationParams) {
+    const settings = await this.getNotificationSettings({
+      userId: recipientId,
+    });
 
-  
+    if (settings === undefined) {
+      return;
+    }
+
+    if (!this.isNotificationEnabled(notificationType, settings)) {
+      return;
+    }
+
+    const pushTokens = await this.getPushTokens({ userId: recipientId });
+    if (pushTokens.length === 0) {
+      return;
+    }
+  }
+
+  isNotificationEnabled(
+    notificationType: NotificationType,
+    settings: NotificationSettings,
+  ): boolean {
+    switch (notificationType) {
+      case "like":
+        return settings.likes;
+      case "post":
+        return settings.posts;
+      case "comment":
+        return settings.comments;
+      case "follow":
+        return settings.followRequests;
+      case "friend":
+        return settings.friendRequests;
+    }
+  }
+
+  async getRecentNotifications(
+    {
+      senderId,
+      recipientId,
+      entityId,
+      entityType,
+      eventType,
+      minutesThreshold,
+      limit,
+    }: GetRecentNotificationsParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<Notification[]> {
+    const notifications = await db
+      .select()
+      .from(this.schema.notification)
+      .where(
+        and(
+          eq(this.schema.notification.senderUserId, senderId),
+          eq(this.schema.notification.recipientUserId, recipientId),
+          eq(this.schema.notification.eventType, eventType),
+          eq(this.schema.notification.entityId, entityId),
+          eq(this.schema.notification.entityType, entityType),
+          lt(
+            this.schema.notification.createdAt,
+            new Date(Date.now() - minutesThreshold * 60 * 1000),
+          ),
+        ),
+      )
+      .limit(limit);
+    return notifications;
   }
 }

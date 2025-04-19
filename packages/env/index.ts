@@ -11,9 +11,10 @@ declare global {
       TWILIO_AUTH_TOKEN: string;
       TWILIO_SERVICE_SID: string;
 
-      SNS_PUSH_NOTIFICATION_TOPIC_ARN: string;
+      // SNS_PUSH_NOTIFICATION_TOPIC_ARN: string;
 
       SQS_CONTACT_QUEUE: string;
+      SQS_NOTIFICATION_QUEUE: string;
 
       S3_POST_BUCKET: string;
       S3_PROFILE_PICTURE_BUCKET: string;
