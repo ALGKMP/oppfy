@@ -37,7 +37,7 @@ export interface PaginateNotificationsParams {
 export interface GetRecentNotificationsParams {
   senderId: string;
   recipientId: string;
-  eventType: NotificationType;
+  eventType: EventType;
   entityId: string;
   entityType: EntityType;
   minutesThreshold: number;
@@ -66,7 +66,7 @@ export interface UpdateNotificationSettingsParams {
   };
 }
 
-type NotificationType = (typeof eventTypeEnum.enumValues)[number];
+type EventType = (typeof eventTypeEnum.enumValues)[number];
 type EntityType = (typeof entityTypeEnum.enumValues)[number];
 
 export interface SendNotificationParams {
@@ -74,7 +74,7 @@ export interface SendNotificationParams {
   recipientId: string;
   title: string;
   body: string;
-  notificationType: NotificationType;
+  eventType: EventType;
   entityId: string;
   entityType: EntityType;
 }
@@ -113,7 +113,7 @@ export class NotificationRepository {
     db.insert(this.schema.notification).values({
       senderUserId: params.senderId,
       recipientUserId: params.recipientId,
-      eventType: params.notificationType,
+      eventType: params.eventType,
       entityId: params.entityId,
       entityType: params.entityType,
     });
@@ -253,30 +253,43 @@ export class NotificationRepository {
     }));
   }
 
-  async sendNotification({
-    recipientId,
-    notificationType,
-  }: SendNotificationParams) {
+  async sendNotification(params: SendNotificationParams) {
+    // check for recent notis
+    const recent = await this.getRecentNotifications({
+      ...params,
+      minutesThreshold: 15,
+      limit: 10,
+    });
+
+    // not sending duplicate noti so no spamming here
+    if (recent.length > 0) {
+      return;
+    }
+
     const settings = await this.getNotificationSettings({
-      userId: recipientId,
+      userId: params.recipientId,
     });
 
     if (settings === undefined) {
       return;
     }
 
-    if (!this.isNotificationEnabled(notificationType, settings)) {
+    if (!this.isNotificationEnabled(params.eventType, settings)) {
       return;
     }
 
-    const pushTokens = await this.getPushTokens({ userId: recipientId });
+    const pushTokens = await this.getPushTokens({ userId: params.recipientId });
     if (pushTokens.length === 0) {
       return;
     }
+
+    await this.storeNotification(params);
+
+    // send notification to sqs
   }
 
   isNotificationEnabled(
-    notificationType: NotificationType,
+    notificationType: EventType,
     settings: NotificationSettings,
   ): boolean {
     switch (notificationType) {
