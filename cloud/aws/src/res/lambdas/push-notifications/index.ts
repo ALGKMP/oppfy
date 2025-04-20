@@ -1,5 +1,6 @@
 import type { ExpoPushMessage, ExpoPushTicket } from "expo-server-sdk";
 import { Expo } from "expo-server-sdk";
+import { SqsEnvelope } from "@aws-lambda-powertools/parser/envelopes";
 import { parser } from "@aws-lambda-powertools/parser/middleware";
 import { SnsSchema } from "@aws-lambda-powertools/parser/schemas";
 import middy from "@middy/core";
@@ -7,11 +8,8 @@ import { createEnv } from "@t3-oss/env-core";
 import type { APIGatewayProxyResult, Context } from "aws-lambda";
 import { z } from "zod";
 
-import { SqsEnvelope } from "@aws-lambda-powertools/parser/envelopes";
-
-import { db, eq, schema } from "@oppfy/db";
+import { db, entityTypeEnum, eq, eventTypeEnum, schema } from "@oppfy/db";
 import { validators } from "@oppfy/validators";
-
 
 /* async storeNotification(
   params: SendNotificationParams,
@@ -76,22 +74,52 @@ import { validators } from "@oppfy/validators";
   }
 } */
 
+// export interface SendNotificationParams {
+//   senderId: string;
+//   recipientId: string;
+//   title: string;
+//   body: string;
+//   eventType: EventType;
+//   entityId: string;
+//   entityType: EntityType;
+// }
+
+/**
+   * 
+   * export const eventTypeEnum = pgEnum("event_type", [
+  "like",
+  "post",
+  "comment",
+  "follow",
+  "friend",
+]);
+   */
+// type EventType = (typeof eventTypeEnum.enumValues)[number];
+// type EntityType = (typeof entityTypeEnum.enumValues)[number];
+
 const notificationBody = z.object({
- 
-})
+  senderId: z.string(),
+  recipientId: z.string(),
+  title: z.string(),
+  body: z.string(),
+  eventType: z.enum(["like", "post", "comment", "follow", "friend"]),
+  entityId: z.string(),
+  entityType: z.enum(["post", "comment", "profile"]),
+});
 
 // list bc of middy powertools thing
 // 1. Parses data using SqsSchema.
 // 2. Parses records in body key using your schema and return them in a list.
-type ContactSyncBodyType = z.infer<typeof notificationBody>[];
+type NotificationBodyType = z.infer<typeof notificationBody>[];
 
 const lambdaHandler = async (
-  event: ContactSyncBodyType,
+  event: NotificationBodyType,
   _context: Context,
 ): Promise<APIGatewayProxyResult> => {
   try {
 
-
+    console.log(event);
+    
 
     return {
       statusCode: 200,
