@@ -25,7 +25,6 @@ const env = createEnv({
   runtimeEnv: process.env,
 });
 
-
 const notificationBody = z.object({
   senderId: z.string(),
   recipientId: z.string(),
@@ -112,79 +111,6 @@ function isNotificationEnabled(
       return settings.friendRequests;
   }
 }
-
-/* async getRecentNotifications(
-  {
-    senderId,
-    recipientId,
-    entityId,
-    entityType,
-    eventType,
-    minutesThreshold,
-    limit,
-  }: GetRecentNotificationsParams,
-  db: DatabaseOrTransaction = this.db,
-): Promise<Notification[]> {
-  const notifications = await db
-    .select()
-    .from(this.schema.notification)
-    .where(
-      and(
-        eq(this.schema.notification.senderUserId, senderId),
-        eq(this.schema.notification.recipientUserId, recipientId),
-        eq(this.schema.notification.eventType, eventType),
-        eq(this.schema.notification.entityId, entityId),
-        eq(this.schema.notification.entityType, entityType),
-        lt(
-          this.schema.notification.createdAt,
-          new Date(Date.now() - minutesThreshold * 60 * 1000),
-        ),
-      ),
-    )
-    .limit(limit);
-  return notifications;
-} */
-
-/* isNotificationEnabled(
-  notificationType: EventType,
-  settings: NotificationSettings,
-): boolean {
-  switch (notificationType) {
-    case "like":
-      return settings.likes;
-    case "post":
-      return settings.posts;
-    case "comment":
-      return settings.comments;
-    case "follow":
-      return settings.followRequests;
-    case "friend":
-      return settings.friendRequests;
-  }
-} */
-
-// export interface SendNotificationParams {
-//   senderId: string;
-//   recipientId: string;
-//   title: string;
-//   body: string;
-//   eventType: EventType;
-//   entityId: string;
-//   entityType: EntityType;
-// }
-
-/**
-   * 
-   * export const eventTypeEnum = pgEnum("event_type", [
-  "like",
-  "post",
-  "comment",
-  "follow",
-  "friend",
-]);
-   */
-// type EventType = (typeof eventTypeEnum.enumValues)[number];
-// type EntityType = (typeof entityTypeEnum.enumValues)[number];
 
 // list bc of middy powertools thing
 // 1. Parses data using SqsSchema.
