@@ -14,9 +14,9 @@ import {
   eq,
   eventTypeEnum,
   lt,
+  not,
   schema,
 } from "@oppfy/db";
-import { validators } from "@oppfy/validators";
 
 const env = createEnv({
   server: {
@@ -122,17 +122,20 @@ const lambdaHandler = async (
   _context: Context,
 ): Promise<APIGatewayProxyResult> => {
   try {
-
     const expo = new Expo({
       accessToken: env.EXPO_ACCESS_TOKEN,
     });
 
-    console.log(event);
+    // group notis by [eventtype][entityType][userId]
+    // for each notification, check if notification is enabled
+    // if enabled, check if notification is recent
+    // if recent, skip
+    // if not recent, send notification
+    // if not enabled, skip
 
-    const notification = event[0];
-
-    if (!notification) {
-      console.log("No notification found");
+    const notifications = event;
+    if (!notifications) {
+      console.log("No notifications found");
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -141,103 +144,22 @@ const lambdaHandler = async (
       };
     }
 
-    const {
-      senderId,
-      recipientId,
-      title,
-      body,
-      eventType,
-      entityId,
-      entityType,
-    } = notification;
-
-    const notificationSettings = await getNotificationSettings(recipientId);
-    if (!notificationSettings) {
-      console.log("Notification settings not found");
-      return {
-        statusCode: 400,
-        body: JSON.stringify({
-          message: "Invalid request",
-        }),
-      };
-    }
-
-    if (!isNotificationEnabled(eventType, notificationSettings)) {
-      console.log("Notification disabled");
-      return {
-        statusCode: 400,
-        body: JSON.stringify({
-          message: "Invalid request",
-        }),
-      };
-    }
-
-    const recentNotifications = await getRecentNotifications({
-      senderId,
-      recipientId,
-      entityId,
-      entityType,
-      eventType,
-      minutesThreshold: 1,
-      limit: 1,
-    });
-    if (recentNotifications.length > 0) {
-      console.log("Recent notifications found");
-      return {
-        statusCode: 400,
-        body: JSON.stringify({
-          message: "Invalid request",
-        }),
-      };
-    }
-    storeNotification(notification);
-
-    const messages: ExpoPushMessage[] = [];
-    const pushTokens = await db
-      .select({
-        token: schema.pushToken.token,
-      })
-      .from(schema.pushToken)
-      .where(eq(schema.pushToken.userId, recipientId));
-
-    if (pushTokens.length === 0) {
-      console.log("No push tokens found");
-      return {
-        statusCode: 400,
-        body: JSON.stringify({
-          message: "Invalid request",
-        }),
-      };
-    }
-
-    messages.push({
-      to: pushTokens.map((token) => token.token),
-      sound: "default",
-      title,
-      body,
-      data: {
-        senderId,
-        recipientId,
-        title,
-        body,
-        eventType,
-        entityId,
-        entityType,
-      },
-    });
-
-    const chunks = expo.chunkPushNotifications(messages);
-
-    for (const chunk of chunks) {
-      try {
-        const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-        handlePushTickets(ticketChunk, chunk);
-      } catch (error) {
-        console.error(error);
+    const things = notifications.reduce((acc, item) => {
+      const { eventType, entityType, recipientId } = item;
+      if (!acc.has(eventType)) {
+        acc.set(eventType, new Map());
       }
-    }
+      if (!acc.get(eventType)!.has(entityType)) {
+        acc.get(eventType)!.set(entityType, new Map());
+      }
+      if (!acc.get(eventType)!.get(entityType)!.has(recipientId)) {
+        acc.get(eventType)!.get(entityType)!.set(recipientId, [item]);
+      }
+      // acc.get(eventType)!.get(entityType)!.get(recipientId)!.push(item);
+      return acc;
+    }, new Map<string, Map<string, Map<string, NotificationBodyType>>>());
+    
 
-    console.log("Notifications sent");
 
     return {
       statusCode: 200,
