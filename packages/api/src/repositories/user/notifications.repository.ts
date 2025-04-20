@@ -230,42 +230,4 @@ export class NotificationRepository {
       followStatus,
     }));
   }
-
-  async sendNotification(params: SendNotificationParams) {
-
-    await this.sqs.sendNotificationMessage(params);
-
-    // // check for recent notis
-    // const recent = await this.getRecentNotifications({
-    //   ...params,
-    //   minutesThreshold: 15,
-    //   limit: 10,
-    // });
-
-    // // not sending duplicate noti so no spamming here
-    // if (recent.length > 0) {
-    //   return;
-    // }
-
-    // const settings = await this.getNotificationSettings({
-    //   userId: params.recipientId,
-    // });
-
-    // if (settings === undefined) {
-    //   return;
-    // }
-
-    // if (!this.isNotificationEnabled(params.eventType, settings)) {
-    //   return;
-    // }
-
-    // const pushTokens = await this.getPushTokens({ userId: params.recipientId });
-    // if (pushTokens.length === 0) {
-    //   return;
-    // }
-
-    // await this.storeNotification(params);
-
-    // send notification to sqs
-  }
 }

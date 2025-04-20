@@ -78,6 +78,8 @@ export class PostInteractionService {
         title: "New Like",
         body: "You have a new like on your post",
       })
+
+      console.log("sent sqs message")
     });
 
 
