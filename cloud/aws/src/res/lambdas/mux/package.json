@@ -15,7 +15,6 @@
   "prettier": "@oppfy/prettier-config",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.564.0",
-    "@aws-sdk/client-sns": "^3.592.0",
     "@mux/mux-node": "^8.5.1",
     "@oppfy/db": "workspace:*",
     "@oppfy/mux": "workspace:*",

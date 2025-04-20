@@ -2,7 +2,6 @@ import type { ExpoPushMessage, ExpoPushTicket } from "expo-server-sdk";
 import { Expo } from "expo-server-sdk";
 import { SqsEnvelope } from "@aws-lambda-powertools/parser/envelopes";
 import { parser } from "@aws-lambda-powertools/parser/middleware";
-import { SnsSchema } from "@aws-lambda-powertools/parser/schemas";
 import middy from "@middy/core";
 import { createEnv } from "@t3-oss/env-core";
 import type { APIGatewayProxyResult, Context } from "aws-lambda";

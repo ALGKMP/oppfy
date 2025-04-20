@@ -5,7 +5,6 @@ import {
   HeadObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
-// import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
 import middy from "@middy/core";
 // import { createEnv } from "@t3-oss/env-core";
 import type { Context } from "aws-lambda";

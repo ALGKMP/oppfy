@@ -6,7 +6,6 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3n from "aws-cdk-lib/aws-s3-notifications";
-import * as sns from "aws-cdk-lib/aws-sns";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import type { Construct } from "constructs";
@@ -20,10 +19,8 @@ import { LambdaFunction } from "./constructs/lambda";
 import { Neptune } from "./constructs/neptune";
 import { Queue } from "./constructs/queue";
 import { NeptuneNotebook } from "./constructs/sagemaker";
-import { SNSTopic } from "./constructs/sns";
 
 const environment = {
-  // SNS_PUSH_NOTIFICATION_TOPIC_ARN: env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
 
   S3_POST_BUCKET: env.S3_POST_BUCKET,
   S3_PROFILE_PICTURE_BUCKET: env.S3_PROFILE_PICTURE_BUCKET,
