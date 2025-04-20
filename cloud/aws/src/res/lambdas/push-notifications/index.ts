@@ -207,6 +207,7 @@ const lambdaHandler = async (
     const notification = event[0];
 
     if (!notification) {
+      console.log("No notification found");
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -224,8 +225,10 @@ const lambdaHandler = async (
       entityId,
       entityType,
     } = notification;
+
     const notificationSettings = await getNotificationSettings(recipientId);
     if (!notificationSettings) {
+      console.log("Notification settings not found");
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -233,7 +236,9 @@ const lambdaHandler = async (
         }),
       };
     }
+
     if (!isNotificationEnabled(eventType, notificationSettings)) {
+      console.log("Notification disabled");
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -241,6 +246,7 @@ const lambdaHandler = async (
         }),
       };
     }
+
     const recentNotifications = await getRecentNotifications({
       senderId,
       recipientId,
@@ -251,6 +257,7 @@ const lambdaHandler = async (
       limit: 1,
     });
     if (recentNotifications.length > 0) {
+      console.log("Recent notifications found");
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -267,6 +274,16 @@ const lambdaHandler = async (
       })
       .from(schema.pushToken)
       .where(eq(schema.pushToken.userId, recipientId));
+
+    if (pushTokens.length === 0) {
+      console.log("No push tokens found");
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "Invalid request",
+        }),
+      };
+    }
 
     messages.push({
       to: pushTokens.map((token) => token.token),
@@ -294,6 +311,8 @@ const lambdaHandler = async (
         console.error(error);
       }
     }
+
+    console.log("Notifications sent");
 
     return {
       statusCode: 200,
