@@ -8,6 +8,7 @@ import { CommentRepository } from "../../repositories/content/comment.repository
 import { LikeRepository } from "../../repositories/content/like.repository";
 import { PostRepository } from "../../repositories/content/post.repository";
 import { TYPES } from "../../symbols";
+import { SQS } from "@oppfy/sqs";
 
 interface LikePostParams {
   postId: string;
@@ -41,6 +42,7 @@ export class PostInteractionService {
     private readonly commentRepository: CommentRepository,
     @inject(TYPES.LikeRepository)
     private readonly likeRepository: LikeRepository,
+    @inject(TYPES.SQS) private readonly sqs: SQS,
   ) {}
 
   async likePost({
@@ -66,7 +68,19 @@ export class PostInteractionService {
         return err(new PostInteractionErrors.AlreadyLiked(postId, userId));
 
       await this.likeRepository.createLike({ postId, userId }, tx);
+
+      await this.sqs.sendNotificationMessage({
+        entityId: postId,
+        entityType: "post",
+        eventType: "like",
+        recipientId: post.post.recipientUserId,
+        senderId: userId,
+        title: "New Like",
+        body: "You have a new like on your post",
+      })
     });
+
+
     return ok();
   }
 

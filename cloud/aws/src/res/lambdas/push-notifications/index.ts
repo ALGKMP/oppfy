@@ -117,9 +117,7 @@ const lambdaHandler = async (
   _context: Context,
 ): Promise<APIGatewayProxyResult> => {
   try {
-
     console.log(event);
-    
 
     return {
       statusCode: 200,
