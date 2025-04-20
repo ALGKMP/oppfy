@@ -10,7 +10,7 @@ import type {
 
 import { env } from "@oppfy/env";
 
-export type NotificationType =
+/* export type NotificationType =
   | "like"
   | "comment"
   | "follow"
@@ -46,9 +46,9 @@ export interface NotificationSettings {
   friendRequests: boolean;
   followRequests: boolean;
 }
-
+ */
 export class SNS {
-  private client: SNSClient;
+/*   private client: SNSClient;
 
   constructor() {
     this.client = new SNSClient({
@@ -109,7 +109,7 @@ export class SNS {
       });
     }
   }
-
+ */
 /*   // Helper methods for common notification types
   async sendLikeNotification(
     pushTokens: string[],

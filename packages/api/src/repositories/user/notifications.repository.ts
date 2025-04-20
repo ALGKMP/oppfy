@@ -22,7 +22,7 @@ import {
   getFollowStatusSql,
   onboardingCompletedCondition,
 } from "@oppfy/db/utils/query-helpers";
-import { SQS } from "@oppfy/sqs";
+import { EntityType, EventType, SendNotificationParams, SQS } from "@oppfy/sqs";
 
 import type { Notification, NotificationSettings, Profile } from "../../models";
 import { TYPES } from "../../symbols";
@@ -66,18 +66,7 @@ export interface UpdateNotificationSettingsParams {
   };
 }
 
-type EventType = (typeof eventTypeEnum.enumValues)[number];
-type EntityType = (typeof entityTypeEnum.enumValues)[number];
 
-export interface SendNotificationParams {
-  senderId: string;
-  recipientId: string;
-  title: string;
-  body: string;
-  eventType: EventType;
-  entityId: string;
-  entityType: EntityType;
-}
 
 @injectable()
 export class NotificationRepository {
@@ -106,18 +95,7 @@ export class NotificationRepository {
     return result[0]?.count ?? 0;
   }
 
-  async storeNotification(
-    params: SendNotificationParams,
-    db: DatabaseOrTransaction = this.db,
-  ) {
-    db.insert(this.schema.notification).values({
-      senderUserId: params.senderId,
-      recipientUserId: params.recipientId,
-      eventType: params.eventType,
-      entityId: params.entityId,
-      entityType: params.entityType,
-    });
-  }
+
 
   async getPushTokens(
     params: UserIdParam,
@@ -254,87 +232,40 @@ export class NotificationRepository {
   }
 
   async sendNotification(params: SendNotificationParams) {
-    // check for recent notis
-    const recent = await this.getRecentNotifications({
-      ...params,
-      minutesThreshold: 15,
-      limit: 10,
-    });
 
-    // not sending duplicate noti so no spamming here
-    if (recent.length > 0) {
-      return;
-    }
+    await this.sqs.sendNotificationMessage(params);
 
-    const settings = await this.getNotificationSettings({
-      userId: params.recipientId,
-    });
+    // // check for recent notis
+    // const recent = await this.getRecentNotifications({
+    //   ...params,
+    //   minutesThreshold: 15,
+    //   limit: 10,
+    // });
 
-    if (settings === undefined) {
-      return;
-    }
+    // // not sending duplicate noti so no spamming here
+    // if (recent.length > 0) {
+    //   return;
+    // }
 
-    if (!this.isNotificationEnabled(params.eventType, settings)) {
-      return;
-    }
+    // const settings = await this.getNotificationSettings({
+    //   userId: params.recipientId,
+    // });
 
-    const pushTokens = await this.getPushTokens({ userId: params.recipientId });
-    if (pushTokens.length === 0) {
-      return;
-    }
+    // if (settings === undefined) {
+    //   return;
+    // }
 
-    await this.storeNotification(params);
+    // if (!this.isNotificationEnabled(params.eventType, settings)) {
+    //   return;
+    // }
+
+    // const pushTokens = await this.getPushTokens({ userId: params.recipientId });
+    // if (pushTokens.length === 0) {
+    //   return;
+    // }
+
+    // await this.storeNotification(params);
 
     // send notification to sqs
-  }
-
-  isNotificationEnabled(
-    notificationType: EventType,
-    settings: NotificationSettings,
-  ): boolean {
-    switch (notificationType) {
-      case "like":
-        return settings.likes;
-      case "post":
-        return settings.posts;
-      case "comment":
-        return settings.comments;
-      case "follow":
-        return settings.followRequests;
-      case "friend":
-        return settings.friendRequests;
-    }
-  }
-
-  async getRecentNotifications(
-    {
-      senderId,
-      recipientId,
-      entityId,
-      entityType,
-      eventType,
-      minutesThreshold,
-      limit,
-    }: GetRecentNotificationsParams,
-    db: DatabaseOrTransaction = this.db,
-  ): Promise<Notification[]> {
-    const notifications = await db
-      .select()
-      .from(this.schema.notification)
-      .where(
-        and(
-          eq(this.schema.notification.senderUserId, senderId),
-          eq(this.schema.notification.recipientUserId, recipientId),
-          eq(this.schema.notification.eventType, eventType),
-          eq(this.schema.notification.entityId, entityId),
-          eq(this.schema.notification.entityType, entityType),
-          lt(
-            this.schema.notification.createdAt,
-            new Date(Date.now() - minutesThreshold * 60 * 1000),
-          ),
-        ),
-      )
-      .limit(limit);
-    return notifications;
   }
 }

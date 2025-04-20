@@ -15,6 +15,20 @@ import type {
 
 import { env } from "@oppfy/env";
 
+export type EventType = "like" | "post" | "comment" | "follow" | "friend";
+
+export type EntityType = "post" | "profile" | "comment";
+
+export interface SendNotificationParams {
+  senderId: string;
+  recipientId: string;
+  title: string;
+  body: string;
+  eventType: EventType;
+  entityId: string;
+  entityType: EntityType;
+}
+
 export class SQS {
   private client: SQSClient;
 
@@ -49,7 +63,6 @@ export class SQS {
     return await this.client.send(command);
   }
 
-
   // New method for sending contact sync messages
   async sendContactSyncMessage({
     userId,
@@ -73,5 +86,14 @@ export class SQS {
       success: true,
       messageId: `${userId}_contactsync_${Date.now().toString()}`,
     };
+  }
+
+  async sendNotificationMessage(params: SendNotificationParams) {
+    const result = await this.sendMessage({
+      QueueUrl: env.SQS_NOTIFICATION_QUEUE,
+      MessageBody: JSON.stringify(params),
+    });
+
+    return result;
   }
 }
