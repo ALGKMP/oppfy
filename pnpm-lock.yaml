@@ -784,6 +784,9 @@ importers:
       '@oppfy/mux':
         specifier: workspace:*
         version: link:../../../../../../packages/mux
+      '@oppfy/sqs':
+        specifier: workspace:*
+        version: link:../../../../../../packages/sqs
       '@oppfy/validators':
         specifier: workspace:*
         version: link:../../../../../../packages/validators
