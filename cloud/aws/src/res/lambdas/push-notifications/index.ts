@@ -126,7 +126,6 @@ const lambdaHandler = async (
       accessToken: env.EXPO_ACCESS_TOKEN,
     });
 
-    // group notis by [eventtype][entityType][entityId][recipientId]
     // group notis by [{eventType, entityType, entityId, recipientId}]
     // for each notification, check if notification is enabled
     // if enabled, check if notification is recent
@@ -209,6 +208,12 @@ const lambdaHandler = async (
         { eventType, entityType, entityId },
         notifications,
       ] of notificationsByEventTypeAndEntityId) {
+        // make sure notification is enabled
+        if (!isNotificationEnabled(eventType, settings)) {
+          console.log("Notification not enabled");
+          continue;
+        }
+
         // aggregate notis if there are multiple
         if (notifications.length > 1) {
           const recentNotifications = await getRecentNotifications({
