@@ -4,6 +4,7 @@ import { err, ok, Result } from "neverthrow";
 import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { FollowStatus } from "@oppfy/db/utils/query-helpers";
+import { SQS } from "@oppfy/sqs";
 
 import * as FollowErrors from "../../errors/social/follow.error";
 import * as FriendErrors from "../../errors/social/friend.error";
@@ -43,6 +44,7 @@ export class FollowService {
     private readonly profileRepository: ProfileRepository,
     @inject(TYPES.CloudFront)
     private readonly cloudfront: CloudFront,
+    @inject(TYPES.SQS) private readonly sqs: SQS,
   ) {}
 
   /**
@@ -98,11 +100,29 @@ export class FollowService {
         );
 
       // Based on privacy, either create a follower relationship or a follow request
-      await this.followRepository[
+      const action =
         recipientProfile.privacy === "public"
           ? "createFollower"
-          : "createFollowRequest"
-      ]({ senderUserId, recipientUserId }, tx);
+          : "createFollowRequest";
+
+      await this.followRepository[action](
+        { senderUserId, recipientUserId },
+        tx,
+      );
+
+      if (action === "createFollowRequest") {
+        await this.sqs.sendFollowRequestNotification({
+          senderId: senderUserId,
+          recipientId: recipientUserId,
+          username: recipientProfile.username,
+        });
+      } else {
+        await this.sqs.sendFollowNotification({
+          senderId: senderUserId,
+          recipientId: recipientUserId,
+          username: recipientProfile.username,
+        });
+      }
     });
 
     return ok();

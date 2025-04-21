@@ -86,12 +86,12 @@ export class PostInteractionService {
 
     if (!profile) throw new ProfileErrors.ProfileNotFound(recipientId.value);
 
-    await this.sqs.sendLikeNotification(
-      recipientId.value,
-      userId,
+    await this.sqs.sendLikeNotification({
       postId,
-      profile.username,
-    );
+      senderId: userId,
+      recipientId: recipientId.value,
+      username: profile.username,
+    });
 
     return ok();
   }

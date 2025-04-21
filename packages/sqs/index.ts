@@ -98,12 +98,17 @@ export class SQS {
   }
 
   // Helper methods for common notification types
-  async sendLikeNotification(
-    senderId: string,
-    recipientId: string,
-    username: string,
-    postId: string,
-  ): Promise<void> {
+  async sendLikeNotification({
+    senderId,
+    recipientId,
+    username,
+    postId,
+  }: {
+    senderId: string;
+    recipientId: string;
+    username: string;
+    postId: string;
+  }): Promise<void> {
     await this.sendNotificationMessage({
       senderId,
       recipientId,
@@ -115,12 +120,17 @@ export class SQS {
     });
   }
 
-  async sendCommentNotification(
-    senderId: string,
-    recipientId: string,
-    username: string,
-    postId: string,
-  ): Promise<void> {
+  async sendCommentNotification({
+    senderId,
+    recipientId,
+    username,
+    postId,
+  }: {
+    senderId: string;
+    recipientId: string;
+    username: string;
+    postId: string;
+  }): Promise<void> {
     await this.sendNotificationMessage({
       senderId,
       recipientId,
@@ -132,12 +142,35 @@ export class SQS {
     });
   }
 
-  async sendFollowRequestNotification(
-    pushTokens: string[],
-    senderId: string,
-    recipientId: string,
-    username: string,
-  ): Promise<void> {
+  async sendFollowNotification({
+    senderId,
+    recipientId,
+    username,
+  }: {
+    senderId: string;
+    recipientId: string;
+    username: string;
+  }): Promise<void> {
+    await this.sendNotificationMessage({
+      senderId,
+      recipientId,
+      title: "New Follow",
+      body: `${username} is now following you`,
+      entityType: "profile",
+      entityId: senderId,
+      eventType: "follow",
+    });
+  }
+
+  async sendFollowRequestNotification({
+    senderId,
+    recipientId,
+    username,
+  }: {
+    senderId: string;
+    recipientId: string;
+    username: string;
+  }): Promise<void> {
     await this.sendNotificationMessage({
       senderId,
       recipientId,
@@ -149,12 +182,15 @@ export class SQS {
     });
   }
 
-  async sendFollowAcceptedNotification(
-    pushTokens: string[],
-    senderId: string,
-    recipientId: string,
-    username: string,
-  ): Promise<void> {
+  async sendFollowAcceptedNotification({
+    senderId,
+    recipientId,
+    username,
+  }: {
+    senderId: string;
+    recipientId: string;
+    username: string;
+  }): Promise<void> {
     await this.sendNotificationMessage({
       senderId,
       recipientId,
@@ -166,12 +202,15 @@ export class SQS {
     });
   }
 
-  async sendFriendRequestNotification(
-    pushTokens: string[],
-    senderId: string,
-    recipientId: string,
-    username: string,
-  ): Promise<void> {
+  async sendFriendRequestNotification({
+    senderId,
+    recipientId,
+    username,
+  }: {
+    senderId: string;
+    recipientId: string;
+    username: string;
+  }): Promise<void> {
     await this.sendNotificationMessage({
       senderId,
       recipientId,
@@ -183,12 +222,15 @@ export class SQS {
     });
   }
 
-  async sendFriendAcceptedNotification(
-    pushTokens: string[],
-    senderId: string,
-    recipientId: string,
-    username: string,
-  ): Promise<void> {
+  async sendFriendAcceptedNotification({
+    senderId,
+    recipientId,
+    username,
+  }: {
+    senderId: string;
+    recipientId: string;
+    username: string;
+  }): Promise<void> {
     await this.sendNotificationMessage({
       senderId,
       recipientId,
