@@ -46,7 +46,7 @@ function storeNotification(params: typeof notificationBody._type) {
 }
 
 async function getRecentNotifications(params: {
-  senderId: string;
+  // senderId: string;
   recipientId: string;
   entityId: string;
   entityType: (typeof entityTypeEnum.enumValues)[number];
@@ -55,7 +55,7 @@ async function getRecentNotifications(params: {
   limit: number;
 }) {
   const {
-    senderId,
+    // senderId,
     recipientId,
     entityId,
     entityType,
@@ -69,7 +69,7 @@ async function getRecentNotifications(params: {
     .from(schema.notification)
     .where(
       and(
-        eq(schema.notification.senderUserId, senderId),
+        // eq(schema.notification.senderUserId, senderId),
         eq(schema.notification.recipientUserId, recipientId),
         eq(schema.notification.eventType, eventType),
         eq(schema.notification.entityId, entityId),
@@ -126,7 +126,8 @@ const lambdaHandler = async (
       accessToken: env.EXPO_ACCESS_TOKEN,
     });
 
-    // group notis by [eventtype][entityType][userId]
+    // group notis by [eventtype][entityType][entityId][recipientId]
+    // group notis by [{eventType, entityType, entityId, recipientId}]
     // for each notification, check if notification is enabled
     // if enabled, check if notification is recent
     // if recent, skip
@@ -144,22 +145,161 @@ const lambdaHandler = async (
       };
     }
 
-    const things = notifications.reduce((acc, item) => {
-      const { eventType, entityType, recipientId } = item;
-      if (!acc.has(eventType)) {
-        acc.set(eventType, new Map());
-      }
-      if (!acc.get(eventType)!.has(entityType)) {
-        acc.get(eventType)!.set(entityType, new Map());
-      }
-      if (!acc.get(eventType)!.get(entityType)!.has(recipientId)) {
-        acc.get(eventType)!.get(entityType)!.set(recipientId, [item]);
-      }
-      // acc.get(eventType)!.get(entityType)!.get(recipientId)!.push(item);
+    // group by user id, so a dict of userId -> [notifications]
+    const notificationsByUser = notifications.reduce((acc, item) => {
+      const { recipientId } = item;
+      acc.set(
+        recipientId,
+        acc.get(recipientId) ? [...acc.get(recipientId)!, item] : [item],
+      );
       return acc;
-    }, new Map<string, Map<string, Map<string, NotificationBodyType>>>());
-    
+    }, new Map<string, NotificationBodyType>());
 
+    for (const [userId, notifications] of notificationsByUser) {
+      const settings = await getNotificationSettings(userId);
+
+      if (!settings) {
+        console.log("No settings found");
+        return {
+          statusCode: 400,
+          body: JSON.stringify({
+            message: "Invalid request",
+          }),
+        };
+      }
+
+      const pushTokens = await db
+        .select({ token: schema.pushToken.token })
+        .from(schema.pushToken)
+        .where(eq(schema.pushToken.userId, userId));
+
+      if (pushTokens.length === 0) {
+        console.log("No push tokens found");
+        return {
+          statusCode: 400,
+          body: JSON.stringify({
+            message: "Invalid request",
+          }),
+        };
+      }
+
+      // group by event type and entity id
+      const notificationsByEventTypeAndEntityId = notifications.reduce(
+        (acc, item) => {
+          const { eventType, entityType, entityId } = item;
+          acc.set(
+            { eventType, entityType, entityId },
+            acc.get({ eventType, entityType, entityId })
+              ? [...acc.get({ eventType, entityType, entityId })!, item]
+              : [item],
+          );
+          return acc;
+        },
+        new Map<
+          {
+            eventType: (typeof notificationBody._type)["eventType"];
+            entityType: (typeof notificationBody._type)["entityType"];
+            entityId: string;
+          },
+          NotificationBodyType
+        >(),
+      );
+
+      for (const [
+        { eventType, entityType, entityId },
+        notifications,
+      ] of notificationsByEventTypeAndEntityId) {
+        // aggregate notis if there are multiple
+        if (notifications.length > 1) {
+          const recentNotifications = await getRecentNotifications({
+            recipientId: userId,
+            entityId,
+            entityType:
+              entityType as (typeof notificationBody._type)["entityType"],
+            eventType:
+              eventType as (typeof notificationBody._type)["eventType"],
+            minutesThreshold: 10,
+            limit: notifications.length,
+          });
+
+          if (recentNotifications.length > 0) {
+            console.log("Notification already sent");
+            continue;
+          }
+          let message = "";
+          if (notifications.length === 1) {
+            // Single notification case
+            const notification = notifications[0];
+            if (!notification) {
+              console.log("No notification found");
+              continue;
+            }
+
+            switch (eventType) {
+              case "like":
+                message = `${notification.title} liked your ${entityType}`;
+                break;
+              case "post":
+                message = `${notification.title} made a new post`;
+                break;
+              case "comment":
+                message = `${notification.title} commented on your ${entityType}`;
+                break;
+              case "follow":
+                message = `${notification.title} followed you`;
+                break;
+              case "friend":
+                message = `${notification.title} sent you a friend request`;
+                break;
+            }
+          } else {
+            // Multiple notifications case
+            switch (eventType) {
+              case "like":
+                message = `${notifications.length} people liked your ${entityType}`;
+                break;
+              case "post":
+                message = `${notifications.length} new posts from people you follow`;
+                break;
+              case "comment":
+                message = `${notifications.length} people commented on your ${entityType}`;
+                break;
+              case "follow":
+                message = `${notifications.length} people followed you`;
+                break;
+              case "friend":
+                message = `${notifications.length} people sent you friend requests`;
+                break;
+            }
+          }
+
+          switch (eventType) {
+            case "like":
+              break;
+            case "post":
+              break;
+            case "comment":
+              break;
+            case "follow":
+              break;
+            case "friend":
+              break;
+          }
+        }
+      }
+    }
+
+    // const things = notifications.reduce((acc, item) => {
+    //   const { eventType, entityType, entityId, recipientId } = item;
+    //   acc.set(
+    //     { eventType, entityType, entityId },
+    //     acc.get({ eventType, entityType, entityId })
+    //       ? [...acc.get({ eventType, entityType, entityId })!, item]
+    //       : [item],
+    //   );
+
+    //   return acc;
+    // }, new Map<{ eventType: string; entityType: string; entityId: string, recepientId }, NotificationBodyType>());
 
     return {
       statusCode: 200,
