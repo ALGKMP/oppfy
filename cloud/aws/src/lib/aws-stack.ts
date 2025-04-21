@@ -237,8 +237,9 @@ export class AwsStack extends cdk.Stack {
     );
 
     const notificationQueue = new Queue(this, "Notifications", {
-      visibilityTimeout: cdk.Duration.seconds(120),
-      receiveMessageWaitTime: cdk.Duration.seconds(20),
+      // VisibilityTimeout must exceed Lambda timeout + batching window
+      visibilityTimeout: cdk.Duration.seconds(120), // up to 2 min  [oai_citation_attribution:0‡AWS Documentation](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html?utm_source=chatgpt.com) [oai_citation_attribution:1‡AWS Documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-sqs-queue.html?utm_source=chatgpt.com)
+      receiveMessageWaitTime: cdk.Duration.seconds(20), // enable long‑polling, max 20 s  [oai_citation_attribution:2‡AWS Documentation](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-short-and-long-polling.html?utm_source=chatgpt.com)
     });
 
     pushNotificationsLambda.function.addEventSource(
