@@ -8,7 +8,6 @@ import {
 import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 import middy from "@middy/core";
 import { createEnv } from "@t3-oss/env-core";
-// import { createEnv } from "@t3-oss/env-core";
 import type { Context } from "aws-lambda";
 import { z } from "zod";
 
@@ -21,10 +20,6 @@ const SQS = new SQSClient({ region: "us-east-1" });
 const s3 = new S3Client({
   region: "us-east-1",
 });
-
-// const sns = new SNSClient({
-//   region: "us-east-1",
-// });
 
 const env = createEnv({
   server: {
@@ -107,6 +102,9 @@ const lambdaHandler = async (
         // nothing
         return;
       }
+
+      console.log("here", env.SQS_NOTIFICATION_QUEUE);
+
       // send noti
       const notiSqsParams = {
         senderId: post.authorUserId,
@@ -124,7 +122,6 @@ const lambdaHandler = async (
       });
 
       await SQS.send(command);
-
     } catch (error) {
       console.log("error", error);
       // If the transaction fails, delete the S3 object
