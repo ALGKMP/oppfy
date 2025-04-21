@@ -103,8 +103,6 @@ const lambdaHandler = async (
         return;
       }
 
-      console.log("here", env.SQS_NOTIFICATION_QUEUE);
-
       // send noti
       const notiSqsParams = {
         senderId: post.authorUserId,

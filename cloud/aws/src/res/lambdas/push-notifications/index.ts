@@ -118,19 +118,22 @@ function buildBody(n: Notification, count: number): string {
   }
 }
 
-function buildTitle(eventType: Notification["eventType"], count: number) {
-  const plural = count > 1 ? "s" : "";
-  switch (eventType) {
+function buildTitle(n: Notification, count: number) {
+  if (count === 1) {
+    return n.title;
+  }
+
+  switch (n.eventType) {
     case "like":
-      return `New Like${plural}`;
+      return `New Likes`;
     case "post":
-      return `New Post${plural}`;
+      return `New Posts`;
     case "comment":
-      return `New Comment${plural}`;
+      return `New Comments`;
     case "follow":
-      return `New Follower${plural}`;
+      return `New Followers`;
     case "friend":
-      return `New Friend Request${plural}`;
+      return `New Friend Requests`;
   }
 }
 
@@ -190,7 +193,7 @@ const lambdaHandler = async (
 
         const count = batch.length;
         const body = buildBody(first, count);
-        const title = buildTitle(eventType, count);
+        const title = buildTitle(first, count);
 
         const message: ExpoPushMessage = {
           to: pushTokens.map((t) => t.token),
