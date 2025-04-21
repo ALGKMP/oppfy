@@ -11,6 +11,7 @@ import type { Context } from "aws-lambda";
 import { z } from "zod";
 
 import { db, eq, schema, sql } from "@oppfy/db";
+import { SQS } from "@oppfy/sqs";
 
 // import { validators } from "@oppfy/validators";
 
@@ -74,7 +75,7 @@ const lambdaHandler = async (
     console.log("metadata.postid", metadata.postid);
     try {
       // transaction to update post status and user stats
-      await db.transaction(async (tx) => {
+      const post = await db.transaction(async (tx) => {
         const post = await tx.query.post.findFirst({
           where: eq(schema.post.id, metadata.postid),
         });
@@ -82,9 +83,12 @@ const lambdaHandler = async (
           throw new Error("Failed to insert post");
         }
 
-        await tx.update(schema.post).set({
-          status: "processed",
-        }).where(eq(schema.post.id, post.id));
+        await tx
+          .update(schema.post)
+          .set({
+            status: "processed",
+          })
+          .where(eq(schema.post.id, post.id));
 
         // Only increment recipient's profile stats post count since they're the one being posted about
         await tx
@@ -96,6 +100,24 @@ const lambdaHandler = async (
               sql`(SELECT recipient_user_id FROM post WHERE id = ${post.id})`,
             ),
           );
+
+        return post;
+      });
+
+      // get profile of poster
+      const authorProfile = await db.query.profile.findFirst({
+        where: eq(schema.profile.userId, post.authorUserId),
+      });
+      if (!authorProfile) {
+        // nothing
+        return;
+      }
+      // send noti
+      await new SQS().sendPostNotification({
+        postId: post.id,
+        recipientId: post.recipientUserId,
+        senderId: post.authorUserId,
+        username: authorProfile.username ?? "",
       });
 
       // await storeNotification(metadata.author, metadata.recipient, {

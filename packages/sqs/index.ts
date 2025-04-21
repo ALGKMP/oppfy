@@ -97,6 +97,28 @@ export class SQS {
     return result;
   }
 
+  async sendPostNotification({
+    senderId,
+    recipientId,
+    username,
+    postId,
+  }: {
+    senderId: string;
+    recipientId: string;
+    username: string;
+    postId: string;
+  }): Promise<void> {
+    await this.sendNotificationMessage({
+      senderId,
+      recipientId,
+      title: "You've been opped",
+      body: `${username} posted a picture of you`,
+      entityType: "post",
+      entityId: postId,
+      eventType: "post",
+    });
+  }
+
   // Helper methods for common notification types
   async sendLikeNotification({
     senderId,
