@@ -203,7 +203,7 @@ export class PostService {
           userId: createdRecipientUser.id,
           update: {
             name: params.recipientNotOnAppName,
-            username: `${params.recipientNotOnAppName}-${Math.random().toString(36).substring(2, 15)}`,
+            username: `${Math.random().toString(36).substring(2, 15)}`,
           },
         },
         tx,
