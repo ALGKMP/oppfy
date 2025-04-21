@@ -101,18 +101,7 @@ function buildBody(n: Notification, count: number): string {
   const { title, eventType, entityType } = n;
 
   if (count === 1) {
-    switch (eventType) {
-      case "like":
-        return `${title} liked your ${entityType}`;
-      case "post":
-        return `${title} made a new post`;
-      case "comment":
-        return `${title} commented on your ${entityType}`;
-      case "follow":
-        return `${title} followed you`;
-      case "friend":
-        return `${title} sent you a friend request`;
-    }
+    return n.body;
   }
 
   switch (eventType) {
