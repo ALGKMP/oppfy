@@ -266,7 +266,7 @@ export class FollowService {
     selfUserId,
     otherUserId,
   }: SelfOtherUserIdsParams): Promise<
-    Result<void, FollowErrors.RequestNotFound>
+    Result<void, FollowErrors.RequestNotFound | ProfileErrors.ProfileNotFound>
   > {
     await this.db.transaction(async (tx) => {
       const isRequested = await this.followRepository.getFollowRequest(
@@ -286,6 +286,18 @@ export class FollowService {
           tx,
         ),
       ]);
+    });
+
+    const profile = await this.profileRepository.getProfile({
+      userId: otherUserId,
+    });
+
+    if (!profile) return err(new ProfileErrors.ProfileNotFound(otherUserId));
+
+    await this.sqs.sendFollowAcceptedNotification({
+      senderId: selfUserId,
+      recipientId: otherUserId,
+      username: profile.username,
     });
 
     return ok();

@@ -133,12 +133,28 @@ export class PostInteractionService {
       PostInteractionErrors.PostNotFound | PostInteractionErrors.FailedToComment
     >
   > {
-    await this.db.transaction(async (tx) => {
+    const post = await this.db.transaction(async (tx) => {
       const post = await this.postRepository.getPost({ postId, userId }, tx);
       if (!post) return err(new PostInteractionErrors.PostNotFound(postId));
 
       await this.commentRepository.createComment({ postId, userId, body }, tx);
+
+      return ok(post);
     });
+
+    if (post.isErr()) return err(post.error);
+
+    // get username
+    const profile = await this.profileRepository.getProfile({ userId });
+    if (!profile) throw new ProfileErrors.ProfileNotFound(userId);
+
+    await this.sqs.sendCommentNotification({
+      postId,
+      senderId: userId,
+      recipientId: post.value.post.recipientUserId,
+      username: profile.username,
+    });
+
     return ok();
   }
 

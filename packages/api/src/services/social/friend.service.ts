@@ -4,6 +4,7 @@ import { err, ok, Result } from "neverthrow";
 import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
 import { FollowStatus } from "@oppfy/db/utils/query-helpers";
+import { SQS } from "@oppfy/sqs"; // Added SQS import
 
 import * as FriendErrors from "../../errors/social/friend.error";
 import { ProfileNotFound } from "../../errors/user/profile.error";
@@ -46,6 +47,7 @@ export class FriendService {
     private readonly userRepository: UserRepository,
     @inject(TYPES.ProfileRepository)
     private readonly profileRepository: ProfileRepository,
+    @inject(TYPES.SQS) private readonly sqs: SQS, // Injected SQS service
   ) {}
 
   /**
@@ -68,11 +70,19 @@ export class FriendService {
       return err(new FriendErrors.CannotFriendSelf(senderUserId));
     }
 
-    const recipientProfile = await this.profileRepository.getProfile({
-      userId: recipientUserId,
-    });
+    const [recipientProfile, senderProfile] = await Promise.all([
+      this.profileRepository.getProfile({
+        userId: recipientUserId,
+      }),
+      this.profileRepository.getProfile({
+        userId: senderUserId,
+      }),
+    ]);
+
     if (recipientProfile === undefined)
       return err(new ProfileNotFound(recipientUserId));
+    if (senderProfile === undefined)
+      return err(new ProfileNotFound(senderUserId)); // Should not happen if called by authenticated user
 
     return await this.db.transaction(async (tx) => {
       const [
@@ -160,6 +170,13 @@ export class FriendService {
           );
         }
 
+        // Friend request accepted implicitly by sending a request back
+        await this.sqs.sendFriendAcceptedNotification({
+          senderId: senderUserId,
+          recipientId: recipientUserId,
+          username: senderProfile.username,
+        });
+
         return ok();
       }
 
@@ -168,13 +185,25 @@ export class FriendService {
         tx,
       );
 
+      // Send notification for new friend request
+      await this.sqs.sendFriendRequestNotification({
+        senderId: senderUserId,
+        recipientId: recipientUserId,
+        username: senderProfile.username,
+      });
+
       if (!isFollowing && !isFollowRequested) {
-        await this.followRepository[
+        const action =
           recipientProfile.privacy === "public"
             ? "createFollower"
-            : "createFollowRequest"
-        ]({ senderUserId, recipientUserId }, tx);
+            : "createFollowRequest";
+
+        await this.followRepository[action](
+          { senderUserId, recipientUserId },
+          tx,
+        );
       }
+
       if (isRecipientFollowRequested) {
         await this.followRepository.deleteFollowRequest(
           { senderUserId: recipientUserId, recipientUserId: senderUserId },
@@ -219,8 +248,13 @@ export class FriendService {
     selfUserId,
     otherUserId,
   }: SelfOtherUserIdsParams): Promise<
-    Result<void, FriendErrors.RequestNotFound>
+    Result<void, FriendErrors.RequestNotFound | ProfileNotFound>
   > {
+    const selfProfile = await this.profileRepository.getProfile({
+      userId: selfUserId,
+    });
+    if (selfProfile === undefined) return err(new ProfileNotFound(selfUserId)); // Should not happen
+
     return await this.db.transaction(async (tx) => {
       // Check that a friend request exists from `otherUserId` -> `selfUserId`
       const isRequested = await this.friendRepository.getFriendRequest(
@@ -240,6 +274,13 @@ export class FriendService {
         { userIdA: otherUserId, userIdB: selfUserId },
         tx,
       );
+
+      // Send notification for accepted friend request
+      await this.sqs.sendFriendAcceptedNotification({
+        senderId: selfUserId,
+        recipientId: otherUserId,
+        username: selfProfile.username,
+      });
 
       // Check if there are any follow requests both ways and remove them
       const [isFollowRequested, isRecipientFollowRequested] = await Promise.all(
