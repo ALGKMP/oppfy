@@ -122,7 +122,6 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
       throw new Error("Author profile not found");
     }
 
-
     const notiSqsParams = {
       senderId: post.authorUserId,
       recipientId: post.recipientUserId,

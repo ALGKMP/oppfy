@@ -180,18 +180,13 @@ export class PostService {
   async uploadImagePostForUserNotOnApp(
     params: BaseImagePostParams & BaseUserNotOnAppParams,
   ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
-    return await this.db.transaction(async (tx) => {
+    const recipientUser = await this.db.transaction(async (tx) => {
       const recipientUser = await this.userRepository.getUserByPhoneNumber({
         phoneNumber: params.recipientNotOnAppPhoneNumber,
       });
 
       if (recipientUser) {
-        return ok(
-          await this.uploadImagePost({
-            ...params,
-            recipientUserId: recipientUser.id,
-          }),
-        );
+        return recipientUser;
       }
 
       const { user: createdRecipientUser } =
@@ -214,13 +209,15 @@ export class PostService {
         tx,
       );
 
-      return ok(
-        await this.uploadImagePost({
-          ...params,
-          recipientUserId: createdRecipientUser.id,
-        }),
-      );
+      return createdRecipientUser;
     });
+
+    return ok(
+      await this.uploadImagePost({
+        ...params,
+        recipientUserId: recipientUser.id,
+      }),
+    );
   }
 
   async uploadVideoPostForUserOnApp(
@@ -232,18 +229,13 @@ export class PostService {
   async uploadVideoPostForUserNotOnApp(
     params: BasePostParams & BaseUserNotOnAppParams,
   ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
-    return await this.db.transaction(async (tx) => {
+    const recipientUser = await this.db.transaction(async (tx) => {
       const recipientUser = await this.userRepository.getUserByPhoneNumber({
         phoneNumber: params.recipientNotOnAppPhoneNumber,
       });
 
       if (recipientUser) {
-        return ok(
-          await this.uploadVideoPost({
-            ...params,
-            recipientUserId: recipientUser.id,
-          }),
-        );
+        return recipientUser;
       }
 
       const { user: createdRecipientUser } =
@@ -266,13 +258,15 @@ export class PostService {
         tx,
       );
 
-      return ok(
-        await this.uploadVideoPost({
-          ...params,
-          recipientUserId: createdRecipientUser.id,
-        }),
-      );
+      return createdRecipientUser;
     });
+
+    return ok(
+      await this.uploadVideoPost({
+        ...params,
+        recipientUserId: recipientUser.id,
+      }),
+    );
   }
 
   async paginatePosts({
