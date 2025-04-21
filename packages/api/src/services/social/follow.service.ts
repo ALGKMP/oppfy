@@ -69,11 +69,20 @@ export class FollowService {
     }
 
     // Verify the recipient exists
-    const recipientProfile = await this.profileRepository.getProfile({
-      userId: recipientUserId,
-    });
+    const [authorProfile, recipientProfile] = await Promise.all([
+      this.profileRepository.getProfile({
+        userId: senderUserId,
+      }),
+      this.profileRepository.getProfile({
+        userId: recipientUserId,
+      }),
+    ]);
+
     if (recipientProfile === undefined)
       return err(new ProfileErrors.ProfileNotFound(recipientUserId));
+
+    if (authorProfile === undefined)
+      return err(new ProfileErrors.ProfileNotFound(senderUserId));
 
     await this.db.transaction(async (tx) => {
       const [isFollowing, isRequested] = await Promise.all([
@@ -114,13 +123,13 @@ export class FollowService {
         await this.sqs.sendFollowRequestNotification({
           senderId: senderUserId,
           recipientId: recipientUserId,
-          username: recipientProfile.username,
+          username: authorProfile.username,
         });
       } else {
         await this.sqs.sendFollowNotification({
           senderId: senderUserId,
           recipientId: recipientUserId,
-          username: recipientProfile.username,
+          username: authorProfile.username,
         });
       }
     });
