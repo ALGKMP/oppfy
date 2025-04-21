@@ -1,116 +1,61 @@
-import { randomUUID } from "crypto";
 import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
 import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
-import { env } from "@oppfy/env";
 import { Mux } from "@oppfy/mux";
-import { S3 } from "@oppfy/s3";
+import { ImageContentType, S3 } from "@oppfy/s3";
 
 import * as PostErrors from "../../errors/content/post.error";
-import type {
-  PaginatedResponse,
-  PaginationParams,
-} from "../../interfaces/types";
-import { Comment, Post, PostStats } from "../../models";
+import { Comment, Post, PostStats, Profile } from "../../models";
 import { CommentRepository } from "../../repositories/content/comment.repository";
-import type { PaginatedCommentResult as RawPaginatedComment } from "../../repositories/content/comment.repository";
-import { PostRepository } from "../../repositories/content/post.repository";
-import type {
-  PostResult as RawPostResult,
-  PostResultWithLike as RawPostResultWithoutLike,
+import {
+  PostRepository,
+  PostResult,
 } from "../../repositories/content/post.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
+import type { PaginatedResponse, PaginationParams } from "../../types";
+import { Hydrate, hydratePost, hydrateProfile } from "../../utils";
 
-interface HydratedAndProcessedPost {
-  post: Post;
-  assetUrl: string;
-  postStats: PostStats;
+interface BasePostParams {
   authorUserId: string;
-  authorUsername: string;
-  authorName: string | null;
-  authorProfilePictureUrl: string | null;
-  recipientUserId: string;
-  recipientUsername: string;
-  recipientName: string | null;
-  recipientProfilePictureUrl: string | null;
-  hasLiked: boolean;
-}
-
-type HydratedAndProcessedPostWithoutLike = Omit<
-  HydratedAndProcessedPost,
-  "hasLiked"
->;
-
-interface HydratedAndProcessedComment {
-  comment: Comment;
-  authorUserId: string;
-  authorUsername: string;
-  authorName: string | null;
-  authorProfilePictureUrl: string | null;
-}
-
-interface UploadPostForUserOnAppUrlParams {
-  authorUserId: string;
-  recipientUserId: string;
   caption: string;
   height: number;
   width: number;
-  contentLength: number;
-  contentType: "image/jpeg" | "image/png" | "image/heic";
 }
 
-interface UploadPostForUserNotOnAppUrlParams {
-  authorUserId: string;
+interface BaseImagePostParams extends BasePostParams {
+  contentLength: number;
+  contentType: ImageContentType;
+}
+
+interface BaseUserOnAppParams {
+  recipientUserId: string;
+}
+
+interface BaseUserNotOnAppParams {
   recipientNotOnAppPhoneNumber: string;
   recipientNotOnAppName: string;
-  caption: string;
-  height: number;
-  width: number;
-  contentLength: number;
-  contentType: "image/jpeg" | "image/png" | "image/heic";
 }
 
-interface UploadVideoPostForUserOnAppUrlParams {
-  authorUserId: string;
-  recipientUserId: string;
-  caption: string;
-  height: number;
-  width: number;
+interface GetPostParams {
+  userId: string;
+  postId: string;
 }
 
-interface UploadVideoPostForUserNotOnAppUrlParams {
-  authorUserId: string;
-  recipientNotOnAppPhoneNumber: string;
-  recipientNotOnAppName: string;
-  caption: string;
-  height: number;
-  width: number;
+interface GetIsLikedParams {
+  userId: string;
+  postId: string;
 }
 
-interface CreatePostParams {
-  authorUserId: string;
-  recipientUserId: string;
-  caption: string;
-  height: number;
-  width: number;
-  mediaType: "image" | "video";
+interface GetPostForSiteParams {
+  postId: string;
 }
 
 interface DeletePostParams {
   userId: string;
-  postId: string;
-}
-
-interface GetPostParams {
-  postId: string;
-  userId: string;
-}
-
-interface GetPostForNextJsParams {
   postId: string;
 }
 
@@ -120,6 +65,16 @@ interface PaginatePostsParams extends PaginationParams {
 
 interface PaginateCommentsParams extends PaginationParams {
   postId: string;
+}
+
+interface HydratedPostResult<
+  T extends "withIsLiked" | "withoutIsLiked" | undefined = undefined,
+> {
+  post: Hydrate<Post>;
+  postStats: PostStats;
+  authorProfile: Hydrate<Profile<"onboarded">>;
+  recipientProfile: Hydrate<Profile<"notOnApp">>;
+  isLiked: T extends "withIsLiked" ? boolean : undefined;
 }
 
 @injectable()
@@ -143,317 +98,175 @@ export class PostService {
     private readonly mux: Mux,
   ) {}
 
-  private async createPost(
-    params: CreatePostParams,
-  ): Promise<Result<Post, PostErrors.FailedToCreatePost>> {
-    // transaction to create post and post stats
-    const currentDate = Date.now();
-    const postKey = `posts/${currentDate}-${params.recipientUserId}-${params.authorUserId}.jpg`;
+  async getPostStats(
+    params: GetPostParams,
+  ): Promise<Result<PostStats, PostErrors.PostNotFound>> {
+    const post = await this.postRepository.getPost(params);
 
-    const result = await this.db.transaction(async (tx) => {
-      const post = await this.postRepository.createPost(
-        {
-          authorUserId: params.authorUserId,
-          recipientUserId: params.recipientUserId,
-          caption: params.caption,
-          width: params.width,
-          height: params.height,
-          mediaType: params.mediaType,
-          postKey,
-          status: "pending",
-        },
-        tx,
-      );
+    if (post === undefined)
+      return err(new PostErrors.PostNotFound(params.postId));
 
-      if (!post) {
-        return err(new PostErrors.FailedToCreatePost(params.authorUserId));
-      }
-
-      await this.postRepository.createPostStats(
-        {
-          postId: post.id,
-        },
-        tx,
-      );
-      return ok(post);
-    });
-
-    return result;
+    return ok(post.postStats);
   }
 
-  private async handleUpload(
-    params:
-      | UploadPostForUserOnAppUrlParams
-      | UploadPostForUserNotOnAppUrlParams
-      | UploadVideoPostForUserOnAppUrlParams
-      | UploadVideoPostForUserNotOnAppUrlParams,
-    isVideo: boolean,
-  ): Promise<
-    Result<
-      { presignedUrl: string; postId: string },
-      PostErrors.FailedToCreatePost
-    >
-  > {
-    const currentDate = Date.now();
+  async getIsLiked(
+    params: GetIsLikedParams,
+  ): Promise<Result<boolean, PostErrors.PostNotFound>> {
+    const post = await this.postRepository.getPost(params);
 
-    try {
-      if ("recipientUserId" in params) {
-        const result = await this.createPost({
-          authorUserId: params.authorUserId,
-          recipientUserId: params.recipientUserId,
-          caption: params.caption,
-          height: params.height,
-          width: params.width,
-          mediaType: isVideo ? "video" : "image",
-        });
+    if (post === undefined)
+      return err(new PostErrors.PostNotFound(params.postId));
 
-        if (result.isErr()) {
-          return err(result.error);
-        }
-
-        const post = result.value;
-
-        if (isVideo) {
-          const presignedUrl = await this.mux.getPresignedUrlForVideo({
-            postid: post.id,
-          });
-          return ok({ presignedUrl, postId: post.id });
-        } else {
-          const { contentLength, contentType } =
-            params as UploadPostForUserOnAppUrlParams;
-          const objectKey = `posts/${currentDate}-${params.recipientUserId}-${params.authorUserId}.jpg`;
-          const presignedUrl = await this.s3.putObjectPresignedUrl({
-            Bucket: env.S3_POST_BUCKET,
-            Key: objectKey,
-            ContentLength: contentLength,
-            ContentType: contentType,
-            Metadata: {
-              postid: post.id,
-            },
-          });
-          return ok({ presignedUrl, postId: post.id });
-        }
-      } else {
-        const { recipientNotOnAppPhoneNumber, recipientNotOnAppName } = params;
-        let result: { presignedUrl: string; postId: string } | undefined;
-
-        await this.db.transaction(async (tx) => {
-          const recipient = await this.userRepository.getUserByPhoneNumber({
-            phoneNumber: recipientNotOnAppPhoneNumber,
-          });
-          const recipientId = recipient?.id ?? randomUUID();
-
-          if (!recipient) {
-            await this.userRepository.createUser(
-              {
-                id: recipientId,
-                phoneNumber: recipientNotOnAppPhoneNumber,
-                isOnApp: false,
-              },
-              tx,
-            );
-
-            await this.profileRepository.updateProfile({
-              userId: recipientId,
-              update: {
-                name: recipientNotOnAppName,
-                username: recipientNotOnAppName,
-              },
-            });
-          }
-
-          const post = await this.createPost({
-            authorUserId: params.authorUserId,
-            recipientUserId: recipientId,
-            caption: params.caption,
-            height: params.height,
-            width: params.width,
-            mediaType: isVideo ? "video" : "image",
-          });
-
-          if (post.isErr()) {
-            return err(post.error);
-          }
-
-          if (isVideo) {
-            result = {
-              presignedUrl: await this.mux.getPresignedUrlForVideo({
-                postid: post.value.id,
-              }),
-              postId: post.value.id,
-            };
-          } else {
-            const { contentLength, contentType } =
-              params as UploadPostForUserNotOnAppUrlParams;
-            const objectKey = `posts/${currentDate}-${recipientId}-${params.authorUserId}.jpg`;
-            result = {
-              presignedUrl: await this.s3.putObjectPresignedUrl({
-                Bucket: env.S3_POST_BUCKET,
-                Key: objectKey,
-                ContentLength: contentLength,
-                ContentType: contentType,
-                Metadata: {
-                  postid: post.value.id,
-                },
-              }),
-              postId: post.value.id,
-            };
-          }
-        });
-
-        if (!result) {
-          return err(new PostErrors.FailedToCreatePost(params.authorUserId));
-        }
-        return ok(result);
-      }
-    } catch (error) {
-      return err(new PostErrors.FailedToCreatePost(params.authorUserId));
-    }
-  }
-
-  // Hydration function for PostResult
-  private hydrateAndProcessPost(raw: RawPostResult): HydratedAndProcessedPost {
-    const hydratedPost = this.cloudfront.hydratePost(raw.post);
-    const hydratedAuthorProfile = this.cloudfront.hydrateProfile(
-      raw.authorProfile,
-    );
-    const hydratedRecipientProfile = this.cloudfront.hydrateProfile(
-      raw.recipientProfile,
-    );
-
-    return {
-      post: hydratedPost,
-      assetUrl: hydratedPost.postUrl,
-      postStats: raw.postStats,
-      authorUserId: raw.authorProfile.userId,
-      authorUsername: raw.authorProfile.username ?? "",
-      authorName: raw.authorProfile.name ?? null,
-      authorProfilePictureUrl: hydratedAuthorProfile.profilePictureUrl,
-      recipientUserId: raw.recipientProfile.userId,
-      recipientUsername: raw.recipientProfile.username ?? "",
-      recipientName: raw.recipientProfile.name ?? null,
-      recipientProfilePictureUrl: hydratedRecipientProfile.profilePictureUrl,
-      hasLiked: !!raw.like,
-    };
-  }
-
-  // Hydration function for PostResultWithoutLike
-  private hydrateAndProcessPostResultWithoutLike(
-    raw: RawPostResultWithoutLike,
-  ): HydratedAndProcessedPostWithoutLike {
-    const hydratedPost = this.cloudfront.hydratePost(raw.post);
-    const hydratedAuthorProfile = this.cloudfront.hydrateProfile(
-      raw.authorProfile,
-    );
-    const hydratedRecipientProfile = this.cloudfront.hydrateProfile(
-      raw.recipientProfile,
-    );
-
-    return {
-      post: hydratedPost,
-      assetUrl: hydratedPost.postUrl,
-      postStats: raw.postStats,
-      authorUserId: raw.authorProfile.userId,
-      authorUsername: raw.authorProfile.username ?? "",
-      authorName: raw.authorProfile.name ?? null,
-      authorProfilePictureUrl: hydratedAuthorProfile.profilePictureUrl,
-      recipientUserId: raw.recipientProfile.userId,
-      recipientUsername: raw.recipientProfile.username ?? "",
-      recipientName: raw.recipientProfile.name ?? null,
-      recipientProfilePictureUrl: hydratedRecipientProfile.profilePictureUrl,
-    };
-  }
-
-  // Hydration function for PaginatedComment
-  private hydrateAndProcessComment(
-    raw: RawPaginatedComment,
-  ): HydratedAndProcessedComment {
-    const hydratedProfile = this.cloudfront.hydrateProfile(raw.profile);
-    return {
-      comment: raw.comment,
-      authorUserId: raw.profile.userId,
-      authorUsername: raw.profile.username ?? "",
-      authorName: raw.profile.name ?? null,
-      authorProfilePictureUrl: hydratedProfile.profilePictureUrl,
-    };
-  }
-
-  async uploadPostForUserOnAppUrl(
-    params: UploadPostForUserOnAppUrlParams,
-  ): Promise<
-    Result<
-      { presignedUrl: string; postId: string },
-      PostErrors.FailedToCreatePost
-    >
-  > {
-    return this.handleUpload(params, false);
-  }
-
-  async uploadPostForUserNotOnAppUrl(
-    params: UploadPostForUserNotOnAppUrlParams,
-  ): Promise<
-    Result<
-      { presignedUrl: string; postId: string },
-      PostErrors.FailedToCreatePost
-    >
-  > {
-    return this.handleUpload(params, false);
-  }
-
-  async uploadVideoPostForUserOnAppUrl(
-    params: UploadVideoPostForUserOnAppUrlParams,
-  ): Promise<
-    Result<
-      { presignedUrl: string; postId: string },
-      PostErrors.FailedToCreatePost
-    >
-  > {
-    return this.handleUpload(params, true);
-  }
-
-  async uploadVideoPostForUserNotOnAppUrl(
-    params: UploadVideoPostForUserNotOnAppUrlParams,
-  ): Promise<
-    Result<
-      { presignedUrl: string; postId: string },
-      PostErrors.FailedToCreatePost
-    >
-  > {
-    return this.handleUpload(params, true);
-  }
-
-  async deletePost(
-    params: DeletePostParams,
-  ): Promise<Result<void, PostErrors.NotPostOwner | PostErrors.PostNotFound>> {
-    try {
-      await this.db.transaction(async (tx) => {
-        const post = await this.postRepository.getPost(
-          { postId: params.postId, userId: params.userId },
-          tx,
-        );
-        if (!post) throw new PostErrors.PostNotFound(params.postId);
-        if (post.post.authorUserId !== params.userId)
-          throw new PostErrors.NotPostOwner(params.userId, params.postId);
-        await this.postRepository.deletePost(params, tx);
-      });
-      return ok();
-    } catch (error) {
-      if (
-        error instanceof PostErrors.PostNotFound ||
-        error instanceof PostErrors.NotPostOwner
-      ) {
-        return err(error);
-      }
-      throw error; // Unexpected errors bubble up
-    }
+    return ok(post.isLiked);
   }
 
   async getPost(
     params: GetPostParams,
-  ): Promise<Result<HydratedAndProcessedPost, PostErrors.PostNotFound>> {
-    const rawPost = await this.postRepository.getPost(params);
-    if (!rawPost) return err(new PostErrors.PostNotFound(params.postId));
-    return ok(this.hydrateAndProcessPost(rawPost));
+  ): Promise<
+    Result<HydratedPostResult<"withIsLiked">, PostErrors.PostNotFound>
+  > {
+    const post = await this.postRepository.getPost(params);
+
+    if (post === undefined)
+      return err(new PostErrors.PostNotFound(params.postId));
+
+    return ok(await this.hydratePost(post));
+  }
+
+  async getPostForSite(
+    params: GetPostForSiteParams,
+  ): Promise<Result<HydratedPostResult, PostErrors.PostNotFound>> {
+    const post = await this.postRepository.getPostForSite(params);
+
+    if (post === undefined)
+      return err(new PostErrors.PostNotFound(params.postId));
+
+    if (post.recipientProfile.privacy === "private")
+      return err(new PostErrors.PostNotFound(params.postId));
+
+    return ok(await this.hydratePost(post));
+  }
+
+  async deletePost(
+    params: DeletePostParams,
+  ): Promise<Result<void, PostErrors.PostNotFound | PostErrors.NotPostOwner>> {
+    const post = await this.postRepository.getPost({
+      postId: params.postId,
+      userId: params.userId,
+    });
+
+    if (post === undefined) {
+      return err(new PostErrors.PostNotFound(params.postId));
+    }
+
+    if (post.post.recipientUserId !== params.userId) {
+      return err(new PostErrors.NotPostOwner(params.userId, params.postId));
+    }
+
+    // TODO: we should delete the actual post from s3/mux
+    await this.db.transaction(async (tx) => {
+      await this.postRepository.deletePost(params, tx);
+    });
+
+    return ok();
+  }
+
+  async uploadImagePostForUserOnApp(
+    params: BaseImagePostParams & BaseUserOnAppParams,
+  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
+    return ok(await this.uploadImagePost(params));
+  }
+
+  async uploadImagePostForUserNotOnApp(
+    params: BaseImagePostParams & BaseUserNotOnAppParams,
+  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
+    const recipientUser = await this.db.transaction(async (tx) => {
+      const recipientUser = await this.userRepository.getUserByPhoneNumber({
+        phoneNumber: params.recipientNotOnAppPhoneNumber,
+      });
+
+      if (recipientUser) {
+        return recipientUser;
+      }
+
+      const { user: createdRecipientUser } =
+        await this.userRepository.createUser(
+          {
+            phoneNumber: params.recipientNotOnAppPhoneNumber,
+            isOnApp: false,
+          },
+          tx,
+        );
+
+      await this.profileRepository.updateProfile(
+        {
+          userId: createdRecipientUser.id,
+          update: {
+            name: params.recipientNotOnAppName,
+            username: `${Math.random().toString(36).substring(2, 15)}`,
+          },
+        },
+        tx,
+      );
+
+      return createdRecipientUser;
+    });
+
+    return ok(
+      await this.uploadImagePost({
+        ...params,
+        recipientUserId: recipientUser.id,
+      }),
+    );
+  }
+
+  async uploadVideoPostForUserOnApp(
+    params: BasePostParams & BaseUserOnAppParams,
+  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
+    return ok(await this.uploadVideoPost(params));
+  }
+
+  async uploadVideoPostForUserNotOnApp(
+    params: BasePostParams & BaseUserNotOnAppParams,
+  ): Promise<Result<{ presignedUrl: string; postId: string }, never>> {
+    const recipientUser = await this.db.transaction(async (tx) => {
+      const recipientUser = await this.userRepository.getUserByPhoneNumber({
+        phoneNumber: params.recipientNotOnAppPhoneNumber,
+      });
+
+      if (recipientUser) {
+        return recipientUser;
+      }
+
+      const { user: createdRecipientUser } =
+        await this.userRepository.createUser(
+          {
+            phoneNumber: params.recipientNotOnAppPhoneNumber,
+            isOnApp: false,
+          },
+          tx,
+        );
+
+      await this.profileRepository.updateProfile(
+        {
+          userId: createdRecipientUser.id,
+          update: {
+            name: params.recipientNotOnAppName,
+            username: `${params.recipientNotOnAppName}-${Math.random().toString(36).substring(2, 15)}`,
+          },
+        },
+        tx,
+      );
+
+      return createdRecipientUser;
+    });
+
+    return ok(
+      await this.uploadVideoPost({
+        ...params,
+        recipientUserId: recipientUser.id,
+      }),
+    );
   }
 
   async paginatePosts({
@@ -461,26 +274,26 @@ export class PostService {
     cursor,
     pageSize = 20,
   }: PaginatePostsParams): Promise<
-    Result<PaginatedResponse<HydratedAndProcessedPost>, never>
+    Result<PaginatedResponse<HydratedPostResult<"withIsLiked">>, never>
   > {
-    const rawPosts = await this.postRepository.paginatePostsOfUser({
+    const posts = await this.postRepository.paginatePostsOfUser({
       userId,
       cursor,
       pageSize,
     });
-    const hydratedPosts = rawPosts.map((post) =>
-      this.hydrateAndProcessPost(post),
+    const hydratedPosts = await Promise.all(
+      posts.map((post) => this.hydratePost(post)),
     );
-    const lastPost = hydratedPosts[pageSize - 1];
+
+    const hasMore = hydratedPosts.length > pageSize;
+    const items = hydratedPosts.slice(0, pageSize);
+    const lastItem = items[items.length - 1];
 
     return ok({
-      items: hydratedPosts.slice(0, pageSize),
+      items,
       nextCursor:
-        rawPosts.length > pageSize && lastPost
-          ? {
-              id: lastPost.post.id,
-              createdAt: lastPost.post.createdAt,
-            }
+        hasMore && lastItem
+          ? { id: lastItem.post.id, createdAt: lastItem.post.createdAt }
           : null,
     });
   }
@@ -490,50 +303,32 @@ export class PostService {
     cursor,
     pageSize = 10,
   }: PaginatePostsParams): Promise<
-    Result<PaginatedResponse<HydratedAndProcessedPost>, PostErrors.PostNotFound>
+    Result<
+      PaginatedResponse<HydratedPostResult<"withIsLiked">>,
+      PostErrors.PostNotFound
+    >
   > {
-    const rawPosts = await this.postRepository.paginatePostsOfFollowing({
+    const posts = await this.postRepository.paginatePostsOfFollowing({
       userId,
       cursor,
       pageSize,
     });
-    if (!rawPosts.length && cursor)
-      return err(new PostErrors.PostNotFound(cursor.id));
 
-    const hydratedPosts = rawPosts.map((post) =>
-      this.hydrateAndProcessPost(post),
+    const hydratedPosts = await Promise.all(
+      posts.map((post) => this.hydratePost(post)),
     );
-    const lastPost = hydratedPosts[pageSize - 1];
 
-    // TODO: userId not returned here anymore (Might die from react query)
+    const hasMore = hydratedPosts.length > pageSize;
+    const items = hydratedPosts.slice(0, pageSize);
+    const lastItem = items[items.length - 1];
+
     return ok({
-      items: hydratedPosts.slice(0, pageSize),
+      items,
       nextCursor:
-        rawPosts.length > pageSize && lastPost
-          ? {
-              id: lastPost.post.id,
-              createdAt: lastPost.post.createdAt,
-            }
+        hasMore && lastItem
+          ? { id: lastItem.post.id, createdAt: lastItem.post.createdAt }
           : null,
     });
-  }
-
-  async getPostForNextJs(
-    params: GetPostForNextJsParams,
-  ): Promise<
-    Result<HydratedAndProcessedPostWithoutLike, PostErrors.PostNotFound>
-  > {
-    const rawPost = await this.postRepository.getPostForSite(params);
-    if (!rawPost) return err(new PostErrors.PostNotFound(params.postId));
-
-    const profile = await this.profileRepository.getProfile({
-      userId: rawPost.post.authorUserId,
-    });
-    if (!profile || profile.privacy !== "public") {
-      return err(new PostErrors.PostNotFound(params.postId));
-    }
-
-    return ok(this.hydrateAndProcessPostResultWithoutLike(rawPost));
   }
 
   async paginateComments({
@@ -541,27 +336,101 @@ export class PostService {
     cursor,
     pageSize = 10,
   }: PaginateCommentsParams): Promise<
-    Result<PaginatedResponse<HydratedAndProcessedComment>, never>
+    Result<
+      PaginatedResponse<{
+        comment: Comment;
+        profile: Hydrate<Profile<"onboarded">>;
+      }>,
+      never
+    >
   > {
-    const rawComments = await this.commentRepository.paginateComments({
+    const commentsAndProfiles = await this.commentRepository.paginateComments({
       postId,
       cursor,
       pageSize,
     });
-    const hydratedComments = rawComments.map((comment) =>
-      this.hydrateAndProcessComment(comment),
+
+    const hydratedCommentsAndProfiles = commentsAndProfiles.map(
+      ({ comment, profile }) => ({
+        comment,
+        profile: hydrateProfile(profile),
+      }),
     );
-    const lastComment = hydratedComments[pageSize - 1];
+
+    const hasMore = hydratedCommentsAndProfiles.length > pageSize;
+    const items = hydratedCommentsAndProfiles.slice(0, pageSize);
+    const lastItem = items[items.length - 1];
 
     return ok({
-      items: hydratedComments.slice(0, pageSize),
+      items,
       nextCursor:
-        rawComments.length > pageSize && lastComment
-          ? {
-              id: lastComment.comment.id,
-              createdAt: lastComment.comment.createdAt,
-            }
+        hasMore && lastItem
+          ? { id: lastItem.comment.id, createdAt: lastItem.comment.createdAt }
           : null,
     });
+  }
+
+  private async uploadImagePost(
+    params: BaseImagePostParams & BaseUserOnAppParams,
+  ): Promise<{ presignedUrl: string; postId: string }> {
+    return await this.db.transaction(async (tx) => {
+      const key = `posts/${Date.now()}-${params.recipientUserId}-${params.authorUserId}.jpg`;
+
+      const { post } = await this.postRepository.createPost(
+        {
+          ...params,
+          postKey: key,
+          mediaType: "image",
+        },
+        tx,
+      );
+
+      const presignedUrl = await this.s3.createPostPresignedUrl({
+        key,
+        contentLength: params.contentLength,
+        contentType: params.contentType,
+        metadata: {
+          postid: post.id,
+        },
+      });
+
+      return { presignedUrl, postId: post.id };
+    });
+  }
+
+  private async uploadVideoPost(
+    params: BasePostParams & BaseUserOnAppParams,
+  ): Promise<{ presignedUrl: string; postId: string }> {
+    return await this.db.transaction(async (tx) => {
+      const key = `processing`;
+
+      const { post } = await this.postRepository.createPost(
+        {
+          ...params,
+          postKey: key,
+          mediaType: "video",
+        },
+        tx,
+      );
+
+      const presignedUrl = await this.mux.getPresignedUrlForVideoUpload({
+        metadata: {
+          postid: post.id,
+        },
+      });
+
+      return { presignedUrl, postId: post.id };
+    });
+  }
+
+  private async hydratePost<
+    T extends "withIsLiked" | "withoutIsLiked" | undefined,
+  >(post: PostResult<T>): Promise<HydratedPostResult<T>> {
+    return {
+      ...post,
+      post: await hydratePost(post.post),
+      authorProfile: hydrateProfile(post.authorProfile),
+      recipientProfile: hydrateProfile(post.recipientProfile),
+    };
   }
 }

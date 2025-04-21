@@ -1,5 +1,6 @@
 import { and, count, desc, eq, lt, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
+import { z } from "zod";
 
 import type {
   Database,
@@ -7,23 +8,25 @@ import type {
   Schema,
   Transaction,
 } from "@oppfy/db";
+// export type NotificationType =
+//   | "like"
+//   | "comment"
+//   | "follow"
+//   | "friend"
+
+// export type EntityType = "post" | "profile";
+
+import { entityTypeEnum, eventTypeEnum } from "@oppfy/db";
 import {
+  FollowStatus,
   getFollowStatusSql,
-  withOnboardingCompleted,
+  onboardingCompletedCondition,
 } from "@oppfy/db/utils/query-helpers";
+import { EntityType, EventType, SendNotificationParams, SQS } from "@oppfy/sqs";
 
-import { FollowStatus, UserIdParam } from "../../interfaces/types";
-import type {
-  Notification,
-  NotificationSettings,
-  OnboardedProfile,
-} from "../../models";
+import type { Notification, NotificationSettings, Profile } from "../../models";
 import { TYPES } from "../../symbols";
-
-export interface UpdateNotificationSettingsParams {
-  notificationSettingsId: string;
-  notificationSettings: NotificationSettings;
-}
+import type { UserIdParam } from "../../types";
 
 export interface PaginateNotificationsParams {
   userId: string;
@@ -31,8 +34,17 @@ export interface PaginateNotificationsParams {
   pageSize?: number;
 }
 
+export interface GetRecentNotificationsParams {
+  senderId: string;
+  recipientId: string;
+  eventType: EventType;
+  entityId: string;
+  entityType: EntityType;
+  minutesThreshold: number;
+  limit: number;
+}
 export interface NotificationAndProfile {
-  profile: OnboardedProfile;
+  profile: Profile<"onboarded">;
   notification: Notification;
   followStatus: FollowStatus;
 }
@@ -42,18 +54,27 @@ export interface PushTokenParams {
   pushToken: string;
 }
 
+export interface UpdateNotificationSettingsParams {
+  userId: string;
+  settings: {
+    likes: boolean;
+    posts: boolean;
+    comments: boolean;
+    mentions: boolean;
+    friendRequests: boolean;
+    followRequests: boolean;
+  };
+}
+
+
+
 @injectable()
 export class NotificationRepository {
-  private db: Database;
-  private schema: Schema;
-
   constructor(
-    @inject(TYPES.Database) db: Database,
-    @inject(TYPES.Schema) schema: Schema,
-  ) {
-    this.db = db;
-    this.schema = schema;
-  }
+    @inject(TYPES.Database) private readonly db: Database,
+    @inject(TYPES.Schema) private readonly schema: Schema,
+    @inject(TYPES.SQS) private readonly sqs: SQS,
+  ) {}
 
   async getUnreadNotificationsCount(
     params: UserIdParam,
@@ -73,6 +94,8 @@ export class NotificationRepository {
 
     return result[0]?.count ?? 0;
   }
+
+
 
   async getPushTokens(
     params: UserIdParam,
@@ -150,12 +173,12 @@ export class NotificationRepository {
     params: UpdateNotificationSettingsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
-    const { notificationSettingsId, notificationSettings } = params;
+    const { userId, settings } = params;
 
     await db
       .update(this.schema.notificationSettings)
-      .set({ ...notificationSettings })
-      .where(eq(this.schema.notificationSettings.id, notificationSettingsId));
+      .set({ ...settings })
+      .where(eq(this.schema.notificationSettings.userId, userId));
   }
 
   async paginateNotifications(
@@ -173,6 +196,10 @@ export class NotificationRepository {
         this.schema.profile,
         eq(this.schema.notification.senderUserId, this.schema.profile.userId),
       )
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.userStatus.userId, this.schema.profile.userId),
+      )
       .where(
         and(
           eq(this.schema.notification.recipientUserId, userId),
@@ -186,21 +213,19 @@ export class NotificationRepository {
                 ),
               )
             : undefined,
+          onboardingCompletedCondition(this.schema.profile),
         ),
       )
       .orderBy(
         desc(this.schema.notification.createdAt),
         desc(this.schema.notification.id),
       )
-      .limit(pageSize)
-      .$dynamic();
-
-    query = withOnboardingCompleted(query);
+      .limit(pageSize);
 
     const notifications = await query;
 
     return notifications.map(({ profile, notification, followStatus }) => ({
-      profile: profile as OnboardedProfile,
+      profile: profile as Profile<"onboarded">,
       notification,
       followStatus,
     }));

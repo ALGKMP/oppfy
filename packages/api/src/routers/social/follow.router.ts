@@ -144,8 +144,8 @@ export const followRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const result = await ctx.services.follow.acceptFollowRequest({
-        senderUserId: input.senderUserId,
-        recipientUserId: ctx.session.uid,
+        selfUserId: ctx.session.uid,
+        otherUserId: input.senderUserId,
       });
 
       return result.match(

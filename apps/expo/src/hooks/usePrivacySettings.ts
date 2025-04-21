@@ -49,7 +49,7 @@ export const usePrivacySettings = () => {
         buttonOptions: [
           {
             text: "Switch to private",
-            onPress: async () => await handlePrivacySettingUpdate("private"),
+            onPress: () => void handlePrivacySettingUpdate("private"),
           },
         ],
       });

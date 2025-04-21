@@ -13,6 +13,7 @@ import { getToken, useTheme } from "tamagui";
 import { validators } from "@oppfy/validators";
 
 import {
+  Avatar,
   Button,
   CardContainer,
   HeaderTitle,
@@ -323,16 +324,17 @@ const EditProfile = () => {
   const updateProfile = api.profile.updateProfile.useMutation({
     onMutate: async (newData) => {
       await utils.profile.getProfile.cancel();
-      const prevData = utils.profile.getProfile.getData();
-      if (prevData) {
-        utils.profile.getProfile.setData(
-          { userId: undefined },
-          {
-            ...prevData,
-            ...newData,
-          },
-        );
-      }
+      const prevData = utils.profile.getProfile.getData({});
+      if (prevData === undefined) return;
+
+      utils.profile.getProfile.setData(
+        { userId: undefined },
+        {
+          ...prevData,
+          ...newData,
+        },
+      );
+
       return { prevData };
     },
     onError: (_err, _newData, ctx) => {
@@ -409,17 +411,13 @@ const EditProfile = () => {
         >
           <YStack alignItems="center" gap="$3">
             <View position="relative">
-              <Image
+              <Avatar
                 source={
-                  defaultValues?.profilePictureUrl ?? DefaultProfilePicture
+                  selectedImageUri ??
+                  defaultValues?.profilePictureUrl ??
+                  DefaultProfilePicture
                 }
-                style={{
-                  width: 160,
-                  height: 160,
-                  borderRadius: 80,
-                  borderColor: "#F214FF",
-                  borderWidth: 2,
-                }}
+                size={160}
               />
               <View
                 position="absolute"

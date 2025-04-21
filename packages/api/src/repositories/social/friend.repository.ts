@@ -1,4 +1,4 @@
-import { and, asc, eq, exists, gt, not, or, sql } from "drizzle-orm";
+import { and, asc, eq, exists, gt, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type {
@@ -8,22 +8,18 @@ import type {
   Transaction,
 } from "@oppfy/db";
 import {
+  FollowStatus,
   getFollowStatusSql,
-  withOnboardingCompleted,
+  onboardingCompletedCondition,
 } from "@oppfy/db/utils/query-helpers";
 
+import type { Friend, FriendRequest, Profile } from "../../models";
+import { TYPES } from "../../symbols";
 import type {
   BidirectionalUserIdsparams,
   DirectionalUserIdsParams,
-  FollowStatus,
   PaginationParams,
-} from "../../interfaces/types";
-import type { Friend, FriendRequest, OnboardedProfile } from "../../models";
-import { TYPES } from "../../symbols";
-
-export interface SocialProfile extends OnboardedProfile {
-  followStatus: FollowStatus;
-}
+} from "../../types";
 
 export interface PaginateFriendParams extends PaginationParams {
   selfUserId: string;
@@ -301,7 +297,7 @@ export class FriendRepository {
   async paginateFriends(
     { userId, cursor, pageSize = 10, selfUserId }: PaginateFriendParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<SocialProfile[]> {
+  ): Promise<(Profile<"onboarded"> & { followStatus: FollowStatus })[]> {
     let query = db
       .select({
         profile: this.schema.profile,
@@ -310,17 +306,25 @@ export class FriendRepository {
       .from(this.schema.friend)
       .innerJoin(
         this.schema.user,
-        or(
-          eq(this.schema.friend.userIdA, userId),
-          eq(this.schema.friend.userIdB, userId),
+        eq(
+          this.schema.user.id,
+          sql`CASE WHEN ${this.schema.friend.userIdA} = ${userId} THEN ${this.schema.friend.userIdB} ELSE ${this.schema.friend.userIdA} END`,
         ),
       )
       .innerJoin(
         this.schema.profile,
         eq(this.schema.user.id, this.schema.profile.userId),
       )
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.userStatus.userId, this.schema.profile.userId),
+      )
       .where(
         and(
+          or(
+            eq(this.schema.friend.userIdA, userId),
+            eq(this.schema.friend.userIdB, userId),
+          ),
           cursor
             ? or(
                 gt(this.schema.friend.createdAt, cursor.createdAt),
@@ -330,21 +334,19 @@ export class FriendRepository {
                 ),
               )
             : undefined,
+          onboardingCompletedCondition(this.schema.profile),
         ),
       )
       .orderBy(
         asc(this.schema.friend.createdAt),
         asc(this.schema.profile.userId),
       )
-      .limit(pageSize)
-      .$dynamic();
-
-    query = withOnboardingCompleted(query);
+      .limit(pageSize);
 
     const friends = await query;
 
     return friends.map(({ profile, followStatus }) => ({
-      ...(profile as OnboardedProfile),
+      ...(profile as Profile<"onboarded">),
       followStatus,
     }));
   }
@@ -356,7 +358,7 @@ export class FriendRepository {
   async paginateFriendRequests(
     { userId, cursor, pageSize = 10 }: PaginateFriendRequestsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<OnboardedProfile[]> {
+  ): Promise<Profile<"onboarded">[]> {
     let query = db
       .select({
         profile: this.schema.profile,
@@ -370,6 +372,10 @@ export class FriendRepository {
         this.schema.profile,
         eq(this.schema.user.id, this.schema.profile.userId),
       )
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.userStatus.userId, this.schema.profile.userId),
+      )
       .where(
         and(
           eq(this.schema.friendRequest.recipientUserId, userId),
@@ -382,19 +388,17 @@ export class FriendRepository {
                 ),
               )
             : undefined,
+          onboardingCompletedCondition(this.schema.profile),
         ),
       )
       .orderBy(
         asc(this.schema.friendRequest.createdAt),
         asc(this.schema.profile.userId),
       )
-      .limit(pageSize)
-      .$dynamic();
-
-    query = withOnboardingCompleted(query);
+      .limit(pageSize);
 
     const friendRequests = await query;
 
-    return friendRequests.map(({ profile }) => profile as OnboardedProfile);
+    return friendRequests.map(({ profile }) => profile as Profile<"onboarded">);
   }
 }

@@ -9,8 +9,8 @@ import type {
 } from "@oppfy/db";
 import { env } from "@oppfy/env";
 
-import type { UserIdParam } from "../../interfaces/types";
 import { TYPES } from "../../symbols";
+import type { UserIdParam } from "../../types";
 
 export interface DeleteUserContactsParam {
   userId: string;
@@ -78,6 +78,19 @@ export class ContactsRepository {
       .insert(this.schema.userContact)
       .values(mappings)
       .onConflictDoNothing();
+  }
+
+  async ensureContactsExist(
+    contactIds: string[],
+    tx: Transaction,
+  ): Promise<void> {
+    if (contactIds.length === 0) {
+      return;
+    }
+    const mappings = contactIds.map((contactId) => ({
+      id: contactId,
+    }));
+    await tx.insert(this.schema.contact).values(mappings).onConflictDoNothing();
   }
 
   async getRecommendationIds({ userId }: UserIdParam): Promise<{

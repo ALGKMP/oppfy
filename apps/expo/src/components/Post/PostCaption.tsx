@@ -4,13 +4,13 @@ import { TouchableOpacity } from "react-native";
 import { Paragraph, Text } from "~/components/ui/";
 
 interface PostCaptionProps {
-  caption: string;
+  caption: string | null;
 }
 
 const PostCaption = ({ caption }: PostCaptionProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  if (!caption) return null;
+  if (caption === null) return null;
 
   return (
     <TouchableOpacity

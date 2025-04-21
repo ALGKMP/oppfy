@@ -1,8 +1,7 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { CameraOff, Lock, UserX } from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
@@ -17,33 +16,42 @@ import { api } from "~/utils/api";
 
 type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
 
+interface ViewToken {
+  item: Post;
+  key: string;
+  index: number | null;
+  isViewable: boolean;
+  timestamp: number;
+}
+
 const OtherProfile = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const params = useLocalSearchParams<{
+  const { userId, ...params } = useLocalSearchParams<{
     userId: string;
     username?: string;
     name?: string;
     profilePictureUrl?: string;
   }>();
 
-  const { userId } = params;
-
   const {
-    data: profileData,
-    isLoading: isLoadingProfile,
+    data: profile,
     refetch: refetchProfile,
+    isLoading: isLoadingProfile,
   } = api.profile.getProfile.useQuery({ userId: userId });
 
   const {
     data: profileStats,
-    isLoading: isLoadingProfileStats,
     refetch: refetchProfileStats,
+    isLoading: isLoadingProfileStats,
   } = api.profile.getStats.useQuery({ userId });
 
-  const { data: networkRelationships, refetch: refetchNetworkRelationships } =
-    api.profile.getRelationshipStatesBetweenUsers.useQuery({ userId });
+  const {
+    data: relationshipState,
+    refetch: refetchRelationshipState,
+    isLoading: isLoadingRelationshipStates,
+  } = api.profile.getRelationshipStatesBetweenUsers.useQuery({ userId });
 
   const {
     data: postsData,
@@ -62,162 +70,96 @@ const OtherProfile = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
-  const postItems = useMemo(
-    () => postsData?.pages.flatMap((page) => page.items) ?? [],
-    [postsData],
-  );
+  const isLoading =
+    isLoadingProfile || isLoadingProfileStats || isLoadingRelationshipStates;
 
-  const handleRefresh = useCallback(async () => {
+  const postItems = postsData?.pages.flatMap((page) => page.items) ?? [];
+
+  const handleRefresh = async () => {
     setIsRefreshing(true);
     await Promise.all([
-      refetchPosts(),
       refetchProfile(),
-      refetchNetworkRelationships(),
+      refetchProfileStats(),
+      refetchRelationshipState(),
+      refetchPosts(),
     ]);
     setIsRefreshing(false);
-  }, [refetchPosts, refetchProfile, refetchNetworkRelationships]);
+  };
 
-  const handleOnEndReached = useCallback(async () => {
+  const handleOnEndReached = async () => {
     if (hasNextPage && !isFetchingNextPage) {
       await fetchNextPage();
     }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  };
 
-  const onViewableItemsChanged = useCallback(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      const visibleItemIds = viewableItems
-        .filter((token) => token.isViewable)
-        .map((token) => (token.item as Post).post.id);
+  const onViewableItemsChanged = ({
+    viewableItems,
+  }: {
+    viewableItems: ViewToken[];
+  }) => {
+    const visibleItemIds = viewableItems
+      .filter((token) => token.isViewable)
+      .map((token) => token.item.post.id);
 
-      setViewableItems(visibleItemIds);
-    },
-    [],
+    setViewableItems(visibleItemIds);
+  };
+
+  const renderPost = ({ item }: { item: Post }) => (
+    <PostCard {...item} isViewable={viewableItems.includes(item.post.id)} />
   );
 
-  const viewabilityConfig = useMemo(
-    () => ({ itemVisiblePercentThreshold: 40 }),
-    [],
-  );
-
-  const renderPost = useCallback(
-    ({ item }: { item: Post }) => (
-      <PostCard
-        postId={item.post.id}
-        endpoint="other-profile"
-        createdAt={item.post.createdAt}
-        caption={item.post.caption}
-        author={{
-          id: item.authorUserId,
-          name: item.authorName ?? "",
-          username: item.authorUsername ?? "",
-          profilePictureUrl: item.authorProfilePictureUrl,
+  const renderHeader = () => (
+    <YStack gap="$2" position="relative">
+      <Header
+        type="other"
+        profile={{
+          ...profile,
+          username: profile?.username ?? params.username,
+          name: profile?.name ?? params.name,
+          profilePictureUrl:
+            profile?.profilePictureUrl ?? params.profilePictureUrl,
         }}
-        recipient={{
-          id: item.recipientUserId,
-          name: item.recipientName ?? "",
-          username: item.recipientUsername ?? "",
-          profilePictureUrl: item.recipientProfilePictureUrl,
-        }}
-        media={{
-          id: item.post.id,
-          recipient: {
-            id: item.post.id,
-            name: item.recipientName ?? "",
-            username: item.recipientUsername ?? "",
-            profilePictureUrl: item.recipientProfilePictureUrl,
-          },
-          type: item.post.mediaType,
-          url: item.assetUrl,
-          dimensions: {
-            width: item.post.width,
-            height: item.post.height,
-          },
-        }}
-        stats={{
-          likes: item.postStats.likes,
-          comments: item.postStats.comments,
-          hasLiked: item.hasLiked,
-        }}
-        isViewable={viewableItems.includes(item.post.id)}
+        stats={profileStats}
+        relationshipState={relationshipState}
+        isLoading={isLoading}
       />
-    ),
-    [viewableItems],
+
+      {isLoadingProfile ? null : (
+        <>
+          {profileStats?.friends &&
+          profileStats.friends > 0 &&
+          !relationshipState?.isBlocked ? (
+            <FriendCarousel
+              userId={userId}
+              username={profile?.username ?? ""}
+              paddingHorizontal="$2.5"
+            />
+          ) : (
+            <RecommendationCarousel paddingHorizontal="$2.5" />
+          )}
+        </>
+      )}
+
+      {(isLoadingPostData || postItems.length > 0) && (
+        <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
+          Posts
+        </HeaderTitle>
+      )}
+
+      <Icon
+        name="chevron-back"
+        onPress={() => router.back()}
+        blurred
+        style={{
+          position: "absolute",
+          top: 12,
+          left: 12,
+        }}
+      />
+    </YStack>
   );
 
-  const memoizedHeader = useMemo(
-    () => (
-      <YStack gap="$2" position="relative">
-        <Header
-          user={{
-            id: userId,
-            name: profileData?.name ?? params.name ?? null,
-            username: profileData?.username ?? params.username ?? "",
-            profilePictureUrl:
-              profileData?.profilePictureUrl ??
-              params.profilePictureUrl ??
-              null,
-            bio: profileData?.bio ?? null,
-            privacy: profileData?.privacy ?? "public",
-          }}
-          stats={{
-            postCount: profileStats?.posts ?? 0,
-            followingCount: profileStats?.following ?? 0,
-            followerCount: profileStats?.followers ?? 0,
-            friendCount: profileStats?.friends ?? 0,
-          }}
-          createdAt={profileData?.createdAt}
-          isLoading={isLoadingProfile}
-          networkRelationships={networkRelationships}
-        />
-        {isLoadingProfile ? null : (
-          <>
-            {profileStats?.friends &&
-            profileStats.friends > 0 &&
-            !networkRelationships?.isBlocked ? (
-              <FriendCarousel
-                userId={userId}
-                username={profileData?.username ?? ""}
-                paddingHorizontal="$2.5"
-              />
-            ) : (
-              <RecommendationCarousel paddingHorizontal="$2.5" />
-            )}
-          </>
-        )}
-        {(isLoadingPostData || postItems.length > 0) && (
-          <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
-            Posts
-          </HeaderTitle>
-        )}
-        <Icon
-          name="chevron-back"
-          onPress={() => router.back()}
-          blurred
-          style={{
-            position: "absolute",
-            top: 12,
-            left: 12,
-          }}
-        />
-      </YStack>
-    ),
-    [
-      profileData,
-      profileStats,
-      isLoadingProfile,
-      isLoadingProfileStats,
-      isLoadingPostData,
-      postItems.length,
-      networkRelationships,
-      params.name,
-      params.username,
-      params.profilePictureUrl,
-      userId,
-      router,
-    ],
-  );
-
-  const renderNoPosts = useCallback(() => {
+  const renderNoPosts = () => {
     if (isLoadingPostData) {
       return (
         <YStack gap="$4">
@@ -228,7 +170,7 @@ const OtherProfile = () => {
       );
     }
 
-    if (networkRelationships?.isBlocked) {
+    if (relationshipState?.isBlocked) {
       return (
         <View paddingTop="$6">
           <EmptyPlaceholder
@@ -240,7 +182,7 @@ const OtherProfile = () => {
       );
     }
 
-    if (profileData?.privacy === "private") {
+    if (profile?.privacy === "private") {
       return (
         <View paddingTop="$6">
           <EmptyPlaceholder
@@ -260,20 +202,20 @@ const OtherProfile = () => {
         />
       </View>
     );
-  }, [isLoadingPostData, networkRelationships]);
+  };
 
   return (
     <FlashList
       data={postItems}
       renderItem={renderPost}
-      ListHeaderComponent={memoizedHeader}
+      ListHeaderComponent={renderHeader}
       ListEmptyComponent={renderNoPosts}
       keyExtractor={(item) => `other-profile-post-${item.post.id}`}
-      estimatedItemSize={300}
+      estimatedItemSize={664}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}
       onViewableItemsChanged={onViewableItemsChanged}
-      viewabilityConfig={viewabilityConfig}
+      viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
       extraData={viewableItems}
       ItemSeparatorComponent={() => <Spacer size="$4" />}
       ListHeaderComponentStyle={{

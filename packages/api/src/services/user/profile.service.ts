@@ -2,32 +2,33 @@ import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
 import { CloudFront } from "@oppfy/cloudfront";
+import type { Database } from "@oppfy/db";
+import {
+  FollowStatus,
+  FriendStatus,
+  Privacy,
+} from "@oppfy/db/utils/query-helpers";
 import { env } from "@oppfy/env";
 import { S3 } from "@oppfy/s3";
 
 import * as ProfileErrors from "../../errors/user/profile.error";
-import {
-  FollowStatus,
-  FriendStatus,
-  SelfOtherUserIdsParams,
-  UserIdParam,
-  UsernameParam,
-} from "../../interfaces/types";
-import {
-  HydratedProfile,
-  Profile,
-  ProfileInsert,
-  UserStats,
-} from "../../models";
+import { Profile, ProfileInsert, UserStats } from "../../models";
 import { BlockRepository } from "../../repositories/social/block.repository";
 import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { TYPES } from "../../symbols";
+import {
+  SelfOtherUserIdsParams,
+  UserIdParam,
+  UsernameParam,
+} from "../../types";
+import { Hydrate, hydrateProfile } from "../../utils";
 
 interface RelationshipState {
   follow: FollowStatus;
   friend: FriendStatus;
+  privacy: Privacy;
   isBlocked: boolean;
 }
 
@@ -49,6 +50,8 @@ interface GenerateProfilePicturePresignedUrlParams {
 @injectable()
 export class ProfileService {
   constructor(
+    @inject(TYPES.Database)
+    private readonly database: Database,
     @inject(TYPES.S3)
     private readonly s3: S3,
     @inject(TYPES.CloudFront)
@@ -66,15 +69,13 @@ export class ProfileService {
   /**
    * Retrieves a user's profile, ensuring access control with privacy and block checks.
    */
-  async profile({
+  async getProfile({
     selfUserId,
     otherUserId,
   }: SelfOtherUserIdsParams<"optional">): Promise<
     Result<
-      HydratedProfile,
-      | ProfileErrors.ProfileBlocked
-      | ProfileErrors.ProfileNotFound
-      | ProfileErrors.ProfilePrivate
+      Hydrate<Profile<"notOnApp"> | Profile<"onboarded">>,
+      ProfileErrors.ProfileBlocked | ProfileErrors.ProfileNotFound
     >
   > {
     if (otherUserId) {
@@ -97,19 +98,7 @@ export class ProfileService {
       return err(new ProfileErrors.ProfileNotFound(otherUserId ?? selfUserId));
     }
 
-    // Check privacy settings if its another profile
-    if (otherUserId && profileData.privacy === "private") {
-      const isFollowing = await this.followRepository.getFollower({
-        senderUserId: otherUserId,
-        recipientUserId: selfUserId,
-      });
-
-      if (!isFollowing) {
-        return err(new ProfileErrors.ProfilePrivate(otherUserId));
-      }
-    }
-
-    return ok(this.cloudfront.hydrateProfile(profileData));
+    return ok(hydrateProfile(profileData));
   }
 
   /**
@@ -117,7 +106,7 @@ export class ProfileService {
    */
   async profileForSite(
     params: UsernameParam,
-  ): Promise<Result<HydratedProfile, ProfileErrors.ProfileNotFound>> {
+  ): Promise<Result<Hydrate<Profile>, ProfileErrors.ProfileNotFound>> {
     const { username } = params;
 
     const profileData = await this.profileRepository.getProfileByUsername({
@@ -128,7 +117,7 @@ export class ProfileService {
       return err(new ProfileErrors.ProfileNotFound(username));
     }
 
-    return ok(this.cloudfront.hydrateProfile(profileData));
+    return ok(hydrateProfile(profileData));
   }
 
   /**
@@ -136,11 +125,11 @@ export class ProfileService {
    */
   async searchProfilesByUsername(
     params: SearchProfilesByUsernameParams,
-  ): Promise<Result<HydratedProfile[], never>> {
+  ): Promise<
+    Result<Hydrate<Profile<"notOnApp"> | Profile<"onboarded">>[], never>
+  > {
     const profiles = await this.profileRepository.getProfilesByUsername(params);
-    const hydratedProfiles = profiles.map((profile) =>
-      this.cloudfront.hydrateProfile(profile),
-    );
+    const hydratedProfiles = profiles.map((profile) => hydrateProfile(profile));
 
     return ok(hydratedProfiles);
   }
@@ -153,6 +142,7 @@ export class ProfileService {
   ): Promise<
     Result<
       RelationshipState,
+      | ProfileErrors.ProfileNotFound
       | ProfileErrors.ProfileBlocked
       | ProfileErrors.CannotCheckRelationshipWithSelf
     >
@@ -163,51 +153,52 @@ export class ProfileService {
       return err(new ProfileErrors.CannotCheckRelationshipWithSelf());
     }
 
-    const isBlockedOutgoing = await this.blockRepository.getBlock({
-      senderUserId: selfUserId,
-      recipientUserId: otherUserId,
-    });
-
-    const isBlockedIncoming = await this.blockRepository.getBlock({
-      senderUserId: otherUserId,
-      recipientUserId: selfUserId,
-    });
-
-    if (isBlockedIncoming) {
-      return ok({
-        follow: "NOT_FOLLOWING",
-        friend: "NOT_FRIENDS",
-        isBlocked: true,
-      });
-    }
-
-    const [
-      isFollowing,
-      isFollowRequested,
-      isFriends,
-      isFriendRequested,
-
-      ] = await Promise.all([
-      this.followRepository.getFollower({
+    const [isBlockedOutgoing, isBlockedIncoming, privacy] = await Promise.all([
+      this.blockRepository.getBlock({
         senderUserId: selfUserId,
         recipientUserId: otherUserId,
       }),
-      this.followRepository.getFollowRequest({
-        senderUserId: selfUserId,
-        recipientUserId: otherUserId,
-      }),
-      this.friendRepository.getFriendRequest({
-        senderUserId: selfUserId,
-        recipientUserId: otherUserId,
-      }),
-      this.friendRepository.getFriendRequest({
-        senderUserId: selfUserId,
-        recipientUserId: otherUserId,
+      this.blockRepository.getBlock({
+        senderUserId: otherUserId,
+        recipientUserId: selfUserId,
       }),
       this.profileRepository.getPrivacy({
         userId: otherUserId,
       }),
     ]);
+
+    if (privacy === undefined) {
+      return err(new ProfileErrors.ProfileNotFound(otherUserId));
+    }
+
+    if (isBlockedIncoming) {
+      return ok({
+        follow: "NOT_FOLLOWING",
+        friend: "NOT_FRIENDS",
+        privacy: privacy === "private" ? "PRIVATE" : "PUBLIC",
+        isBlocked: true,
+      });
+    }
+
+    const [isFollowing, isFollowRequested, isFriends, isFriendRequested] =
+      await Promise.all([
+        this.followRepository.getFollower({
+          senderUserId: selfUserId,
+          recipientUserId: otherUserId,
+        }),
+        this.followRepository.getFollowRequest({
+          senderUserId: selfUserId,
+          recipientUserId: otherUserId,
+        }),
+        this.friendRepository.getFriend({
+          userIdA: selfUserId,
+          userIdB: otherUserId,
+        }),
+        this.friendRepository.getFriendRequest({
+          senderUserId: selfUserId,
+          recipientUserId: otherUserId,
+        }),
+      ]);
 
     const followState = (
       isFollowing
@@ -224,6 +215,7 @@ export class ProfileService {
     return ok({
       follow: followState,
       friend: friendState,
+      privacy: privacy === "private" ? "PRIVATE" : "PUBLIC",
       isBlocked: isBlockedOutgoing != undefined,
     });
   }
@@ -296,30 +288,35 @@ export class ProfileService {
   /**
    * Generates a presigned URL for profile picture upload, restricted to the owner.
    */
-  async generateProfilePicturePresignedUrl(
-    params: GenerateProfilePicturePresignedUrlParams,
-  ): Promise<Result<string, never>> {
-    const { userId, contentLength } = params;
+  async generateProfilePicturePresignedUrl({
+    userId,
+    contentLength,
+  }: GenerateProfilePicturePresignedUrlParams): Promise<Result<string, never>> {
+    return await this.database.transaction(async (tx) => {
+      const key = `profile-pictures/${userId}.jpg`;
 
-    const presignedUrl = await this.s3.createProfilePicturePresignedUrl({
-      userId,
-      contentLength,
+      await this.profileRepository.updateProfile(
+        {
+          userId,
+          update: {
+            profilePictureKey: key,
+          },
+        },
+        tx,
+      );
+
+      const presignedUrl = await this.s3.createProfilePicturePresignedUrl({
+        key,
+        contentLength,
+        contentType: "image/jpeg",
+        metadata: {
+          user: userId,
+        },
+      });
+
+      await this.cloudfront.invalidateProfilePicture(key);
+
+      return ok(presignedUrl);
     });
-
-    const key = `/profile-pictures/${userId}.jpg`;
-
-    await this.cloudfront.createInvalidation(
-      env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
-      key,
-    );
-
-    await this.profileRepository.updateProfile({
-      userId,
-      update: {
-        profilePictureKey: key,
-      },
-    });
-
-    return ok(presignedUrl);
   }
 }

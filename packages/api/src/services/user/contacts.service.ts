@@ -1,15 +1,18 @@
+import { createHash } from "crypto";
 import { inject, injectable } from "inversify";
 import { ok, Result } from "neverthrow";
 
-import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
+import { FollowStatus } from "@oppfy/db/utils/query-helpers";
+import { SQS } from "@oppfy/sqs";
 
-import { UserIdParam } from "../../interfaces/types";
-import { HydratedProfile } from "../../models";
+import { Profile } from "../../models";
 import { ContactsRepository } from "../../repositories/user/contacts.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
+import type { UserIdParam } from "../../types";
+import { Hydrate, hydrateProfile } from "../../utils";
 
 export interface UpdateUserContactsParams {
   userId: string;
@@ -38,22 +41,29 @@ export class ContactsService {
     private readonly userRepository: UserRepository,
     @inject(TYPES.ProfileRepository)
     private readonly profileRepository: ProfileRepository,
-    @inject(TYPES.CloudFront) private readonly cloudfront: CloudFront,
+    @inject(TYPES.SQS) private readonly sqs: SQS,
   ) {}
 
-  async filterPhoneNumbersOnApp({
+  async getUnregisteredPhoneNumbers({
     phoneNumbers,
   }: FilterPhoneNumbersOnAppParams): Promise<Result<string[], never>> {
-    const result = await this.userRepository.existingPhoneNumbers({
+    const result = await this.userRepository.getUnregisteredPhoneNumbers({
       phoneNumbers,
     });
 
     return ok(result);
   }
 
-  async getProfileRecommendations({
-    userId,
-  }: UserIdParam): Promise<Result<HydratedProfile[], never>> {
+  async getProfileRecommendations({ userId }: UserIdParam): Promise<
+    Result<
+      Hydrate<
+        Profile<"onboarded"> & {
+          followStatus: FollowStatus;
+        }
+      >[],
+      never
+    >
+  > {
     // Get recommendations from Lambda function
     const { tier1, tier2, tier3 } =
       await this.contactsRepository.getRecommendationIds({ userId });
@@ -69,8 +79,14 @@ export class ContactsService {
       userIds: allRecommendedUserIds,
     });
 
-    const hydratedProfiles = profiles.map((profile) =>
-      this.cloudfront.hydrateProfile(profile),
+    // set all to not following by default
+    const profilesWithFollowStatus = profiles.map((profile) => ({
+      ...profile,
+      followStatus: "NOT_FOLLOWING" as const satisfies FollowStatus,
+    }));
+
+    const hydratedProfiles = profilesWithFollowStatus.map((profile) =>
+      hydrateProfile(profile),
     );
 
     return ok(hydratedProfiles);
@@ -80,6 +96,21 @@ export class ContactsService {
     params: UpdateUserContactsParams,
   ): Promise<Result<void, never>> {
     const { userId, hashedPhoneNumbers } = params;
+
+    const user = await this.userRepository.getUser({ userId });
+
+    if (!user) {
+      return ok(undefined);
+    }
+
+    const userPhoneNumber = user.phoneNumber;
+    const userPhoneNumberHash = createHash("sha512")
+      .update(userPhoneNumber)
+      .digest("hex");
+
+    const filteredContacts = params.hashedPhoneNumbers.filter(
+      (contact) => contact !== userPhoneNumberHash,
+    );
 
     await this.db.transaction(async (tx) => {
       // 1. Get current contacts
@@ -106,12 +137,19 @@ export class ContactsService {
       );
 
       // Ensure new contact IDs exist in the contact table
-      // await this.contactsRepository.ensureContactsExist(contactsToAdd, tx);
+      await this.contactsRepository.ensureContactsExist(contactsToAdd, tx);
 
       await this.contactsRepository.insertUserContacts(
         { userId, contactIds: contactsToAdd },
         tx,
       );
+
+      // 4. Send SQS message
+      await this.sqs.sendContactSyncMessage({
+        userId,
+        userPhoneNumberHash,
+        contacts: filteredContacts,
+      });
     });
 
     return ok(undefined);

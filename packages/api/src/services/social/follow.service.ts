@@ -3,26 +3,24 @@ import { err, ok, Result } from "neverthrow";
 
 import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
+import { FollowStatus } from "@oppfy/db/utils/query-helpers";
+import { SQS } from "@oppfy/sqs";
 
 import * as FollowErrors from "../../errors/social/follow.error";
 import * as FriendErrors from "../../errors/social/friend.error";
 import * as ProfileErrors from "../../errors/user/profile.error";
-import {
-  DirectionalUserIdsParams,
-  FollowStatus,
-  PaginatedResponse,
-  PaginationParams,
-} from "../../interfaces/types";
-import { HydratedProfile } from "../../models";
-import {
-  FollowRepository,
-  SocialProfile,
-} from "../../repositories/social/follow.repository";
+import { Profile } from "../../models";
+import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { TYPES } from "../../symbols";
-
-type HydratedSocialProfile = HydratedProfile & SocialProfile;
+import {
+  DirectionalUserIdsParams,
+  PaginatedResponse,
+  PaginationParams,
+  SelfOtherUserIdsParams,
+} from "../../types";
+import { Hydrate, hydrateProfile } from "../../utils";
 
 interface PaginateByUserIdWithSelfUserIdParams extends PaginationParams {
   selfUserId: string;
@@ -46,6 +44,7 @@ export class FollowService {
     private readonly profileRepository: ProfileRepository,
     @inject(TYPES.CloudFront)
     private readonly cloudfront: CloudFront,
+    @inject(TYPES.SQS) private readonly sqs: SQS,
   ) {}
 
   /**
@@ -70,11 +69,20 @@ export class FollowService {
     }
 
     // Verify the recipient exists
-    const recipientProfile = await this.profileRepository.getProfile({
-      userId: recipientUserId,
-    });
+    const [authorProfile, recipientProfile] = await Promise.all([
+      this.profileRepository.getProfile({
+        userId: senderUserId,
+      }),
+      this.profileRepository.getProfile({
+        userId: recipientUserId,
+      }),
+    ]);
+
     if (recipientProfile === undefined)
       return err(new ProfileErrors.ProfileNotFound(recipientUserId));
+
+    if (authorProfile === undefined)
+      return err(new ProfileErrors.ProfileNotFound(senderUserId));
 
     await this.db.transaction(async (tx) => {
       const [isFollowing, isRequested] = await Promise.all([
@@ -101,11 +109,29 @@ export class FollowService {
         );
 
       // Based on privacy, either create a follower relationship or a follow request
-      await this.followRepository[
+      const action =
         recipientProfile.privacy === "public"
           ? "createFollower"
-          : "createFollowRequest"
-      ]({ senderUserId, recipientUserId }, tx);
+          : "createFollowRequest";
+
+      await this.followRepository[action](
+        { senderUserId, recipientUserId },
+        tx,
+      );
+
+      if (action === "createFollowRequest") {
+        await this.sqs.sendFollowRequestNotification({
+          senderId: senderUserId,
+          recipientId: recipientUserId,
+          username: authorProfile.username,
+        });
+      } else {
+        await this.sqs.sendFollowNotification({
+          senderId: senderUserId,
+          recipientId: recipientUserId,
+          username: authorProfile.username,
+        });
+      }
     });
 
     return ok();
@@ -246,31 +272,41 @@ export class FollowService {
    * senderUserId is the user accepting (recipient of the request), recipientUserId is the requester.
    */
   async acceptFollowRequest({
-    senderUserId,
-    recipientUserId,
-  }: DirectionalUserIdsParams): Promise<
-    Result<void, FollowErrors.RequestNotFound>
+    selfUserId,
+    otherUserId,
+  }: SelfOtherUserIdsParams): Promise<
+    Result<void, FollowErrors.RequestNotFound | ProfileErrors.ProfileNotFound>
   > {
     await this.db.transaction(async (tx) => {
       const isRequested = await this.followRepository.getFollowRequest(
-        { senderUserId: recipientUserId, recipientUserId: senderUserId },
+        { senderUserId: otherUserId, recipientUserId: selfUserId },
         tx,
       );
       if (!isRequested)
-        return err(
-          new FollowErrors.RequestNotFound(recipientUserId, senderUserId),
-        );
+        return err(new FollowErrors.RequestNotFound(selfUserId, otherUserId));
 
       await Promise.all([
         this.followRepository.deleteFollowRequest(
-          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          { senderUserId: otherUserId, recipientUserId: selfUserId },
           tx,
         ),
         this.followRepository.createFollower(
-          { senderUserId: recipientUserId, recipientUserId: senderUserId },
+          { senderUserId: otherUserId, recipientUserId: selfUserId },
           tx,
         ),
       ]);
+    });
+
+    const profile = await this.profileRepository.getProfile({
+      userId: otherUserId,
+    });
+
+    if (!profile) return err(new ProfileErrors.ProfileNotFound(otherUserId));
+
+    await this.sqs.sendFollowAcceptedNotification({
+      senderId: selfUserId,
+      recipientId: otherUserId,
+      username: profile.username,
     });
 
     return ok();
@@ -343,7 +379,12 @@ export class FollowService {
     pageSize = 10,
     selfUserId,
   }: PaginateByUserIdWithSelfUserIdParams): Promise<
-    Result<PaginatedResponse<HydratedSocialProfile>, never>
+    Result<
+      PaginatedResponse<
+        Hydrate<Profile<"onboarded">> & { followStatus: FollowStatus }
+      >,
+      never
+    >
   > {
     const rawProfiles = await this.followRepository.paginateFollowers({
       userId,
@@ -353,7 +394,7 @@ export class FollowService {
     });
 
     const hydratedProfiles = rawProfiles.map((profile) => ({
-      ...this.cloudfront.hydrateProfile(profile),
+      ...hydrateProfile(profile),
       followStatus: profile.followStatus,
     }));
 
@@ -380,7 +421,12 @@ export class FollowService {
     pageSize = 10,
     selfUserId,
   }: PaginateByUserIdWithSelfUserIdParams): Promise<
-    Result<PaginatedResponse<HydratedSocialProfile>, never>
+    Result<
+      PaginatedResponse<
+        Hydrate<Profile<"onboarded">> & { followStatus: FollowStatus }
+      >,
+      never
+    >
   > {
     const rawProfiles = await this.followRepository.paginateFollowing({
       userId,
@@ -390,7 +436,7 @@ export class FollowService {
     });
 
     const hydratedProfiles = rawProfiles.map((profile) => ({
-      ...this.cloudfront.hydrateProfile(profile),
+      ...hydrateProfile(profile),
       followStatus: profile.followStatus,
     }));
 
@@ -415,7 +461,7 @@ export class FollowService {
     cursor,
     pageSize = 10,
   }: PaginateByUserIdParams): Promise<
-    Result<PaginatedResponse<HydratedProfile>, never>
+    Result<PaginatedResponse<Hydrate<Profile<"onboarded">>>, never>
   > {
     const rawProfiles = await this.followRepository.paginateFollowRequests({
       userId,
@@ -424,7 +470,7 @@ export class FollowService {
     });
 
     const hydratedProfiles = rawProfiles.map((profile) =>
-      this.cloudfront.hydrateProfile(profile),
+      hydrateProfile(profile),
     );
 
     const hasMore = rawProfiles.length > pageSize;

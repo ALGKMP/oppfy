@@ -46,7 +46,7 @@ export const profileRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const result = await ctx.services.profile.profile({
+      const result = await ctx.services.profile.getProfile({
         selfUserId: ctx.session.uid,
         otherUserId: input.userId,
       });
@@ -60,15 +60,35 @@ export const profileRouter = createTRPCRouter({
                 code: "NOT_FOUND",
                 message: "Profile not found",
               });
-            case "ProfilePrivateError":
-              throw new TRPCError({
-                code: "FORBIDDEN",
-                message: "Profile is private",
-              });
             case "ProfileBlockedError":
               throw new TRPCError({
                 code: "FORBIDDEN",
                 message: "Profile is blocked",
+              });
+          }
+        },
+      );
+    }),
+
+  getProfileForSite: publicProcedure
+    .input(
+      z.object({
+        username: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.services.profile.profileForSite({
+        username: input.username,
+      });
+
+      return result.match(
+        (res) => res,
+        (err) => {
+          switch (err.name) {
+            case "ProfileNotFoundError":
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Profile not found",
               });
           }
         },
@@ -96,31 +116,6 @@ export const profileRouter = createTRPCRouter({
           dateOfBirth: input.dateOfBirth,
         },
       });
-    }),
-
-  getProfileForSite: publicProcedure
-    .input(
-      z.object({
-        username: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const result = await ctx.services.profile.profileForSite({
-        username: input.username,
-      });
-
-      return result.match(
-        (res) => res,
-        (err) => {
-          switch (err.name) {
-            case "ProfileNotFoundError":
-              throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "Profile not found",
-              });
-          }
-        },
-      );
     }),
 
   getProfilesByUsername: protectedProcedure
@@ -162,6 +157,12 @@ export const profileRouter = createTRPCRouter({
         (res) => res,
         (err) => {
           switch (err.name) {
+            case "ProfileNotFoundError": {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Profile not found",
+              });
+            }
             case "ProfileBlockedError":
               throw new TRPCError({
                 code: "FORBIDDEN",

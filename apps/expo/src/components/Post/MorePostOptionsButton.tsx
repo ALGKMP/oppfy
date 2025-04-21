@@ -1,34 +1,21 @@
-import type { StyleProp, ViewStyle } from "react-native";
-import { TouchableOpacity } from "react-native";
-import { MoreHorizontal } from "@tamagui/lucide-icons";
-
+import { useReport } from "~/components/Post/hooks/useReport";
 import {
   Icon,
   useActionSheetController,
   useAlertDialogController,
 } from "~/components/ui";
-import { useSaveMedia } from "~/hooks/post/useSaveMedia";
 import { useAuth } from "~/hooks/useAuth";
-import { useDeletePost } from "../../hooks/post/useDeletePost";
-import { useReportPost } from "../../hooks/post/useReportPost";
-import type { Author, Recipient } from "./PostCard";
+import { useDeletePost } from "./hooks/useDeletePost";
 
 interface MorePostOptionsButtonProps {
   postId: string;
-  author: Author;
-  recipient: Recipient;
-  mediaUrl: string;
+  recipientUserId: string;
+  assetUrl: string;
 }
 
-const MorePostOptionsButton = ({
-  mediaUrl,
-  postId,
-  author,
-  recipient,
-}: MorePostOptionsButtonProps) => {
-  const { handleSavePost, isSaving } = useSaveMedia();
-  const { handleDeletePost, isDeleting } = useDeletePost();
-  const { handleReportPost } = useReportPost(postId);
+const MorePostOptionsButton = (props: MorePostOptionsButtonProps) => {
+  const { reportPost } = useReport();
+  const { deletePost, isDeleting } = useDeletePost();
 
   const { user } = useAuth();
   const { show: showAlert } = useAlertDialogController();
@@ -36,17 +23,12 @@ const MorePostOptionsButton = ({
 
   const buttonOptionsOther = [
     {
-      text: "Save Post",
-      onPress: () => void handleSavePost(mediaUrl),
-      autoClose: true,
-    },
-    {
       text: "Report Post",
       textProps: {
         color: "$red9",
       },
       onPress: () => {
-        show({
+        void show({
           title: "Report Post",
           titleProps: {
             color: "$red9",
@@ -55,39 +37,61 @@ const MorePostOptionsButton = ({
             {
               text: "Violent or abusive",
               textProps: { color: "$blue9" },
-              onPress: () => void handleReportPost("Violent or abusive"),
+              onPress: () =>
+                void reportPost({
+                  postId: props.postId,
+                  reason: "Violent or abusive",
+                }),
               autoClose: true,
             },
             {
               text: "Sexually explicit or predatory",
               textProps: { color: "$blue9" },
               onPress: () =>
-                void handleReportPost("Sexually explicit or predatory"),
+                void reportPost({
+                  postId: props.postId,
+                  reason: "Sexually explicit or predatory",
+                }),
               autoClose: true,
             },
             {
               text: "Hate, harassment, or bullying",
               textProps: { color: "$blue9" },
               onPress: () =>
-                void handleReportPost("Hate, harassment or bullying"),
+                void reportPost({
+                  postId: props.postId,
+                  reason: "Hate, harassment or bullying",
+                }),
               autoClose: true,
             },
             {
               text: "Suicide and self-harm",
               textProps: { color: "$blue9" },
-              onPress: () => void handleReportPost("Suicide and self-harm"),
+              onPress: () =>
+                void reportPost({
+                  postId: props.postId,
+                  reason: "Suicide and self-harm",
+                }),
               autoClose: true,
             },
             {
               text: "Scam or spam",
               textProps: { color: "$blue9" },
-              onPress: () => void handleReportPost("Spam or scam"),
+              onPress: () =>
+                void reportPost({
+                  postId: props.postId,
+                  reason: "Spam or scam",
+                }),
               autoClose: true,
             },
             {
               text: "Other",
               textProps: { color: "$blue9" },
-              onPress: () => void handleReportPost("Other"),
+              onPress: () =>
+                void reportPost({
+                  postId: props.postId,
+                  reason: "Other",
+                }),
               autoClose: true,
             },
           ],
@@ -98,15 +102,6 @@ const MorePostOptionsButton = ({
   ];
 
   const buttonOptionsSelf = [
-    {
-      text: isSaving ? "Saving..." : "Save Post",
-      textProps: {
-        color: isSaving ? "$gray9" : undefined,
-      },
-      disabled: isSaving,
-      onPress: () => void handleSavePost(mediaUrl),
-      autoClose: true,
-    },
     {
       text: "Delete Post",
       textProps: {
@@ -124,7 +119,7 @@ const MorePostOptionsButton = ({
         });
 
         if (shouldDelete) {
-          void handleDeletePost(postId);
+          void deletePost(props.postId);
         }
       },
       autoClose: false,
@@ -135,10 +130,12 @@ const MorePostOptionsButton = ({
     <Icon
       name="ellipsis-horizontal"
       onPress={() => {
-        show({
+        void show({
           title: "More Options",
           buttonOptions:
-            user?.uid === recipient.id ? buttonOptionsSelf : buttonOptionsOther,
+            user?.uid === props.recipientUserId
+              ? buttonOptionsSelf
+              : buttonOptionsOther,
         });
       }}
     />

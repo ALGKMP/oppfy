@@ -8,12 +8,18 @@ import type {
   Transaction,
 } from "@oppfy/db";
 
-import type { PhoneNumberParam, UserIdParam } from "../../interfaces/types";
-import type { User, UserStatus } from "../../models";
+import type {
+  NotificationSettings,
+  Profile,
+  User,
+  UserStats,
+  UserStatus,
+} from "../../models";
 import { TYPES } from "../../symbols";
+import type { PhoneNumberParam, UserIdParam } from "../../types";
+import { invariant } from "../../utils";
 
 export interface CreateUserParams {
-  id?: string;
   phoneNumber: string;
   isOnApp?: boolean;
 }
@@ -24,6 +30,14 @@ export interface GetRandomActiveUserIdsParams {
 
 export interface ExistingPhoneNumbersParams {
   phoneNumbers: string[];
+}
+
+export interface CreateUserResult {
+  user: User;
+  profile: Profile;
+  notificationSettings: NotificationSettings;
+  userStats: UserStats;
+  userStatus: UserStatus;
 }
 
 @injectable()
@@ -83,33 +97,80 @@ export class UserRepository {
   }
 
   async createUser(
-    { id = crypto.randomUUID(), phoneNumber, isOnApp = true }: CreateUserParams,
+    { phoneNumber, isOnApp = true }: CreateUserParams,
     tx: Transaction,
-  ): Promise<void> {
-    await tx
+  ): Promise<CreateUserResult> {
+    const [user] = await tx
       .insert(this.schema.user)
       .values({
-        id,
         phoneNumber,
       })
       .returning();
 
-    await tx.insert(this.schema.profile).values({
-      userId: id,
-    });
+    invariant(user);
 
-    await tx.insert(this.schema.notificationSettings).values({ userId: id });
-    await tx.insert(this.schema.userStats).values({ userId: id });
-    await tx.insert(this.schema.userStatus).values({
-      userId: id,
-      isOnApp,
-    });
+    const [profile] = await tx
+      .insert(this.schema.profile)
+      .values({
+        userId: user.id,
+      })
+      .returning();
+
+    const [notificationSettings] = await tx
+      .insert(this.schema.notificationSettings)
+      .values({ userId: user.id })
+      .returning();
+
+    const [userStats] = await tx
+      .insert(this.schema.userStats)
+      .values({ userId: user.id })
+      .returning();
+
+    const [userStatus] = await tx
+      .insert(this.schema.userStatus)
+      .values({
+        userId: user.id,
+        isOnApp,
+      })
+      .returning();
+
+    invariant(profile);
+    invariant(notificationSettings);
+    invariant(userStats);
+    invariant(userStatus);
+
+    return { user, profile, notificationSettings, userStats, userStatus };
   }
+
   async deleteUser(
     { userId }: UserIdParam,
     db: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     await db.delete(this.schema.user).where(eq(this.schema.user.id, userId));
+  }
+
+  // given a list of phone numbers return all the ones that dont exist in the databas
+  async getUnregisteredPhoneNumbers(
+    { phoneNumbers }: ExistingPhoneNumbersParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<string[]> {
+    const existingNumbers = await db
+      .select({ phoneNumber: this.schema.user.phoneNumber })
+      .from(this.schema.user)
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.user.id, this.schema.userStatus.userId),
+      )
+      .where(
+        and(
+          inArray(this.schema.user.phoneNumber, phoneNumbers),
+          eq(this.schema.userStatus.isOnApp, false),
+        ),
+      );
+
+    return phoneNumbers.filter(
+      (number) => !existingNumbers.includes({ phoneNumber: number }),
+    );
   }
 
   async existingPhoneNumbers(

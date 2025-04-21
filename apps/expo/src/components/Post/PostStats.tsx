@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Share } from "react-native";
+import { Share, TouchableOpacity } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -7,24 +7,51 @@ import Animated, {
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
-import { Circle, getTokens, Text, XStack, YStack } from "tamagui";
+import { getTokens, Text, XStack, YStack } from "tamagui";
 
 import CommentsBottomSheet from "~/components/Post/Comment/CommentsBottomSheet";
 import { useBottomSheetController } from "~/components/ui/BottomSheet";
-import { useLikePost } from "~/hooks/post/useLikePost";
 import useShare from "~/hooks/useShare";
+import type { RouterOutputs } from "~/utils/api";
 import { Icon } from "../ui";
+import { useLike } from "./hooks/useLike";
+
+type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
 
 interface PostStatsProps {
   postId: string;
-  recipientUserId: string;
-  endpoint: "self-profile" | "other-profile" | "home-feed" | "single-post";
-  stats: {
-    likes: number;
-    comments: number;
-    hasLiked: boolean;
-  };
+  postAuthorUserId: string;
+  postRecipientUserId: string;
+  postStats: Post["postStats"];
+  isLiked: boolean;
 }
+
+export const PostStats = (props: PostStatsProps) => {
+  return (
+    <YStack
+      position="absolute"
+      right={0}
+      bottom={24}
+      paddingRight="$4"
+      gap="$5"
+      zIndex={3}
+      alignItems="flex-end"
+    >
+      <LikeAction
+        postId={props.postId}
+        postStats={props.postStats}
+        isLiked={props.isLiked}
+      />
+      <CommentAction
+        postId={props.postId}
+        postAuthorUserId={props.postAuthorUserId}
+        postRecipientUserId={props.postRecipientUserId}
+        count={props.postStats.comments}
+      />
+      <ShareAction postId={props.postId} />
+    </YStack>
+  );
+};
 
 const useButtonAnimation = () => {
   const scale = useSharedValue(1);
@@ -53,90 +80,46 @@ const useButtonAnimation = () => {
   return { buttonScale, animate };
 };
 
-const StatButton = ({
-  count,
-  children,
-}: {
-  count?: number;
-  children: React.ReactNode;
-}) => {
-  const formatCount = (num: number) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-    return num.toString();
-  };
-
-  return (
-    <BlurView
-      intensity={30}
-      style={{
-        padding: 12,
-        borderRadius: 20,
-        overflow: "hidden",
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: `${getTokens().color.$primary.val}90`,
-      }}
-    >
-      <XStack justifyContent="center" alignItems="center" gap="$2">
-        {count !== undefined && count > 0 && (
-          <Text color="white" fontWeight="500">
-            {formatCount(count)}
-          </Text>
-        )}
-        {children}
-      </XStack>
-    </BlurView>
-  );
-};
-
-const LikeAction = ({
-  postId,
-  endpoint,
-  initialHasLiked,
-  count,
-}: {
+interface LikeActionProps {
   postId: string;
-  endpoint: PostStatsProps["endpoint"];
-  initialHasLiked: boolean;
-  count: number;
-}) => {
+  postStats: PostStatsProps["postStats"];
+  isLiked: boolean;
+}
+
+const LikeAction = ({ postId, postStats, isLiked }: LikeActionProps) => {
   const { buttonScale, animate } = useButtonAnimation();
-  const { handleLikePressed, hasLiked } = useLikePost({
+
+  const { likePost, unlikePost } = useLike({
     postId,
-    endpoint,
-    initialHasLiked,
   });
 
-  const handlePress = () => {
-    void handleLikePressed();
+  const handlePress = async () => {
     animate();
+    isLiked ? void unlikePost() : void likePost();
   };
 
   return (
-    <StatButton count={count}>
+    <StatButton count={postStats.likes} onPress={handlePress}>
       <Animated.View style={buttonScale}>
-        <Icon
-          name="heart"
-          onPress={handlePress}
-          color={hasLiked ? "#ff3b30" : "white"}
-        />
+        <Icon name="heart" color={isLiked ? "#ff3b30" : "white"} disabled />
       </Animated.View>
     </StatButton>
   );
 };
 
+interface CommentActionProps {
+  postId: string;
+  postAuthorUserId: string;
+  postRecipientUserId: string;
+  count: number;
+}
+
 const CommentAction = ({
   postId,
-  endpoint,
-  recipientUserId,
+  postAuthorUserId,
+  postRecipientUserId,
   count,
-}: {
-  postId: string;
-  endpoint: PostStatsProps["endpoint"];
-  recipientUserId: string;
-  count: number;
-}) => {
+}: CommentActionProps) => {
   const { buttonScale, animate } = useButtonAnimation();
   const { show, hide } = useBottomSheetController();
 
@@ -148,18 +131,18 @@ const CommentAction = ({
       children: (
         <CommentsBottomSheet
           postId={postId}
-          endpoint={endpoint}
-          postRecipientUserId={recipientUserId}
-          onHideBottomSheet={hide}
+          postAuthorId={postAuthorUserId}
+          postRecipientId={postRecipientUserId}
+          onHide={hide}
         />
       ),
     });
   };
 
   return (
-    <StatButton count={count}>
+    <StatButton count={count} onPress={handlePress}>
       <Animated.View style={buttonScale}>
-        <Icon name="chatbubble-outline" onPress={handlePress} color="white" />
+        <Icon name="chatbubble-outline" color="white" disabled />
       </Animated.View>
     </StatButton>
   );
@@ -175,43 +158,58 @@ const ShareAction = ({ postId }: { postId: string }) => {
   };
 
   return (
-    <StatButton>
+    <StatButton onPress={handlePress}>
       <Animated.View style={buttonScale}>
-        <Icon name="share-outline" onPress={handlePress} color="white" />
+        <Icon name="share-outline" color="white" disabled />
       </Animated.View>
     </StatButton>
   );
 };
 
-export const PostStats = ({
-  postId,
-  recipientUserId,
-  endpoint,
-  stats,
-}: PostStatsProps) => {
+const StatButton = ({
+  count,
+  children,
+  onPress,
+}: {
+  count?: number;
+  children: React.ReactNode;
+  onPress?: () => void;
+}) => {
+  const formatCount = (num: number) => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+    return num.toString();
+  };
+
   return (
-    <YStack
-      position="absolute"
-      right={0}
-      bottom={24}
-      paddingRight="$4"
-      gap="$5"
-      zIndex={3}
-      alignItems="flex-end"
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      style={{
+        borderRadius: 20,
+        overflow: "hidden",
+      }}
     >
-      <LikeAction
-        postId={postId}
-        endpoint={endpoint}
-        initialHasLiked={stats.hasLiked}
-        count={stats.likes}
-      />
-      <CommentAction
-        postId={postId}
-        endpoint={endpoint}
-        recipientUserId={recipientUserId}
-        count={stats.comments}
-      />
-      <ShareAction postId={postId} />
-    </YStack>
+      <BlurView
+        intensity={30}
+        style={{
+          padding: 12,
+          borderRadius: 20,
+          overflow: "hidden",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: `${getTokens().color.$primary.val}90`,
+        }}
+      >
+        <XStack justifyContent="center" alignItems="center" gap="$2">
+          {count !== undefined && count > 0 && (
+            <Text color="white" fontWeight="500">
+              {formatCount(count)}
+            </Text>
+          )}
+          {children}
+        </XStack>
+      </BlurView>
+    </TouchableOpacity>
   );
 };

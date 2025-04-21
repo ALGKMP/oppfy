@@ -3,52 +3,41 @@ import type { PgSelect } from "drizzle-orm/pg-core";
 
 import { schema } from "../..";
 
+export type Privacy = "PUBLIC" | "PRIVATE";
+export type MediaType = "IMAGE" | "VIDEO";
 export type FollowStatus = "FOLLOWING" | "REQUESTED" | "NOT_FOLLOWING";
 export type FriendStatus = "FRIENDS" | "REQUESTED" | "NOT_FRIENDS";
 export type BlockStatus = "BLOCKED" | "NOT_BLOCKED";
-export type Privacy = "PUBLIC" | "PRIVATE";
 
-/**
- * Only include profiles of users who have completed onboarding
- */
-export const withOnboardingCompleted = <T extends PgSelect>(qb: T) => {
-  return qb
-    .innerJoin(
-      schema.userStatus,
-      eq(schema.userStatus.userId, schema.profile.userId),
-    )
-    .where(
-      and(
-        eq(schema.userStatus.hasCompletedOnboarding, true),
-        isNotNull(schema.profile.name),
-        isNotNull(schema.profile.username),
-        isNotNull(schema.profile.dateOfBirth),
-        isNotNull(schema.profile.bio),
-        isNotNull(schema.profile.profilePictureKey),
-      ),
-    );
+export const onboardingCompletedCondition = (profileTable = schema.profile) => {
+  return and(
+    eq(schema.userStatus.hasCompletedOnboarding, true),
+    isNotNull(profileTable.name),
+    isNotNull(profileTable.username),
+    isNotNull(profileTable.dateOfBirth),
+  );
 };
 
 /**
  * Exclude profiles that have blocked or been blocked by the given user
  */
-export const withoutBlocked = <T extends PgSelect>(qb: T, userId: string) => {
-  return qb
-    .leftJoin(
-      schema.block,
-      or(
-        and(
-          eq(schema.block.senderUserId, userId),
-          eq(schema.block.recipientUserId, schema.profile.userId),
-        ),
-        and(
-          eq(schema.block.recipientUserId, userId),
-          eq(schema.block.senderUserId, schema.profile.userId),
-        ),
-      ),
-    )
-    .where(isNull(schema.block.id));
-};
+// export const withoutBlocked = <T extends PgSelect>(qb: T, userId: string) => {
+//   return qb
+//     .leftJoin(
+//       schema.block,
+//       or(
+//         and(
+//           eq(schema.block.senderUserId, userId),
+//           eq(schema.block.recipientUserId, schema.profile.userId),
+//         ),
+//         and(
+//           eq(schema.block.recipientUserId, userId),
+//           eq(schema.block.senderUserId, schema.profile.userId),
+//         ),
+//       ),
+//     )
+//     .where(isNull(schema.block.id));
+// };
 
 export const getFollowStatusSql = (selfUserId: string) => {
   return sql<FollowStatus>`CASE
@@ -83,4 +72,12 @@ export const getFriendStatusSql = (selfUserId: string) => {
     ) THEN 'REQUESTED'
     ELSE 'NOT_FRIENDS'
   END`;
+};
+
+export const isLikedSql = (userId: string) => {
+  return sql<boolean>`EXISTS (
+    SELECT 1 FROM ${schema.like}
+    WHERE ${schema.like.postId} = ${schema.post.id}
+    AND ${schema.like.userId} = ${userId}
+  )`;
 };

@@ -7,9 +7,6 @@ import { getSignedUrl } from "@aws-sdk/cloudfront-signer";
 import type { InferSelectModel, schema } from "@oppfy/db";
 import { env } from "@oppfy/env";
 
-type Profile = InferSelectModel<typeof schema.profile>;
-type Post = InferSelectModel<typeof schema.post>;
-
 const ONE_HOUR = 60 * 60 * 1000;
 
 export class CloudFront {
@@ -23,25 +20,6 @@ export class CloudFront {
         secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
       },
     });
-  }
-
-  hydrateProfile<T extends Profile>(
-    profile: T,
-  ): T & { profilePictureUrl: string | null } {
-    const profilePictureUrl = profile.profilePictureKey
-      ? this.getProfilePictureUrl(profile.profilePictureKey)
-      : null;
-
-    return {
-      ...profile,
-      profilePictureUrl,
-    };
-  }
-
-  hydratePost<T extends Post>(post: T): T & { postUrl: string } {
-    const postUrl = this.getPublicPostUrl(post.postKey);
-
-    return { ...post, postUrl };
   }
 
   getProfilePictureUrl(objectKey: string): string {
@@ -58,34 +36,18 @@ export class CloudFront {
     });
   }
 
-  async invalidateUserPosts(userId: string): Promise<void> {
-    const distributionId = env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_ID;
-    const objectPattern = `/posts/*-${userId}-*.jpg`;
-    await this.createInvalidation(distributionId, objectPattern);
+  async invalidatePost(key: string): Promise<void> {
+    await this.createInvalidation(
+      env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_ID,
+      key,
+    );
   }
 
-  async invalidateProfilePicture(userId: string): Promise<void> {
-    const distributionId = env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID;
-    const objectPattern = `/profile-pictures/${userId}.jpg`;
-    await this.createInvalidation(distributionId, objectPattern);
-  }
-
-  async createInvalidation(
-    distributionId: string,
-    objectPattern: string,
-  ): Promise<void> {
-    const command = new CreateInvalidationCommand({
-      DistributionId: distributionId,
-      InvalidationBatch: {
-        CallerReference: Date.now().toString(),
-        Paths: {
-          Quantity: 1,
-          Items: [objectPattern],
-        },
-      },
-    });
-
-    await this.client.send(command);
+  async invalidateProfilePicture(key: string): Promise<void> {
+    await this.createInvalidation(
+      env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_ID,
+      key,
+    );
   }
 
   private async getSignedUrl({ url }: { url: string }): Promise<string> {
@@ -97,15 +59,33 @@ export class CloudFront {
     }) as unknown as Promise<string>;
   }
 
+  private getProfilePictureDistributionDomainUrl(objectKey: string): string {
+    return `https://${env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_DOMAIN}/${objectKey}`;
+  }
+
   private getPublicPostDistributionDomainUrl(objectKey: string): string {
-    return `https://${env.CLOUDFRONT_PUBLIC_POSTS_DISTRIBUTION_DOMAIN}${objectKey}`;
+    return `https://${env.CLOUDFRONT_PUBLIC_POSTS_DISTRIBUTION_DOMAIN}/${objectKey}`;
   }
 
   private getPrivatePostDistributionDomainUrl(objectKey: string): string {
-    return `https://${env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_DOMAIN}${objectKey}`;
+    return `https://${env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_DOMAIN}/${objectKey}`;
   }
 
-  private getProfilePictureDistributionDomainUrl(objectKey: string): string {
-    return `https://${env.CLOUDFRONT_PROFILE_PICTURE_DISTRIBUTION_DOMAIN}${objectKey}`;
+  private async createInvalidation(
+    distributionId: string,
+    objectPattern: string,
+  ): Promise<void> {
+    const command = new CreateInvalidationCommand({
+      DistributionId: distributionId,
+      InvalidationBatch: {
+        CallerReference: Date.now().toString(),
+        Paths: {
+          Quantity: 1,
+          Items: [`/${objectPattern}`],
+        },
+      },
+    });
+
+    await this.client.send(command);
   }
 }

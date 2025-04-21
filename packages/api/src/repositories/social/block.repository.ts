@@ -2,14 +2,11 @@ import { and, asc, eq, gt, or } from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type { Database, DatabaseOrTransaction, Schema } from "@oppfy/db";
-import { withOnboardingCompleted } from "@oppfy/db/utils/query-helpers";
+import { onboardingCompletedCondition } from "@oppfy/db/utils/query-helpers";
 
-import type {
-  DirectionalUserIdsParams,
-  PaginationParams,
-} from "../../interfaces/types";
-import type { Block, OnboardedProfile } from "../../models";
+import type { Block, Profile } from "../../models";
 import { TYPES } from "../../symbols";
+import type { DirectionalUserIdsParams, PaginationParams } from "../../types";
 
 export interface PaginateBlockedUsersParams extends PaginationParams {
   userId: string;
@@ -65,7 +62,7 @@ export class BlockRepository {
   async paginateBlockedProfiles(
     { userId, cursor, pageSize = 10 }: PaginateBlockedUsersParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<OnboardedProfile[]> {
+  ): Promise<Profile<"onboarded">[]> {
     let query = db
       .select({
         profile: this.schema.profile,
@@ -74,6 +71,10 @@ export class BlockRepository {
       .innerJoin(
         this.schema.profile,
         eq(this.schema.profile.userId, this.schema.block.recipientUserId),
+      )
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.userStatus.userId, this.schema.profile.userId),
       )
       .where(
         and(
@@ -87,19 +88,17 @@ export class BlockRepository {
                 ),
               )
             : undefined,
+            onboardingCompletedCondition(this.schema.profile)
         ),
       )
       .orderBy(
         asc(this.schema.block.createdAt),
         asc(this.schema.profile.userId),
       )
-      .limit(pageSize)
-      .$dynamic();
-
-    query = withOnboardingCompleted(query);
+      .limit(pageSize);
 
     const blockedUsers = await query;
 
-    return blockedUsers.map(({ profile }) => profile as OnboardedProfile);
+    return blockedUsers.map(({ profile }) => profile as Profile<"onboarded">);
   }
 }

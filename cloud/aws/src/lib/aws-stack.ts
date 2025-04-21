@@ -6,6 +6,7 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3n from "aws-cdk-lib/aws-s3-notifications";
+import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import type { Construct } from "constructs";
 
@@ -18,13 +19,10 @@ import { LambdaFunction } from "./constructs/lambda";
 import { Neptune } from "./constructs/neptune";
 import { Queue } from "./constructs/queue";
 import { NeptuneNotebook } from "./constructs/sagemaker";
-import { SNSTopic } from "./constructs/sns";
 
 const environment = {
-  SNS_PUSH_NOTIFICATION_TOPIC_ARN: env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
-
   S3_POST_BUCKET: env.S3_POST_BUCKET,
-  S3_PROFILE_BUCKET: env.S3_PROFILE_BUCKET,
+  S3_PROFILE_PICTURE_BUCKET: env.S3_PROFILE_PICTURE_BUCKET,
 
   MUX_TOKEN_ID: env.MUX_TOKEN_ID,
   MUX_TOKEN_SECRET: env.MUX_TOKEN_SECRET,
@@ -38,6 +36,7 @@ const environment = {
   DATABASE_URL: env.DATABASE_URL,
 
   SQS_CONTACT_QUEUE: env.SQS_CONTACT_QUEUE,
+  SQS_NOTIFICATION_QUEUE: env.SQS_NOTIFICATION_QUEUE,
 
   AWS_ACCOUNT_ID: env.AWS_ACCOUNT_ID,
 
@@ -101,7 +100,7 @@ export class AwsStack extends cdk.Stack {
     });
  */
     const postBucket = new Bucket(this, "PostBucket");
-    const profileBucket = new Bucket(this, "ProfileBucket");
+    const profileBucket = new Bucket(this, "ProfilePictureBucket");
 
     const accessControlLambda = new LambdaFunction(
       this,
@@ -159,6 +158,33 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
+    const pushNotificationsLambda = new LambdaFunction(
+      this,
+      "PushNotificationsLambda",
+      {
+        entry: "src/res/lambdas/push-notifications/index.ts",
+        environment,
+      },
+    );
+
+    const notificationQueue = new Queue(this, "Notifications", {
+      // VisibilityTimeout must exceed Lambda timeout + batching window
+      visibilityTimeout: cdk.Duration.seconds(120), // up to 2 min  [oai_citation_attribution:0‡AWS Documentation](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html?utm_source=chatgpt.com) [oai_citation_attribution:1‡AWS Documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-sqs-queue.html?utm_source=chatgpt.com)
+      receiveMessageWaitTime: cdk.Duration.seconds(20), // enable long‑polling, max 20 s  [oai_citation_attribution:2‡AWS Documentation](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-short-and-long-polling.html?utm_source=chatgpt.com)
+    });
+
+    notificationQueue.queue.grantConsumeMessages(
+      pushNotificationsLambda.function,
+    );
+
+    pushNotificationsLambda.function.addEventSource(
+      new SqsEventSource(notificationQueue.queue, {
+        batchSize: 10_000, // max for standard queues
+        maxBatchingWindow: cdk.Duration.seconds(10), // hold up to 10 s for aggregation  [oai_citation_attribution:5‡AWS Documentation](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda_event_sources-readme.html?utm_source=chatgpt.com)
+        reportBatchItemFailures: true, // handle partial failures
+      }),
+    );
+
     const postLambda = new LambdaFunction(this, "PostLambda", {
       entry: "src/res/lambdas/posts/index.ts",
       environment,
@@ -169,11 +195,13 @@ export class AwsStack extends cdk.Stack {
       postLambda,
       "AllowPostS3Invocation",
     );
+    notificationQueue.queue.grantSendMessages(postLambda.function);
 
     const muxWebhookLambda = new LambdaFunction(this, "MuxWebhookLambda", {
       entry: "src/res/lambdas/mux/index.ts",
       environment,
     });
+    notificationQueue.queue.grantSendMessages(muxWebhookLambda.function);
 
     const muxWebhookUrl = muxWebhookLambda.function.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE,
@@ -221,33 +249,12 @@ export class AwsStack extends cdk.Stack {
     const contactSyncQueue = new Queue(this, "ContactSync");
 
     contactSyncQueue.queue.grantSendMessages(contactSyncLambda.function);
-    contactSyncQueue.deadLetterQueue.grantSendMessages(
-      contactSyncLambda.function,
-    );
 
     contactSyncLambda.function.addEventSource(
       new SqsEventSource(contactSyncQueue.queue, {
         batchSize: 1,
       }),
     );
-
-    const pushNotificationsLambda = new LambdaFunction(
-      this,
-      "PushNotificationsLambda",
-      {
-        entry: "src/res/lambdas/push-notifications/index.ts",
-        environment,
-      },
-    );
-
-    const pushNotificationsTopic = new SNSTopic(
-      this,
-      "PushNotifications",
-      pushNotificationsLambda.function,
-    );
-
-    pushNotificationsTopic.topic.grantPublish(postLambda.function);
-    pushNotificationsTopic.topic.grantPublish(muxWebhookLambda.function);
 
     new ssm.StringParameter(this, "DbConfigParameter", {
       parameterName: "/oppfy/db-config",
@@ -308,8 +315,8 @@ export class AwsStack extends cdk.Stack {
       value: contactSyncQueue.queue.queueUrl,
     });
 
-    new cdk.CfnOutput(this, "PushNotificationsTopicArn", {
-      value: pushNotificationsTopic.topic.topicArn,
+    new cdk.CfnOutput(this, "PushNotificationsQueueUrl", {
+      value: notificationQueue.queue.queueUrl,
     });
   }
 }

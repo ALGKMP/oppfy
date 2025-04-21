@@ -1,12 +1,16 @@
 import { parser } from "@aws-lambda-powertools/parser/middleware";
 import { APIGatewayProxyEventV2Schema } from "@aws-lambda-powertools/parser/schemas";
+import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 // import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
 import middy from "@middy/core";
+import { createEnv } from "@t3-oss/env-core";
 // import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 
 import { db, eq, schema, sql } from "@oppfy/db";
 import { Mux } from "@oppfy/mux";
+
+const SQS = new SQSClient({ region: "us-east-1" });
 
 // type SnsNotificationData = z.infer<typeof validators.snsNotificationData>;
 
@@ -23,12 +27,13 @@ const mux = new Mux();
 const muxPassthroughSchema = z.object({
   postid: z.string(),
 });
-// const env = createEnv({
-//   server: {
-//     SNS_PUSH_NOTIFICATION_TOPIC_ARN: z.string().min(1),
-//   },
-//   runtimeEnv: process.env,
-// });
+
+const env = createEnv({
+  server: {
+    SQS_NOTIFICATION_QUEUE: z.string().min(1),
+  },
+  runtimeEnv: process.env,
+});
 
 // const sns = new SNSClient({
 //   region: "us-east-1",
@@ -84,6 +89,7 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
       await tx
         .update(schema.post)
         .set({
+          postKey: body.data.playback_ids[0].id,
           status: "processed",
         })
         .where(eq(schema.post.id, postId));
@@ -100,108 +106,43 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
         );
     });
 
-    // await storeNotification(metadata.author, metadata.recipient, {
-    //   eventType: "post",
-    //   entityType: "post",
-    //   entityId: postId.toString(),
-    // });
+    // get the post
+    const post = await db.query.post.findFirst({
+      where: eq(schema.post.id, postId),
+    });
+    if (!post) {
+      throw new Error("Post not found");
+    }
 
-    // const { posts } = await getNotificationSettings(metadata.recipient);
-    // if (posts) {
-    //   const pushTokens = await getPushTokens(metadata.recipient);
-    //   if (pushTokens.length > 0) {
-    //     const senderProfile = await getProfile(metadata.author);
-    //     await sendNotification(
-    //       pushTokens,
-    //       metadata.author,
-    //       metadata.recipient,
-    //       {
-    //         title: "You've been opped",
-    //         body: `${senderProfile.username} posted a video of you`,
-    //         entityId: postId.toString(),
-    //         entityType: "post",
-    //       },
-    //     );
-    //   }
-    // }
+    // get username of poster
+    const authorProfile = await db.query.profile.findFirst({
+      where: eq(schema.profile.userId, post.authorUserId),
+    });
+    if (!authorProfile) {
+      throw new Error("Author profile not found");
+    }
+
+    const notiSqsParams = {
+      senderId: post.authorUserId,
+      recipientId: post.recipientUserId,
+      title: "You've been opped",
+      body: `${authorProfile.username} posted a picture of you`,
+      entityType: "post",
+      entityId: postId,
+      eventType: "post",
+    };
+
+    const command = new SendMessageCommand({
+      QueueUrl: env.SQS_NOTIFICATION_QUEUE,
+      MessageBody: JSON.stringify(notiSqsParams),
+    });
+
+    await SQS.send(command);
   } catch (error) {
     console.error("Error processing video:", error);
     throw error;
   }
 };
-
-// const sendNotification = async (
-//   pushTokens: string[],
-//   senderId: string,
-//   recipientId: string,
-//   notificationData: SendNotificationData,
-// ) => {
-//   const message = {
-//     senderId,
-//     recipientId,
-//     pushTokens,
-//     ...notificationData,
-//   } satisfies SnsNotificationData;
-//   const params = {
-//     Subject: "New notification",
-//     TopicArn: env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
-//     Message: JSON.stringify(message),
-//   };
-//   await sns.send(new PublishCommand(params));
-// };
-
-// const storeNotification = async (
-//   senderId: string,
-//   recipientId: string,
-//   notificationData: StoreNotificationData,
-// ) => {
-//   await db.insert(schema.notifications).values({
-//     senderId,
-//     recipientId,
-//     ...notificationData,
-//   });
-// };
-
-// const getProfile = async (userId: string) => {
-//   const user = await db.query.user.findFirst({
-//     where: eq(schema.user.id, userId),
-//     with: {
-//       profile: true,
-//     },
-//   });
-
-//   if (user === undefined) {
-//     throw new Error("User not found");
-//   }
-
-//   return user.profile;
-// };
-
-// const getNotificationSettings = async (userId: string) => {
-//   const user = await db.query.user.findFirst({
-//     where: eq(schema.user.id, userId),
-//     with: {
-//       notificationSettings: true,
-//     },
-//   });
-
-//   if (user === undefined) {
-//     throw new Error("User not found");
-//   }
-
-//   return user.notificationSettings;
-// };
-
-// const getPushTokens = async (userId: string) => {
-//   const possiblePushTokens = await db.query.pushToken.findMany({
-//     where: eq(schema.pushToken.userId, userId),
-//     columns: {
-//       token: true,
-//     },
-//   });
-
-//   return possiblePushTokens.map((token) => token.token);
-// };
 
 export const handler = middy(lambdaHandler).use(
   parser({ schema: APIGatewayProxyEventV2Schema }),

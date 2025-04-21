@@ -9,13 +9,14 @@ interface UseUploadProfilePictureInput {
   optimisticallyUpdate?: boolean;
 }
 
-export default function useUploadProfilePicture({
+const useUploadProfilePicture = ({
   optimisticallyUpdate = true,
-}: UseUploadProfilePictureInput = {}) {
-  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
+}: UseUploadProfilePictureInput = {}) => {
   const utils = api.useUtils();
 
-  const generatePresignedUrl =
+  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
+
+  const generateProfilePicturePresignedUrl =
     api.profile.generateProfilePicturePresignedUrl.useMutation();
 
   // Pick image mutation
@@ -23,7 +24,7 @@ export default function useUploadProfilePicture({
     mutationFn: async () => {
       // Let user pick an image
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 1,
@@ -52,9 +53,11 @@ export default function useUploadProfilePicture({
     mutationFn: async (uri: string) => {
       const profilePictureBlob = await fetch(uri).then((r) => r.blob());
 
-      const presignedUrl = await generatePresignedUrl.mutateAsync({
-        contentLength: profilePictureBlob.size,
-      });
+      const presignedUrl = await generateProfilePicturePresignedUrl.mutateAsync(
+        {
+          contentLength: profilePictureBlob.size,
+        },
+      );
 
       if (!presignedUrl) {
         throw new Error("Failed to generate presigned url");
@@ -75,15 +78,15 @@ export default function useUploadProfilePicture({
       if (!optimisticallyUpdate) return;
 
       // Cancel outgoing fetches
-      await utils.profile.getProfile.cancel();
+      await utils.profile.getProfile.cancel({});
 
       // Get current data
-      const prevData = utils.profile.getProfile.getData();
-      if (!prevData) return;
+      const prevData = utils.profile.getProfile.getData({});
+      if (prevData === undefined) return;
 
       // Optimistically update
       utils.profile.getProfile.setData(
-        { userId: prevData.userId },
+        {},
         {
           ...prevData,
           profilePictureUrl: newProfilePictureUrl,
@@ -92,20 +95,12 @@ export default function useUploadProfilePicture({
 
       return { prevData };
     },
-    onError: (err, newUrl, ctx) => {
-      if (!optimisticallyUpdate || !ctx) return;
+    onError: (_err, _newUrl, ctx) => {
+      if (!optimisticallyUpdate) return;
+      if (ctx === undefined) return;
 
       // Revert optimistic update on error
-      utils.profile.getProfile.setData(
-        { userId: ctx.prevData.userId },
-        ctx.prevData,
-      );
-    },
-    onSettled: () => {
-      if (!optimisticallyUpdate) return;
-
-      // Sync with server after delay
-      setTimeout(() => void utils.profile.getProfile.invalidate(), 10000);
+      utils.profile.getProfile.setData({}, ctx.prevData);
     },
   });
 
@@ -132,4 +127,6 @@ export default function useUploadProfilePicture({
       uploadImage.reset();
     },
   };
-}
+};
+
+export default useUploadProfilePicture;

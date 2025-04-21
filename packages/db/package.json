@@ -15,7 +15,7 @@
     "migrate": "pnpm with-env tsx ./migrate.ts",
     "push": "pnpm generate && pnpm migrate",
     "studio": "pnpm with-env drizzle-kit studio --config drizzle.config.ts",
-    "sync-profile-stats": "pnpm with-env tsx ./sync-profile-stats.ts",
+    "sync-stats": "pnpm with-env tsx ./sync-stats.ts",
     "typecheck": "tsc --noEmit",
     "wipe": "pnpm with-env tsx ./wipe.ts",
     "with-env": "dotenv -e ../../.env --"

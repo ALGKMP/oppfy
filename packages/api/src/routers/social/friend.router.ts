@@ -111,8 +111,8 @@ export const friendRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const result = await ctx.services.friend.acceptFriendRequest({
-        senderUserId: input.senderUserId,
-        recipientUserId: ctx.session.uid,
+        selfUserId: ctx.session.uid,
+        otherUserId: input.senderUserId,
       });
 
       return result.match(

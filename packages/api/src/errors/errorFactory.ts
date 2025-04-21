@@ -9,7 +9,8 @@ type ErrorDomain =
   | "Friend"
   | "Block"
   | "Follow"
-  | "PostInteraction";
+  | "PostInteraction"
+  | "Notification";
 
 // Factory function to create base error classes
 export function createBaseErrorClass<D extends ErrorDomain>(domain: D) {

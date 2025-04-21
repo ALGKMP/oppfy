@@ -1,27 +1,30 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { Image } from "expo-image";
 import { getToken } from "tamagui";
 
 import { Circle, View } from "~/components/ui";
-import { useLikePost } from "~/hooks/post/useLikePost";
+import type { RouterOutputs } from "~/utils/api";
 import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
-import type { PostMediaProps } from "./types";
+import { useLike } from "./hooks/useLike";
 
-export const PostImage = ({
-  endpoint,
-  media,
-  stats,
-  isViewable,
-}: PostMediaProps) => {
-  const { handleLikeDoubleTapped } = useLikePost({
-    postId: media.id,
-    endpoint,
-    userId: media.recipient.id,
-    initialHasLiked: stats.hasLiked,
+type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
+
+interface PostImageProps {
+  post: Post["post"];
+  stats: Post["postStats"];
+  isLiked: boolean;
+  isViewable: boolean;
+}
+
+export const PostImage = (props: PostImageProps) => {
+  const { likePost } = useLike({
+    postId: props.post.id,
   });
+
   const { hearts, addHeart } = useHeartAnimations();
+
   const [isImageLoading, setIsImageLoading] = useState(false);
 
   // Cleanup loading state when component unmounts
@@ -31,13 +34,10 @@ export const PostImage = ({
     };
   }, []);
 
-  const handleDoubleTap = useCallback(
-    (x: number, y: number) => {
-      addHeart(x, y);
-      handleLikeDoubleTapped();
-    },
-    [addHeart, handleLikeDoubleTapped],
-  );
+  const handleDoubleTap = (x: number, y: number) => {
+    addHeart(x, y);
+    if (!props.isLiked) void likePost();
+  };
 
   const doubleTap = Gesture.Tap()
     .numberOfTaps(2)
@@ -48,34 +48,38 @@ export const PostImage = ({
   return (
     <GestureDetector gesture={doubleTap}>
       <View>
-        <Image
-          source={{ uri: media.url }}
-          recyclingKey={media.id}
-          cachePolicy="memory-disk"
-          style={{
-            width: "100%",
-            aspectRatio: media.dimensions.width / media.dimensions.height,
-            borderRadius: getToken("$8", "radius") as number,
-          }}
-          contentFit="cover"
-          transition={0}
-          onLoadStart={() => setIsImageLoading(true)}
-          onLoad={() => setIsImageLoading(false)}
-        />
-        {isImageLoading && (
-          <View
-            position="absolute"
-            top={0}
-            left={0}
-            right={0}
-            bottom={0}
-            justifyContent="center"
-            alignItems="center"
-            backgroundColor="rgba(0, 0, 0, 0.1)"
-          >
-            <Circle size={48} borderWidth={2} borderColor="$gray11" />
-          </View>
-        )}
+        <>
+          <Image
+            recyclingKey={props.post.id}
+            source={{ uri: props.post.assetUrl }}
+            cachePolicy="memory-disk"
+            style={{
+              width: "100%",
+              aspectRatio: props.post.width / props.post.height,
+              borderRadius: getToken("$8", "radius") as number,
+            }}
+            contentFit="cover"
+            transition={0}
+            onLoadStart={() => setIsImageLoading(true)}
+            onLoad={() => setIsImageLoading(false)}
+          />
+
+          {isImageLoading && (
+            <View
+              position="absolute"
+              top={0}
+              left={0}
+              right={0}
+              bottom={0}
+              justifyContent="center"
+              alignItems="center"
+              backgroundColor="rgba(0, 0, 0, 0.1)"
+            >
+              <Circle size={48} borderWidth={2} borderColor="$gray11" />
+            </View>
+          )}
+        </>
+
         {hearts.map((heart) => (
           <GradientHeart
             key={heart.id}

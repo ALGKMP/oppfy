@@ -214,7 +214,7 @@ const CameraPage = () => {
   const onFocus = useCallback(
     (point: Point) => {
       addAnimation(point);
-      camera.current?.focus(point);
+      void camera.current?.focus(point);
     },
     [addAnimation],
   );
@@ -253,6 +253,7 @@ const CameraPage = () => {
     .maxDuration(250)
     .numberOfTaps(1)
     .enabled(supportsFocus)
+    // eslint-disable-next-line react-compiler/react-compiler
     .onEnd(({ x, y }) => {
       runOnJS(onFocus)({ x, y });
     });
@@ -275,7 +276,7 @@ const CameraPage = () => {
 
   useEffect(() => {
     if (!microphone.hasPermission) {
-      microphone.requestPermission().catch(() => {});
+      void microphone.requestPermission();
     }
   }, [microphone]);
 

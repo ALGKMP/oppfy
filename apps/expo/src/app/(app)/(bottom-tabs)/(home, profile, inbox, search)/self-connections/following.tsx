@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { RefreshControl } from "react-native";
-import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { getToken, H6, YStack } from "tamagui";
+import { getToken, YStack } from "tamagui";
 
 import {
   EmptyPlaceholder,
@@ -54,10 +53,8 @@ const Following = () => {
               item.userId === newData.recipientUserId
                 ? {
                     ...item,
-                    relationshipState:
-                      item.privacy === "private"
-                        ? "followRequestSent"
-                        : "following",
+                    followStatus:
+                      item.privacy === "private" ? "REQUESTED" : "FOLLOWING",
                   }
                 : item,
             ),
@@ -96,7 +93,7 @@ const Following = () => {
             ...page,
             items: page.items.map((item) =>
               item.userId === newData.recipientUserId
-                ? { ...item, relationshipState: "notFollowing" }
+                ? { ...item, followStatus: "NOT_FOLLOWING" }
                 : item,
             ),
           })),
@@ -134,7 +131,7 @@ const Following = () => {
             ...page,
             items: page.items.map((item) =>
               item.userId === newData.recipientUserId
-                ? { ...item, relationshipState: "notFollowing" }
+                ? { ...item, followStatus: "NOT_FOLLOWING" }
                 : item,
             ),
           })),
@@ -240,7 +237,7 @@ const Following = () => {
               ],
             }),
         };
-        default:
+      default:
         return {
           label: "Follow",
           icon: UserRoundPlus,
@@ -318,9 +315,11 @@ const Following = () => {
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ItemSeparatorComponent={Spacer}
-      ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
+      ListHeaderComponentStyle={{
+        marginBottom: getToken("$4", "space") as number,
+      }}
       contentContainerStyle={{
-        padding: getToken("$4", "space"),
+        padding: getToken("$4", "space") as number,
       }}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}

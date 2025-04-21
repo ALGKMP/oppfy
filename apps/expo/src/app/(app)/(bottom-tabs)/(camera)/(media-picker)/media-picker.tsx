@@ -1,5 +1,5 @@
 import React, { useCallback, useLayoutEffect } from "react";
-import { Alert, Dimensions, FlatList } from "react-native";
+import { Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
@@ -8,13 +8,12 @@ import { FlashList } from "@shopify/flash-list";
 import { Video } from "@tamagui/lucide-icons";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { InfiniteData, QueryFunctionContext } from "@tanstack/react-query";
-import { getToken, Image, ScrollView } from "tamagui";
+import { getToken, Image } from "tamagui";
 
 import { Stack } from "~/components/ui";
 
 const MAX_VIDEO_DURATION = 60;
 const NUM_COLUMNS = 3;
-const SCREEN_WIDTH = Dimensions.get("window").width;
 const ITEM_SIZE = 143;
 const PAGE_SIZE = 500;
 const INITIAL_PAGE_SIZE = 1000;
@@ -115,7 +114,7 @@ const MediaPickerScreen = () => {
     albumTitle: string;
   }>();
 
-  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
+  const { data, isFetchingNextPage, hasNextPage, fetchNextPage } =
     useMediaAssets({ albumId });
 
   const assets = data?.pages.flatMap((page) => page.items) ?? [];

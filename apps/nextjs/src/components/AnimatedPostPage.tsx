@@ -1,18 +1,23 @@
 "use client";
 
 import Image from "next/image";
+import MuxPlayer from "@mux/mux-player-react";
 import { motion } from "framer-motion";
 
 import type { RouterOutputs } from "@oppfy/api";
 
-type Post = RouterOutputs["post"]["getPostForNextJs"];
+type Post = RouterOutputs["post"]["getPostForSite"];
 
 interface PostPageProps {
   post: Post;
-  aspectRatio: number;
 }
 
-export default function AnimatedPostPage({ post, aspectRatio }: PostPageProps) {
+export default function AnimatedPostPage({ post }: PostPageProps) {
+  const aspectRatio =
+    post.post.height && post.post.width
+      ? post.post.height / post.post.width
+      : 1;
+
   return (
     <div className="container mx-auto flex max-w-6xl flex-col items-center justify-center md:flex-row">
       {/* Left Side - Content */}
@@ -43,7 +48,7 @@ export default function AnimatedPostPage({ post, aspectRatio }: PostPageProps) {
             Join the <span className="text-[#F214FF]">Oppfy</span> Beta
           </motion.h1>
 
-          {/* Image Section - Above profiles on mobile */}
+          {/* Image/Video Section - Above profiles on mobile */}
           <motion.div
             className="flex w-full justify-center md:hidden"
             initial={{ opacity: 0 }}
@@ -60,19 +65,35 @@ export default function AnimatedPostPage({ post, aspectRatio }: PostPageProps) {
                 <div
                   className="absolute inset-0 opacity-30 blur-xl"
                   style={{
-                    backgroundImage: `url(${post.imageUrl})`,
+                    backgroundImage:
+                      post.post.mediaType === "image"
+                        ? `url(${post.post.assetUrl})`
+                        : "none",
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                   }}
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Image
-                    src={post.imageUrl}
-                    alt="Post preview"
-                    className="h-full w-full object-contain"
-                    fill
-                    unoptimized
-                  />
+                  {post.post.mediaType === "image" ? (
+                    <Image
+                      src={post.post.assetUrl}
+                      alt="Post preview"
+                      className="h-full w-full object-contain"
+                      fill
+                      unoptimized
+                    />
+                  ) : (
+                    <MuxPlayer
+                      src={post.post.assetUrl}
+                      className="h-full w-full object-contain"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      streamType="on-demand"
+                      primaryColor="#F214FF"
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -88,9 +109,10 @@ export default function AnimatedPostPage({ post, aspectRatio }: PostPageProps) {
               <div className="relative h-14 w-14 md:h-16 md:w-16">
                 <Image
                   src={
-                    post.authorProfilePicture ?? "/default_profile_picture.jpg"
+                    post.authorProfile.profilePictureUrl ??
+                    "/default-profile-picture.jpg"
                   }
-                  alt={`${post.authorUsername}'s profile`}
+                  alt={`${post.authorProfile.name}'s profile`}
                   className="rounded-full border-2 border-[#F214FF]"
                   fill
                   unoptimized
@@ -98,9 +120,9 @@ export default function AnimatedPostPage({ post, aspectRatio }: PostPageProps) {
               </div>
               <p
                 className="mt-2 w-full truncate text-center text-sm text-white"
-                title={`@${post.authorUsername}`}
+                title={`@${post.authorProfile.username}`}
               >
-                @{post.authorUsername}
+                @{post.authorProfile.username}
               </p>
             </div>
 
@@ -115,10 +137,10 @@ export default function AnimatedPostPage({ post, aspectRatio }: PostPageProps) {
               <div className="relative h-14 w-14 md:h-16 md:w-16">
                 <Image
                   src={
-                    post.recipientProfilePicture ??
-                    "/default_profile_picture.jpg"
+                    post.recipientProfile.profilePictureUrl ??
+                    "/default-profile-picture.jpg"
                   }
-                  alt={`${post.recipientUsername}'s profile`}
+                  alt={`${post.recipientProfile.name}'s profile`}
                   className="rounded-full border-2 border-[#F214FF]"
                   fill
                   unoptimized
@@ -126,9 +148,9 @@ export default function AnimatedPostPage({ post, aspectRatio }: PostPageProps) {
               </div>
               <p
                 className="mt-2 w-full truncate text-center text-sm text-white"
-                title={`@${post.recipientUsername}`}
+                title={`@${post.recipientProfile.username}`}
               >
-                @{post.recipientUsername}
+                @{post.recipientProfile.username}
               </p>
             </div>
           </motion.div>
@@ -198,7 +220,7 @@ export default function AnimatedPostPage({ post, aspectRatio }: PostPageProps) {
         </motion.div>
       </div>
 
-      {/* Right Side - Image (Desktop only) */}
+      {/* Right Side - Image/Video (Desktop only) */}
       <motion.div
         className="hidden w-full max-w-md flex-1 items-center justify-center p-4 md:flex md:p-8 lg:p-12"
         initial={{ opacity: 0, x: 20 }}
@@ -216,19 +238,35 @@ export default function AnimatedPostPage({ post, aspectRatio }: PostPageProps) {
             <div
               className="absolute inset-0 opacity-30 blur-xl"
               style={{
-                backgroundImage: `url(${post.imageUrl})`,
+                backgroundImage:
+                  post.post.mediaType === "image"
+                    ? `url(${post.post.assetUrl})`
+                    : "none",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
             />
             <div className="absolute inset-0 flex items-center justify-center">
-              <Image
-                src={post.imageUrl}
-                alt="Post preview"
-                className="h-full w-full object-contain"
-                fill
-                unoptimized
-              />
+              {post.post.mediaType === "image" ? (
+                <Image
+                  src={post.post.assetUrl}
+                  alt="Post preview"
+                  className="h-full w-full object-contain"
+                  fill
+                  unoptimized
+                />
+              ) : (
+                <MuxPlayer
+                  src={post.post.assetUrl}
+                  className="h-full w-full object-contain"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  streamType="on-demand"
+                  primaryColor="#F214FF"
+                />
+              )}
             </div>
           </div>
         </div>

@@ -2,27 +2,6 @@ import { createBaseErrorClass } from "../errorFactory";
 
 const PostError = createBaseErrorClass("Post");
 
-export class FailedToCreatePost extends PostError {
-  name = "FailedToCreatePostError" as const;
-  constructor(userId: string) {
-    super(`Failed to create post for user ${userId}`);
-  }
-}
-
-export class FailedToUpdatePost extends PostError {
-  name = "FailedToUpdatePostError" as const;
-  constructor(postId: string) {
-    super(`Failed to update post ${postId}`);
-  }
-}
-
-export class FailedToDeletePost extends PostError {
-  name = "FailedToDeletePostError" as const;
-  constructor(postId: string) {
-    super(`Failed to delete post ${postId}`);
-  }
-}
-
 export class PostNotFound extends PostError {
   name = "PostNotFoundError" as const;
   constructor(postId: string) {

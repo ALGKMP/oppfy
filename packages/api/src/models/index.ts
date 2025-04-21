@@ -11,18 +11,28 @@ export type ReportCommentReason =
   (typeof schema.reportCommentReasonEnum.enumValues)[number];
 
 export type User = InferSelectModel<typeof schema.user>;
-export type Profile = InferSelectModel<typeof schema.profile>;
-export type OnboardedProfile = {
-  [K in keyof Profile]: K extends "profilePictureKey"
-    ? Profile[K]
-    : NonNullable<Profile[K]>;
-};
-export type HydratedProfile = Profile & {
-  profilePictureUrl: string | null;
-};
-export type HydratedOnboardedProfile = OnboardedProfile & {
-  profilePictureUrl: string | null;
-};
+
+type BaseProfile = InferSelectModel<typeof schema.profile>;
+
+export type Profile<
+  TState extends "onboarded" | "notOnApp" | undefined = undefined,
+> =
+  // 1. Onboarded: everything except `profilePictureKey` is non-null
+  TState extends "onboarded"
+    ? {
+        [K in keyof BaseProfile]: K extends "profilePictureKey"
+          ? BaseProfile[K] // let it remain possibly null
+          : NonNullable<BaseProfile[K]>; // must be non-null
+      }
+    : // 2. Not On App: only `name` and `username` must be non-null
+      TState extends "notOnApp"
+      ? {
+          [K in keyof BaseProfile]: K extends "name" | "username"
+            ? NonNullable<BaseProfile[K]>
+            : BaseProfile[K];
+        }
+      : // 3. Default: the original BaseProfile shape (everything possibly null)
+        BaseProfile;
 
 export type Block = InferSelectModel<typeof schema.block>;
 
@@ -56,3 +66,6 @@ export type ProfileInsert = InferInsertModel<typeof schema.profile>;
 export type ProfileStatsInsert = InferInsertModel<typeof schema.userStats>;
 export type PostInsert = InferInsertModel<typeof schema.post>;
 export type PostStatsInsert = InferInsertModel<typeof schema.postStats>;
+export type NotificationSettingsInsert = InferInsertModel<
+  typeof schema.notificationSettings
+>;

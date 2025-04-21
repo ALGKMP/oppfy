@@ -8,22 +8,18 @@ import type {
   Transaction,
 } from "@oppfy/db";
 import {
+  FollowStatus,
   getFollowStatusSql,
-  withOnboardingCompleted,
+  onboardingCompletedCondition,
 } from "@oppfy/db/utils/query-helpers";
 
+import type { Follow, FollowRequest, Profile } from "../../models";
+import { TYPES } from "../../symbols";
 import type {
   BidirectionalUserIdsparams,
   DirectionalUserIdsParams,
-  FollowStatus,
   PaginationParams,
-} from "../../interfaces/types";
-import type { Follow, FollowRequest, OnboardedProfile } from "../../models";
-import { TYPES } from "../../symbols";
-
-export interface SocialProfile extends OnboardedProfile {
-  followStatus: FollowStatus;
-}
+} from "../../types";
 
 export interface PaginateFollowParams extends PaginationParams {
   selfUserId: string;
@@ -298,7 +294,7 @@ export class FollowRepository {
   async paginateFollowers(
     { userId, cursor, pageSize = 10, selfUserId }: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<SocialProfile[]> {
+  ): Promise<(Profile<"onboarded"> & { followStatus: FollowStatus })[]> {
     let query = db
       .select({
         profile: this.schema.profile,
@@ -313,6 +309,10 @@ export class FollowRepository {
         this.schema.profile,
         eq(this.schema.user.id, this.schema.profile.userId),
       )
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.userStatus.userId, this.schema.profile.userId),
+      )
       .where(
         and(
           eq(this.schema.follow.recipientUserId, userId),
@@ -325,21 +325,19 @@ export class FollowRepository {
                 ),
               )
             : undefined,
+          onboardingCompletedCondition(this.schema.profile),
         ),
       )
       .orderBy(
         asc(this.schema.follow.createdAt),
         asc(this.schema.profile.userId),
       )
-      .limit(pageSize)
-      .$dynamic();
-
-    query = withOnboardingCompleted(query);
+      .limit(pageSize);
 
     const followers = await query;
 
     return followers.map(({ profile, followStatus }) => ({
-      ...(profile as OnboardedProfile),
+      ...(profile as Profile<"onboarded">),
       followStatus,
     }));
   }
@@ -347,7 +345,7 @@ export class FollowRepository {
   async paginateFollowing(
     { userId, cursor, pageSize = 10, selfUserId }: PaginateFollowParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<SocialProfile[]> {
+  ): Promise<(Profile<"onboarded"> & { followStatus: FollowStatus })[]> {
     let query = db
       .select({
         profile: this.schema.profile,
@@ -362,6 +360,10 @@ export class FollowRepository {
         this.schema.profile,
         eq(this.schema.user.id, this.schema.profile.userId),
       )
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.userStatus.userId, this.schema.profile.userId),
+      )
       .where(
         and(
           eq(this.schema.follow.senderUserId, userId),
@@ -374,21 +376,19 @@ export class FollowRepository {
                 ),
               )
             : undefined,
+          onboardingCompletedCondition(this.schema.profile),
         ),
       )
       .orderBy(
         asc(this.schema.follow.createdAt),
         asc(this.schema.profile.userId),
       )
-      .limit(pageSize)
-      .$dynamic();
-
-    query = withOnboardingCompleted(query);
+      .limit(pageSize);
 
     const following = await query;
 
     return following.map(({ profile, followStatus }) => ({
-      ...(profile as OnboardedProfile),
+      ...(profile as Profile<"onboarded">),
       followStatus,
     }));
   }
@@ -396,7 +396,7 @@ export class FollowRepository {
   async paginateFollowRequests(
     { userId, cursor, pageSize = 10 }: PaginateFollowRequestsParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<OnboardedProfile[]> {
+  ): Promise<Profile<"onboarded">[]> {
     let query = db
       .select({
         profile: this.schema.profile,
@@ -428,13 +428,10 @@ export class FollowRepository {
         asc(this.schema.followRequest.createdAt),
         asc(this.schema.profile.userId),
       )
-      .limit(pageSize)
-      .$dynamic();
-
-    query = withOnboardingCompleted(query);
+      .limit(pageSize);
 
     const followRequests = await query;
 
-    return followRequests.map(({ profile }) => profile as OnboardedProfile);
+    return followRequests.map(({ profile }) => profile as Profile<"onboarded">);
   }
 }

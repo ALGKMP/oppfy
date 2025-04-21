@@ -10,23 +10,26 @@ import { Button, useActionSheetController } from "~/components/ui";
 import { useBlockUser } from "~/hooks/useBlockUser";
 import useShare from "~/hooks/useShare";
 
-type NetworkRelationships = RouterOutputs["profile"]["getNetworkRelationships"];
+type Profile = RouterOutputs["profile"]["getProfile"];
+type RelationshipState =
+  RouterOutputs["profile"]["getRelationshipStatesBetweenUsers"];
 
-interface QuickActionsProps {
-  userId?: string;
-  username?: string;
-  profilePictureUrl?: string | null;
+interface QuickActionsSelfProps {
+  type: "self";
+  profile: Partial<Profile> | undefined;
   isLoading: boolean;
-  networkRelationships?: NetworkRelationships;
 }
 
-const QuickActions = ({
-  userId,
-  username,
-  profilePictureUrl,
-  isLoading,
-  networkRelationships,
-}: QuickActionsProps) => {
+interface QuickActionsOtherProps {
+  type: "other";
+  profile: Partial<Profile> | undefined;
+  relationshipState: RelationshipState | undefined;
+  isLoading: boolean;
+}
+
+type QuickActionsProps = QuickActionsSelfProps | QuickActionsOtherProps;
+
+const QuickActions = (props: QuickActionsProps) => {
   const router = useRouter();
   const actionSheet = useActionSheetController();
   const { shareProfile } = useShare();
@@ -35,9 +38,9 @@ const QuickActions = ({
     handleBlockUser,
     handleUnblockUser,
     isLoading: isBlockActionLoading,
-  } = useBlockUser(userId ?? "");
+  } = useBlockUser(props.profile?.userId ?? "");
 
-  if (!userId) {
+  if (props.type === "self") {
     return (
       <XStack gap="$3" paddingBottom="$1">
         <Button
@@ -47,8 +50,8 @@ const QuickActions = ({
           circular
           borderWidth={1.5}
           onPress={() => router.push("/(app)/(settings)")}
-          disabled={isLoading}
-          opacity={isLoading ? 0.5 : 1}
+          disabled={props.isLoading}
+          opacity={props.isLoading ? 0.5 : 1}
         />
       </XStack>
     );
@@ -56,18 +59,16 @@ const QuickActions = ({
 
   const handleBlockAction = () => {
     void actionSheet.show({
-      title: networkRelationships?.isTargetUserBlocked
-        ? "Unblock User"
-        : "Block User",
-      subtitle: networkRelationships?.isTargetUserBlocked
-        ? `Are you sure you want to unblock ${username}?`
-        : `Are you sure you want to block ${username}?`,
-      imageUrl: profilePictureUrl ?? DefaultProfilePicture,
+      title: props.relationshipState?.isBlocked ? "Unblock User" : "Block User",
+      subtitle: props.relationshipState?.isBlocked
+        ? `Are you sure you want to unblock ${props.profile?.username}?`
+        : `Are you sure you want to block ${props.profile?.username}?`,
+      imageUrl: props.profile?.profilePictureUrl ?? DefaultProfilePicture,
       buttonOptions: [
         {
-          text: networkRelationships?.isTargetUserBlocked ? "Unblock" : "Block",
+          text: props.relationshipState?.isBlocked ? "Unblock" : "Block",
           textProps: { color: "$red11" },
-          onPress: networkRelationships?.isTargetUserBlocked
+          onPress: props.relationshipState?.isBlocked
             ? handleUnblockUser
             : handleBlockUser,
         },
@@ -83,11 +84,11 @@ const QuickActions = ({
         size="$3.5"
         circular
         borderWidth={1.5}
-        disabled={isLoading || networkRelationships?.isTargetUserBlocked}
+        disabled={props.isLoading || props.relationshipState?.isBlocked}
         opacity={
-          isLoading || networkRelationships?.isTargetUserBlocked ? 0.5 : 1
+          props.isLoading || props.relationshipState?.isBlocked ? 0.5 : 1
         }
-        onPress={() => shareProfile(username ?? "")}
+        onPress={() => shareProfile(props.profile?.username ?? "")}
       />
       <Button
         icon={<Ban size={20} color="$red11" />}
@@ -96,8 +97,8 @@ const QuickActions = ({
         circular
         borderWidth={1.5}
         borderColor="$red11"
-        disabled={isLoading || isBlockActionLoading}
-        opacity={isLoading || isBlockActionLoading ? 0.5 : 1}
+        disabled={props.isLoading || isBlockActionLoading}
+        opacity={props.isLoading || isBlockActionLoading ? 0.5 : 1}
         onPress={handleBlockAction}
       />
     </XStack>

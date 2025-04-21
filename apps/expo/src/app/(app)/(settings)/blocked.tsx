@@ -3,7 +3,7 @@ import { RefreshControl } from "react-native";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
-import { getToken, H6, YStack } from "tamagui";
+import { getToken, YStack } from "tamagui";
 
 import {
   EmptyPlaceholder,
@@ -42,7 +42,9 @@ const Blocked = () => {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
-            items: page.items.filter((item) => item.userId !== newData.userId),
+            items: page.items.filter(
+              (item) => item.userId !== newData.recipientUserId,
+            ),
           })),
         },
       );
@@ -94,7 +96,7 @@ const Blocked = () => {
   };
 
   const handleUnblock = async (userId: string) => {
-    await unblockUser.mutateAsync({ userId });
+    await unblockUser.mutateAsync({ recipientUserId: userId });
   };
 
   const handleRefresh = async () => {
@@ -181,9 +183,11 @@ const Blocked = () => {
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ItemSeparatorComponent={Spacer}
-      ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
+      ListHeaderComponentStyle={{
+        marginBottom: getToken("$4", "space") as number,
+      }}
       contentContainerStyle={{
-        padding: getToken("$4", "space"),
+        padding: getToken("$4", "space") as number,
       }}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}

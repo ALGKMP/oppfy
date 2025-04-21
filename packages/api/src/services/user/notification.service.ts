@@ -1,22 +1,28 @@
 import { inject, injectable } from "inversify";
-import { ok, Result } from "neverthrow";
+import { err, ok, Result } from "neverthrow";
 
 import { CloudFront } from "@oppfy/cloudfront";
 import type { Database } from "@oppfy/db";
+import { FollowStatus } from "@oppfy/db/utils/query-helpers";
 
-import { FollowStatus, PaginatedResponse } from "../../interfaces/types";
-import { HydratedProfile, Notification } from "../../models";
+import { NotificationSettingsNotFound } from "../../errors/user/notifications.error";
+import * as NotificationErrors from "../../errors/user/notifications.error";
+import { Notification, NotificationSettings, Profile } from "../../models";
 import {
   NotificationRepository,
   PaginateNotificationsParams,
+  PushTokenParams,
+  UpdateNotificationSettingsParams,
 } from "../../repositories/user/notifications.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
+import { PaginatedResponse } from "../../types";
+import { Hydrate, hydrateProfile } from "../../utils";
 
 interface NotificationAndHydratedProfile {
+  profile: Hydrate<Profile>;
   notification: Notification;
-  profile: HydratedProfile;
   followStatus: FollowStatus;
 }
 
@@ -33,6 +39,48 @@ export class NotificationService {
     @inject(TYPES.NotificationRepository)
     private readonly notificationRepository: NotificationRepository,
   ) {}
+
+  async storePushToken(params: PushTokenParams): Promise<Result<void, never>> {
+    await this.db.transaction(async (tx) => {
+      await this.notificationRepository.addPushToken(params, tx);
+    });
+
+    return ok();
+  }
+
+  async deletePushToken(params: PushTokenParams): Promise<Result<void, never>> {
+    await this.db.transaction(async (tx) => {
+      await this.notificationRepository.deletePushToken(params, tx);
+    });
+
+    return ok();
+  }
+
+  async notificationSettings(
+    userId: string,
+  ): Promise<
+    Result<
+      NotificationSettings,
+      NotificationErrors.NotificationSettingsNotFound
+    >
+  > {
+    const settings = await this.notificationRepository.getNotificationSettings({
+      userId,
+    });
+
+    if (settings === undefined) {
+      return err(new NotificationSettingsNotFound(userId));
+    }
+
+    return ok(settings);
+  }
+
+  async updateNotificationSettings(
+    params: UpdateNotificationSettingsParams,
+  ): Promise<Result<void, never>> {
+    await this.notificationRepository.updateNotificationSettings(params);
+    return ok();
+  }
 
   async unreadNotificationsCount(
     userId: string,
@@ -62,7 +110,7 @@ export class NotificationService {
 
     const notificationsAndHydratedProfiles = notifications.map((data) => ({
       ...data,
-      profile: this.cloudfront.hydrateProfile(data.profile),
+      profile: hydrateProfile(data.profile),
     }));
 
     const hasMore = notifications.length > pageSize;

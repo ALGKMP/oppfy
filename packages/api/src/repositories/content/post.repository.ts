@@ -7,35 +7,17 @@ import type {
   Schema,
   Transaction,
 } from "@oppfy/db";
-import { withOnboardingCompleted } from "@oppfy/db/utils/query-helpers";
-
-import { mediaTypeEnum, postStatusEnum } from "../../../../db/src/schema";
-import { PaginationParams, PostIdParam } from "../../interfaces/types";
 import {
-  Like,
-  MediaType,
-  OnboardedProfile,
-  Post,
-  PostStats,
-  PostStatus,
-} from "../../models";
+  isLikedSql,
+  onboardingCompletedCondition,
+} from "@oppfy/db/utils/query-helpers";
+
+import { Post, PostInsert, PostStats, Profile } from "../../models";
 import { TYPES } from "../../symbols";
+import { PaginationParams, PostIdParam } from "../../types";
+import { invariant } from "../../utils";
 
 export interface GetPostParams {
-  postId: string;
-  userId: string;
-}
-
-export interface PaginatePostsParams extends PaginationParams {
-  userId: string;
-}
-
-export interface UpdatePostParams {
-  postId: string;
-  caption: string;
-}
-
-export interface DeletePostParams {
   userId: string;
   postId: string;
 }
@@ -44,23 +26,29 @@ export interface CreatePostParams {
   authorUserId: string;
   recipientUserId: string;
   caption: string;
-  postKey: string;
-  width: number;
   height: number;
-  mediaType: MediaType;
-  status: PostStatus;
+  width: number;
+  mediaType: "image" | "video";
+  postKey: string;
 }
 
-export interface PostResult {
+export interface DeletePostParams {
+  userId: string;
+  postId: string;
+}
+
+export interface PaginatePostsParams extends PaginationParams {
+  userId: string;
+}
+
+export interface PostResult<
+  T extends "withIsLiked" | "withoutIsLiked" | undefined = undefined,
+> {
   post: Post;
   postStats: PostStats;
-  authorProfile: OnboardedProfile;
-  recipientProfile: OnboardedProfile;
-  like: Like;
-}
-
-export interface PostResultWithLike extends PostResult {
-  like: Like;
+  authorProfile: Profile<"onboarded">;
+  recipientProfile: Profile<"notOnApp">;
+  isLiked: T extends "withIsLiked" ? boolean : undefined;
 }
 
 @injectable()
@@ -77,80 +65,78 @@ export class PostRepository {
     };
   }
 
-  async createPost(
-    {
-      authorUserId,
-      recipientUserId,
-      caption,
-      postKey,
-      width,
-      height,
-      mediaType,
-      status,
-    }: CreatePostParams,
-    tx: Transaction,
-  ): Promise<Post | undefined> {
-    // transaction to create post and post stats
-    const [post] = await tx
-      .insert(this.schema.post)
-      .values({
-        authorUserId,
-        recipientUserId,
-        caption,
-        postKey,
-        width,
-        height,
-        mediaType,
-        status,
-      })
-      .returning();
-
-    return post;
-  }
-
-  async createPostStats(
-    { postId }: PostIdParam,
-    tx: Transaction,
-  ): Promise<void> {
-    await tx.insert(this.schema.postStats).values({
-      postId,
-    });
-  }
-
   async getPost(
-    { postId, userId }: GetPostParams,
-    tx: DatabaseOrTransaction = this.db,
-  ): Promise<PostResult | undefined> {
-    const query = this.baseQuery(userId, tx);
-    const results = await query.where(eq(this.schema.post.id, postId)).limit(1);
+    { userId, postId }: GetPostParams,
+    db: Database = this.db,
+  ): Promise<PostResult<"withIsLiked"> | undefined> {
+    let query = this.baseQuery(userId, db);
+    query = query.where(eq(this.schema.post.id, postId)).limit(1);
 
-    if (results[0] === undefined) return undefined;
+    const [result] = await query;
+
+    if (result === undefined) {
+      return undefined;
+    }
+
     return {
-      ...results[0],
-      authorProfile: results[0].authorProfile as OnboardedProfile,
-      recipientProfile: results[0].recipientProfile as OnboardedProfile,
+      ...result,
+      authorProfile: result.authorProfile as Profile<"onboarded">,
+      recipientProfile: result.recipientProfile as Profile<"notOnApp">,
+      isLiked: result.isLiked ?? false,
     };
   }
 
   async getPostForSite(
     { postId }: PostIdParam,
     tx: DatabaseOrTransaction = this.db,
-  ): Promise<PostResultWithLike | undefined> {
-    const query = this.baseQuery(undefined, tx);
-    const results = await query.where(eq(this.schema.post.id, postId)).limit(1);
+  ): Promise<PostResult | undefined> {
+    let query = this.baseQuery(undefined, tx);
+    query = query.where(eq(this.schema.post.id, postId)).limit(1);
 
-    if (results[0] === undefined) return undefined;
+    const [result] = await query;
+
+    if (result === undefined) {
+      return undefined;
+    }
+
     return {
-      ...results[0],
-      authorProfile: results[0].authorProfile as OnboardedProfile,
-      recipientProfile: results[0].recipientProfile as OnboardedProfile,
+      ...result,
+      authorProfile: result.authorProfile as Profile<"onboarded">,
+      recipientProfile: result.recipientProfile as Profile<"notOnApp">,
+      isLiked: undefined,
     };
+  }
+
+  async createPost(
+    params: CreatePostParams,
+    tx: Transaction,
+  ): Promise<{ post: Post; postStats: PostStats }> {
+    const [post] = await tx
+      .insert(this.schema.post)
+      .values({
+        ...params,
+        status: "pending",
+      })
+      .returning();
+
+    invariant(post);
+
+    const [postStats] = await tx
+      .insert(this.schema.postStats)
+      .values({
+        postId: post.id,
+      })
+      .returning();
+
+    invariant(postStats);
+
+    return { post, postStats };
   }
 
   async paginatePostsOfFollowing(
     { userId, cursor, pageSize = 10 }: PaginatePostsParams,
     tx: DatabaseOrTransaction = this.db,
-  ): Promise<PostResult[]> {
+  ): Promise<PostResult<"withIsLiked">[]> {
     const query = this.baseQuery(userId, tx);
 
     let whereClause = or(
@@ -183,19 +169,20 @@ export class PostRepository {
 
     return results.map((result) => ({
       ...result,
-      authorProfile: result.authorProfile as OnboardedProfile,
-      recipientProfile: result.recipientProfile as OnboardedProfile,
+      authorProfile: result.authorProfile as Profile<"onboarded">,
+      recipientProfile: result.recipientProfile as Profile<"notOnApp">,
+      isLiked: result.isLiked ?? false,
     }));
   }
 
   async paginatePostsOfUser(
     { userId, cursor, pageSize = 10 }: PaginatePostsParams,
     tx: DatabaseOrTransaction = this.db,
-  ): Promise<PostResult[]> {
+  ): Promise<PostResult<"withIsLiked">[]> {
     const query = this.baseQuery(userId, tx);
 
     const whereClause = and(
-      eq(this.schema.post.authorUserId, userId),
+      eq(this.schema.post.recipientUserId, userId),
       cursor
         ? or(
             lt(this.schema.post.createdAt, cursor.createdAt),
@@ -214,22 +201,23 @@ export class PostRepository {
 
     return results.map((result) => ({
       ...result,
-      authorProfile: result.authorProfile as OnboardedProfile,
-      recipientProfile: result.recipientProfile as OnboardedProfile,
+      authorProfile: result.authorProfile as Profile<"onboarded">,
+      recipientProfile: result.recipientProfile as Profile<"onboarded">,
+      isLiked: result.isLiked ?? false,
     }));
   }
 
   async updatePost(
-    { postId, caption }: UpdatePostParams,
+    values: PostInsert & { id: string },
     tx: DatabaseOrTransaction = this.db,
   ): Promise<void> {
     await tx
       .update(this.schema.post)
       .set({
-        caption,
+        ...values,
         updatedAt: new Date(),
       })
-      .where(eq(this.schema.post.id, postId));
+      .where(eq(this.schema.post.id, values.id));
   }
 
   async deletePost(
@@ -249,13 +237,15 @@ export class PostRepository {
   }
 
   private baseQuery(userId?: string, tx: DatabaseOrTransaction = this.db) {
-    const query = tx
+    let query = tx
       .select({
         authorProfile: this.aliasedSchema.authorProfile,
         recipientProfile: this.aliasedSchema.recipientProfile,
         post: this.schema.post,
         postStats: this.schema.postStats,
-        like: this.schema.like,
+        ...(userId
+          ? { isLiked: isLikedSql(userId) }
+          : { isLiked: sql<boolean>`false` }),
       })
       .from(this.schema.post)
       .innerJoin(
@@ -278,16 +268,10 @@ export class PostRepository {
       )
       .$dynamic();
 
-    if (userId) {
-      query.leftJoin(
-        this.schema.like,
-        and(
-          eq(this.schema.like.postId, this.schema.post.id),
-          eq(this.schema.like.userId, userId),
-        ),
-      );
-    }
+    query = query.where(
+      onboardingCompletedCondition(this.aliasedSchema.authorProfile),
+    );
 
-    return withOnboardingCompleted(query);
+    return query;
   }
 }

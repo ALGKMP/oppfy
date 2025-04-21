@@ -5,6 +5,7 @@ import { Container } from "inversify";
 import { CloudFront } from "@oppfy/cloudfront";
 import { db, schema } from "@oppfy/db";
 import { Mux } from "@oppfy/mux";
+import { SQS } from "@oppfy/sqs";
 import { S3 } from "@oppfy/s3";
 import { Twilio } from "@oppfy/twilio";
 
@@ -44,6 +45,7 @@ container.bind<CloudFront>(TYPES.CloudFront).to(CloudFront);
 container.bind<S3>(TYPES.S3).to(S3);
 container.bind<Twilio>(TYPES.Twilio).to(Twilio);
 container.bind<Mux>(TYPES.Mux).to(Mux);
+container.bind<SQS>(TYPES.SQS).to(SQS);
 
 container.bind<ReportRepository>(TYPES.ReportRepository).to(ReportRepository);
 container.bind<BlockRepository>(TYPES.BlockRepository).to(BlockRepository);

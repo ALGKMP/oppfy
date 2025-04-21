@@ -7,11 +7,11 @@ import type {
   Schema,
   Transaction,
 } from "@oppfy/db";
-import { withOnboardingCompleted } from "@oppfy/db/utils/query-helpers";
+import { onboardingCompletedCondition } from "@oppfy/db/utils/query-helpers";
 
-import { PaginationParams } from "../../interfaces/types";
 import { Comment, Profile } from "../../models";
 import { TYPES } from "../../symbols";
+import type { PaginationParams } from "../../types";
 
 export interface GetCommentParams {
   commentId: string;
@@ -34,7 +34,7 @@ export interface PaginateCommentsParams extends PaginationParams {
 
 export interface PaginatedCommentResult {
   comment: Comment;
-  profile: Profile;
+  profile: Profile<"onboarded">;
 }
 
 @injectable()
@@ -113,6 +113,10 @@ export class CommentRepository {
         this.schema.profile,
         eq(this.schema.profile.userId, this.schema.user.id),
       )
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.userStatus.userId, this.schema.profile.userId),
+      )
       .where(
         and(
           eq(this.schema.comment.postId, postId),
@@ -125,19 +129,20 @@ export class CommentRepository {
                 ),
               )
             : undefined,
+            onboardingCompletedCondition(this.schema.profile),
         ),
       )
       .orderBy(
         desc(this.schema.comment.createdAt),
         desc(this.schema.comment.id),
       )
-      .limit(pageSize)
-      .$dynamic();
-
-    query = withOnboardingCompleted(query);
+      .limit(pageSize);
 
     const commentsAndProfiles = await query;
 
-    return commentsAndProfiles;
+    return commentsAndProfiles.map(({ comment, profile }) => ({
+      comment,
+      profile: profile as Profile<"onboarded">,
+    }));
   }
 }

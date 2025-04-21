@@ -10,108 +10,97 @@ import {
 } from "../../trpc";
 
 export const postRouter = createTRPCRouter({
-  uploadPostForUserOnAppUrl: protectedProcedure
-    .input(
-      z.object({
-        recipientUserId: z.string(),
-        caption: z.string(),
-        height: z.number(),
-        width: z.number(),
-        contentLength: z.number(),
-        contentType: validators.imageContentType,
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.post.uploadPostForUserOnAppUrl({
-        authorUserId: ctx.session.uid,
-        ...input,
+  getPostStats: protectedProcedure
+    .input(z.object({ postId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.services.post.getPostStats({
+        userId: ctx.session.uid,
+        postId: input.postId,
       });
 
       return result.match(
         (res) => res,
-        (_) => {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-          });
+        (err) => {
+          switch (err.name) {
+            case "PostNotFoundError":
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Post not found",
+              });
+          }
         },
       );
     }),
 
-  uploadPostForUserNotOnAppUrl: protectedProcedure
+  getPost: protectedProcedure
     .input(
       z.object({
-        recipientNotOnAppPhoneNumber: z.string(),
-        recipientNotOnAppName: z.string(),
-        caption: z.string(),
-        height: z.number(),
-        width: z.number(),
-        contentLength: z.number(),
-        contentType: validators.imageContentType,
+        postId: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.post.uploadPostForUserNotOnAppUrl({
-        authorUserId: ctx.session.uid,
-        ...input,
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.services.post.getPost({
+        userId: ctx.session.uid,
+        postId: input.postId,
       });
 
       return result.match(
         (res) => res,
-        (_) => {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-          });
+        (err) => {
+          switch (err.name) {
+            case "PostNotFoundError":
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Post not found",
+              });
+          }
         },
       );
     }),
 
-  uploadVideoPostForUserOnAppUrl: protectedProcedure
+  getPostForSite: publicProcedure
     .input(
       z.object({
-        recipientUserId: z.string(),
-        caption: z.string(),
-        height: z.number(),
-        width: z.number(),
+        postId: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.post.uploadVideoPostForUserOnAppUrl({
-        authorUserId: ctx.session.uid,
-        ...input,
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.services.post.getPostForSite({
+        postId: input.postId,
       });
 
       return result.match(
         (res) => res,
-        (_) => {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-          });
+        (err) => {
+          switch (err.name) {
+            case "PostNotFoundError":
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Post not found",
+              });
+          }
         },
       );
     }),
 
-  uploadVideoPostForUserNotOnAppUrl: protectedProcedure
-    .input(
-      z.object({
-        recipientNotOnAppPhoneNumber: z.string(),
-        recipientNotOnAppName: z.string(),
-        caption: z.string(),
-        height: z.number(),
-        width: z.number(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.post.uploadVideoPostForUserNotOnAppUrl({
-        authorUserId: ctx.session.uid,
-        ...input,
+  getIsLiked: protectedProcedure
+    .input(z.object({ postId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.services.post.getIsLiked({
+        userId: ctx.session.uid,
+        postId: input.postId,
       });
 
       return result.match(
         (res) => res,
-        (_) => {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-          });
+        (err) => {
+          switch (err.name) {
+            case "PostNotFoundError":
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Post not found",
+              });
+          }
         },
       );
     }),
@@ -147,16 +136,100 @@ export const postRouter = createTRPCRouter({
       );
     }),
 
-  getPost: protectedProcedure
+  uploadPostForUserOnAppUrl: protectedProcedure
     .input(
       z.object({
-        postId: z.string(),
+        recipientUserId: z.string(),
+        caption: z.string(),
+        height: z.number(),
+        width: z.number(),
+        contentLength: z.number(),
+        contentType: validators.imageContentType,
       }),
     )
-    .query(async ({ ctx, input }) => {
-      const result = await ctx.services.post.getPost({
-        userId: ctx.session.uid,
-        postId: input.postId,
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.services.post.uploadImagePostForUserOnApp({
+        authorUserId: ctx.session.uid,
+        ...input,
+      });
+
+      return result.match(
+        (res) => res,
+        (_) => {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+          });
+        },
+      );
+    }),
+
+  uploadPostForUserNotOnAppUrl: protectedProcedure
+    .input(
+      z.object({
+        recipientNotOnAppPhoneNumber: z.string(),
+        recipientNotOnAppName: z.string(),
+        caption: z.string(),
+        height: z.number(),
+        width: z.number(),
+        contentLength: z.number(),
+        contentType: validators.imageContentType,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.services.post.uploadImagePostForUserNotOnApp({
+        authorUserId: ctx.session.uid,
+        ...input,
+      });
+
+      return result.match(
+        (res) => res,
+        (_) => {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+          });
+        },
+      );
+    }),
+
+  uploadVideoPostForUserOnAppUrl: protectedProcedure
+    .input(
+      z.object({
+        recipientUserId: z.string(),
+        caption: z.string(),
+        height: z.number(),
+        width: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.services.post.uploadVideoPostForUserOnApp({
+        authorUserId: ctx.session.uid,
+        ...input,
+      });
+
+      return result.match(
+        (res) => res,
+        (_) => {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+          });
+        },
+      );
+    }),
+
+  uploadVideoPostForUserNotOnAppUrl: protectedProcedure
+    .input(
+      z.object({
+        recipientNotOnAppPhoneNumber: z.string(),
+        recipientNotOnAppName: z.string(),
+        caption: z.string(),
+        height: z.number(),
+        width: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.services.post.uploadVideoPostForUserNotOnApp({
+        authorUserId: ctx.session.uid,
+        ...input,
       });
 
       return result.match(
@@ -216,27 +289,6 @@ export const postRouter = createTRPCRouter({
         userId: ctx.session.uid,
         cursor: input.cursor,
         pageSize: input.pageSize,
-      });
-
-      return result.match(
-        (res) => res,
-        (_) => {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-          });
-        },
-      );
-    }),
-
-  getPostForNextJs: publicProcedure
-    .input(
-      z.object({
-        postId: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const result = await ctx.services.post.getPostForNextJs({
-        postId: input.postId,
       });
 
       return result.match(

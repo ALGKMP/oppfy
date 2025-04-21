@@ -5,38 +5,28 @@ import {
   HeadObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
-// import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
+import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 import middy from "@middy/core";
-// import { createEnv } from "@t3-oss/env-core";
+import { createEnv } from "@t3-oss/env-core";
 import type { Context } from "aws-lambda";
 import { z } from "zod";
 
 import { db, eq, schema, sql } from "@oppfy/db";
 
-// import { validators } from "@oppfy/validators";
-
-// type SnsNotificationData = z.infer<typeof validators.snsNotificationData>;
-
-// type StoreNotificationData = z.infer<typeof validators.notificationData>;
-
-// type SendNotificationData = z.infer<typeof validators.sendNotificationData>;
-
 type S3ObjectLambdaEvent = z.infer<typeof S3Schema>;
 
-// const env = createEnv({
-//   server: {
-//     SNS_PUSH_NOTIFICATION_TOPIC_ARN: z.string().min(1),
-//   },
-//   runtimeEnv: process.env,
-// });
+const SQS = new SQSClient({ region: "us-east-1" });
 
 const s3 = new S3Client({
   region: "us-east-1",
 });
 
-// const sns = new SNSClient({
-//   region: "us-east-1",
-// });
+const env = createEnv({
+  server: {
+    SQS_NOTIFICATION_QUEUE: z.string().min(1),
+  },
+  runtimeEnv: process.env,
+});
 
 const lambdaHandler = async (
   event: S3ObjectLambdaEvent,
@@ -75,13 +65,20 @@ const lambdaHandler = async (
     console.log("metadata.postid", metadata.postid);
     try {
       // transaction to update post status and user stats
-      await db.transaction(async (tx) => {
+      const post = await db.transaction(async (tx) => {
         const post = await tx.query.post.findFirst({
           where: eq(schema.post.id, metadata.postid),
         });
         if (post === undefined) {
           throw new Error("Failed to insert post");
         }
+
+        await tx
+          .update(schema.post)
+          .set({
+            status: "processed",
+          })
+          .where(eq(schema.post.id, post.id));
 
         // Only increment recipient's profile stats post count since they're the one being posted about
         await tx
@@ -93,32 +90,36 @@ const lambdaHandler = async (
               sql`(SELECT recipient_user_id FROM post WHERE id = ${post.id})`,
             ),
           );
+
+        return post;
       });
 
-      // await storeNotification(metadata.author, metadata.recipient, {
-      //   eventType: "post",
-      //   entityType: "post",
-      //   entityId: postId.toString(),
-      // });
+      // get profile of poster
+      const authorProfile = await db.query.profile.findFirst({
+        where: eq(schema.profile.userId, post.authorUserId),
+      });
+      if (!authorProfile) {
+        // nothing
+        return;
+      }
 
-      // const { posts } = await getNotificationSettings(metadata.recipient);
-      // if (posts) {
-      //   const pushTokens = await getPushTokens(metadata.recipient);
-      //   if (pushTokens.length > 0) {
-      //     const senderProfile = await getProfile(metadata.author);
-      //     await sendNotification(
-      //       pushTokens,
-      //       metadata.author,
-      //       metadata.recipient,
-      //       {
-      //         title: "You've been opped",
-      //         body: `${senderProfile.username} posted a picture of you`,
-      //         entityId: postId.toString(),
-      //         entityType: "post",
-      //       },
-      //     );
-      //   }
-      // }
+      // send noti
+      const notiSqsParams = {
+        senderId: post.authorUserId,
+        recipientId: post.recipientUserId,
+        title: "You've been opped",
+        body: `${authorProfile.username} posted a picture of you`,
+        entityType: "post",
+        entityId: post.id,
+        eventType: "post",
+      };
+
+      const command = new SendMessageCommand({
+        QueueUrl: env.SQS_NOTIFICATION_QUEUE,
+        MessageBody: JSON.stringify(notiSqsParams),
+      });
+
+      await SQS.send(command);
     } catch (error) {
       console.log("error", error);
       // If the transaction fails, delete the S3 object

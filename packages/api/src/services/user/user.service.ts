@@ -4,10 +4,10 @@ import { err, ok, Result } from "neverthrow";
 import type { Database } from "@oppfy/db";
 
 import * as UserErrors from "../../errors/user/user.error";
-import type { UserIdParam } from "../../interfaces/types";
 import { UserStatus } from "../../models";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
+import type { UserIdParam } from "../../types";
 
 @injectable()
 export class UserService {

@@ -87,53 +87,8 @@ const HomeScreen = () => {
     setViewableItems(visibleItemIds);
   };
 
-  const renderPost = useCallback(
-    ({ item }: { item: Post }) => {
-      if (profile === undefined) return null;
-
-      return (
-        <PostCard
-          postId={item.post.id}
-          createdAt={item.post.createdAt}
-          caption={item.post.caption}
-          endpoint="home-feed"
-          author={{
-            id: item.authorUserId,
-            name: item.authorName ?? "",
-            username: item.authorUsername ?? "",
-            profilePictureUrl: item.authorProfilePictureUrl,
-          }}
-          recipient={{
-            id: item.recipientUserId,
-            name: item.recipientName ?? "",
-            username: item.recipientUsername ?? "",
-            profilePictureUrl: item.recipientProfilePictureUrl,
-          }}
-          media={{
-            id: item.post.id,
-            recipient: {
-              id: item.recipientUserId,
-              name: item.recipientName ?? "",
-              username: item.recipientUsername ?? "",
-              profilePictureUrl: item.recipientProfilePictureUrl,
-            },
-            type: item.post.mediaType,
-            url: item.assetUrl,
-            dimensions: {
-              width: item.post.width,
-              height: item.post.height,
-            },
-          }}
-          stats={{
-            likes: item.postStats.likes,
-            comments: item.postStats.comments,
-            hasLiked: item.hasLiked,
-          }}
-          isViewable={viewableItems.includes(item.post.id)}
-        />
-      );
-    },
-    [profile, viewableItems],
+  const renderPost = ({ item }: { item: Post }) => (
+    <PostCard {...item} isViewable={viewableItems.includes(item.post.id)} />
   );
 
   const isLoading = isLoadingPostData || isLoadingProfile;

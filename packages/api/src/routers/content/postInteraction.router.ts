@@ -76,7 +76,7 @@ export const postInteractionRouter = createTRPCRouter({
       );
     }),
 
-  addComment: protectedProcedure
+  createComment: protectedProcedure
     .input(
       z.object({
         postId: z.string(),
@@ -109,7 +109,7 @@ export const postInteractionRouter = createTRPCRouter({
       );
     }),
 
-  removeComment: protectedProcedure
+  deleteComment: protectedProcedure
     .input(
       z.object({
         commentId: z.string(),
@@ -118,15 +118,20 @@ export const postInteractionRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const result = await ctx.services.postInteraction.removeComment({
-        commentId: input.commentId,
-        postId: input.postId,
         userId: ctx.session.uid,
+        postId: input.postId,
+        commentId: input.commentId,
       });
 
       return result.match(
         () => undefined,
         (err) => {
           switch (err.name) {
+            case "PostNotFoundError":
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Post not found",
+              });
             case "CommentNotFoundError":
               throw new TRPCError({
                 code: "NOT_FOUND",
@@ -137,10 +142,10 @@ export const postInteractionRouter = createTRPCRouter({
                 code: "FORBIDDEN",
                 message: "You are not the owner of this comment",
               });
-            case "FailedToDeleteCommentError":
+            case "NotPostOwnerError":
               throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Failed to delete comment",
+                code: "FORBIDDEN",
+                message: "You are not the owner of this post",
               });
           }
         },

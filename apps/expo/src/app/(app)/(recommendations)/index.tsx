@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Dimensions, FlatList } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { getToken, Text } from "tamagui";
+import { getToken } from "tamagui";
 
 import { UserCard } from "~/components/ui/UserCard";
 import useRouteProfile from "~/hooks/useRouteProfile";
@@ -16,7 +16,7 @@ const Recommendations = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { data, refetch, isLoading } =
-    api.contacts.getProfileSuggestions.useQuery(undefined, {
+    api.contacts.profileRecommendations.useQuery(undefined, {
       staleTime: 60 * 5000,
     });
 
@@ -28,18 +28,18 @@ const Recommendations = () => {
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
-      await utils.contacts.getProfileSuggestions.cancel();
-      const prevData = utils.contacts.getProfileSuggestions.getData();
+      await utils.contacts.profileRecommendations.cancel();
+      const prevData = utils.contacts.profileRecommendations.getData();
       if (!prevData) return { prevData: undefined };
 
-      utils.contacts.getProfileSuggestions.setData(
+      utils.contacts.profileRecommendations.setData(
         undefined,
         prevData.map((item) =>
-          item.userId === newData.userId
+          item.userId === newData.recipientUserId
             ? {
                 ...item,
-                relationshipStatus:
-                  item.privacy === "private" ? "requested" : "following",
+                followStatus:
+                  item.privacy === "public" ? "FOLLOWING" : "REQUESTED",
               }
             : item,
         ),
@@ -49,7 +49,7 @@ const Recommendations = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx?.prevData === undefined) return;
-      utils.contacts.getProfileSuggestions.setData(undefined, ctx.prevData);
+      utils.contacts.profileRecommendations.setData(undefined, ctx.prevData);
     },
   });
 
@@ -97,16 +97,18 @@ const Recommendations = () => {
           }
           actionButton={{
             label:
-              item.relationshipStatus === "following"
+              item.followStatus === "FOLLOWING"
                 ? "Following"
-                : item.relationshipStatus === "requested"
+                : item.followStatus === "REQUESTED"
                   ? "Requested"
                   : "Follow",
             onPress: () =>
-              void followMutation.mutateAsync({ userId: item.userId }),
+              void followMutation.mutateAsync({
+                recipientUserId: item.userId,
+              }),
             variant:
-              item.relationshipStatus === "following" ||
-              item.relationshipStatus === "requested"
+              item.followStatus === "FOLLOWING" ||
+              item.followStatus === "REQUESTED"
                 ? "outlined"
                 : "primary",
           }}

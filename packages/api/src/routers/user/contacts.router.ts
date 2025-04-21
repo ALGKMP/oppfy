@@ -15,14 +15,14 @@ export const contactsRouter = createTRPCRouter({
     );
   }),
 
-  filterPhoneNumbersOnApp: protectedProcedure
+  getUnregisteredPhoneNumbers: protectedProcedure
     .input(
       z.object({
         phoneNumbers: z.array(z.string()),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.services.contacts.filterPhoneNumbersOnApp({
+      const result = await ctx.services.contacts.getUnregisteredPhoneNumbers({
         phoneNumbers: input.phoneNumbers,
       });
 

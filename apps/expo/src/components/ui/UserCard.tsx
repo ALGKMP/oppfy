@@ -181,6 +181,7 @@ export const UserCard = ({
             style={{ width: "100%", aspectRatio }}
             contentFit="cover"
             transition={200}
+            cachePolicy={"none"}
           />
 
           {/* Gradient Overlay */}

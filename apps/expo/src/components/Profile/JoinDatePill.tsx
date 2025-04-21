@@ -5,7 +5,7 @@ import { XStack } from "tamagui";
 import { TimeAgo } from "~/components/ui/TimeAgo";
 
 interface JoinDatePillProps {
-  createdAt?: Date;
+  createdAt: Date | undefined;
 }
 
 const JoinDatePill = ({ createdAt }: JoinDatePillProps) => {

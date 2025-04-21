@@ -3,17 +3,9 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 
-interface Profile {
-  profilePictureUrl: string | null;
-  id: string;
-  name: string | null;
-  username: string;
-  dateOfBirth: Date | null;
-  bio: string | null;
-  profilePictureKey: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { RouterOutputs } from "@oppfy/api";
+
+type Profile = RouterOutputs["profile"]["getProfileForSite"];
 
 interface ProfilePageProps {
   profile: Profile;
@@ -37,7 +29,7 @@ export default function AnimatedProfilePage({ profile }: ProfilePageProps) {
         >
           <div className="relative h-32 w-32 md:h-40 md:w-40">
             <Image
-              src={profile.profilePictureUrl ?? "/default_profile_picture.jpg"}
+              src={profile.profilePictureUrl ?? "/default-profile-picture.jpg"}
               alt={`${profile.username}'s profile picture`}
               className="rounded-full border-4 border-[#F214FF] object-cover shadow-lg"
               fill

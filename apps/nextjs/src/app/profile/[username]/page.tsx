@@ -13,7 +13,7 @@ interface Props {
 // Generate metadata for the page
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
-    const profile = await api.profile.getProfileForNextJs({
+    const profile = await api.profile.getProfileForSite({
       username: params.username,
     });
 
@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           `Check out ${profile.name ?? profile.username}'s profile on Oppfy`,
         images: [
           {
-            url: profile.profilePictureUrl ?? "/default_profile_picture.jpg",
+            url: profile.profilePictureUrl ?? "/default-profile-picture.jpg",
             width: 800,
             height: 800,
             alt: `${profile.name ?? profile.username}'s profile picture`,
@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description:
           profile.bio ??
           `Check out ${profile.name ?? profile.username}'s profile on Oppfy`,
-        images: [profile.profilePictureUrl ?? "/default_profile_picture.jpg"],
+        images: [profile.profilePictureUrl ?? "/default-profile-picture.jpg"],
         site: "@oppfyapp",
         creator: "@oppfyapp",
       },
@@ -112,7 +112,7 @@ export default async function ProfilePage({ params }: Props) {
   let profile;
 
   try {
-    profile = await api.profile.getProfileForNextJs({
+    profile = await api.profile.getProfileForSite({
       username: params.username,
     });
   } catch (error) {

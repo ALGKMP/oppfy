@@ -1,16 +1,19 @@
 import { useState } from "react";
-import { Alert, Linking } from "react-native";
+import { Linking } from "react-native";
 import Marker, { Position } from "react-native-image-marker";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { PermissionStatus } from "expo-media-library";
 import watermark from "@assets/watermark.png";
 
+import { useAlertDialogController } from "../components/ui/AlertDialog/AlertDialogContext";
+
 type SaveState = "idle" | "saving" | "saved";
 type MediaType = "image" | "video";
 
 const useSaveMedia = () => {
   const [saveState, setSaveState] = useState<SaveState>("idle");
+  const { show: showAlert } = useAlertDialogController();
 
   const addWatermark = async (imageUri: string) => {
     try {
@@ -46,14 +49,20 @@ const useSaveMedia = () => {
       return true;
     }
 
-    Alert.alert(
-      "Media Library Permission",
-      "Media library permission is required for this app. Please enable it in your device settings.",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Open Settings", onPress: void openSettings },
-      ],
-    );
+    const isAccepted = await showAlert({
+      title: "Media Library Permission",
+      subtitle:
+        "Media library permission is required for this app. Please enable it in your device settings.",
+      acceptText: "Open Settings",
+      acceptTextProps: {
+        color: "$blue10",
+      },
+      cancelText: "Cancel",
+    });
+
+    if (isAccepted) {
+      await openSettings();
+    }
 
     return false;
   };
