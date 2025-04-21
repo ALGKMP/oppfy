@@ -2,13 +2,15 @@ import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
 import type { Database } from "@oppfy/db";
+import { SQS } from "@oppfy/sqs";
 
 import * as PostInteractionErrors from "../../errors/content/postInteraction.error";
+import * as ProfileErrors from "../../errors/user/profile.error";
 import { CommentRepository } from "../../repositories/content/comment.repository";
 import { LikeRepository } from "../../repositories/content/like.repository";
 import { PostRepository } from "../../repositories/content/post.repository";
+import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { TYPES } from "../../symbols";
-import { SQS } from "@oppfy/sqs";
 
 interface LikePostParams {
   postId: string;
@@ -42,6 +44,8 @@ export class PostInteractionService {
     private readonly commentRepository: CommentRepository,
     @inject(TYPES.LikeRepository)
     private readonly likeRepository: LikeRepository,
+    @inject(TYPES.ProfileRepository)
+    private readonly profileRepository: ProfileRepository,
     @inject(TYPES.SQS) private readonly sqs: SQS,
   ) {}
 
@@ -54,9 +58,10 @@ export class PostInteractionService {
       | PostInteractionErrors.PostNotFound
       | PostInteractionErrors.FailedToLikePost
       | PostInteractionErrors.AlreadyLiked
+      | ProfileErrors.ProfileNotFound
     >
   > {
-    await this.db.transaction(async (tx) => {
+    const recipientId = await this.db.transaction(async (tx) => {
       const post = await this.postRepository.getPost({ postId, userId }, tx);
       if (!post) throw new PostInteractionErrors.PostNotFound(postId);
 
@@ -69,19 +74,24 @@ export class PostInteractionService {
 
       await this.likeRepository.createLike({ postId, userId }, tx);
 
-      await this.sqs.sendNotificationMessage({
-        entityId: postId,
-        entityType: "post",
-        eventType: "like",
-        recipientId: post.post.recipientUserId,
-        senderId: userId,
-        title: "New Like",
-        body: "You have a new like on your post",
-      })
-
-      console.log("sent sqs message")
+      return ok(post.post.recipientUserId);
     });
 
+    if (recipientId.isErr()) return err(recipientId.error);
+
+    // get username
+    const profile = await this.profileRepository.getProfile({
+      userId: recipientId.value,
+    });
+
+    if (!profile) throw new ProfileErrors.ProfileNotFound(recipientId.value);
+
+    await this.sqs.sendLikeNotification(
+      recipientId.value,
+      userId,
+      postId,
+      profile.username,
+    );
 
     return ok();
   }

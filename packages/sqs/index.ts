@@ -42,21 +42,21 @@ export class SQS {
     });
   }
 
-  async sendMessage(
+  private async sendMessage(
     sendMessageCommandInput: SendMessageCommandInput,
   ): Promise<SendMessageCommandOutput> {
     const command = new SendMessageCommand(sendMessageCommandInput);
     return await this.client.send(command);
   }
 
-  async receiveMessage(
+  private async receiveMessage(
     receiveMessageCommandInput: ReceiveMessageCommandInput,
   ): Promise<ReceiveMessageCommandOutput> {
     const command = new ReceiveMessageCommand(receiveMessageCommandInput);
     return await this.client.send(command);
   }
 
-  async deleteMessage(
+  private async deleteMessage(
     deleteMessageCommandInput: DeleteMessageCommandInput,
   ): Promise<DeleteMessageCommandOutput> {
     const command = new DeleteMessageCommand(deleteMessageCommandInput);
@@ -88,12 +88,115 @@ export class SQS {
     };
   }
 
-  async sendNotificationMessage(params: SendNotificationParams) {
+  private async sendNotificationMessage(params: SendNotificationParams) {
     const result = await this.sendMessage({
       QueueUrl: env.SQS_NOTIFICATION_QUEUE,
       MessageBody: JSON.stringify(params),
     });
 
     return result;
+  }
+
+  // Helper methods for common notification types
+  async sendLikeNotification(
+    senderId: string,
+    recipientId: string,
+    username: string,
+    postId: string,
+  ): Promise<void> {
+    await this.sendNotificationMessage({
+      senderId,
+      recipientId,
+      title: "New like",
+      body: `${username} liked your post`,
+      entityType: "post",
+      entityId: postId,
+      eventType: "like",
+    });
+  }
+
+  async sendCommentNotification(
+    senderId: string,
+    recipientId: string,
+    username: string,
+    postId: string,
+  ): Promise<void> {
+    await this.sendNotificationMessage({
+      senderId,
+      recipientId,
+      title: "New Comment",
+      body: `${username} commented on your post`,
+      entityType: "post",
+      entityId: postId,
+      eventType: "comment",
+    });
+  }
+
+  async sendFollowRequestNotification(
+    pushTokens: string[],
+    senderId: string,
+    recipientId: string,
+    username: string,
+  ): Promise<void> {
+    await this.sendNotificationMessage({
+      senderId,
+      recipientId,
+      title: "Follow Request",
+      body: `${username} has sent you a follow request.`,
+      entityType: "profile",
+      entityId: senderId,
+      eventType: "follow",
+    });
+  }
+
+  async sendFollowAcceptedNotification(
+    pushTokens: string[],
+    senderId: string,
+    recipientId: string,
+    username: string,
+  ): Promise<void> {
+    await this.sendNotificationMessage({
+      senderId,
+      recipientId,
+      title: "Follow Request Accepted",
+      body: `${username} has accepted your follow request`,
+      entityType: "profile",
+      entityId: senderId,
+      eventType: "follow",
+    });
+  }
+
+  async sendFriendRequestNotification(
+    pushTokens: string[],
+    senderId: string,
+    recipientId: string,
+    username: string,
+  ): Promise<void> {
+    await this.sendNotificationMessage({
+      senderId,
+      recipientId,
+      title: "Friend Request",
+      body: `${username} has sent you a friend request.`,
+      entityType: "profile",
+      entityId: senderId,
+      eventType: "friend",
+    });
+  }
+
+  async sendFriendAcceptedNotification(
+    pushTokens: string[],
+    senderId: string,
+    recipientId: string,
+    username: string,
+  ): Promise<void> {
+    await this.sendNotificationMessage({
+      senderId,
+      recipientId,
+      title: "Friend Request Accepted",
+      body: `${username} has accepted your friend request`,
+      entityType: "profile",
+      entityId: senderId,
+      eventType: "friend",
+    });
   }
 }
