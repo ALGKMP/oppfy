@@ -242,6 +242,8 @@ export class AwsStack extends cdk.Stack {
       receiveMessageWaitTime: cdk.Duration.seconds(20), // enable long‑polling, max 20 s  [oai_citation_attribution:2‡AWS Documentation](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-short-and-long-polling.html?utm_source=chatgpt.com)
     });
 
+    notificationQueue.queue.grantConsumeMessages(pushNotificationsLambda.function);
+
     pushNotificationsLambda.function.addEventSource(
       new SqsEventSource(notificationQueue.queue, {
         batchSize: 10_000, // max for standard queues
