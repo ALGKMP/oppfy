@@ -13,26 +13,15 @@ import { z } from "zod";
 import { db, eq, schema, sql } from "@oppfy/db";
 import { SQS } from "@oppfy/sqs";
 
-// import { validators } from "@oppfy/validators";
-
-// type SnsNotificationData = z.infer<typeof validators.snsNotificationData>;
-
-// type StoreNotificationData = z.infer<typeof validators.notificationData>;
-
-// type SendNotificationData = z.infer<typeof validators.sendNotificationData>;
-
 type S3ObjectLambdaEvent = z.infer<typeof S3Schema>;
 
-// const env = createEnv({
-//   server: {
-//     SNS_PUSH_NOTIFICATION_TOPIC_ARN: z.string().min(1),
-//   },
-//   runtimeEnv: process.env,
-// });
+
 
 const s3 = new S3Client({
   region: "us-east-1",
 });
+
+const sqs = new SQS
 
 // const sns = new SNSClient({
 //   region: "us-east-1",
