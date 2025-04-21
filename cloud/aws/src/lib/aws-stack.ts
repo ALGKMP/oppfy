@@ -21,7 +21,6 @@ import { Queue } from "./constructs/queue";
 import { NeptuneNotebook } from "./constructs/sagemaker";
 
 const environment = {
-
   S3_POST_BUCKET: env.S3_POST_BUCKET,
   S3_PROFILE_PICTURE_BUCKET: env.S3_PROFILE_PICTURE_BUCKET,
 
@@ -221,9 +220,6 @@ export class AwsStack extends cdk.Stack {
     const contactSyncQueue = new Queue(this, "ContactSync");
 
     contactSyncQueue.queue.grantSendMessages(contactSyncLambda.function);
-    contactSyncQueue.deadLetterQueue.grantSendMessages(
-      contactSyncLambda.function,
-    );
 
     contactSyncLambda.function.addEventSource(
       new SqsEventSource(contactSyncQueue.queue, {
@@ -231,14 +227,6 @@ export class AwsStack extends cdk.Stack {
       }),
     );
 
-    // 1️⃣ Standard SQS queue
-    const notificationQueue = new sqs.Queue(this, "NotificationQueue", {
-      // VisibilityTimeout must exceed Lambda timeout + batching window
-      visibilityTimeout: cdk.Duration.seconds(120), // up to 2 min  [oai_citation_attribution:0‡AWS Documentation](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html?utm_source=chatgpt.com) [oai_citation_attribution:1‡AWS Documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-sqs-queue.html?utm_source=chatgpt.com)
-      receiveMessageWaitTime: cdk.Duration.seconds(20), // enable long‑polling, max 20 s  [oai_citation_attribution:2‡AWS Documentation](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-short-and-long-polling.html?utm_source=chatgpt.com)
-    });
-
-    // 2️⃣ Lambda function that processes SQS batches and sends Expo pushes
     const pushNotificationsLambda = new LambdaFunction(
       this,
       "PushNotificationsLambda",
@@ -248,12 +236,13 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
-    // Grant the lambda permission to read from the queue
-    notificationQueue.grantConsumeMessages(pushNotificationsLambda.function);
+    const notificationQueue = new Queue(this, "Notifications", {
+      visibilityTimeout: cdk.Duration.seconds(120),
+      receiveMessageWaitTime: cdk.Duration.seconds(20),
+    });
 
-    // 3️⃣ Wire SQS → Lambda with up to 10 000 msgs per batch
     pushNotificationsLambda.function.addEventSource(
-      new SqsEventSource(notificationQueue, {
+      new SqsEventSource(notificationQueue.queue, {
         batchSize: 10_000, // max for standard queues
         maxBatchingWindow: cdk.Duration.seconds(10), // hold up to 10 s for aggregation  [oai_citation_attribution:5‡AWS Documentation](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda_event_sources-readme.html?utm_source=chatgpt.com)
         reportBatchItemFailures: true, // handle partial failures
@@ -320,11 +309,7 @@ export class AwsStack extends cdk.Stack {
     });
 
     new cdk.CfnOutput(this, "PushNotificationsQueueUrl", {
-      value: notificationQueue.queueUrl,
+      value: notificationQueue.queue.queueUrl,
     });
-
-    // new cdk.CfnOutput(this, "PushNotificationsTopicArn", {
-    //   value: pushNotificationsTopic.topic.topicArn,
-    // });
   }
 }
