@@ -1,13 +1,16 @@
 import { parser } from "@aws-lambda-powertools/parser/middleware";
 import { APIGatewayProxyEventV2Schema } from "@aws-lambda-powertools/parser/schemas";
+import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 // import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
 import middy from "@middy/core";
+import { createEnv } from "@t3-oss/env-core";
 // import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 
 import { db, eq, schema, sql } from "@oppfy/db";
 import { Mux } from "@oppfy/mux";
-import { SQS } from "@oppfy/sqs";
+
+const SQS = new SQSClient({ region: "us-east-1" });
 
 // type SnsNotificationData = z.infer<typeof validators.snsNotificationData>;
 
@@ -24,12 +27,13 @@ const mux = new Mux();
 const muxPassthroughSchema = z.object({
   postid: z.string(),
 });
-// const env = createEnv({
-//   server: {
-//     SNS_PUSH_NOTIFICATION_TOPIC_ARN: z.string().min(1),
-//   },
-//   runtimeEnv: process.env,
-// });
+
+const env = createEnv({
+  server: {
+    SQS_NOTIFICATION_QUEUE: z.string().min(1),
+  },
+  runtimeEnv: process.env,
+});
 
 // const sns = new SNSClient({
 //   region: "us-east-1",
@@ -118,15 +122,23 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
       throw new Error("Author profile not found");
     }
 
-    // get profile of poster
-    await new SQS().sendPostNotification({
-      postId: postId,
-      recipientId: post.recipientUserId,
+
+    const notiSqsParams = {
       senderId: post.authorUserId,
-      username: authorProfile.username ?? "",
+      recipientId: post.recipientUserId,
+      title: "You've been opped",
+      body: `${authorProfile.username} posted a picture of you`,
+      entityType: "post",
+      entityId: postId,
+      eventType: "post",
+    };
+
+    const command = new SendMessageCommand({
+      QueueUrl: env.SQS_NOTIFICATION_QUEUE,
+      MessageBody: JSON.stringify(notiSqsParams),
     });
 
-
+    await SQS.send(command);
   } catch (error) {
     console.error("Error processing video:", error);
     throw error;

@@ -5,27 +5,33 @@ import {
   HeadObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 import middy from "@middy/core";
+import { createEnv } from "@t3-oss/env-core";
 // import { createEnv } from "@t3-oss/env-core";
 import type { Context } from "aws-lambda";
 import { z } from "zod";
 
 import { db, eq, schema, sql } from "@oppfy/db";
-import { SQS } from "@oppfy/sqs";
 
 type S3ObjectLambdaEvent = z.infer<typeof S3Schema>;
 
-
+const SQS = new SQSClient({ region: "us-east-1" });
 
 const s3 = new S3Client({
   region: "us-east-1",
 });
 
-const sqs = new SQS
-
 // const sns = new SNSClient({
 //   region: "us-east-1",
 // });
+
+const env = createEnv({
+  server: {
+    SQS_NOTIFICATION_QUEUE: z.string().min(1),
+  },
+  runtimeEnv: process.env,
+});
 
 const lambdaHandler = async (
   event: S3ObjectLambdaEvent,
@@ -102,37 +108,23 @@ const lambdaHandler = async (
         return;
       }
       // send noti
-      await new SQS().sendPostNotification({
-        postId: post.id,
-        recipientId: post.recipientUserId,
+      const notiSqsParams = {
         senderId: post.authorUserId,
-        username: authorProfile.username ?? "",
+        recipientId: post.recipientUserId,
+        title: "You've been opped",
+        body: `${authorProfile.username} posted a picture of you`,
+        entityType: "post",
+        entityId: post.id,
+        eventType: "post",
+      };
+
+      const command = new SendMessageCommand({
+        QueueUrl: env.SQS_NOTIFICATION_QUEUE,
+        MessageBody: JSON.stringify(notiSqsParams),
       });
 
-      // await storeNotification(metadata.author, metadata.recipient, {
-      //   eventType: "post",
-      //   entityType: "post",
-      //   entityId: postId.toString(),
-      // });
+      await SQS.send(command);
 
-      // const { posts } = await getNotificationSettings(metadata.recipient);
-      // if (posts) {
-      //   const pushTokens = await getPushTokens(metadata.recipient);
-      //   if (pushTokens.length > 0) {
-      //     const senderProfile = await getProfile(metadata.author);
-      //     await sendNotification(
-      //       pushTokens,
-      //       metadata.author,
-      //       metadata.recipient,
-      //       {
-      //         title: "You've been opped",
-      //         body: `${senderProfile.username} posted a picture of you`,
-      //         entityId: postId.toString(),
-      //         entityType: "post",
-      //       },
-      //     );
-      //   }
-      // }
     } catch (error) {
       console.log("error", error);
       // If the transaction fails, delete the S3 object

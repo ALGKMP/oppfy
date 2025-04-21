@@ -775,6 +775,9 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.564.0
         version: 3.722.0
+      '@aws-sdk/client-sqs':
+        specifier: ^3.598.0
+        version: 3.721.0
       '@mux/mux-node':
         specifier: ^8.5.1
         version: 8.8.0
@@ -784,9 +787,6 @@ importers:
       '@oppfy/mux':
         specifier: workspace:*
         version: link:../../../../../../packages/mux
-      '@oppfy/sqs':
-        specifier: workspace:*
-        version: link:../../../../../../packages/sqs
       '@oppfy/validators':
         specifier: workspace:*
         version: link:../../../../../../packages/validators
@@ -821,12 +821,12 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.564.0
         version: 3.722.0
+      '@aws-sdk/client-sqs':
+        specifier: ^3.598.0
+        version: 3.721.0
       '@oppfy/db':
         specifier: workspace:*
         version: link:../../../../../../packages/db
-      '@oppfy/sqs':
-        specifier: workspace:*
-        version: link:../../../../../../packages/sqs
       '@oppfy/validators':
         specifier: workspace:*
         version: link:../../../../../../packages/validators
