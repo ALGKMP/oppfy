@@ -348,18 +348,6 @@ const lambdaHandler = async (
       }
     }
 
-    // const things = notifications.reduce((acc, item) => {
-    //   const { eventType, entityType, entityId, recipientId } = item;
-    //   acc.set(
-    //     { eventType, entityType, entityId },
-    //     acc.get({ eventType, entityType, entityId })
-    //       ? [...acc.get({ eventType, entityType, entityId })!, item]
-    //       : [item],
-    //   );
-
-    //   return acc;
-    // }, new Map<{ eventType: string; entityType: string; entityId: string, recepientId }, NotificationBodyType>());
-
     return {
       statusCode: 200,
       body: JSON.stringify({
