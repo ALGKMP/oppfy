@@ -51,7 +51,7 @@ const useContacts = (): ContactFns => {
   // const deleteContactsMutation = api.contacts.deleteContacts.useMutation();
   const updateContactsMutation = api.contacts.updateUserContacts.useMutation();
   const filterContactsOnApp =
-    api.contacts.filterPhoneNumbersOnApp.useMutation();
+    api.contacts.getUnregisteredPhoneNumbers.useMutation();
 
   const parsePhoneNumberEntry = (
     phoneNumber: PhoneNumber | undefined,

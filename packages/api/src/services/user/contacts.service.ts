@@ -44,7 +44,7 @@ export class ContactsService {
     @inject(TYPES.SQS) private readonly sqs: SQS,
   ) {}
 
-  async filterPhoneNumbersOnApp({
+  async getUnregisteredPhoneNumbers({
     phoneNumbers,
   }: FilterPhoneNumbersOnAppParams): Promise<Result<string[], never>> {
     const result = await this.userRepository.getUnregisteredPhoneNumbers({
