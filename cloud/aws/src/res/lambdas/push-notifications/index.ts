@@ -1,5 +1,4 @@
-import type { ExpoPushMessage, ExpoPushTicket } from "expo-server-sdk";
-import { Expo } from "expo-server-sdk";
+import { Expo, ExpoPushMessage, ExpoPushTicket } from "expo-server-sdk";
 import { SqsEnvelope } from "@aws-lambda-powertools/parser/envelopes";
 import { parser } from "@aws-lambda-powertools/parser/middleware";
 import middy from "@middy/core";
@@ -7,25 +6,17 @@ import { createEnv } from "@t3-oss/env-core";
 import type { APIGatewayProxyResult, Context } from "aws-lambda";
 import { z } from "zod";
 
-import {
-  and,
-  db,
-  entityTypeEnum,
-  eq,
-  eventTypeEnum,
-  lt,
-  not,
-  schema,
-} from "@oppfy/db";
+import { and, db, eq, gt, schema } from "@oppfy/db";
 
+// ────────────────────────────────────────────────────────────────────────────
+// 1. Runtime configuration & schemas
+// ────────────────────────────────────────────────────────────────────────────
 const env = createEnv({
-  server: {
-    EXPO_ACCESS_TOKEN: z.string().min(1),
-  },
+  server: { EXPO_ACCESS_TOKEN: z.string().min(1) },
   runtimeEnv: process.env,
 });
 
-const notificationBody = z.object({
+const NotificationSchema = z.object({
   senderId: z.string(),
   recipientId: z.string(),
   title: z.string(),
@@ -34,359 +25,243 @@ const notificationBody = z.object({
   entityId: z.string(),
   entityType: z.enum(["post", "comment", "profile"]),
 });
+export type Notification = z.infer<typeof NotificationSchema>;
+export type NotificationBatch = Notification[];
 
-function storeNotification(params: typeof notificationBody._type) {
-  db.insert(schema.notification).values({
-    senderUserId: params.senderId,
-    recipientUserId: params.recipientId,
-    eventType: params.eventType,
-    entityId: params.entityId,
-    entityType: params.entityType,
-  });
-}
-
-async function getRecentNotifications(params: {
-  // senderId: string;
-  recipientId: string;
-  entityId: string;
-  entityType: (typeof entityTypeEnum.enumValues)[number];
-  eventType: (typeof eventTypeEnum.enumValues)[number];
-  minutesThreshold: number;
-  limit: number;
-}) {
-  const {
-    // senderId,
-    recipientId,
-    entityId,
-    entityType,
-    eventType,
-    minutesThreshold,
-    limit,
-  } = params;
-
-  const notifications = await db
-    .select()
-    .from(schema.notification)
-    .where(
-      and(
-        // eq(schema.notification.senderUserId, senderId),
-        eq(schema.notification.recipientUserId, recipientId),
-        eq(schema.notification.eventType, eventType),
-        eq(schema.notification.entityId, entityId),
-        eq(schema.notification.entityType, entityType),
-        lt(
-          schema.notification.createdAt,
-          new Date(Date.now() - minutesThreshold * 60 * 1000),
-        ),
-      ),
-    )
-    .limit(limit);
-  return notifications;
-}
-
-// funciton to get notfication settings
+// ────────────────────────────────────────────────────────────────────────────
+// 2. DB helpers
+// ────────────────────────────────────────────────────────────────────────────
 async function getNotificationSettings(userId: string) {
-  const settings = await db
-    .select()
-    .from(schema.notificationSettings)
-    .where(eq(schema.notificationSettings.userId, userId))
-    .limit(1);
-  return settings[0];
+  return (
+    (
+      await db
+        .select()
+        .from(schema.notificationSettings)
+        .where(eq(schema.notificationSettings.userId, userId))
+        .limit(1)
+    )[0] ?? null
+  );
 }
 
 function isNotificationEnabled(
-  notificationType: (typeof eventTypeEnum.enumValues)[number],
+  event: Notification["eventType"],
   settings: NonNullable<Awaited<ReturnType<typeof getNotificationSettings>>>,
-): boolean {
-  switch (notificationType) {
+) {
+  const map: Record<Notification["eventType"], boolean> = {
+    like: settings.likes,
+    post: settings.posts,
+    comment: settings.comments,
+    follow: settings.followRequests,
+    friend: settings.friendRequests,
+  };
+  return map[event];
+}
+
+async function hasRecentDuplicate(params: {
+  recipientId: string;
+  entityId: string;
+  entityType: Notification["entityType"];
+  eventType: Notification["eventType"];
+  minutes: number;
+}) {
+  const { recipientId, entityId, entityType, eventType, minutes } = params;
+  const cutoff = new Date(Date.now() - minutes * 60 * 1000);
+
+  const [row] = await db
+    .select({ id: schema.notification.id })
+    .from(schema.notification)
+    .where(
+      and(
+        eq(schema.notification.recipientUserId, recipientId),
+        eq(schema.notification.entityId, entityId),
+        eq(schema.notification.entityType, entityType),
+        eq(schema.notification.eventType, eventType),
+        gt(schema.notification.createdAt, cutoff),
+      ),
+    )
+    .limit(1);
+
+  return Boolean(row);
+}
+
+function storeNotification(n: Notification) {
+  return db.insert(schema.notification).values({
+    senderUserId: n.senderId,
+    recipientUserId: n.recipientId,
+    eventType: n.eventType,
+    entityId: n.entityId,
+    entityType: n.entityType,
+  });
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// 3. Message builders
+// ────────────────────────────────────────────────────────────────────────────
+function buildBody(n: Notification, count: number): string {
+  const { title, eventType, entityType } = n;
+
+  if (count === 1) {
+    switch (eventType) {
+      case "like":
+        return `${title} liked your ${entityType}`;
+      case "post":
+        return `${title} made a new post`;
+      case "comment":
+        return `${title} commented on your ${entityType}`;
+      case "follow":
+        return `${title} followed you`;
+      case "friend":
+        return `${title} sent you a friend request`;
+    }
+  }
+
+  switch (eventType) {
     case "like":
-      return settings.likes;
+      return `${count} people liked your ${entityType}`;
     case "post":
-      return settings.posts;
+      return `${count} new posts from people you follow`;
     case "comment":
-      return settings.comments;
+      return `${count} people commented on your ${entityType}`;
     case "follow":
-      return settings.followRequests;
+      return `${count} people followed you`;
     case "friend":
-      return settings.friendRequests;
+      return `${count} people sent you friend requests`;
   }
 }
 
-// list bc of middy powertools thing
-// 1. Parses data using SqsSchema.
-// 2. Parses records in body key using your schema and return them in a list.
-type NotificationBodyType = z.infer<typeof notificationBody>[];
+function buildTitle(eventType: Notification["eventType"], count: number) {
+  const plural = count > 1 ? "s" : "";
+  switch (eventType) {
+    case "like":
+      return `New Like${plural}`;
+    case "post":
+      return `New Post${plural}`;
+    case "comment":
+      return `New Comment${plural}`;
+    case "follow":
+      return `New Follower${plural}`;
+    case "friend":
+      return `New Friend Request${plural}`;
+  }
+}
 
+// ────────────────────────────────────────────────────────────────────────────
+// 4. Lambda core
+// ────────────────────────────────────────────────────────────────────────────
 const lambdaHandler = async (
-  event: NotificationBodyType,
-  _context: Context,
+  event: NotificationBatch,
+  _ctx: Context,
 ): Promise<APIGatewayProxyResult> => {
-  try {
-    const expo = new Expo({
-      accessToken: env.EXPO_ACCESS_TOKEN,
-    });
+  const expo = new Expo({ accessToken: env.EXPO_ACCESS_TOKEN });
 
-    // group notis by [{eventType, entityType, entityId, recipientId}]
-    // for each notification, check if notification is enabled
-    // if enabled, check if notification is recent
-    // if recent, skip
-    // if not recent, send notification
-    // if not enabled, skip
+  // 1. Group notifications by recipient
+  const byRecipient = new Map<string, NotificationBatch>();
+  for (const n of event) {
+    byRecipient.set(n.recipientId, [
+      ...(byRecipient.get(n.recipientId) ?? []),
+      n,
+    ]);
+  }
 
-    const notifications = event;
-    if (!notifications) {
-      console.log("No notifications found");
-      return {
-        statusCode: 400,
-        body: JSON.stringify({
-          message: "Invalid request",
-        }),
-      };
-    }
-
-    // group by user id, so a dict of userId -> [notifications]
-    const notificationsByUser = notifications.reduce((acc, item) => {
-      const { recipientId } = item;
-      acc.set(
-        recipientId,
-        acc.get(recipientId) ? [...acc.get(recipientId)!, item] : [item],
-      );
-      return acc;
-    }, new Map<string, NotificationBodyType>());
-
-    for (const [userId, notifications] of notificationsByUser) {
+  // 2. Process each recipient concurrently
+  await Promise.all(
+    [...byRecipient.entries()].map(async ([userId, userNotifs]) => {
       const settings = await getNotificationSettings(userId);
-
-      if (!settings) {
-        console.log("No settings found");
-        return {
-          statusCode: 400,
-          body: JSON.stringify({
-            message: "Invalid request",
-          }),
-        };
-      }
+      if (!settings) return;
 
       const pushTokens = await db
         .select({ token: schema.pushToken.token })
         .from(schema.pushToken)
         .where(eq(schema.pushToken.userId, userId));
+      if (pushTokens.length === 0) return;
 
-      if (pushTokens.length === 0) {
-        console.log("No push tokens found");
-        return {
-          statusCode: 400,
-          body: JSON.stringify({
-            message: "Invalid request",
-          }),
-        };
+      // Group by composite key eventType:entityType:entityId
+      const groups = new Map<string, NotificationBatch>();
+      for (const n of userNotifs) {
+        const key = `${n.eventType}:${n.entityType}:${n.entityId}`;
+        groups.set(key, [...(groups.get(key) ?? []), n]);
       }
 
-      // group by event type and entity id
-      const notificationsByEventTypeAndEntityId = notifications.reduce(
-        (acc, item) => {
-          const { eventType, entityType, entityId } = item;
-          acc.set(
-            { eventType, entityType, entityId },
-            acc.get({ eventType, entityType, entityId })
-              ? [...acc.get({ eventType, entityType, entityId })!, item]
-              : [item],
-          );
-          return acc;
-        },
-        new Map<
-          {
-            eventType: (typeof notificationBody._type)["eventType"];
-            entityType: (typeof notificationBody._type)["entityType"];
-            entityId: string;
-          },
-          NotificationBodyType
-        >(),
-      );
+      for (const batch of groups.values()) {
+        if (batch.length === 0) continue;
+        const first = batch[0]!;
+        const { eventType, entityType, entityId } = first;
 
-      for (const [
-        { eventType, entityType, entityId },
-        notifications,
-      ] of notificationsByEventTypeAndEntityId) {
-        // make sure notification is enabled
-        if (!isNotificationEnabled(eventType, settings)) {
-          console.log("Notification not enabled");
+        if (!isNotificationEnabled(eventType, settings)) continue;
+        if (
+          await hasRecentDuplicate({
+            recipientId: userId,
+            entityId,
+            entityType,
+            eventType,
+            minutes: 10,
+          })
+        )
           continue;
-        }
 
-        // aggregate notis if there are multiple
-        if (notifications.length > 1) {
-          const recentNotifications = await getRecentNotifications({
-            recipientId: userId,
-            entityId,
-            entityType:
-              entityType as (typeof notificationBody._type)["entityType"],
-            eventType:
-              eventType as (typeof notificationBody._type)["eventType"],
-            minutesThreshold: 10,
-            limit: notifications.length,
-          });
+        const count = batch.length;
+        const body = buildBody(first, count);
+        const title = buildTitle(eventType, count);
 
-          if (recentNotifications.length > 0) {
-            console.log("Notification already sent");
-            continue;
-          }
-          let message = "";
-          if (notifications.length === 1) {
-            // Single notification case
-            const notification = notifications[0];
-            if (!notification) {
-              console.log("No notification found");
-              continue;
-            }
+        const message: ExpoPushMessage = {
+          to: pushTokens.map((t) => t.token),
+          sound: "default",
+          title,
+          body,
+          data: { eventType, entityType, entityId },
+        };
 
-            switch (eventType) {
-              case "like":
-                message = `${notification.title} liked your ${entityType}`;
-                break;
-              case "post":
-                message = `${notification.title} made a new post`;
-                break;
-              case "comment":
-                message = `${notification.title} commented on your ${entityType}`;
-                break;
-              case "follow":
-                message = `${notification.title} followed you`;
-                break;
-              case "friend":
-                message = `${notification.title} sent you a friend request`;
-                break;
-            }
-          } else {
-            // Multiple notifications case
-            switch (eventType) {
-              case "like":
-                message = `${notifications.length} people liked your ${entityType}`;
-                break;
-              case "post":
-                message = `${notifications.length} new posts from people you follow`;
-                break;
-              case "comment":
-                message = `${notifications.length} people commented on your ${entityType}`;
-                break;
-              case "follow":
-                message = `${notifications.length} people followed you`;
-                break;
-              case "friend":
-                message = `${notifications.length} people sent you friend requests`;
-                break;
-            }
-          }
-
-          // Send push notification
-          const pushMessage: ExpoPushMessage = {
-            to: pushTokens.map((token) => token.token),
-            sound: "default",
-            title: message,
-            body: message,
-            data: {
-              eventType,
-              entityType,
-              entityId,
-            },
-          };
-          const chunks = expo.chunkPushNotifications([pushMessage]);
-          for (const chunk of chunks) {
-            try {
-              const tickets = await expo.sendPushNotificationsAsync(chunk);
-              handlePushTickets(tickets, chunk);
-            } catch (error) {
-              console.error(error);
-            }
-          }
-        } else {
-          const notification = notifications[0];
-          if (!notification) {
-            console.log("No notification found");
-            continue;
-          }
-
-          const recentNotifications = await getRecentNotifications({
-            recipientId: userId,
-            entityId,
-            entityType:
-              entityType as (typeof notificationBody._type)["entityType"],
-            eventType:
-              eventType as (typeof notificationBody._type)["eventType"],
-            minutesThreshold: 10,
-            limit: 1,
-          });
-
-          if (recentNotifications.length > 0) {
-            console.log("Notification already sent");
-            continue;
-          }
-
-          // Send push notification
-          const pushMessage: ExpoPushMessage = {
-            to: pushTokens.map((token) => token.token),
-            sound: "default",
-            title: notification.title,
-            body: notification.body,
-            data: {
-              eventType,
-              entityType,
-              entityId,
-            },
-          };
-
-          const chunks = expo.chunkPushNotifications([pushMessage]);
-          for (const chunk of chunks) {
-            try {
-              const tickets = await expo.sendPushNotificationsAsync(chunk);
-              handlePushTickets(tickets, chunk);
-            } catch (error) {
-              console.error(error);
-            }
+        // Chunk to respect 100‑token limit / request
+        const chunks = expo.chunkPushNotifications([message]);
+        for (const chunk of chunks) {
+          try {
+            const tickets = await expo.sendPushNotificationsAsync(chunk);
+            await handleTickets(tickets, chunk);
+          } catch (err) {
+            console.error("Expo send error", err);
           }
         }
+
+        // Persist every individual notification
+        await Promise.all(batch.map(storeNotification));
       }
-    }
+    }),
+  );
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        message: "Success",
-      }),
-    };
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        message: "Internal server error",
-      }),
-    };
-  }
+  return { statusCode: 200, body: JSON.stringify({ message: "Success" }) };
 };
 
-const handlePushTickets = (
+// ────────────────────────────────────────────────────────────────────────────
+// 5. Ticket handling & stale‑token cleanup
+// ────────────────────────────────────────────────────────────────────────────
+async function handleTickets(
   tickets: ExpoPushTicket[],
   chunk: ExpoPushMessage[],
-) => {
-  tickets.forEach((ticket, index) => {
-    if (ticket.status === "ok") return;
-    if (ticket.details === undefined) return;
+) {
+  await Promise.all(
+    tickets.map(async (ticket, idx) => {
+      if (ticket.status !== "error") return;
+      if (ticket.details?.error !== "DeviceNotRegistered") return;
 
-    const token = chunk[index]?.to;
-    if (typeof token !== "string") return;
+      const to = chunk[idx]?.to;
+      const token =
+        typeof to === "string" ? to : Array.isArray(to) ? to[0] : null;
+      if (!token) return;
 
-    switch (ticket.details.error) {
-      case "DeviceNotRegistered":
-        void removeTokenFromDatabase(token);
-        break;
-    }
-  });
-};
+      try {
+        await db
+          .delete(schema.pushToken)
+          .where(eq(schema.pushToken.token, token));
+      } catch (err) {
+        console.error("Failed to delete stale push token", err);
+      }
+    }),
+  );
+}
 
-const removeTokenFromDatabase = async (token: string) => {
-  await db.delete(schema.pushToken).where(eq(schema.pushToken.token, token));
-};
-
+// ────────────────────────────────────────────────────────────────────────────
+// 6. Middy wrapper
+// ────────────────────────────────────────────────────────────────────────────
 export const handler = middy(lambdaHandler).use(
-  parser({ schema: notificationBody, envelope: SqsEnvelope }),
+  parser({ schema: NotificationSchema, envelope: SqsEnvelope }),
 );
