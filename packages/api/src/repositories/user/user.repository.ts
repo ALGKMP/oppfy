@@ -149,6 +149,30 @@ export class UserRepository {
     await db.delete(this.schema.user).where(eq(this.schema.user.id, userId));
   }
 
+  // given a list of phone numbers return all the ones that dont exist in the databas
+  async getUnregisteredPhoneNumbers(
+    { phoneNumbers }: ExistingPhoneNumbersParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<string[]> {
+    const existingNumbers = await db
+      .select({ phoneNumber: this.schema.user.phoneNumber })
+      .from(this.schema.user)
+      .innerJoin(
+        this.schema.userStatus,
+        eq(this.schema.user.id, this.schema.userStatus.userId),
+      )
+      .where(
+        and(
+          inArray(this.schema.user.phoneNumber, phoneNumbers),
+          eq(this.schema.userStatus.isOnApp, false),
+        ),
+      );
+
+    return phoneNumbers.filter(
+      (number) => !existingNumbers.includes({ phoneNumber: number }),
+    );
+  }
+
   async existingPhoneNumbers(
     { phoneNumbers }: ExistingPhoneNumbersParams,
     db: DatabaseOrTransaction = this.db,

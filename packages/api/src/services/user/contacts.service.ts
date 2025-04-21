@@ -47,7 +47,7 @@ export class ContactsService {
   async filterPhoneNumbersOnApp({
     phoneNumbers,
   }: FilterPhoneNumbersOnAppParams): Promise<Result<string[], never>> {
-    const result = await this.userRepository.existingPhoneNumbers({
+    const result = await this.userRepository.getUnregisteredPhoneNumbers({
       phoneNumbers,
     });
 

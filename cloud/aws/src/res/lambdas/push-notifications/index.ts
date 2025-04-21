@@ -273,17 +273,71 @@ const lambdaHandler = async (
             }
           }
 
-          switch (eventType) {
-            case "like":
-              break;
-            case "post":
-              break;
-            case "comment":
-              break;
-            case "follow":
-              break;
-            case "friend":
-              break;
+          // Send push notification
+          const pushMessage: ExpoPushMessage = {
+            to: pushTokens.map((token) => token.token),
+            sound: "default",
+            title: message,
+            body: message,
+            data: {
+              eventType,
+              entityType,
+              entityId,
+            },
+          };
+          const chunks = expo.chunkPushNotifications([pushMessage]);
+          for (const chunk of chunks) {
+            try {
+              const tickets = await expo.sendPushNotificationsAsync(chunk);
+              handlePushTickets(tickets, chunk);
+            } catch (error) {
+              console.error(error);
+            }
+          }
+        } else {
+          const notification = notifications[0];
+          if (!notification) {
+            console.log("No notification found");
+            continue;
+          }
+
+          const recentNotifications = await getRecentNotifications({
+            recipientId: userId,
+            entityId,
+            entityType:
+              entityType as (typeof notificationBody._type)["entityType"],
+            eventType:
+              eventType as (typeof notificationBody._type)["eventType"],
+            minutesThreshold: 10,
+            limit: 1,
+          });
+
+          if (recentNotifications.length > 0) {
+            console.log("Notification already sent");
+            continue;
+          }
+
+          // Send push notification
+          const pushMessage: ExpoPushMessage = {
+            to: pushTokens.map((token) => token.token),
+            sound: "default",
+            title: notification.title,
+            body: notification.body,
+            data: {
+              eventType,
+              entityType,
+              entityId,
+            },
+          };
+
+          const chunks = expo.chunkPushNotifications([pushMessage]);
+          for (const chunk of chunks) {
+            try {
+              const tickets = await expo.sendPushNotificationsAsync(chunk);
+              handlePushTickets(tickets, chunk);
+            } catch (error) {
+              console.error(error);
+            }
           }
         }
       }
