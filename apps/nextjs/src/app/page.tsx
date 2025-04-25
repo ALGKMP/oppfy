@@ -12,6 +12,8 @@ import {
   useTransform,
 } from "framer-motion";
 
+import { api } from "~/trpc/react";
+
 /** ===============================================================
  *  Oppfy Landing v6 – Next Level Experience
  *  ===============================================================
@@ -201,6 +203,8 @@ export default function WaitlistPage() {
     return () => removeEventListener("mousemove", fn);
   }, [isMobile]);
 
+  const joinWaitlist = api.waitlist.joinWaitlist.useMutation();
+
   /* ---------------- submit ---------------- */
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -209,8 +213,10 @@ export default function WaitlistPage() {
     if (!/^[0-9+()\s-]{6,}$/.test(value)) return phoneRef.current.focus();
     setSubmitting(true);
     try {
-      await new Promise((r) => setTimeout(r, 800));
+      await joinWaitlist.mutateAsync({ phone: value });
       setSubmitted(true);
+    } catch (error) {
+      console.error("Failed to join waitlist:", error);
     } finally {
       setSubmitting(false);
     }

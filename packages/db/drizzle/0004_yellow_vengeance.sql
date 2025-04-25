@@ -1,0 +1,1 @@
+ALTER TABLE "waitlist" ADD CONSTRAINT "waitlist_phone_number_unique" UNIQUE("phone_number");

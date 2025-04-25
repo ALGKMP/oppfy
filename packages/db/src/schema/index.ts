@@ -717,3 +717,11 @@ export const reportUserRelations = relations(reportUser, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const waitlist = pgTable("waitlist", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  phoneNumber: text("phone_number").notNull().unique(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});

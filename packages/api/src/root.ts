@@ -13,6 +13,7 @@ import { contactsRouter } from "./routers/user/contacts.router";
 import { notificationRouter } from "./routers/user/notification.router";
 import { profileRouter } from "./routers/user/profile.router";
 import { userRouter } from "./routers/user/user.router";
+import { waitlistRouter } from "./routers/waitlist.router";
 import { createCallerFactory, createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
@@ -27,6 +28,7 @@ export const appRouter = createTRPCRouter({
   report: reportRouter,
   contacts: contactsRouter,
   notification: notificationRouter,
+  waitlist: waitlistRouter,
 });
 
 export const createCaller = createCallerFactory(appRouter);
