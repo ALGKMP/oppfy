@@ -1,8 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import type { MotionValue } from "framer-motion";
 import {
   AnimatePresence,
   motion,
@@ -12,681 +12,574 @@ import {
   useTransform,
 } from "framer-motion";
 
-// Premium animated particle component
-const Particle = ({ delay = 0 }: { delay?: number }) => {
-  const size = Math.random() * 5 + 2;
-  const xOffset = Math.random() * 100;
-  const yOffset = Math.random() * 100;
-  const duration = Math.random() * 10 + 15;
+/** ===============================================================
+ *  Oppfy Landing v6 – Next Level Experience
+ *  ===============================================================
+ *  ✦ Ultra-smooth animations with spring physics
+ *  ✦ Dynamic gradient effects that respond to movement
+ *  ✦ Sophisticated micro-interactions
+ *  ✦ Enhanced visual hierarchy and flow
+ *  ✦ Improved mobile experience
+ * ----------------------------------------------------------------*/
 
+/* ---------------- helper hooks ---------------- */
+function useIsMobile() {
+  const [state, setState] = useState(true);
+  useEffect(() => {
+    const fn = () => setState(window.innerWidth < 768);
+    fn();
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+  return state;
+}
+
+function useMousePosition() {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  return { mouseX, mouseY };
+}
+
+/* ---------------- decorative elements ---------------- */
+const Dot = () => {
+  const size = Math.random() * 4 + 2;
+  const x = Math.random() * 100;
+  const y = Math.random() * 100;
+  const drift = Math.random() * 60 - 30;
+  const duration = Math.random() * 12 + 18;
   return (
     <motion.div
       className="absolute rounded-full"
       style={{
         width: size,
         height: size,
-        left: `${xOffset}%`,
-        top: `${yOffset}%`,
-        background: `radial-gradient(circle at center, rgba(242, 20, 255, 0.8), rgba(242, 20, 255, 0))`,
-        boxShadow: "0 0 10px 2px rgba(242, 20, 255, 0.3)",
+        left: `${x}%`,
+        top: `${y}%`,
+        background: "#F214FF",
+        opacity: 0.5,
+        boxShadow: "0 0 10px 3px rgba(242,20,255,.4)",
       }}
-      initial={{ opacity: 0, scale: 0 }}
+      initial={{ scale: 0, opacity: 0 }}
       animate={{
+        scale: [0, 1.2, 0.7],
+        y: [-40, 40],
+        x: [0, drift],
         opacity: [0, 0.8, 0],
-        scale: [0, 1, 0.5],
-        y: [-50, 50],
-        x: [0, Math.random() * 50 - 25],
       }}
       transition={{
-        duration: duration,
+        duration,
         repeat: Infinity,
-        delay: delay,
         ease: "easeInOut",
+        delay: Math.random() * 5,
       }}
     />
   );
 };
 
-// Animated blurred light gradient
-const LightSource = ({
-  color1,
-  color2,
-  size,
-  position,
-  animate = true,
-  delay = 0,
-}: {
-  color1: string;
-  color2: string;
-  size: number;
-  position: { x: number | string; y: number | string };
-  animate?: boolean;
-  delay?: number;
-}) => {
-  const animation = animate
-    ? {
-        opacity: [0.3, 0.7, 0.3],
-        scale: [1, 1.2, 1],
-      }
-    : {};
+const Star = () => {
+  const size = Math.random() * 8 + 8;
+  const x = Math.random() * 100;
+  const y = Math.random() * 100;
+  const delay = Math.random() * 6;
+  const rotate = Math.random() * 360;
+  return (
+    <motion.svg
+      className="absolute text-fuchsia-500"
+      style={{ left: `${x}%`, top: `${y}%` }}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      initial={{ scale: 0, opacity: 0, rotate: 0 }}
+      animate={{
+        scale: [0, 1.3, 0],
+        opacity: [0, 1, 0],
+        rotate: [rotate, rotate + 180],
+      }}
+      transition={{ duration: 2.5, repeat: Infinity, delay }}
+    >
+      <path d="M12 2l1.9 5.9H20l-4.9 3.6 1.9 5.9L12 13.8 7 17.4l1.9-5.9L4 7.9h6.1z" />
+    </motion.svg>
+  );
+};
+
+const FloatingShape = ({ index }: { index: number }) => {
+  const shapes = [
+    "M0 15L15 0L30 15L15 30Z", // diamond
+    "M0 0H30V30H0Z", // square
+    "M15 0L30 30H0Z", // triangle
+    "M0 15C0 6.716 6.716 0 15 0C23.284 0 30 6.716 30 15C30 23.284 23.284 30 15 30C6.716 30 0 23.284 0 15Z", // circle
+  ];
+  const shape = shapes[index % shapes.length];
+  const size = Math.random() * 30 + 20;
+  const x = Math.random() * 80 + 10;
+  const y = Math.random() * 80 + 10;
 
   return (
-    <motion.div
-      className="absolute rounded-full blur-[80px]"
-      style={{
-        left: position.x,
-        top: position.y,
-        width: size,
-        height: size,
-        background: `radial-gradient(circle at center, ${color1}, ${color2})`,
-        zIndex: -1,
+    <motion.svg
+      className="absolute opacity-20"
+      style={{ left: `${x}%`, top: `${y}%` }}
+      width={size}
+      height={size}
+      viewBox="0 0 30 30"
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{
+        scale: [0, 1, 0.8],
+        y: [y - 50, y + 50],
+        opacity: [0, 0.2, 0],
+        rotate: [0, 180],
       }}
-      initial={{ opacity: 0.3, scale: 1 }}
-      animate={animation}
       transition={{
-        duration: 8,
+        duration: 20 + Math.random() * 10,
         repeat: Infinity,
-        repeatType: "reverse",
         ease: "easeInOut",
-        delay: delay,
+        delay: Math.random() * 5,
       }}
-    />
+    >
+      <path d={shape} fill="url(#grad)" />
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FF00CC" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="#FF66FF" stopOpacity="0.6" />
+        </linearGradient>
+      </defs>
+    </motion.svg>
   );
 };
 
-// Dynamic 3D spotlight effect
-const SpotlightEffect = ({
-  mouseX,
-  mouseY,
-}: {
-  mouseX: MotionValue<number>;
-  mouseY: MotionValue<number>;
-}) => {
-  // Guard for server-side rendering
-  const isBrowser = typeof window !== "undefined";
+export default function WaitlistPage() {
+  const isMobile = useIsMobile();
+  const { mouseX, mouseY } = useMousePosition();
 
-  const spotlightX = useTransform(mouseX, (value) => {
-    if (!isBrowser) return "50%"; // Safe fallback for SSR
-    return `${(value / window.innerWidth) * 100}%`;
-  });
+  /* ---------------- state ---------------- */
+  const [modalOpen, setModalOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const phoneRef = useRef<HTMLInputElement>(null);
 
-  const spotlightY = useTransform(mouseY, (value) => {
-    if (!isBrowser) return "50%"; // Safe fallback for SSR
-    return `${(value / window.innerHeight) * 100}%`;
-  });
+  /* ---------------- hero entrance ---------------- */
+  const controls = useAnimation();
+  useEffect(() => {
+    controls.start({ opacity: 1, y: 0 });
+  }, []);
 
-  return (
-    <motion.div
-      className="pointer-events-none absolute inset-0 opacity-40 mix-blend-soft-light"
-      style={{
-        background: `radial-gradient(circle at ${spotlightX} ${spotlightY}, rgba(255, 255, 255, 0.15), transparent 50%)`,
-      }}
-    />
-  );
-};
-
-export default function HomePage() {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [hoverButton, setHoverButton] = useState(false);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const phoneRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const containerControls = useAnimation();
-  const buttonControls = useAnimation();
-
-  // Enhanced mouse interaction
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  // Spring physics for smoother phone movement - balanced for better feel
-  const springConfig = { damping: 30, stiffness: 120 }; // More responsive physics
-  const rotateX = useSpring(0, springConfig);
-  const rotateY = useSpring(0, springConfig);
-  const phoneScale = useSpring(0.95, springConfig);
-
-  // Animated gradient background angle
-  const gradientAngle = useMotionValue(135);
+  /* ---------------- dynamic gradient ---------------- */
+  const angle = useMotionValue(135);
+  const gradientX = useTransform(mouseX, [0, window.innerWidth], [-50, 50]);
+  const gradientY = useTransform(mouseY, [0, window.innerHeight], [-50, 50]);
 
   useEffect(() => {
-    // Ensure we're in browser environment before using window
-    if (typeof window === "undefined") return;
+    let id = requestAnimationFrame(function loop() {
+      angle.set(135 + Math.sin(performance.now() / 5000) * 50);
+      id = requestAnimationFrame(loop);
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
 
-    // Check if we're on mobile
-    const isMobile = window.innerWidth < 768; // 768px is the md breakpoint
+  /* ---------------- phone tilt (desktop) ---------------- */
+  const rotX = useSpring(0, { stiffness: 150, damping: 20 });
+  const rotY = useSpring(0, { stiffness: 150, damping: 20 });
+  const scale = useSpring(1, { stiffness: 200, damping: 22 });
 
-    // Animate gradient background
-    const interval = setInterval(() => {
-      gradientAngle.set(135 + Math.sin(Date.now() / 10000) * 30);
-    }, 50);
-
-    const sequence = async () => {
-      await containerControls.start({ opacity: 1 });
-      setIsLoaded(true);
-      phoneScale.set(1);
-
-      // Auto-play video after staggered animation sequence, but only on desktop
-      if (!isMobile) {
-        setTimeout(() => {
-          if (videoRef.current) {
-            try {
-              videoRef.current.muted = false;
-              videoRef.current.volume = 0.2;
-              const playPromise = videoRef.current.play();
-
-              if (playPromise !== undefined) {
-                playPromise
-                  .then(() => {
-                    setIsVideoPlaying(true);
-                  })
-                  .catch((error) => {
-                    console.error("Video autoplay failed:", error);
-                  });
-              }
-            } catch (err) {
-              console.error("Error playing video:", err);
-            }
-          }
-        }, 1500);
-      }
-    };
-
-    sequence();
-
-    const handleMouseMove = (e: MouseEvent) => {
-      // Update mouse position for effects
-      mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
-
-      // Subtler, more intuitive 3D phone effect
-      if (phoneRef.current) {
-        const rect = phoneRef.current.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-
-        // Calculate normalized direction vector with reduced movement
-        const maxRotation = 6; // Balanced rotation
-
-        // Safe access to window properties
-        const viewportWidth = window.innerWidth || 1024;
-        const viewportHeight = window.innerHeight || 768;
-
-        // Calculate distance from center, with balanced divisor
-        const distanceX = (e.clientX - centerX) / (viewportWidth / 3);
-        const distanceY = (e.clientY - centerY) / (viewportHeight / 3);
-
-        // Apply spring physics for smooth animation - follows cursor
-        rotateY.set(distanceX * maxRotation); // Follow cursor horizontally
-        rotateX.set(-distanceY * maxRotation); // Follow cursor vertically
-      }
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      clearInterval(interval);
-    };
-  }, [
-    containerControls,
-    mouseX,
-    mouseY,
-    phoneScale,
-    rotateX,
-    rotateY,
-    gradientAngle,
-  ]);
-
-  // Advanced hover states for CTA button
   useEffect(() => {
-    if (hoverButton) {
-      buttonControls.start({
-        scale: 1.05,
-        boxShadow: "0 20px 30px -10px rgba(242, 20, 255, 0.5)",
-        transition: { duration: 0.2 },
-      });
-    } else {
-      buttonControls.start({
-        scale: 1,
-        boxShadow: "0 10px 20px -5px rgba(242, 20, 255, 0.3)",
-        transition: { duration: 0.2 },
-      });
+    if (isMobile) return;
+    const fn = (e: MouseEvent) => {
+      rotY.set(((e.clientX - innerWidth / 2) / (innerWidth / 2)) * 7);
+      rotX.set((-(e.clientY - innerHeight / 2) / (innerHeight / 2)) * 7);
+    };
+    addEventListener("mousemove", fn);
+    return () => removeEventListener("mousemove", fn);
+  }, [isMobile]);
+
+  /* ---------------- submit ---------------- */
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!phoneRef.current) return;
+    const value = phoneRef.current.value.trim();
+    if (!/^[0-9+()\s-]{6,}$/.test(value)) return phoneRef.current.focus();
+    setSubmitting(true);
+    try {
+      await new Promise((r) => setTimeout(r, 800));
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
     }
-  }, [hoverButton, buttonControls]);
-
-  // Restart video
-  const toggleVideoPlayback = () => {
-    if (!videoRef.current) return;
-
-    if (isVideoPlaying) {
-      videoRef.current.pause();
-    } else {
-      videoRef.current.currentTime = 0;
-      videoRef.current
-        .play()
-        .catch((err) => console.error("Error playing video:", err));
-    }
-    setIsVideoPlaying(!isVideoPlaying);
-  };
-
-  // Premium animation variants
-  const phoneVariants = {
-    hidden: {
-      opacity: 0,
-      scale: 0.9,
-      y: 100,
-    },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: {
-        type: "spring",
-        damping: 20,
-        stiffness: 100,
-        duration: 1.2,
-        delay: 0.5,
-      },
-    },
-  };
-
-  const contentVariants = {
-    hidden: {
-      opacity: 0,
-    },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.6,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: {
-      opacity: 0,
-      y: 30,
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring",
-        damping: 25,
-        stiffness: 200,
-      },
-    },
-  };
+  }
 
   return (
-    <main className="relative flex h-screen w-full flex-col items-center justify-center overflow-hidden">
-      {/* Premium animated background - brightened and more pink */}
+    <main className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-4 py-16 text-white">
+      {/* Dynamic gradient backdrop */}
       <motion.div
-        className="absolute inset-0 -z-10"
+        className="pointer-events-none absolute inset-0 -z-20"
         style={{
           background: useTransform(
-            gradientAngle,
-            (angle) => `linear-gradient(${angle}deg, #150025 0%, #3F0053 100%)`,
+            angle,
+            (a) =>
+              `linear-gradient(${a}deg, #2a0b4a 0%, #5a1b8a 50%, #7a2bca 100%)`,
           ),
+          transform: `translate(${gradientX}px, ${gradientY}px)`,
         }}
-      >
-        {/* Animated spotlight that follows cursor */}
-        <SpotlightEffect mouseX={mouseX} mouseY={mouseY} />
+      />
 
-        {/* Dynamic light sources */}
-        <LightSource
-          color1="rgba(255, 41, 255, 0.6)"
-          color2="rgba(128, 0, 255, 0)"
-          size={800}
-          position={{ x: "10%", y: "0%" }}
-          delay={0}
-        />
-        <LightSource
-          color1="rgba(255, 0, 247, 0.5)"
-          color2="rgba(156, 0, 255, 0)"
-          size={700}
-          position={{ x: "80%", y: "20%" }}
-          delay={2}
-        />
-        <LightSource
-          color1="rgba(255, 83, 178, 0.5)"
-          color2="rgba(242, 20, 255, 0)"
-          size={600}
-          position={{ x: "40%", y: "80%" }}
-          delay={4}
-        />
-
-        {/* Premium animated particles */}
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(15)].map((_, i) => (
-            <Particle key={i} delay={i * 0.5} />
-          ))}
-        </div>
-
-        {/* Subtle grain texture overlay */}
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.05] mix-blend-overlay"></div>
-      </motion.div>
-
-      {/* Main content container with enhanced layout - now truly centered and responsive */}
-      <motion.div
-        className="relative z-10 mx-auto flex w-full max-w-[1400px] flex-col-reverse items-center justify-center px-4 sm:px-6 md:flex-row md:items-center md:gap-8 lg:gap-12"
-        initial={{ opacity: 0 }}
-        animate={containerControls}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      >
-        {/* RIGHT SIDE - Content with premium design */}
-        <div className="w-full max-w-[600px] md:w-1/2 md:pr-4 lg:pr-8">
-          <motion.div
-            className="max-w-lg"
-            variants={contentVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {/* Simplified premium logo */}
-            <motion.div variants={itemVariants}>
-              <div className="mb-6 flex items-center gap-4 sm:mb-8">
-                <motion.div
-                  className="relative overflow-hidden rounded-xl"
-                  whileHover={{
-                    rotate: [0, -5, 5, 0],
-                    transition: { duration: 0.5 },
-                  }}
-                >
-                  <Image
-                    src="/icon.png"
-                    alt="Oppfy Logo"
-                    className="h-12 w-12 rounded-xl object-cover sm:h-14 sm:w-14"
-                    width={56}
-                    height={56}
-                  />
-                </motion.div>
-                <div>
-                  <h2 className="text-2xl font-bold sm:text-3xl">
-                    <span className="bg-gradient-to-r from-[#F214FF] to-[#FF14F0] bg-clip-text text-transparent">
-                      oppfy
-                    </span>
-                  </h2>
-                  <p className="text-xs text-white/60 sm:text-sm">BETA • iOS</p>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Premium headline with fixed typography spacing - responsive */}
-            <motion.h1
-              variants={itemVariants}
-              className="mb-6 pb-1 text-4xl font-extrabold leading-tight tracking-tight text-white sm:mb-8 sm:text-5xl md:text-5xl lg:text-6xl xl:text-7xl"
-            >
-              Friends <br className="hidden md:block" /> capture{" "}
-              <br className="hidden md:block" />
-              <span className="bg-gradient-to-r from-[#F214FF] to-[#FF14F0] bg-clip-text pb-1 text-transparent">
-                your moments
-              </span>
-            </motion.h1>
-
-            {/* Premium description - responsive */}
-            <motion.p
-              variants={itemVariants}
-              className="mb-6 text-base leading-relaxed text-white/80 sm:mb-8 sm:text-lg md:text-xl"
-            >
-              A revolutionary social experience where{" "}
-              <span className="font-bold text-white">
-                friends become your photographers
-              </span>
-              , creating your authentic social timeline. No selfies, no
-              posing—just real life.
-            </motion.p>
-
-            {/* Enhanced feature highlights - responsive grid */}
-            <motion.div
-              variants={itemVariants}
-              className="mb-6 grid grid-cols-1 gap-3 sm:mb-8 sm:grid-cols-2"
-            >
-              {[
-                {
-                  icon: "👁️",
-                  text: "See yourself through their eyes",
-                  color: "from-pink-500/40 to-purple-500/40",
-                },
-                {
-                  icon: "✨",
-                  text: "Pure authenticity",
-                  color: "from-violet-500/40 to-indigo-500/40",
-                },
-                {
-                  icon: "🔄",
-                  text: "Return the favor",
-                  color: "from-fuchsia-500/40 to-pink-500/40",
-                },
-                {
-                  icon: "🎭",
-                  text: "The real you",
-                  color: "from-purple-500/40 to-violet-500/40",
-                },
-              ].map((feature, i) => (
-                <motion.div
-                  key={i}
-                  className={`flex items-center gap-3 rounded-xl bg-gradient-to-r ${feature.color} p-0.5 backdrop-blur-sm`}
-                  whileHover={{
-                    y: -5,
-                    transition: { duration: 0.2 },
-                  }}
-                >
-                  <div className="flex h-full w-full items-center gap-3 rounded-[0.7rem] bg-[#0e0024]/90 py-2.5 pl-3 pr-4 backdrop-blur-md">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-lg shadow-inner">
-                      {feature.icon}
-                    </span>
-                    <span className="text-sm font-medium text-white">
-                      {feature.text}
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-
-            {/* Improved premium CTA button with Apple icon - responsive */}
-            <motion.div variants={itemVariants} className="w-full">
-              <motion.a
-                href="https://testflight.apple.com/join/EHMR7AxB"
-                className="group relative flex w-full"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                {/* Elegant button with primary color */}
-                <div className="w-full overflow-hidden rounded-full bg-[#F214FF] px-4 py-3 shadow-lg shadow-[#F214FF]/30 sm:px-6 sm:py-4">
-                  <div className="flex items-center justify-center gap-2 sm:gap-3">
-                    {/* Apple icon */}
-                    <svg
-                      viewBox="0 0 384 512"
-                      className="h-4 w-4 text-white sm:h-5 sm:w-5"
-                      fill="currentColor"
-                    >
-                      <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
-                    </svg>
-                    <span className="text-base font-semibold text-white sm:text-lg">
-                      Download for iOS
-                    </span>
-                  </div>
-                </div>
-
-                {/* Elegant glow effect */}
-                <motion.div
-                  className="absolute -inset-4 -z-10 rounded-full opacity-0 blur-xl"
-                  style={{
-                    background:
-                      "radial-gradient(circle, rgba(242, 20, 255, 0.8) 0%, rgba(242, 20, 255, 0) 70%)",
-                  }}
-                  animate={{ opacity: [0, 0.5, 0] }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                  }}
-                />
-              </motion.a>
-
-              {/* Android Coming Soon indicator */}
-              <div className="mt-3 flex items-center justify-center gap-2">
-                <svg
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4 text-white/70"
-                  fill="currentColor"
-                >
-                  <path d="M17.6,9.48l1.84-3.18c0.16-0.31,0.05-0.69-0.26-0.85c-0.31-0.16-0.69-0.05-0.85,0.26l-1.86,3.22 c-1.56-0.65-3.28-1.01-5.07-1.01c-1.79,0-3.51,0.36-5.07,1.01L4.47,5.72c-0.16-0.31-0.55-0.42-0.85-0.26 c-0.31,0.16-0.42,0.55-0.26,0.85l1.84,3.18C1.74,11.13,0,14.08,0,17.5h24C24,14.08,22.26,11.13,17.6,9.48z M6,13.5 c-0.83,0-1.5-0.67-1.5-1.5s0.67-1.5,1.5-1.5s1.5,0.67,1.5,1.5S6.83,13.5,6,13.5z M18,13.5c-0.83,0-1.5-0.67-1.5-1.5 s0.67-1.5,1.5-1.5s1.5,0.67,1.5,1.5S18.83,13.5,18,13.5z" />
-                </svg>
-                <span className="text-xs text-white/70 sm:text-sm">
-                  Android Coming Soon
-                </span>
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-
-        {/* LEFT SIDE - Enhanced 3D iPhone with video - hidden on mobile */}
+      {/* Animated background elements */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        {/* Dynamic gradient blobs */}
         <motion.div
-          className="relative mb-8 hidden w-full max-w-[500px] justify-center md:mb-0 md:flex md:w-1/2"
-          variants={phoneVariants}
-          initial="hidden"
-          animate="visible"
-        >
+          className="absolute -left-40 -top-40 h-[36rem] w-[36rem] rounded-full bg-fuchsia-500/25 blur-[160px]"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.6, 0.8, 0.6],
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-0 right-0 h-[30rem] w-[30rem] rounded-full bg-purple-600/25 blur-[160px]"
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.6, 0.8, 0.6],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2,
+          }}
+        />
+        <motion.div
+          className="absolute left-1/2 top-1/2 h-[40rem] w-[40rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-pink-500/10 blur-[200px]"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.4, 0.6, 0.4],
+          }}
+          transition={{
+            duration: 12,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 4,
+          }}
+        />
+
+        {/* Interactive particles */}
+        {[...Array(40)].map((_, i) => (
+          <Dot key={`d${i}`} />
+        ))}
+        {[...Array(20)].map((_, i) => (
+          <Star key={`s${i}`} />
+        ))}
+        {[...Array(8)].map((_, i) => (
+          <FloatingShape key={`fs${i}`} index={i} />
+        ))}
+      </div>
+
+      {/* Hero section */}
+      <motion.section
+        initial={{ opacity: 0, y: 80 }}
+        animate={controls}
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        className="flex w-full max-w-[1200px] flex-col items-center justify-center gap-12 md:flex-row md:gap-16 lg:gap-24"
+      >
+        {/* Phone visual */}
+        {!isMobile && (
           <motion.div
-            ref={phoneRef}
-            className="relative"
             style={{
-              rotateX: rotateX,
-              rotateY: rotateY,
+              rotateX: rotX,
+              rotateY: rotY,
+              scale,
               transformStyle: "preserve-3d",
-              transformPerspective: 1000,
-              scale: phoneScale,
+              transformPerspective: 1200,
             }}
+            whileHover={{ scale: 1.05 }}
+            className="relative flex justify-center"
           >
-            {/* Premium light effects around phone */}
-            <motion.div
-              className="absolute -right-[15%] -top-[15%] -z-10 h-[130%] w-[130%] rounded-full opacity-60 blur-[80px]"
-              animate={{
-                background: [
-                  "radial-gradient(circle at center, rgba(242, 20, 255, 0.4), rgba(242, 20, 255, 0))",
-                  "radial-gradient(circle at center, rgba(98, 0, 234, 0.4), rgba(98, 0, 234, 0))",
-                  "radial-gradient(circle at center, rgba(242, 20, 255, 0.4), rgba(242, 20, 255, 0))",
-                ],
-              }}
-              transition={{
-                duration: 8,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
+            <div className="relative aspect-[9/16] w-[360px] p-2">
+              {/* Glassy phone frame */}
+              <div className="absolute inset-0 rounded-[52px] bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-sm" />
+              <div className="absolute inset-[1px] rounded-[50px] bg-black/10 backdrop-blur-md" />
 
-            {/* Ultra-realistic 3D iPhone Pro - modern proportions */}
-            <div className="relative h-[620px] w-[300px]">
-              {/* 3D phone structure with premium shadow */}
-              <div className="absolute -bottom-6 -left-2 -right-6 -top-2 -z-10 translate-x-2 rotate-[-5deg] scale-[0.95] transform-gpu rounded-[50px] bg-black/20 blur-lg"></div>
-
-              {/* Phone outer frame with realistic metallic finish */}
-              <div className="absolute inset-0 transform-gpu rounded-[50px] bg-[#0a0a0a] shadow-lg">
-                {/* Subtle curved edge highlight */}
-                <div className="absolute inset-0 rounded-[50px] bg-gradient-to-tr from-[#2a2a2f] via-transparent to-[#2a2a2f]/80 opacity-50"></div>
-
-                {/* Metallic rim with subtle reflection */}
-                <div
-                  className="absolute inset-1 transform-gpu rounded-[46px] bg-[#0a0a0a]"
-                  style={{
-                    boxShadow: "inset 0 0 0 1.5px rgba(60, 60, 70, 0.4)",
-                  }}
-                >
-                  {/* Side buttons with realistic rendering */}
-                  <div className="absolute -left-[1px] top-[120px] h-[12px] w-[2px] rounded-l-full bg-[#2a2a2c]"></div>
-                  <div className="absolute -left-[1px] top-[140px] h-[12px] w-[2px] rounded-l-full bg-[#2a2a2c]"></div>
-                  <div className="absolute -left-[1px] top-[160px] h-[40px] w-[2px] rounded-l-full bg-[#2a2a2c]"></div>
-                  <div className="absolute -right-[1px] top-[140px] h-[30px] w-[2px] rounded-r-full bg-[#2a2a2c]"></div>
-
-                  {/* Ultra-realistic screen with minimal bezel */}
-                  <div className="absolute inset-[3px] transform-gpu overflow-hidden rounded-[44px] bg-black">
-                    {/* Dynamic Island - minimal pill */}
-                    <div className="absolute left-1/2 top-[10px] z-10 -translate-x-1/2">
-                      <div className="h-[8px] w-[60px] rounded-full bg-black">
-                        {/* Tiny camera dot */}
-                        <div className="absolute right-[15px] top-[2px] h-[4px] w-[4px] rounded-full bg-[#0c0c0c]"></div>
-                      </div>
-                    </div>
-
-                    {/* Premium video content with letterboxing */}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black">
-                      <video
-                        ref={videoRef}
-                        className="h-full w-full object-contain"
-                        playsInline
-                        muted
-                        onClick={toggleVideoPlayback}
-                      >
-                        <source src="/vid.mp4" type="video/mp4" />
-                      </video>
-                    </div>
-
-                    {/* Premium glass reflections */}
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/10 opacity-70"></div>
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20 opacity-30"></div>
-                    <div className="pointer-events-none absolute inset-0 rounded-[44px] shadow-inner"></div>
-
-                    {/* Glass glare effect */}
-                    <motion.div
-                      className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-30"
-                      animate={{
-                        backgroundPosition: ["0% 0%", "100% 100%"],
-                      }}
-                      transition={{
-                        duration: 5,
-                        repeat: Infinity,
-                        repeatType: "reverse",
-                      }}
-                    />
-
-                    {/* Play/pause overlay */}
-                    <motion.div
-                      className="absolute inset-0 flex items-center justify-center bg-black/0"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: isVideoPlaying ? 0 : 0.5 }}
-                      transition={{ duration: 0.3 }}
-                      onClick={toggleVideoPlayback}
-                    >
-                      {!isVideoPlaying && (
-                        <motion.div
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 20,
-                            delay: 0.1,
-                          }}
-                          className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-black/20 backdrop-blur-md"
-                        >
-                          <div className="flex h-[60px] w-[60px] items-center justify-center rounded-full bg-gradient-to-br from-[#F214FF] to-[#FF14F0] shadow-lg">
-                            <svg
-                              viewBox="0 0 24 24"
-                              width="26"
-                              height="26"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M6.5 4.5L18.5 12L6.5 19.5V4.5Z"
-                                fill="white"
-                                stroke="white"
-                                strokeWidth="1"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </div>
-                        </motion.div>
-                      )}
-                    </motion.div>
-                  </div>
-                </div>
+              {/* Video container with outer border */}
+              <div className="relative h-full w-full overflow-hidden rounded-[48px] ring-[0.5px] ring-inset ring-white/30">
+                <video
+                  src="/vid.mp4"
+                  className="h-full w-full object-cover"
+                  playsInline
+                  muted
+                  autoPlay
+                  loop
+                />
               </div>
             </div>
+
+            {/* Animated glow effect */}
+            <motion.div
+              className="absolute -inset-6 -z-10 rounded-[60px] blur-2xl"
+              animate={{
+                opacity: [0.4, 0.7, 0.4],
+                scale: [0.95, 1.05, 0.95],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }}
+              style={{
+                background:
+                  "radial-gradient(circle, #F214FF99 0%, #F214FF00 70%)",
+              }}
+            />
           </motion.div>
-        </motion.div>
-      </motion.div>
+        )}
+
+        {/* Content section */}
+        <div className="flex w-full max-w-md flex-col items-center text-center md:items-center lg:items-start lg:text-left">
+          {/* Logo */}
+          <motion.div
+            className="mb-8 flex items-center gap-3"
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+          >
+            <div className="relative">
+              <Image
+                src="/icon.png"
+                alt="logo"
+                width={48}
+                height={48}
+                className="rounded-xl"
+              />
+              <motion.div
+                className="absolute -inset-1 -z-10 rounded-xl blur-md"
+                animate={{ opacity: [0.4, 0.8, 0.4] }}
+                transition={{ duration: 2.5, repeat: Infinity }}
+                style={{
+                  background:
+                    "radial-gradient(circle, #F214FF77 0%, #F214FF00 70%)",
+                }}
+              />
+            </div>
+            <span className="bg-gradient-to-r from-[#F214FF] to-[#FF14F0] bg-clip-text text-3xl font-bold text-transparent">
+              oppfy
+            </span>
+          </motion.div>
+
+          {/* Headline */}
+          <motion.h1
+            className="mb-8 text-4xl font-extrabold leading-tight tracking-tight md:text-5xl lg:text-6xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+          >
+            Real moments,{" "}
+            <span className="bg-gradient-to-r from-[#F214FF] to-[#FF14F0] bg-clip-text text-transparent">
+              captured by friends
+            </span>
+          </motion.h1>
+
+          {/* Description */}
+          <motion.p
+            className="mb-12 max-w-md text-lg text-white/80 md:text-xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.8 }}
+          >
+            Oppfy is almost here. Join our waitlist to secure early access.
+          </motion.p>
+
+          {/* CTA Button */}
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9, duration: 0.8 }}
+            whileTap={{ scale: 0.98 }}
+            whileHover={{
+              scale: 1.02,
+              boxShadow: "0 0 30px rgba(255, 0, 204, 0.3)",
+            }}
+            onClick={() => setModalOpen(true)}
+            className="group relative w-full overflow-hidden rounded-full bg-gradient-to-r from-[#FF00CC] to-[#FF66FF] px-8 py-4 text-lg font-medium tracking-wide text-white"
+          >
+            <span className="relative z-10 flex items-center justify-center gap-3">
+              Join Waitlist
+              <motion.svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="transition-transform duration-300 group-hover:translate-x-1"
+              >
+                <path
+                  d="M5 12H19M19 12L12 5M19 12L12 19"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </motion.svg>
+            </span>
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-[#FF66FF] to-[#FF00CC] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              initial={{ x: "100%" }}
+              whileHover={{ x: 0 }}
+              transition={{ duration: 0.4 }}
+            />
+          </motion.button>
+        </div>
+      </motion.section>
+
+      {/* Modal */}
+      <AnimatePresence>
+        {modalOpen && (
+          <motion.div
+            className="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => {
+              setModalOpen(false);
+              setSubmitted(false);
+            }}
+          >
+            <motion.div
+              className="absolute inset-0 bg-black/80"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            />
+
+            <motion.div
+              className="relative mx-4 w-full max-w-md rounded-2xl bg-gradient-to-br from-[#2A004D] to-[#4A0080] p-8 shadow-2xl"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <motion.button
+                className="absolute right-6 top-6 text-white/70 hover:text-white"
+                onClick={() => {
+                  setModalOpen(false);
+                  setSubmitted(false);
+                }}
+                whileHover={{ scale: 1.1 }}
+                transition={{ duration: 0.1 }}
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18 6L6 18M6 6L18 18"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </motion.button>
+
+              <h2 className="mb-6 text-center text-3xl font-bold">
+                Join the Oppfy Waitlist
+              </h2>
+
+              {!submitted ? (
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                  <input
+                    ref={phoneRef}
+                    type="tel"
+                    placeholder="Your phone number"
+                    className="w-full rounded-xl bg-white/15 px-6 py-4 text-lg placeholder-white/50 backdrop-blur-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#FF66FF]"
+                    required
+                  />
+
+                  <motion.button
+                    type="submit"
+                    disabled={submitting}
+                    whileTap={{ scale: 0.95 }}
+                    className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#FF00CC] to-[#FF66FF] py-4 text-lg font-bold shadow-lg shadow-[#FF00CC]/30 disabled:opacity-60"
+                  >
+                    {submitting ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{
+                            duration: 1,
+                            repeat: Infinity,
+                            ease: "linear",
+                          }}
+                          className="h-5 w-5 rounded-full border-2 border-white border-t-transparent"
+                        />
+                        <span>Joining...</span>
+                      </div>
+                    ) : (
+                      "Join Now"
+                    )}
+                  </motion.button>
+                </form>
+              ) : (
+                <div className="text-center">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-[#FF00CC] to-[#FF66FF]"
+                  >
+                    <motion.svg
+                      width="48"
+                      height="48"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
+                    >
+                      <motion.path
+                        d="M20 6L9 17L4 12"
+                        stroke="white"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                      />
+                    </motion.svg>
+                  </motion.div>
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.4 }}
+                    className="text-2xl font-bold text-white"
+                  >
+                    You're on the list! 🎉
+                  </motion.p>
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3, delay: 0.5 }}
+                    className="mt-2 text-lg text-white/80"
+                  >
+                    We'll text you when we launch
+                  </motion.p>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
