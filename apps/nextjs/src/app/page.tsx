@@ -294,58 +294,7 @@ export default function WaitlistPage() {
         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
         className="flex w-full max-w-[1200px] flex-col items-center justify-center gap-12 md:flex-row md:gap-16 lg:gap-24"
       >
-        {/* Phone visual */}
-        {!isMobile && (
-          <motion.div
-            style={{
-              rotateX: rotX,
-              rotateY: rotY,
-              scale,
-              transformStyle: "preserve-3d",
-              transformPerspective: 1200,
-            }}
-            whileHover={{ scale: 1.05 }}
-            className="relative flex justify-center"
-          >
-            <div className="relative aspect-[9/16] w-[360px] p-2">
-              {/* Glassy phone frame */}
-              <div className="absolute inset-0 rounded-[52px] bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-sm" />
-              <div className="absolute inset-[1px] rounded-[50px] bg-black/10 backdrop-blur-md" />
-
-              {/* Video container with outer border */}
-              <div className="relative h-full w-full overflow-hidden rounded-[48px] ring-[0.5px] ring-inset ring-white/30">
-                <video
-                  src="/vid.mp4"
-                  className="h-full w-full object-cover"
-                  playsInline
-                  muted
-                  autoPlay
-                  loop
-                />
-              </div>
-            </div>
-
-            {/* Animated glow effect */}
-            <motion.div
-              className="absolute -inset-6 -z-10 rounded-[60px] blur-2xl"
-              animate={{
-                opacity: [0.4, 0.7, 0.4],
-                scale: [0.95, 1.05, 0.95],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Infinity,
-                repeatType: "reverse",
-              }}
-              style={{
-                background:
-                  "radial-gradient(circle, #F214FF99 0%, #F214FF00 70%)",
-              }}
-            />
-          </motion.div>
-        )}
-
-        {/* Content section */}
+        {/* Content section - now first on mobile */}
         <div className="flex w-full max-w-md flex-col items-center text-center md:items-center lg:items-start lg:text-left">
           {/* Logo */}
           <motion.div
@@ -440,6 +389,57 @@ export default function WaitlistPage() {
             />
           </motion.button>
         </div>
+
+        {/* Phone visual - now second on mobile */}
+        <motion.div
+          style={{
+            rotateX: isMobile ? 0 : rotX,
+            rotateY: isMobile ? 0 : rotY,
+            scale: isMobile ? 1 : scale,
+            transformStyle: "preserve-3d",
+            transformPerspective: 1200,
+          }}
+          whileHover={isMobile ? {} : { scale: 1.05 }}
+          className="relative flex justify-center"
+        >
+          <div
+            className={`relative ${isMobile ? "w-full max-w-[280px]" : "aspect-[9/16] w-[360px]"} p-2`}
+          >
+            {/* Glassy phone frame */}
+            <div className="absolute inset-0 rounded-[52px] bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-sm" />
+            <div className="absolute inset-[1px] rounded-[50px] bg-black/10 backdrop-blur-md" />
+
+            {/* Video container with outer border */}
+            <div className="relative h-full w-full overflow-hidden rounded-[48px] ring-[0.5px] ring-inset ring-white/30">
+              <video
+                src="/vid.mp4"
+                className="h-full w-full object-cover"
+                playsInline
+                muted
+                autoPlay
+                loop
+              />
+            </div>
+          </div>
+
+          {/* Animated glow effect */}
+          <motion.div
+            className="absolute -inset-6 -z-10 rounded-[60px] blur-2xl"
+            animate={{
+              opacity: [0.4, 0.7, 0.4],
+              scale: [0.95, 1.05, 0.95],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+            style={{
+              background:
+                "radial-gradient(circle, #F214FF99 0%, #F214FF00 70%)",
+            }}
+          />
+        </motion.div>
       </motion.section>
 
       {/* Modal */}
