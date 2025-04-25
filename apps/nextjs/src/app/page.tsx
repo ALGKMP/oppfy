@@ -177,15 +177,28 @@ export default function WaitlistPage() {
 
   /* ---------------- dynamic gradient ---------------- */
   const angle = useMotionValue(135);
-  const gradientX = useTransform(mouseX, [0, window.innerWidth], [-50, 50]);
-  const gradientY = useTransform(mouseY, [0, window.innerHeight], [-50, 50]);
+  const gradientX = useTransform(
+    mouseX,
+    [0, typeof window !== "undefined" ? window.innerWidth : 0],
+    [-50, 50],
+  );
+  const gradientY = useTransform(
+    mouseY,
+    [0, typeof window !== "undefined" ? window.innerHeight : 0],
+    [-50, 50],
+  );
 
   useEffect(() => {
-    let id = requestAnimationFrame(function loop() {
-      angle.set(135 + Math.sin(performance.now() / 5000) * 50);
-      id = requestAnimationFrame(loop);
-    });
-    return () => cancelAnimationFrame(id);
+    let id: number;
+    if (typeof window !== "undefined") {
+      id = requestAnimationFrame(function loop() {
+        angle.set(135 + Math.sin(performance.now() / 5000) * 50);
+        id = requestAnimationFrame(loop);
+      });
+    }
+    return () => {
+      if (id) cancelAnimationFrame(id);
+    };
   }, []);
 
   /* ---------------- phone tilt (desktop) ---------------- */
@@ -196,11 +209,18 @@ export default function WaitlistPage() {
   useEffect(() => {
     if (isMobile) return;
     const fn = (e: MouseEvent) => {
-      rotY.set(((e.clientX - innerWidth / 2) / (innerWidth / 2)) * 7);
-      rotX.set((-(e.clientY - innerHeight / 2) / (innerHeight / 2)) * 7);
+      if (typeof window !== "undefined") {
+        rotY.set(
+          ((e.clientX - window.innerWidth / 2) / (window.innerWidth / 2)) * 7,
+        );
+        rotX.set(
+          (-(e.clientY - window.innerHeight / 2) / (window.innerHeight / 2)) *
+            7,
+        );
+      }
     };
-    addEventListener("mousemove", fn);
-    return () => removeEventListener("mousemove", fn);
+    window.addEventListener("mousemove", fn);
+    return () => window.removeEventListener("mousemove", fn);
   }, [isMobile]);
 
   const joinWaitlist = api.waitlist.joinWaitlist.useMutation();
