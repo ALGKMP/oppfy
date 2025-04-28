@@ -25,6 +25,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     associatedDomains: ["applinks:oppfy.app", "applinks:www.oppfy.app"],
     infoPlist: {
       UIBackgroundModes: ["fetch"],
+      ITSAppUsesNonExemptEncryption: false,
     },
     icon: {
       dark: "./assets/icons/icon.png",
