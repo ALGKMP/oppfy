@@ -1,6 +1,5 @@
-import { and, count, desc, eq, lt, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
 import { inject, injectable } from "inversify";
-import { z } from "zod";
 
 import type {
   Database,
@@ -8,21 +7,12 @@ import type {
   Schema,
   Transaction,
 } from "@oppfy/db";
-// export type NotificationType =
-//   | "like"
-//   | "comment"
-//   | "follow"
-//   | "friend"
-
-// export type EntityType = "post" | "profile";
-
-import { entityTypeEnum, eventTypeEnum } from "@oppfy/db";
 import {
   FollowStatus,
   getFollowStatusSql,
   onboardingCompletedCondition,
 } from "@oppfy/db/utils/query-helpers";
-import { EntityType, EventType, SendNotificationParams, SQS } from "@oppfy/sqs";
+import { EntityType, EventType, SQS } from "@oppfy/sqs";
 
 import type { Notification, NotificationSettings, Profile } from "../../models";
 import { TYPES } from "../../symbols";
@@ -66,7 +56,9 @@ export interface UpdateNotificationSettingsParams {
   };
 }
 
-
+export interface SetNotificationsAsReadParams {
+  notificationIds: string[];
+}
 
 @injectable()
 export class NotificationRepository {
@@ -94,8 +86,6 @@ export class NotificationRepository {
 
     return result[0]?.count ?? 0;
   }
-
-
 
   async getPushTokens(
     params: UserIdParam,
@@ -181,11 +171,21 @@ export class NotificationRepository {
       .where(eq(this.schema.notificationSettings.userId, userId));
   }
 
+  async setNotificationsAsRead(
+    { notificationIds }: SetNotificationsAsReadParams,
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    await db
+      .update(this.schema.notification)
+      .set({ read: true })
+      .where(inArray(this.schema.notification.id, notificationIds));
+  }
+
   async paginateNotifications(
     { userId, cursor, pageSize = 10 }: PaginateNotificationsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<NotificationAndProfile[]> {
-    let query = db
+    const notifications = await db
       .select({
         profile: this.schema.profile,
         notification: this.schema.notification,
@@ -221,8 +221,6 @@ export class NotificationRepository {
         desc(this.schema.notification.id),
       )
       .limit(pageSize);
-
-    const notifications = await query;
 
     return notifications.map(({ profile, notification, followStatus }) => ({
       profile: profile as Profile<"onboarded">,

@@ -101,6 +101,7 @@ export class NotificationService {
   }: PaginateNotificationsParams): Promise<
     Result<PaginatedResponse<NotificationAndHydratedProfile>, never>
   > {
+    // Fetch notifications from the repository
     const notifications =
       await this.notificationRepository.paginateNotifications({
         userId,
@@ -108,22 +109,36 @@ export class NotificationService {
         pageSize,
       });
 
+    // Extract notification IDs and mark them as read in the database
+    const notificationIds = notifications.map((n) => n.notification.id);
+    if (notificationIds.length > 0) {
+      await this.notificationRepository.setNotificationsAsRead({
+        notificationIds,
+      });
+    }
+
+    // Hydrate profiles and update notifications to reflect read: true
     const notificationsAndHydratedProfiles = notifications.map((data) => ({
       ...data,
       profile: hydrateProfile(data.profile),
+      notification: { ...data.notification, read: true },
     }));
 
-    const hasMore = notifications.length > pageSize;
-    const items = notificationsAndHydratedProfiles.slice(0, pageSize);
-    const lastUser = items[items.length - 1];
+    // Define items (no need to slice, as repository limits to pageSize)
+    const items = notificationsAndHydratedProfiles;
 
+    // Correct hasMore logic: true if we fetched exactly pageSize items
+    const hasMore = items.length === pageSize;
+    const lastItem = items[items.length - 1];
+
+    // Return paginated response
     return ok({
       items,
       nextCursor:
-        hasMore && lastUser
+        hasMore && lastItem
           ? {
-              id: lastUser.notification.id,
-              createdAt: lastUser.notification.createdAt,
+              id: lastItem.notification.id,
+              createdAt: lastItem.notification.createdAt,
             }
           : null,
     });
