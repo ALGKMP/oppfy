@@ -48,6 +48,26 @@ export default function AnimatedPostPage({ post }: PostPageProps) {
             Join the <span className="text-[#F214FF]">Oppfy</span> Beta
           </motion.h1>
 
+          <motion.div
+            className="flex flex-col items-center gap-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <motion.a
+              href="https://testflight.apple.com/join/EHMR7AxB"
+              className="rounded-xl bg-[#F214FF] px-6 py-3 font-bold text-white transition-all hover:opacity-90 hover:shadow-lg hover:shadow-[#F214FF]/20 md:px-8 md:py-4"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Download Now
+            </motion.a>
+
+            <p className="text-center text-sm text-gray-500">
+              Currently available for iOS users
+            </p>
+          </motion.div>
+
           {/* Image/Video Section - Above profiles on mobile */}
           <motion.div
             className="flex w-full justify-center md:hidden"
@@ -164,26 +184,6 @@ export default function AnimatedPostPage({ post }: PostPageProps) {
             Where your friends capture your most authentic moments. Join our
             exclusive beta and be part of something special.
           </motion.p>
-
-          <motion.div
-            className="flex flex-col items-center gap-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-          >
-            <motion.a
-              href="https://testflight.apple.com/join/EHMR7AxB"
-              className="rounded-xl bg-[#F214FF] px-6 py-3 font-bold text-white transition-all hover:opacity-90 hover:shadow-lg hover:shadow-[#F214FF]/20 md:px-8 md:py-4"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Download Now
-            </motion.a>
-
-            <p className="text-center text-sm text-gray-500">
-              Currently available for iOS users
-            </p>
-          </motion.div>
 
           <motion.div
             className="grid w-full grid-cols-3 gap-2 md:gap-4"
