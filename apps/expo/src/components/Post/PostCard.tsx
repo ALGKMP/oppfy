@@ -126,7 +126,7 @@ const PostCard = (props: PostCardProps) => {
             <TouchableOpacity
               onPress={() => {
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                routeProfile(props.recipientProfile.id, {
+                routeProfile(props.recipientProfile.userId, {
                   name: props.recipientProfile.name,
                   username: props.recipientProfile.username,
                   profilePictureUrl: props.recipientProfile.profilePictureUrl,
