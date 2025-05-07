@@ -68,19 +68,28 @@ export class ContactsService {
     const { tier1, tier2, tier3 } =
       await this.contactsRepository.getRecommendationIds({ userId });
 
-    // Combine all tiers
+    // Combine all tiers while preserving original order
     const allRecommendedUserIds = [...tier1, ...tier2, ...tier3];
 
     if (allRecommendedUserIds.length === 0) {
       return ok([]);
     }
 
+    // Get profiles and preserve original order
     const profiles = await this.profileRepository.getProfilesByIds({
       userIds: allRecommendedUserIds,
     });
 
+    // Create a map for efficient lookup
+    const profileMap = new Map(profiles.map(profile => [profile.userId, profile]));
+
+    // Re-map to original order with fallback for missing profiles
+    const orderedProfiles = allRecommendedUserIds
+      .map(id => profileMap.get(id))
+      .filter((profile): profile is Profile<"onboarded"> => !!profile);
+
     // set all to not following by default
-    const profilesWithFollowStatus = profiles.map((profile) => ({
+    const profilesWithFollowStatus = orderedProfiles.map((profile) => ({
       ...profile,
       followStatus: "NOT_FOLLOWING" as const satisfies FollowStatus,
     }));
