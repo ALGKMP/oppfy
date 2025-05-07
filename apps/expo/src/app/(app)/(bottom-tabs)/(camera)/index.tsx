@@ -322,6 +322,7 @@ const CameraPage = () => {
               video={true}
               audio={microphone.hasPermission}
               enableLocation={location.hasPermission}
+              outputOrientation={"preview"}
               style={{ flex: 1 }}
             />
           </View>

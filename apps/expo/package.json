@@ -21,7 +21,7 @@
     "ios": "pnpm with-env expo run:ios",
     "lint": "eslint",
     "open:android": "open -a \"Android Studio\" android",
-    "open:ios": "open -a \"Xcode\" ios",
+    "open:ios": "open -a \"/Applications/Xcode.app\" ios",
     "prebuild": "expo prebuild",
     "prebuild:clean": "expo prebuild --clean",
     "submit": "eas submit --platform ios --path",
