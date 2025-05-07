@@ -157,7 +157,9 @@ const lambdaHandler = async (
 
   // 2. Process each recipient concurrently
   await Promise.all(
-    [...byRecipient.entries()].map(async ([userId, userNotifs]) => {
+    [...byRecipient.entries()].filter((x) => {
+      
+    }).map(async ([userId, userNotifs]) => {
       const settings = await getNotificationSettings(userId);
       if (!settings) return;
 
