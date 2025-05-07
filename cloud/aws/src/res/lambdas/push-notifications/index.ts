@@ -146,9 +146,12 @@ const lambdaHandler = async (
 ): Promise<APIGatewayProxyResult> => {
   const expo = new Expo({ accessToken: env.EXPO_ACCESS_TOKEN });
 
-  // 1. Group notifications by recipient
+
+
+  // 1. Group notifications by recipient, excluding self-notifications
   const byRecipient = new Map<string, NotificationBatch>();
   for (const n of event) {
+    if (n.senderId === n.recipientId) continue;
     byRecipient.set(n.recipientId, [
       ...(byRecipient.get(n.recipientId) ?? []),
       n,
@@ -157,9 +160,7 @@ const lambdaHandler = async (
 
   // 2. Process each recipient concurrently
   await Promise.all(
-    [...byRecipient.entries()].filter((x) => {
-      return x[1].some((n) => n.senderId !== n.recipientId)
-    }).map(async ([userId, userNotifs]) => {
+    [...byRecipient.entries()].map(async ([userId, userNotifs]) => {
       const settings = await getNotificationSettings(userId);
       if (!settings) return;
 
