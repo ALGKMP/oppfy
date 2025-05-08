@@ -525,7 +525,7 @@ export default function WaitlistPage() {
               </motion.button>
 
               <h2 className="mb-6 text-center text-3xl font-bold">
-                Join the Waitlist
+                {submitted ? "Success!" : "Join the Waitlist"}
               </h2>
 
               {!submitted ? (
@@ -596,18 +596,10 @@ export default function WaitlistPage() {
                     </motion.svg>
                   </motion.div>
                   <motion.p
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.4 }}
-                    className="text-2xl font-bold text-white"
-                  >
-                    You're on the list! 🎉
-                  </motion.p>
-                  <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.3, delay: 0.5 }}
-                    className="mt-2 text-lg text-white/80"
+                    className="text-lg text-white/80"
                   >
                     We'll text you when we launch
                   </motion.p>
