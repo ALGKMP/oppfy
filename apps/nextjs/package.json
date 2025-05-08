@@ -30,6 +30,7 @@
     "nextjs-cors": "^2.2.0",
     "react": "catalog:react18",
     "react-dom": "catalog:react18",
+    "react-phone-number-input": "^3.4.12",
     "superjson": "2.2.1",
     "zod": "catalog:"
   },

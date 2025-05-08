@@ -3,6 +3,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
+
+import "react-phone-number-input/style.css";
+
 import {
   AnimatePresence,
   motion,
@@ -167,7 +171,13 @@ export default function WaitlistPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState<string>();
+  const [isValid, setIsValid] = useState(false);
   const phoneRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setIsValid(!!phoneNumber && isValidPhoneNumber(phoneNumber));
+  }, [phoneNumber]);
 
   /* ---------------- hero entrance ---------------- */
   const controls = useAnimation();
@@ -228,12 +238,10 @@ export default function WaitlistPage() {
   /* ---------------- submit ---------------- */
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!phoneRef.current) return;
-    const value = phoneRef.current.value.trim();
-    if (!/^[0-9+()\s-]{6,}$/.test(value)) return phoneRef.current.focus();
+    if (!phoneNumber || !isValid) return;
     setSubmitting(true);
     try {
-      await joinWaitlist.mutateAsync({ phone: value });
+      await joinWaitlist.mutateAsync({ phone: phoneNumber });
       setSubmitted(true);
     } catch (error) {
       console.error("Failed to join waitlist:", error);
@@ -517,22 +525,25 @@ export default function WaitlistPage() {
               </motion.button>
 
               <h2 className="mb-6 text-center text-3xl font-bold">
-                Join the Oppfy Waitlist
+                Join the Waitlist
               </h2>
 
               {!submitted ? (
                 <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-                  <input
-                    ref={phoneRef}
-                    type="tel"
-                    placeholder="Your phone number"
-                    className="w-full rounded-xl bg-white/15 px-6 py-4 text-lg placeholder-white/50 backdrop-blur-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#FF66FF]"
-                    required
-                  />
+                  <div className="[&_.PhoneInputCountryIcon]:!border-0 [&_.PhoneInputCountrySelectArrow]:!border-t-white [&_.PhoneInputCountrySelect]:!rounded-lg [&_.PhoneInputCountrySelect]:!border [&_.PhoneInputCountrySelect]:!border-white/10 [&_.PhoneInputCountrySelect]:!bg-[#2A004D] [&_.PhoneInputCountrySelect]:!bg-transparent [&_.PhoneInputCountrySelect]:!text-lg [&_.PhoneInputCountrySelect]:!text-white [&_.PhoneInputCountrySelect]:!shadow-lg [&_.PhoneInputCountrySelect]:!shadow-black/20 [&_.PhoneInputCountrySelect]:!backdrop-blur-md [&_.PhoneInputCountrySelect]:focus:!outline-none [&_.PhoneInputCountrySelect]:focus:!ring-0 [&_.PhoneInputCountrySelect_arrow]:!border-t-white [&_.PhoneInputCountrySelect_option]:!bg-[#2A004D] [&_.PhoneInputCountrySelect_option]:!text-white [&_.PhoneInputCountry]:ml-4 [&_.PhoneInputCountry]:mr-2 [&_.PhoneInputInput]:!border-0 [&_.PhoneInputInput]:!bg-transparent [&_.PhoneInputInput]:!px-0 [&_.PhoneInputInput]:!py-4 [&_.PhoneInputInput]:!text-lg [&_.PhoneInputInput]:!text-white [&_.PhoneInputInput]:!placeholder-white/50 [&_.PhoneInputInput]:!outline-none [&_.PhoneInput]:rounded-xl [&_.PhoneInput]:bg-white/15 [&_.PhoneInput]:backdrop-blur-md [&_.PhoneInput]:transition-all [&_.PhoneInput]:duration-300 [&_.PhoneInput]:focus-within:ring-2 [&_.PhoneInput]:focus-within:ring-[#FF66FF]">
+                    <PhoneInput
+                      international
+                      countryCallingCodeEditable={false}
+                      defaultCountry="US"
+                      value={phoneNumber}
+                      onChange={setPhoneNumber}
+                      placeholder="Your phone number"
+                    />
+                  </div>
 
                   <motion.button
                     type="submit"
-                    disabled={submitting}
+                    disabled={submitting || !isValid}
                     whileTap={{ scale: 0.95 }}
                     className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#FF00CC] to-[#FF66FF] py-4 text-lg font-bold shadow-lg shadow-[#FF00CC]/30 disabled:opacity-60"
                   >
