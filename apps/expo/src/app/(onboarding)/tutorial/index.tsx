@@ -60,11 +60,12 @@ export default function Start() {
 
   const onSubmit = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    if (requiredPermissions) {
-      router.push("/auth/phone-number");
-    } else {
-      router.push("/misc/permissions");
-    }
+    // if (requiredPermissions) {
+    //   router.push("/auth/phone-number");
+    // } else {
+    //   router.push("/misc/permissions");
+    // }
+    router.push("/tutorial/screen2")
   };
 
   return (
@@ -101,7 +102,7 @@ export default function Start() {
                 textAlign="center"
                 marginBottom={40}
               >
-                Post For Your Friends
+                post for your friends
               </Text>
               <View
                 width="100%"
@@ -111,7 +112,7 @@ export default function Start() {
                 <OnboardingButton
                   onPress={onSubmit}
                   isValid
-                  text="get started"
+                  text="next"
                 />
               </View>
             </YStack>
