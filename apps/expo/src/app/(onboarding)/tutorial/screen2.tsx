@@ -25,7 +25,7 @@ interface OnboardingImage {
 }
 
 // Import all onboarding images
-const onboardingImages: OnboardingImage[] = [
+const baseImages: OnboardingImage[] = [
   {
     id: "1",
     photo: require("../../../../assets/onboarding/opp-1.jpg"),
@@ -62,12 +62,14 @@ const onboardingImages: OnboardingImage[] = [
     username: "alex",
     caption: "Concert nights 🎵",
   },
-  //   {
-  // id: "7",
-  // photo: require("../../../../assets/onboarding/opp-7.JPG"),
-  // username: "taylor",
-  // caption: "Weekend escape 🚗",
-  //   },
+];
+
+// Create a longer array by duplicating the images multiple times with unique IDs
+const onboardingImages: OnboardingImage[] = [
+  ...baseImages,
+  ...baseImages.map((img) => ({ ...img, id: `${img.id}-2` })),
+  ...baseImages.map((img) => ({ ...img, id: `${img.id}-3` })),
+  ...baseImages.map((img) => ({ ...img, id: `${img.id}-4` })),
 ];
 
 export default function Start() {
@@ -104,43 +106,84 @@ export default function Start() {
   }, []);
 
   const startScrollAnimation = () => {
-    const scrollDuration = 2000; // 3 seconds total animation time (reduced from 20000)
+    const totalDuration = 7000; // Total animation duration
+    const accelerationPhase = 0.3; // First 30% of animation is acceleration
     animationStartTime.current = Date.now();
+    let lastScrollPos = 0;
 
     const animate = () => {
       if (!scrollViewRef.current || !animationStartTime.current) return;
 
       const now = Date.now();
       const elapsedTime = now - animationStartTime.current;
-      const progress = Math.min(elapsedTime / scrollDuration, 1);
 
-      // Create an easing curve that starts slow and accelerates
-      // Using a custom power function for stronger acceleration
-      const easedProgress = Math.pow(progress, 2.2); // Reduced power for faster initial speed
+      // Simple progress from 0 to 1
+      const progress = Math.min(elapsedTime / totalDuration, 1);
 
-      // Calculate current scroll position
-      const scrollPos = easedProgress * (totalScrollHeight.current - 300);
+      // Get max scroll height (80% of total to avoid scrolling too far)
+      const maxScrollPos = (totalScrollHeight.current - 300) * 0.8;
 
-      // Scroll to position without animation to prevent jank
-      scrollViewRef.current.scrollTo({
-        y: scrollPos,
-        animated: false,
-      });
+      let targetScrollPos;
 
-      // Determine if we're near the end for the footer animation
-      if (progress > 0.75 && !isNearEnd) {
-        // Show footer sooner
+      // Split the animation into acceleration and deceleration phases
+      if (progress < accelerationPhase) {
+        // Acceleration phase: ease-in cubic - starts slow, gets faster
+        // Map progress from 0-0.3 to 0-0.4 (first 40% of the scroll)
+        const accelerationProgress = progress / accelerationPhase;
+        const easeInCubic = Math.pow(accelerationProgress, 3);
+        targetScrollPos = maxScrollPos * 0.4 * easeInCubic;
+      } else {
+        // Deceleration phase: ease-out cubic - starts fast, slows down
+        // Map progress from 0.3-1.0 to 0.4-1.0 (remaining 60% of the scroll)
+        const decelerationProgress =
+          (progress - accelerationPhase) / (1 - accelerationPhase);
+        const easeOutCubic = 1 - Math.pow(1 - decelerationProgress, 3);
+        // Start from 40% scroll position and go to 100%
+        targetScrollPos =
+          maxScrollPos * 0.4 + maxScrollPos * 0.6 * easeOutCubic;
+      }
+
+      // Apply smoothing to prevent jerky movement
+      const smoothingFactor = 0.1; // Lower = smoother but slower to respond
+      const smoothedPos =
+        lastScrollPos +
+        (targetScrollPos - lastScrollPos) * (1 - smoothingFactor);
+      lastScrollPos = smoothedPos;
+
+      // Show footer when we get past halfway
+      if (progress > 0.5 && !isNearEnd) {
         setIsNearEnd(true);
         opacity.value = withTiming(1, { duration: 400 });
       }
 
-      // Continue animation if not complete
+      // Add subtle haptic feedback during phase transitions and deceleration
+      if (
+        (progress > accelerationPhase - 0.03 &&
+          progress < accelerationPhase + 0.03) || // During phase transition
+        (progress > 0.5 && progress < 0.9) // During deceleration
+      ) {
+        // Only trigger haptics occasionally
+        if (
+          Math.floor(progress * 20) !==
+          Math.floor(((elapsedTime - 16) / totalDuration) * 20)
+        ) {
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+      }
+
+      // Apply the scroll position
+      scrollViewRef.current.scrollTo({
+        y: smoothedPos,
+        animated: false, // NEVER use true here
+      });
+
+      // Continue until complete
       if (progress < 1) {
         animationFrameId.current = requestAnimationFrame(animate);
       }
     };
 
-    // Start the animation loop
+    // Start the animation
     animationFrameId.current = requestAnimationFrame(animate);
   };
 
@@ -363,7 +406,7 @@ export default function Start() {
                 textAlign="center"
                 marginBottom={20}
               >
-                embarrass them
+                post for your friends
               </Text>
               <View width="100%" paddingHorizontal={24}>
                 <OnboardingButton onPress={onSubmit} isValid text="next" />
