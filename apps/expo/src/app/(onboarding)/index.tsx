@@ -42,7 +42,7 @@ export default function Start() {
 
     // Navigate after animation completes
     setTimeout(() => {
-      router.push("/tutorial/screen1");
+      router.push("/tutorial");
     }, 2200);
   }, []);
 

@@ -1,9 +1,9 @@
 import { usePathname } from "expo-router";
 
-import type { OnboardingStackOptions } from "~/components/Layouts/Navigation/OnboardingStack";
 import { OnboardingStack } from "~/components/Layouts/Navigation/OnboardingStack";
+import type { OnboardingStackOptions } from "~/components/Layouts/Navigation/OnboardingStack";
 
-const ROUTES = ["screen1", "screen2"];
+const ROUTES = ["index", "screen2"];
 
 const AuthLayout = () => {
   const pathName = usePathname();
@@ -16,7 +16,7 @@ const AuthLayout = () => {
         {
           title: "",
           animation: "fade",
-          // headerShown: false,
+          headerShown: false,
           progress: {
             currentStep: Math.max(0, currentIndex),
             totalSteps: ROUTES.length,
@@ -25,9 +25,9 @@ const AuthLayout = () => {
       }
     >
       <OnboardingStack.Screen
-        name="screen1"
+        name="index"
         options={{
-        //   headerShown: false,
+          headerShown: false,
           contentStyle: {
             backgroundColor: "$primary",
           },
@@ -35,9 +35,19 @@ const AuthLayout = () => {
       />
 
       <OnboardingStack.Screen
+        name="screen1"
+        options={{
+          headerShown: false,
+          contentStyle: {
+            backgroundColor: "screen1",
+          },
+        }}
+      />
+
+      <OnboardingStack.Screen
         name="screen2"
         options={{
-        //   headerShown: false,
+          headerShown: false,
           contentStyle: {
             backgroundColor: "#C7F458",
           },
