@@ -10,50 +10,7 @@ import { ScreenView } from "~/components/ui";
 import { OnboardingButton } from "~/components/ui/Onboarding";
 import { usePermissions } from "~/contexts/PermissionsContext";
 
-// interface DefaultImageProps {
-//   source: any;
-//   left?: number;
-//   right?: number;
-//   top?: number;
-//   bottom?: number;
-//   zIndex: number;
-//   rotate: string;
-//   translateX?: number;
-//   translateY?: number;
-//   scale?: number;
-//   width?: number;
-//   height?: number;
-// }
-
-// const DefaultImage: React.FC<DefaultImageProps> = (props) => {
-//   return (
-//     <Image
-//       source={props.source}
-//       style={{
-//         width: props.width ?? 180,
-//         height: props.height ?? 240,
-//         borderRadius: 20,
-//         position: "absolute",
-//         borderWidth: 5,
-//         borderColor: "white",
-//         left: props.left,
-//         right: props.right,
-//         top: props.top,
-//         bottom: props.bottom,
-//         transform: [
-//           { rotate: props.rotate },
-//           { translateX: props.translateX ?? 0 },
-//           { translateY: props.translateY ?? 0 },
-//           { scale: props.scale ?? 0.9 },
-//         ],
-//         zIndex: props.zIndex,
-//       }}
-//       resizeMode="cover"
-//     />
-//   );
-// };
-
-export default function Start() {
+export default function Screen1() {
   const router = useRouter();
   const { permissions } = usePermissions();
   const requiredPermissions = permissions.camera && permissions.contacts;
