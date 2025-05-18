@@ -1,12 +1,8 @@
-import React, { useCallback, useRef, useState } from "react";
-import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
-import { Image, TouchableOpacity } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Image, ScrollView } from "react-native";
 import Animated, {
   FadeIn,
-  FadeOut,
-  Layout,
-  SlideInDown,
-  SlideOutDown,
+  LinearTransition,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -14,8 +10,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { LegendList } from "@legendapp/list";
-import { Stack, Text, View, XStack, YStack } from "tamagui";
+import { Text, View, XStack, YStack } from "tamagui";
 
 import { ScreenView } from "~/components/ui";
 import { OnboardingButton } from "~/components/ui/Onboarding";
@@ -79,11 +74,75 @@ export default function Start() {
   const router = useRouter();
   const { permissions } = usePermissions();
   const requiredPermissions = permissions.camera && permissions.contacts;
-  const listRef = useRef(null);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   // Track if we're at the bottom of the scroll
   const [isNearEnd, setIsNearEnd] = useState(false);
   const opacity = useSharedValue(0);
+  const totalScrollHeight = useRef(0);
+  const animationStartTime = useRef<number | null>(null);
+  const animationFrameId = useRef<number | null>(null);
+
+  // Get the content height after render
+  const onContentSizeChange = (_width: number, height: number) => {
+    totalScrollHeight.current = height;
+  };
+
+  // Auto-scroll functionality with acceleration
+  useEffect(() => {
+    // Wait a short delay before starting animation
+    const startDelay = setTimeout(() => {
+      startScrollAnimation();
+    }, 1000);
+
+    return () => {
+      clearTimeout(startDelay);
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+      }
+    };
+  }, []);
+
+  const startScrollAnimation = () => {
+    const scrollDuration = 2000; // 3 seconds total animation time (reduced from 20000)
+    animationStartTime.current = Date.now();
+
+    const animate = () => {
+      if (!scrollViewRef.current || !animationStartTime.current) return;
+
+      const now = Date.now();
+      const elapsedTime = now - animationStartTime.current;
+      const progress = Math.min(elapsedTime / scrollDuration, 1);
+
+      // Create an easing curve that starts slow and accelerates
+      // Using a custom power function for stronger acceleration
+      const easedProgress = Math.pow(progress, 2.2); // Reduced power for faster initial speed
+
+      // Calculate current scroll position
+      const scrollPos = easedProgress * (totalScrollHeight.current - 300);
+
+      // Scroll to position without animation to prevent jank
+      scrollViewRef.current.scrollTo({
+        y: scrollPos,
+        animated: false,
+      });
+
+      // Determine if we're near the end for the footer animation
+      if (progress > 0.75 && !isNearEnd) {
+        // Show footer sooner
+        setIsNearEnd(true);
+        opacity.value = withTiming(1, { duration: 400 });
+      }
+
+      // Continue animation if not complete
+      if (progress < 1) {
+        animationFrameId.current = requestAnimationFrame(animate);
+      }
+    };
+
+    // Start the animation loop
+    animationFrameId.current = requestAnimationFrame(animate);
+  };
 
   const onSubmit = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -94,23 +153,6 @@ export default function Start() {
     }
   };
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-
-    // Check if scrolled to about 80% of the way down
-    const scrollPosition = layoutMeasurement.height + contentOffset.y;
-    const totalContentHeight = contentSize.height;
-    const scrollThreshold = totalContentHeight * 0.8;
-
-    if (scrollPosition >= scrollThreshold && !isNearEnd) {
-      setIsNearEnd(true);
-      opacity.value = withTiming(1, { duration: 400 });
-    } else if (scrollPosition < scrollThreshold && isNearEnd) {
-      setIsNearEnd(false);
-      opacity.value = withTiming(0, { duration: 300 });
-    }
-  };
-
   const animatedStyle = useAnimatedStyle(() => {
     return {
       opacity: opacity.value,
@@ -118,138 +160,151 @@ export default function Start() {
     };
   });
 
-  const renderItem = ({ item }: { item: OnboardingImage }) => {
-    return (
-      <View borderRadius="$8" borderWidth="$1.5" borderColor={"white"} overflow="hidden" marginBottom={20}>
-        <View>
-          <Image
-            source={item.photo}
-            style={{
-              width: "100%",
-              height: 550,
-              borderRadius: 16,
-            }}
-            resizeMode="cover"
-          />
+  // Render all image items
+  const renderImageItems = () => {
+    return onboardingImages.map((item, index) => (
+      <Animated.View
+        key={item.id}
+        entering={FadeIn.delay(index * 100).duration(400)}
+        layout={LinearTransition.springify()}
+      >
+        <View
+          borderRadius="$8"
+          borderWidth="$1.5"
+          borderColor="white"
+          overflow="hidden"
+          marginBottom={20}
+        >
+          <View>
+            <Image
+              source={item.photo}
+              style={{
+                width: "100%",
+                height: 550,
+                borderRadius: 16,
+              }}
+              resizeMode="cover"
+            />
 
-          {/* Top Gradient Overlay */}
-          <LinearGradient
-            colors={["rgba(0,0,0,0.5)", "transparent"]}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 120,
-              zIndex: 1,
-            }}
-          />
+            {/* Top Gradient Overlay */}
+            <LinearGradient
+              colors={["rgba(0,0,0,0.5)", "transparent"]}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 120,
+                zIndex: 1,
+              }}
+            />
 
-          {/* Bottom Gradient Overlay */}
-          <LinearGradient
-            colors={["transparent", "rgba(0,0,0,0.7)"]}
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: 160,
-              zIndex: 1,
-            }}
-          />
+            {/* Bottom Gradient Overlay */}
+            <LinearGradient
+              colors={["transparent", "rgba(0,0,0,0.7)"]}
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: 160,
+                zIndex: 1,
+              }}
+            />
 
-          {/* Top Header */}
-          <XStack
-            position="absolute"
-            top={0}
-            left={0}
-            right={0}
-            paddingVertical="$4"
-            paddingHorizontal="$4"
-            justifyContent="space-between"
-            zIndex={2}
-          >
-            <XStack gap="$3" alignItems="center">
-              <View
-                width={44}
-                height={44}
-                borderRadius={22}
-                backgroundColor="white"
-                borderWidth={2}
-                borderColor="white"
-                overflow="hidden"
-              >
-                {/* Profile pic placeholder */}
-              </View>
+            {/* Top Header */}
+            <XStack
+              position="absolute"
+              top={0}
+              left={0}
+              right={0}
+              paddingVertical="$4"
+              paddingHorizontal="$4"
+              justifyContent="space-between"
+              zIndex={2}
+            >
+              <XStack gap="$3" alignItems="center">
+                <View
+                  width={44}
+                  height={44}
+                  borderRadius={22}
+                  backgroundColor="white"
+                  borderWidth={2}
+                  borderColor="white"
+                  overflow="hidden"
+                >
+                  {/* Profile pic placeholder */}
+                </View>
 
-              <YStack>
+                <YStack>
+                  <Text
+                    color="white"
+                    fontWeight="600"
+                    fontSize="$5"
+                    shadowColor="black"
+                    shadowOffset={{ width: 1, height: 1 }}
+                    shadowOpacity={0.4}
+                    shadowRadius={3}
+                  >
+                    {item.username}
+                  </Text>
+                  <XStack gap="$1" alignItems="center">
+                    <Text
+                      color="white"
+                      fontWeight="500"
+                      fontSize="$4"
+                      shadowColor="black"
+                      shadowOffset={{ width: 1, height: 1 }}
+                      shadowOpacity={0.4}
+                      shadowRadius={3}
+                    >
+                      opped by friend
+                    </Text>
+                    <Text
+                      color="white"
+                      fontWeight="500"
+                      fontSize="$4"
+                      shadowColor="black"
+                      shadowOffset={{ width: 1, height: 1 }}
+                      shadowOpacity={0.4}
+                      shadowRadius={3}
+                    >
+                      • just now
+                    </Text>
+                  </XStack>
+                </YStack>
+              </XStack>
+            </XStack>
+
+            {/* Bottom Content Overlay */}
+            <YStack
+              position="absolute"
+              bottom={0}
+              left={0}
+              right={0}
+              paddingHorizontal="$4"
+              paddingVertical="$4"
+              zIndex={2}
+              gap="$2"
+            >
+              <View maxWidth="80%">
                 <Text
                   color="white"
-                  fontWeight="600"
-                  fontSize="$5"
+                  fontSize="$4"
+                  fontWeight="500"
                   shadowColor="black"
                   shadowOffset={{ width: 1, height: 1 }}
                   shadowOpacity={0.4}
                   shadowRadius={3}
                 >
-                  {item.username}
+                  {item.caption}
                 </Text>
-                <XStack gap="$1" alignItems="center">
-                  <Text
-                    color="white"
-                    fontWeight="500"
-                    fontSize="$4"
-                    shadowColor="black"
-                    shadowOffset={{ width: 1, height: 1 }}
-                    shadowOpacity={0.4}
-                    shadowRadius={3}
-                  >
-                    opped by friend
-                  </Text>
-                  <Text
-                    color="white"
-                    fontWeight="500"
-                    fontSize="$4"
-                    shadowColor="black"
-                    shadowOffset={{ width: 1, height: 1 }}
-                    shadowOpacity={0.4}
-                    shadowRadius={3}
-                  >
-                    • just now
-                  </Text>
-                </XStack>
-              </YStack>
-            </XStack>
-          </XStack>
-
-          {/* Bottom Content Overlay */}
-          <YStack
-            position="absolute"
-            bottom={0}
-            left={0}
-            right={0}
-            paddingHorizontal="$4"
-            paddingVertical="$4"
-            zIndex={2}
-            gap="$2"
-          >
-            <View maxWidth="80%">
-              <Text
-                color="white"
-                fontSize="$4"
-                fontWeight="500"
-                shadowColor="black"
-                shadowOffset={{ width: 1, height: 1 }}
-                shadowOpacity={0.4}
-                shadowRadius={3}
-              >
-                {item.caption}
-              </Text>
-            </View>
-          </YStack>
+              </View>
+            </YStack>
+          </View>
         </View>
-      </View>
-    );
+      </Animated.View>
+    ));
   };
 
   return (
@@ -259,19 +314,20 @@ export default function Start() {
       backgroundColor="#C7F458"
     >
       <YStack flex={1} width="100%">
-        <LegendList
-          ref={listRef}
+        <ScrollView
+          ref={scrollViewRef}
           style={{ flex: 1 }}
-          data={onboardingImages}
-          renderItem={renderItem}
-          keyExtractor={(item: OnboardingImage) => item.id}
           contentContainerStyle={{
             paddingHorizontal: 16,
             paddingTop: 16,
             paddingBottom: 160,
           }}
-          onScroll={handleScroll}
-        />
+          showsVerticalScrollIndicator={false}
+          scrollEnabled={false}
+          onContentSizeChange={onContentSizeChange}
+        >
+          {renderImageItems()}
+        </ScrollView>
 
         {/* Absolutely positioned bottom content with gradient */}
         <Animated.View
@@ -310,7 +366,7 @@ export default function Start() {
                 embarrass them
               </Text>
               <View width="100%" paddingHorizontal={24}>
-                <OnboardingButton onPress={onSubmit} isValid text="next"  />
+                <OnboardingButton onPress={onSubmit} isValid text="next" />
               </View>
             </View>
           </LinearGradient>
