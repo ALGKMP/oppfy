@@ -37,6 +37,7 @@
     "@expo/react-native-action-sheet": "^4.0.1",
     "@gorhom/bottom-sheet": "^5.0.6",
     "@hookform/resolvers": "^3.3.4",
+    "@legendapp/list": "^1.0.12",
     "@mux/mux-data-react-native-video": "^0.15.2",
     "@oppfy/env": "workspace:*",
     "@oppfy/validators": "workspace:*",
