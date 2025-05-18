@@ -1,4 +1,3 @@
-
 import { OnboardingStack } from "~/components/Layouts/Navigation/OnboardingStack";
 
 const AuthLayout = () => (
@@ -7,7 +6,17 @@ const AuthLayout = () => (
       title: "",
       headerShown: false,
     }}
-  />
+  >
+    <OnboardingStack.Screen
+      name="screen2"
+      options={{
+        headerShown: false,
+        contentStyle: {
+          backgroundColor: "#C7F458",
+        },
+      }}
+    />
+  </OnboardingStack>
 );
 
 export default AuthLayout;
