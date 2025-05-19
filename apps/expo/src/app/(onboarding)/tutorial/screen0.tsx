@@ -1,5 +1,5 @@
-import React from "react";
-import { Dimensions, Image, StyleSheet } from "react-native";
+import React, { useEffect } from "react";
+import { Animated, Dimensions, Image, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -18,6 +18,35 @@ import { usePermissions } from "~/contexts/PermissionsContext";
 export default function Screen1() {
   const router = useRouter();
   const { permissions } = usePermissions();
+
+  // Create animated values for each image
+  const pop1Anim = React.useRef(new Animated.Value(0)).current;
+  const pop8Anim = React.useRef(new Animated.Value(0)).current;
+  const opp7Anim = React.useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Animate images in sequence
+    Animated.sequence([
+      // Pop1 animation
+      Animated.timing(pop1Anim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      // Pop8 animation
+      Animated.timing(pop8Anim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      // Opp7 animation
+      Animated.timing(opp7Anim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const onSubmit = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -47,7 +76,8 @@ export default function Screen1() {
               },
             ]}
           />
-          <Image
+          {/* Animated Pop1 */}
+          <Animated.Image
             source={Pop1}
             resizeMode="cover"
             style={[
@@ -60,12 +90,22 @@ export default function Screen1() {
                 borderRadius: 20,
                 borderWidth: 5,
                 borderColor: "white",
-                transform: [{ rotate: "-5deg" }],
+                transform: [
+                  { rotate: "-5deg" },
+                  {
+                    translateY: pop1Anim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [50, 0],
+                    }),
+                  },
+                ],
+                opacity: pop1Anim,
                 zIndex: 2,
               },
             ]}
           />
-          <Image
+          {/* Animated Pop8 */}
+          <Animated.Image
             source={Pop8}
             style={[
               {
@@ -77,12 +117,22 @@ export default function Screen1() {
                 borderRadius: 20,
                 borderWidth: 5,
                 borderColor: "white",
-                transform: [{ rotate: "6deg" }],
+                transform: [
+                  { rotate: "6deg" },
+                  {
+                    translateY: pop8Anim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [50, 0],
+                    }),
+                  },
+                ],
+                opacity: pop8Anim,
                 zIndex: 3,
               },
             ]}
           />
-          <Image
+          {/* Animated Opp7 */}
+          <Animated.Image
             source={Opp7}
             style={[
               {
@@ -94,7 +144,16 @@ export default function Screen1() {
                 borderRadius: 20,
                 borderWidth: 5,
                 borderColor: "white",
-                transform: [{ rotate: "-6deg" }],
+                transform: [
+                  { rotate: "-6deg" },
+                  {
+                    translateY: opp7Anim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [50, 0],
+                    }),
+                  },
+                ],
+                opacity: opp7Anim,
                 zIndex: 3,
               },
             ]}
