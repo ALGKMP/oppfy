@@ -27,6 +27,8 @@ export default function Screen1() {
   useEffect(() => {
     // Animate images in sequence
     Animated.sequence([
+      // Initial delay
+      Animated.delay(500),
       // Pop1 animation
       Animated.timing(pop1Anim, {
         toValue: 1,
@@ -45,13 +47,14 @@ export default function Screen1() {
         duration: 400,
         useNativeDriver: true,
       }),
-    ]).start();
+      // Add delay after animations
+      Animated.delay(1000),
+    ]).start(() => {
+      // Route to next screen after animations complete
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      router.push("/tutorial/screen1");
+    });
   }, []);
-
-  const onSubmit = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    router.push("/tutorial/screen1");
-  };
 
   return (
     <ScreenView padding={0} safeAreaEdges={["bottom"]}>
@@ -160,7 +163,7 @@ export default function Screen1() {
           />
         </View>
 
-        {/* Gradient Overlay and Text/Button */}
+        {/* Gradient Overlay and Text */}
         <YStack
           position="absolute"
           bottom={0}
@@ -183,13 +186,6 @@ export default function Screen1() {
               >
                 post for your friends
               </Text>
-              <View
-                width="100%"
-                paddingHorizontal={24}
-                // justifyContent="center"
-              >
-                <OnboardingButton onPress={onSubmit} isValid text="next" />
-              </View>
             </YStack>
           </LinearGradient>
         </YStack>
@@ -201,7 +197,6 @@ export default function Screen1() {
 const styles = StyleSheet.create({
   collageContainer: {
     width: "100%",
-
     height: "100%",
     position: "absolute",
   },

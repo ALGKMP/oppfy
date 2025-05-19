@@ -13,7 +13,6 @@ import { useRouter } from "expo-router";
 import { Text, View, XStack, YStack } from "tamagui";
 
 import { ScreenView } from "~/components/ui";
-import { OnboardingButton } from "~/components/ui/Onboarding";
 import { usePermissions } from "~/contexts/PermissionsContext";
 
 // Define interfaces
@@ -180,20 +179,21 @@ export default function Start() {
       // Continue until complete
       if (progress < 1) {
         animationFrameId.current = requestAnimationFrame(animate);
+      } else {
+        // Animation complete, wait a bit then route
+        setTimeout(() => {
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+          if (requiredPermissions) {
+            router.push("/auth/phone-number");
+          } else {
+            router.push("/misc/permissions");
+          }
+        }, 1000);
       }
     };
 
     // Start the animation
     animationFrameId.current = requestAnimationFrame(animate);
-  };
-
-  const onSubmit = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    if (requiredPermissions) {
-      router.push("/auth/phone-number");
-    } else {
-      router.push("/misc/permissions");
-    }
   };
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -250,100 +250,31 @@ export default function Start() {
                 bottom: 0,
                 left: 0,
                 right: 0,
-                height: 160,
+                height: 120,
                 zIndex: 1,
               }}
             />
 
-            {/* Top Header */}
-            <XStack
+            {/* Username and Caption */}
+            <View
               position="absolute"
-              top={0}
-              left={0}
-              right={0}
-              paddingVertical="$4"
-              paddingHorizontal="$4"
-              justifyContent="space-between"
+              bottom={16}
+              left={16}
+              right={16}
               zIndex={2}
             >
-              <XStack gap="$3" alignItems="center">
-                <View
-                  width={44}
-                  height={44}
-                  borderRadius={22}
-                  backgroundColor="white"
-                  borderWidth={2}
-                  borderColor="white"
-                  overflow="hidden"
-                >
-                  {/* Profile pic placeholder */}
-                </View>
-
-                <YStack>
-                  <Text
-                    color="white"
-                    fontWeight="600"
-                    fontSize="$5"
-                    shadowColor="black"
-                    shadowOffset={{ width: 1, height: 1 }}
-                    shadowOpacity={0.4}
-                    shadowRadius={3}
-                  >
-                    {item.username}
-                  </Text>
-                  <XStack gap="$1" alignItems="center">
-                    <Text
-                      color="white"
-                      fontWeight="500"
-                      fontSize="$4"
-                      shadowColor="black"
-                      shadowOffset={{ width: 1, height: 1 }}
-                      shadowOpacity={0.4}
-                      shadowRadius={3}
-                    >
-                      opped by friend
-                    </Text>
-                    <Text
-                      color="white"
-                      fontWeight="500"
-                      fontSize="$4"
-                      shadowColor="black"
-                      shadowOffset={{ width: 1, height: 1 }}
-                      shadowOpacity={0.4}
-                      shadowRadius={3}
-                    >
-                      • just now
-                    </Text>
-                  </XStack>
-                </YStack>
-              </XStack>
-            </XStack>
-
-            {/* Bottom Content Overlay */}
-            <YStack
-              position="absolute"
-              bottom={0}
-              left={0}
-              right={0}
-              paddingHorizontal="$4"
-              paddingVertical="$4"
-              zIndex={2}
-              gap="$2"
-            >
-              <View maxWidth="80%">
-                <Text
-                  color="white"
-                  fontSize="$4"
-                  fontWeight="500"
-                  shadowColor="black"
-                  shadowOffset={{ width: 1, height: 1 }}
-                  shadowOpacity={0.4}
-                  shadowRadius={3}
-                >
-                  {item.caption}
-                </Text>
-              </View>
-            </YStack>
+              <Text
+                color="white"
+                fontSize={18}
+                fontWeight="bold"
+                marginBottom={4}
+              >
+                {item.username}
+              </Text>
+              <Text color="white" fontSize={16}>
+                {item.caption}
+              </Text>
+            </View>
           </View>
         </View>
       </Animated.View>
@@ -351,70 +282,15 @@ export default function Start() {
   };
 
   return (
-    <ScreenView
-      padding={0}
-      safeAreaEdges={["bottom", "top"]}
-      backgroundColor="#C7F458"
-    >
-      <YStack flex={1} width="100%">
-        <ScrollView
-          ref={scrollViewRef}
-          style={{ flex: 1 }}
-          contentContainerStyle={{
-            paddingHorizontal: 16,
-            paddingTop: 16,
-            paddingBottom: 160,
-          }}
-          showsVerticalScrollIndicator={false}
-          scrollEnabled={false}
-          onContentSizeChange={onContentSizeChange}
-        >
-          {renderImageItems()}
-        </ScrollView>
-
-        {/* Absolutely positioned bottom content with gradient */}
-        <Animated.View
-          style={[
-            {
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              width: "100%",
-              pointerEvents: isNearEnd ? "auto" : "none",
-            },
-            animatedStyle,
-          ]}
-        >
-          <LinearGradient
-            colors={["transparent", "#C7F458"]}
-            locations={[0.0, 1.0]}
-            style={{ width: "100%" }}
-          >
-            <View
-              style={{
-                width: "100%",
-                paddingBottom: 40,
-                alignItems: "center",
-                paddingTop: 80,
-              }}
-            >
-              <Text
-                fontSize={32}
-                fontWeight="bold"
-                color="white"
-                textAlign="center"
-                marginBottom={20}
-              >
-                post for your friends
-              </Text>
-              <View width="100%" paddingHorizontal={24}>
-                <OnboardingButton onPress={onSubmit} isValid text="next" />
-              </View>
-            </View>
-          </LinearGradient>
-        </Animated.View>
-      </YStack>
+    <ScreenView padding={0} safeAreaEdges={["bottom"]}>
+      <ScrollView
+        ref={scrollViewRef}
+        onContentSizeChange={onContentSizeChange}
+        showsVerticalScrollIndicator={false}
+        style={{ flex: 1 }}
+      >
+        <YStack padding={16}>{renderImageItems()}</YStack>
+      </ScrollView>
     </ScreenView>
   );
 }

@@ -1,13 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Image } from "react-native";
-import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import Maya from "@assets/onboarding/Maya.png";
-import { Stack, Text, View, XStack, YStack } from "tamagui";
+import { Text, View, YStack } from "tamagui";
 
 import { ScreenView } from "~/components/ui";
-import { OnboardingButton } from "~/components/ui/Onboarding";
 import { usePermissions } from "~/contexts/PermissionsContext";
 
 export default function Screen1() {
@@ -15,15 +13,14 @@ export default function Screen1() {
   const { permissions } = usePermissions();
   const requiredPermissions = permissions.camera && permissions.contacts;
 
-  const onSubmit = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    // if (requiredPermissions) {
-    //   router.push("/auth/phone-number");
-    // } else {
-    //   router.push("/misc/permissions");
-    // }
-    router.push("/tutorial/screen2")
-  };
+  useEffect(() => {
+    // Wait 3 seconds then route to next screen
+    const timer = setTimeout(() => {
+      router.push("/tutorial/screen2");
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <ScreenView padding={0} safeAreaEdges={["bottom"]}>
@@ -38,7 +35,7 @@ export default function Screen1() {
           }}
           resizeMode="cover"
         />
-        {/* Gradient Overlay and Text/Button */}
+        {/* Gradient Overlay and Text */}
         <YStack
           position="absolute"
           bottom={0}
@@ -61,17 +58,6 @@ export default function Screen1() {
               >
                 post for your friends
               </Text>
-              <View
-                width="100%"
-                paddingHorizontal={24}
-                // justifyContent="center"
-              >
-                <OnboardingButton
-                  onPress={onSubmit}
-                  isValid
-                  text="next"
-                />
-              </View>
             </YStack>
           </LinearGradient>
         </YStack>
