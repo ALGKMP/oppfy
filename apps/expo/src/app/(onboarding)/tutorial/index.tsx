@@ -307,12 +307,7 @@ export default function Start() {
   // =================== HANDLER ===================
   const onSubmit = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    // if (requiredPermissions) {
-    //   router.push("/auth/phone-number");
-    // } else {
-    //   router.push("/misc/permissions");
-    // }
-    router.push("/tutorial//screen1")
+    router.push("/tutorial//screen0")
   };
 
   // =================== ANIMATED STYLES ===================
