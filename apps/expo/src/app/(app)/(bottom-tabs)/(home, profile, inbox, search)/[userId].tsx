@@ -1,7 +1,7 @@
-import React, { useRef, useState, useMemo } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLocalSearchParams, useRouter,  } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { CameraOff, Lock, UserX } from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
@@ -132,7 +132,10 @@ const OtherProfile = () => {
 
       {isLoading ? null : (
         <>
-          {profileStats && relationshipState && profileStats.friends > 0 && !relationshipState.isBlocked ? (
+          {profileStats &&
+          relationshipState &&
+          profileStats.friends > 0 &&
+          !relationshipState.isBlocked ? (
             <FriendCarousel
               userId={userId}
               username={headerProfile.username ?? ""}

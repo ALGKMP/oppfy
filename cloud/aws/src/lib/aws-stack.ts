@@ -169,8 +169,8 @@ export class AwsStack extends cdk.Stack {
 
     const notificationQueue = new Queue(this, "Notifications", {
       // VisibilityTimeout must exceed Lambda timeout + batching window
-      visibilityTimeout: cdk.Duration.seconds(120), // up to 2 min  [oai_citation_attribution:0‡AWS Documentation](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html?utm_source=chatgpt.com) [oai_citation_attribution:1‡AWS Documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-sqs-queue.html?utm_source=chatgpt.com)
-      receiveMessageWaitTime: cdk.Duration.seconds(20), // enable long‑polling, max 20 s  [oai_citation_attribution:2‡AWS Documentation](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-short-and-long-polling.html?utm_source=chatgpt.com)
+      visibilityTimeout: cdk.Duration.seconds(120), // up to 2 min  [oai_citation_attribution:0‡AWS Documentation](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html?utm_source=chatgpt.com) [oai_citation_attribution:1‡AWS Documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-sqs-queue.html?utm_source=chatgpt.com)
+      receiveMessageWaitTime: cdk.Duration.seconds(20), // enable long‑polling, max 20 s  [oai_citation_attribution:2‡AWS Documentation](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-short-and-long-polling.html?utm_source=chatgpt.com)
     });
 
     notificationQueue.queue.grantConsumeMessages(
@@ -180,7 +180,7 @@ export class AwsStack extends cdk.Stack {
     pushNotificationsLambda.function.addEventSource(
       new SqsEventSource(notificationQueue.queue, {
         batchSize: 10_000, // max for standard queues
-        maxBatchingWindow: cdk.Duration.seconds(10), // hold up to 10 s for aggregation  [oai_citation_attribution:5‡AWS Documentation](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda_event_sources-readme.html?utm_source=chatgpt.com)
+        maxBatchingWindow: cdk.Duration.seconds(10), // hold up to 10 s for aggregation  [oai_citation_attribution:5‡AWS Documentation](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda_event_sources-readme.html?utm_source=chatgpt.com)
         reportBatchItemFailures: true, // handle partial failures
       }),
     );

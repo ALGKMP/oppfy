@@ -17,7 +17,7 @@ interface User {
   uid: string;
 }
 
-const ACCESS_REFRESH_BUFFER_MS = 2 * 60 * 1000; // refresh 2 min before expiry
+const ACCESS_REFRESH_BUFFER_MS = 2 * 60 * 1000; // refresh 2 min before expiry
 
 class AuthService {
   private user: User | null = null;
@@ -59,7 +59,7 @@ class AuthService {
   }
 
   // ---------------------------------------------------------------------------
-  // Public API
+  // Public API
   // ---------------------------------------------------------------------------
 
   public subscribe(listener: () => void) {
@@ -98,7 +98,7 @@ class AuthService {
   }
 
   // ---------------------------------------------------------------------------
-  // Private helpers
+  // Private helpers
   // ---------------------------------------------------------------------------
 
   private async initialize() {

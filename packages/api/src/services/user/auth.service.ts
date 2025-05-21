@@ -94,7 +94,7 @@ export class AuthService {
   > {
     let isNewUser = false;
 
-    // 1 — Verify code (admin shortcut or Twilio)
+    // 1 — Verify code (admin shortcut or Twilio)
     if (ADMIN_PHONE_NUMBERS.includes(phoneNumber)) {
       if (code !== ADMIN_CODE)
         return err(new AuthErrors.InvalidVerificationCode());
@@ -110,7 +110,7 @@ export class AuthService {
       }
     }
 
-    // 2 — Ensure user exists / on‑app
+    // 2 — Ensure user exists / on‑app
     const possibleUser = await this.userRepository.getUserByPhoneNumber({
       phoneNumber,
     });
@@ -141,7 +141,7 @@ export class AuthService {
     });
     if (!user) return err(new UserErrors.UserNotFound(phoneNumber));
 
-    // 3 — Issue tokens
+    // 3 — Issue tokens
     const tokens = this.generateTokens(user.id);
     return ok({ isNewUser, tokens });
   }
@@ -157,7 +157,7 @@ export class AuthService {
         exp: number;
       };
 
-      // Optionally: rotate refresh tokens only if < 7 days remaining
+      // Optionally: rotate refresh tokens only if < 7 days remaining
       const msLeft = exp * 1000 - Date.now();
       const rotate = msLeft < 7 * 24 * 60 * 60 * 1000;
 
