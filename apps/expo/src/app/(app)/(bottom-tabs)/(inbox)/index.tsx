@@ -248,7 +248,7 @@ const Inbox = () => {
       );
     }
 
-    if (notificationItems.length === 0) {
+    if (notificationItems.length === 0 && pendingRequests === 0) {
       return (
         <YStack flex={1} justifyContent="center" padding="$4">
           <EmptyPlaceholder
