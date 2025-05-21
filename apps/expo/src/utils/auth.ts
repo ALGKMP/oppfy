@@ -1,6 +1,7 @@
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { jwtDecode } from "jwt-decode";
 import superjson from "superjson";
+import { AppState } from "react-native";
 
 import type { AppRouter } from "@oppfy/api";
 
@@ -23,6 +24,7 @@ class AuthService {
   private tokens: AuthTokens | null = null;
   private listeners: (() => void)[] = [];
   private refreshTimer: NodeJS.Timeout | null = null;
+  private appStateSubscription: { remove: () => void } | null = null;
 
   private readonly client = createTRPCClient<AppRouter>({
     links: [
@@ -38,6 +40,22 @@ class AuthService {
 
   constructor() {
     void this.initialize();
+    this.setupAppStateListener();
+  }
+
+  private setupAppStateListener() {
+    this.appStateSubscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "active" && this.tokens) {
+        console.log("[Auth] App came to foreground, checking token validity");
+        if (!this.isAccessTokenValid(this.tokens.accessToken)) {
+          console.log("[Auth] Token invalid after app resume, attempting refresh");
+          void this.handleTokenRefresh(this.tokens);
+        } else {
+          console.log("[Auth] Token still valid after app resume");
+          this.scheduleTokenRefresh();
+        }
+      }
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -67,7 +85,11 @@ class AuthService {
   }
 
   public signOut() {
-    console.log("SIGNING OUT - IN AUTH SERVICE");
+    console.log("[Auth] Signing out user");
+    if (this.appStateSubscription) {
+      this.appStateSubscription.remove();
+      this.appStateSubscription = null;
+    }
     storage.delete("auth_tokens");
     this.clearTimer();
     this.user = null;
@@ -121,19 +143,24 @@ class AuthService {
       0,
     );
 
+    console.log(`[Auth] Scheduling token refresh in ${msUntilRefresh}ms`);
     this.refreshTimer = setTimeout(() => {
+      console.log("[Auth] Token refresh timer triggered");
       if (this.tokens) void this.handleTokenRefresh(this.tokens);
     }, msUntilRefresh);
   }
 
   private async handleTokenRefresh(tokens: AuthTokens): Promise<boolean> {
     try {
+      console.log("[Auth] Attempting to refresh token");
       const newTokens = await this.client.auth.refreshToken.mutate({
         refreshToken: tokens.refreshToken,
       });
+      console.log("[Auth] Token refresh successful");
       this.setTokens(newTokens);
       return true;
     } catch (err) {
+      console.error("[Auth] Token refresh failed:", err);
       return false;
     }
   }
