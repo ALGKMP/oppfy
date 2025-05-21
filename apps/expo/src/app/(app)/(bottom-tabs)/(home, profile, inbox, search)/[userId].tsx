@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter,  } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { CameraOff, Lock, UserX } from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
@@ -27,6 +27,7 @@ interface ViewToken {
 const OtherProfile = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const scrollRef = useRef(null);
 
   const { userId, ...params } = useLocalSearchParams<{
     userId: string;
@@ -54,12 +55,12 @@ const OtherProfile = () => {
   } = api.profile.getRelationshipStatesBetweenUsers.useQuery({ userId });
 
   const {
-    data: postsData,
-    isLoading: isLoadingPostData,
-    isFetchingNextPage,
-    fetchNextPage,
+    data: posts,
     refetch: refetchPosts,
+    isLoading: isLoadingPostData,
     hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
   } = api.post.paginatePosts.useInfiniteQuery(
     { userId, pageSize: 10 },
     {
@@ -73,7 +74,19 @@ const OtherProfile = () => {
   const isLoading =
     isLoadingProfile || isLoadingProfileStats || isLoadingRelationshipStates;
 
-  const postItems = postsData?.pages.flatMap((page) => page.items) ?? [];
+  const postItems = posts?.pages.flatMap((page) => page.items) ?? [];
+
+  // Memoize the profile prop to prevent unnecessary re-renders
+  const headerProfile = useMemo(() => {
+    if (profile) {
+      return profile;
+    }
+    return {
+      username: params.username,
+      name: params.name,
+      profilePictureUrl: params.profilePictureUrl,
+    };
+  }, [profile, params.username, params.name, params.profilePictureUrl]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -100,7 +113,6 @@ const OtherProfile = () => {
     const visibleItemIds = viewableItems
       .filter((token) => token.isViewable)
       .map((token) => token.item.post.id);
-
     setViewableItems(visibleItemIds);
   };
 
@@ -112,26 +124,18 @@ const OtherProfile = () => {
     <YStack gap="$2" position="relative">
       <Header
         type="other"
-        profile={{
-          ...profile,
-          username: profile?.username ?? params.username,
-          name: profile?.name ?? params.name,
-          profilePictureUrl:
-            profile?.profilePictureUrl ?? params.profilePictureUrl,
-        }}
+        profile={headerProfile}
         stats={profileStats}
         relationshipState={relationshipState}
         isLoading={isLoading}
       />
 
-      {isLoadingProfile ? null : (
+      {isLoading ? null : (
         <>
-          {profileStats?.friends &&
-          profileStats.friends > 0 &&
-          !relationshipState?.isBlocked ? (
+          {profileStats && relationshipState && profileStats.friends > 0 && !relationshipState.isBlocked ? (
             <FriendCarousel
               userId={userId}
-              username={profile?.username ?? ""}
+              username={headerProfile.username ?? ""}
               paddingHorizontal="$2.5"
             />
           ) : (
@@ -159,7 +163,7 @@ const OtherProfile = () => {
     </YStack>
   );
 
-  const renderNoPosts = () => {
+  const renderEmptyList = () => {
     if (isLoadingPostData) {
       return (
         <YStack gap="$4">
@@ -206,10 +210,11 @@ const OtherProfile = () => {
 
   return (
     <FlashList
+      ref={scrollRef}
       data={postItems}
       renderItem={renderPost}
       ListHeaderComponent={renderHeader}
-      ListEmptyComponent={renderNoPosts}
+      ListEmptyComponent={renderEmptyList}
       keyExtractor={(item) => `other-profile-post-${item.post.id}`}
       estimatedItemSize={664}
       showsVerticalScrollIndicator={false}
