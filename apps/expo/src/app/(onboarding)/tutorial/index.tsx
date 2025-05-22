@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
-import { Dimensions, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import Animated, {
-  Easing,
   interpolate,
   useAnimatedStyle,
   useSharedValue,
@@ -11,11 +10,9 @@ import Animated, {
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
 import { SplashScreen, useRouter } from "expo-router";
 import Splash from "@assets/icons/logo.png";
 // Import collage images
-import Opp4 from "@assets/onboarding/opp-4.jpg";
 import Opp7 from "@assets/onboarding/opp-7.jpg";
 import Pop1 from "@assets/onboarding/pop-1.jpg";
 import Pop2 from "@assets/onboarding/pop-2.jpg";
@@ -121,7 +118,11 @@ export default function Start() {
     setTimeout(() => {
       // Final haptic feedback and navigate to next screen
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      router.replace("/auth/phone-number");
+      if (requiredPermissions) {
+        router.replace("/auth/phone-number");
+      } else {
+        router.replace("/auth/permissions");
+      }
     }, 2000); // Wait for logo animations to finish
   };
 
@@ -272,13 +273,6 @@ export default function Start() {
           justifyContent="flex-end"
           style={{ zIndex: 5 }}
         >
-          <LinearGradient
-            colors={["transparent", "#F214FF"]}
-            locations={[0.6, 1.0]}
-            style={{ flex: 1, justifyContent: "flex-end" }}
-          >
-            {/* Text removed as per user's changes */}
-          </LinearGradient>
         </View>
       </Animated.View>
 
