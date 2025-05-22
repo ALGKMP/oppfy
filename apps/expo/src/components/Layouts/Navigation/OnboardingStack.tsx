@@ -43,21 +43,27 @@ const CustomNavigator = ({
             <OnboardingHeader
               title={title}
               HeaderLeft={
-                options.headerLeft?.({
-                  canGoBack: !!back,
-                  tintColor: "#fff",
-                }) ?? (
+                options.headerLeft ? (
+                  options.headerLeft({
+                    canGoBack: !!back,
+                    tintColor: "#fff",
+                  })
+                ) : back ? (
                   <DefaultHeaderLeft
                     navigation={navigation}
                     canGoBack={!!back}
                   />
-                )
+                ) : null
               }
               HeaderRight={
-                options.headerRight?.({
-                  canGoBack: !!back,
-                  tintColor: "#fff",
-                }) ?? <DefaultHeaderRight />
+                options.headerRight ? (
+                  options.headerRight({
+                    canGoBack: !!back,
+                    tintColor: "#fff",
+                  })
+                ) : (
+                  <DefaultHeaderRight />
+                )
               }
               progress={(options as OnboardingStackOptions).progress}
             />

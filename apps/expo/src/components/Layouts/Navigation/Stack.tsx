@@ -35,15 +35,18 @@ const CustomNavigator = ({
                 options.headerTransparent ? "transparent" : undefined
               }
               HeaderLeft={
-                options.headerLeft?.({
-                  canGoBack: !!back,
-                  tintColor: options.headerTintColor,
-                }) ?? (
+                options.headerLeft ? (
+                  options.headerLeft({
+                    canGoBack: !!back,
+                    tintColor: options.headerTintColor,
+                  })
+                ) : back ? (
                   <DefaultHeaderLeft
                     navigation={navigation}
                     canGoBack={!!back}
                   />
                 )
+                : null
               }
               HeaderTitle={
                 typeof options.headerTitle === "function" ? (

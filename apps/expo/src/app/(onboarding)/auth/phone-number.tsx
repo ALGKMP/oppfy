@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { BackHandler } from "react-native";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 
 import { validators } from "@oppfy/validators";
 
@@ -23,6 +24,23 @@ const PhoneNumber = () => {
     dialingCode: "+1",
     flag: "🇺🇸",
   });
+
+  // Disable back navigation
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        // Return true to prevent going back
+        return true;
+      };
+
+      // Add back button handler for Android
+      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+      // Cleanup
+      return () =>
+        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+    }, []),
+  );
 
   const isValidPhoneNumber = useMemo(
     () =>

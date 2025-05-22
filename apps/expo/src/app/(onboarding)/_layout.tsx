@@ -8,8 +8,16 @@ const OnboardingLayout = () => (
       gestureEnabled: false,
     }}
   >
+    
     <OnboardingStack.Screen
       name="index"
+      options={{
+        headerShown: false,
+      }}
+    />
+
+    <OnboardingStack.Screen
+      name="tutorial"
       options={{
         headerShown: false,
       }}
