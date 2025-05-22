@@ -1,5 +1,6 @@
 import { OnboardingStack } from "~/components/Layouts/Navigation/OnboardingStack";
 import type { OnboardingStackOptions } from "~/components/Layouts/Navigation/OnboardingStack";
+import { Icon } from "~/components/ui";
 
 const AuthLayout = () => (
   <OnboardingStack
