@@ -1,11 +1,5 @@
-import React, {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
-import { Dimensions } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Dimensions, StyleSheet } from "react-native";
 import Animated, {
   Easing,
   interpolate,
@@ -18,156 +12,20 @@ import Animated, {
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { SplashScreen, useRouter } from "expo-router";
 import Splash from "@assets/icons/logo.png";
+// Import collage images
+import Opp4 from "@assets/onboarding/opp-4.jpg";
+import Opp7 from "@assets/onboarding/opp-7.jpg";
+import Pop1 from "@assets/onboarding/pop-1.jpg";
+import Pop2 from "@assets/onboarding/pop-2.jpg";
+import Pop8 from "@assets/onboarding/pop-8.jpg";
 import { getToken } from "tamagui";
 
-import { H2, ScreenView, View } from "~/components/ui";
+import { H2, ScreenView, Text, View } from "~/components/ui";
 import { OnboardingButton } from "~/components/ui/Onboarding";
 import { usePermissions } from "~/contexts/PermissionsContext";
-
-// ====================== CONFIG ======================
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
-
-// Fixed-size pool for performance
-const MAX_EMOJI_POOL = 50;
-const SPAWN_INTERVAL_MS = 100;
-
-const CONFIG = {
-  EMOJI_SIZE: 40,
-  // Fall durations let you see the arc
-  FALL_DURATION_MIN: 1500,
-  FALL_DURATION_MAX: 2000,
-
-  // We'll do a single half-cosine in X
-  // amplitude picks a random sign for left or right
-  ARC_AMPLITUDE_MIN: 40,
-  ARC_AMPLITUDE_MAX: 120,
-
-  // We'll rotate up to ±20° across the fall
-  MAX_ROTATION_DEG: 20,
-
-  PHASES: [
-    // { key: "FIRE", emoji: "🔥", duration: 1200 },
-    // { key: "SKULL", emoji: "💀", duration: 1200 },
-    // { key: "LAUGH", emoji: "😈", duration: 1200 },
-    { key: "CAMERA", emoji: "📸", duration: 3000 },
-  ],
-};
-
-// ================== FLOATING EMOJI (POOL ITEM) ==================
-export interface FloatingEmojiRef {
-  resetAndAnimate: (emoji: string) => void;
-}
-
-interface FloatingEmojiProps {
-  size: number;
-}
-
-/**
- * A single re-usable emoji that arcs from top to bottom.
- */
-const FloatingEmoji = forwardRef<FloatingEmojiRef, FloatingEmojiProps>(
-  ({ size }, ref) => {
-    // We store the actual character in normal React state
-    const [emoji, setEmoji] = useState("🔥");
-
-    // Reanimated shared values
-    const progress = useSharedValue(0); // 0→1 over the fall
-    const startX = useSharedValue(0); // random initial x
-    const arcAmp = useSharedValue(0); // amplitude for arc
-    const scale = useSharedValue(0);
-
-    // Called by the parent to spawn a new fall
-    useImperativeHandle(ref, () => ({
-      resetAndAnimate(newEmoji: string) {
-        setEmoji(newEmoji);
-
-        progress.value = 0;
-
-        // random initial X
-        const x = Math.random() * SCREEN_WIDTH;
-        startX.value = x;
-
-        // random arc amplitude ±
-        const ampBase =
-          CONFIG.ARC_AMPLITUDE_MIN +
-          Math.random() * (CONFIG.ARC_AMPLITUDE_MAX - CONFIG.ARC_AMPLITUDE_MIN);
-        // 50% chance left or right
-        arcAmp.value = Math.random() < 0.5 ? -ampBase : ampBase;
-
-        // random fall time
-        const duration =
-          CONFIG.FALL_DURATION_MIN +
-          Math.random() * (CONFIG.FALL_DURATION_MAX - CONFIG.FALL_DURATION_MIN);
-
-        // animate progress 0→1
-        progress.value = withTiming(1, {
-          duration,
-          easing: Easing.out(Easing.quad),
-        });
-
-        // pop-in scale
-        scale.value = 0;
-        scale.value = withSequence(
-          withSpring(1.05, { damping: 9 }),
-          withSpring(1, { damping: 8 }),
-        );
-      },
-    }));
-
-    // Animate x/y from progress
-    const animatedStyle = useAnimatedStyle(() => {
-      // y: linear from well above top to well below bottom
-      const y = interpolate(
-        progress.value,
-        [0, 1],
-        [-size - 200, SCREEN_HEIGHT + size * 2],
-      );
-
-      // x: single half-cosine arc from 0 to 2 * amplitude
-      // x(t) = startX + arcAmp * (1 - cos(pi * t))
-      //  - at t=0 => x(0) = startX
-      //  - at t=1 => x(1) = startX + 2 * arcAmp
-      const arcFactor = 1 - Math.cos(Math.PI * progress.value);
-      const x = startX.value + arcAmp.value * arcFactor;
-
-      // rotation: from 0 to ±MAX_ROTATION_DEG across progress
-      // sign determined by arcAmp. So if we arc right, we rotate right.
-      const rotationSign = arcAmp.value > 0 ? 1 : -1;
-      const rotateDeg = rotationSign * CONFIG.MAX_ROTATION_DEG * progress.value;
-
-      return {
-        transform: [
-          { translateX: x },
-          { translateY: y },
-          { rotate: `${rotateDeg}deg` },
-          { scale: scale.value },
-        ],
-        // fade slightly at the bottom
-        opacity: progress.value < 0.98 ? 1 : 0.99,
-      };
-    });
-
-    return (
-      <Animated.Text
-        style={[
-          {
-            position: "absolute",
-            fontSize: size,
-            textShadowColor: "rgba(0,0,0,0.2)",
-            textShadowOffset: { width: 1, height: 1 },
-            textShadowRadius: 4,
-          },
-          animatedStyle,
-        ]}
-      >
-        {emoji}
-      </Animated.Text>
-    );
-  },
-);
-FloatingEmoji.displayName = "FloatingEmoji";
 
 // =================== MAIN SCREEN ===================
 const AnimatedImage = Animated.createAnimatedComponent(Image);
@@ -177,141 +35,112 @@ export default function Start() {
   const { permissions } = usePermissions();
   const requiredPermissions = permissions.camera && permissions.contacts;
 
-  // Phase index
-  const [phaseIndex, setPhaseIndex] = useState(0);
-  // Stop spawning after final phase
-  const [shouldSpawn, setShouldSpawn] = useState(true);
-
-  // Our pool of 50 references
-  const emojiRefs = useRef<FloatingEmojiRef[]>([]);
-  const poolCursorRef = useRef(0);
-
   // Main logo reanimated
-  const scale = useSharedValue(1);
+  const scale = useSharedValue(0); // Start at 0 to be hidden initially
   const rotate = useSharedValue(0);
   const translateY = useSharedValue(0);
-  const subtitleOpacity = useSharedValue(0);
-  const subtitleTranslateY = useSharedValue(20);
   const buttonOpacity = useSharedValue(0);
   const buttonTranslateY = useSharedValue(50);
   const glowOpacity = useSharedValue(0);
+  const logoOpacity = useSharedValue(0); // Control logo visibility
 
-  // =================== SPAWNING ===================
+  // Collage image animations
+  const pop1Anim = useSharedValue(0);
+  const pop8Anim = useSharedValue(0);
+  const opp7Anim = useSharedValue(0);
+  const collageOpacity = useSharedValue(0);
+
+  // =================== IMAGE COLLAGE ANIMATION ===================
   useEffect(() => {
-    if (!shouldSpawn) return undefined;
-
-    const intervalId = setInterval(() => {
-      const phase = CONFIG.PHASES[phaseIndex];
-      const emoji = phase ? phase.emoji : "🔥";
-
-      if (emojiRefs.current.length > 0) {
-        const i = poolCursorRef.current;
-        if (emojiRefs.current[i]) {
-          emojiRefs.current[i].resetAndAnimate(emoji);
-        }
-        poolCursorRef.current = (i + 1) % MAX_EMOJI_POOL;
-      }
-    }, SPAWN_INTERVAL_MS);
-
-    return () => clearInterval(intervalId);
-  }, [phaseIndex, shouldSpawn]);
-
-  // =================== PHASE PROGRESSION ===================
-  useEffect(() => {
-    let isMounted = true;
-    const runPhases = async () => {
-      for (let i = 0; i < CONFIG.PHASES.length; i++) {
-        if (!isMounted) return;
-        setPhaseIndex(i);
-        await new Promise((resolve) =>
-          setTimeout(resolve, CONFIG.PHASES[i]?.duration ?? 0),
-        );
-      }
-      // Done with all phases
-      setShouldSpawn(false);
-    };
-
-    void runPhases();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  // =================== SPLASH + LOGO ANIMATION ===================
-  useEffect(() => {
-    const animateStartup = async () => {
-      // Let splash be visible for a bit, then hide
+    const animateCollage = async () => {
+      // Hide splash screen
       await new Promise((resolve) => setTimeout(resolve, 300));
       await SplashScreen.hideAsync();
 
-      // Big scale entrance
-      scale.value = withSequence(
-        withTiming(0.8, { duration: 100 }),
-        withSpring(1.2, { damping: 12, stiffness: 100 }),
-        withSpring(1, { damping: 10 }),
-      );
+      // Fade in collage background
+      collageOpacity.value = withTiming(1, { duration: 500 });
 
-      // Wiggle rotate
-      rotate.value = withSequence(
-        withTiming(12, { duration: 200 }),
-        withTiming(-12, { duration: 200 }),
-        withTiming(0, { duration: 200 }),
-      );
+      // Animate images in sequence with delays
+      setTimeout(() => {
+        // Pop1 animation
+        pop1Anim.value = withTiming(1, { duration: 400 });
 
-      // Bounce
-      translateY.value = withSequence(
-        withTiming(-50, { duration: 300 }),
-        withSpring(0, { damping: 8, stiffness: 100 }),
-      );
+        // Pop8 animation after delay
+        setTimeout(() => {
+          pop8Anim.value = withTiming(1, { duration: 400 });
 
-      // Glow effect
-      glowOpacity.value = withSequence(
-        withTiming(1, { duration: 500 }),
-        withTiming(0.4, { duration: 500 }),
-        withTiming(1, { duration: 500 }),
-        withTiming(0.7, { duration: 500 }), // final
-      );
+          // Opp7 animation after delay
+          setTimeout(() => {
+            opp7Anim.value = withTiming(1, { duration: 400 });
 
-      // Subtitle + button
-      subtitleOpacity.value = withDelay(
-        700,
-        withSpring(1, { damping: 12, stiffness: 80 }),
-      );
-      subtitleTranslateY.value = withDelay(
-        700,
-        withSpring(0, { damping: 12, stiffness: 80 }),
-      );
+            // Add haptic feedback after image animations complete
+            setTimeout(() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-      buttonOpacity.value = withDelay(
-        1000,
-        withSpring(1, { damping: 12, stiffness: 80 }),
-      );
-      buttonTranslateY.value = withDelay(
-        1000,
-        withSpring(0, { damping: 12, stiffness: 80 }),
-      );
+              // After all images have appeared, start the logo animation
+              animateLogo();
+            }, 800);
+          }, 400);
+        }, 400);
+      }, 500);
     };
 
-    void animateStartup();
-  }, [
-    scale,
-    rotate,
-    translateY,
-    glowOpacity,
-    subtitleOpacity,
-    subtitleTranslateY,
-    buttonOpacity,
-    buttonTranslateY,
-  ]);
+    // Start the collage animations immediately
+    void animateCollage();
+  }, []);
+
+  // =================== LOGO ANIMATION ===================
+  const animateLogo = () => {
+    // Fade in logo
+    logoOpacity.value = withTiming(1, { duration: 400 });
+
+    // Big scale entrance
+    scale.value = withSequence(
+      withTiming(0.8, { duration: 200 }),
+      withSpring(1.2, { damping: 12, stiffness: 100 }),
+      withSpring(1, { damping: 10 }),
+    );
+
+    // Wiggle rotate
+    rotate.value = withSequence(
+      withTiming(12, { duration: 200 }),
+      withTiming(-12, { duration: 200 }),
+      withTiming(0, { duration: 200 }),
+    );
+
+    // Bounce
+    translateY.value = withSequence(
+      withTiming(-50, { duration: 300 }),
+      withSpring(0, { damping: 8, stiffness: 100 }),
+    );
+
+    // Glow effect
+    glowOpacity.value = withSequence(
+      withTiming(1, { duration: 500 }),
+      withTiming(0.4, { duration: 500 }),
+      withTiming(1, { duration: 500 }),
+      withTiming(0.7, { duration: 500 }), // final
+    );
+
+    // Button with delay
+    setTimeout(() => {
+      buttonOpacity.value = withSpring(1, { damping: 12, stiffness: 80 });
+      buttonTranslateY.value = withSpring(0, { damping: 12, stiffness: 80 });
+
+      // Final haptic feedback when everything is done
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    }, 1200);
+  };
 
   // =================== HANDLER ===================
   const onSubmit = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    router.push("/tutorial//screen0")
+    router.push("/tutorial/screen1");
   };
 
   // =================== ANIMATED STYLES ===================
   const animatedIconStyle = useAnimatedStyle(() => ({
+    opacity: logoOpacity.value,
     transform: [
       { scale: scale.value },
       { rotate: `${rotate.value}deg` },
@@ -323,14 +152,44 @@ export default function Start() {
     opacity: glowOpacity.value,
   }));
 
-  const animatedSubtitleStyle = useAnimatedStyle(() => ({
-    opacity: subtitleOpacity.value,
-    transform: [{ translateY: subtitleTranslateY.value }],
-  }));
-
   const animatedButtonStyle = useAnimatedStyle(() => ({
     opacity: buttonOpacity.value,
     transform: [{ translateY: buttonTranslateY.value }],
+  }));
+
+  // Animated collage styles
+  const animatedCollageStyle = useAnimatedStyle(() => ({
+    opacity: collageOpacity.value,
+  }));
+
+  const animatedPop1Style = useAnimatedStyle(() => ({
+    transform: [
+      { rotate: "-5deg" },
+      {
+        translateY: interpolate(pop1Anim.value, [0, 1], [50, 0]),
+      },
+    ],
+    opacity: pop1Anim.value,
+  }));
+
+  const animatedPop8Style = useAnimatedStyle(() => ({
+    transform: [
+      { rotate: "6deg" },
+      {
+        translateY: interpolate(pop8Anim.value, [0, 1], [50, 0]),
+      },
+    ],
+    opacity: pop8Anim.value,
+  }));
+
+  const animatedOpp7Style = useAnimatedStyle(() => ({
+    transform: [
+      { rotate: "-6deg" },
+      {
+        translateY: interpolate(opp7Anim.value, [0, 1], [50, 0]),
+      },
+    ],
+    opacity: opp7Anim.value,
   }));
 
   // =================== RENDER ===================
@@ -340,18 +199,118 @@ export default function Start() {
       backgroundColor="$primary"
       safeAreaEdges={["bottom"]}
     >
-      {/* Pooled emojis, each arcs once. */}
-      {Array.from({ length: MAX_EMOJI_POOL }, (_, i) => (
-        <FloatingEmoji
-          key={`emoji-${i}`}
-          ref={(ref) => {
-            if (ref) emojiRefs.current[i] = ref;
+      {/* Image Collage (appears first) */}
+      <Animated.View style={[styles.collageContainer, animatedCollageStyle]}>
+        {/* Fixed position image */}
+        <Image
+          source={Pop2}
+          style={{
+            position: "absolute",
+            left: 150,
+            top: 50,
+            width: 300,
+            height: 500,
+            borderRadius: 20,
+            borderWidth: 5,
+            borderColor: "white",
+            transform: [{ rotate: "6deg" }],
+            zIndex: 1,
           }}
-          size={CONFIG.EMOJI_SIZE}
         />
-      ))}
 
-      {/* Main Logo & UI */}
+        {/* Animated Pop1 */}
+        <Animated.View
+          style={[
+            {
+              position: "absolute",
+              left: 20,
+              top: 100,
+              width: 300,
+              height: 500,
+              borderRadius: 20,
+              borderWidth: 5,
+              borderColor: "white",
+              zIndex: 2,
+              overflow: "hidden",
+            },
+            animatedPop1Style,
+          ]}
+        >
+          <Image source={Pop1} style={{ width: "100%", height: "100%" }} />
+        </Animated.View>
+
+        {/* Animated Pop8 */}
+        <Animated.View
+          style={[
+            {
+              position: "absolute",
+              top: 150,
+              left: 100,
+              width: 300,
+              height: 600,
+              borderRadius: 20,
+              borderWidth: 5,
+              borderColor: "white",
+              zIndex: 3,
+              overflow: "hidden",
+            },
+            animatedPop8Style,
+          ]}
+        >
+          <Image source={Pop8} style={{ width: "100%", height: "100%" }} />
+        </Animated.View>
+
+        {/* Animated Opp7 */}
+        <Animated.View
+          style={[
+            {
+              position: "absolute",
+              top: 250,
+              left: 25,
+              width: 350,
+              height: 550,
+              borderRadius: 20,
+              borderWidth: 5,
+              borderColor: "white",
+              zIndex: 4,
+              overflow: "hidden",
+            },
+            animatedOpp7Style,
+          ]}
+        >
+          <Image source={Opp7} style={{ width: "100%", height: "100%" }} />
+        </Animated.View>
+
+        {/* Gradient Overlay and Text */}
+        <View
+          position="absolute"
+          bottom={0}
+          width="100%"
+          height="100%"
+          justifyContent="flex-end"
+          style={{ zIndex: 5 }}
+        >
+          <LinearGradient
+            colors={["transparent", "#F214FF"]}
+            locations={[0.6, 1.0]}
+            style={{ flex: 1, justifyContent: "flex-end" }}
+          >
+            {/* <View paddingBottom={40} alignItems="center">
+              <Text
+                fontSize={32}
+                fontWeight="bold"
+                color="white"
+                textAlign="center"
+                marginBottom={40}
+              >
+                post for your friends
+              </Text>
+            </View> */}
+          </LinearGradient>
+        </View>
+      </Animated.View>
+
+      {/* Main Logo & UI (appears after images) */}
       <View
         position="absolute"
         width="100%"
@@ -386,19 +345,6 @@ export default function Start() {
             animatedIconStyle,
           ]}
         />
-
-        <Animated.View style={animatedSubtitleStyle}>
-          <H2
-            textAlign="center"
-            style={{
-              textShadowColor: "rgba(0,0,0,0.2)",
-              textShadowOffset: { width: 1, height: 1 },
-              textShadowRadius: 10,
-            }}
-          >
-            Other people post for you
-          </H2>
-        </Animated.View>
       </View>
 
       <Animated.View
@@ -413,12 +359,16 @@ export default function Start() {
           animatedButtonStyle,
         ]}
       >
-        <OnboardingButton
-          onPress={onSubmit}
-          isValid
-          text="next"
-        />
+        <OnboardingButton onPress={onSubmit} isValid text="next" />
       </Animated.View>
     </ScreenView>
   );
-} 
+}
+
+const styles = StyleSheet.create({
+  collageContainer: {
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+  },
+});
