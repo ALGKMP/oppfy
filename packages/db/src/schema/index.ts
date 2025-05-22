@@ -60,32 +60,32 @@ export const reportCommentReasonEnum = pgEnum("report_comment_reason", [
 ]);
 
 export const user = pgTable("user", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  phoneNumber: text("phone_number").notNull().unique(),
-  createdAt: timestamp("created_at", { withTimezone: true })
+  id: uuid().primaryKey().defaultRandom(),
+  phoneNumber: text().notNull().unique(),
+  createdAt: timestamp({ withTimezone: true })
     .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
+  updatedAt: timestamp({ withTimezone: true })
     .defaultNow()
     .notNull(),
 });
 
 export const userStatus = pgTable("user_status", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")
+  id: uuid().primaryKey().defaultRandom(),
+  userId: uuid()
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  isOnApp: boolean("is_on_app").default(true).notNull(),
-  hasCompletedTutorial: boolean("has_completed_tutorial")
+  isOnApp: boolean().default(true).notNull(),
+  hasCompletedTutorial: boolean()
     .default(false)
     .notNull(),
-  hasCompletedOnboarding: boolean("has_completed_onboarding")
+  hasCompletedOnboarding: boolean()
     .default(false)
     .notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
+  createdAt: timestamp({ withTimezone: true })
     .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
+  updatedAt: timestamp({ withTimezone: true })
     .defaultNow()
     .notNull(),
 });
@@ -125,7 +125,7 @@ export const userRelations = relations(user, ({ one, many }) => ({
 
 export const contact = pgTable("contact", {
   id: varchar("id", { length: 128 }).primaryKey(),
-  createdAt: timestamp("created_at", { withTimezone: true })
+  createdAt: timestamp({ withTimezone: true })
     .defaultNow()
     .notNull(),
 });
@@ -133,13 +133,13 @@ export const contact = pgTable("contact", {
 export const userContact = pgTable(
   "user_contact",
   {
-    userId: uuid("user_id")
+    userId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    contactId: varchar("contact_id", { length: 128 })
+    contactId: varchar({ length: 128 })
       .notNull()
       .references(() => contact.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    createdAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
   },
@@ -153,20 +153,20 @@ export const userContact = pgTable(
 export const profile = pgTable(
   "profile",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    userId: uuid("user_id")
+    id: uuid().primaryKey().defaultRandom(),
+    userId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    privacy: privacyEnum("privacy").default("public").notNull(),
-    username: varchar("username", { length: 30 }).unique(),
-    name: varchar("name", { length: 30 }),
-    dateOfBirth: timestamp("date_of_birth"),
-    bio: varchar("bio", { length: 100 }),
-    profilePictureKey: text("profile_picture_key"),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    privacy: privacyEnum().default("public").notNull(),
+    username: varchar({ length: 30 }).unique(),
+    name: varchar({ length: 30 }),
+    dateOfBirth: timestamp(),
+    bio: varchar({ length: 100 }),
+    profilePictureKey: text(),
+    createdAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
+    updatedAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
   },
@@ -183,20 +183,20 @@ export const profileRelations = relations(profile, ({ one }) => ({
 }));
 
 export const userStats = pgTable("user_stats", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")
+  id: uuid().primaryKey().defaultRandom(),
+  userId: uuid()
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  followers: integer("followers").notNull().default(0),
-  following: integer("following").notNull().default(0),
-  friends: integer("friends").notNull().default(0),
-  friendRequests: integer("friend_requests").notNull().default(0),
-  followRequests: integer("follow_requests").notNull().default(0),
-  posts: integer("posts").notNull().default(0),
-  createdAt: timestamp("created_at", { withTimezone: true })
+  followers: integer().notNull().default(0),
+  following: integer().notNull().default(0),
+  friends: integer().notNull().default(0),
+  friendRequests: integer().notNull().default(0),
+  followRequests: integer().notNull().default(0),
+  posts: integer().notNull().default(0),
+  createdAt: timestamp({ withTimezone: true })
     .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
+  updatedAt: timestamp({ withTimezone: true })
     .defaultNow()
     .notNull(),
 });
@@ -209,15 +209,15 @@ export const profileStatsRelations = relations(userStats, ({ one }) => ({
 }));
 
 export const pushToken = pgTable("push_token", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")
+  id: uuid().primaryKey().defaultRandom(),
+  userId: uuid()
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  token: text("token").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
+  token: text().notNull(),
+  createdAt: timestamp({ withTimezone: true })
     .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
+  updatedAt: timestamp({ withTimezone: true })
     .defaultNow()
     .notNull(),
 });
@@ -232,22 +232,22 @@ export const pushTokenRelations = relations(pushToken, ({ one }) => ({
 export const notification = pgTable(
   "notification",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    senderUserId: uuid("sender_user_id")
+    id: uuid().primaryKey().defaultRandom(),
+    senderUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    recipientUserId: uuid("recipient_user_id")
+    recipientUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    read: boolean("read").default(false).notNull(),
-    active: boolean("active").default(true).notNull(),
-    eventType: eventTypeEnum("event_type").notNull(),
-    entityId: varchar("entity_id", { length: 255 }),
-    entityType: entityTypeEnum("entity_type"),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    read: boolean().default(false).notNull(),
+    active: boolean().default(true).notNull(),
+    eventType: eventTypeEnum().notNull(),
+    entityId: varchar({ length: 255 }),
+    entityType: entityTypeEnum(),
+    createdAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
+    updatedAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
   },
@@ -275,20 +275,20 @@ export const notificationRelations = relations(notification, ({ one }) => ({
 }));
 
 export const notificationSettings = pgTable("notification_settings", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")
+  id: uuid().primaryKey().defaultRandom(),
+  userId: uuid()
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  posts: boolean("posts").default(true).notNull(),
-  likes: boolean("likes").default(true).notNull(),
-  mentions: boolean("mentions").default(true).notNull(),
-  comments: boolean("comments").default(true).notNull(),
-  followRequests: boolean("follow_requests").default(true).notNull(),
-  friendRequests: boolean("friend_requests").default(true).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
+  posts: boolean().default(true).notNull(),
+  likes: boolean().default(true).notNull(),
+  mentions: boolean().default(true).notNull(),
+  comments: boolean().default(true).notNull(),
+  followRequests: boolean().default(true).notNull(),
+  friendRequests: boolean().default(true).notNull(),
+  createdAt: timestamp({ withTimezone: true })
     .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
+  updatedAt: timestamp({ withTimezone: true })
     .defaultNow()
     .notNull(),
 });
@@ -296,23 +296,23 @@ export const notificationSettings = pgTable("notification_settings", {
 export const post = pgTable(
   "post",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    authorUserId: uuid("author_user_id")
+    id: uuid().primaryKey().defaultRandom(),
+    authorUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    recipientUserId: uuid("recipient_user_id")
+    recipientUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    caption: text("caption"),
-    postKey: text("post_key").unique().notNull(),
-    width: integer("width").notNull().default(500),
-    height: integer("height").notNull().default(500),
-    mediaType: mediaTypeEnum("media_type").notNull(),
-    status: postStatusEnum("status").default("pending").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    caption: text(),
+    postKey: text().unique().notNull(),
+    width: integer().notNull().default(500),
+    height: integer().notNull().default(500),
+    mediaType: mediaTypeEnum().notNull(),
+    status: postStatusEnum().default("pending").notNull(),
+    createdAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
+    updatedAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
   },
@@ -345,16 +345,16 @@ export const postRelations = relations(post, ({ one, many }) => ({
 }));
 
 export const postStats = pgTable("post_stats", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  postId: uuid("post_id")
+  id: uuid().primaryKey().defaultRandom(),
+  postId: uuid()
     .notNull()
     .references(() => post.id, { onDelete: "cascade" }),
-  likes: integer("likes").notNull().default(0),
-  comments: integer("comments").notNull().default(0),
-  createdAt: timestamp("created_at", { withTimezone: true })
+  likes: integer().notNull().default(0),
+  comments: integer().notNull().default(0),
+  createdAt: timestamp({ withTimezone: true })
     .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
+  updatedAt: timestamp({ withTimezone: true })
     .defaultNow()
     .notNull(),
 });
@@ -362,14 +362,14 @@ export const postStats = pgTable("post_stats", {
 export const like = pgTable(
   "like",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    postId: uuid("post_id")
+    id: uuid().primaryKey().defaultRandom(),
+    postId: uuid()
       .notNull()
       .references(() => post.id, { onDelete: "cascade" }),
-    userId: uuid("user_id")
+    userId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    createdAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
   },
@@ -397,18 +397,18 @@ export const likeRelations = relations(like, ({ one }) => ({
 export const comment = pgTable(
   "comment",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    userId: uuid("user_id")
+    id: uuid().primaryKey().defaultRandom(),
+    userId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    postId: uuid("post_id")
+    postId: uuid()
       .notNull()
       .references(() => post.id, { onDelete: "cascade" }),
-    body: text("body").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    body: text().notNull(),
+    createdAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
+    updatedAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
   },
@@ -432,14 +432,14 @@ export const commentRelations = relations(comment, ({ one }) => ({
 export const follow = pgTable(
   "follow",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    senderUserId: uuid("sender_user_id")
+    id: uuid().primaryKey().defaultRandom(),
+    senderUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    recipientUserId: uuid("recipient_user_id")
+    recipientUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    createdAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
   },
@@ -465,17 +465,17 @@ export const followRelations = relations(follow, ({ one }) => ({
 export const friendRequest = pgTable(
   "friend_request",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    senderUserId: uuid("sender_user_id")
+    id: uuid().primaryKey().defaultRandom(),
+    senderUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    recipientUserId: uuid("recipient_user_id")
+    recipientUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    createdAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
+    updatedAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
   },
@@ -506,17 +506,17 @@ export const friendRequestRelations = relations(friendRequest, ({ one }) => ({
 export const followRequest = pgTable(
   "follow_request",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    senderUserId: uuid("sender_user_id")
+    id: uuid().primaryKey().defaultRandom(),
+    senderUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    recipientUserId: uuid("recipient_user_id")
+    recipientUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    createdAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
+    updatedAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
   },
@@ -547,14 +547,14 @@ export const followRequestRelations = relations(followRequest, ({ one }) => ({
 export const friend = pgTable(
   "friend",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    userIdA: uuid("user_id_a")
+    id: uuid().primaryKey().defaultRandom(),
+    userIdA: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    userIdB: uuid("user_id_b")
+    userIdB: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    createdAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
   },
@@ -586,14 +586,14 @@ export const friendRelations = relations(friend, ({ one }) => ({
 export const block = pgTable(
   "block",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    senderUserId: uuid("sender_user_id")
+    id: uuid().primaryKey().defaultRandom(),
+    senderUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    recipientUserId: uuid("recipient_user_id")
+    recipientUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    createdAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
   },
@@ -625,15 +625,15 @@ export const blockRelations = relations(block, ({ one }) => ({
 export const reportComment = pgTable(
   "report_comment",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    commentId: uuid("comment_id")
+    id: uuid().primaryKey().defaultRandom(),
+    commentId: uuid()
       .notNull()
       .references(() => comment.id, { onDelete: "cascade" }),
-    reporterUserId: uuid("reporter_user_id")
+    reporterUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    reason: reportCommentReasonEnum("reason").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    reason: reportCommentReasonEnum().notNull(),
+    createdAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
   },
@@ -646,15 +646,15 @@ export const reportComment = pgTable(
 export const reportPost = pgTable(
   "report_post",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    postId: uuid("post_id")
+    id: uuid().primaryKey().defaultRandom(),
+    postId: uuid()
       .notNull()
       .references(() => post.id, { onDelete: "cascade" }),
-    reporterUserId: uuid("reporter_user_id")
+    reporterUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    reason: reportPostReasonEnum("reason").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    reason: reportPostReasonEnum().notNull(),
+    createdAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
   },
@@ -678,15 +678,15 @@ export const reportPostRelations = relations(reportPost, ({ one }) => ({
 export const reportUser = pgTable(
   "report_user",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    reportedUserId: uuid("reported_user_id")
+    id: uuid().primaryKey().defaultRandom(),
+    reportedUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    reporterUserId: uuid("reporter_user_id")
+    reporterUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    reason: reportUserReasonEnum("reason").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    reason: reportUserReasonEnum().notNull(),
+    createdAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
   },
@@ -719,9 +719,9 @@ export const reportUserRelations = relations(reportUser, ({ one }) => ({
 }));
 
 export const waitlist = pgTable("waitlist", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  phoneNumber: text("phone_number").notNull().unique(),
-  createdAt: timestamp("created_at", { withTimezone: true })
+  id: uuid().primaryKey().defaultRandom(),
+  phoneNumber: text().notNull().unique(),
+  createdAt: timestamp({ withTimezone: true })
     .defaultNow()
     .notNull(),
 });

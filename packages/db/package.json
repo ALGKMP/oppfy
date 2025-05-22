@@ -25,8 +25,8 @@
     "@aws-sdk/client-rds-data": "^3.564.0",
     "@aws-sdk/credential-providers": "^3.564.0",
     "@oppfy/env": "workspace:*",
-    "drizzle-orm": "^0.30.10",
-    "drizzle-zod": "^0.5.1",
+    "drizzle-orm": "^0.43.1",
+    "drizzle-zod": "^0.8.1",
     "postgres": "^3.4.4",
     "zod": "^3.23.8"
   },
@@ -34,7 +34,7 @@
     "@oppfy/eslint-config": "workspace:*",
     "@oppfy/prettier-config": "workspace:*",
     "@oppfy/tsconfig": "workspace:*",
-    "drizzle-kit": "^0.21.1",
+    "drizzle-kit": "^0.31.1",
     "eslint": "catalog:",
     "prettier": "^3.2.5",
     "typescript": "^5.4"
