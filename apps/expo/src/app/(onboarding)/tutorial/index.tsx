@@ -121,7 +121,7 @@ export default function Start() {
     setTimeout(() => {
       // Final haptic feedback and navigate to next screen
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      router.push("/tutorial/screen1");
+      router.replace("/auth/phone-number");
     }, 2000); // Wait for logo animations to finish
   };
 
