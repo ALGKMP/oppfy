@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import Animated, {
   Easing,
   interpolate,
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
   withSequence,
   withSpring,
   withTiming,
@@ -21,10 +20,8 @@ import Opp7 from "@assets/onboarding/opp-7.jpg";
 import Pop1 from "@assets/onboarding/pop-1.jpg";
 import Pop2 from "@assets/onboarding/pop-2.jpg";
 import Pop8 from "@assets/onboarding/pop-8.jpg";
-import { getToken } from "tamagui";
 
-import { H2, ScreenView, Text, View } from "~/components/ui";
-import { OnboardingButton } from "~/components/ui/Onboarding";
+import { ScreenView, View } from "~/components/ui";
 import { usePermissions } from "~/contexts/PermissionsContext";
 
 // =================== MAIN SCREEN ===================
@@ -39,8 +36,6 @@ export default function Start() {
   const scale = useSharedValue(0); // Start at 0 to be hidden initially
   const rotate = useSharedValue(0);
   const translateY = useSharedValue(0);
-  const buttonOpacity = useSharedValue(0);
-  const buttonTranslateY = useSharedValue(50);
   const glowOpacity = useSharedValue(0);
   const logoOpacity = useSharedValue(0); // Control logo visibility
 
@@ -122,20 +117,12 @@ export default function Start() {
       withTiming(0.7, { duration: 500 }), // final
     );
 
-    // Button with delay
+    // Add a delay before navigating to the next screen
     setTimeout(() => {
-      buttonOpacity.value = withSpring(1, { damping: 12, stiffness: 80 });
-      buttonTranslateY.value = withSpring(0, { damping: 12, stiffness: 80 });
-
-      // Final haptic feedback when everything is done
+      // Final haptic feedback and navigate to next screen
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    }, 1200);
-  };
-
-  // =================== HANDLER ===================
-  const onSubmit = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    router.push("/tutorial/screen1");
+      router.push("/tutorial/screen1");
+    }, 2000); // Wait for logo animations to finish
   };
 
   // =================== ANIMATED STYLES ===================
@@ -150,11 +137,6 @@ export default function Start() {
 
   const animatedGlowStyle = useAnimatedStyle(() => ({
     opacity: glowOpacity.value,
-  }));
-
-  const animatedButtonStyle = useAnimatedStyle(() => ({
-    opacity: buttonOpacity.value,
-    transform: [{ translateY: buttonTranslateY.value }],
   }));
 
   // Animated collage styles
@@ -281,7 +263,7 @@ export default function Start() {
           <Image source={Opp7} style={{ width: "100%", height: "100%" }} />
         </Animated.View>
 
-        {/* Gradient Overlay and Text */}
+        {/* Gradient Overlay */}
         <View
           position="absolute"
           bottom={0}
@@ -295,17 +277,7 @@ export default function Start() {
             locations={[0.6, 1.0]}
             style={{ flex: 1, justifyContent: "flex-end" }}
           >
-            {/* <View paddingBottom={40} alignItems="center">
-              <Text
-                fontSize={32}
-                fontWeight="bold"
-                color="white"
-                textAlign="center"
-                marginBottom={40}
-              >
-                post for your friends
-              </Text>
-            </View> */}
+            {/* Text removed as per user's changes */}
           </LinearGradient>
         </View>
       </Animated.View>
@@ -346,21 +318,6 @@ export default function Start() {
           ]}
         />
       </View>
-
-      <Animated.View
-        style={[
-          {
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: getToken("$4", "space") as number,
-            paddingHorizontal: getToken("$6", "space") as number,
-          },
-          animatedButtonStyle,
-        ]}
-      >
-        <OnboardingButton onPress={onSubmit} isValid text="next" />
-      </Animated.View>
     </ScreenView>
   );
 }
