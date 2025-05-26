@@ -32,7 +32,7 @@ export const PostStats = (props: PostStatsProps) => {
       right={0}
       bottom={24}
       paddingRight="$4"
-      gap="$6"
+      gap="$4"
       zIndex={3}
       alignItems="flex-end"
     >
