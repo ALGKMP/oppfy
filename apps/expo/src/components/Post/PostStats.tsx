@@ -99,7 +99,11 @@ const LikeAction = ({ postId, postStats, isLiked }: LikeActionProps) => {
   };
 
   return (
-    <StatButton count={postStats.likes} onPress={handlePress}>
+    <StatButton
+      count={postStats.likes}
+      onPress={handlePress}
+      backgroundColor={isLiked ? "rgba(255, 255, 255, 0.2)" : undefined}
+    >
       <Animated.View style={buttonScale}>
         <Text fontSize={20}>{isLiked ? "❤️‍🔥" : "❤️"}</Text>
       </Animated.View>
@@ -176,10 +180,12 @@ const StatButton = ({
   count,
   children,
   onPress,
+  backgroundColor,
 }: {
   count?: number;
   children: React.ReactNode;
   onPress?: () => void;
+  backgroundColor?: string;
 }) => {
   const formatCount = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -194,13 +200,14 @@ const StatButton = ({
       style={{
         borderRadius: 20,
         overflow: "hidden",
+        backgroundColor,
       }}
     >
       <BlurView
         intensity={30}
         style={{
           padding: 14,
-          borderRadius: 24,
+          borderRadius: 15,
           overflow: "hidden",
           justifyContent: "center",
           alignItems: "center",
