@@ -659,8 +659,8 @@ importers:
         specifier: ^0.10.1
         version: 0.10.1(typescript@5.7.2)(zod@3.24.1)
       drizzle-zod:
-        specifier: ^0.5.1
-        version: 0.5.1(drizzle-orm@0.43.1(@aws-sdk/client-rds-data@3.721.0)(@opentelemetry/api@1.9.0)(@types/pg@8.11.10)(pg@8.13.1)(postgres@3.4.5))(zod@3.24.1)
+        specifier: ^0.8.1
+        version: 0.8.1(drizzle-orm@0.43.1(@aws-sdk/client-rds-data@3.721.0)(@opentelemetry/api@1.9.0)(@types/pg@8.11.10)(pg@8.13.1)(postgres@3.4.5))(zod@3.24.1)
       pg:
         specifier: ^8.12.0
         version: 8.13.1
@@ -840,8 +840,8 @@ importers:
         specifier: ^0.10.1
         version: 0.10.1(typescript@5.7.2)(zod@3.24.1)
       drizzle-zod:
-        specifier: ^0.5.1
-        version: 0.5.1(drizzle-orm@0.43.1(@aws-sdk/client-rds-data@3.721.0)(@opentelemetry/api@1.9.0)(@types/pg@8.11.10)(pg@8.13.1)(postgres@3.4.5))(zod@3.24.1)
+        specifier: ^0.8.1
+        version: 0.8.1(drizzle-orm@0.43.1(@aws-sdk/client-rds-data@3.721.0)(@opentelemetry/api@1.9.0)(@types/pg@8.11.10)(pg@8.13.1)(postgres@3.4.5))(zod@3.24.1)
       zod:
         specifier: ^3.23.8
         version: 3.24.1
@@ -6574,12 +6574,6 @@ packages:
         optional: true
       sqlite3:
         optional: true
-
-  drizzle-zod@0.5.1:
-    resolution: {integrity: sha512-C/8bvzUH/zSnVfwdSibOgFjLhtDtbKYmkbPbUCq46QZyZCH6kODIMSOgZ8R7rVjoI+tCj3k06MRJMDqsIeoS4A==}
-    peerDependencies:
-      drizzle-orm: '>=0.23.13'
-      zod: '*'
 
   drizzle-zod@0.8.1:
     resolution: {integrity: sha512-k2/2cwBz3Vjb7CWPVCeMNajZpG43V7SqhNrZ8LsWJOz8TztQ5YtU2ifgnfnxqZXsxeHmdQnsl6eXm7GwDZnq/Q==}
@@ -18446,11 +18440,6 @@ snapshots:
       '@types/pg': 8.11.10
       pg: 8.13.1
       postgres: 3.4.5
-
-  drizzle-zod@0.5.1(drizzle-orm@0.43.1(@aws-sdk/client-rds-data@3.721.0)(@opentelemetry/api@1.9.0)(@types/pg@8.11.10)(pg@8.13.1)(postgres@3.4.5))(zod@3.24.1):
-    dependencies:
-      drizzle-orm: 0.43.1(@aws-sdk/client-rds-data@3.721.0)(@opentelemetry/api@1.9.0)(@types/pg@8.11.10)(pg@8.13.1)(postgres@3.4.5)
-      zod: 3.24.1
 
   drizzle-zod@0.8.1(drizzle-orm@0.43.1(@aws-sdk/client-rds-data@3.721.0)(@opentelemetry/api@1.9.0)(@types/pg@8.11.10)(pg@8.13.1)(postgres@3.4.5))(zod@3.24.1):
     dependencies:
