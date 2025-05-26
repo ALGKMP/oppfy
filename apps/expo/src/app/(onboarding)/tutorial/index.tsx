@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
   interpolate,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withSequence,
@@ -42,34 +43,56 @@ export default function Start() {
   const opp7Anim = useSharedValue(0);
   const collageOpacity = useSharedValue(0);
 
+  // Helper functions for haptic feedback
+  const triggerImpactHaptic = (style: Haptics.ImpactFeedbackStyle) => {
+    void Haptics.impactAsync(style);
+  };
+
+  const triggerNotificationHaptic = (
+    type: Haptics.NotificationFeedbackType,
+  ) => {
+    void Haptics.notificationAsync(type);
+  };
+
   // =================== IMAGE COLLAGE ANIMATION ===================
   useEffect(() => {
     const animateCollage = async () => {
-      // Hide splash screen
+      // Hide splash screen with a subtle haptic kickoff
       await new Promise((resolve) => setTimeout(resolve, 300));
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       await SplashScreen.hideAsync();
 
-      // Fade in collage background
-      collageOpacity.value = withTiming(1, { duration: 500 });
+      // Fade in collage background with a gentle vibration
+      collageOpacity.value = withTiming(1, { duration: 500 }, () => {
+        runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Soft);
+      });
 
-      // Animate images in sequence with delays
+      // Animate images in sequence with creative haptics
       setTimeout(() => {
-        // Pop1 animation
+        // Pop1 animation with a light, quick pulse
+        runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Light);
         pop1Anim.value = withTiming(1, { duration: 400 });
 
-        // Pop8 animation after delay
+        // Pop8 animation with a medium double-tap effect
         setTimeout(() => {
+          runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Medium);
+          setTimeout(
+            () =>
+              runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Soft),
+            100,
+          );
           pop8Anim.value = withTiming(1, { duration: 400 });
 
-          // Opp7 animation after delay
+          // Opp7 animation with a heavy thud
           setTimeout(() => {
+            runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Heavy);
             opp7Anim.value = withTiming(1, { duration: 400 });
 
-            // Add haptic feedback after image animations complete
+            // After all images, trigger logo animation with a success vibe
             setTimeout(() => {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-              // After all images have appeared, start the logo animation
+              runOnJS(triggerNotificationHaptic)(
+                Haptics.NotificationFeedbackType.Success,
+              );
               animateLogo();
             }, 800);
           }, 400);
@@ -79,50 +102,88 @@ export default function Start() {
 
     // Start the collage animations immediately
     void animateCollage();
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // =================== LOGO ANIMATION ===================
   const animateLogo = () => {
-    // Fade in logo
-    logoOpacity.value = withTiming(1, { duration: 400 });
+    // Fade in logo with a soft entry haptic
+    logoOpacity.value = withTiming(1, { duration: 400 }, () => {
+      runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Soft);
+    });
 
-    // Big scale entrance
+    // Big scale entrance with escalating haptics
     scale.value = withSequence(
-      withTiming(0.8, { duration: 200 }),
-      withSpring(1.2, { damping: 12, stiffness: 100 }),
-      withSpring(1, { damping: 10 }),
+      withTiming(0.8, { duration: 200 }, () => {
+        runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Light);
+      }),
+      withSpring(1.2, { damping: 12, stiffness: 100 }, () => {
+        runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Medium);
+      }),
+      withSpring(1, { damping: 10 }, () => {
+        runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Heavy);
+      }),
     );
 
-    // Wiggle rotate
+    // Wiggle rotate with rhythmic haptics
     rotate.value = withSequence(
-      withTiming(12, { duration: 200 }),
-      withTiming(-12, { duration: 200 }),
-      withTiming(0, { duration: 200 }),
+      withTiming(12, { duration: 200 }, () => {
+        runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Medium);
+      }),
+      withTiming(-12, { duration: 200 }, () => {
+        runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Medium);
+      }),
+      withTiming(0, { duration: 200 }, () => {
+        runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Medium);
+      }),
     );
 
-    // Bounce
+    // Bounce with dramatic haptics
     translateY.value = withSequence(
-      withTiming(-50, { duration: 300 }),
-      withSpring(0, { damping: 8, stiffness: 100 }),
+      withTiming(-50, { duration: 300 }, () => {
+        runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Heavy);
+      }),
+      withSpring(0, { damping: 8, stiffness: 100 }, () => {
+        runOnJS(triggerNotificationHaptic)(
+          Haptics.NotificationFeedbackType.Success,
+        );
+      }),
     );
 
-    // Glow effect
+    // Glow effect with subtle pulsing haptics
     glowOpacity.value = withSequence(
-      withTiming(1, { duration: 500 }),
+      withTiming(1, { duration: 500 }, () => {
+        runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Soft);
+      }),
       withTiming(0.4, { duration: 500 }),
-      withTiming(1, { duration: 500 }),
-      withTiming(0.7, { duration: 500 }), // final
+      withTiming(1, { duration: 500 }, () => {
+        runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Soft);
+      }),
+      withTiming(0.7, { duration: 500 }),
     );
 
-    // Add a delay before navigating to the next screen
+    // Final epic haptic sequence before navigation
     setTimeout(() => {
-      // Final haptic feedback and navigate to next screen
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      if (requiredPermissions) {
-        router.replace("/auth/phone-number");
-      } else {
-        router.replace("/auth/permissions");
-      }
+      // Crescendo effect: light -> medium -> heavy -> success
+      runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Light);
+      setTimeout(() => {
+        runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Medium);
+        setTimeout(() => {
+          runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Heavy);
+          setTimeout(() => {
+            runOnJS(triggerNotificationHaptic)(
+              Haptics.NotificationFeedbackType.Success,
+            );
+            // Navigate to next screen
+            if (requiredPermissions) {
+              router.replace("/auth/phone-number");
+            } else {
+              router.replace("/auth/permissions");
+            }
+          }, 150);
+        }, 150);
+      }, 150);
     }, 2000); // Wait for logo animations to finish
   };
 
@@ -272,8 +333,7 @@ export default function Start() {
           height="100%"
           justifyContent="flex-end"
           style={{ zIndex: 5 }}
-        >
-        </View>
+        />
       </Animated.View>
 
       {/* Main Logo & UI (appears after images) */}

@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import Maya from "@assets/onboarding/Maya.png";
+import Maya from "@assets/onboarding/maya.png";
 import { Text, View, YStack } from "tamagui";
 
 import { ScreenView } from "~/components/ui";
