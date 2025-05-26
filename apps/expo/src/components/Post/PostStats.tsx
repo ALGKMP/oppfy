@@ -101,7 +101,7 @@ const LikeAction = ({ postId, postStats, isLiked }: LikeActionProps) => {
   return (
     <StatButton count={postStats.likes} onPress={handlePress}>
       <Animated.View style={buttonScale}>
-        <Text fontSize={18}>{isLiked ? "❤️‍🔥" : "🤍"}</Text>
+        <Text fontSize={18}>{isLiked ? "❤️‍🔥" : "❤️"}</Text>
       </Animated.View>
     </StatButton>
   );
