@@ -5,7 +5,6 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { getTokens, Text, XStack, YStack } from "tamagui";
 
@@ -37,16 +36,16 @@ export const PostStats = (props: PostStatsProps) => {
       zIndex={3}
       alignItems="flex-end"
     >
-      <LikeAction
-        postId={props.postId}
-        postStats={props.postStats}
-        isLiked={props.isLiked}
-      />
       <CommentAction
         postId={props.postId}
         postAuthorUserId={props.postAuthorUserId}
         postRecipientUserId={props.postRecipientUserId}
         count={props.postStats.comments}
+      />
+      <LikeAction
+        postId={props.postId}
+        postStats={props.postStats}
+        isLiked={props.isLiked}
       />
       <ShareAction postId={props.postId} />
     </YStack>
@@ -102,10 +101,9 @@ const LikeAction = ({ postId, postStats, isLiked }: LikeActionProps) => {
     <StatButton
       count={postStats.likes}
       onPress={handlePress}
-      backgroundColor={isLiked ? "rgba(255, 255, 255, 0.2)" : undefined}
     >
       <Animated.View style={buttonScale}>
-        <Text fontSize={20}>{isLiked ? "❤️‍🔥" : "❤️"}</Text>
+        <Text fontSize={40}>{isLiked ? "❤️‍🔥" : "❤️"}</Text>
       </Animated.View>
     </StatButton>
   );
@@ -146,7 +144,7 @@ const CommentAction = ({
   return (
     <StatButton count={count} onPress={handlePress}>
       <Animated.View style={buttonScale}>
-        <Icon name="chatbubble-outline" color="white" size={24} disabled />
+        <Icon name="chatbubble-outline" color="white" size={40} disabled />
       </Animated.View>
     </StatButton>
   );
@@ -167,7 +165,7 @@ const ShareAction = ({ postId }: { postId: string }) => {
         <Icon
           name="paper-plane-outline"
           color="white"
-          size={24}
+          size={40}
           disabled
           iconStyle={{ marginRight: 2.5 }}
         />
@@ -180,7 +178,6 @@ const StatButton = ({
   count,
   children,
   onPress,
-  backgroundColor,
 }: {
   count?: number;
   children: React.ReactNode;
@@ -194,39 +191,34 @@ const StatButton = ({
   };
 
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.7}
-      style={{
-        borderRadius: 20,
-        overflow: "hidden",
-        backgroundColor,
-      }}
-    >
-      <BlurView
-        intensity={30}
+    <YStack alignItems="center" gap="$2">
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.7}
         style={{
-          padding: 14,
-          borderRadius: 15,
-          overflow: "hidden",
+          width: 48,
+          height: 48,
           justifyContent: "center",
           alignItems: "center",
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.84,
-          elevation: 5,
         }}
       >
-        <XStack justifyContent="center" alignItems="center" gap="$3">
-          {count !== undefined && count > 0 && (
-            <Text color="white" fontWeight="500" fontSize="$4">
-              {formatCount(count)}
-            </Text>
-          )}
-          {children}
-        </XStack>
-      </BlurView>
-    </TouchableOpacity>
+        {children}
+      </TouchableOpacity>
+      {count !== undefined && count > 0 && (
+        <Text
+          color="white"
+          fontWeight="bold"
+          fontSize="$3"
+          textAlign="center"
+          style={{
+            textShadowColor: "rgba(0, 0, 0, 0.75)",
+            textShadowOffset: { width: 0, height: 1 },
+            textShadowRadius: 2,
+          }}
+        >
+          {formatCount(count)}
+        </Text>
+      )}
+    </YStack>
   );
 };
