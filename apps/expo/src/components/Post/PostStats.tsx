@@ -33,7 +33,7 @@ export const PostStats = (props: PostStatsProps) => {
       right={0}
       bottom={24}
       paddingRight="$4"
-      gap="$5"
+      gap="$6"
       zIndex={3}
       alignItems="flex-end"
     >
@@ -101,7 +101,7 @@ const LikeAction = ({ postId, postStats, isLiked }: LikeActionProps) => {
   return (
     <StatButton count={postStats.likes} onPress={handlePress}>
       <Animated.View style={buttonScale}>
-        <Text fontSize={18}>{isLiked ? "❤️‍🔥" : "❤️"}</Text>
+        <Text fontSize={20}>{isLiked ? "❤️‍🔥" : "❤️"}</Text>
       </Animated.View>
     </StatButton>
   );
@@ -142,7 +142,7 @@ const CommentAction = ({
   return (
     <StatButton count={count} onPress={handlePress}>
       <Animated.View style={buttonScale}>
-        <Text fontSize={18}>💬</Text>
+        <Icon name="chatbubble-outline" color="white" size={24} disabled />
       </Animated.View>
     </StatButton>
   );
@@ -160,7 +160,13 @@ const ShareAction = ({ postId }: { postId: string }) => {
   return (
     <StatButton onPress={handlePress}>
       <Animated.View style={buttonScale}>
-        <Text fontSize={18}>📤</Text>
+        <Icon
+          name="paper-plane-outline"
+          color="white"
+          size={24}
+          disabled
+          iconStyle={{ marginRight: 2.5 }}
+        />
       </Animated.View>
     </StatButton>
   );
@@ -193,8 +199,8 @@ const StatButton = ({
       <BlurView
         intensity={30}
         style={{
-          padding: 12,
-          borderRadius: 20,
+          padding: 14,
+          borderRadius: 24,
           overflow: "hidden",
           justifyContent: "center",
           alignItems: "center",
@@ -205,9 +211,9 @@ const StatButton = ({
           elevation: 5,
         }}
       >
-        <XStack justifyContent="center" alignItems="center" gap="$2">
+        <XStack justifyContent="center" alignItems="center" gap="$3">
           {count !== undefined && count > 0 && (
-            <Text color="white" fontWeight="500">
+            <Text color="white" fontWeight="500" fontSize="$4">
               {formatCount(count)}
             </Text>
           )}
