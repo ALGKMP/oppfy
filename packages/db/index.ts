@@ -24,6 +24,7 @@ const queryClient = postgres(env.DATABASE_URL);
 
 const db = drizzle(queryClient, {
   schema,
+  casing: "snake_case",
   logger: true,
 });
 
