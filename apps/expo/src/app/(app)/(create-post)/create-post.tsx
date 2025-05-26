@@ -207,8 +207,6 @@ const CreatePost = () => {
               name: params.name,
             } satisfies UploadMediaInputNotOnApp);
 
-      console.log("before upload", input);
-
       const postId =
         type === "photo"
           ? await uploadPhotoMutation.mutateAsync(input)

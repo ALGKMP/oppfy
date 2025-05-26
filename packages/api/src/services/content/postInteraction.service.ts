@@ -47,7 +47,7 @@ export class PostInteractionService {
     @inject(TYPES.ProfileRepository)
     private readonly profileRepository: ProfileRepository,
     @inject(TYPES.SQS) private readonly sqs: SQS,
-  ) {}
+  ) { }
 
   async likePost({
     postId,
@@ -78,6 +78,11 @@ export class PostInteractionService {
     });
 
     if (recipientId.isErr()) return err(recipientId.error);
+
+    // Don't send notification if user is liking their own post
+    if (recipientId.value === userId) {
+      return ok();
+    }
 
     // get username
     const profile = await this.profileRepository.getProfile({
@@ -143,6 +148,11 @@ export class PostInteractionService {
     });
 
     if (post.isErr()) return err(post.error);
+
+    // Don't send notification if user is commenting on their own post
+    if (post.value.post.recipientUserId === userId) {
+      return ok();
+    }
 
     // get username
     const profile = await this.profileRepository.getProfile({ userId });
