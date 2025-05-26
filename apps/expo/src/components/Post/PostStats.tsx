@@ -157,7 +157,7 @@ const ShareAction = ({ postId }: { postId: string }) => {
   };
 
   return (
-    <StatButton onPress={handlePress}>
+    <StatButton onPress={handlePress} label="Send">
       <Animated.View style={buttonScale}>
         <Icon
           name="paper-plane-outline"
@@ -175,11 +175,13 @@ const StatButton = ({
   count,
   children,
   onPress,
+  label,
 }: {
   count?: number;
   children: React.ReactNode;
   onPress?: () => void;
   backgroundColor?: string;
+  label?: string;
 }) => {
   const formatCount = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -214,6 +216,21 @@ const StatButton = ({
           }}
         >
           {formatCount(count)}
+        </Text>
+      )}
+      {label && (
+        <Text
+          color="white"
+          fontWeight="bold"
+          fontSize="$2"
+          textAlign="center"
+          style={{
+            textShadowColor: "rgba(0, 0, 0, 0.75)",
+            textShadowOffset: { width: 0, height: 1 },
+            textShadowRadius: 2,
+          }}
+        >
+          {label}
         </Text>
       )}
     </YStack>
