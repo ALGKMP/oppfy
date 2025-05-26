@@ -36,16 +36,16 @@ export const PostStats = (props: PostStatsProps) => {
       zIndex={3}
       alignItems="flex-end"
     >
+      <LikeAction
+        postId={props.postId}
+        postStats={props.postStats}
+        isLiked={props.isLiked}
+      />
       <CommentAction
         postId={props.postId}
         postAuthorUserId={props.postAuthorUserId}
         postRecipientUserId={props.postRecipientUserId}
         count={props.postStats.comments}
-      />
-      <LikeAction
-        postId={props.postId}
-        postStats={props.postStats}
-        isLiked={props.isLiked}
       />
       <ShareAction postId={props.postId} />
     </YStack>
@@ -98,10 +98,7 @@ const LikeAction = ({ postId, postStats, isLiked }: LikeActionProps) => {
   };
 
   return (
-    <StatButton
-      count={postStats.likes}
-      onPress={handlePress}
-    >
+    <StatButton count={postStats.likes} onPress={handlePress}>
       <Animated.View style={buttonScale}>
         <Text fontSize={40}>{isLiked ? "❤️‍🔥" : "❤️"}</Text>
       </Animated.View>
