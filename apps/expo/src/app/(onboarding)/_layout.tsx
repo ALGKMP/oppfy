@@ -16,13 +16,6 @@ const OnboardingLayout = () => (
       }}
     />
 
-    <OnboardingStack.Screen
-      name="tutorial"
-      options={{
-        headerShown: false,
-      }}
-    />
-
     {/* Main route groups */}
     <OnboardingStack.Screen
       name="auth"
