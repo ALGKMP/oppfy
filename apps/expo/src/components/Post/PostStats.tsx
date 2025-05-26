@@ -101,7 +101,7 @@ const LikeAction = ({ postId, postStats, isLiked }: LikeActionProps) => {
   return (
     <StatButton count={postStats.likes} onPress={handlePress}>
       <Animated.View style={buttonScale}>
-        <Icon name="heart" color={isLiked ? "#ff3b30" : "white"} disabled />
+        <Text fontSize={18}>{isLiked ? "❤️‍🔥" : "🤍"}</Text>
       </Animated.View>
     </StatButton>
   );
@@ -142,7 +142,7 @@ const CommentAction = ({
   return (
     <StatButton count={count} onPress={handlePress}>
       <Animated.View style={buttonScale}>
-        <Icon name="chatbubble-outline" color="white" disabled />
+        <Text fontSize={18}>💬</Text>
       </Animated.View>
     </StatButton>
   );
@@ -160,7 +160,7 @@ const ShareAction = ({ postId }: { postId: string }) => {
   return (
     <StatButton onPress={handlePress}>
       <Animated.View style={buttonScale}>
-        <Icon name="share-outline" color="white" disabled />
+        <Text fontSize={18}>📤</Text>
       </Animated.View>
     </StatButton>
   );
@@ -198,7 +198,11 @@ const StatButton = ({
           overflow: "hidden",
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: `${getTokens().color.$primary.val}90`,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+          elevation: 5,
         }}
       >
         <XStack justifyContent="center" alignItems="center" gap="$2">
