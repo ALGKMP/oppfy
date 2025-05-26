@@ -32,7 +32,7 @@ export const PostStats = (props: PostStatsProps) => {
       right={0}
       bottom={24}
       paddingRight="$4"
-      gap="$4"
+      gap="$3"
       zIndex={3}
       alignItems="flex-end"
     >
@@ -100,7 +100,7 @@ const LikeAction = ({ postId, postStats, isLiked }: LikeActionProps) => {
   return (
     <StatButton count={postStats.likes} onPress={handlePress}>
       <Animated.View style={buttonScale}>
-        <Text fontSize={40}>{isLiked ? "❤️‍🔥" : "❤️"}</Text>
+        <Text fontSize={30}>{isLiked ? "❤️‍🔥" : "❤️"}</Text>
       </Animated.View>
     </StatButton>
   );
@@ -141,7 +141,7 @@ const CommentAction = ({
   return (
     <StatButton count={count} onPress={handlePress}>
       <Animated.View style={buttonScale}>
-        <Icon name="chatbubble-outline" color="white" size={40} disabled />
+        <Icon name="chatbubble-outline" color="white" size={30} disabled />
       </Animated.View>
     </StatButton>
   );
@@ -162,7 +162,7 @@ const ShareAction = ({ postId }: { postId: string }) => {
         <Icon
           name="paper-plane-outline"
           color="white"
-          size={40}
+          size={30}
           disabled
           iconStyle={{ marginRight: 2.5 }}
         />
@@ -190,7 +190,7 @@ const StatButton = ({
   };
 
   return (
-    <YStack alignItems="center" gap="$2">
+    <YStack alignItems="center" gap="$1">
       <TouchableOpacity
         onPress={onPress}
         activeOpacity={0.7}
@@ -207,7 +207,7 @@ const StatButton = ({
         <Text
           color="white"
           fontWeight="bold"
-          fontSize="$3"
+          fontSize="$2"
           textAlign="center"
           style={{
             textShadowColor: "rgba(0, 0, 0, 0.75)",
