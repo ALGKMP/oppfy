@@ -53,7 +53,6 @@ const PostCard = (props: PostCardProps) => {
           post={props.post}
           stats={currentPostStats}
           isLiked={currentIsLiked}
-          isViewable={props.isViewable}
         />
       ) : (
         <PostVideo

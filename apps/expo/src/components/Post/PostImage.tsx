@@ -15,7 +15,6 @@ interface PostImageProps {
   post: Post["post"];
   stats: Post["postStats"];
   isLiked: boolean;
-  isViewable: boolean;
 }
 
 export const PostImage = (props: PostImageProps) => {
