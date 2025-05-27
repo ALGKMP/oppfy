@@ -5,6 +5,7 @@ import { useScrollToTop } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { CameraOff } from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
+import { LegendList } from "@legendapp/list"
 
 import FriendCarousel from "~/components/FriendCarousel";
 import PostCard from "~/components/Post/PostCard";
@@ -21,7 +22,7 @@ interface ViewToken {
   key: string;
   index: number | null;
   isViewable: boolean;
-  timestamp: number;
+  // timestamp: number;
 }
 
 const SelfProfile = () => {
@@ -144,7 +145,7 @@ const SelfProfile = () => {
   );
 
   return (
-    <FlashList
+    <LegendList
       ref={scrollRef}
       data={postItems}
       renderItem={renderPost}
