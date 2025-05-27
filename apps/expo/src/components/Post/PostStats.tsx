@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { Share, TouchableOpacity } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -32,7 +32,7 @@ export const PostStats = (props: PostStatsProps) => {
       right={0}
       bottom={24}
       paddingRight="$4"
-      gap="$3"
+      gap="$2"
       zIndex={3}
       alignItems="flex-end"
     >
@@ -91,6 +91,11 @@ const LikeAction = ({ postId, postStats, isLiked }: LikeActionProps) => {
   const { likePost, unlikePost } = useLike({
     postId,
   });
+
+  // Animate when isLiked changes from external sources
+  useEffect(() => {
+    animate();
+  }, [isLiked, animate]);
 
   const handlePress = async () => {
     animate();
@@ -157,7 +162,7 @@ const ShareAction = ({ postId }: { postId: string }) => {
   };
 
   return (
-    <StatButton onPress={handlePress} label="Send">
+    <StatButton onPress={handlePress} label="share">
       <Animated.View style={buttonScale}>
         <Icon
           name="paper-plane-outline"
@@ -190,7 +195,7 @@ const StatButton = ({
   };
 
   return (
-    <YStack alignItems="center" gap="$1">
+    <YStack alignItems="center">
       <TouchableOpacity
         onPress={onPress}
         activeOpacity={0.7}
