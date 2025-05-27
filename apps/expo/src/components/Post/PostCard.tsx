@@ -211,20 +211,6 @@ const PostCard = (props: PostCardProps) => {
         zIndex={2}
         gap="$2"
       >
-        {/* TODO: Implement backend */}
-        {/* {props.stats.comments > 0 && (
-          <FloatingComments
-            comments={[
-              { id: "1", username: "user1", content: "🔥 This is amazing!" },
-              { id: "2", username: "user2", content: "Love this! 💫" },
-              { id: "3", username: "user3", content: "Incredible shot 📸" },
-            ]}
-            postId={props.postId}
-            postRecipientUserId={props.recipient.id}
-            endpoint={props.endpoint}
-            isViewable={props.isViewable}
-          />
-        )} */}
         <View maxWidth="80%">
           <PostCaption caption={props.post.caption} />
         </View>
