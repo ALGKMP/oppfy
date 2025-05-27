@@ -117,8 +117,8 @@ const NotificationBadge = ({ count }: { count: number }) => (
 const styles = StyleSheet.create({
   badgeContainer: {
     position: "absolute",
-    top: -6,
-    left: 12,
+    top: 0,
+    right: 2,
     minWidth: 18,
     height: 18,
     paddingHorizontal: 4,
