@@ -179,7 +179,7 @@ export default function Start() {
             if (requiredPermissions) {
               router.replace("/auth/phone-number");
             } else {
-              router.replace("/auth/permissions");
+              router.replace("/misc/permissions");
             }
           }, 150);
         }, 150);

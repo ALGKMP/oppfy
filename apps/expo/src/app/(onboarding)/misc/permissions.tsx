@@ -166,6 +166,8 @@ const Permissions = () => {
   const alertDialog = useAlertDialogController();
   const learnMoreDialog = useDialogController();
 
+  const allPermissions =
+    permissions.camera && permissions.contacts && permissions.notifications;
   const requiredPermissions = permissions.camera && permissions.contacts;
 
   const openSettings = async (): Promise<void> => {
@@ -282,13 +284,11 @@ const Permissions = () => {
           text={
             requiredPermissions ? "Continue" : "Enable Required Permissions"
           }
-          isValid={requiredPermissions}
+          isValid={allPermissions}
         />
       }
       successMessage={
-        requiredPermissions
-          ? "All required permissions are enabled! 🎉"
-          : undefined
+        allPermissions ? "All permissions are enabled! 🎉" : undefined
       }
     >
       <Group orientation="vertical" gap="$3">

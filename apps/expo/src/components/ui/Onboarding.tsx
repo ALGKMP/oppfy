@@ -310,7 +310,7 @@ export function OnboardingButton({
           pressStyle={{
             scale: 0.95,
             opacity: 0.9,
-            backgroundColor: backgroundColor,
+            backgroundColor: isValid ? backgroundColor : "transparent",
           }}
           animation="medium"
           onPress={handlePress}
