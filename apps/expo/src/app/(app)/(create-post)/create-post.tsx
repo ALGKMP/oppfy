@@ -55,7 +55,8 @@ interface CreatePostWithPhoneNumber extends CreatePostBaseParams {
 }
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const ASPECT_RATIO = 16 / 9;
+const MAX_PREVIEW_WIDTH = SCREEN_WIDTH / 3;
+const MAX_PREVIEW_HEIGHT = SCREEN_WIDTH * 0.6; // Maximum preview height
 
 const SEND_BUTTON_MESSAGES = [
   (name: string) => `EXPOSE ${name} 📸`,
@@ -241,9 +242,20 @@ const CreatePost = () => {
     });
   };
 
-  // Calculate the preview size using the same aspect ratio as preview.tsx
-  const previewWidth = SCREEN_WIDTH / 3;
-  const previewHeight = previewWidth * ASPECT_RATIO;
+  // Calculate the preview size using the actual media aspect ratio
+  const mediaWidth = parseInt(width, 10);
+  const mediaHeight = parseInt(height, 10);
+  const aspectRatio = mediaWidth / mediaHeight;
+
+  // Calculate preview dimensions based on actual aspect ratio
+  let previewWidth = MAX_PREVIEW_WIDTH;
+  let previewHeight = previewWidth / aspectRatio;
+
+  // Cap the height to prevent extremely tall previews
+  if (previewHeight > MAX_PREVIEW_HEIGHT) {
+    previewHeight = MAX_PREVIEW_HEIGHT;
+    previewWidth = previewHeight * aspectRatio;
+  }
 
   return (
     <ScreenView paddingBottom={0} safeAreaEdges={["bottom"]}>
@@ -256,6 +268,7 @@ const CreatePost = () => {
                 styles.media,
                 { width: previewWidth, height: previewHeight },
               ]}
+              contentFit="contain"
             />
           ) : (
             <PreviewVideo
@@ -349,7 +362,7 @@ const PreviewVideo = ({
         style={[styles.media, { width, height }]}
         player={player}
         nativeControls={false}
-        contentFit="cover"
+        contentFit="contain"
       />
       {playPauseIcons.map((icon) => (
         <PlayPause key={icon.id} isPlaying={icon.isPlaying} />

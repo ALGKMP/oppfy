@@ -56,9 +56,9 @@ const useMediaAssets = ({ albumId }: UseMediaAssetsProps) => {
       // Filter out landscape media and long videos
       const filteredAssets = media.assets.filter((asset) => {
         // Filter out landscape media
-        if (asset.height < asset.width) {
-          return false;
-        }
+        // if (asset.height < asset.width) {
+        //   return false;
+        // }
 
         // Filter out long videos
         if (
