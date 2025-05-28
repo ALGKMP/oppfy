@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as MediaLibrary from "expo-media-library";
 import { useRouter } from "expo-router";
-import { FlashList } from "@shopify/flash-list";
 import { ChevronRight, Image as ImageIcon } from "@tamagui/lucide-icons";
 import { getToken, Image, Text, XStack, YStack } from "tamagui";
+import { LegendList } from "@legendapp/list";
 
 import { EmptyPlaceholder } from "~/components/ui/EmptyPlaceholder";
 
@@ -150,7 +150,7 @@ const AlbumPickerScreen = () => {
   }, []);
 
   return (
-    <FlashList
+    <LegendList
       data={albums}
       keyExtractor={keyExtractor}
       renderItem={renderAlbumItem}

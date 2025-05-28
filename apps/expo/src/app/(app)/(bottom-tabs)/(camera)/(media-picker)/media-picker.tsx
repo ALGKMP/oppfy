@@ -11,6 +11,7 @@ import type { InfiniteData, QueryFunctionContext } from "@tanstack/react-query";
 import { getToken, Image } from "tamagui";
 
 import { Stack } from "~/components/ui";
+import { LegendList } from "@legendapp/list";
 
 const MAX_VIDEO_DURATION = 60;
 const NUM_COLUMNS = 3;
@@ -199,7 +200,7 @@ const MediaPickerScreen = () => {
   );
 
   return (
-    <FlashList
+    <LegendList
       data={assets}
       renderItem={renderItem}
       keyExtractor={(item) => item.id}
