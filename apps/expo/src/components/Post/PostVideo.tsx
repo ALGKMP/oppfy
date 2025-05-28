@@ -76,9 +76,9 @@ export const PostVideo = (props: PostVideoProps) => {
   const handleDoubleTap = useCallback(
     (x: number, y: number) => {
       addHeart(x, y);
-      if (!props.isLiked) void likePost();
+      void likePost();
     },
-    [addHeart, props.isLiked, likePost],
+    [addHeart, likePost],
   );
 
   const handleHold = useCallback(() => {

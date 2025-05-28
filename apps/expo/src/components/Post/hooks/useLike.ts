@@ -87,20 +87,15 @@ const useLike = ({ postId }: UseLikeParams) => {
     }, 3000),
   );
 
-  const likePost = async () => {
-    isProcessingRef.current = true;
-
+  // Generic function to update UI optimistically
+  const updateUIOptimistically = async (newIsLiked: boolean) => {
     // Cancel outgoing fetches (so they don't overwrite our optimistic update)
     await utils.post.getIsLiked.cancel();
     await utils.post.getPostStats.cancel();
 
     // Get the current data from cache
-    const currentIsLiked = utils.post.getIsLiked.getData({ postId });
     const currentPostStats = utils.post.getPostStats.getData({ postId });
-
-    if (currentIsLiked === undefined || currentPostStats === undefined) return;
-
-    const newIsLiked = !currentIsLiked;
+    if (currentPostStats === undefined) return false;
 
     // Optimistically update the UI immediately
     utils.post.getIsLiked.setData({ postId }, newIsLiked);
@@ -112,19 +107,53 @@ const useLike = ({ postId }: UseLikeParams) => {
       },
     );
 
-    // Track the click and call throttled server request
-    clickCount.current++;
-    throttledServerRequest.current(newIsLiked);
+    return true;
   };
 
+  // Function to like a post (only likes if not already liked)
+  const likePost = async () => {
+    const currentIsLiked = utils.post.getIsLiked.getData({ postId });
+    if (currentIsLiked === true) return; // Already liked, do nothing
+
+    const success = await updateUIOptimistically(true);
+    if (!success) return;
+
+    isProcessingRef.current = true;
+    clickCount.current++;
+    throttledServerRequest.current(true);
+  };
+
+  // Function to unlike a post (only unlikes if currently liked)
   const unlikePost = async () => {
-    // Same logic as likePost but explicit unlike
-    await likePost();
+    const currentIsLiked = utils.post.getIsLiked.getData({ postId });
+    if (currentIsLiked === false) return; // Already unliked, do nothing
+
+    const success = await updateUIOptimistically(false);
+    if (!success) return;
+
+    isProcessingRef.current = true;
+    clickCount.current++;
+    throttledServerRequest.current(false);
+  };
+
+  // Function to toggle like state (for like button)
+  const handleLikeToggle = async () => {
+    const currentIsLiked = utils.post.getIsLiked.getData({ postId });
+    if (currentIsLiked === undefined) return;
+
+    const newIsLiked = !currentIsLiked;
+    const success = await updateUIOptimistically(newIsLiked);
+    if (!success) return;
+
+    isProcessingRef.current = true;
+    clickCount.current++;
+    throttledServerRequest.current(newIsLiked);
   };
 
   return {
     likePost,
     unlikePost,
+    handleLikeToggle,
   };
 };
 

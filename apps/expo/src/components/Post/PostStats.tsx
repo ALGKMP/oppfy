@@ -88,7 +88,7 @@ interface LikeActionProps {
 const LikeAction = ({ postId, postStats, isLiked }: LikeActionProps) => {
   const { buttonScale, animate } = useButtonAnimation();
 
-  const { likePost, unlikePost } = useLike({
+  const { handleLikeToggle } = useLike({
     postId,
   });
 
@@ -99,7 +99,7 @@ const LikeAction = ({ postId, postStats, isLiked }: LikeActionProps) => {
 
   const handlePress = async () => {
     animate();
-    isLiked ? void unlikePost() : void likePost();
+    void handleLikeToggle();
   };
 
   return (

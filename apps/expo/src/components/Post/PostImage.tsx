@@ -35,7 +35,7 @@ export const PostImage = (props: PostImageProps) => {
 
   const handleDoubleTap = (x: number, y: number) => {
     addHeart(x, y);
-    if (!props.isLiked) void likePost();
+    void likePost();
   };
 
   const doubleTap = Gesture.Tap()
