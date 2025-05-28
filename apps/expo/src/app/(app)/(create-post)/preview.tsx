@@ -14,20 +14,12 @@ import { Check, ChevronRight, Download, X } from "@tamagui/lucide-icons";
 import PlayPause, {
   usePlayPauseAnimations,
 } from "~/components/Icons/PlayPause";
-import {
-  Button,
-  ScreenView,
-  Spinner,
-  Text,
-  View,
-  XStack,
-} from "~/components/ui";
+import { Button, ScreenView, Spinner, View, XStack } from "~/components/ui";
 import { useContacts } from "~/hooks/contacts";
 import useSaveMedia from "~/hooks/useSaveMedia";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const ASPECT_RATIO = 16 / 9;
-const PREVIEW_HEIGHT = SCREEN_WIDTH * ASPECT_RATIO; // 16:9
+const MAX_HEIGHT = Dimensions.get("window").height * 0.7; // Maximum 70% of screen height
 
 const PreviewScreen = () => {
   const { type, uri, width, height } = useLocalSearchParams<{
@@ -41,7 +33,20 @@ const PreviewScreen = () => {
   const { saveState, saveToCameraRoll } = useSaveMedia();
   const { contactsPaginatedQuery: _ } = useContacts();
 
-  const onContinue = async () => {
+  // Calculate the display dimensions based on the actual media aspect ratio
+  const mediaWidth = parseInt(width, 10);
+  const mediaHeight = parseInt(height, 10);
+  const aspectRatio = mediaWidth / mediaHeight;
+
+  // Calculate display height based on screen width and media aspect ratio
+  let displayHeight = SCREEN_WIDTH / aspectRatio;
+
+  // Cap the height to prevent extremely tall images from taking up too much space
+  if (displayHeight > MAX_HEIGHT) {
+    displayHeight = MAX_HEIGHT;
+  }
+
+  const onContinue = () => {
     router.push({
       pathname: "/post-to",
       params: {
@@ -55,10 +60,10 @@ const PreviewScreen = () => {
 
   return (
     <ScreenView padding={0} safeAreaEdges={["top", "bottom"]}>
-      <View flex={1}>
+      <View flex={1} justifyContent="center">
         <View
           width={SCREEN_WIDTH}
-          height={PREVIEW_HEIGHT}
+          height={displayHeight}
           borderRadius={20}
           overflow="hidden"
         >
@@ -122,7 +127,11 @@ const PreviewScreen = () => {
 };
 
 const PreviewImage = ({ uri }: { uri: string }) => (
-  <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
+  <Image
+    source={{ uri }}
+    style={StyleSheet.absoluteFill}
+    contentFit="contain"
+  />
 );
 
 const PreviewVideo = ({ uri }: { uri: string }) => {
@@ -149,7 +158,7 @@ const PreviewVideo = ({ uri }: { uri: string }) => {
         style={{ flex: 1 }}
         player={player}
         nativeControls={false}
-        contentFit="cover"
+        contentFit="contain"
       />
       {playPauseIcons.map((icon) => (
         <PlayPause key={icon.id} isPlaying={icon.isPlaying} />
