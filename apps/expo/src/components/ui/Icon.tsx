@@ -41,12 +41,12 @@ export const Icon = ({
 
   return (
     <TouchableOpacity
-      style={[styles(size).iconButton, style]}
+      style={[styles(size, blurred).iconButton, style]}
       onPress={onPress}
       disabled={disabled}
     >
       {blurred ? (
-        <BlurView intensity={30} style={styles(size).blurView}>
+        <BlurView intensity={30} style={styles(size, blurred).blurView}>
           {iconElement}
         </BlurView>
       ) : (
@@ -56,13 +56,15 @@ export const Icon = ({
   );
 };
 
-const styles = (size: number) =>
+const styles = (size: number, blurred?: boolean) =>
   StyleSheet.create({
     iconButton: {
-      borderRadius: 16,
-      overflow: "hidden",
       justifyContent: "center",
       alignItems: "center",
+      ...(blurred && {
+        borderRadius: 16,
+        overflow: "hidden",
+      }),
     },
     blurView: {
       width: size + 14,
