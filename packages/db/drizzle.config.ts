@@ -1,5 +1,6 @@
-// import type { Config } from "drizzle-kit";
 import { defineConfig } from "drizzle-kit";
+import { readFileSync } from "fs";
+import { join } from "path";
 
 import { env } from "@oppfy/env";
 
@@ -15,5 +16,9 @@ export default defineConfig({
     user: env.DATABASE_USERNAME,
     password: env.DATABASE_PASSWORD,
     database: env.DATABASE_NAME,
+    ssl: {
+      rejectUnauthorized: true,
+      ca: readFileSync(join(__dirname, "us-east-1-bundle.pem"), "utf8"),
+    },
   },
 });
