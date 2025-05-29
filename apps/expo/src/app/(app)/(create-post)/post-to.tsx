@@ -30,7 +30,6 @@ import {
 import {
   EmptyPlaceholder,
   HeaderTitle,
-  Icon,
   MediaListItem,
   SearchInput,
   Spacer,

@@ -118,6 +118,7 @@ const PreviewScreen = () => {
           variant="primary"
           iconAfter={ChevronRight}
           onPress={onContinue}
+          bolded
         >
           Continue
         </Button>

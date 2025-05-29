@@ -322,7 +322,7 @@ export function OnboardingButton({
               <Text
                 color={isValid ? tokens.color.primary.val : "white"}
                 fontSize="$6"
-                fontWeight="600"
+                // fontWeight="bold"
               >
                 {text}
               </Text>

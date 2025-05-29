@@ -60,6 +60,13 @@ export const Button = styled(TamaguiButton, {
         borderRadius: 999,
       },
     },
+    bolded: {
+      true: {
+        textProps: {
+          fontWeight: "bold",
+        },
+      },
+    },
   } as const,
 });
 
