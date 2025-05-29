@@ -129,8 +129,8 @@ const PreviewScreen = () => {
 const PreviewImage = ({ uri }: { uri: string }) => (
   <Image
     source={{ uri }}
-    style={StyleSheet.absoluteFill}
-    contentFit="contain"
+    style={[StyleSheet.absoluteFill, { borderRadius: 20 }]}
+    contentFit="cover"
   />
 );
 
@@ -153,12 +153,15 @@ const PreviewVideo = ({ uri }: { uri: string }) => {
   };
 
   return (
-    <Pressable style={{ flex: 1 }} onPress={togglePlayback}>
+    <Pressable
+      style={{ flex: 1, borderRadius: 20, overflow: "hidden" }}
+      onPress={togglePlayback}
+    >
       <VideoView
         style={{ flex: 1 }}
         player={player}
         nativeControls={false}
-        contentFit="contain"
+        contentFit="cover"
       />
       {playPauseIcons.map((icon) => (
         <PlayPause key={icon.id} isPlaying={icon.isPlaying} />
