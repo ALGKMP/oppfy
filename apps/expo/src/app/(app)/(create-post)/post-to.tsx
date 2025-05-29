@@ -206,16 +206,7 @@ const CreativeListItem = ({
             <XStack alignItems="center" gap="$3" flex={1}>
               {/* Profile Picture with decorative ring */}
               <Stack position="relative">
-                <Circle
-                  size={65}
-                  backgroundColor="white"
-                  padding={2}
-                  shadowColor="$shadowColor"
-                  shadowOffset={{ width: 0, height: 3 }}
-                  shadowOpacity={0.3}
-                  shadowRadius={6}
-                  elevation={8}
-                >
+                <Circle size={65} backgroundColor="white" padding={2}>
                   <Circle size={61} overflow="hidden" backgroundColor="$gray6">
                     <Image
                       source={
@@ -237,10 +228,6 @@ const CreativeListItem = ({
                   fontSize={17}
                   fontWeight="700"
                   numberOfLines={1}
-                  shadowColor="rgba(0,0,0,0.3)"
-                  shadowOffset={{ width: 0, height: 1 }}
-                  shadowOpacity={1}
-                  shadowRadius={2}
                 >
                   @{item.data.username}
                 </Text>
@@ -249,10 +236,6 @@ const CreativeListItem = ({
                   opacity={0.95}
                   fontSize={15}
                   numberOfLines={1}
-                  shadowColor="rgba(0,0,0,0.2)"
-                  shadowOffset={{ width: 0, height: 1 }}
-                  shadowOpacity={1}
-                  shadowRadius={1}
                 >
                   {item.data.name}
                 </Text>
@@ -276,10 +259,6 @@ const CreativeListItem = ({
                   size="$3"
                   borderRadius="$4"
                   backgroundColor="rgba(255,215,0,0.9)"
-                  shadowColor="$shadowColor"
-                  shadowOffset={{ width: 0, height: 2 }}
-                  shadowOpacity={0.3}
-                  shadowRadius={4}
                   pressStyle={{
                     backgroundColor: "rgba(255,215,0,1)",
                     scale: 0.95,
@@ -507,10 +486,10 @@ const CreativeListItem = ({
           }}
         >
           <XStack alignItems="center" gap="$1.5">
-            <Text color="#6B7280" fontSize={12} fontWeight="700">
+            <Text fontSize={12} fontWeight="700" color="$gray3">
               Invite
             </Text>
-            <ChevronRight size={14} color="#6B7280" />
+            <ChevronRight size={14} color="$gray3" />
           </XStack>
         </Button>
       </XStack>
