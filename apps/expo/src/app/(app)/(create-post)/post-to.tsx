@@ -232,81 +232,71 @@ const CreativeListItem = ({
 
               {/* User Info */}
               <YStack flex={1} gap="$1">
-                <XStack alignItems="center" gap="$2">
-                  <Text
-                    color="white"
-                    fontSize={17}
-                    fontWeight="700"
-                    numberOfLines={1}
-                    shadowColor="rgba(0,0,0,0.3)"
-                    shadowOffset={{ width: 0, height: 1 }}
-                    shadowOpacity={1}
-                    shadowRadius={2}
-                  >
-                    @{item.data.username}
-                  </Text>
-                  <XStack
-                    alignItems="center"
-                    gap="$1.5"
-                    backgroundColor="rgba(255,215,0,0.95)"
-                    paddingHorizontal="$2.5"
-                    paddingVertical="$1.5"
-                    borderRadius="$4"
-                    shadowColor="$shadowColor"
-                    shadowOffset={{ width: 0, height: 2 }}
-                    shadowOpacity={0.4}
-                    shadowRadius={3}
-                  >
-                    <Text fontSize={16} color="white">
-                      🔥
-                    </Text>
-                    <Text fontSize={13} color="white" fontWeight="800">
-                      {item.data.friend.currentStreak}
-                    </Text>
-                  </XStack>
-                </XStack>
-                <XStack alignItems="center" gap="$1.5">
-                  <Text
-                    color="white"
-                    opacity={0.95}
-                    fontSize={15}
-                    numberOfLines={1}
-                    shadowColor="rgba(0,0,0,0.2)"
-                    shadowOffset={{ width: 0, height: 1 }}
-                    shadowOpacity={1}
-                    shadowRadius={1}
-                  >
-                    {item.data.name}
-                  </Text>
-                </XStack>
+                <Text
+                  color="white"
+                  fontSize={17}
+                  fontWeight="700"
+                  numberOfLines={1}
+                  shadowColor="rgba(0,0,0,0.3)"
+                  shadowOffset={{ width: 0, height: 1 }}
+                  shadowOpacity={1}
+                  shadowRadius={2}
+                >
+                  @{item.data.username}
+                </Text>
+                <Text
+                  color="white"
+                  opacity={0.95}
+                  fontSize={15}
+                  numberOfLines={1}
+                  shadowColor="rgba(0,0,0,0.2)"
+                  shadowOffset={{ width: 0, height: 1 }}
+                  shadowOpacity={1}
+                  shadowRadius={1}
+                >
+                  {item.data.name}
+                </Text>
               </YStack>
 
-              {/* Action Button */}
-              <Button
-                variant="primary"
-                size="$3"
-                borderRadius="$4"
-                backgroundColor="rgba(255,215,0,0.9)"
-                shadowColor="$shadowColor"
-                shadowOffset={{ width: 0, height: 2 }}
-                shadowOpacity={0.3}
-                shadowRadius={4}
-                pressStyle={{
-                  backgroundColor: "rgba(255,215,0,1)",
-                  scale: 0.95,
-                }}
-                onPress={(e) => {
-                  e.stopPropagation();
-                  onPress();
-                }}
-              >
-                <XStack alignItems="center" gap="$1.5">
-                  <Text color="white" fontSize={12} fontWeight="700">
-                    Keep it up!
+              {/* Action Button and Streak */}
+              <XStack alignItems="center" gap="$2">
+                {/* Streak indicator */}
+                <XStack alignItems="center" gap="$1">
+                  <Text fontSize="$9" color="white">
+                    🔥
                   </Text>
-                  <ChevronRight size={14} color="white" />
+                  <Text fontSize={12} color="white" fontWeight="800">
+                    {item.data.friend.currentStreak}
+                  </Text>
                 </XStack>
-              </Button>
+
+                {/* Action Button */}
+                <Button
+                  variant="primary"
+                  size="$3"
+                  borderRadius="$4"
+                  backgroundColor="rgba(255,215,0,0.9)"
+                  shadowColor="$shadowColor"
+                  shadowOffset={{ width: 0, height: 2 }}
+                  shadowOpacity={0.3}
+                  shadowRadius={4}
+                  pressStyle={{
+                    backgroundColor: "rgba(255,215,0,1)",
+                    scale: 0.95,
+                  }}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    onPress();
+                  }}
+                >
+                  <XStack alignItems="center" gap="$1.5">
+                    <Text color="white" fontSize={12} fontWeight="700">
+                      Keep it up!
+                    </Text>
+                    <ChevronRight size={14} color="white" />
+                  </XStack>
+                </Button>
+              </XStack>
             </XStack>
           </Stack>
         </Animated.View>
