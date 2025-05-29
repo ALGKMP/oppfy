@@ -51,7 +51,7 @@ interface Friend {
   profilePictureUrl: string | null;
   friend: {
     currentStreak: number;
-  }
+  };
 }
 
 type ListItem =
@@ -225,11 +225,6 @@ const CreativeListItem = ({
             >
               {item.data.name}
             </Text>
-            {isStreak && (
-              <Text fontSize={11} color="gold" fontWeight="600" opacity={0.9}>
-                🔥 On a streak!
-              </Text>
-            )}
           </YStack>
 
           {/* Action Button */}
