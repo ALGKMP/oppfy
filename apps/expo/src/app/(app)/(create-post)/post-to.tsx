@@ -563,7 +563,7 @@ const PostTo = () => {
     if (contactsToShow.length > 0) {
       result.push({
         type: "header",
-        title: "Post for Anyone",
+        title: "Post for contacts",
         isContact: true,
       });
       contactsToShow.forEach((contact) => {
