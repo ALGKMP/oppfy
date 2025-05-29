@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Keyboard, RefreshControl } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { debounce } from "lodash";
@@ -8,6 +9,7 @@ import { getToken, YStack } from "tamagui";
 import GridSuggestions from "~/components/GridSuggestions";
 import { HeaderTitle, MediaListItem, SearchInput } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
+import { useFlashListSize } from "~/hooks/useFlashListSize";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
@@ -17,6 +19,16 @@ type SearchResultItem =
 
 const Search = () => {
   const { routeProfile } = useRouteProfile();
+
+  // Use the reusable hook for FlashList size estimation
+  const { estimatedListSize } = useFlashListSize({
+    estimatedItemCount: 10,
+    averageItemHeight: 75,
+    headerHeight: 60,
+    sectionHeaderHeight: 0,
+    sectionHeaderCount: 0,
+    extraBottomPadding: 16,
+  });
 
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -111,6 +123,7 @@ const Search = () => {
       data={searchTerm ? searchResults : []}
       renderItem={({ item }) => renderListItem(item)}
       estimatedItemSize={75}
+      estimatedListSize={estimatedListSize}
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ListFooterComponent={ListFooterComponent}

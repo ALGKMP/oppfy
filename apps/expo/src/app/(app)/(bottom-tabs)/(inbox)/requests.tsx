@@ -362,6 +362,7 @@ const Requests = () => {
       data={items}
       renderItem={renderItem}
       estimatedItemSize={75}
+      estimatedListSize={{ height: 1000, width: 1000 }}
       getItemType={getItemType}
       keyExtractor={keyExtractor}
       ItemSeparatorComponent={Spacer}

@@ -32,6 +32,7 @@ import {
 } from "~/components/ui";
 import { Button } from "~/components/ui/Buttons";
 import { useContacts } from "~/hooks/contacts";
+import { useFlashListSize } from "~/hooks/useFlashListSize";
 import useSearch from "~/hooks/useSearch";
 import { api } from "~/utils/api";
 import { storage } from "~/utils/storage";
@@ -533,6 +534,16 @@ const PostTo = () => {
   const router = useRouter();
   const infoDialog = useDialogController();
 
+  // Use the reusable hook for FlashList size estimation
+  const { estimatedListSize } = useFlashListSize({
+    estimatedItemCount: 15,
+    averageItemHeight: 85,
+    headerHeight: 60,
+    sectionHeaderHeight: 60,
+    sectionHeaderCount: 2,
+    extraBottomPadding: 50,
+  });
+
   const { type, uri, height, width } = useLocalSearchParams<{
     uri: string;
     type: "photo" | "video";
@@ -840,7 +851,20 @@ const PostTo = () => {
       data={displayItems()}
       renderItem={renderItem}
       keyExtractor={keyExtractor}
-      estimatedItemSize={75}
+      estimatedItemSize={85}
+      estimatedListSize={estimatedListSize}
+      removeClippedSubviews={false}
+      overrideItemLayout={(layout, item) => {
+        // Provide exact measurements to prevent layout shifts
+        if (item.type === "header") {
+          layout.size = 60;
+        } else if (item.type === "friend") {
+          const isStreakFriend = item.data.friend.currentStreak > 0;
+          layout.size = isStreakFriend ? 103 : 88;
+        } else if (item.type === "contact") {
+          layout.size = 88;
+        }
+      }}
       getItemType={getItemType}
       ItemSeparatorComponent={Spacer}
       ListHeaderComponent={ListHeaderComponent}

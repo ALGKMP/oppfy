@@ -326,6 +326,7 @@ const Friends = () => {
       data={filteredItems}
       renderItem={({ item }) => renderListItem(item)}
       estimatedItemSize={75}
+      estimatedListSize={{ height: 1000, width: 1000 }}
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ItemSeparatorComponent={Spacer}
