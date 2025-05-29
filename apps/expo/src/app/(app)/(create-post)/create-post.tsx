@@ -219,7 +219,7 @@ const CreatePost = () => {
           phoneNumber: params.number,
         });
       }
-      router.dismissTo("/(app)/(bottom-tabs)/(camera)");
+      router.dismissTo("/(app)/(bottom-tabs)/(home)");
     } catch (error) {
       console.error(error);
     } finally {
