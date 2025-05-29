@@ -2,15 +2,34 @@ import React, { useEffect, useState } from "react";
 import { Keyboard, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Contact } from "expo-contacts";
+import { LinearGradient as ExpoLinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { FlashList } from "@shopify/flash-list";
-import { ChevronRight, UserRoundX } from "@tamagui/lucide-icons";
+import {
+  ChevronRight,
+  Crown,
+  Flame,
+  Phone,
+  Sparkles,
+  Star,
+  UserRoundX,
+  Users,
+} from "@tamagui/lucide-icons";
 import type { IFuseOptions } from "fuse.js";
 import type { CountryCode } from "libphonenumber-js";
 import { parsePhoneNumberWithError } from "libphonenumber-js";
 import { debounce } from "lodash";
-import { getToken, useTheme } from "tamagui";
+import {
+  Circle,
+  getToken,
+  Image,
+  Stack,
+  Text,
+  useTheme,
+  XStack,
+  YStack,
+} from "tamagui";
 
 import {
   EmptyPlaceholder,
@@ -19,8 +38,6 @@ import {
   SearchInput,
   Spacer,
   useDialogController,
-  XStack,
-  YStack,
 } from "~/components/ui";
 import { useContacts } from "~/hooks/contacts";
 import useSearch from "~/hooks/useSearch";
@@ -32,6 +49,8 @@ interface Friend {
   username: string;
   name: string;
   profilePictureUrl: string | null;
+  streakCount?: number;
+  hasActiveStreak?: boolean;
 }
 
 type ListItem =
@@ -40,6 +59,298 @@ type ListItem =
   | { type: "contact"; data: Contact };
 
 const HAS_SEEN_SHARE_TIP_KEY = "has_seen_share_tip";
+
+// Creative card variants for different list items
+const getItemVariant = (
+  index: number,
+  type: "friend" | "contact",
+  hasStreak?: boolean,
+) => {
+  if (type === "friend" && hasStreak) {
+    return "streak";
+  }
+
+  return "standard";
+};
+
+const CreativeListItem = ({
+  item,
+  index,
+  onPress,
+}: {
+  item: ListItem;
+  index: number;
+  onPress: () => void;
+}) => {
+  const theme = useTheme();
+
+  if (item.type === "header") {
+    return (
+      <XStack
+        alignItems="center"
+        gap="$3"
+        paddingVertical="$3"
+        paddingHorizontal="$1"
+      >
+        <XStack alignItems="center" gap="$2" flex={1}>
+          <Circle size={32} backgroundColor="$blue5">
+            {item.isContact ? (
+              <Phone size={16} color="$blue11" />
+            ) : (
+              <Users size={16} color="$blue11" />
+            )}
+          </Circle>
+          <HeaderTitle
+            iconSize={18}
+            iconColor={theme.primary.val as string}
+            iconAfter={item.isContact ? "information-circle" : undefined}
+            onPress={() => {
+              // Handle info dialog if needed
+            }}
+          >
+            {item.title}
+          </HeaderTitle>
+        </XStack>
+        {item.isContact && (
+          <Circle size={24} backgroundColor="$orange5">
+            <Sparkles size={12} color="$orange11" />
+          </Circle>
+        )}
+      </XStack>
+    );
+  }
+
+  if (item.type === "friend") {
+    const hasStreak = Boolean(
+      item.data.hasActiveStreak ||
+        (item.data.streakCount && item.data.streakCount > 0),
+    );
+    const variant = getItemVariant(index, "friend", hasStreak);
+    const isStreak = variant === "streak";
+
+    const backgroundColor = isStreak ? "$red8" : "$blue6";
+
+    return (
+      <Stack
+        backgroundColor={backgroundColor}
+        borderRadius="$6"
+        overflow="hidden"
+        marginBottom="$2"
+        pressStyle={{ scale: 0.98 }}
+        onPress={onPress}
+        padding="$4"
+        minHeight={isStreak ? 95 : 75}
+        borderWidth={isStreak ? 2 : 0}
+        borderColor={isStreak ? "$red10" : "transparent"}
+      >
+        <XStack alignItems="center" gap="$3" flex={1}>
+          {/* Profile Picture with decorative ring */}
+          <Stack position="relative">
+            <Circle
+              size={isStreak ? 65 : 50}
+              backgroundColor="white"
+              padding={2}
+              shadowColor="$shadowColor"
+              shadowOffset={{ width: 0, height: 2 }}
+              shadowOpacity={0.15}
+              shadowRadius={4}
+              elevation={4}
+            >
+              <Circle
+                size={isStreak ? 61 : 46}
+                overflow="hidden"
+                backgroundColor="$gray6"
+              >
+                <Image
+                  source={
+                    item.data.profilePictureUrl
+                      ? { uri: item.data.profilePictureUrl }
+                      : DefaultProfilePicture
+                  }
+                  width="100%"
+                  height="100%"
+                />
+              </Circle>
+            </Circle>
+
+            {/* Streak badge */}
+            {isStreak && (
+              <Circle
+                size={24}
+                position="absolute"
+                top={-4}
+                right={-4}
+                backgroundColor="$red10"
+                shadowColor="$shadowColor"
+                shadowOffset={{ width: 0, height: 2 }}
+                shadowOpacity={0.4}
+                shadowRadius={4}
+                elevation={6}
+              >
+                <Flame size={14} color="white" />
+              </Circle>
+            )}
+          </Stack>
+
+          {/* User Info */}
+          <YStack flex={1} gap="$1">
+            <XStack alignItems="center" gap="$2">
+              <Text
+                color="white"
+                fontSize={isStreak ? 17 : 15}
+                fontWeight="700"
+                numberOfLines={1}
+              >
+                @{item.data.username}
+              </Text>
+              {isStreak && item.data.streakCount && (
+                <XStack
+                  alignItems="center"
+                  gap="$1"
+                  backgroundColor="rgba(255,255,255,0.2)"
+                  paddingHorizontal="$1.5"
+                  paddingVertical="$0.5"
+                  borderRadius="$2"
+                >
+                  <Flame size={10} color="gold" />
+                  <Text fontSize={10} color="gold" fontWeight="700">
+                    {item.data.streakCount}
+                  </Text>
+                </XStack>
+              )}
+            </XStack>
+            <Text
+              color="white"
+              opacity={0.9}
+              fontSize={isStreak ? 15 : 13}
+              numberOfLines={1}
+            >
+              {item.data.name}
+            </Text>
+            {isStreak && (
+              <Text fontSize={11} color="gold" fontWeight="600" opacity={0.9}>
+                🔥 On a streak!
+              </Text>
+            )}
+          </YStack>
+
+          {/* Action Button */}
+          <Stack
+            backgroundColor={
+              isStreak ? "rgba(255,215,0,0.3)" : "rgba(255,255,255,0.2)"
+            }
+            borderRadius="$3"
+            paddingHorizontal="$3"
+            paddingVertical="$2"
+            borderWidth={1}
+            borderColor={
+              isStreak ? "rgba(255,215,0,0.5)" : "rgba(255,255,255,0.3)"
+            }
+            pressStyle={{
+              backgroundColor: isStreak
+                ? "rgba(255,215,0,0.4)"
+                : "rgba(255,255,255,0.3)",
+              scale: 0.95,
+            }}
+          >
+            <XStack alignItems="center" gap="$1.5">
+              <Text
+                color={isStreak ? "gold" : "white"}
+                fontSize={12}
+                fontWeight="600"
+              >
+                {isStreak ? "Keep it up!" : "Select"}
+              </Text>
+              <ChevronRight size={14} color={isStreak ? "gold" : "white"} />
+            </XStack>
+          </Stack>
+        </XStack>
+      </Stack>
+    );
+  }
+
+  // Contact item
+  return (
+    <Stack
+      backgroundColor="$gray2"
+      borderRadius="$6"
+      padding="$4"
+      marginBottom="$2"
+      pressStyle={{
+        scale: 0.98,
+        backgroundColor: "$gray3",
+      }}
+      onPress={onPress}
+    >
+      <XStack alignItems="center" gap="$3">
+        {/* Profile Picture */}
+        <Stack position="relative">
+          <Circle size={50} backgroundColor="$gray8" padding={2}>
+            <Circle size={46} overflow="hidden" backgroundColor="$gray6">
+              <Image
+                source={
+                  item.data.imageAvailable
+                    ? { uri: item.data.image?.uri }
+                    : DefaultProfilePicture
+                }
+                width="100%"
+                height="100%"
+              />
+            </Circle>
+          </Circle>
+
+          {/* Invite indicator */}
+          <Circle
+            size={18}
+            position="absolute"
+            bottom={-2}
+            right={-2}
+            backgroundColor="$blue10"
+          >
+            <Phone size={8} color="white" />
+          </Circle>
+        </Stack>
+
+        {/* Contact Info */}
+        <YStack flex={1} gap="$1">
+          <Text
+            color="$gray12"
+            fontSize={15}
+            fontWeight="600"
+            numberOfLines={1}
+          >
+            {item.data.name}
+          </Text>
+          <Text color="$gray11" fontSize={13} numberOfLines={1}>
+            {item.data.phoneNumbers?.[0]?.number}
+          </Text>
+          <Text fontSize={11} color="$blue11" fontWeight="500">
+            Will receive invite ✨
+          </Text>
+        </YStack>
+
+        {/* Action Button */}
+        <Stack
+          backgroundColor="$blue9"
+          borderRadius="$3"
+          paddingHorizontal="$3"
+          paddingVertical="$2"
+          pressStyle={{
+            backgroundColor: "$blue10",
+            scale: 0.95,
+          }}
+        >
+          <XStack alignItems="center" gap="$1.5">
+            <Text color="white" fontSize={12} fontWeight="600">
+              Invite
+            </Text>
+            <ChevronRight size={14} color="white" />
+          </XStack>
+        </Stack>
+      </XStack>
+    </Stack>
+  );
+};
 
 const PostTo = () => {
   const theme = useTheme();
@@ -233,66 +544,40 @@ const PostTo = () => {
     });
   };
 
-  const renderItem = ({ item }: { item: ListItem }) => {
+  const renderItem = ({ item, index }: { item: ListItem; index: number }) => {
     if (item.type === "header") {
       return (
-        <XStack alignItems="center" gap="$1">
-          <HeaderTitle
-            iconSize={18}
-            iconColor={theme.primary.val as string}
-            iconAfter={item.isContact ? "information-circle" : undefined}
-            onPress={() =>
+        <CreativeListItem
+          item={item}
+          index={index}
+          onPress={() => {
+            if (item.isContact) {
               void infoDialog.show({
                 title: "Post for Anyone",
                 subtitle:
                   "You can share posts with friends who aren't on Oppfy yet! They'll get a text invite to join and see your post when they do. It's a great way to bring your friends into the fun.",
                 acceptText: "Got it",
-              })
+              });
             }
-          >
-            {item.title}
-          </HeaderTitle>
-        </XStack>
+          }}
+        />
       );
     }
 
     if (item.type === "friend") {
       return (
-        <MediaListItem
-          title={item.data.username}
-          subtitle={item.data.name}
-          imageUrl={
-            item.data.profilePictureUrl
-              ? { uri: item.data.profilePictureUrl }
-              : DefaultProfilePicture
-          }
-          primaryAction={{
-            label: "Select",
-            iconAfter: ChevronRight,
-            onPress: () => onFriendSelected(item.data),
-          }}
+        <CreativeListItem
+          item={item}
+          index={index}
           onPress={() => onFriendSelected(item.data)}
         />
       );
     }
 
     return (
-      <MediaListItem
-        title={item.data.name}
-        subtitle={formatPhoneNumber(
-          item.data.phoneNumbers?.[0]?.number,
-          item.data.phoneNumbers?.[0]?.countryCode,
-        )}
-        imageUrl={
-          item.data.imageAvailable
-            ? { uri: item.data.image?.uri }
-            : DefaultProfilePicture
-        }
-        primaryAction={{
-          label: "Select",
-          iconAfter: ChevronRight,
-          onPress: () => onContactSelected(item.data),
-        }}
+      <CreativeListItem
+        item={item}
+        index={index}
         onPress={() => onContactSelected(item.data)}
       />
     );
