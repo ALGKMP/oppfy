@@ -417,7 +417,7 @@ const CreativeListItem = ({
             }}
           >
             <XStack alignItems="center" gap="$1.5">
-              <Text color="#FF66FF" fontSize={12} fontWeight="600">
+              <Text color="#FF66FF" fontSize={12} fontWeight="bold">
                 Select
               </Text>
               <ChevronRight size={14} color="#FF66FF" />
@@ -435,25 +435,12 @@ const CreativeListItem = ({
       overflow="hidden"
       padding="$4"
       marginBottom="$2"
-      borderWidth={1}
-      borderColor="$blue8"
+      backgroundColor="$gray3"
       pressStyle={{
         scale: 0.98,
       }}
       onPress={onPress}
     >
-      <LinearGradient
-        colors={["#3B82F6", "#1E40AF", "#1E3A8A"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }}
-      />
       <XStack alignItems="center" gap="$3">
         {/* Profile Picture */}
         <Stack position="relative">
@@ -492,7 +479,7 @@ const CreativeListItem = ({
             shadowOpacity={0.3}
             shadowRadius={2}
           >
-            <Phone size={8} color="#3B82F6" />
+            <Phone size={8} color="#6B7280" />
           </Circle>
         </Stack>
 
@@ -551,10 +538,10 @@ const CreativeListItem = ({
           }}
         >
           <XStack alignItems="center" gap="$1.5">
-            <Text color="#3B82F6" fontSize={12} fontWeight="700">
+            <Text color="#6B7280" fontSize={12} fontWeight="700">
               Invite
             </Text>
-            <ChevronRight size={14} color="#3B82F6" />
+            <ChevronRight size={14} color="#6B7280" />
           </XStack>
         </Button>
       </XStack>
