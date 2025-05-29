@@ -186,6 +186,58 @@ export class FriendRepository {
       .where(eq(this.schema.userStats.userId, recipientUserId));
   }
 
+  async updateFriend(
+    { friendId }: { friendId: string },
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<void> {
+    const friend = await db.query.friend.findFirst({
+      where: eq(this.schema.friend.id, friendId),
+    });
+
+    if (!friend) {
+      return;
+    }
+  }
+
+  /**
+   * Simple data access method to update friend streak fields
+   * Business logic should be handled in the service layer
+   */
+  async updateFriendStreakFields(
+    params: {
+      userIdA: string;
+      userIdB: string;
+      currentStreak: number;
+      longestStreak: number;
+      lastPostDate: Date;
+      lastPostAuthorId: string;
+      lastPostRecipientId: string;
+      lastPostId: string;
+    },
+    tx: Transaction,
+  ): Promise<void> {
+    const friend = await this.getFriend(
+      { userIdA: params.userIdA, userIdB: params.userIdB },
+      tx,
+    );
+
+    if (!friend) {
+      return;
+    }
+
+    await tx
+      .update(this.schema.friend)
+      .set({
+        currentStreak: params.currentStreak,
+        longestStreak: params.longestStreak,
+        lastPostDate: params.lastPostDate,
+        lastPostAuthorId: params.lastPostAuthorId,
+        lastPostRecipientId: params.lastPostRecipientId,
+        lastPostId: params.lastPostId,
+      })
+      .where(eq(this.schema.friend.id, friend.id));
+  }
+
   async cleanupFriendRelationships(
     { userIdA, userIdB }: BidirectionalUserIdsparams,
     tx: Transaction,
@@ -298,7 +350,7 @@ export class FriendRepository {
     { userId, cursor, pageSize = 10, selfUserId }: PaginateFriendParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<(Profile<"onboarded"> & { followStatus: FollowStatus } & { friend: Friend })[]> {
-    let query = db
+    const query = db
       .select({
         profile: this.schema.profile,
         followStatus: getFollowStatusSql(selfUserId),
@@ -328,12 +380,12 @@ export class FriendRepository {
           ),
           cursor
             ? or(
-                gt(this.schema.friend.createdAt, cursor.createdAt),
-                and(
-                  eq(this.schema.friend.createdAt, cursor.createdAt),
-                  gt(this.schema.profile.userId, cursor.id),
-                ),
-              )
+              gt(this.schema.friend.createdAt, cursor.createdAt),
+              and(
+                eq(this.schema.friend.createdAt, cursor.createdAt),
+                gt(this.schema.profile.userId, cursor.id),
+              ),
+            )
             : undefined,
           onboardingCompletedCondition(this.schema.profile),
         ),
@@ -361,7 +413,7 @@ export class FriendRepository {
     { userId, cursor, pageSize = 10 }: PaginateFriendRequestsParams,
     db: DatabaseOrTransaction = this.db,
   ): Promise<Profile<"onboarded">[]> {
-    let query = db
+    const query = db
       .select({
         profile: this.schema.profile,
       })
@@ -383,12 +435,12 @@ export class FriendRepository {
           eq(this.schema.friendRequest.recipientUserId, userId),
           cursor
             ? or(
-                gt(this.schema.friendRequest.createdAt, cursor.createdAt),
-                and(
-                  eq(this.schema.friendRequest.createdAt, cursor.createdAt),
-                  gt(this.schema.profile.userId, cursor.id),
-                ),
-              )
+              gt(this.schema.friendRequest.createdAt, cursor.createdAt),
+              and(
+                eq(this.schema.friendRequest.createdAt, cursor.createdAt),
+                gt(this.schema.profile.userId, cursor.id),
+              ),
+            )
             : undefined,
           onboardingCompletedCondition(this.schema.profile),
         ),

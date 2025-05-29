@@ -130,29 +130,6 @@ export class PostRepository {
 
     invariant(postStats);
 
-    await tx
-      .update(this.schema.friend)
-      .set({
-        lastPostDate: new Date(),
-        lastPostRecipientId: params.recipientUserId,
-        lastPostAuthorId: params.authorUserId,
-        lastPostId: post.id,
-        currentStreak: sql`${this.schema.friend.currentStreak} + 1`,
-        longestStreak: sql`${this.schema.friend.longestStreak} + 1`,
-      })
-      .where(
-        or(
-          and(
-            eq(this.schema.friend.userIdA, params.authorUserId),
-            eq(this.schema.friend.userIdB, params.recipientUserId),
-          ),
-          and(
-            eq(this.schema.friend.userIdB, params.authorUserId),
-            eq(this.schema.friend.userIdA, params.recipientUserId),
-          ),
-        ),
-      );
-
     return { post, postStats };
   }
 
@@ -208,12 +185,12 @@ export class PostRepository {
       eq(this.schema.post.recipientUserId, userId),
       cursor
         ? or(
-            lt(this.schema.post.createdAt, cursor.createdAt),
-            and(
-              eq(this.schema.post.createdAt, cursor.createdAt),
-              lt(this.schema.post.id, cursor.id),
-            ),
-          )
+          lt(this.schema.post.createdAt, cursor.createdAt),
+          and(
+            eq(this.schema.post.createdAt, cursor.createdAt),
+            lt(this.schema.post.id, cursor.id),
+          ),
+        )
         : undefined,
     );
 
