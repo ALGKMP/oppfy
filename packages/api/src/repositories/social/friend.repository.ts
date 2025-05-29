@@ -297,11 +297,12 @@ export class FriendRepository {
   async paginateFriends(
     { userId, cursor, pageSize = 10, selfUserId }: PaginateFriendParams,
     db: DatabaseOrTransaction = this.db,
-  ): Promise<(Profile<"onboarded"> & { followStatus: FollowStatus })[]> {
+  ): Promise<(Profile<"onboarded"> & { followStatus: FollowStatus } & { friend: Friend })[]> {
     let query = db
       .select({
         profile: this.schema.profile,
         followStatus: getFollowStatusSql(selfUserId),
+        friend: this.schema.friend,
       })
       .from(this.schema.friend)
       .innerJoin(
@@ -345,9 +346,10 @@ export class FriendRepository {
 
     const friends = await query;
 
-    return friends.map(({ profile, followStatus }) => ({
+    return friends.map(({ profile, followStatus, friend }) => ({
       ...(profile as Profile<"onboarded">),
       followStatus,
+      friend,
     }));
   }
 

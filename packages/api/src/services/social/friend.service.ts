@@ -422,6 +422,7 @@ export class FriendService {
     const hydratedProfiles = rawProfiles.map((profile) => ({
       ...hydrateProfile(profile),
       followStatus: profile.followStatus,
+      friend: profile.friend,
     }));
 
     const hasMore = rawProfiles.length > pageSize;
