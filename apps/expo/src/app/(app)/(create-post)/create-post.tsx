@@ -59,21 +59,21 @@ const MAX_PREVIEW_WIDTH = SCREEN_WIDTH / 3;
 const MAX_PREVIEW_HEIGHT = SCREEN_WIDTH * 0.6; // Maximum preview height
 
 const SEND_BUTTON_MESSAGES = [
-  (name: string) => `EXPOSE ${name} 📸`,
-  (name: string) => `GET ${name} IN HERE 😈`,
-  (name: string) => `${name} CAN'T HIDE 👀`,
-  (name: string) => `${name} NEEDS THIS 🫣`,
-  (name: string) => `PEER PRESSURE ${name} 🎯`,
-  (name: string) => `GOTCHA ${name} 😏`,
-  (name: string) => `SHOW ${name} WHAT'S UP 🌟`,
-  (name: string) => `${name} SHOULD SEE THIS 👋`,
-  (name: string) => `TIME TO TAG ${name} 🎯`,
-  (name: string) => `BRING ${name} TO THE PARTY 🎈`,
-  (name: string) => `${name} WON'T BELIEVE THIS 🤯`,
-  (name: string) => `SUMMON ${name} 🔮`,
-  (name: string) => `${name} GOTTA SEE THIS 👀`,
-  (name: string) => `CALLING ${name} OUT 📢`,
-  (name: string) => `${name} WHERE YOU AT? 🗺️`,
+  (name: string) => `Post for ${name} 📸`,
+  // (name: string) => `GET ${name} IN HERE 😈`,
+  // (name: string) => `${name} CAN'T HIDE 👀`,
+  // (name: string) => `${name} NEEDS THIS 🫣`,
+  // (name: string) => `PEER PRESSURE ${name} 🎯`,
+  // (name: string) => `GOTCHA ${name} 😏`,
+  // (name: string) => `SHOW ${name} WHAT'S UP 🌟`,
+  // (name: string) => `${name} SHOULD SEE THIS 👋`,
+  // (name: string) => `TIME TO TAG ${name} 🎯`,
+  // (name: string) => `BRING ${name} TO THE PARTY 🎈`,
+  // (name: string) => `${name} WON'T BELIEVE THIS 🤯`,
+  // (name: string) => `SUMMON ${name} 🔮`,
+  // (name: string) => `${name} GOTTA SEE THIS 👀`,
+  // (name: string) => `CALLING ${name} OUT 📢`,
+  // (name: string) => `${name} WHERE YOU AT? 🗺️`,
 ];
 
 const CaptionSheet = ({
