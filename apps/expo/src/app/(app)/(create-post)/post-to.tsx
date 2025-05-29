@@ -8,11 +8,7 @@ import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import {
   ChevronRight,
-  Crown,
-  Flame,
   Phone,
-  Sparkles,
-  Star,
   UserRoundX,
   Users,
 } from "@tamagui/lucide-icons";
@@ -172,7 +168,7 @@ const CreativeListItem = ({
               shadowRadius={1}
             >
               {item.isContact
-                ? "Post for people not on the app ✨"
+                ? "Post for your friends not on the app to invite them ✨"
                 : "Your Opps 🚀"}
             </Text>
           </YStack>
@@ -191,7 +187,7 @@ const CreativeListItem = ({
           }}
         >
           <Stack
-            borderRadius="$6"
+            borderRadius="$8"
             overflow="hidden"
             pressStyle={{ scale: 0.98 }}
             onPress={onPress}
@@ -325,7 +321,7 @@ const CreativeListItem = ({
     // Standard friend card
     return (
       <Stack
-        borderRadius="$6"
+        borderRadius="$8"
         overflow="hidden"
         marginBottom="$2"
         pressStyle={{ scale: 0.98 }}
@@ -431,7 +427,7 @@ const CreativeListItem = ({
   // Contact item
   return (
     <Stack
-      borderRadius="$6"
+      borderRadius="$8"
       overflow="hidden"
       padding="$4"
       marginBottom="$2"
@@ -646,7 +642,7 @@ const PostTo = () => {
     if (contactsToShow.length > 0) {
       result.push({
         type: "header",
-        title: "Post for contacts",
+        title: "Post for Contacts",
         isContact: true,
       });
       contactsToShow.forEach((contact) => {
