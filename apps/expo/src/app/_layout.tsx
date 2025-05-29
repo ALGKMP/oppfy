@@ -15,6 +15,7 @@ import {
 } from "~/components/ui";
 import { BottomSheetProvider } from "~/components/ui/BottomSheet";
 import { AudioProvider } from "~/contexts/AudioContext";
+import { CelebrationProvider } from "~/contexts/CelebrationContext";
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { FontProvider } from "~/providers/FontProvider";
 import { SentryProvider } from "~/providers/SentryProvider";
@@ -31,28 +32,30 @@ const RootLayout = () => {
             <FontProvider>
               <PermissionsProvider>
                 <AudioProvider>
-                  <SafeAreaProvider>
-                    <GestureHandlerRootView style={{ flex: 1 }}>
-                      <PortalProvider>
-                        <BottomSheetModalProvider>
-                          <ActionSheetProvider>
-                            <AlertDialogProvider>
-                              <DialogProvider>
-                                <ToastProvider native={true}>
-                                  <BottomSheetProvider>
-                                    <StatusBar style="auto" />
-                                    <UpdateHandler />
-                                    <Slot />
-                                    <ToastViewport />
-                                  </BottomSheetProvider>
-                                </ToastProvider>
-                              </DialogProvider>
-                            </AlertDialogProvider>
-                          </ActionSheetProvider>
-                        </BottomSheetModalProvider>
-                      </PortalProvider>
-                    </GestureHandlerRootView>
-                  </SafeAreaProvider>
+                  <CelebrationProvider>
+                    <SafeAreaProvider>
+                      <GestureHandlerRootView style={{ flex: 1 }}>
+                        <PortalProvider>
+                          <BottomSheetModalProvider>
+                            <ActionSheetProvider>
+                              <AlertDialogProvider>
+                                <DialogProvider>
+                                  <ToastProvider native={true}>
+                                    <BottomSheetProvider>
+                                      <StatusBar style="auto" />
+                                      <UpdateHandler />
+                                      <Slot />
+                                      <ToastViewport />
+                                    </BottomSheetProvider>
+                                  </ToastProvider>
+                                </DialogProvider>
+                              </AlertDialogProvider>
+                            </ActionSheetProvider>
+                          </BottomSheetModalProvider>
+                        </PortalProvider>
+                      </GestureHandlerRootView>
+                    </SafeAreaProvider>
+                  </CelebrationProvider>
                 </AudioProvider>
               </PermissionsProvider>
             </FontProvider>

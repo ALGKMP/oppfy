@@ -29,6 +29,7 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
+import { useCelebration } from "~/contexts/CelebrationContext";
 import { useUploadMedia } from "~/hooks/media";
 import type {
   UploadMediaInputNotOnApp,
@@ -145,10 +146,11 @@ const CaptionSheet = ({
 };
 
 const CreatePost = () => {
-  const theme = useTheme();
   const router = useRouter();
+  const theme = useTheme();
   const { show, hide } = useBottomSheetController();
   const { sharePostToNewUser } = useShare();
+  const { showCelebration } = useCelebration();
 
   const [caption, setCaption] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -219,7 +221,17 @@ const CreatePost = () => {
           phoneNumber: params.number,
         });
       }
+
+      // Navigate to home first
       router.dismissTo("/(app)/(bottom-tabs)/(home)");
+
+      // Trigger celebration animation with a small delay to ensure navigation completes
+      setTimeout(() => {
+        showCelebration({
+          recipientName: recipientName || displayName,
+          recipientImage: recipientImage,
+        });
+      }, 100);
     } catch (error) {
       console.error(error);
     } finally {

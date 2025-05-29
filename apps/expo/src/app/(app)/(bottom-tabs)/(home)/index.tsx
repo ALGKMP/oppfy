@@ -20,7 +20,14 @@ import {
 
 import PostCard from "~/components/Post/PostCard";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
-import { Avatar, HeaderTitle, Icon, Separator } from "~/components/ui";
+import {
+  Avatar,
+  CelebrationAnimation,
+  HeaderTitle,
+  Icon,
+  Separator,
+} from "~/components/ui";
+import { useCelebration } from "~/contexts/CelebrationContext";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -33,6 +40,7 @@ const HomeScreen = () => {
   useScrollToTop(scrollRef);
 
   const router = useRouter();
+  const { celebrationData, isVisible, hideCelebration } = useCelebration();
 
   const insets = useSafeAreaInsets();
 
@@ -193,37 +201,47 @@ const HomeScreen = () => {
   }, [hasNextPage, isLoading]);
 
   return (
-    <FlashList
-      ref={scrollRef}
-      data={postItems}
-      onEndReached={handleOnEndReached}
-      nestedScrollEnabled={false}
-      showsVerticalScrollIndicator={false}
-      numColumns={1}
-      keyExtractor={(item) => "home_post_" + item.post.id}
-      renderItem={renderPost}
-      estimatedItemSize={screenWidth}
-      ListFooterComponent={renderFooter}
-      extraData={viewableItems}
-      onViewableItemsChanged={onViewableItemsChanged}
-      viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
-      ItemSeparatorComponent={() => <Spacer size="$4" />}
-      ListEmptyComponent={renderEmptyList}
-      contentContainerStyle={{
-        paddingTop: insets.top,
-      }}
-      ListFooterComponentStyle={{
-        paddingTop: getToken("$3", "space") as number,
-        paddingBottom: getToken("$4", "space") as number,
-      }}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          progressViewOffset={insets.top}
-        />
-      }
-    />
+    <>
+      <FlashList
+        ref={scrollRef}
+        data={postItems}
+        onEndReached={handleOnEndReached}
+        nestedScrollEnabled={false}
+        showsVerticalScrollIndicator={false}
+        numColumns={1}
+        keyExtractor={(item) => "home_post_" + item.post.id}
+        renderItem={renderPost}
+        estimatedItemSize={screenWidth}
+        ListFooterComponent={renderFooter}
+        extraData={viewableItems}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
+        ItemSeparatorComponent={() => <Spacer size="$4" />}
+        ListEmptyComponent={renderEmptyList}
+        contentContainerStyle={{
+          paddingTop: insets.top,
+        }}
+        ListFooterComponentStyle={{
+          paddingTop: getToken("$3", "space") as number,
+          paddingBottom: getToken("$4", "space") as number,
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            progressViewOffset={insets.top}
+          />
+        }
+      />
+
+      {/* Celebration Animation */}
+      <CelebrationAnimation
+        visible={isVisible}
+        recipientName={celebrationData?.recipientName ?? ""}
+        recipientImage={celebrationData?.recipientImage}
+        onComplete={hideCelebration}
+      />
+    </>
   );
 };
 

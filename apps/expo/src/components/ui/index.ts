@@ -20,6 +20,7 @@ import type { BottomSheetProps } from "./BottomSheet";
 import { Button, OnboardingButton } from "./Buttons";
 import { Card } from "./Card";
 import { CardContainer } from "./CardContainer";
+import { CelebrationAnimation } from "./CelebrationAnimation";
 import { Checkbox } from "./Checkbox";
 import { Dialog, DialogProvider, useDialogController } from "./Dialog";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
@@ -128,6 +129,7 @@ export {
   LoadingIndicatorOverlay,
   BlurContextMenuWrapper,
   QRCode,
+  CelebrationAnimation,
 };
 
 export type {
