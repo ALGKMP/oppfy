@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
 import { CloudFront } from "@oppfy/cloudfront";
-import type { Database } from "@oppfy/db";
+import type { Database, DatabaseOrTransaction, Transaction } from "@oppfy/db";
 import { FollowStatus } from "@oppfy/db/utils/query-helpers";
 import { SQS } from "@oppfy/sqs"; // Added SQS import
 
@@ -48,7 +48,7 @@ export class FriendService {
     @inject(TYPES.ProfileRepository)
     private readonly profileRepository: ProfileRepository,
     @inject(TYPES.SQS) private readonly sqs: SQS, // Injected SQS service
-  ) {}
+  ) { }
 
   /**
    * Initiates or completes a friend relationship. Sends a friend request if no prior relationship exists,
@@ -469,6 +469,83 @@ export class FriendService {
         hasMore && lastUser
           ? { id: lastUser.userId, createdAt: lastUser.createdAt }
           : null,
+    });
+  }
+
+  /**
+   * Expires all streaks that haven't had activity in 24+ hours
+   * Call this function on app open to clean up expired streaks
+   */
+  async expireInactiveStreaks(): Promise<{
+    totalChecked: number;
+    totalExpired: number;
+    expiredStreaks: {
+      userIdA: string;
+      userIdB: string;
+      previousStreak: number;
+      hoursSinceLastPost: number;
+    }[];
+  }> {
+    return await this.db.transaction(async (tx) => {
+      // Get all friendships with active streaks
+      const friendsWithStreaks = await this.friendRepository.getAllFriendsWithActiveStreaks(tx);
+
+      const currentDate = new Date();
+      const expiredStreaks: {
+        userIdA: string;
+        userIdB: string;
+        previousStreak: number;
+        hoursSinceLastPost: number;
+      }[] = [];
+
+      // Check each friendship for expiration
+      for (const friend of friendsWithStreaks) {
+        if (!friend.lastPostDate || friend.currentStreak === 0) {
+          continue;
+        }
+
+        // Business rule: Check if 24+ hours have passed since last post
+        const hoursSinceLastPost = (currentDate.getTime() - friend.lastPostDate.getTime()) / (1000 * 60 * 60);
+
+        if (hoursSinceLastPost >= 24) {
+          // Business rule: Expire the streak
+          const previousStreak = friend.currentStreak;
+
+          await this.friendRepository.updateFriendStreakFields(
+            {
+              userIdA: friend.userIdA,
+              userIdB: friend.userIdB,
+              currentStreak: 0,
+              longestStreak: friend.longestStreak, // Keep longest streak
+              lastPostDate: null, // Reset last post date when streak expires
+              lastPostAuthorId: null,
+              lastPostRecipientId: null,
+              lastPostId: null,
+            },
+            tx,
+          );
+
+          expiredStreaks.push({
+            userIdA: friend.userIdA,
+            userIdB: friend.userIdB,
+            previousStreak,
+            hoursSinceLastPost: Math.round(hoursSinceLastPost * 100) / 100,
+          });
+        }
+      }
+
+      // Log the results
+      if (expiredStreaks.length > 0) {
+        console.log(`Expired ${expiredStreaks.length} inactive streaks:`, expiredStreaks);
+      } else {
+        console.log(`Checked ${friendsWithStreaks.length} active streaks - none expired`);
+      }
+
+      return {
+        totalChecked: friendsWithStreaks.length,
+        totalExpired: expiredStreaks.length,
+        expiredStreaks,
+      };
     });
   }
 }

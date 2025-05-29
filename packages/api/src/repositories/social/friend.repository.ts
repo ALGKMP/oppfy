@@ -209,10 +209,10 @@ export class FriendRepository {
       userIdB: string;
       currentStreak: number;
       longestStreak: number;
-      lastPostDate: Date;
-      lastPostAuthorId: string;
-      lastPostRecipientId: string;
-      lastPostId: string;
+      lastPostDate: Date | null;
+      lastPostAuthorId: string | null;
+      lastPostRecipientId: string | null;
+      lastPostId: string | null;
     },
     tx: Transaction,
   ): Promise<void> {
@@ -454,5 +454,20 @@ export class FriendRepository {
     const friendRequests = await query;
 
     return friendRequests.map(({ profile }) => profile as Profile<"onboarded">);
+  }
+
+  /**
+   * Get all friendships that have active streaks for expiration checking
+   * Data access only - returns raw friend records with currentStreak > 0
+   */
+  async getAllFriendsWithActiveStreaks(
+    db: DatabaseOrTransaction = this.db,
+  ): Promise<Friend[]> {
+    const result = await db
+      .select()
+      .from(this.schema.friend)
+      .where(gt(this.schema.friend.currentStreak, 0));
+
+    return result;
   }
 }

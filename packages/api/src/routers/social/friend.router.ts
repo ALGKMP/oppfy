@@ -216,4 +216,10 @@ export const friendRouter = createTRPCRouter({
         },
       );
     }),
+
+  expireInactiveStreaks: protectedProcedure
+    .mutation(async ({ ctx }) => {
+      const result = await ctx.services.friend.expireInactiveStreaks();
+      return result;
+    }),
 });
