@@ -1,7 +1,5 @@
 {
-  "id": "569d86a4-d06b-4089-80be-86b55ae399af",
-  "prevId": "f95a134d-8464-4400-913a-c41838cb4eeb",
-  "version": "6",
+  "version": "7",
   "dialect": "postgresql",
   "tables": {
     "public.block": {
@@ -37,43 +35,90 @@
       },
       "indexes": {
         "block_sender_user_idx": {
+          "columns": [
+            {
+              "expression": "sender_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "block_sender_user_idx",
-          "columns": ["sender_user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "block_recipient_user_idx": {
+          "columns": [
+            {
+              "expression": "recipient_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "block_recipient_user_idx",
-          "columns": ["recipient_user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "block_unique_pair": {
+          "columns": [
+            {
+              "expression": "sender_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "recipient_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "block_unique_pair",
-          "columns": ["sender_user_id", "recipient_user_id"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "block_sender_user_id_user_id_fk": {
           "name": "block_sender_user_id_user_id_fk",
           "tableFrom": "block",
+          "columnsFrom": [
+            "sender_user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["sender_user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "block_recipient_user_id_user_id_fk": {
           "name": "block_recipient_user_id_user_id_fk",
           "tableFrom": "block",
+          "columnsFrom": [
+            "recipient_user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["recipient_user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.comment": {
       "name": "comment",
@@ -121,38 +166,69 @@
       },
       "indexes": {
         "comment_post_idx": {
+          "columns": [
+            {
+              "expression": "post_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "comment_post_idx",
-          "columns": ["post_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "comment_user_idx": {
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "comment_user_idx",
-          "columns": ["user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "comment_user_id_user_id_fk": {
           "name": "comment_user_id_user_id_fk",
           "tableFrom": "comment",
+          "columnsFrom": [
+            "user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "comment_post_id_post_id_fk": {
           "name": "comment_post_id_post_id_fk",
           "tableFrom": "comment",
+          "columnsFrom": [
+            "post_id"
+          ],
           "tableTo": "post",
-          "columnsFrom": ["post_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.contact": {
       "name": "contact",
@@ -175,7 +251,10 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.follow": {
       "name": "follow",
@@ -210,38 +289,69 @@
       },
       "indexes": {
         "follow_sender_idx": {
+          "columns": [
+            {
+              "expression": "sender_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "follow_sender_idx",
-          "columns": ["sender_user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "follow_recipient_idx": {
+          "columns": [
+            {
+              "expression": "recipient_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "follow_recipient_idx",
-          "columns": ["recipient_user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "follow_sender_user_id_user_id_fk": {
           "name": "follow_sender_user_id_user_id_fk",
           "tableFrom": "follow",
+          "columnsFrom": [
+            "sender_user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["sender_user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "follow_recipient_user_id_user_id_fk": {
           "name": "follow_recipient_user_id_user_id_fk",
           "tableFrom": "follow",
+          "columnsFrom": [
+            "recipient_user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["recipient_user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.follow_request": {
       "name": "follow_request",
@@ -283,43 +393,90 @@
       },
       "indexes": {
         "follow_request_sender_idx": {
+          "columns": [
+            {
+              "expression": "sender_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "follow_request_sender_idx",
-          "columns": ["sender_user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "follow_request_recipient_idx": {
+          "columns": [
+            {
+              "expression": "recipient_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "follow_request_recipient_idx",
-          "columns": ["recipient_user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "follow_request_sender_recipient_unique": {
+          "columns": [
+            {
+              "expression": "sender_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "recipient_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "follow_request_sender_recipient_unique",
-          "columns": ["sender_user_id", "recipient_user_id"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "follow_request_sender_user_id_user_id_fk": {
           "name": "follow_request_sender_user_id_user_id_fk",
           "tableFrom": "follow_request",
+          "columnsFrom": [
+            "sender_user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["sender_user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "follow_request_recipient_user_id_user_id_fk": {
           "name": "follow_request_recipient_user_id_user_id_fk",
           "tableFrom": "follow_request",
+          "columnsFrom": [
+            "recipient_user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["recipient_user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.friend": {
       "name": "friend",
@@ -354,43 +511,90 @@
       },
       "indexes": {
         "friend_user_a_idx": {
+          "columns": [
+            {
+              "expression": "user_id_a",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "friend_user_a_idx",
-          "columns": ["user_id_a"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "friend_user_b_idx": {
+          "columns": [
+            {
+              "expression": "user_id_b",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "friend_user_b_idx",
-          "columns": ["user_id_b"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "friend_user_pair_unique": {
+          "columns": [
+            {
+              "expression": "user_id_a",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id_b",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "friend_user_pair_unique",
-          "columns": ["user_id_a", "user_id_b"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "friend_user_id_a_user_id_fk": {
           "name": "friend_user_id_a_user_id_fk",
           "tableFrom": "friend",
+          "columnsFrom": [
+            "user_id_a"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["user_id_a"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "friend_user_id_b_user_id_fk": {
           "name": "friend_user_id_b_user_id_fk",
           "tableFrom": "friend",
+          "columnsFrom": [
+            "user_id_b"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["user_id_b"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.friend_request": {
       "name": "friend_request",
@@ -432,43 +636,90 @@
       },
       "indexes": {
         "friend_request_sender_idx": {
+          "columns": [
+            {
+              "expression": "sender_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "friend_request_sender_idx",
-          "columns": ["sender_user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "friend_request_recipient_idx": {
+          "columns": [
+            {
+              "expression": "recipient_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "friend_request_recipient_idx",
-          "columns": ["recipient_user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "friend_request_sender_recipient_unique": {
+          "columns": [
+            {
+              "expression": "sender_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "recipient_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "friend_request_sender_recipient_unique",
-          "columns": ["sender_user_id", "recipient_user_id"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "friend_request_sender_user_id_user_id_fk": {
           "name": "friend_request_sender_user_id_user_id_fk",
           "tableFrom": "friend_request",
+          "columnsFrom": [
+            "sender_user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["sender_user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "friend_request_recipient_user_id_user_id_fk": {
           "name": "friend_request_recipient_user_id_user_id_fk",
           "tableFrom": "friend_request",
+          "columnsFrom": [
+            "recipient_user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["recipient_user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.like": {
       "name": "like",
@@ -503,43 +754,90 @@
       },
       "indexes": {
         "like_post_idx": {
+          "columns": [
+            {
+              "expression": "post_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "like_post_idx",
-          "columns": ["post_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "like_user_idx": {
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "like_user_idx",
-          "columns": ["user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "like_post_user_unique": {
+          "columns": [
+            {
+              "expression": "post_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "like_post_user_unique",
-          "columns": ["post_id", "user_id"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "like_post_id_post_id_fk": {
           "name": "like_post_id_post_id_fk",
           "tableFrom": "like",
+          "columnsFrom": [
+            "post_id"
+          ],
           "tableTo": "post",
-          "columnsFrom": ["post_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "like_user_id_user_id_fk": {
           "name": "like_user_id_user_id_fk",
           "tableFrom": "like",
+          "columnsFrom": [
+            "user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.notification": {
       "name": "notification",
@@ -615,58 +913,129 @@
       },
       "indexes": {
         "notification_recipient_idx": {
+          "columns": [
+            {
+              "expression": "recipient_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "notification_recipient_idx",
-          "columns": ["recipient_user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "notification_sender_idx": {
+          "columns": [
+            {
+              "expression": "sender_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "notification_sender_idx",
-          "columns": ["sender_user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "notification_read_idx": {
+          "columns": [
+            {
+              "expression": "read",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "notification_read_idx",
-          "columns": ["read"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "notification_active_idx": {
+          "columns": [
+            {
+              "expression": "active",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "notification_active_idx",
-          "columns": ["active"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "notification_event_type_idx": {
+          "columns": [
+            {
+              "expression": "event_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "notification_event_type_idx",
-          "columns": ["event_type"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "notification_created_at_idx": {
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "notification_created_at_idx",
-          "columns": ["created_at"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "notification_sender_user_id_user_id_fk": {
           "name": "notification_sender_user_id_user_id_fk",
           "tableFrom": "notification",
+          "columnsFrom": [
+            "sender_user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["sender_user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "notification_recipient_user_id_user_id_fk": {
           "name": "notification_recipient_user_id_user_id_fk",
           "tableFrom": "notification",
+          "columnsFrom": [
+            "recipient_user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["recipient_user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.notification_settings": {
       "name": "notification_settings",
@@ -747,15 +1116,22 @@
         "notification_settings_user_id_user_id_fk": {
           "name": "notification_settings_user_id_user_id_fk",
           "tableFrom": "notification_settings",
+          "columnsFrom": [
+            "user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.post": {
       "name": "post",
@@ -839,49 +1215,92 @@
       },
       "indexes": {
         "post_author_user_idx": {
+          "columns": [
+            {
+              "expression": "author_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "post_author_user_idx",
-          "columns": ["author_user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "post_recipient_user_idx": {
+          "columns": [
+            {
+              "expression": "recipient_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "post_recipient_user_idx",
-          "columns": ["recipient_user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "post_created_at_idx": {
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "post_created_at_idx",
-          "columns": ["created_at"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "post_author_user_id_user_id_fk": {
           "name": "post_author_user_id_user_id_fk",
           "tableFrom": "post",
+          "columnsFrom": [
+            "author_user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["author_user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "post_recipient_user_id_user_id_fk": {
           "name": "post_recipient_user_id_user_id_fk",
           "tableFrom": "post",
+          "columnsFrom": [
+            "recipient_user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["recipient_user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "post_post_key_unique": {
           "name": "post_post_key_unique",
-          "nullsNotDistinct": false,
-          "columns": ["post_key"]
+          "columns": [
+            "post_key"
+          ],
+          "nullsNotDistinct": false
         }
-      }
+      },
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.post_stats": {
       "name": "post_stats",
@@ -934,15 +1353,22 @@
         "post_stats_post_id_post_id_fk": {
           "name": "post_stats_post_id_post_id_fk",
           "tableFrom": "post_stats",
+          "columnsFrom": [
+            "post_id"
+          ],
           "tableTo": "post",
-          "columnsFrom": ["post_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.profile": {
       "name": "profile",
@@ -1016,30 +1442,49 @@
       },
       "indexes": {
         "profile_name_idx": {
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "profile_name_idx",
-          "columns": ["name"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "profile_user_id_user_id_fk": {
           "name": "profile_user_id_user_id_fk",
           "tableFrom": "profile",
+          "columnsFrom": [
+            "user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "profile_username_unique": {
           "name": "profile_username_unique",
-          "nullsNotDistinct": false,
-          "columns": ["username"]
+          "columns": [
+            "username"
+          ],
+          "nullsNotDistinct": false
         }
-      }
+      },
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.push_token": {
       "name": "push_token",
@@ -1084,15 +1529,22 @@
         "push_token_user_id_user_id_fk": {
           "name": "push_token_user_id_user_id_fk",
           "tableFrom": "push_token",
+          "columnsFrom": [
+            "user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.report_comment": {
       "name": "report_comment",
@@ -1134,38 +1586,69 @@
       },
       "indexes": {
         "report_comment_comment_idx": {
+          "columns": [
+            {
+              "expression": "comment_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "report_comment_comment_idx",
-          "columns": ["comment_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "report_comment_reporter_idx": {
+          "columns": [
+            {
+              "expression": "reporter_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "report_comment_reporter_idx",
-          "columns": ["reporter_user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "report_comment_comment_id_comment_id_fk": {
           "name": "report_comment_comment_id_comment_id_fk",
           "tableFrom": "report_comment",
+          "columnsFrom": [
+            "comment_id"
+          ],
           "tableTo": "comment",
-          "columnsFrom": ["comment_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "report_comment_reporter_user_id_user_id_fk": {
           "name": "report_comment_reporter_user_id_user_id_fk",
           "tableFrom": "report_comment",
+          "columnsFrom": [
+            "reporter_user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["reporter_user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.report_post": {
       "name": "report_post",
@@ -1207,38 +1690,69 @@
       },
       "indexes": {
         "report_post_post_idx": {
+          "columns": [
+            {
+              "expression": "post_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "report_post_post_idx",
-          "columns": ["post_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "report_post_reporter_idx": {
+          "columns": [
+            {
+              "expression": "reporter_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "report_post_reporter_idx",
-          "columns": ["reporter_user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "report_post_post_id_post_id_fk": {
           "name": "report_post_post_id_post_id_fk",
           "tableFrom": "report_post",
+          "columnsFrom": [
+            "post_id"
+          ],
           "tableTo": "post",
-          "columnsFrom": ["post_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "report_post_reporter_user_id_user_id_fk": {
           "name": "report_post_reporter_user_id_user_id_fk",
           "tableFrom": "report_post",
+          "columnsFrom": [
+            "reporter_user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["reporter_user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.report_user": {
       "name": "report_user",
@@ -1280,38 +1794,69 @@
       },
       "indexes": {
         "report_user_reported_idx": {
+          "columns": [
+            {
+              "expression": "reported_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "report_user_reported_idx",
-          "columns": ["reported_user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "report_user_reporter_idx": {
+          "columns": [
+            {
+              "expression": "reporter_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "report_user_reporter_idx",
-          "columns": ["reporter_user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "report_user_reported_user_id_user_id_fk": {
           "name": "report_user_reported_user_id_user_id_fk",
           "tableFrom": "report_user",
+          "columnsFrom": [
+            "reported_user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["reported_user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "report_user_reporter_user_id_user_id_fk": {
           "name": "report_user_reporter_user_id_user_id_fk",
           "tableFrom": "report_user",
+          "columnsFrom": [
+            "reporter_user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["reporter_user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.user": {
       "name": "user",
@@ -1351,10 +1896,15 @@
       "uniqueConstraints": {
         "user_phone_number_unique": {
           "name": "user_phone_number_unique",
-          "nullsNotDistinct": false,
-          "columns": ["phone_number"]
+          "columns": [
+            "phone_number"
+          ],
+          "nullsNotDistinct": false
         }
-      }
+      },
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.user_contact": {
       "name": "user_contact",
@@ -1382,43 +1932,77 @@
       },
       "indexes": {
         "user_contact_user_idx": {
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "user_contact_user_idx",
-          "columns": ["user_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "user_contact_contact_idx": {
+          "columns": [
+            {
+              "expression": "contact_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "with": {},
           "name": "user_contact_contact_idx",
-          "columns": ["contact_id"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "user_contact_user_id_user_id_fk": {
           "name": "user_contact_user_id_user_id_fk",
           "tableFrom": "user_contact",
+          "columnsFrom": [
+            "user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "user_contact_contact_id_contact_id_fk": {
           "name": "user_contact_contact_id_contact_id_fk",
           "tableFrom": "user_contact",
+          "columnsFrom": [
+            "contact_id"
+          ],
           "tableTo": "contact",
-          "columnsFrom": ["contact_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
         "user_contact_user_id_contact_id_pk": {
           "name": "user_contact_user_id_contact_id_pk",
-          "columns": ["user_id", "contact_id"]
+          "columns": [
+            "user_id",
+            "contact_id"
+          ]
         }
       },
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.user_stats": {
       "name": "user_stats",
@@ -1499,15 +2083,22 @@
         "user_stats_user_id_user_id_fk": {
           "name": "user_stats_user_id_user_id_fk",
           "tableFrom": "user_stats",
+          "columnsFrom": [
+            "user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.user_status": {
       "name": "user_status",
@@ -1567,42 +2158,68 @@
         "user_status_user_id_user_id_fk": {
           "name": "user_status_user_id_user_id_fk",
           "tableFrom": "user_status",
+          "columnsFrom": [
+            "user_id"
+          ],
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     }
   },
   "enums": {
     "public.entity_type": {
       "name": "entity_type",
       "schema": "public",
-      "values": ["post", "profile", "comment"]
+      "values": [
+        "post",
+        "profile",
+        "comment"
+      ]
     },
     "public.event_type": {
       "name": "event_type",
       "schema": "public",
-      "values": ["like", "post", "comment", "follow", "friend"]
+      "values": [
+        "like",
+        "post",
+        "comment",
+        "follow",
+        "friend"
+      ]
     },
     "public.media_type": {
       "name": "media_type",
       "schema": "public",
-      "values": ["image", "video"]
+      "values": [
+        "image",
+        "video"
+      ]
     },
     "public.post_status": {
       "name": "post_status",
       "schema": "public",
-      "values": ["pending", "processed"]
+      "values": [
+        "pending",
+        "processed"
+      ]
     },
     "public.privacy": {
       "name": "privacy",
       "schema": "public",
-      "values": ["public", "private"]
+      "values": [
+        "public",
+        "private"
+      ]
     },
     "public.report_comment_reason": {
       "name": "report_comment_reason",
@@ -1641,8 +2258,14 @@
   },
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "569d86a4-d06b-4089-80be-86b55ae399af",
+  "prevId": "f95a134d-8464-4400-913a-c41838cb4eeb",
+  "sequences": {},
+  "policies": {},
+  "views": {},
+  "roles": {}
 }
