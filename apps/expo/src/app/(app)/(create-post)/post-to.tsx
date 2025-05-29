@@ -509,18 +509,6 @@ const CreativeListItem = ({
           >
             {item.data.phoneNumbers?.[0]?.number}
           </Text>
-          <Text
-            fontSize={11}
-            color="white"
-            opacity={0.95}
-            fontWeight="500"
-            shadowColor="rgba(0,0,0,0.1)"
-            shadowOffset={{ width: 0, height: 1 }}
-            shadowOpacity={1}
-            shadowRadius={1}
-          >
-            Will receive invite ✨
-          </Text>
         </YStack>
 
         {/* Action Button */}
