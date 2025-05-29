@@ -137,6 +137,8 @@ export class PostRepository {
         lastPostRecipientId: params.recipientUserId,
         lastPostAuthorId: params.authorUserId,
         lastPostId: post.id,
+        currentStreak: sql`${this.schema.friend.currentStreak} + 1`,
+        longestStreak: sql`${this.schema.friend.longestStreak} + 1`,
       })
       .where(
         or(
