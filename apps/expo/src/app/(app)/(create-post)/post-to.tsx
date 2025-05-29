@@ -6,12 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { FlashList } from "@shopify/flash-list";
-import {
-  ChevronRight,
-  Phone,
-  UserRoundX,
-  Users,
-} from "@tamagui/lucide-icons";
+import { ChevronRight, Phone, UserRoundX, Users } from "@tamagui/lucide-icons";
 import type { IFuseOptions } from "fuse.js";
 import type { CountryCode } from "libphonenumber-js";
 import { parsePhoneNumberWithError } from "libphonenumber-js";
@@ -631,6 +626,14 @@ const PostTo = () => {
     const friends = searchQuery ? filteredFriends : friendsList;
     const contactsToShow = searchQuery ? searchedContacts : contacts;
 
+    // Wait for both data sources to be ready before displaying anything
+    // This prevents the jumping effect where contacts appear first, then friends
+    const bothDataReady = !isLoadingFriends && !isLoadingContacts;
+
+    if (!bothDataReady) {
+      return []; // Return empty array while loading
+    }
+
     if (friends.length > 0) {
       result.push({ type: "header", title: "Friends" });
       friends.forEach((friend) => {
@@ -781,13 +784,13 @@ const PostTo = () => {
   );
 
   const ListEmptyComponent = () => {
-    const isLoading =
-      isLoadingFriends || isLoadingContacts || isSearchingContacts;
+    // Always show loading skeletons when data isn't ready to prevent black flash
+    const bothDataReady = !isLoadingFriends && !isLoadingContacts;
 
-    if (isLoading) {
+    if (!bothDataReady || isSearchingContacts) {
       return (
         <YStack gap="$2.5">
-          {Array.from({ length: 20 }).map((_, index) => (
+          {Array.from({ length: 12 }).map((_, index) => (
             <MediaListItem.Skeleton key={index} />
           ))}
         </YStack>
