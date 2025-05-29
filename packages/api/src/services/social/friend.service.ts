@@ -8,7 +8,7 @@ import { SQS } from "@oppfy/sqs"; // Added SQS import
 
 import * as FriendErrors from "../../errors/social/friend.error";
 import { ProfileNotFound } from "../../errors/user/profile.error";
-import { Profile } from "../../models";
+import { Friend, Profile } from "../../models";
 import { FollowRepository } from "../../repositories/social/follow.repository";
 import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
@@ -407,6 +407,7 @@ export class FriendService {
       PaginatedResponse<
         Hydrate<Profile<"onboarded">> & {
           followStatus: FollowStatus;
+          friend: Friend;
         }
       >,
       never
