@@ -554,6 +554,13 @@ export const friend = pgTable(
     userIdB: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
+    currentStreak: integer().notNull().default(0),
+    longestStreak: integer().notNull().default(0),
+    lastPostDate: timestamp({ withTimezone: true }),
+    lastPostAuthorId: uuid()
+      .references(() => user.id, { onDelete: "set null" }),
+    lastPostId: uuid()
+      .references(() => post.id, { onDelete: "set null" }),
     createdAt: timestamp({ withTimezone: true })
       .defaultNow()
       .notNull(),
