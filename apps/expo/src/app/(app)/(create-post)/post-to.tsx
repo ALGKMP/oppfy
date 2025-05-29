@@ -49,8 +49,9 @@ interface Friend {
   username: string;
   name: string;
   profilePictureUrl: string | null;
-  streakCount?: number;
-  hasActiveStreak?: boolean;
+  friend: {
+    currentStreak: number;
+  }
 }
 
 type ListItem =
@@ -121,10 +122,7 @@ const CreativeListItem = ({
   }
 
   if (item.type === "friend") {
-    const hasStreak = Boolean(
-      item.data.hasActiveStreak ||
-        (item.data.streakCount && item.data.streakCount > 0),
-    );
+    const hasStreak = item.data.friend.currentStreak > 0;
     const variant = getItemVariant(index, "friend", hasStreak);
     const isStreak = variant === "streak";
 
@@ -203,7 +201,7 @@ const CreativeListItem = ({
               >
                 @{item.data.username}
               </Text>
-              {isStreak && item.data.streakCount && (
+              {isStreak && item.data.friend.currentStreak && (
                 <XStack
                   alignItems="center"
                   gap="$1"
@@ -214,7 +212,7 @@ const CreativeListItem = ({
                 >
                   <Flame size={10} color="gold" />
                   <Text fontSize={10} color="gold" fontWeight="700">
-                    {item.data.streakCount}
+                    {item.data.friend.currentStreak}
                   </Text>
                 </XStack>
               )}
@@ -402,6 +400,8 @@ const PostTo = () => {
     keys: ["username", "name"],
     threshold: 0.3,
   };
+
+  console.log(friendsList);
 
   const {
     filteredItems: filteredFriends,
