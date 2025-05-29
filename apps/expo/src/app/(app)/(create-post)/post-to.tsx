@@ -122,55 +122,54 @@ const CreativeListItem = ({
     return (
       <XStack
         alignItems="center"
-        gap="$3"
-        paddingVertical="$4"
+        gap="$2.5"
+        paddingVertical="$3"
         paddingHorizontal="$2"
         marginTop="$2"
       >
-        <XStack alignItems="center" gap="$3" flex={1}>
+        <XStack alignItems="center" gap="$2.5" flex={1}>
           {/* Enhanced icon with decorative elements */}
           <Stack position="relative">
             <Circle
-              size={50}
+              size={40}
               backgroundColor="rgba(255,255,255,0.95)"
               shadowColor="$shadowColor"
-              shadowOffset={{ width: 0, height: 3 }}
-              shadowOpacity={0.3}
-              shadowRadius={6}
-              elevation={8}
+              shadowOffset={{ width: 0, height: 2 }}
+              shadowOpacity={0.25}
+              shadowRadius={4}
+              elevation={6}
             >
               {item.isContact ? (
-                <Phone size={24} color="#3B82F6" />
+                <Phone size={18} color="#3B82F6" />
               ) : (
-                <Users size={24} color="#FF66FF" />
+                <Users size={18} color="#FF66FF" />
               )}
             </Circle>
-
           </Stack>
 
           {/* Enhanced title section */}
-          <YStack flex={1} gap="$1">
+          <YStack flex={1} gap="$0.5">
             <Text
               color="white"
-              fontSize={22}
+              fontSize={18}
               fontWeight="800"
               numberOfLines={1}
               shadowColor="rgba(0,0,0,0.4)"
-              shadowOffset={{ width: 0, height: 2 }}
+              shadowOffset={{ width: 0, height: 1 }}
               shadowOpacity={1}
-              shadowRadius={3}
+              shadowRadius={2}
             >
               {item.title}
             </Text>
             <Text
               color="white"
               opacity={0.9}
-              fontSize={13}
+              fontSize={11}
               fontWeight="600"
               shadowColor="rgba(0,0,0,0.2)"
               shadowOffset={{ width: 0, height: 1 }}
               shadowOpacity={1}
-              shadowRadius={2}
+              shadowRadius={1}
             >
               {item.isContact
                 ? "Post for people not on the app ✨"
@@ -178,7 +177,6 @@ const CreativeListItem = ({
             </Text>
           </YStack>
         </XStack>
-
       </XStack>
     );
   }
