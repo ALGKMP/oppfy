@@ -146,20 +146,6 @@ const CreativeListItem = ({
               )}
             </Circle>
 
-            {/* Decorative sparkles */}
-            <Circle
-              size={16}
-              position="absolute"
-              top={-2}
-              right={-2}
-              backgroundColor="rgba(255,215,0,0.95)"
-              shadowColor="$shadowColor"
-              shadowOffset={{ width: 0, height: 2 }}
-              shadowOpacity={0.4}
-              shadowRadius={3}
-            >
-              <Sparkles size={8} color="white" />
-            </Circle>
           </Stack>
 
           {/* Enhanced title section */}
@@ -187,34 +173,12 @@ const CreativeListItem = ({
               shadowRadius={2}
             >
               {item.isContact
-                ? "Invite friends to join the fun ✨"
-                : "Your Oppfy crew 🚀"}
+                ? "Post for people not on the app ✨"
+                : "Your Opps 🚀"}
             </Text>
           </YStack>
         </XStack>
 
-        {/* Enhanced info button for contacts */}
-        {item.isContact && (
-          <Stack
-            borderRadius="$3"
-            backgroundColor="rgba(255,255,255,0.15)"
-            paddingHorizontal="$2.5"
-            paddingVertical="$1.5"
-            borderWidth={1}
-            borderColor="rgba(255,255,255,0.3)"
-            pressStyle={{ scale: 0.95 }}
-            onPress={() => {
-              // Handle info dialog if needed
-            }}
-          >
-            <XStack alignItems="center" gap="$1">
-              <Icon name="information-circle" size={12} color="white" />
-              <Text color="white" fontSize={10} fontWeight="700">
-                INFO
-              </Text>
-            </XStack>
-          </Stack>
-        )}
       </XStack>
     );
   }
