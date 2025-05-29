@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Keyboard, RefreshControl } from "react-native";
+import { Animated, Keyboard, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Contact } from "expo-contacts";
-import { LinearGradient as ExpoLinearGradient } from "expo-linear-gradient";
+import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { FlashList } from "@shopify/flash-list";
@@ -85,6 +85,37 @@ const CreativeListItem = ({
 }) => {
   const theme = useTheme();
 
+  // Animation for streak cards (must be at top level)
+  const [pulseAnim] = useState(new Animated.Value(1));
+
+  const isStreakFriend =
+    item.type === "friend" && item.data.friend.currentStreak > 0;
+  const variant =
+    item.type === "friend"
+      ? getItemVariant(index, "friend", isStreakFriend)
+      : "standard";
+  const isStreak = variant === "streak";
+
+  useEffect(() => {
+    if (isStreak) {
+      const pulse = () => {
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.02,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+        ]).start(() => pulse());
+      };
+      pulse();
+    }
+  }, [isStreak, pulseAnim]);
+
   if (item.type === "header") {
     return (
       <XStack
@@ -122,43 +153,182 @@ const CreativeListItem = ({
   }
 
   if (item.type === "friend") {
-    const hasStreak = item.data.friend.currentStreak > 0;
-    const variant = getItemVariant(index, "friend", hasStreak);
-    const isStreak = variant === "streak";
+    if (isStreak) {
+      return (
+        <Animated.View
+          style={{
+            transform: [{ scale: pulseAnim }],
+            marginBottom: 8,
+          }}
+        >
+          <Stack
+            borderRadius="$6"
+            overflow="hidden"
+            pressStyle={{ scale: 0.98 }}
+            onPress={onPress}
+            padding="$4"
+            minHeight={95}
+            borderWidth={2}
+            borderColor="$red10"
+          >
+            <LinearGradient
+              colors={["#FF6B6B", "#EE5A52", "#DC2626"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+              }}
+            />
+            <XStack alignItems="center" gap="$3" flex={1}>
+              {/* Profile Picture with decorative ring */}
+              <Stack position="relative">
+                <Circle
+                  size={65}
+                  backgroundColor="white"
+                  padding={2}
+                  shadowColor="$shadowColor"
+                  shadowOffset={{ width: 0, height: 3 }}
+                  shadowOpacity={0.3}
+                  shadowRadius={6}
+                  elevation={8}
+                >
+                  <Circle size={61} overflow="hidden" backgroundColor="$gray6">
+                    <Image
+                      source={
+                        item.data.profilePictureUrl
+                          ? { uri: item.data.profilePictureUrl }
+                          : DefaultProfilePicture
+                      }
+                      width="100%"
+                      height="100%"
+                    />
+                  </Circle>
+                </Circle>
 
-    const backgroundColor = isStreak ? "$red8" : "$blue6";
+                {/* Streak badge */}
+                <Circle
+                  size={24}
+                  position="absolute"
+                  top={-4}
+                  right={-4}
+                  backgroundColor="gold"
+                  shadowColor="$shadowColor"
+                  shadowOffset={{ width: 0, height: 2 }}
+                  shadowOpacity={0.5}
+                  shadowRadius={4}
+                  elevation={8}
+                >
+                  <Flame size={14} color="white" />
+                </Circle>
+              </Stack>
 
+              {/* User Info */}
+              <YStack flex={1} gap="$1">
+                <XStack alignItems="center" gap="$2">
+                  <Text
+                    color="white"
+                    fontSize={17}
+                    fontWeight="700"
+                    numberOfLines={1}
+                    shadowColor="rgba(0,0,0,0.3)"
+                    shadowOffset={{ width: 0, height: 1 }}
+                    shadowOpacity={1}
+                    shadowRadius={2}
+                  >
+                    @{item.data.username}
+                  </Text>
+                  <XStack
+                    alignItems="center"
+                    gap="$1"
+                    backgroundColor="rgba(255,215,0,0.9)"
+                    paddingHorizontal="$1.5"
+                    paddingVertical="$0.5"
+                    borderRadius="$3"
+                    shadowColor="$shadowColor"
+                    shadowOffset={{ width: 0, height: 1 }}
+                    shadowOpacity={0.3}
+                    shadowRadius={2}
+                    elevation={3}
+                  >
+                    <Flame size={10} color="white" />
+                    <Text fontSize={10} color="white" fontWeight="700">
+                      {item.data.friend.currentStreak}
+                    </Text>
+                  </XStack>
+                </XStack>
+                <Text
+                  color="white"
+                  opacity={0.95}
+                  fontSize={15}
+                  numberOfLines={1}
+                  shadowColor="rgba(0,0,0,0.2)"
+                  shadowOffset={{ width: 0, height: 1 }}
+                  shadowOpacity={1}
+                  shadowRadius={1}
+                >
+                  {item.data.name}
+                </Text>
+              </YStack>
+
+              {/* Action Button */}
+              <Stack
+                backgroundColor="rgba(255,215,0,0.9)"
+                borderRadius="$4"
+                paddingHorizontal="$3"
+                paddingVertical="$2"
+                borderWidth={1}
+                borderColor="rgba(255,255,255,0.3)"
+                shadowColor="$shadowColor"
+                shadowOffset={{ width: 0, height: 2 }}
+                shadowOpacity={0.3}
+                shadowRadius={4}
+                pressStyle={{
+                  backgroundColor: "rgba(255,215,0,1)",
+                  scale: 0.95,
+                }}
+              >
+                <XStack alignItems="center" gap="$1.5">
+                  <Text color="white" fontSize={12} fontWeight="700">
+                    Keep it up!
+                  </Text>
+                  <ChevronRight size={14} color="white" />
+                </XStack>
+              </Stack>
+            </XStack>
+          </Stack>
+        </Animated.View>
+      );
+    }
+
+    // Standard friend card
     return (
       <Stack
-        backgroundColor={backgroundColor}
+        backgroundColor="$blue6"
         borderRadius="$6"
         overflow="hidden"
         marginBottom="$2"
         pressStyle={{ scale: 0.98 }}
         onPress={onPress}
         padding="$4"
-        minHeight={isStreak ? 95 : 75}
-        borderWidth={isStreak ? 2 : 0}
-        borderColor={isStreak ? "$red10" : "transparent"}
+        minHeight={75}
       >
         <XStack alignItems="center" gap="$3" flex={1}>
           {/* Profile Picture with decorative ring */}
           <Stack position="relative">
             <Circle
-              size={isStreak ? 65 : 50}
+              size={50}
               backgroundColor="white"
               padding={2}
               shadowColor="$shadowColor"
               shadowOffset={{ width: 0, height: 2 }}
               shadowOpacity={0.15}
               shadowRadius={4}
-              elevation={4}
             >
-              <Circle
-                size={isStreak ? 61 : 46}
-                overflow="hidden"
-                backgroundColor="$gray6"
-              >
+              <Circle size={46} overflow="hidden" backgroundColor="$gray6">
                 <Image
                   source={
                     item.data.profilePictureUrl
@@ -170,91 +340,41 @@ const CreativeListItem = ({
                 />
               </Circle>
             </Circle>
-
-            {/* Streak badge */}
-            {isStreak && (
-              <Circle
-                size={24}
-                position="absolute"
-                top={-4}
-                right={-4}
-                backgroundColor="$red10"
-                shadowColor="$shadowColor"
-                shadowOffset={{ width: 0, height: 2 }}
-                shadowOpacity={0.4}
-                shadowRadius={4}
-                elevation={6}
-              >
-                <Flame size={14} color="white" />
-              </Circle>
-            )}
           </Stack>
 
           {/* User Info */}
           <YStack flex={1} gap="$1">
-            <XStack alignItems="center" gap="$2">
-              <Text
-                color="white"
-                fontSize={isStreak ? 17 : 15}
-                fontWeight="700"
-                numberOfLines={1}
-              >
-                @{item.data.username}
-              </Text>
-              {isStreak && item.data.friend.currentStreak && (
-                <XStack
-                  alignItems="center"
-                  gap="$1"
-                  backgroundColor="rgba(255,255,255,0.2)"
-                  paddingHorizontal="$1.5"
-                  paddingVertical="$0.5"
-                  borderRadius="$2"
-                >
-                  <Flame size={10} color="gold" />
-                  <Text fontSize={10} color="gold" fontWeight="700">
-                    {item.data.friend.currentStreak}
-                  </Text>
-                </XStack>
-              )}
-            </XStack>
             <Text
               color="white"
-              opacity={0.9}
-              fontSize={isStreak ? 15 : 13}
+              fontSize={15}
+              fontWeight="700"
               numberOfLines={1}
             >
+              @{item.data.username}
+            </Text>
+            <Text color="white" opacity={0.9} fontSize={13} numberOfLines={1}>
               {item.data.name}
             </Text>
           </YStack>
 
           {/* Action Button */}
           <Stack
-            backgroundColor={
-              isStreak ? "rgba(255,215,0,0.3)" : "rgba(255,255,255,0.2)"
-            }
+            backgroundColor="rgba(255,255,255,0.2)"
             borderRadius="$3"
             paddingHorizontal="$3"
             paddingVertical="$2"
             borderWidth={1}
-            borderColor={
-              isStreak ? "rgba(255,215,0,0.5)" : "rgba(255,255,255,0.3)"
-            }
+            borderColor="rgba(255,255,255,0.3)"
             pressStyle={{
-              backgroundColor: isStreak
-                ? "rgba(255,215,0,0.4)"
-                : "rgba(255,255,255,0.3)",
+              backgroundColor: "rgba(255,255,255,0.3)",
               scale: 0.95,
             }}
           >
             <XStack alignItems="center" gap="$1.5">
-              <Text
-                color={isStreak ? "gold" : "white"}
-                fontSize={12}
-                fontWeight="600"
-              >
-                {isStreak ? "Keep it up!" : "Select"}
+              <Text color="white" fontSize={12} fontWeight="600">
+                Select
               </Text>
-              <ChevronRight size={14} color={isStreak ? "gold" : "white"} />
+              <ChevronRight size={14} color="white" />
             </XStack>
           </Stack>
         </XStack>
