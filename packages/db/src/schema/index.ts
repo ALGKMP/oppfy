@@ -557,6 +557,8 @@ export const friend = pgTable(
     currentStreak: integer().notNull().default(0),
     longestStreak: integer().notNull().default(0),
     lastPostDate: timestamp({ withTimezone: true }),
+    lastPostRecipientId: uuid()
+      .references(() => user.id, { onDelete: "set null" }),
     lastPostAuthorId: uuid()
       .references(() => user.id, { onDelete: "set null" }),
     lastPostId: uuid()
@@ -586,6 +588,18 @@ export const friendRelations = relations(friend, ({ one }) => ({
   userB: one(user, {
     relationName: "userB",
     fields: [friend.userIdB],
+    references: [user.id],
+  }),
+  lastPost: one(post, {
+    fields: [friend.lastPostId],
+    references: [post.id],
+  }),
+  lastPostAuthor: one(user, {
+    fields: [friend.lastPostAuthorId],
+    references: [user.id],
+  }),
+  lastPostRecipient: one(user, {
+    fields: [friend.lastPostRecipientId],
     references: [user.id],
   }),
 }));
