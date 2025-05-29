@@ -34,11 +34,13 @@ import {
 import {
   EmptyPlaceholder,
   HeaderTitle,
+  Icon,
   MediaListItem,
   SearchInput,
   Spacer,
   useDialogController,
 } from "~/components/ui";
+import { Button } from "~/components/ui/Buttons";
 import { useContacts } from "~/hooks/contacts";
 import useSearch from "~/hooks/useSearch";
 import { api } from "~/utils/api";
@@ -135,7 +137,7 @@ const CreativeListItem = ({
           <HeaderTitle
             iconSize={18}
             iconColor={theme.primary.val as string}
-            iconAfter={item.isContact ? "information-circle" : undefined}
+            // iconAfter={item.isContact ? "information-circle" : undefined}
             onPress={() => {
               // Handle info dialog if needed
             }}
@@ -144,8 +146,9 @@ const CreativeListItem = ({
           </HeaderTitle>
         </XStack>
         {item.isContact && (
-          <Circle size={24} backgroundColor="$orange5">
-            <Sparkles size={12} color="$orange11" />
+          <Circle size={24}>
+            {/* <Sparkles size={12} color="$orange11" /> */}
+            <Icon name="information-circle" size={16} />
           </Circle>
         )}
       </XStack>
@@ -262,13 +265,11 @@ const CreativeListItem = ({
               </YStack>
 
               {/* Action Button */}
-              <Stack
-                backgroundColor="rgba(255,215,0,0.9)"
+              <Button
+                variant="primary"
+                size="$3"
                 borderRadius="$4"
-                paddingHorizontal="$3"
-                paddingVertical="$2"
-                borderWidth={1}
-                borderColor="rgba(255,255,255,0.3)"
+                backgroundColor="rgba(255,215,0,0.9)"
                 shadowColor="$shadowColor"
                 shadowOffset={{ width: 0, height: 2 }}
                 shadowOpacity={0.3}
@@ -277,6 +278,10 @@ const CreativeListItem = ({
                   backgroundColor: "rgba(255,215,0,1)",
                   scale: 0.95,
                 }}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onPress();
+                }}
               >
                 <XStack alignItems="center" gap="$1.5">
                   <Text color="white" fontSize={12} fontWeight="700">
@@ -284,7 +289,7 @@ const CreativeListItem = ({
                   </Text>
                   <ChevronRight size={14} color="white" />
                 </XStack>
-              </Stack>
+              </Button>
             </XStack>
           </Stack>
         </Animated.View>
@@ -345,25 +350,22 @@ const CreativeListItem = ({
           </YStack>
 
           {/* Action Button */}
-          <Stack
-            backgroundColor="rgba(255,255,255,0.2)"
+          <Button
+            variant="white"
+            size="$3"
             borderRadius="$3"
-            paddingHorizontal="$3"
-            paddingVertical="$2"
-            borderWidth={1}
-            borderColor="rgba(255,255,255,0.3)"
-            pressStyle={{
-              backgroundColor: "rgba(255,255,255,0.3)",
-              scale: 0.95,
+            onPress={(e) => {
+              e.stopPropagation();
+              onPress();
             }}
           >
             <XStack alignItems="center" gap="$1.5">
-              <Text color="white" fontSize={12} fontWeight="600">
+              <Text color="$primary" fontSize={12} fontWeight="600">
                 Select
               </Text>
-              <ChevronRight size={14} color="white" />
+              <ChevronRight size={14} color="$primary" />
             </XStack>
-          </Stack>
+          </Button>
         </XStack>
       </Stack>
     );
@@ -430,14 +432,13 @@ const CreativeListItem = ({
         </YStack>
 
         {/* Action Button */}
-        <Stack
-          backgroundColor="$blue9"
+        <Button
+          variant="primary"
+          size="$3"
           borderRadius="$3"
-          paddingHorizontal="$3"
-          paddingVertical="$2"
-          pressStyle={{
-            backgroundColor: "$blue10",
-            scale: 0.95,
+          onPress={(e) => {
+            e.stopPropagation();
+            onPress();
           }}
         >
           <XStack alignItems="center" gap="$1.5">
@@ -446,7 +447,7 @@ const CreativeListItem = ({
             </Text>
             <ChevronRight size={14} color="white" />
           </XStack>
-        </Stack>
+        </Button>
       </XStack>
     </Stack>
   );
