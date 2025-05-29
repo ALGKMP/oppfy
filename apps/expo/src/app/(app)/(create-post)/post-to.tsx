@@ -215,14 +215,17 @@ const CreativeListItem = ({
                   position="absolute"
                   top={-4}
                   right={-4}
-                  backgroundColor="gold"
+                  // backgroundColor="gold"
                   shadowColor="$shadowColor"
                   shadowOffset={{ width: 0, height: 2 }}
                   shadowOpacity={0.5}
                   shadowRadius={4}
                   elevation={8}
                 >
-                  <Flame size={14} color="white" />
+                  {/* <Flame size={14} color="white" /> */}
+                  <Text fontSize="$5" color="white">
+                    🔥
+                  </Text>
                 </Circle>
               </Stack>
 
