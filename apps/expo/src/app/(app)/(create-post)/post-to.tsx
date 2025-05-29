@@ -418,7 +418,7 @@ const CreativeListItem = ({
           <Text
             color="$gray12"
             fontSize={15}
-            fontWeight="600"
+            fontWeight="bold"
             numberOfLines={1}
           >
             {item.data.name}
@@ -433,7 +433,8 @@ const CreativeListItem = ({
 
         {/* Action Button */}
         <Button
-          variant="primary"
+          // variant="primary"
+          backgroundColor="$blue11"
           size="$3"
           borderRadius="$3"
           onPress={(e) => {
@@ -442,7 +443,7 @@ const CreativeListItem = ({
           }}
         >
           <XStack alignItems="center" gap="$1.5">
-            <Text color="white" fontSize={12} fontWeight="600">
+            <Text color="white" fontSize={12} fontWeight="bold">
               Invite
             </Text>
             <ChevronRight size={14} color="white" />
