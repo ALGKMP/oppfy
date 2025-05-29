@@ -130,6 +130,27 @@ export class PostRepository {
 
     invariant(postStats);
 
+    await tx
+      .update(this.schema.friend)
+      .set({
+        lastPostDate: new Date(),
+        lastPostRecipientId: params.recipientUserId,
+        lastPostAuthorId: params.authorUserId,
+        lastPostId: post.id,
+      })
+      .where(
+        or(
+          and(
+            eq(this.schema.friend.userIdA, params.authorUserId),
+            eq(this.schema.friend.userIdB, params.recipientUserId),
+          ),
+          and(
+            eq(this.schema.friend.userIdB, params.authorUserId),
+            eq(this.schema.friend.userIdA, params.recipientUserId),
+          ),
+        ),
+      );
+
     return { post, postStats };
   }
 
