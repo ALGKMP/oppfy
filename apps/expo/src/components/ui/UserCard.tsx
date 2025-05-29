@@ -181,7 +181,7 @@ export const UserCard = ({
             style={{ width: "100%", aspectRatio }}
             contentFit="cover"
             transition={200}
-            cachePolicy={"none"}
+            cachePolicy="none"
           />
 
           {/* Gradient Overlay */}
@@ -318,43 +318,11 @@ UserCard.SeeAll = ({
   index?: number;
   size?: "small" | "large";
 }) => {
-  const [isPressed, setIsPressed] = useState(false);
-  const scale = useSharedValue(1);
-  const contentY = useSharedValue(0);
-  const blur = useSharedValue(0);
-
   // Calculate height based on size
   const height = size === "small" ? width * 1.2 : width;
 
-  const handlePressIn = () => {
-    setIsPressed(true);
-    scale.value = withSpring(0.95, { damping: 15, stiffness: 200 });
-    contentY.value = withSpring(-5, { damping: 15, stiffness: 200 });
-    blur.value = withTiming(1, { duration: 200 });
-  };
-
-  const handlePressOut = () => {
-    setIsPressed(false);
-    scale.value = withSpring(1, { damping: 15, stiffness: 200 });
-    contentY.value = withSpring(0, { damping: 15, stiffness: 200 });
-    blur.value = withTiming(0, { duration: 200 });
-  };
-
-  const cardStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const contentStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: contentY.value }],
-  }));
-
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      activeOpacity={1}
-    >
+    <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
       <AnimatedYStack
         entering={FadeIn.delay(index * 100).springify()}
         width={width}
@@ -369,16 +337,13 @@ UserCard.SeeAll = ({
         shadowOffset={{ width: 0, height: 8 }}
         shadowOpacity={0.2}
         shadowRadius={16}
-        style={cardStyle}
       >
-        <Animated.View style={contentStyle}>
-          <YStack alignItems="center" gap="$2">
-            <ChevronRight size={24} opacity={0.6} />
-            <Text fontSize="$2" fontWeight="500" opacity={0.6}>
-              See All
-            </Text>
-          </YStack>
-        </Animated.View>
+        <YStack alignItems="center" gap="$2">
+          <ChevronRight size={24} opacity={0.6} />
+          <Text fontSize="$2" fontWeight="500" opacity={0.6}>
+            See All
+          </Text>
+        </YStack>
       </AnimatedYStack>
     </TouchableOpacity>
   );
