@@ -120,119 +120,102 @@ const CreativeListItem = ({
 
   if (item.type === "header") {
     return (
-      <Stack marginVertical="$3" paddingHorizontal="$1">
-        <Stack
-          borderRadius="$5"
-          overflow="hidden"
-          padding="$4"
-          marginBottom="$2"
-          borderWidth={2}
-          borderColor={item.isContact ? "#3B82F6" : "#FF66FF"}
-        >
-          <LinearGradient
-            colors={
-              item.isContact
-                ? ["#3B82F6", "#1E40AF", "#1E3A8A"]
-                : ["#FF66FF", "#E533E5", "#CC00CC"]
-            }
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
+      <XStack
+        alignItems="center"
+        gap="$3"
+        paddingVertical="$4"
+        paddingHorizontal="$2"
+        marginTop="$2"
+      >
+        <XStack alignItems="center" gap="$3" flex={1}>
+          {/* Enhanced icon with decorative elements */}
+          <Stack position="relative">
+            <Circle
+              size={50}
+              backgroundColor="rgba(255,255,255,0.95)"
+              shadowColor="$shadowColor"
+              shadowOffset={{ width: 0, height: 3 }}
+              shadowOpacity={0.3}
+              shadowRadius={6}
+              elevation={8}
+            >
+              {item.isContact ? (
+                <Phone size={24} color="#3B82F6" />
+              ) : (
+                <Users size={24} color="#FF66FF" />
+              )}
+            </Circle>
+
+            {/* Decorative sparkles */}
+            <Circle
+              size={16}
+              position="absolute"
+              top={-2}
+              right={-2}
+              backgroundColor="rgba(255,215,0,0.95)"
+              shadowColor="$shadowColor"
+              shadowOffset={{ width: 0, height: 2 }}
+              shadowOpacity={0.4}
+              shadowRadius={3}
+            >
+              <Sparkles size={8} color="white" />
+            </Circle>
+          </Stack>
+
+          {/* Enhanced title section */}
+          <YStack flex={1} gap="$1">
+            <Text
+              color="white"
+              fontSize={22}
+              fontWeight="800"
+              numberOfLines={1}
+              shadowColor="rgba(0,0,0,0.4)"
+              shadowOffset={{ width: 0, height: 2 }}
+              shadowOpacity={1}
+              shadowRadius={3}
+            >
+              {item.title}
+            </Text>
+            <Text
+              color="white"
+              opacity={0.9}
+              fontSize={13}
+              fontWeight="600"
+              shadowColor="rgba(0,0,0,0.2)"
+              shadowOffset={{ width: 0, height: 1 }}
+              shadowOpacity={1}
+              shadowRadius={2}
+            >
+              {item.isContact
+                ? "Invite friends to join the fun ✨"
+                : "Your Oppfy crew 🚀"}
+            </Text>
+          </YStack>
+        </XStack>
+
+        {/* Enhanced info button for contacts */}
+        {item.isContact && (
+          <Stack
+            borderRadius="$3"
+            backgroundColor="rgba(255,255,255,0.15)"
+            paddingHorizontal="$2.5"
+            paddingVertical="$1.5"
+            borderWidth={1}
+            borderColor="rgba(255,255,255,0.3)"
+            pressStyle={{ scale: 0.95 }}
+            onPress={() => {
+              // Handle info dialog if needed
             }}
-          />
-
-          <XStack alignItems="center" gap="$3" flex={1}>
-            {/* Decorative icon cluster */}
-            <Stack position="relative">
-              <Circle
-                size={50}
-                backgroundColor="rgba(255,255,255,0.95)"
-                shadowColor="$shadowColor"
-                shadowOffset={{ width: 0, height: 3 }}
-                shadowOpacity={0.3}
-                shadowRadius={6}
-                elevation={8}
-              >
-                {item.isContact ? (
-                  <Phone size={24} color="#3B82F6" />
-                ) : (
-                  <Users size={24} color="#FF66FF" />
-                )}
-              </Circle>
-
-              {/* Decorative sparkles */}
-              <Circle
-                size={16}
-                position="absolute"
-                top={-2}
-                right={-2}
-                backgroundColor="rgba(255,215,0,0.95)"
-                shadowColor="$shadowColor"
-                shadowOffset={{ width: 0, height: 2 }}
-                shadowOpacity={0.4}
-                shadowRadius={3}
-              >
-                <Sparkles size={8} color="white" />
-              </Circle>
-            </Stack>
-
-            {/* Enhanced title section */}
-            <YStack flex={1} gap="$1">
-              <Text
-                color="white"
-                fontSize={22}
-                fontWeight="800"
-                numberOfLines={1}
-                shadowColor="rgba(0,0,0,0.4)"
-                shadowOffset={{ width: 0, height: 2 }}
-                shadowOpacity={1}
-                shadowRadius={3}
-              >
-                {item.title}
+          >
+            <XStack alignItems="center" gap="$1">
+              <Icon name="information-circle" size={12} color="white" />
+              <Text color="white" fontSize={10} fontWeight="700">
+                INFO
               </Text>
-              <Text
-                color="white"
-                opacity={0.9}
-                fontSize={13}
-                fontWeight="600"
-                shadowColor="rgba(0,0,0,0.2)"
-                shadowOffset={{ width: 0, height: 1 }}
-                shadowOpacity={1}
-                shadowRadius={2}
-              >
-                {item.isContact
-                  ? "Invite friends to join the fun ✨"
-                  : "Your Oppfy crew 🚀"}
-              </Text>
-            </YStack>
-
-            {/* Action indicator */}
-            {item.isContact && (
-              <Button
-                size="$2"
-                borderRadius="$3"
-                backgroundColor="rgba(255,255,255,0.95)"
-                pressStyle={{ scale: 0.95 }}
-                onPress={() => {
-                  // Handle info dialog if needed
-                }}
-              >
-                <XStack alignItems="center" gap="$1">
-                  <Icon name="information-circle" size={14} color="#3B82F6" />
-                  <Text color="#3B82F6" fontSize={10} fontWeight="700">
-                    INFO
-                  </Text>
-                </XStack>
-              </Button>
-            )}
-          </XStack>
-        </Stack>
-      </Stack>
+            </XStack>
+          </Stack>
+        )}
+      </XStack>
     );
   }
 
