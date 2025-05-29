@@ -13,7 +13,10 @@ const __dirname = path.dirname(__filename);
 
 const queryClient = postgres(env.DATABASE_URL);
 
-const db = drizzle(queryClient);
+const db = drizzle(queryClient, {
+  casing: "snake_case",
+  logger: true,
+});
 
 const rl = readline.createInterface({
   input: process.stdin,

@@ -7,7 +7,11 @@ import { env } from "@oppfy/env";
 import { schema } from ".";
 
 const queryClient = postgres(env.DATABASE_URL);
-const db = drizzle(queryClient);
+const db = drizzle(queryClient, {
+  schema,
+  casing: "snake_case",
+  logger: true,
+});
 
 async function syncUserStats() {
   console.log("Starting user stats sync...");
