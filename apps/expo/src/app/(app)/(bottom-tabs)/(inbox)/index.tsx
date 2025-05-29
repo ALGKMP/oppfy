@@ -269,6 +269,7 @@ const Inbox = () => {
       renderItem={renderListItem}
       keyExtractor={(item) => item.notification.id}
       estimatedItemSize={18}
+      estimatedListSize={{ height: 1000, width: 1000 }}
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ListFooterComponent={GridSuggestions}
