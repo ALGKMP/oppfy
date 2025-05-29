@@ -172,7 +172,7 @@ const CreativeListItem = ({
             borderColor="$red10"
           >
             <LinearGradient
-              colors={["#FF6B6B", "#EE5A52", "#DC2626"]}
+              colors={["#F214FF", "#EE5A52", "#DC2626"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={{
@@ -208,25 +208,6 @@ const CreativeListItem = ({
                     />
                   </Circle>
                 </Circle>
-
-                {/* Streak badge */}
-                <Circle
-                  size={24}
-                  position="absolute"
-                  top={-4}
-                  right={-4}
-                  // backgroundColor="gold"
-                  shadowColor="$shadowColor"
-                  shadowOffset={{ width: 0, height: 2 }}
-                  shadowOpacity={0.5}
-                  shadowRadius={4}
-                  elevation={8}
-                >
-                  {/* <Flame size={14} color="white" /> */}
-                  <Text fontSize="$5" color="white">
-                    🔥
-                  </Text>
-                </Circle>
               </Stack>
 
               {/* User Info */}
@@ -246,35 +227,38 @@ const CreativeListItem = ({
                   </Text>
                   <XStack
                     alignItems="center"
-                    gap="$1"
-                    backgroundColor="rgba(255,215,0,0.9)"
-                    paddingHorizontal="$1.5"
-                    paddingVertical="$0.5"
-                    borderRadius="$3"
+                    gap="$1.5"
+                    backgroundColor="rgba(255,215,0,0.95)"
+                    paddingHorizontal="$2.5"
+                    paddingVertical="$1.5"
+                    borderRadius="$4"
                     shadowColor="$shadowColor"
-                    shadowOffset={{ width: 0, height: 1 }}
-                    shadowOpacity={0.3}
-                    shadowRadius={2}
-                    elevation={3}
+                    shadowOffset={{ width: 0, height: 2 }}
+                    shadowOpacity={0.4}
+                    shadowRadius={3}
                   >
-                    <Flame size={10} color="white" />
-                    <Text fontSize={10} color="white" fontWeight="700">
+                    <Text fontSize={16} color="white">
+                      🔥
+                    </Text>
+                    <Text fontSize={13} color="white" fontWeight="800">
                       {item.data.friend.currentStreak}
                     </Text>
                   </XStack>
                 </XStack>
-                <Text
-                  color="white"
-                  opacity={0.95}
-                  fontSize={15}
-                  numberOfLines={1}
-                  shadowColor="rgba(0,0,0,0.2)"
-                  shadowOffset={{ width: 0, height: 1 }}
-                  shadowOpacity={1}
-                  shadowRadius={1}
-                >
-                  {item.data.name}
-                </Text>
+                <XStack alignItems="center" gap="$1.5">
+                  <Text
+                    color="white"
+                    opacity={0.95}
+                    fontSize={15}
+                    numberOfLines={1}
+                    shadowColor="rgba(0,0,0,0.2)"
+                    shadowOffset={{ width: 0, height: 1 }}
+                    shadowOpacity={1}
+                    shadowRadius={1}
+                  >
+                    {item.data.name}
+                  </Text>
+                </XStack>
               </YStack>
 
               {/* Action Button */}
@@ -310,7 +294,7 @@ const CreativeListItem = ({
     // Standard friend card
     return (
       <Stack
-        backgroundColor="$blue6"
+        backgroundColor="$primary"
         borderRadius="$6"
         overflow="hidden"
         marginBottom="$2"
