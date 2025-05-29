@@ -120,38 +120,119 @@ const CreativeListItem = ({
 
   if (item.type === "header") {
     return (
-      <XStack
-        alignItems="center"
-        gap="$3"
-        paddingVertical="$3"
-        paddingHorizontal="$1"
-      >
-        <XStack alignItems="center" gap="$2" flex={1}>
-          <Circle size={32} backgroundColor="$blue5">
-            {item.isContact ? (
-              <Phone size={16} color="$blue11" />
-            ) : (
-              <Users size={16} color="$blue11" />
-            )}
-          </Circle>
-          <HeaderTitle
-            iconSize={18}
-            iconColor={theme.primary.val as string}
-            // iconAfter={item.isContact ? "information-circle" : undefined}
-            onPress={() => {
-              // Handle info dialog if needed
+      <Stack marginVertical="$3" paddingHorizontal="$1">
+        <Stack
+          borderRadius="$5"
+          overflow="hidden"
+          padding="$4"
+          marginBottom="$2"
+          borderWidth={2}
+          borderColor={item.isContact ? "#3B82F6" : "#FF66FF"}
+        >
+          <LinearGradient
+            colors={
+              item.isContact
+                ? ["#3B82F6", "#1E40AF", "#1E3A8A"]
+                : ["#FF66FF", "#E533E5", "#CC00CC"]
+            }
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
             }}
-          >
-            {item.title}
-          </HeaderTitle>
-        </XStack>
-        {item.isContact && (
-          <Circle size={24}>
-            {/* <Sparkles size={12} color="$orange11" /> */}
-            <Icon name="information-circle" size={16} />
-          </Circle>
-        )}
-      </XStack>
+          />
+
+          <XStack alignItems="center" gap="$3" flex={1}>
+            {/* Decorative icon cluster */}
+            <Stack position="relative">
+              <Circle
+                size={50}
+                backgroundColor="rgba(255,255,255,0.95)"
+                shadowColor="$shadowColor"
+                shadowOffset={{ width: 0, height: 3 }}
+                shadowOpacity={0.3}
+                shadowRadius={6}
+                elevation={8}
+              >
+                {item.isContact ? (
+                  <Phone size={24} color="#3B82F6" />
+                ) : (
+                  <Users size={24} color="#FF66FF" />
+                )}
+              </Circle>
+
+              {/* Decorative sparkles */}
+              <Circle
+                size={16}
+                position="absolute"
+                top={-2}
+                right={-2}
+                backgroundColor="rgba(255,215,0,0.95)"
+                shadowColor="$shadowColor"
+                shadowOffset={{ width: 0, height: 2 }}
+                shadowOpacity={0.4}
+                shadowRadius={3}
+              >
+                <Sparkles size={8} color="white" />
+              </Circle>
+            </Stack>
+
+            {/* Enhanced title section */}
+            <YStack flex={1} gap="$1">
+              <Text
+                color="white"
+                fontSize={22}
+                fontWeight="800"
+                numberOfLines={1}
+                shadowColor="rgba(0,0,0,0.4)"
+                shadowOffset={{ width: 0, height: 2 }}
+                shadowOpacity={1}
+                shadowRadius={3}
+              >
+                {item.title}
+              </Text>
+              <Text
+                color="white"
+                opacity={0.9}
+                fontSize={13}
+                fontWeight="600"
+                shadowColor="rgba(0,0,0,0.2)"
+                shadowOffset={{ width: 0, height: 1 }}
+                shadowOpacity={1}
+                shadowRadius={2}
+              >
+                {item.isContact
+                  ? "Invite friends to join the fun ✨"
+                  : "Your Oppfy crew 🚀"}
+              </Text>
+            </YStack>
+
+            {/* Action indicator */}
+            {item.isContact && (
+              <Button
+                size="$2"
+                borderRadius="$3"
+                backgroundColor="rgba(255,255,255,0.95)"
+                pressStyle={{ scale: 0.95 }}
+                onPress={() => {
+                  // Handle info dialog if needed
+                }}
+              >
+                <XStack alignItems="center" gap="$1">
+                  <Icon name="information-circle" size={14} color="#3B82F6" />
+                  <Text color="#3B82F6" fontSize={10} fontWeight="700">
+                    INFO
+                  </Text>
+                </XStack>
+              </Button>
+            )}
+          </XStack>
+        </Stack>
+      </Stack>
     );
   }
 
@@ -299,28 +380,42 @@ const CreativeListItem = ({
     // Standard friend card
     return (
       <Stack
-        backgroundColor="$primary"
         borderRadius="$6"
         overflow="hidden"
         marginBottom="$2"
         pressStyle={{ scale: 0.98 }}
         onPress={onPress}
         padding="$4"
-        minHeight={75}
+        minHeight={80}
+        borderWidth={1}
+        borderColor="#E533E5"
       >
+        <LinearGradient
+          colors={["#FF66FF", "#E533E5", "#CC00CC"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+        />
         <XStack alignItems="center" gap="$3" flex={1}>
           {/* Profile Picture with decorative ring */}
           <Stack position="relative">
             <Circle
-              size={50}
+              size={55}
               backgroundColor="white"
               padding={2}
               shadowColor="$shadowColor"
               shadowOffset={{ width: 0, height: 2 }}
-              shadowOpacity={0.15}
+              shadowOpacity={0.2}
               shadowRadius={4}
+              elevation={4}
             >
-              <Circle size={46} overflow="hidden" backgroundColor="$gray6">
+              <Circle size={51} overflow="hidden" backgroundColor="$gray6">
                 <Image
                   source={
                     item.data.profilePictureUrl
@@ -338,13 +433,26 @@ const CreativeListItem = ({
           <YStack flex={1} gap="$1">
             <Text
               color="white"
-              fontSize={15}
+              fontSize={16}
               fontWeight="700"
               numberOfLines={1}
+              shadowColor="rgba(0,0,0,0.2)"
+              shadowOffset={{ width: 0, height: 1 }}
+              shadowOpacity={1}
+              shadowRadius={1}
             >
               @{item.data.username}
             </Text>
-            <Text color="white" opacity={0.9} fontSize={13} numberOfLines={1}>
+            <Text
+              color="white"
+              opacity={0.9}
+              fontSize={14}
+              numberOfLines={1}
+              shadowColor="rgba(0,0,0,0.1)"
+              shadowOffset={{ width: 0, height: 1 }}
+              shadowOpacity={1}
+              shadowRadius={1}
+            >
               {item.data.name}
             </Text>
           </YStack>
@@ -353,17 +461,21 @@ const CreativeListItem = ({
           <Button
             variant="white"
             size="$3"
-            borderRadius="$3"
+            borderRadius="$4"
+            shadowColor="$shadowColor"
+            shadowOffset={{ width: 0, height: 2 }}
+            shadowOpacity={0.2}
+            shadowRadius={3}
             onPress={(e) => {
               e.stopPropagation();
               onPress();
             }}
           >
             <XStack alignItems="center" gap="$1.5">
-              <Text color="$primary" fontSize={12} fontWeight="600">
+              <Text color="#FF66FF" fontSize={12} fontWeight="600">
                 Select
               </Text>
-              <ChevronRight size={14} color="$primary" />
+              <ChevronRight size={14} color="#FF66FF" />
             </XStack>
           </Button>
         </XStack>
@@ -374,21 +486,43 @@ const CreativeListItem = ({
   // Contact item
   return (
     <Stack
-      backgroundColor="$gray2"
       borderRadius="$6"
+      overflow="hidden"
       padding="$4"
       marginBottom="$2"
+      borderWidth={1}
+      borderColor="$blue8"
       pressStyle={{
         scale: 0.98,
-        backgroundColor: "$gray3",
       }}
       onPress={onPress}
     >
+      <LinearGradient
+        colors={["#3B82F6", "#1E40AF", "#1E3A8A"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+      />
       <XStack alignItems="center" gap="$3">
         {/* Profile Picture */}
         <Stack position="relative">
-          <Circle size={50} backgroundColor="$gray8" padding={2}>
-            <Circle size={46} overflow="hidden" backgroundColor="$gray6">
+          <Circle
+            size={55}
+            backgroundColor="white"
+            padding={2}
+            shadowColor="$shadowColor"
+            shadowOffset={{ width: 0, height: 2 }}
+            shadowOpacity={0.2}
+            shadowRadius={4}
+            elevation={4}
+          >
+            <Circle size={51} overflow="hidden" backgroundColor="$gray6">
               <Image
                 source={
                   item.data.imageAvailable
@@ -407,46 +541,75 @@ const CreativeListItem = ({
             position="absolute"
             bottom={-2}
             right={-2}
-            backgroundColor="$blue10"
+            backgroundColor="white"
+            shadowColor="$shadowColor"
+            shadowOffset={{ width: 0, height: 1 }}
+            shadowOpacity={0.3}
+            shadowRadius={2}
           >
-            <Phone size={8} color="white" />
+            <Phone size={8} color="#3B82F6" />
           </Circle>
         </Stack>
 
         {/* Contact Info */}
         <YStack flex={1} gap="$1">
           <Text
-            color="$gray12"
-            fontSize={15}
-            fontWeight="bold"
+            color="white"
+            fontSize={16}
+            fontWeight="700"
             numberOfLines={1}
+            shadowColor="rgba(0,0,0,0.2)"
+            shadowOffset={{ width: 0, height: 1 }}
+            shadowOpacity={1}
+            shadowRadius={1}
           >
             {item.data.name}
           </Text>
-          <Text color="$gray11" fontSize={13} numberOfLines={1}>
+          <Text
+            color="white"
+            opacity={0.9}
+            fontSize={13}
+            numberOfLines={1}
+            shadowColor="rgba(0,0,0,0.1)"
+            shadowOffset={{ width: 0, height: 1 }}
+            shadowOpacity={1}
+            shadowRadius={1}
+          >
             {item.data.phoneNumbers?.[0]?.number}
           </Text>
-          <Text fontSize={11} color="$blue11" fontWeight="500">
+          <Text
+            fontSize={11}
+            color="white"
+            opacity={0.95}
+            fontWeight="500"
+            shadowColor="rgba(0,0,0,0.1)"
+            shadowOffset={{ width: 0, height: 1 }}
+            shadowOpacity={1}
+            shadowRadius={1}
+          >
             Will receive invite ✨
           </Text>
         </YStack>
 
         {/* Action Button */}
         <Button
-          // variant="primary"
-          backgroundColor="$blue11"
+          variant="white"
           size="$3"
-          borderRadius="$3"
+          borderRadius="$4"
+          shadowColor="$shadowColor"
+          shadowOffset={{ width: 0, height: 2 }}
+          shadowOpacity={0.2}
+          shadowRadius={3}
           onPress={(e) => {
             e.stopPropagation();
             onPress();
           }}
         >
           <XStack alignItems="center" gap="$1.5">
-            <Text color="white" fontSize={12} fontWeight="bold">
+            <Text color="#3B82F6" fontSize={12} fontWeight="700">
               Invite
             </Text>
-            <ChevronRight size={14} color="white" />
+            <ChevronRight size={14} color="#3B82F6" />
           </XStack>
         </Button>
       </XStack>
