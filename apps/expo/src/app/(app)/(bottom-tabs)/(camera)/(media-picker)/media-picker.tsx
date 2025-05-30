@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { FlashList } from "@shopify/flash-list";
 import { Video } from "@tamagui/lucide-icons";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { InfiniteData, QueryFunctionContext } from "@tanstack/react-query";
