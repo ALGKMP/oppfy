@@ -1,16 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { DimensionValue } from "react-native";
-import { Dimensions, Pressable, StyleSheet } from "react-native";
+import { Animated, Dimensions, Pressable, StyleSheet } from "react-native";
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import { getToken, useTheme } from "tamagui";
+import { Circle, getToken, useTheme } from "tamagui";
 
 import PlayPause, {
   usePlayPauseAnimations,
@@ -56,7 +57,7 @@ interface CreatePostWithPhoneNumber extends CreatePostBaseParams {
 }
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const MAX_PREVIEW_WIDTH = SCREEN_WIDTH / 3;
+const MAX_PREVIEW_WIDTH = SCREEN_WIDTH / 1.4;
 const MAX_PREVIEW_HEIGHT = SCREEN_WIDTH * 0.6; // Maximum preview height
 
 const SEND_BUTTON_MESSAGES = [
@@ -145,6 +146,84 @@ const CaptionSheet = ({
   );
 };
 
+// Floating decoration component
+const FloatingDecoration = ({
+  children,
+  delay = 0,
+  duration = 3000,
+  initialPosition = { x: 0, y: 0 },
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  duration?: number;
+  initialPosition?: { x: number; y: number };
+}) => {
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const [floatAnim] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    const startAnimation = () => {
+      Animated.parallel([
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+          Animated.delay(duration - 1600),
+          Animated.timing(fadeAnim, {
+            toValue: 0,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(floatAnim, {
+            toValue: 1,
+            duration: duration,
+            useNativeDriver: true,
+          }),
+        ]),
+      ]).start(() => {
+        fadeAnim.setValue(0);
+        floatAnim.setValue(0);
+        startAnimation();
+      });
+    };
+
+    startAnimation();
+  }, [fadeAnim, floatAnim, delay, duration]);
+
+  return (
+    <Animated.View
+      style={{
+        position: "absolute",
+        left: initialPosition.x,
+        top: initialPosition.y,
+        opacity: fadeAnim,
+        transform: [
+          {
+            translateY: floatAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, -100],
+            }),
+          },
+          {
+            translateX: floatAnim.interpolate({
+              inputRange: [0, 0.5, 1],
+              outputRange: [0, 20, -10],
+            }),
+          },
+        ],
+      }}
+    >
+      {children}
+    </Animated.View>
+  );
+};
+
 const CreatePost = () => {
   const router = useRouter();
   const theme = useTheme();
@@ -154,6 +233,9 @@ const CreatePost = () => {
 
   const [caption, setCaption] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Animation for media preview
+  const [pulseAnim] = useState(new Animated.Value(1));
 
   const {
     type,
@@ -185,6 +267,25 @@ const CreatePost = () => {
       ]!;
     return messageTemplate(displayName.toUpperCase());
   });
+
+  // Pulse animation for media preview
+  useEffect(() => {
+    const pulse = () => {
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.05,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ]).start(() => pulse());
+    };
+    pulse();
+  }, [pulseAnim]);
 
   const onSubmit = async () => {
     setIsLoading(true);
@@ -271,24 +372,75 @@ const CreatePost = () => {
 
   return (
     <ScreenView paddingBottom={0} safeAreaEdges={["bottom"]}>
+      {/* Floating decorations */}
+      <FloatingDecoration
+        delay={0}
+        duration={4000}
+        initialPosition={{ x: 50, y: 100 }}
+      >
+        <Text fontSize={24}>✨</Text>
+      </FloatingDecoration>
+      <FloatingDecoration
+        delay={1000}
+        duration={3500}
+        initialPosition={{ x: SCREEN_WIDTH - 80, y: 150 }}
+      >
+        <Text fontSize={20}>🎉</Text>
+      </FloatingDecoration>
+      <FloatingDecoration
+        delay={2000}
+        duration={4500}
+        initialPosition={{ x: 30, y: 300 }}
+      >
+        <Text fontSize={18}>💫</Text>
+      </FloatingDecoration>
+      <FloatingDecoration
+        delay={500}
+        duration={3000}
+        initialPosition={{ x: SCREEN_WIDTH - 60, y: 400 }}
+      >
+        <Text fontSize={22}>🌟</Text>
+      </FloatingDecoration>
+
       <YStack flex={1} gap="$5">
         <YStack gap="$4" alignItems="center">
-          {type === "photo" ? (
-            <Image
-              source={{ uri }}
-              style={[
-                styles.media,
-                { width: previewWidth, height: previewHeight },
-              ]}
-              contentFit="contain"
-            />
-          ) : (
-            <PreviewVideo
-              uri={uri}
-              width={previewWidth}
-              height={previewHeight}
-            />
-          )}
+          {/* Enhanced media preview with decorative frame and animation */}
+          <Animated.View
+            style={{
+              transform: [{ scale: pulseAnim }],
+              shadowColor: "rgba(0,0,0,0.3)",
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 1,
+              shadowRadius: 20,
+            }}
+          >
+            <View
+              backgroundColor="white"
+              padding="$1.5"
+              borderRadius="$8"
+              borderWidth={0.5}
+              borderColor="rgba(0,0,0,0.1)"
+            >
+              <View borderRadius="$6" overflow="hidden" position="relative">
+                {type === "photo" ? (
+                  <Image
+                    source={{ uri }}
+                    style={[
+                      styles.media,
+                      { width: previewWidth, height: previewHeight },
+                    ]}
+                    contentFit="contain"
+                  />
+                ) : (
+                  <PreviewVideo
+                    uri={uri}
+                    width={previewWidth}
+                    height={previewHeight}
+                  />
+                )}
+              </View>
+            </View>
+          </Animated.View>
 
           <XStack gap="$2" alignItems="center">
             <Avatar
