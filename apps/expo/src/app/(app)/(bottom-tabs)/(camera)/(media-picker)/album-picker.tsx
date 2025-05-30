@@ -2,11 +2,13 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as MediaLibrary from "expo-media-library";
 import { useRouter } from "expo-router";
+import { LegendList } from "@legendapp/list";
+import { FlashList } from "@shopify/flash-list";
 import { ChevronRight, Image as ImageIcon } from "@tamagui/lucide-icons";
 import { getToken, Image, Text, XStack, YStack } from "tamagui";
-import { LegendList } from "@legendapp/list";
 
 import { EmptyPlaceholder } from "~/components/ui/EmptyPlaceholder";
+import { useFlashListSize } from "~/hooks/useFlashListSize";
 
 const EXCLUDED_ALBUMS = ["Bursts", "Raw", "Recently Deleted", "Screenshots"];
 
@@ -17,6 +19,16 @@ type AlbumWithCover = MediaLibrary.Album & {
 const AlbumPickerScreen = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+
+  // Use the reusable hook for FlashList size estimation
+  const { estimatedListSize } = useFlashListSize({
+    estimatedItemCount: 15,
+    averageItemHeight: 80,
+    headerHeight: 0, // No header component
+    sectionHeaderHeight: 0, // No section headers
+    sectionHeaderCount: 0,
+    extraBottomPadding: 20,
+  });
 
   const [albums, setAlbums] = useState<AlbumWithCover[]>([]);
 
@@ -150,12 +162,13 @@ const AlbumPickerScreen = () => {
   }, []);
 
   return (
-    <LegendList
+    <FlashList
       data={albums}
       keyExtractor={keyExtractor}
       renderItem={renderAlbumItem}
       showsVerticalScrollIndicator={false}
       estimatedItemSize={80}
+      estimatedListSize={estimatedListSize}
       ListEmptyComponent={ListEmptyComponent}
       contentContainerStyle={{
         paddingBottom: insets.bottom,
