@@ -1,10 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
+  Easing,
   interpolate,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withSequence,
   withSpring,
   withTiming,
@@ -13,6 +15,7 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { SplashScreen, useRouter } from "expo-router";
 import Splash from "@assets/icons/logo.png";
+import SplashIcon from "@assets/icons/splash-icon.png";
 // Import collage images
 import Opp7 from "@assets/onboarding/opp-7.jpg";
 import Pop1 from "@assets/onboarding/pop-1.jpg";
@@ -29,6 +32,13 @@ export default function Start() {
   const router = useRouter();
   const { permissions } = usePermissions();
   const requiredPermissions = permissions.camera && permissions.contacts;
+
+  // React state to control which animation phase we're in
+  const [showInitialLogo, setShowInitialLogo] = useState(true);
+
+  // Initial logo animation (runs first)
+  const initialScale = useSharedValue(1);
+  const initialOpacity = useSharedValue(1);
 
   // Main logo reanimated
   const scale = useSharedValue(0); // Start at 0 to be hidden initially
@@ -54,57 +64,89 @@ export default function Start() {
     void Haptics.notificationAsync(type);
   };
 
-  // =================== IMAGE COLLAGE ANIMATION ===================
+  // Function to transition from initial logo to main content
+  const transitionToMainContent = () => {
+    setShowInitialLogo(false);
+    void animateCollage();
+  };
+
+  // =================== INITIAL LOGO ANIMATION ===================
   useEffect(() => {
-    const animateCollage = async () => {
-      // Hide splash screen with a subtle haptic kickoff
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      await SplashScreen.hideAsync();
+    const startInitialAnimation = async () => {
+      // Initial logo animation sequence
+      initialScale.value = withSequence(
+        // Scale up slightly
+        withTiming(1.2, { duration: 600, easing: Easing.out(Easing.ease) }),
+        // Back to normal size
+        withTiming(1, { duration: 400, easing: Easing.inOut(Easing.ease) }),
+        // Delay before final animation
+        withDelay(
+          200,
+          // Scale up while fading out
+          withTiming(1.5, { duration: 800, easing: Easing.out(Easing.ease) }),
+        ),
+      );
 
-      // Fade in collage background with a gentle vibration
-      collageOpacity.value = withTiming(1, { duration: 500 }, () => {
-        runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Soft);
-      });
+      // Fade out during final scale animation
+      initialOpacity.value = withDelay(
+        1200, // Delay until the final scale animation
+        withTiming(0, { duration: 800, easing: Easing.out(Easing.ease) }),
+      );
 
-      // Animate images in sequence with creative haptics
+      // Hide initial logo and start main animations after initial animation completes
       setTimeout(() => {
-        // Pop1 animation with a light, quick pulse
-        runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Light);
-        pop1Anim.value = withTiming(1, { duration: 400 });
-
-        // Pop8 animation with a medium double-tap effect
-        setTimeout(() => {
-          runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Medium);
-          setTimeout(
-            () =>
-              runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Soft),
-            100,
-          );
-          pop8Anim.value = withTiming(1, { duration: 400 });
-
-          // Opp7 animation with a heavy thud
-          setTimeout(() => {
-            runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Heavy);
-            opp7Anim.value = withTiming(1, { duration: 400 });
-
-            // After all images, trigger logo animation with a success vibe
-            setTimeout(() => {
-              runOnJS(triggerNotificationHaptic)(
-                Haptics.NotificationFeedbackType.Success,
-              );
-              animateLogo();
-            }, 800);
-          }, 400);
-        }, 400);
-      }, 500);
+        runOnJS(transitionToMainContent)();
+      }, 2200);
     };
 
-    // Start the collage animations immediately
-    void animateCollage();
+    void startInitialAnimation();
     // eslint-disable-next-line react-compiler/react-compiler
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // =================== IMAGE COLLAGE ANIMATION ===================
+  const animateCollage = async () => {
+    // Hide splash screen with a subtle haptic kickoff
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    await SplashScreen.hideAsync();
+
+    // Fade in collage background with a gentle vibration
+    collageOpacity.value = withTiming(1, { duration: 500 }, () => {
+      runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Soft);
+    });
+
+    // Animate images in sequence with creative haptics
+    setTimeout(() => {
+      // Pop1 animation with a light, quick pulse
+      runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Light);
+      pop1Anim.value = withTiming(1, { duration: 400 });
+
+      // Pop8 animation with a medium double-tap effect
+      setTimeout(() => {
+        runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Medium);
+        setTimeout(
+          () => runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Soft),
+          100,
+        );
+        pop8Anim.value = withTiming(1, { duration: 400 });
+
+        // Opp7 animation with a heavy thud
+        setTimeout(() => {
+          runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Heavy);
+          opp7Anim.value = withTiming(1, { duration: 400 });
+
+          // After all images, trigger logo animation with a success vibe
+          setTimeout(() => {
+            runOnJS(triggerNotificationHaptic)(
+              Haptics.NotificationFeedbackType.Success,
+            );
+            animateLogo();
+          }, 800);
+        }, 400);
+      }, 400);
+    }, 500);
+  };
 
   // =================== LOGO ANIMATION ===================
   const animateLogo = () => {
@@ -188,6 +230,11 @@ export default function Start() {
   };
 
   // =================== ANIMATED STYLES ===================
+  const initialLogoStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: initialScale.value }],
+    opacity: initialOpacity.value,
+  }));
+
   const animatedIconStyle = useAnimatedStyle(() => ({
     opacity: logoOpacity.value,
     transform: [
@@ -243,7 +290,28 @@ export default function Start() {
       backgroundColor="$primary"
       safeAreaEdges={["bottom"]}
     >
-      {/* Image Collage (appears first) */}
+      {/* Initial Logo (appears first, before everything else) */}
+      {showInitialLogo && (
+        <View
+          position="absolute"
+          width="100%"
+          height="100%"
+          justifyContent="center"
+          alignItems="center"
+          zIndex={10}
+          backgroundColor="$primary"
+        >
+          <Animated.View style={initialLogoStyle}>
+            <Image
+              source={SplashIcon}
+              style={{ width: 200, height: 200 }}
+              contentFit="contain"
+            />
+          </Animated.View>
+        </View>
+      )}
+
+      {/* Image Collage (appears after initial logo) */}
       <Animated.View style={[styles.collageContainer, animatedCollageStyle]}>
         {/* Fixed position image */}
         <Image
