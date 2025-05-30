@@ -37,6 +37,7 @@ import type {
   UploadMediaInputOnApp,
 } from "~/hooks/media/useUploadMedia";
 import useShare from "~/hooks/useShare";
+import { api } from "~/utils/api";
 
 interface CreatePostBaseParams extends Record<string, string> {
   uri: string;
@@ -58,11 +59,9 @@ interface CreatePostWithPhoneNumber extends CreatePostBaseParams {
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const MAX_PREVIEW_WIDTH = SCREEN_WIDTH;
-const MAX_PREVIEW_HEIGHT = SCREEN_WIDTH ; // Maximum preview height
+const MAX_PREVIEW_HEIGHT = SCREEN_WIDTH; // Maximum preview height
 
-const SEND_BUTTON_MESSAGES = [
-  (name: string) => `Post for ${name} 📸`,
-];
+const SEND_BUTTON_MESSAGES = [(name: string) => `Post for ${name} 📸`];
 
 const CaptionSheet = ({
   caption,
@@ -217,6 +216,9 @@ const CreatePost = () => {
   const { sharePostToNewUser } = useShare();
   const { showCelebration } = useCelebration();
 
+  // Add TRPC utils for cache invalidation
+  const utils = api.useUtils();
+
   const [caption, setCaption] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -308,6 +310,9 @@ const CreatePost = () => {
           phoneNumber: params.number,
         });
       }
+
+      // Invalidate the posts feed cache so it refreshes with the new post
+      await utils.post.paginatePostsForFeed.invalidate();
 
       // Navigate to home first
       router.dismissTo("/(app)/(bottom-tabs)/(home)");
