@@ -11,7 +11,7 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import { Circle, getToken, useTheme } from "tamagui";
+import { getToken, useTheme } from "tamagui";
 
 import PlayPause, {
   usePlayPauseAnimations,
@@ -405,14 +405,8 @@ const CreatePost = () => {
               shadowRadius: 20,
             }}
           >
-            <View
-              // backgroundColor="white"
-              padding="$1.5"
-              borderRadius="$8"
-              borderWidth={0.5}
-              borderColor="rgba(0,0,0,0.1)"
-            >
-              <View borderRadius="$6" overflow="hidden" position="relative">
+            <View padding="$1.5" borderColor="rgba(0,0,0,0.1)">
+              <View overflow="hidden" position="relative">
                 {type === "photo" ? (
                   <Image
                     source={{ uri }}
@@ -528,14 +522,13 @@ const PreviewVideo = ({
 
 const styles = StyleSheet.create({
   media: {
-    borderRadius: 24,
+    borderRadius: 16,
     borderWidth: 3,
     borderColor: "white",
   },
   mediaContainer: {
     position: "relative",
     overflow: "hidden",
-    borderRadius: 24,
   },
 });
 

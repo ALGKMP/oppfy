@@ -10,7 +10,7 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { Check, ChevronRight, Download, X } from "@tamagui/lucide-icons";
-import { Stack, Text, YStack } from "tamagui";
+import { getToken, Stack, Text, YStack } from "tamagui";
 
 import PlayPause, {
   usePlayPauseAnimations,
@@ -89,9 +89,7 @@ const PreviewScreen = () => {
           <View style={{ alignItems: "center" }}>
             <View
               style={{
-                borderRadius: 20,
                 overflow: "hidden",
-                backgroundColor: "white",
                 padding: 4,
                 shadowColor: "rgba(0,0,0,0.8)",
                 shadowOffset: { width: 0, height: 20 },
@@ -103,7 +101,6 @@ const PreviewScreen = () => {
               <View
                 width={SCREEN_WIDTH - 60}
                 height={displayHeight - 40}
-                borderRadius={16}
                 overflow="hidden"
               >
                 {type === "photo" ? (
@@ -144,10 +141,7 @@ const PreviewScreen = () => {
         </View>
 
         {/* Buttons Section */}
-        <XStack
-          gap="$4"
-          marginTop="$4"
-        >
+        <XStack gap="$4" marginTop="$4">
           <Button
             flex={1}
             disabled={saveState === "saving" || saveState === "saved"}
@@ -185,7 +179,7 @@ const PreviewScreen = () => {
 const PreviewImage = ({ uri }: { uri: string }) => (
   <Image
     source={{ uri }}
-    style={[StyleSheet.absoluteFill, { borderRadius: 20 }]}
+    style={[StyleSheet.absoluteFill, styles.media]}
     contentFit="cover"
   />
 );
@@ -209,12 +203,9 @@ const PreviewVideo = ({ uri }: { uri: string }) => {
   };
 
   return (
-    <Pressable
-      style={{ flex: 1, borderRadius: 20, overflow: "hidden" }}
-      onPress={togglePlayback}
-    >
+    <Pressable style={{ flex: 1, overflow: "hidden" }} onPress={togglePlayback}>
       <VideoView
-        style={{ flex: 1 }}
+        style={[{ flex: 1 }, styles.media]}
         player={player}
         nativeControls={false}
         contentFit="cover"
@@ -229,6 +220,11 @@ const PreviewVideo = ({ uri }: { uri: string }) => {
 export default PreviewScreen;
 
 const styles = StyleSheet.create({
+  media: {
+    borderRadius: 16,
+    borderWidth: 5,
+    borderColor: "white",
+  },
   iconButton: {
     width: 40,
     height: 40,
