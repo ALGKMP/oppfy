@@ -259,10 +259,6 @@ const CreativeListItem = ({
                   size="$3"
                   borderRadius="$4"
                   backgroundColor="rgba(255,215,0,0.9)"
-                  pressStyle={{
-                    backgroundColor: "rgba(255,215,0,1)",
-                    scale: 0.95,
-                  }}
                   onPress={(e) => {
                     e.stopPropagation();
                     onPress();
@@ -288,7 +284,6 @@ const CreativeListItem = ({
         borderRadius="$8"
         overflow="hidden"
         marginBottom="$2"
-        pressStyle={{ scale: 0.98 }}
         onPress={onPress}
         padding="$4"
         minHeight={80}
@@ -396,9 +391,6 @@ const CreativeListItem = ({
       padding="$4"
       marginBottom="$2"
       backgroundColor="$gray3"
-      pressStyle={{
-        scale: 0.98,
-      }}
       onPress={onPress}
     >
       <XStack alignItems="center" gap="$3">
