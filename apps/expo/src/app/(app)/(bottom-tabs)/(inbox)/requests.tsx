@@ -3,16 +3,22 @@ import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { FlashList } from "@shopify/flash-list";
-import { getToken } from "tamagui";
+import { Check, UserRoundX, X } from "@tamagui/lucide-icons";
+import type { IFuseOptions } from "fuse.js";
+import { debounce } from "lodash";
+import { getToken, YStack } from "tamagui";
 
 import {
   EmptyPlaceholder,
   HeaderTitle,
   MediaListItem,
-  Spacer,
-  YStack,
+  SearchInput,
 } from "~/components/ui";
+import { Button } from "~/components/ui/Buttons";
+import { Spacer } from "~/components/ui/Spacer";
+import { useFlashListSize } from "~/hooks/useFlashListSize";
 import useRouteProfile from "~/hooks/useRouteProfile";
+import useSearch from "~/hooks/useSearch";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 
@@ -32,6 +38,16 @@ const Requests = () => {
   const insets = useSafeAreaInsets();
   const utils = api.useUtils();
   const [refreshing, setRefreshing] = useState(false);
+
+  // Use the reusable hook for FlashList size estimation
+  const { estimatedListSize } = useFlashListSize({
+    estimatedItemCount: 15,
+    averageItemHeight: 75,
+    headerHeight: 60,
+    sectionHeaderHeight: 0,
+    sectionHeaderCount: 0,
+    extraBottomPadding: 16,
+  });
 
   const { routeProfile } = useRouteProfile();
 
@@ -362,7 +378,7 @@ const Requests = () => {
       data={items}
       renderItem={renderItem}
       estimatedItemSize={75}
-      estimatedListSize={{ height: 1000, width: 1000 }}
+      estimatedListSize={estimatedListSize}
       getItemType={getItemType}
       keyExtractor={keyExtractor}
       ItemSeparatorComponent={Spacer}

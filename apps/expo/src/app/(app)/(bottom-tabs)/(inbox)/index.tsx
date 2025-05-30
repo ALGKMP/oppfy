@@ -1,10 +1,12 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { RefreshControl, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { useScrollToTop } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
+import { debounce } from "lodash";
 import { getToken } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
@@ -21,6 +23,7 @@ import {
 } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
 import { TimeAgo } from "~/components/ui/TimeAgo";
+import { useFlashListSize } from "~/hooks/useFlashListSize";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -34,6 +37,17 @@ const Inbox = () => {
   const router = useRouter();
   const utils = api.useUtils();
   const { routeProfile } = useRouteProfile();
+  const insets = useSafeAreaInsets();
+
+  // Use the reusable hook for FlashList size estimation
+  const { estimatedListSize } = useFlashListSize({
+    estimatedItemCount: 15,
+    averageItemHeight: 18,
+    headerHeight: 60,
+    sectionHeaderHeight: 0,
+    sectionHeaderCount: 0,
+    extraBottomPadding: 16,
+  });
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -269,7 +283,7 @@ const Inbox = () => {
       renderItem={renderListItem}
       keyExtractor={(item) => item.notification.id}
       estimatedItemSize={18}
-      estimatedListSize={{ height: 1000, width: 1000 }}
+      estimatedListSize={estimatedListSize}
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ListFooterComponent={GridSuggestions}

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { RefreshControl } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
@@ -14,6 +15,7 @@ import {
 } from "~/components/ui";
 import type { MediaListItemActionProps } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
+import { useFlashListSize } from "~/hooks/useFlashListSize";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
@@ -25,9 +27,20 @@ const PAGE_SIZE = 20;
 
 const Following = () => {
   const utils = api.useUtils();
-  const actionSheet = useActionSheetController();
+
+  // Use the reusable hook for FlashList size estimation
+  const { estimatedListSize } = useFlashListSize({
+    estimatedItemCount: 15,
+    averageItemHeight: 75,
+    headerHeight: 60,
+    sectionHeaderHeight: 0,
+    sectionHeaderCount: 0,
+    extraBottomPadding: 16,
+  });
 
   const { routeProfile } = useRouteProfile();
+
+  const actionSheet = useActionSheetController();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -312,7 +325,7 @@ const Following = () => {
       data={filteredItems}
       renderItem={({ item }) => renderListItem(item)}
       estimatedItemSize={75}
-      estimatedListSize={{ height: 1000, width: 1000 }}
+      estimatedListSize={estimatedListSize}
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ItemSeparatorComponent={Spacer}
