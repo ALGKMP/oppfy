@@ -10,7 +10,7 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { Check, ChevronRight, Download, X } from "@tamagui/lucide-icons";
-import { getToken, Stack, Text, YStack } from "tamagui";
+import { Stack, Text, YStack } from "tamagui";
 
 import PlayPause, {
   usePlayPauseAnimations,

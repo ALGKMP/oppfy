@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Animated, Keyboard, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Contact } from "expo-contacts";
-import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import { FlashList } from "@shopify/flash-list";
@@ -21,14 +20,19 @@ import {
   XStack,
   YStack,
 } from "tamagui";
+import { LinearGradient } from "tamagui/linear-gradient";
 
 import {
+  Avatar,
   EmptyPlaceholder,
   HeaderTitle,
+  Icon,
   MediaListItem,
   SearchInput,
+  SizableText,
   Spacer,
   useDialogController,
+  View,
 } from "~/components/ui";
 import { Button } from "~/components/ui/Buttons";
 import { useContacts } from "~/hooks/contacts";
@@ -80,6 +84,7 @@ const CreativeListItem = ({
 
   // Animation for streak cards (must be at top level)
   const [pulseAnim] = useState(new Animated.Value(1));
+  const [gradientAnim] = useState(new Animated.Value(0));
 
   const isStreakFriend =
     item.type === "friend" && item.data.friend.currentStreak > 0;
@@ -88,6 +93,24 @@ const CreativeListItem = ({
       ? getItemVariant(index, "friend", isStreakFriend)
       : "standard";
   const isStreak = variant === "streak";
+
+  const formatPhoneNumber = (
+    phoneNumber: string | undefined,
+    countryCode: string | undefined,
+  ) => {
+    if (phoneNumber === undefined || countryCode === undefined) return;
+    try {
+      const parsedNumber = parsePhoneNumberWithError(
+        phoneNumber,
+        countryCode.toUpperCase() as CountryCode,
+      );
+      return parsedNumber.isValid()
+        ? parsedNumber.formatNational()
+        : phoneNumber;
+    } catch {
+      return phoneNumber;
+    }
+  };
 
   useEffect(() => {
     if (isStreak) {
@@ -106,68 +129,49 @@ const CreativeListItem = ({
         ]).start(() => pulse());
       };
       pulse();
+
+      // Gradient animation
+      const animateGradient = () => {
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(gradientAnim, {
+              toValue: 1,
+              duration: 3000,
+              useNativeDriver: false,
+            }),
+            Animated.timing(gradientAnim, {
+              toValue: 0,
+              duration: 3000,
+              useNativeDriver: false,
+            }),
+          ]),
+        ).start();
+      };
+      animateGradient();
     }
-  }, [isStreak, pulseAnim]);
+  }, [isStreak, pulseAnim, gradientAnim]);
 
   if (item.type === "header") {
     return (
-      <XStack
-        alignItems="center"
-        gap="$2.5"
-        paddingVertical="$3"
-        paddingHorizontal="$2"
-        marginTop="$2"
-      >
-        <XStack alignItems="center" gap="$2.5" flex={1}>
-          {/* Enhanced icon with decorative elements */}
-          <Stack position="relative">
-            <Circle
-              size={40}
-              backgroundColor="rgba(255,255,255,0.95)"
-              shadowColor="$shadowColor"
-              shadowOffset={{ width: 0, height: 2 }}
-              shadowOpacity={0.25}
-              shadowRadius={4}
-              elevation={6}
-            >
-              {item.isContact ? (
-                <Phone size={18} color="black" />
-              ) : (
-                <Users size={18} color="#FF66FF" />
-              )}
-            </Circle>
-          </Stack>
+      <XStack alignItems="center" paddingVertical="$2" gap="$2">
+        <View borderRadius="$6" backgroundColor="$gray5" padding="$2.5">
+          {item.isContact ? (
+            <Icon name="call" disabled />
+          ) : (
+            <Icon name="people" disabled />
+          )}
+        </View>
 
-          {/* Enhanced title section */}
-          <YStack flex={1} gap="$0.5">
-            <Text
-              color="white"
-              fontSize={18}
-              fontWeight="800"
-              numberOfLines={1}
-              shadowColor="rgba(0,0,0,0.4)"
-              shadowOffset={{ width: 0, height: 1 }}
-              shadowOpacity={1}
-              shadowRadius={2}
-            >
-              {item.title}
-            </Text>
-            <Text
-              color="white"
-              opacity={0.9}
-              fontSize={11}
-              fontWeight="600"
-              shadowColor="rgba(0,0,0,0.2)"
-              shadowOffset={{ width: 0, height: 1 }}
-              shadowOpacity={1}
-              shadowRadius={1}
-            >
-              {item.isContact
-                ? "Post for your friends not on the app to invite them ✨"
-                : "Your Opps 🚀"}
-            </Text>
-          </YStack>
-        </XStack>
+        <YStack>
+          <SizableText size="$5" fontWeight="bold" lineHeight={0}>
+            {item.title}
+          </SizableText>
+          <SizableText size="$3" theme="alt1" lineHeight={0}>
+            {item.isContact
+              ? "Post for someone not on the app & invite them 📱"
+              : "Post for friends already on Oppfy 🚀"}
+          </SizableText>
+        </YStack>
       </XStack>
     );
   }
@@ -175,104 +179,74 @@ const CreativeListItem = ({
   if (item.type === "friend") {
     if (isStreak) {
       return (
-        <Animated.View
-          style={{
-            transform: [{ scale: pulseAnim }],
-            marginBottom: 8,
-          }}
-        >
+        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
           <Stack
-            borderRadius="$8"
-            overflow="hidden"
-            pressStyle={{ scale: 0.98 }}
+            pressStyle={{ scale: 0.985, opacity: 0.9 }}
+            animation="100ms"
             onPress={onPress}
-            padding="$4"
-            minHeight={95}
-            borderWidth={2}
-            borderColor="$red10"
+            style={{ borderRadius: 24 }}
           >
             <LinearGradient
-              colors={["#F214FF", "#EE5A52", "#DC2626"]}
+              padding="$4"
+              borderRadius="$6"
+              colors={["#FF0099", "#FF00FF", "#DD00DD"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-              }}
-            />
-            <XStack alignItems="center" gap="$3" flex={1}>
-              {/* Profile Picture with decorative ring */}
-              <Stack position="relative">
-                <Circle size={65} backgroundColor="white" padding={2}>
-                  <Circle size={61} overflow="hidden" backgroundColor="$gray6">
-                    <Image
-                      source={
-                        item.data.profilePictureUrl
-                          ? { uri: item.data.profilePictureUrl }
-                          : DefaultProfilePicture
-                      }
-                      width="100%"
-                      height="100%"
-                    />
-                  </Circle>
-                </Circle>
-              </Stack>
-
-              {/* User Info */}
-              <YStack flex={1} gap="$1">
-                <Text
-                  color="white"
-                  fontSize={17}
-                  fontWeight="700"
-                  numberOfLines={1}
-                >
-                  @{item.data.username}
-                </Text>
-                <Text
-                  color="white"
-                  opacity={0.95}
-                  fontSize={15}
-                  numberOfLines={1}
-                >
-                  {item.data.name}
-                </Text>
-              </YStack>
-
-              {/* Action Button and Streak */}
+            >
               <XStack alignItems="center" gap="$2">
-                {/* Streak indicator */}
-                <XStack alignItems="center" gap="$1">
-                  <Text fontSize="$9" color="white">
-                    🔥
-                  </Text>
-                  <Text fontSize={12} color="white" fontWeight="800">
-                    {item.data.friend.currentStreak}
-                  </Text>
-                </XStack>
-
-                {/* Action Button */}
-                <Button
-                  variant="primary"
-                  size="$3"
-                  borderRadius="$4"
-                  backgroundColor="rgba(255,215,0,0.9)"
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    onPress();
+                <Avatar
+                  size={56}
+                  style={{
+                    borderWidth: 3,
+                    borderColor: "white",
                   }}
-                >
-                  <XStack alignItems="center" gap="$1.5">
-                    <Text color="white" fontSize={12} fontWeight="700">
+                  source={item.data.profilePictureUrl}
+                />
+
+                {/* User Info */}
+                <YStack flex={1} gap="$1">
+                  <SizableText
+                    size="$5"
+                    fontWeight="bold"
+                    lineHeight={0}
+                    color="white"
+                  >
+                    {item.data.name}
+                  </SizableText>
+                  <SizableText
+                    size="$3"
+                    lineHeight={0}
+                    color="white"
+                    opacity={0.95}
+                  >
+                    @{item.data.username}
+                  </SizableText>
+                </YStack>
+
+                {/* Action Button and Streak */}
+                <XStack alignItems="center" gap="$2">
+                  {/* Streak indicator */}
+                  <Button variant="white" size="$3" paddingLeft={10}>
+                    <Text color="$primary" fontWeight="bold">
+                      🔥
+                      {item.data.friend.currentStreak}
+                    </Text>
+                  </Button>
+
+                  {/* Action Button */}
+                  <Button
+                    variant="white"
+                    size="$3"
+                    iconAfter={<ChevronRight color="$primary" />}
+                    onPress={onPress}
+                  >
+                    <Text color="$primary" fontWeight="bold">
                       Keep it up!
                     </Text>
-                    <ChevronRight size={14} color="white" />
-                  </XStack>
-                </Button>
+                  </Button>
+                </XStack>
               </XStack>
-            </XStack>
+            </LinearGradient>
           </Stack>
         </Animated.View>
       );
@@ -281,104 +255,51 @@ const CreativeListItem = ({
     // Standard friend card
     return (
       <Stack
-        borderRadius="$8"
-        overflow="hidden"
-        marginBottom="$2"
+        pressStyle={{ scale: 0.985, opacity: 0.9 }}
+        animation="100ms"
         onPress={onPress}
-        padding="$4"
-        minHeight={80}
-        borderWidth={1}
-        borderColor="#E533E5"
+        style={{ borderRadius: 24 }}
       >
         <LinearGradient
-          colors={["#FF66FF", "#E533E5", "#CC00CC"]}
+          padding="$3.5"
+          borderRadius="$6"
+          colors={["#6B7280", "#4B5563"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-          }}
-        />
-        <XStack alignItems="center" gap="$3" flex={1}>
-          {/* Profile Picture with decorative ring */}
-          <Stack position="relative">
-            <Circle
-              size={55}
-              backgroundColor="white"
-              padding={2}
-              shadowColor="$shadowColor"
-              shadowOffset={{ width: 0, height: 2 }}
-              shadowOpacity={0.2}
-              shadowRadius={4}
-              elevation={4}
-            >
-              <Circle size={51} overflow="hidden" backgroundColor="$gray6">
-                <Image
-                  source={
-                    item.data.profilePictureUrl
-                      ? { uri: item.data.profilePictureUrl }
-                      : DefaultProfilePicture
-                  }
-                  width="100%"
-                  height="100%"
-                />
-              </Circle>
-            </Circle>
-          </Stack>
+        >
+          <XStack alignItems="center" gap="$2">
+            <Avatar
+              size={56}
+              style={{ borderColor: "white", borderWidth: 2 }}
+              source={item.data.profilePictureUrl}
+            />
 
-          {/* User Info */}
-          <YStack flex={1} gap="$1">
-            <Text
-              color="white"
-              fontSize={16}
-              fontWeight="700"
-              numberOfLines={1}
-              shadowColor="rgba(0,0,0,0.2)"
-              shadowOffset={{ width: 0, height: 1 }}
-              shadowOpacity={1}
-              shadowRadius={1}
-            >
-              @{item.data.username}
-            </Text>
-            <Text
-              color="white"
-              opacity={0.9}
-              fontSize={14}
-              numberOfLines={1}
-              shadowColor="rgba(0,0,0,0.1)"
-              shadowOffset={{ width: 0, height: 1 }}
-              shadowOpacity={1}
-              shadowRadius={1}
-            >
-              {item.data.name}
-            </Text>
-          </YStack>
+            {/* User Info */}
+            <YStack flex={1} gap="$1">
+              <SizableText
+                size="$5"
+                fontWeight="bold"
+                lineHeight={0}
+                color="white"
+              >
+                {item.data.name}
+              </SizableText>
+              <SizableText size="$3" lineHeight={0} color="white" opacity={0.9}>
+                @{item.data.username}
+              </SizableText>
+            </YStack>
 
-          {/* Action Button */}
-          <Button
-            variant="white"
-            size="$3"
-            borderRadius="$4"
-            shadowColor="$shadowColor"
-            shadowOffset={{ width: 0, height: 2 }}
-            shadowOpacity={0.2}
-            shadowRadius={3}
-            onPress={(e) => {
-              e.stopPropagation();
-              onPress();
-            }}
-          >
-            <XStack alignItems="center" gap="$1.5">
-              <Text color="#FF66FF" fontSize={12} fontWeight="bold">
-                Select
-              </Text>
-              <ChevronRight size={14} color="#FF66FF" />
-            </XStack>
-          </Button>
-        </XStack>
+            {/* Action Button */}
+            <Button
+              variant="white"
+              size="$3"
+              iconAfter={<ChevronRight color="$gray3" />}
+              onPress={onPress}
+            >
+              Select
+            </Button>
+          </XStack>
+        </LinearGradient>
       </Stack>
     );
   }
@@ -386,105 +307,51 @@ const CreativeListItem = ({
   // Contact item
   return (
     <Stack
-      borderRadius="$8"
-      overflow="hidden"
-      padding="$4"
-      marginBottom="$2"
-      backgroundColor="$gray3"
+      pressStyle={{ scale: 0.985, opacity: 0.9 }}
+      animation="100ms"
       onPress={onPress}
+      style={{ borderRadius: 24 }}
     >
-      <XStack alignItems="center" gap="$3">
-        {/* Profile Picture */}
-        <Stack position="relative">
-          <Circle
-            size={55}
-            backgroundColor="white"
-            padding={2}
-            shadowColor="$shadowColor"
-            shadowOffset={{ width: 0, height: 2 }}
-            shadowOpacity={0.2}
-            shadowRadius={4}
-            elevation={4}
-          >
-            <Circle size={51} overflow="hidden" backgroundColor="$gray6">
-              <Image
-                source={
-                  item.data.imageAvailable
-                    ? { uri: item.data.image?.uri }
-                    : DefaultProfilePicture
-                }
-                width="100%"
-                height="100%"
-              />
-            </Circle>
-          </Circle>
+      <View padding="$3.5" borderRadius="$6" backgroundColor="$gray3">
+        <XStack alignItems="center" gap="$2">
+          <Avatar
+            size={56}
+            style={{ borderColor: "white", borderWidth: 2 }}
+            source={item.data.imageAvailable ? item.data.image?.uri : undefined}
+          />
 
-          {/* Invite indicator */}
-          <Circle
-            size={18}
-            position="absolute"
-            bottom={-2}
-            right={-2}
-            backgroundColor="white"
-            shadowColor="$shadowColor"
-            shadowOffset={{ width: 0, height: 1 }}
-            shadowOpacity={0.3}
-            shadowRadius={2}
-          >
-            <Phone size={8} color="black" />
-          </Circle>
-        </Stack>
+          {/* Contact Info */}
+          <YStack flex={1} gap="$1">
+            <SizableText
+              size="$5"
+              fontWeight="bold"
+              lineHeight={0}
+              color="white"
+            >
+              {item.data.name}
+            </SizableText>
+            <SizableText size="$3" lineHeight={0} color="white" opacity={0.9}>
+              {formatPhoneNumber(
+                item.data.phoneNumbers?.[0]?.number,
+                item.data.phoneNumbers?.[0]?.countryCode,
+              ) ?? item.data.phoneNumbers?.[0]?.number}
+            </SizableText>
+          </YStack>
 
-        {/* Contact Info */}
-        <YStack flex={1} gap="$1">
-          <Text
-            color="white"
-            fontSize={16}
-            fontWeight="700"
-            numberOfLines={1}
-            shadowColor="rgba(0,0,0,0.2)"
-            shadowOffset={{ width: 0, height: 1 }}
-            shadowOpacity={1}
-            shadowRadius={1}
+          {/* Action Button */}
+          <Button
+            variant="white"
+            size="$3"
+            iconAfter={<ChevronRight color="black" />}
+            textProps={{
+              color: "black",
+            }}
+            onPress={onPress}
           >
-            {item.data.name}
-          </Text>
-          <Text
-            color="white"
-            opacity={0.9}
-            fontSize={13}
-            numberOfLines={1}
-            shadowColor="rgba(0,0,0,0.1)"
-            shadowOffset={{ width: 0, height: 1 }}
-            shadowOpacity={1}
-            shadowRadius={1}
-          >
-            {item.data.phoneNumbers?.[0]?.number}
-          </Text>
-        </YStack>
-
-        {/* Action Button */}
-        <Button
-          variant="white"
-          size="$3"
-          borderRadius="$4"
-          shadowColor="$shadowColor"
-          shadowOffset={{ width: 0, height: 2 }}
-          shadowOpacity={0.2}
-          shadowRadius={3}
-          onPress={(e) => {
-            e.stopPropagation();
-            onPress();
-          }}
-        >
-          <XStack alignItems="center" gap="$1.5">
-            <Text fontSize={12} fontWeight="700" color="$gray3">
-              Invite
-            </Text>
-            <ChevronRight size={14} color="$gray3" />
-          </XStack>
-        </Button>
-      </XStack>
+            Invite
+          </Button>
+        </XStack>
+      </View>
     </Stack>
   );
 };
@@ -607,7 +474,7 @@ const PostTo = () => {
     }
 
     if (friends.length > 0) {
-      result.push({ type: "header", title: "Friends" });
+      result.push({ type: "header", title: "Your Friends" });
       friends.forEach((friend) => {
         result.push({ type: "friend", data: friend as Friend });
       });
@@ -616,7 +483,7 @@ const PostTo = () => {
     if (contactsToShow.length > 0) {
       result.push({
         type: "header",
-        title: "Post for Contacts",
+        title: "Your Contacts",
         isContact: true,
       });
       contactsToShow.forEach((contact) => {
@@ -628,7 +495,7 @@ const PostTo = () => {
   };
 
   useEffect(() => {
-    if (__DEV__) storage.set(HAS_SEEN_SHARE_TIP_KEY, false);
+    if (__DEV__) storage.set(HAS_SEEN_SHARE_TIP_KEY, true);
     const hasSeenTip = storage.getBoolean(HAS_SEEN_SHARE_TIP_KEY);
 
     if (!hasSeenTip) {
