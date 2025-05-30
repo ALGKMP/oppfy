@@ -10,6 +10,7 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { Check, ChevronRight, Download, X } from "@tamagui/lucide-icons";
+import { Stack, Text, YStack } from "tamagui";
 
 import PlayPause, {
   usePlayPauseAnimations,
@@ -60,68 +61,123 @@ const PreviewScreen = () => {
 
   return (
     <ScreenView padding={0} safeAreaEdges={["top", "bottom"]}>
-      <View flex={1} justifyContent="center">
-        <View
-          width={SCREEN_WIDTH}
-          height={displayHeight}
-          borderRadius={20}
-          overflow="hidden"
-        >
-          {type === "photo" ? (
-            <PreviewImage uri={uri} />
-          ) : (
-            <PreviewVideo uri={uri} />
-          )}
-
-          <TouchableOpacity
-            style={[
-              styles.iconButton,
-              { position: "absolute", top: 12, left: 12 },
-            ]}
-            onPress={() => router.back()}
+      <YStack flex={1} justifyContent="space-between" padding="$4">
+        {/* Header Section */}
+        <YStack alignItems="center" paddingTop="$2" gap="$2">
+          <Text
+            fontSize={28}
+            fontWeight="900"
+            color="$color"
+            textAlign="center"
+            letterSpacing={-0.5}
           >
-            <BlurView intensity={50} style={styles.blurView}>
-              <X />
-            </BlurView>
-          </TouchableOpacity>
+            Preview
+          </Text>
+          <Text
+            fontSize={15}
+            color="$color"
+            opacity={0.7}
+            textAlign="center"
+            fontWeight="500"
+          >
+            Looking good? Let's share it with the world
+          </Text>
+        </YStack>
+
+        {/* Media Section */}
+        <View flex={1} justifyContent="center">
+          <View style={{ alignItems: "center" }}>
+            <View
+              style={{
+                borderRadius: 20,
+                overflow: "hidden",
+                backgroundColor: "white",
+                padding: 4,
+                shadowColor: "rgba(0,0,0,0.8)",
+                shadowOffset: { width: 0, height: 20 },
+                shadowOpacity: 0.5,
+                shadowRadius: 40,
+                elevation: 20,
+              }}
+            >
+              <View
+                width={SCREEN_WIDTH - 60}
+                height={displayHeight - 40}
+                borderRadius={16}
+                overflow="hidden"
+              >
+                {type === "photo" ? (
+                  <PreviewImage uri={uri} />
+                ) : (
+                  <PreviewVideo uri={uri} />
+                )}
+
+                <TouchableOpacity
+                  style={[
+                    styles.iconButton,
+                    { position: "absolute", top: 12, left: 12 },
+                  ]}
+                  onPress={() => router.back()}
+                >
+                  <BlurView intensity={50} style={styles.blurView}>
+                    <X />
+                  </BlurView>
+                </TouchableOpacity>
+
+                {/* Media type badge */}
+                <Stack
+                  position="absolute"
+                  top={12}
+                  right={12}
+                  backgroundColor="rgba(0,0,0,0.7)"
+                  paddingHorizontal="$3"
+                  paddingVertical="$1.5"
+                  borderRadius="$5"
+                >
+                  <Text fontSize={12} color="white" fontWeight="700">
+                    {type === "photo" ? "📸 PHOTO" : "🎥 VIDEO"}
+                  </Text>
+                </Stack>
+              </View>
+            </View>
+          </View>
         </View>
-      </View>
 
-      <XStack
-        gap="$4"
-        paddingHorizontal="$4"
-        marginTop="$4"
-        width={SCREEN_WIDTH}
-      >
-        <Button
-          flex={1}
-          disabled={saveState === "saving" || saveState === "saved"}
-          onPress={() =>
-            saveToCameraRoll({
-              uri,
-              isNetworkUrl: false,
-              mediaType: type === "photo" ? "image" : "video",
-            })
-          }
+        {/* Buttons Section */}
+        <XStack
+          gap="$4"
+          marginTop="$4"
         >
-          {saveState === "saved" ? (
-            <Check />
-          ) : saveState === "saving" ? (
-            <Spinner />
-          ) : (
-            <Download />
-          )}
-        </Button>
+          <Button
+            flex={1}
+            disabled={saveState === "saving" || saveState === "saved"}
+            onPress={() =>
+              saveToCameraRoll({
+                uri,
+                isNetworkUrl: false,
+                mediaType: type === "photo" ? "image" : "video",
+              })
+            }
+          >
+            {saveState === "saved" ? (
+              <Check />
+            ) : saveState === "saving" ? (
+              <Spinner />
+            ) : (
+              <Download />
+            )}
+          </Button>
 
-        <Button
-          flex={5}
-          variant="primary"
-          iconAfter={ChevronRight}
-          onPress={onContinue}
-        >
-          Continue
-        </Button>
-      </XStack>
+          <Button
+            flex={5}
+            variant="primary"
+            iconAfter={ChevronRight}
+            onPress={onContinue}
+          >
+            Continue
+          </Button>
+        </XStack>
+      </YStack>
     </ScreenView>
   );
 };
