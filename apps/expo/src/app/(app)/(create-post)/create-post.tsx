@@ -222,9 +222,6 @@ const CreatePost = () => {
   const [caption, setCaption] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Animation for media preview
-  const [pulseAnim] = useState(new Animated.Value(1));
-
   const {
     type,
     uri,
@@ -255,25 +252,6 @@ const CreatePost = () => {
       ]!;
     return messageTemplate(displayName.toUpperCase());
   });
-
-  // Pulse animation for media preview
-  useEffect(() => {
-    const pulse = () => {
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.05,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-      ]).start(() => pulse());
-    };
-    pulse();
-  }, [pulseAnim]);
 
   const onSubmit = async () => {
     setIsLoading(true);
@@ -395,10 +373,9 @@ const CreatePost = () => {
 
       <YStack flex={1} gap="$5">
         <YStack gap="$4" alignItems="center">
-          {/* Enhanced media preview with decorative frame and animation */}
-          <Animated.View
+          {/* Enhanced media preview with decorative frame */}
+          <View
             style={{
-              transform: [{ scale: pulseAnim }],
               shadowColor: "rgba(0,0,0,0.3)",
               shadowOffset: { width: 0, height: 10 },
               shadowOpacity: 1,
@@ -425,7 +402,7 @@ const CreatePost = () => {
                 )}
               </View>
             </View>
-          </Animated.View>
+          </View>
 
           <XStack gap="$2" alignItems="center">
             <Avatar
