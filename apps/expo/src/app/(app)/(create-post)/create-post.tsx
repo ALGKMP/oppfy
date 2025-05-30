@@ -415,7 +415,7 @@ const CreatePost = () => {
             }}
           >
             <View
-              backgroundColor="white"
+              // backgroundColor="white"
               padding="$1.5"
               borderRadius="$8"
               borderWidth={0.5}
@@ -538,6 +538,8 @@ const PreviewVideo = ({
 const styles = StyleSheet.create({
   media: {
     borderRadius: 24,
+    borderWidth: 3,
+    borderColor: "white",
   },
   mediaContainer: {
     position: "relative",
