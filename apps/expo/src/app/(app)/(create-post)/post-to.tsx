@@ -131,7 +131,7 @@ const CreativeListItem = ({
               elevation={6}
             >
               {item.isContact ? (
-                <Phone size={18} color="#3B82F6" />
+                <Phone size={18} color="black" />
               ) : (
                 <Users size={18} color="#FF66FF" />
               )}
@@ -439,7 +439,7 @@ const CreativeListItem = ({
             shadowOpacity={0.3}
             shadowRadius={2}
           >
-            <Phone size={8} color="#6B7280" />
+            <Phone size={8} color="black" />
           </Circle>
         </Stack>
 
