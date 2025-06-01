@@ -334,8 +334,9 @@ const CreatePost = () => {
       }
       console.log("$$$$$$$$$$$$$$$$$$$$$$ POST ID", postId);
 
-      // Invalidate the posts feed cache so it refreshes with the new post
+      // Force a complete refresh of the posts feed data
       await utils.post.paginatePostsForFeed.invalidate();
+      await utils.post.paginatePostsForFeed.refetch();
 
       // Navigate to home first
       router.dismissTo("/(app)/(bottom-tabs)/(home)");
