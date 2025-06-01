@@ -537,7 +537,7 @@ const PostTo = () => {
     if (!formattedPhoneNumber) return;
 
     router.navigate({
-      pathname: "/create-post",
+      pathname: "/(app)/(create-post)/(tiktok)/create-post",
       params: {
         uri,
         type,
@@ -554,7 +554,7 @@ const PostTo = () => {
 
   const onFriendSelected = (friend: Friend) => {
     router.navigate({
-      pathname: "/create-post",
+      pathname: "/(app)/(create-post)/(tiktok)/create-post",
       params: {
         uri,
         type,

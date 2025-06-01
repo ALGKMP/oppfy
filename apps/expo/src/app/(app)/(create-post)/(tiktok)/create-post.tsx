@@ -10,6 +10,7 @@ import {
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Asset } from "expo-asset";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -230,6 +231,7 @@ const CreatePost = () => {
 
   const [caption, setCaption] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadUri, setUploadUri] = useState<string>("");
 
   const {
     type,
@@ -246,11 +248,31 @@ const CreatePost = () => {
 
   const { uploadVideoMutation, uploadPhotoMutation } = useUploadMedia();
 
-  // Process the video asset URI similar to how it's done in tiktok index.tsx
+  // Process the video asset URI - use the asset directly for video player
   const processedVideoUri = useMemo(() => {
-    return Platform.OS === "android"
-      ? `file://${AURA_VIDEO_ASSET}`
-      : AURA_VIDEO_ASSET;
+    // For bundled video assets, we use the require result directly
+    return AURA_VIDEO_ASSET;
+  }, []);
+
+  console.log("$$$$$$$$$$$$$$$$$$ processedVideoUri", processedVideoUri);
+
+  // Load the asset and get a proper URI for upload
+  useEffect(() => {
+    const loadAsset = async () => {
+      try {
+        const asset = Asset.fromModule(AURA_VIDEO_ASSET);
+        await asset.downloadAsync();
+        setUploadUri(asset.localUri || asset.uri);
+        console.log(
+          "$$$$$$$$$$$$$$$$$$ uploadUri",
+          asset.localUri || asset.uri,
+        );
+      } catch (error) {
+        console.error("Failed to load asset:", error);
+      }
+    };
+
+    loadAsset();
   }, []);
 
   const displayName = useMemo(() => {
@@ -270,10 +292,16 @@ const CreatePost = () => {
   });
 
   const onSubmit = async () => {
+    if (!uploadUri) {
+      console.error("Upload URI not ready yet");
+      return;
+    }
+
     setIsLoading(true);
     try {
+      console.log("$$$$$$$$$$$$$$$$$$ uploadUri for submit", uploadUri);
       const baseData = {
-        uri: processedVideoUri, // Use the video asset instead of the param uri
+        uri: uploadUri, // Use the proper file URI for upload
         width: 1080, // Use standard dimensions for the aura video
         height: 1920,
         caption,
@@ -304,6 +332,7 @@ const CreatePost = () => {
           phoneNumber: params.number,
         });
       }
+      console.log("$$$$$$$$$$$$$$$$$$$$$$ POST ID", postId);
 
       // Invalidate the posts feed cache so it refreshes with the new post
       await utils.post.paginatePostsForFeed.invalidate();
