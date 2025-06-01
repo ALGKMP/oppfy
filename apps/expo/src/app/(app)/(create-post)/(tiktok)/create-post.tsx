@@ -334,10 +334,6 @@ const CreatePost = () => {
       }
       console.log("$$$$$$$$$$$$$$$$$$$$$$ POST ID", postId);
 
-      // Force a complete refresh of the posts feed data
-      await utils.post.paginatePostsForFeed.invalidate();
-      await utils.post.paginatePostsForFeed.refetch();
-
       // Navigate to home first
       router.dismissTo("/(app)/(bottom-tabs)/(home)");
 
@@ -347,7 +343,7 @@ const CreatePost = () => {
           recipientName: recipientName || displayName,
           recipientImage: recipientImage,
         });
-      }, 100);
+      }, 1500);
     } catch (error) {
       console.error(error);
     } finally {
@@ -428,22 +424,12 @@ const CreatePost = () => {
           >
             <View padding="$1.5" borderColor="rgba(0,0,0,0.1)">
               <View overflow="hidden" position="relative">
-                {type === "photo" ? (
-                  <Image
-                    source={{ uri }}
-                    style={[
-                      styles.media,
-                      { width: previewWidth, height: previewHeight },
-                    ]}
-                    contentFit="contain"
-                  />
-                ) : (
-                  <PreviewVideo
-                    uri={processedVideoUri} // Use the video asset instead of param uri
-                    width={previewWidth}
-                    height={previewHeight}
-                  />
-                )}
+                {/* Always show the aura video, regardless of type param */}
+                <PreviewVideo
+                  uri={processedVideoUri} // Use the video asset instead of param uri
+                  width={previewWidth}
+                  height={previewHeight}
+                />
               </View>
             </View>
           </View>
