@@ -28,6 +28,7 @@ import {
   HeaderTitle,
   Icon,
   MediaListItem,
+  SafeAreaView,
   SearchInput,
   SizableText,
   Spacer,
@@ -536,7 +537,7 @@ const PostTo = () => {
     if (!formattedPhoneNumber) return;
 
     router.navigate({
-      pathname: "/(app)/(bottom-tabs)/(camera)/tiktok/(create-post)/create-post",
+      pathname: "/create-post",
       params: {
         uri,
         type,
@@ -709,9 +710,9 @@ const PostTo = () => {
       onEndReached={handleOnEndReached}
       onEndReachedThreshold={0.5}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-      }
-    />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+      />
   );
 };
 

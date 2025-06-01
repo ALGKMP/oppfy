@@ -23,6 +23,18 @@ const CreatePostLayout = () => (
         title: "Create Post",
       }}
     />
+    <Stack.Screen
+      name="(tiktok)/post-to"
+      options={{
+        title: "Post To",
+      }}
+    />
+    <Stack.Screen
+      name="(tiktok)/create-post"
+      options={{
+        title: "Create Post",
+      }}
+    />
   </Stack>
 );
 

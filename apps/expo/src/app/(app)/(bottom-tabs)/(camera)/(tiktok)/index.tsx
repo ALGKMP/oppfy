@@ -308,7 +308,7 @@ const CameraPage = () => {
 
       // Route to post-to screen
       router.push({
-        pathname: "/(app)/(bottom-tabs)/(camera)/tiktok/(create-post)/post-to",
+        pathname: "/(app)/(create-post)/(tiktok)/post-to",
         params: {
           type: "video",
           uri: processedUri,
