@@ -18,7 +18,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   assetBundlePatterns: ["**/*"],
   ios: {
     supportsTablet: false,
-    bundleIdentifier: "com.oppfy",
+    bundleIdentifier: "com.oppfy.app",
     entitlements: {
       "aps-environment": "development",
     },
@@ -34,7 +34,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
   },
   android: {
-    package: "com.oppfy",
+    package: "com.oppfy.app",
     googleServicesFile: "./google-services.json",
     adaptiveIcon: {
       foregroundImage: "./assets/icons/adaptive-icon.png",
