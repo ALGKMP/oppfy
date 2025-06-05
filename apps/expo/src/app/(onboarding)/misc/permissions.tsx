@@ -56,7 +56,8 @@ const PERMISSIONS: Permission[] = [
     subtitle: "Find and connect with friends",
     isRequired: true,
     description:
-      "We use your contacts so you can easily find and share posts with friends. Oppfy is a social app which doesn't work without your contacts. We encrypt your contacts for maximum security.",
+      "We use your contacts to help you find and connect with friends on Oppfy. Your contact information will be uploaded to our servers to enable these features. By granting this permission, you consent to this data upload. We encrypt your contacts for maximum security and handle them according to our Privacy Policy.",
+",
   },
   {
     type: "Notifications",
