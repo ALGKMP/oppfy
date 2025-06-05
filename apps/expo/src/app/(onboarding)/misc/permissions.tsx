@@ -57,7 +57,6 @@ const PERMISSIONS: Permission[] = [
     isRequired: true,
     description:
       "We use your contacts to help you find and connect with friends on Oppfy. Your contact information will be uploaded to our servers to enable these features. By granting this permission, you consent to this data upload. We encrypt your contacts for maximum security and handle them according to our Privacy Policy.",
-",
   },
   {
     type: "Notifications",
