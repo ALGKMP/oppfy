@@ -50,7 +50,7 @@ import { Spacer } from "./Spacer";
 import { Spinner } from "./Spinner";
 import { Stack, XStack, YStack } from "./Stacks";
 import { Switch } from "./Switch";
-import { Paragraph, SizableText, Text } from "./Texts";
+import { Anchor, Paragraph, SizableText, Text } from "./Texts";
 import type { TimeFormat } from "./TimeAgo";
 import { TimeAgo } from "./TimeAgo";
 import { ToggleGroup } from "./ToggleGroup";
@@ -70,6 +70,7 @@ export {
   H5,
   H6,
   HeaderTitle,
+  Anchor,
   Paragraph,
   SizableText,
   Text,

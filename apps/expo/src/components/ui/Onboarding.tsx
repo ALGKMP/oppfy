@@ -65,7 +65,7 @@ interface OnboardingScreenProps {
   subtitle?: string;
   children: React.ReactNode;
   error?: string | null;
-  successMessage?: string;
+  successMessage?: string | React.ReactNode;
   footer?: React.ReactNode;
 }
 
@@ -140,13 +140,19 @@ export function OnboardingScreen({
             </Text>
           )}
           {!error && successMessage && (
-            <AnimatedText
-              textAlign="center"
-              fontSize="$5"
-              entering={FadeIn.duration(800).delay(200)}
-            >
-              {successMessage}
-            </AnimatedText>
+            <AnimatedYStack entering={FadeIn.duration(800).delay(200)}>
+              {typeof successMessage === "string" ? (
+                <Text
+                  textAlign="center"
+                  fontSize="$5"
+                  color="rgba(255,255,255,0.8)"
+                >
+                  {successMessage}
+                </Text>
+              ) : (
+                successMessage
+              )}
+            </AnimatedYStack>
           )}
         </YStack>
       </YStack>

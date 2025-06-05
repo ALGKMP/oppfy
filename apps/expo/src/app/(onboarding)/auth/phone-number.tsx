@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { BackHandler } from "react-native";
 import * as Haptics from "expo-haptics";
+import * as Linking from "expo-linking";
 import { useFocusEffect, useRouter } from "expo-router";
 
 import { validators } from "@oppfy/validators";
 
+import { Anchor, Text } from "~/components/ui";
 import {
   OnboardingButton,
   OnboardingPhoneInput,
@@ -100,9 +102,29 @@ const PhoneNumber = () => {
         />
       }
       successMessage={
-        !error
-          ? "By Continuing you agree to our Privacy Policy and Terms of Service."
-          : undefined
+        !error ? (
+          <Text textAlign="center" fontSize="$5" color="rgba(255,255,255,0.8)">
+            By Continuing you agree to our{" "}
+            <Anchor
+              href="https://www.oppfy.app/privacy"
+              onPress={() => Linking.openURL("https://www.oppfy.app/privacy")}
+              fontWeight="bold"
+              textDecorationLine="underline"
+            >
+              Privacy Policy
+            </Anchor>{" "}
+            and{" "}
+            <Anchor
+              href="https://www.oppfy.app/terms"
+              onPress={() => Linking.openURL("https://www.oppfy.app/terms")}
+              fontWeight="bold"
+              textDecorationLine="underline"
+            >
+              Terms of Service
+            </Anchor>
+            .
+          </Text>
+        ) : undefined
       }
     >
       <OnboardingPhoneInput
