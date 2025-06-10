@@ -11,6 +11,7 @@ import {
   AnimatePresence,
   motion,
   useAnimation,
+  useInView,
   useMotionValue,
   useSpring,
   useTransform,
@@ -19,13 +20,13 @@ import {
 import { api } from "~/trpc/react";
 
 /** ===============================================================
- *  Oppfy Landing v6 – Next Level Experience
+ *  Oppfy Landing v7 – Complete Redesign
  *  ===============================================================
- *  ✦ Ultra-smooth animations with spring physics
- *  ✦ Dynamic gradient effects that respond to movement
- *  ✦ Sophisticated micro-interactions
- *  ✦ Enhanced visual hierarchy and flow
- *  ✦ Improved mobile experience
+ *  ✦ Multi-section layout showcasing app features
+ *  ✦ Mobile-responsive video and interactions
+ *  ✦ Dynamic friend posting examples
+ *  ✦ Interactive how-it-works section
+ *  ✦ Social proof and testimonials
  * ----------------------------------------------------------------*/
 
 /* ---------------- helper hooks ---------------- */
@@ -119,49 +120,57 @@ const Star = () => {
   );
 };
 
-const FloatingShape = ({ index }: { index: number }) => {
-  const shapes = [
-    "M0 15L15 0L30 15L15 30Z", // diamond
-    "M0 0H30V30H0Z", // square
-    "M15 0L30 30H0Z", // triangle
-    "M0 15C0 6.716 6.716 0 15 0C23.284 0 30 6.716 30 15C30 23.284 23.284 30 15 30C6.716 30 0 23.284 0 15Z", // circle
-  ];
-  const shape = shapes[index % shapes.length];
-  const size = Math.random() * 30 + 20;
-  const x = Math.random() * 80 + 10;
-  const y = Math.random() * 80 + 10;
+/* ---------------- mock data ---------------- */
+const mockPosts = [
+  {
+    id: 1,
+    author: "Sarah M.",
+    target: "Alex",
+    image: "🎂",
+    caption: "Caught Alex being the birthday hero we all needed! 🎉",
+    time: "2m ago",
+    likes: 24,
+  },
+  {
+    id: 2,
+    author: "Mike J.",
+    target: "Emma",
+    image: "☕",
+    caption: "Emma's coffee addiction is real and we're here for it ☕✨",
+    time: "5m ago",
+    likes: 18,
+  },
+  {
+    id: 3,
+    author: "Lisa K.",
+    target: "David",
+    image: "🎸",
+    caption: "David absolutely crushing it at open mic night! 🔥",
+    time: "12m ago",
+    likes: 41,
+  },
+];
 
-  return (
-    <motion.svg
-      className="absolute opacity-20"
-      style={{ left: `${x}%`, top: `${y}%` }}
-      width={size}
-      height={size}
-      viewBox="0 0 30 30"
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{
-        scale: [0, 1, 0.8],
-        y: [y - 50, y + 50],
-        opacity: [0, 0.2, 0],
-        rotate: [0, 180],
-      }}
-      transition={{
-        duration: 20 + Math.random() * 10,
-        repeat: Infinity,
-        ease: "easeInOut",
-        delay: Math.random() * 5,
-      }}
-    >
-      <path d={shape} fill="url(#grad)" />
-      <defs>
-        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#FF00CC" stopOpacity="0.6" />
-          <stop offset="100%" stopColor="#FF66FF" stopOpacity="0.6" />
-        </linearGradient>
-      </defs>
-    </motion.svg>
-  );
-};
+const testimonials = [
+  {
+    name: "Emma Chen",
+    username: "@emmac",
+    text: "Finally, an app that captures the real me through my friends' eyes! Love seeing myself from their perspective.",
+    avatar: "👩🏻‍💻",
+  },
+  {
+    name: "Marcus Johnson",
+    username: "@mjohnson",
+    text: "Oppfy brings back that authentic social media feeling. No more posed selfies - just genuine moments.",
+    avatar: "👨🏾‍🎨",
+  },
+  {
+    name: "Sophie Miller",
+    username: "@sophiem",
+    text: "My friends capture the best parts of me that I'd never think to share. It's like having personal paparazzi!",
+    avatar: "👩🏼‍🎨",
+  },
+];
 
 export default function WaitlistPage() {
   const isMobile = useIsMobile();
@@ -173,29 +182,25 @@ export default function WaitlistPage() {
   const [submitted, setSubmitted] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState<string>();
   const [isValid, setIsValid] = useState(false);
-  const phoneRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
     setIsValid(!!phoneNumber && isValidPhoneNumber(phoneNumber));
   }, [phoneNumber]);
 
   /* ---------------- hero entrance ---------------- */
-  const controls = useAnimation();
-  useEffect(() => {
-    controls.start({ opacity: 1, y: 0 });
-  }, []);
+  const heroRef = useRef<HTMLElement>(null);
+  const heroInView = useInView(heroRef, { once: true });
 
   /* ---------------- dynamic gradient ---------------- */
   const angle = useMotionValue(135);
   const gradientX = useTransform(
     mouseX,
     [0, typeof window !== "undefined" ? window.innerWidth : 0],
-    [-50, 50],
+    [-30, 30],
   );
   const gradientY = useTransform(
     mouseY,
     [0, typeof window !== "undefined" ? window.innerHeight : 0],
-    [-50, 50],
+    [-30, 30],
   );
 
   useEffect(() => {
@@ -221,11 +226,11 @@ export default function WaitlistPage() {
     const fn = (e: MouseEvent) => {
       if (typeof window !== "undefined") {
         rotY.set(
-          ((e.clientX - window.innerWidth / 2) / (window.innerWidth / 2)) * 7,
+          ((e.clientX - window.innerWidth / 2) / (window.innerWidth / 2)) * 5,
         );
         rotX.set(
           (-(e.clientY - window.innerHeight / 2) / (window.innerHeight / 2)) *
-            7,
+            5,
         );
       }
     };
@@ -251,36 +256,36 @@ export default function WaitlistPage() {
   }
 
   return (
-    <main className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-4 py-16 text-white">
+    <main className="relative min-h-screen w-full overflow-hidden text-white">
       {/* Dynamic gradient backdrop */}
       <motion.div
-        className="pointer-events-none absolute inset-0 -z-20"
+        className="pointer-events-none fixed inset-0 -z-20"
         style={{
           background: useTransform(
             angle,
             (a) =>
-              `linear-gradient(${a}deg, #2a0b4a 0%, #5a1b8a 50%, #7a2bca 100%)`,
+              `linear-gradient(${a}deg, #1a0533 0%, #2d0a5a 30%, #4a1580 60%, #6a20a0 100%)`,
           ),
           transform: `translate(${gradientX}px, ${gradientY}px)`,
         }}
       />
 
       {/* Animated background elements */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
+      <div className="fixed inset-0 -z-10 overflow-hidden">
         {/* Dynamic gradient blobs */}
         <motion.div
-          className="absolute -left-40 -top-40 h-[36rem] w-[36rem] rounded-full bg-fuchsia-500/25 blur-[160px]"
+          className="absolute -left-40 -top-40 h-[36rem] w-[36rem] rounded-full bg-fuchsia-500/20 blur-[120px]"
           animate={{
             scale: [1, 1.2, 1],
-            opacity: [0.6, 0.8, 0.6],
+            opacity: [0.4, 0.6, 0.4],
           }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute bottom-0 right-0 h-[30rem] w-[30rem] rounded-full bg-purple-600/25 blur-[160px]"
+          className="absolute bottom-0 right-0 h-[30rem] w-[30rem] rounded-full bg-purple-600/20 blur-[120px]"
           animate={{
             scale: [1, 1.1, 1],
-            opacity: [0.6, 0.8, 0.6],
+            opacity: [0.4, 0.6, 0.4],
           }}
           transition={{
             duration: 10,
@@ -289,46 +294,32 @@ export default function WaitlistPage() {
             delay: 2,
           }}
         />
-        <motion.div
-          className="absolute left-1/2 top-1/2 h-[40rem] w-[40rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-pink-500/10 blur-[200px]"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.4, 0.6, 0.4],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 4,
-          }}
-        />
 
         {/* Interactive particles */}
-        {[...Array(40)].map((_, i) => (
+        {[...Array(25)].map((_, i) => (
           <Dot key={`d${i}`} />
         ))}
-        {[...Array(20)].map((_, i) => (
+        {[...Array(15)].map((_, i) => (
           <Star key={`s${i}`} />
-        ))}
-        {[...Array(8)].map((_, i) => (
-          <FloatingShape key={`fs${i}`} index={i} />
         ))}
       </div>
 
-      {/* Hero section */}
-      <motion.section
-        initial={{ opacity: 0, y: 80 }}
-        animate={controls}
-        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-        className="flex w-full max-w-[1200px] flex-col items-center justify-center gap-12 md:flex-row-reverse md:gap-16 lg:gap-24"
+      {/* Hero section - Mobile optimized */}
+      <section
+        ref={heroRef}
+        className="relative flex min-h-screen flex-col justify-center px-4 py-8 md:py-16"
       >
-        {/* Content section */}
-        <div className="flex w-full max-w-md flex-col items-center text-center md:items-center lg:items-start lg:text-left">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={heroInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto flex w-full max-w-7xl flex-col items-center text-center"
+        >
           {/* Logo */}
           <motion.div
             className="mb-8 flex items-center gap-3"
             initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+            animate={heroInView ? { scale: 1, opacity: 1 } : {}}
             transition={{ delay: 0.3, duration: 0.8 }}
           >
             <div className="relative">
@@ -337,7 +328,7 @@ export default function WaitlistPage() {
                 alt="logo"
                 width={48}
                 height={48}
-                className="rounded-xl"
+                className="rounded-xl md:h-14 md:w-14"
               />
               <motion.div
                 className="absolute -inset-1 -z-10 rounded-xl blur-md"
@@ -349,56 +340,58 @@ export default function WaitlistPage() {
                 }}
               />
             </div>
-            <span className="bg-gradient-to-r from-[#F214FF] to-[#FF14F0] bg-clip-text text-3xl font-bold text-transparent">
+            <span className="bg-gradient-to-r from-[#F214FF] to-[#FF14F0] bg-clip-text text-3xl font-bold text-transparent md:text-4xl">
               oppfy
             </span>
           </motion.div>
 
           {/* Headline */}
           <motion.h1
-            className="mb-8 text-4xl font-extrabold leading-tight tracking-tight md:text-5xl lg:text-6xl"
+            className="mb-6 max-w-4xl text-4xl font-extrabold leading-tight tracking-tight md:text-6xl lg:text-7xl"
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={heroInView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.5, duration: 0.8 }}
           >
-            Real moments,{" "}
+            Your friends become your{" "}
             <span className="bg-gradient-to-r from-[#F214FF] to-[#FF14F0] bg-clip-text text-transparent">
-              captured by friends
+              opps
             </span>
           </motion.h1>
 
           {/* Description */}
           <motion.p
-            className="mb-12 max-w-md text-lg text-white/80 md:text-xl"
+            className="mb-12 max-w-2xl px-4 text-lg text-white/90 md:text-xl lg:text-2xl"
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={heroInView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.7, duration: 0.8 }}
           >
-            Oppfy is almost here. Join our waitlist to secure early access.
+            The social app where friends capture your best moments. No more
+            awkward selfies - just authentic posts from the people who know you
+            best.
           </motion.p>
 
           {/* CTA Button */}
           <motion.button
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={heroInView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.9, duration: 0.8 }}
             whileTap={{ scale: 0.98 }}
             whileHover={{
               scale: 1.02,
-              boxShadow: "0 0 30px rgba(255, 0, 204, 0.3)",
+              boxShadow: "0 0 40px rgba(255, 0, 204, 0.4)",
             }}
             onClick={() => setModalOpen(true)}
-            className="group relative w-full overflow-hidden rounded-full bg-gradient-to-r from-[#FF00CC] to-[#FF66FF] px-8 py-4 text-lg font-medium tracking-wide text-white"
+            className="group relative overflow-hidden rounded-full bg-gradient-to-r from-[#FF00CC] to-[#FF66FF] px-8 py-4 text-lg font-bold tracking-wide text-white shadow-2xl shadow-[#FF00CC]/30 md:px-12 md:py-5 md:text-xl"
           >
             <span className="relative z-10 flex items-center justify-center gap-3">
-              Join Waitlist
+              Join the Waitlist
               <motion.svg
                 width="20"
                 height="20"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="transition-transform duration-300 group-hover:translate-x-1"
+                className="transition-transform duration-300 group-hover:translate-x-1 md:h-6 md:w-6"
               >
                 <path
                   d="M5 12H19M19 12L12 5M19 12L12 19"
@@ -409,72 +402,154 @@ export default function WaitlistPage() {
                 />
               </motion.svg>
             </span>
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-[#FF66FF] to-[#FF00CC] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-              initial={{ x: "100%" }}
-              whileHover={{ x: 0 }}
-              transition={{ duration: 0.4 }}
-            />
           </motion.button>
-        </div>
+        </motion.div>
+      </section>
 
-        {/* Phone visual - hidden on mobile */}
-        {!isMobile && (
+      {/* Video showcase section - Separate section that appears on scroll */}
+      <section className="relative px-4 py-16 md:py-24">
+        <div className="mx-auto max-w-6xl">
           <motion.div
-            style={{
-              rotateX: rotX,
-              rotateY: rotY,
-              scale,
-              transformStyle: "preserve-3d",
-              transformPerspective: 1200,
-            }}
-            whileHover={{ scale: 1.05 }}
-            className="relative flex justify-center"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="mb-12 text-center"
           >
-            <div className="relative aspect-[9/16] w-[360px] p-2">
-              {/* Glassy phone frame */}
-              <div className="absolute inset-0 rounded-[52px] bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-sm" />
-              <div className="absolute inset-[1px] rounded-[50px] bg-black/10 backdrop-blur-md" />
-
-              {/* Video container with outer border */}
-              <div className="relative h-full w-full overflow-hidden rounded-[48px] ring-[0.5px] ring-inset ring-white/30">
-                <video
-                  src="/vid.mp4"
-                  className="h-full w-full object-cover"
-                  playsInline
-                  muted
-                  autoPlay
-                  loop
-                />
-              </div>
-            </div>
-
-            {/* Animated glow effect */}
-            <motion.div
-              className="absolute -inset-6 -z-10 rounded-[60px] blur-2xl"
-              animate={{
-                opacity: [0.4, 0.7, 0.4],
-                scale: [0.95, 1.05, 0.95],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Infinity,
-                repeatType: "reverse",
-              }}
-              style={{
-                background:
-                  "radial-gradient(circle, #F214FF99 0%, #F214FF00 70%)",
-              }}
-            />
+            <h2 className="mb-4 text-2xl font-bold md:text-3xl lg:text-4xl">
+              See{" "}
+              <span className="bg-gradient-to-r from-[#F214FF] to-[#FF14F0] bg-clip-text text-transparent">
+                Oppfy
+              </span>{" "}
+              in action
+            </h2>
+            <p className="mx-auto max-w-2xl text-lg text-white/80">
+              Experience authentic social sharing through your friends' eyes
+            </p>
           </motion.div>
-        )}
-      </motion.section>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            viewport={{ once: true, margin: "-50px" }}
+            className="flex justify-center"
+          >
+            <motion.div
+              style={
+                !isMobile
+                  ? {
+                      rotateX: rotX,
+                      rotateY: rotY,
+                      scale,
+                      transformStyle: "preserve-3d",
+                      transformPerspective: 1200,
+                    }
+                  : {}
+              }
+              whileHover={!isMobile ? { scale: 1.05 } : {}}
+              className="relative"
+            >
+              <div
+                className={`relative ${isMobile ? "aspect-[9/16] w-[320px]" : "aspect-[9/16] w-[400px]"} p-3`}
+              >
+                {/* Glassy phone frame */}
+                <div className="absolute inset-0 rounded-[52px] bg-gradient-to-br from-white/10 to-white/0 backdrop-blur-sm" />
+                <div className="absolute inset-[1px] rounded-[50px] bg-black/20 backdrop-blur-md" />
+
+                {/* Video container */}
+                <div className="relative h-full w-full overflow-hidden rounded-[48px] ring-[0.5px] ring-inset ring-white/30">
+                  <video
+                    src="/vid.mp4"
+                    className="h-full w-full object-cover"
+                    playsInline
+                    muted
+                    autoPlay
+                    loop
+                    controls={false}
+                    preload="auto"
+                  />
+                </div>
+              </div>
+
+              {/* Animated glow effect */}
+              <motion.div
+                className="absolute -inset-6 -z-10 rounded-[60px] blur-2xl"
+                animate={{
+                  opacity: [0.3, 0.6, 0.3],
+                  scale: [0.95, 1.05, 0.95],
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                }}
+                style={{
+                  background:
+                    "radial-gradient(circle, #F214FF66 0%, #F214FF00 70%)",
+                }}
+              />
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Final CTA section */}
+      <section className="relative px-4 py-24">
+        <motion.div
+          className="mx-auto max-w-4xl text-center"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+        >
+          <h2 className="mb-6 text-5xl font-bold md:text-6xl">
+            Ready to see yourself through{" "}
+            <span className="bg-gradient-to-r from-[#F214FF] to-[#FF14F0] bg-clip-text text-transparent">
+              friends' eyes?
+            </span>
+          </h2>
+          <p className="mb-12 text-xl text-white/80">
+            Be among the first to experience authentic social sharing
+          </p>
+
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            whileHover={{
+              scale: 1.05,
+              boxShadow: "0 0 50px rgba(255, 0, 204, 0.5)",
+            }}
+            onClick={() => setModalOpen(true)}
+            className="group relative overflow-hidden rounded-full bg-gradient-to-r from-[#FF00CC] to-[#FF66FF] px-16 py-6 text-2xl font-bold tracking-wide text-white shadow-2xl shadow-[#FF00CC]/40"
+          >
+            <span className="relative z-10 flex items-center justify-center gap-4">
+              {submitted ? "Success!" : "Join the Waitlist"}
+              <motion.svg
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="transition-transform duration-300 group-hover:translate-x-2"
+              >
+                <path
+                  d="M5 12H19M19 12L12 5M19 12L12 19"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </motion.svg>
+            </span>
+          </motion.button>
+        </motion.div>
+      </section>
 
       {/* Modal */}
       <AnimatePresence>
         {modalOpen && (
           <motion.div
-            className="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -601,7 +676,7 @@ export default function WaitlistPage() {
                     transition={{ duration: 0.3, delay: 0.5 }}
                     className="text-lg text-white/80"
                   >
-                    We'll text you when we launch
+                    We'll text you when we launch! 🎉
                   </motion.p>
                 </div>
               )}
