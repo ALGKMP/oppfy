@@ -342,7 +342,7 @@ const CameraPage = () => {
       >
         <GestureDetector gesture={composedGesture}>
           <View style={{ flex: 1 }}>
-            {isCameraInitialized && isActive && (
+            {cameraPermission.hasPermission && (
               <ReanimatedCamera
                 ref={camera}
                 device={device}

@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as MediaLibrary from "expo-media-library";
 import { useRouter } from "expo-router";
-import { LegendList } from "@legendapp/list";
 import { FlashList } from "@shopify/flash-list";
 import { ChevronRight, Image as ImageIcon } from "@tamagui/lucide-icons";
 import { getToken, Image, Text, XStack, YStack } from "tamagui";
@@ -31,12 +30,14 @@ const AlbumPickerScreen = () => {
   });
 
   const [albums, setAlbums] = useState<AlbumWithCover[]>([]);
+  const [loading, setLoading] = useState(true);
 
   /**
    * Fetches albums from device, filters them, and assigns cover photos.
    */
   const fetchAlbums = useCallback(async () => {
     try {
+      setLoading(true);
       const allAlbums = await MediaLibrary.getAlbumsAsync({
         includeSmartAlbums: true,
       });
@@ -76,6 +77,8 @@ const AlbumPickerScreen = () => {
       setAlbums(withCover);
     } catch (error) {
       console.error("Error fetching albums:", error);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -145,6 +148,8 @@ const AlbumPickerScreen = () => {
   const keyExtractor = useCallback((album: AlbumWithCover) => album.id, []);
 
   const ListEmptyComponent = useCallback(() => {
+    if (loading) return null;
+
     return (
       <YStack
         flex={1}
@@ -159,7 +164,7 @@ const AlbumPickerScreen = () => {
         />
       </YStack>
     );
-  }, []);
+  }, [loading]);
 
   return (
     <FlashList
@@ -172,7 +177,6 @@ const AlbumPickerScreen = () => {
       ListEmptyComponent={ListEmptyComponent}
       contentContainerStyle={{
         paddingBottom: insets.bottom,
-        paddingTop: getToken("$3", "space") as number,
         paddingHorizontal: getToken("$4", "space") as number,
       }}
     />

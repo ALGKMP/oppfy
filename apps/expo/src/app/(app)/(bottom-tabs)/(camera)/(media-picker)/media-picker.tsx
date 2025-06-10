@@ -4,13 +4,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { LegendList } from "@legendapp/list";
 import { Video } from "@tamagui/lucide-icons";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { InfiniteData, QueryFunctionContext } from "@tanstack/react-query";
 import { getToken, Image } from "tamagui";
 
 import { Stack } from "~/components/ui";
-import { LegendList } from "@legendapp/list";
 
 const MAX_VIDEO_DURATION = 60;
 const NUM_COLUMNS = 3;
@@ -93,6 +93,7 @@ const moveVideoToLocalStorage = async (uri: string) => {
     {
       intermediates: true,
     },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
   ).catch(() => {});
 
   // Copy file
@@ -212,7 +213,6 @@ const MediaPickerScreen = () => {
       onEndReachedThreshold={0.5}
       contentContainerStyle={{
         paddingBottom: insets.bottom,
-        paddingTop: getToken("$3", "space") as number,
       }}
     />
   );
