@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Linking, TouchableOpacity } from "react-native";
 import Animated, {
   FadeInDown,
@@ -27,6 +28,7 @@ import { OnboardingButton, OnboardingScreen } from "~/components/ui/Onboarding";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useContacts } from "~/hooks/contacts";
 import { useAuth } from "~/hooks/useAuth";
+import { storage } from "~/utils/storage";
 
 type PermissionType = "Camera" | "Contacts" | "Notifications";
 
@@ -45,18 +47,18 @@ const PERMISSIONS: Permission[] = [
     emoji: "📸",
     title: "Camera",
     subtitle: "Take photos of your friends",
-    isRequired: true,
+    isRequired: false,
     description:
-      "Oppfy is a photo-sharing app, and we require camera permissions so users can take photos directly within the app. This allows you to capture and share moments instantly with your friends. Without camera access, you won't be able to use key features of the app.",
+      "Oppfy works best when you can take photos directly within the app. Camera access allows you to capture and share moments instantly with your friends.",
   },
   {
     type: "Contacts",
     emoji: "📱",
     title: "Contacts",
     subtitle: "Find and connect with friends",
-    isRequired: true,
+    isRequired: false,
     description:
-      "We use your contacts to help you find and connect with friends on Oppfy. Your contact information will be uploaded to our servers to enable these features. By granting this permission, you consent to this data upload. We encrypt your contacts for maximum security and handle them according to our Privacy Policy.",
+      "We can help you find and connect with friends on Oppfy by accessing your contacts. Your contact information would be uploaded to our servers to enable these features. We encrypt your contacts for maximum security and handle them according to our Privacy Policy.",
   },
   {
     type: "Notifications",
@@ -65,7 +67,7 @@ const PERMISSIONS: Permission[] = [
     subtitle: "Stay updated on what's happening",
     isRequired: false,
     description:
-      "Enable notifications to stay updated when friends post about you or interact with your content. You can always change this later in settings.",
+      "Enable notifications to stay updated when friends post about you or interact with your content.",
   },
 ];
 
@@ -185,7 +187,7 @@ const Permissions = () => {
   const showPermissionAlert = async (permissionType: PermissionType) => {
     const confirmed = await alertDialog.show({
       title: `Enable ${permissionType}`,
-      subtitle: `Please enable ${permissionType.toLowerCase()} access in your device settings to continue using Oppfy.`,
+      subtitle: `${permissionType} access will enhance your Oppfy experience. You can enable it in your device settings.`,
       cancelText: "Not Now",
       acceptText: "Open Settings",
       acceptTextProps: {
@@ -273,17 +275,20 @@ const Permissions = () => {
     }
   };
 
+  useEffect(() => {
+    // Mark that the user has seen the permissions screen
+    storage.set("hasSeenPermissions", true);
+  }, []);
+
   return (
     <OnboardingScreen
       title="Just a few things..."
-      subtitle="We need some permissions to give you the best experience"
+      subtitle="We'd like some permissions to give you the best experience"
       footer={
         <OnboardingButton
           onPress={onContinue}
-          disabled={!requiredPermissions}
-          text={
-            requiredPermissions ? "Continue" : "Enable Required Permissions"
-          }
+          disabled={false}
+          text="Continue"
           isValid={allPermissions}
         />
       }

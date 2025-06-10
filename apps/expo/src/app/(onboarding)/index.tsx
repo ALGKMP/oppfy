@@ -24,6 +24,7 @@ import Pop8 from "@assets/onboarding/pop-8.jpg";
 
 import { ScreenView, View } from "~/components/ui";
 import { usePermissions } from "~/contexts/PermissionsContext";
+import { storage } from "~/utils/storage";
 
 // =================== MAIN SCREEN ===================
 const AnimatedImage = Animated.createAnimatedComponent(Image);
@@ -218,7 +219,11 @@ export default function Start() {
               Haptics.NotificationFeedbackType.Success,
             );
             // Navigate to next screen
-            if (requiredPermissions) {
+            const hasSeenPermissions = __DEV__
+              ? false
+              : storage.getBoolean("hasSeenPermissions");
+
+            if (hasSeenPermissions) {
               router.replace("/auth/phone-number");
             } else {
               router.replace("/misc/permissions");
