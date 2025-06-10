@@ -293,8 +293,10 @@ const CameraPage = () => {
       setShowPermissionDialog(true);
     } else {
       setShowPermissionDialog(false);
+      // Manually hide dialog when permissions are granted
+      dialog.hide();
     }
-  }, [cameraPermission.hasPermission]);
+  }, [cameraPermission.hasPermission, dialog]);
 
   // Show the actual dialog when showPermissionDialog is true
   useEffect(() => {
@@ -340,25 +342,27 @@ const CameraPage = () => {
       >
         <GestureDetector gesture={composedGesture}>
           <View style={{ flex: 1 }}>
-            <ReanimatedCamera
-              ref={camera}
-              device={device}
-              isActive={isActive}
-              onInitialized={onInitialized}
-              format={format}
-              fps={maxFps}
-              photoHdr={photoHdr}
-              videoHdr={videoHdr}
-              lowLightBoost={device.supportsLowLightBoost && enableNightMode}
-              enableZoomGesture={false}
-              animatedProps={cameraAnimatedProps}
-              photo={true}
-              video={true}
-              audio={microphone.hasPermission}
-              enableLocation={location.hasPermission}
-              outputOrientation="preview"
-              style={{ flex: 1 }}
-            />
+            {isCameraInitialized && isActive && (
+              <ReanimatedCamera
+                ref={camera}
+                device={device}
+                isActive={isActive}
+                onInitialized={onInitialized}
+                format={format}
+                fps={maxFps}
+                photoHdr={photoHdr}
+                videoHdr={videoHdr}
+                lowLightBoost={device.supportsLowLightBoost && enableNightMode}
+                enableZoomGesture={false}
+                animatedProps={cameraAnimatedProps}
+                photo={true}
+                video={true}
+                audio={microphone.hasPermission}
+                enableLocation={location.hasPermission}
+                outputOrientation="preview"
+                style={{ flex: 1 }}
+              />
+            )}
           </View>
         </GestureDetector>
 
