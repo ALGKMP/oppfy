@@ -289,14 +289,24 @@ const CameraPage = () => {
 
   // Show permission dialog when camera permissions are not granted
   useEffect(() => {
-    if (!cameraPermission.hasPermission) {
-      setShowPermissionDialog(true);
-    } else {
-      setShowPermissionDialog(false);
-      // Manually hide dialog when permissions are granted
-      dialog.hide();
-    }
-  }, [cameraPermission.hasPermission, dialog]);
+    const handleCameraPermissions = async () => {
+      if (!cameraPermission.hasPermission) {
+        // First try the built-in permission request
+        const granted = await cameraPermission.requestPermission();
+
+        if (!granted) {
+          // Only show dialog if built-in request failed
+          setShowPermissionDialog(true);
+        }
+      } else {
+        setShowPermissionDialog(false);
+        // Manually hide dialog when permissions are granted
+        dialog.hide();
+      }
+    };
+
+    void handleCameraPermissions();
+  }, [cameraPermission, dialog]);
 
   // Show the actual dialog when showPermissionDialog is true
   useEffect(() => {

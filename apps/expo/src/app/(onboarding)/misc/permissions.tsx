@@ -147,7 +147,7 @@ const AnimatedPermissionItem = ({
               gap="$2"
             >
               <Text color="white" fontSize="$3" fontWeight="600">
-                {isGranted ? "Enabled" : "Enable Access"}
+                {isGranted ? "" : "Continue"}
               </Text>
               {isGranted ? (
                 <Icon name="checkmark" size={18} color="white" />
