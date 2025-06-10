@@ -30,6 +30,7 @@ import {
   Camera,
   useCameraDevice,
   useCameraFormat,
+  useCameraPermission,
   useLocationPermission,
   useMicrophonePermission,
 } from "react-native-vision-camera";
@@ -47,6 +48,7 @@ import {
   EmptyPlaceholder,
   ScreenView,
   useAlertDialogController,
+  useDialogController,
   View,
 } from "~/components/ui";
 import useIsForeground from "~/hooks/useIsForeground";
@@ -66,9 +68,11 @@ const SCALE_FULL_ZOOM = 3;
 const CameraPage = () => {
   const router = useRouter();
   const alertDialog = useAlertDialogController();
+  const dialog = useDialogController();
 
   const camera = useRef<Camera>(null);
 
+  const cameraPermission = useCameraPermission();
   const location = useLocationPermission();
   const microphone = useMicrophonePermission();
   const [isCameraInitialized, setIsCameraInitialized] = useState(false);
@@ -96,6 +100,9 @@ const CameraPage = () => {
 
   const [flash, setFlash] = useState<"off" | "on">("off");
   const [position, setPosition] = useState<"front" | "back">("back");
+
+  // State to control persistent permission dialog
+  const [showPermissionDialog, setShowPermissionDialog] = useState(false);
 
   const device = useCameraDevice(position);
   const format = useCameraFormat(device, [
@@ -280,6 +287,33 @@ const CameraPage = () => {
     }
   }, [microphone]);
 
+  // Show permission dialog when camera permissions are not granted
+  useEffect(() => {
+    if (!cameraPermission.hasPermission) {
+      setShowPermissionDialog(true);
+    } else {
+      setShowPermissionDialog(false);
+    }
+  }, [cameraPermission.hasPermission]);
+
+  // Show the actual dialog when showPermissionDialog is true
+  useEffect(() => {
+    if (showPermissionDialog) {
+      void dialog.show({
+        title: "Camera Permission Required",
+        subtitle:
+          "Camera access is required to use this feature. Please enable it in your device settings and return to the app.",
+        acceptText: "Open Settings",
+        acceptTextProps: {
+          color: "$blue9",
+        },
+        onAccept: () => void Linking.openSettings(),
+
+        autoClose: false,
+      });
+    }
+  }, [showPermissionDialog, dialog]);
+
   if (!device) {
     return (
       <ScreenView
@@ -322,7 +356,7 @@ const CameraPage = () => {
               video={true}
               audio={microphone.hasPermission}
               enableLocation={location.hasPermission}
-              outputOrientation={"preview"}
+              outputOrientation="preview"
               style={{ flex: 1 }}
             />
           </View>

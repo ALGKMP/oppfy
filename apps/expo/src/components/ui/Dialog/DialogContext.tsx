@@ -3,7 +3,9 @@ import React, { createContext, useCallback, useContext, useState } from "react";
 import type { DialogProps } from "./Dialog";
 import { Dialog } from "./Dialog";
 
-type DialogOptions = Omit<DialogProps, "isVisible" | "onAnimationComplete">;
+type DialogOptions = Omit<DialogProps, "isVisible" | "onAnimationComplete"> & {
+  autoClose?: boolean;
+};
 
 interface DialogContextValue {
   show: (props: DialogOptions) => Promise<void>;
@@ -43,7 +45,9 @@ export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
     (props: DialogOptions): Promise<void> => {
       return new Promise<void>((resolve) => {
         const handleAccept = () => {
-          hide();
+          if (props.autoClose !== false) {
+            hide();
+          }
           props.onAccept?.();
           resolve();
         };
