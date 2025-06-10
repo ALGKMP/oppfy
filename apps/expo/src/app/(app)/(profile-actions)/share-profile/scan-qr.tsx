@@ -6,13 +6,11 @@ import {
   useCodeScanner,
 } from "react-native-vision-camera";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
 import { LinearGradient } from "@tamagui/linear-gradient";
 import { CameraOff } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
 
 import { EmptyPlaceholder, ScreenView } from "~/components/ui";
-import useRouteProfile from "~/hooks/useRouteProfile";
 
 const { width } = Dimensions.get("window");
 
@@ -20,16 +18,9 @@ const GRADIENT_COLORS = ["#fc00ff", "#9700ff"];
 
 const ScanQr = () => {
   const device = useCameraDevice("back");
-  const [hasPermission, setHasPermission] = useState(false);
   const [isScanning, setIsScanning] = useState(true);
 
   useEffect(() => {
-    const checkPermissions = async () => {
-      const status = await Camera.requestCameraPermission();
-      setHasPermission(status === "granted");
-    };
-    void checkPermissions();
-
     // Reset scanning state when component mounts
     setIsScanning(true);
 
@@ -56,19 +47,7 @@ const ScanQr = () => {
     },
   });
 
-  if (!hasPermission) {
-    return (
-      <ScreenView justifyContent="center" alignItems="center">
-        <EmptyPlaceholder
-          title="No camera device found"
-          subtitle="Please check your camera settings and try again."
-          icon={<CameraOff />}
-        />
-      </ScreenView>
-    );
-  }
-
-  if (device === undefined) {
+  if (!device) {
     return (
       <ScreenView justifyContent="center" alignItems="center">
         <EmptyPlaceholder
