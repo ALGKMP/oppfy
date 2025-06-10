@@ -23,7 +23,6 @@ import Pop2 from "@assets/onboarding/pop-2.jpg";
 import Pop8 from "@assets/onboarding/pop-8.jpg";
 
 import { ScreenView, View } from "~/components/ui";
-import { usePermissions } from "~/contexts/PermissionsContext";
 import { storage } from "~/utils/storage";
 
 // =================== MAIN SCREEN ===================
@@ -31,8 +30,6 @@ const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 export default function Start() {
   const router = useRouter();
-  const { permissions } = usePermissions();
-  const requiredPermissions = permissions.camera && permissions.contacts;
 
   // React state to control which animation phase we're in
   const [showInitialLogo, setShowInitialLogo] = useState(true);

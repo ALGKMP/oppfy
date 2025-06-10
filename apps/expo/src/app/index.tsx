@@ -1,7 +1,6 @@
 import React from "react";
 import { Redirect } from "expo-router";
 
-import { usePermissions } from "~/contexts/PermissionsContext";
 import { useAuth } from "~/hooks/useAuth";
 import { api } from "~/utils/api";
 
@@ -12,17 +11,13 @@ const Index = () => {
       enabled: isSignedIn,
     });
 
-  const { isLoading: isLoadingPermissions, permissions } = usePermissions();
-  const requiredPermissions = permissions.camera && permissions.contacts;
-
-  const isLoading =
-    isLoadingAuth || isLoadingPermissions || isLoadingUserStatus;
+  const isLoading = isLoadingAuth || isLoadingUserStatus;
 
   if (isLoading) {
     return null;
   }
 
-  if (!isSignedIn || !requiredPermissions) {
+  if (!isSignedIn) {
     return <Redirect href="/(onboarding)" />;
   }
 

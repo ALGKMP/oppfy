@@ -21,31 +21,19 @@ const AppLayout = () => {
   const { syncContacts } = useContacts();
 
   const { isLoading: isLoadingAuth, isSignedIn } = useAuth();
-  const { isLoading: isLoadingPermissions, permissions } = usePermissions();
-
-  const requiredPermissions = permissions.camera && permissions.contacts;
 
   const expireStreaksMutation = api.friend.expireInactiveStreaks.useMutation();
 
   useEffect(() => void syncContacts(), []);
 
   useEffect(() => {
-    if (isLoadingAuth || isLoadingPermissions) {
-      return;
-    }
+    if (isLoadingAuth) return;
 
-    if (!isSignedIn || !requiredPermissions) {
+    if (!isSignedIn) {
       router.replace("/(onboarding)");
       return;
     }
-  }, [
-    isLoadingAuth,
-    isLoadingPermissions,
-    isSignedIn,
-    requiredPermissions,
-    router,
-    syncContacts,
-  ]);
+  }, [isLoadingAuth, isSignedIn, router, syncContacts]);
 
   useEffect(() => {
     // Expire inactive streaks when app opens

@@ -162,7 +162,6 @@ const AnimatedPermissionItem = ({
 
 const Permissions = () => {
   const router = useRouter();
-  const { isSignedIn } = useAuth();
   const { permissions, checkPermissions } = usePermissions();
 
   const alertDialog = useAlertDialogController();
@@ -170,7 +169,6 @@ const Permissions = () => {
 
   const allPermissions =
     permissions.camera && permissions.contacts && permissions.notifications;
-  const requiredPermissions = permissions.camera && permissions.contacts;
 
   const openSettings = async (): Promise<void> => {
     await Linking.openSettings();
@@ -179,9 +177,7 @@ const Permissions = () => {
   const onContinue = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-    router.push(
-      isSignedIn ? "/(app)/(bottom-tabs)/(home)" : "/auth/phone-number",
-    );
+    router.push("/auth/phone-number");
   };
 
   const showPermissionAlert = async (permissionType: PermissionType) => {
