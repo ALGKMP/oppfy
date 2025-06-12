@@ -47,7 +47,7 @@ import useShare from "~/hooks/useShare";
 import { api } from "~/utils/api";
 
 // Add the video asset import after the existing imports
-const AURA_VIDEO_ASSET = require("@assets/videos/stairs.mp4");
+const AURA_VIDEO_ASSET = require("@assets/videos/golf.mp4");
 
 interface CreatePostBaseParams extends Record<string, string> {
   uri: string;
