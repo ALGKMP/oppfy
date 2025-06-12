@@ -281,12 +281,6 @@ export default function WaitlistPage() {
               height={56}
               className="mx-auto mb-3 md:mx-0"
             />
-            <span
-              className="mb-2 inline-block text-3xl font-black tracking-tight text-white"
-              style={{ letterSpacing: "-0.04em" }}
-            >
-              Oppfy
-            </span>
             <h1
               className="mb-4 text-5xl font-extrabold leading-tight text-white md:text-6xl"
               style={{ letterSpacing: "-0.04em" }}
