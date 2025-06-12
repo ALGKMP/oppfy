@@ -296,27 +296,6 @@ export default function WaitlistPage() {
               <span className="text-white/80">captured by friends</span>
             </h1>
           </div>
-          <span className="text-lg font-medium text-white/90">
-            Oppfy is almost here. Join our waitlist to get early access!
-          </span>
-          <div className="mt-2 flex gap-3">
-            <a href="#" className="inline-block">
-              <Image
-                src="/appstore.svg"
-                alt="App Store"
-                width={40}
-                height={40}
-              />
-            </a>
-            <a href="#" className="inline-block">
-              <Image
-                src="/playstore.svg"
-                alt="Google Play"
-                width={40}
-                height={40}
-              />
-            </a>
-          </div>
           {/* Pre-Order on the App Store Button */}
           <a
             href="#" // Replace with your App Store pre-order link
