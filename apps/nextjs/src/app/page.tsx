@@ -256,12 +256,12 @@ export default function WaitlistPage() {
       style={{ background: "#F214FF" }}
     >
       {/* Centered content */}
-      <section className="flex w-full max-w-5xl flex-col items-center justify-center gap-12 md:flex-row md:gap-16">
+      <section className="flex w-full max-w-5xl flex-col items-center justify-center gap-8 md:flex-row md:gap-16">
         {/* Phone visual */}
-        <div className="relative mb-8 flex justify-center md:mb-0">
-          <div className="relative aspect-[9/16] w-full max-w-[340px] rounded-[48px] shadow-2xl">
+        <div className="relative flex justify-center">
+          <div className="relative aspect-[9/16] w-full max-w-[280px] rounded-[32px] shadow-2xl md:max-w-[340px] md:rounded-[48px]">
             <video
-              className="h-full w-full rounded-[48px] border-8 border-white object-cover"
+              className="h-full w-full rounded-[32px] border-4 border-white object-cover md:rounded-[48px] md:border-8"
               src="/vid.mp4"
               playsInline
               muted
@@ -271,7 +271,7 @@ export default function WaitlistPage() {
           </div>
         </div>
         {/* Text and QR section */}
-        <div className="flex flex-col items-start gap-8 text-left">
+        <div className="flex flex-col items-center gap-6 text-center md:items-start md:gap-8 md:text-left">
           <div>
             {/* Logo */}
             <Image
@@ -282,7 +282,7 @@ export default function WaitlistPage() {
               className="mx-auto mb-3 md:mx-0"
             />
             <h1
-              className="mb-4 text-5xl font-extrabold leading-tight text-white md:text-6xl"
+              className="mb-4 text-4xl font-extrabold leading-tight text-white md:text-5xl lg:text-6xl"
               style={{ letterSpacing: "-0.04em" }}
             >
               Real moments,
@@ -293,16 +293,17 @@ export default function WaitlistPage() {
           {/* Pre-Order on the App Store Button */}
           <a
             href="#" // Replace with your App Store pre-order link
-            className="mt-4 flex max-w-xs items-center justify-center gap-3 rounded-full bg-white px-6 py-2 text-lg font-semibold text-black shadow-md transition hover:bg-gray-100"
+            className="flex w-full max-w-sm items-center justify-center gap-3 rounded-full bg-white px-6 py-3 text-base font-semibold text-black shadow-md transition hover:bg-gray-100 md:max-w-xs md:py-2 md:text-lg"
             style={{ textDecoration: "none" }}
           >
             <svg
               fill="#000000"
-              width="24"
-              height="24"
+              width="20"
+              height="20"
               viewBox="0 0 22.773 22.773"
               xmlns="http://www.w3.org/2000/svg"
               stroke="#000000"
+              className="flex-shrink-0"
             >
               <g>
                 <g>
@@ -311,20 +312,23 @@ export default function WaitlistPage() {
                 </g>
               </g>
             </svg>
-            Pre-Order on the App Store
+            <span className="whitespace-nowrap">
+              Pre-Order on the App Store
+            </span>
           </a>
           {/* Join our Discord Community Button */}
           <a
             href="#" // Replace with your Discord invite link
-            className="mt-3 flex max-w-xs items-center justify-center gap-3 rounded-full bg-gray-500/60 px-6 py-2 text-lg font-semibold text-white shadow-md transition hover:bg-gray-600/80"
+            className="flex w-full max-w-sm items-center justify-center gap-3 rounded-full bg-gray-500/20 border border-white/20 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:bg-gray-600/80 md:max-w-xs md:py-2 md:text-lg"
             style={{ textDecoration: "none" }}
           >
             <svg
               viewBox="0 -28.5 256 256"
-              width="24"
-              height="24"
+              width="20"
+              height="20"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
+              className="flex-shrink-0"
             >
               <g>
                 <path
@@ -334,7 +338,9 @@ export default function WaitlistPage() {
                 ></path>
               </g>
             </svg>
-            Join our Discord community
+            <span className="whitespace-nowrap">
+              Join our Discord community
+            </span>
           </a>
         </div>
       </section>
@@ -474,8 +480,8 @@ export default function WaitlistPage() {
         )}
       </AnimatePresence>
       {/* Transparent Footer */}
-      <footer className="mt-12 flex w-full flex-col items-center justify-center bg-transparent py-8">
-        <div className="mb-2 flex items-center justify-center gap-6">
+      <footer className="mt-8 flex w-full flex-col items-center justify-center bg-transparent px-4 py-6 md:mt-12 md:py-8">
+        <div className="mb-3 flex items-center justify-center gap-6 md:mb-2">
           {/* Instagram Icon */}
           <a
             href="#"
@@ -530,7 +536,7 @@ export default function WaitlistPage() {
         <div className="mb-2 text-center text-sm font-light text-white opacity-70">
           © {new Date().getFullYear()} Oppfy Inc.
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-4 text-sm font-light text-white opacity-70">
+        <div className="flex flex-wrap items-center justify-center gap-2 text-xs font-light text-white opacity-70 md:gap-4 md:text-sm">
           <a href="/privacy" className="transition hover:opacity-100">
             Privacy Policy
           </a>
