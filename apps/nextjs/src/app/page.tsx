@@ -303,12 +303,12 @@ export default function WaitlistPage() {
             style={{ textDecoration: "none" }}
           >
             <svg
-              fill="#ffffff"
+              fill="#000000"
               width="24"
               height="24"
               viewBox="0 0 22.773 22.773"
               xmlns="http://www.w3.org/2000/svg"
-              stroke="#ffffff"
+              stroke="#000000"
             >
               <g>
                 <g>
