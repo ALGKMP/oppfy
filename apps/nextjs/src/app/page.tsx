@@ -533,10 +533,10 @@ export default function WaitlistPage() {
             </svg>
           </a>
         </div>
-        <div className="mb-2 text-center text-sm text-white opacity-70">
+        <div className="mb-2 text-center text-sm font-light text-white opacity-70">
           © {new Date().getFullYear()} Oppfy Inc.
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-white opacity-70">
+        <div className="flex flex-wrap items-center justify-center gap-4 text-sm font-light text-white opacity-70">
           <a href="/privacy" className="transition hover:opacity-100">
             Privacy Policy
           </a>
