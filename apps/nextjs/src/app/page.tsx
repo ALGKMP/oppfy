@@ -479,6 +479,86 @@ export default function WaitlistPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Transparent Footer */}
+      <footer className="mt-12 flex w-full flex-col items-center justify-center bg-transparent py-8">
+        <div className="mb-2 flex items-center justify-center gap-6">
+          {/* Instagram Icon */}
+          <a
+            href="#"
+            aria-label="Instagram"
+            className="opacity-70 transition hover:opacity-100"
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect
+                x="2"
+                y="2"
+                width="20"
+                height="20"
+                rx="6"
+                stroke="white"
+                strokeWidth="2"
+                fill="none"
+              />
+              <circle
+                cx="12"
+                cy="12"
+                r="5"
+                stroke="white"
+                strokeWidth="2"
+                fill="none"
+              />
+              <circle cx="17" cy="7" r="1.2" fill="white" />
+            </svg>
+          </a>
+          {/* X (Twitter) Icon */}
+          <a
+            href="#"
+            aria-label="X"
+            className="opacity-70 transition hover:opacity-100"
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M4 4L20 20M20 4L4 20"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </a>
+        </div>
+        <div className="mb-2 text-center text-sm text-white opacity-70">
+          © {new Date().getFullYear()} Oppfy Inc.
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-white opacity-70">
+          <a href="#" className="transition hover:opacity-100">
+            Privacy Policy
+          </a>
+          <span className="mx-1">•</span>
+          <a href="#" className="transition hover:opacity-100">
+            Terms of Service
+          </a>
+          <span className="mx-1">•</span>
+          <a href="#" className="transition hover:opacity-100">
+            Support
+          </a>
+          <span className="mx-1">•</span>
+          <a href="#" className="transition hover:opacity-100">
+            Data Deletion
+          </a>
+        </div>
+      </footer>
     </main>
   );
 }
