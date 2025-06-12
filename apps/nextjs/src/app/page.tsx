@@ -293,7 +293,7 @@ export default function WaitlistPage() {
             >
               Real moments,
               <br />
-              <span className="text-white/80">captured by friends</span>
+              <span className="text-white">captured by friends</span>
             </h1>
           </div>
           {/* Pre-Order on the App Store Button */}
