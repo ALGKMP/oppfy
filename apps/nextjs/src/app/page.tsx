@@ -271,7 +271,7 @@ export default function WaitlistPage() {
           </div>
         </div>
         {/* Text and QR section */}
-        <div className="flex flex-col items-center gap-8 text-center md:items-start md:text-left">
+        <div className="flex flex-col items-start gap-8 text-left">
           <div>
             {/* Logo */}
             <Image
@@ -299,7 +299,7 @@ export default function WaitlistPage() {
           {/* Pre-Order on the App Store Button */}
           <a
             href="#" // Replace with your App Store pre-order link
-            className="mx-auto mt-4 flex w-full max-w-xs items-center justify-center gap-3 rounded-full bg-white px-6 py-4 text-lg font-semibold text-black shadow-md transition hover:bg-gray-100 md:w-auto"
+            className="mt-4 flex max-w-xs items-center justify-center gap-3 rounded-full bg-white px-6 py-2 text-lg font-semibold text-black shadow-md transition hover:bg-gray-100"
             style={{ textDecoration: "none" }}
           >
             <svg
@@ -322,7 +322,7 @@ export default function WaitlistPage() {
           {/* Join our Discord Community Button */}
           <a
             href="#" // Replace with your Discord invite link
-            className="mx-auto mt-3 flex w-full max-w-xs items-center justify-center gap-3 rounded-full bg-[#5865F2] px-6 py-4 text-lg font-semibold text-white shadow-md transition hover:bg-[#4752c4] md:w-auto"
+            className="mt-3 flex max-w-xs items-center justify-center gap-3 rounded-full bg-gray-500/60 px-6 py-2 text-lg font-semibold text-white shadow-md transition hover:bg-gray-600/80"
             style={{ textDecoration: "none" }}
           >
             <svg
