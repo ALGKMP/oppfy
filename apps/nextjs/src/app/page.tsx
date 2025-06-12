@@ -251,226 +251,121 @@ export default function WaitlistPage() {
   }
 
   return (
-    <main className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-4 py-16 text-white">
-      {/* Dynamic gradient backdrop */}
-      <motion.div
-        className="pointer-events-none absolute inset-0 -z-20"
-        style={{
-          background: useTransform(
-            angle,
-            (a) =>
-              `linear-gradient(${a}deg, #2a0b4a 0%, #5a1b8a 50%, #7a2bca 100%)`,
-          ),
-          transform: `translate(${gradientX}px, ${gradientY}px)`,
-        }}
-      />
-
-      {/* Animated background elements */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        {/* Dynamic gradient blobs */}
-        <motion.div
-          className="absolute -left-40 -top-40 h-[36rem] w-[36rem] rounded-full bg-fuchsia-500/25 blur-[160px]"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.6, 0.8, 0.6],
-          }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute bottom-0 right-0 h-[30rem] w-[30rem] rounded-full bg-purple-600/25 blur-[160px]"
-          animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.6, 0.8, 0.6],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2,
-          }}
-        />
-        <motion.div
-          className="absolute left-1/2 top-1/2 h-[40rem] w-[40rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-pink-500/10 blur-[200px]"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.4, 0.6, 0.4],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 4,
-          }}
-        />
-
-        {/* Interactive particles */}
-        {[...Array(40)].map((_, i) => (
-          <Dot key={`d${i}`} />
-        ))}
-        {[...Array(20)].map((_, i) => (
-          <Star key={`s${i}`} />
-        ))}
-        {[...Array(8)].map((_, i) => (
-          <FloatingShape key={`fs${i}`} index={i} />
-        ))}
-      </div>
-
-      {/* Hero section */}
-      <motion.section
-        initial={{ opacity: 0, y: 80 }}
-        animate={controls}
-        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-        className="flex w-full max-w-[1200px] flex-col items-center justify-center gap-12 md:flex-row-reverse md:gap-16 lg:gap-24"
-      >
-        {/* Content section */}
-        <div className="flex w-full max-w-md flex-col items-center text-center md:items-center lg:items-start lg:text-left">
-          {/* Logo */}
-          <motion.div
-            className="mb-8 flex items-center gap-3"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-          >
-            <div className="relative">
-              <Image
-                src="/icon.png"
-                alt="logo"
-                width={48}
-                height={48}
-                className="rounded-xl"
-              />
-              <motion.div
-                className="absolute -inset-1 -z-10 rounded-xl blur-md"
-                animate={{ opacity: [0.4, 0.8, 0.4] }}
-                transition={{ duration: 2.5, repeat: Infinity }}
-                style={{
-                  background:
-                    "radial-gradient(circle, #F214FF77 0%, #F214FF00 70%)",
-                }}
-              />
-            </div>
-            <span className="bg-gradient-to-r from-[#F214FF] to-[#FF14F0] bg-clip-text text-3xl font-bold text-transparent">
-              oppfy
-            </span>
-          </motion.div>
-
-          {/* Headline */}
-          <motion.h1
-            className="mb-8 text-4xl font-extrabold leading-tight tracking-tight md:text-5xl lg:text-6xl"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
-          >
-            Real moments,{" "}
-            <span className="bg-gradient-to-r from-[#F214FF] to-[#FF14F0] bg-clip-text text-transparent">
-              captured by friends
-            </span>
-          </motion.h1>
-
-          {/* Description */}
-          <motion.p
-            className="mb-12 max-w-md text-lg text-white/80 md:text-xl"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.8 }}
-          >
-            Oppfy is almost here. Join our waitlist to secure early access.
-          </motion.p>
-
-          {/* CTA Button */}
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9, duration: 0.8 }}
-            whileTap={{ scale: 0.98 }}
-            whileHover={{
-              scale: 1.02,
-              boxShadow: "0 0 30px rgba(255, 0, 204, 0.3)",
-            }}
-            onClick={() => setModalOpen(true)}
-            className="group relative w-full overflow-hidden rounded-full bg-gradient-to-r from-[#FF00CC] to-[#FF66FF] px-8 py-4 text-lg font-medium tracking-wide text-white"
-          >
-            <span className="relative z-10 flex items-center justify-center gap-3">
-              Join Waitlist
-              <motion.svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="transition-transform duration-300 group-hover:translate-x-1"
-              >
-                <path
-                  d="M5 12H19M19 12L12 5M19 12L12 19"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </motion.svg>
-            </span>
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-[#FF66FF] to-[#FF00CC] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-              initial={{ x: "100%" }}
-              whileHover={{ x: 0 }}
-              transition={{ duration: 0.4 }}
+    <main
+      className="relative flex min-h-screen w-full flex-col items-center justify-center px-4 py-16"
+      style={{ background: "#F214FF" }}
+    >
+      {/* Centered content */}
+      <section className="flex w-full max-w-5xl flex-col items-center justify-center gap-12 md:flex-row md:gap-16">
+        {/* Phone visual */}
+        <div className="relative mb-8 flex justify-center md:mb-0">
+          <div className="relative aspect-[9/16] w-full max-w-[340px] rounded-[48px] shadow-2xl">
+            <video
+              className="h-full w-full rounded-[48px] border-8 border-white object-cover"
+              src="/vid.mp4"
+              playsInline
+              muted
+              autoPlay
+              loop
             />
-          </motion.button>
+          </div>
         </div>
-
-        {/* Phone visual - hidden on mobile */}
-        {!isMobile && (
-          <motion.div
-            style={{
-              rotateX: rotX,
-              rotateY: rotY,
-              scale,
-              transformStyle: "preserve-3d",
-              transformPerspective: 1200,
-            }}
-            whileHover={{ scale: 1.05 }}
-            className="relative flex justify-center"
-          >
-            <div className="relative aspect-[9/16] w-[360px] p-2">
-              {/* Glassy phone frame */}
-              <div className="absolute inset-0 rounded-[52px] bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-sm" />
-              <div className="absolute inset-[1px] rounded-[50px] bg-black/10 backdrop-blur-md" />
-
-              {/* Video container with outer border */}
-              <div className="relative h-full w-full overflow-hidden rounded-[48px] ring-[0.5px] ring-inset ring-white/30">
-                <video
-                  src="/vid.mp4"
-                  className="h-full w-full object-cover"
-                  playsInline
-                  muted
-                  autoPlay
-                  loop
-                />
-              </div>
-            </div>
-
-            {/* Animated glow effect */}
-            <motion.div
-              className="absolute -inset-6 -z-10 rounded-[60px] blur-2xl"
-              animate={{
-                opacity: [0.4, 0.7, 0.4],
-                scale: [0.95, 1.05, 0.95],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Infinity,
-                repeatType: "reverse",
-              }}
-              style={{
-                background:
-                  "radial-gradient(circle, #F214FF99 0%, #F214FF00 70%)",
-              }}
+        {/* Text and QR section */}
+        <div className="flex flex-col items-center gap-8 text-center md:items-start md:text-left">
+          <div>
+            {/* Logo */}
+            <Image
+              src="/icon.png"
+              alt="Oppfy logo"
+              width={56}
+              height={56}
+              className="mx-auto mb-3 md:mx-0"
             />
-          </motion.div>
-        )}
-      </motion.section>
-
-      {/* Modal */}
+            <span
+              className="mb-2 inline-block text-3xl font-black tracking-tight text-white"
+              style={{ letterSpacing: "-0.04em" }}
+            >
+              Oppfy
+            </span>
+            <h1
+              className="mb-4 text-5xl font-extrabold leading-tight text-white md:text-6xl"
+              style={{ letterSpacing: "-0.04em" }}
+            >
+              Real moments,
+              <br />
+              <span className="text-white/80">captured by friends</span>
+            </h1>
+          </div>
+          <span className="text-lg font-medium text-white/90">
+            Oppfy is almost here. Join our waitlist to get early access!
+          </span>
+          <div className="mt-2 flex gap-3">
+            <a href="#" className="inline-block">
+              <Image
+                src="/appstore.svg"
+                alt="App Store"
+                width={40}
+                height={40}
+              />
+            </a>
+            <a href="#" className="inline-block">
+              <Image
+                src="/playstore.svg"
+                alt="Google Play"
+                width={40}
+                height={40}
+              />
+            </a>
+          </div>
+          {/* Pre-Order on the App Store Button */}
+          <a
+            href="#" // Replace with your App Store pre-order link
+            className="mx-auto mt-4 flex w-full max-w-xs items-center justify-center gap-3 rounded-full bg-white px-6 py-4 text-lg font-semibold text-black shadow-md transition hover:bg-gray-100 md:w-auto"
+            style={{ textDecoration: "none" }}
+          >
+            <svg
+              fill="#ffffff"
+              width="24"
+              height="24"
+              viewBox="0 0 22.773 22.773"
+              xmlns="http://www.w3.org/2000/svg"
+              stroke="#ffffff"
+            >
+              <g>
+                <g>
+                  <path d="M15.769,0c0.053,0,0.106,0,0.162,0c0.13,1.606-0.483,2.806-1.228,3.675c-0.731,0.863-1.732,1.7-3.351,1.573 c-0.108-1.583,0.506-2.694,1.25-3.561C13.292,0.879,14.557,0.16,15.769,0z"></path>
+                  <path d="M20.67,16.716c0,0.016,0,0.03,0,0.045c-0.455,1.378-1.104,2.559-1.896,3.655c-0.723,0.995-1.609,2.334-3.191,2.334 c-1.367,0-2.275-0.879-3.676-0.903c-1.482-0.024-2.297,0.735-3.652,0.926c-0.155,0-0.31,0-0.462,0 c-0.995-0.144-1.798-0.932-2.383-1.642c-1.725-2.098-3.058-4.808-3.306-8.276c0-0.34,0-0.679,0-1.019 c0.105-2.482,1.311-4.5,2.914-5.478c0.846-0.52,2.009-0.963,3.304-0.765c0.555,0.086,1.122,0.276,1.619,0.464 c0.471,0.181,1.06,0.502,1.618,0.485c0.378-0.011,0.754-0.208,1.135-0.347c1.116-0.403,2.21-0.865,3.652-0.648 c1.733,0.262,2.963,1.032,3.723,2.22c-1.466,0.933-2.625,2.339-2.427,4.74C17.818,14.688,19.086,15.964,20.67,16.716z"></path>
+                </g>
+              </g>
+            </svg>
+            Pre-Order on the App Store
+          </a>
+          {/* Join our Discord Community Button */}
+          <a
+            href="#" // Replace with your Discord invite link
+            className="mx-auto mt-3 flex w-full max-w-xs items-center justify-center gap-3 rounded-full bg-[#5865F2] px-6 py-4 text-lg font-semibold text-white shadow-md transition hover:bg-[#4752c4] md:w-auto"
+            style={{ textDecoration: "none" }}
+          >
+            <svg
+              viewBox="0 -28.5 256 256"
+              width="24"
+              height="24"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+            >
+              <g>
+                <path
+                  d="M216.856339,16.5966031 C200.285002,8.84328665 182.566144,3.2084988 164.041564,0 C161.766523,4.11318106 159.108624,9.64549908 157.276099,14.0464379 C137.583995,11.0849896 118.072967,11.0849896 98.7430163,14.0464379 C96.9108417,9.64549908 94.1925838,4.11318106 91.8971895,0 C73.3526068,3.2084988 55.6133949,8.86399117 39.0420583,16.6376612 C5.61752293,67.146514 -3.4433191,116.400813 1.08711069,164.955721 C23.2560196,181.510915 44.7403634,191.567697 65.8621325,198.148576 C71.0772151,190.971126 75.7283628,183.341335 79.7352139,175.300261 C72.104019,172.400575 64.7949724,168.822202 57.8887866,164.667963 C59.7209612,163.310589 61.5131304,161.891452 63.2445898,160.431257 C105.36741,180.133187 151.134928,180.133187 192.754523,160.431257 C194.506336,161.891452 196.298154,163.310589 198.110326,164.667963 C191.183787,168.842556 183.854737,172.420929 176.223542,175.320965 C180.230393,183.341335 184.861538,190.991831 190.096624,198.16893 C211.238746,191.588051 232.743023,181.531619 254.911949,164.955721 C260.227747,108.668201 245.831087,59.8662432 216.856339,16.5966031 Z M85.4738752,135.09489 C72.8290281,135.09489 62.4592217,123.290155 62.4592217,108.914901 C62.4592217,94.5396472 72.607595,82.7145587 85.4738752,82.7145587 C98.3405064,82.7145587 108.709962,94.5189427 108.488529,108.914901 C108.508531,123.290155 98.3405064,135.09489 85.4738752,135.09489 Z M170.525237,135.09489 C157.88039,135.09489 147.510584,123.290155 147.510584,108.914901 C147.510584,94.5396472 157.658606,82.7145587 170.525237,82.7145587 C183.391518,82.7145587 193.761324,94.5189427 193.539891,108.914901 C193.539891,123.290155 183.391518,135.09489 170.525237,135.09489 Z"
+                  fill="#FFFF"
+                  fill-rule="nonzero"
+                ></path>
+              </g>
+            </svg>
+            Join our Discord community
+          </a>
+        </div>
+      </section>
+      {/* Modal (unchanged) */}
       <AnimatePresence>
         {modalOpen && (
           <motion.div
@@ -489,7 +384,6 @@ export default function WaitlistPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             />
-
             <motion.div
               className="relative mx-4 w-full max-w-md rounded-2xl bg-gradient-to-br from-[#2A004D] to-[#4A0080] p-8 shadow-2xl"
               initial={{ scale: 0.95, opacity: 0 }}
@@ -523,11 +417,9 @@ export default function WaitlistPage() {
                   />
                 </svg>
               </motion.button>
-
               <h2 className="mb-6 text-center text-3xl font-bold">
                 {submitted ? "Success!" : "Join the Waitlist"}
               </h2>
-
               {!submitted ? (
                 <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                   <div className="[&_.PhoneInputCountryIcon]:!border-0 [&_.PhoneInputCountrySelectArrow]:!border-t-white [&_.PhoneInputCountrySelect]:!rounded-lg [&_.PhoneInputCountrySelect]:!border [&_.PhoneInputCountrySelect]:!border-white/10 [&_.PhoneInputCountrySelect]:!bg-[#2A004D] [&_.PhoneInputCountrySelect]:!bg-transparent [&_.PhoneInputCountrySelect]:!text-lg [&_.PhoneInputCountrySelect]:!text-white [&_.PhoneInputCountrySelect]:!shadow-lg [&_.PhoneInputCountrySelect]:!shadow-black/20 [&_.PhoneInputCountrySelect]:!backdrop-blur-md [&_.PhoneInputCountrySelect]:focus:!outline-none [&_.PhoneInputCountrySelect]:focus:!ring-0 [&_.PhoneInputCountrySelect_arrow]:!border-t-white [&_.PhoneInputCountrySelect_option]:!bg-[#2A004D] [&_.PhoneInputCountrySelect_option]:!text-white [&_.PhoneInputCountry]:ml-4 [&_.PhoneInputCountry]:mr-2 [&_.PhoneInputInput]:!border-0 [&_.PhoneInputInput]:!bg-transparent [&_.PhoneInputInput]:!px-0 [&_.PhoneInputInput]:!py-4 [&_.PhoneInputInput]:!text-lg [&_.PhoneInputInput]:!text-white [&_.PhoneInputInput]:!placeholder-white/50 [&_.PhoneInputInput]:!outline-none [&_.PhoneInput]:rounded-xl [&_.PhoneInput]:bg-white/15 [&_.PhoneInput]:backdrop-blur-md [&_.PhoneInput]:transition-all [&_.PhoneInput]:duration-300 [&_.PhoneInput]:focus-within:ring-2 [&_.PhoneInput]:focus-within:ring-[#FF66FF]">
@@ -540,7 +432,6 @@ export default function WaitlistPage() {
                       placeholder="Your phone number"
                     />
                   </div>
-
                   <motion.button
                     type="submit"
                     disabled={submitting || !isValid}
