@@ -333,7 +333,7 @@ export default function WaitlistPage() {
           {/* Join our Discord Community Button */}
           <a
             href="#" // Replace with your Discord invite link
-            className="flex w-full max-w-sm items-center justify-center gap-3 rounded-full bg-gray-500/20 border border-white/20 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:bg-gray-600/40 md:max-w-xs md:py-2 md:text-lg"
+            className="flex w-full max-w-sm items-center justify-center gap-3 rounded-full border border-white/20 bg-gray-500/20 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:bg-gray-600/40 md:max-w-xs md:py-2 md:text-lg"
             style={{ textDecoration: "none" }}
           >
             <svg
