@@ -255,13 +255,27 @@ export default function WaitlistPage() {
       className="relative flex min-h-screen w-full flex-col items-center justify-center px-4 py-16"
       style={{ background: "#F214FF" }}
     >
+      {/* Mobile background video */}
+      <div className="absolute inset-0 md:hidden">
+        <video
+          className="h-full w-full object-cover"
+          src="/vid.mp4"
+          playsInline
+          muted
+          autoPlay
+          loop
+        />
+        {/* Overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#F214FF]/80 via-[#F214FF]/85 to-[#F214FF]/90" />
+      </div>
+
       {/* Centered content */}
-      <section className="flex w-full max-w-5xl flex-col items-center justify-center gap-8 md:flex-row md:gap-16">
-        {/* Phone visual */}
-        <div className="relative flex justify-center">
-          <div className="relative aspect-[9/16] w-full max-w-[280px] rounded-[32px] shadow-2xl md:max-w-[340px] md:rounded-[48px]">
+      <section className="relative z-10 flex w-full max-w-5xl flex-col items-center justify-center gap-8 md:flex-row md:gap-16">
+        {/* Phone visual - hidden on mobile, visible on desktop */}
+        <div className="relative hidden justify-center md:flex">
+          <div className="relative aspect-[9/16] w-full max-w-[340px] rounded-[48px] shadow-2xl">
             <video
-              className="h-full w-full rounded-[32px] border-4 border-white object-cover md:rounded-[48px] md:border-8"
+              className="h-full w-full rounded-[48px] border-8 border-white object-cover"
               src="/vid.mp4"
               playsInline
               muted
@@ -319,7 +333,7 @@ export default function WaitlistPage() {
           {/* Join our Discord Community Button */}
           <a
             href="#" // Replace with your Discord invite link
-            className="flex w-full max-w-sm items-center justify-center gap-3 rounded-full bg-gray-500/20 border border-white/20 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:bg-gray-600/80 md:max-w-xs md:py-2 md:text-lg"
+            className="flex w-full max-w-sm items-center justify-center gap-3 rounded-full bg-gray-500/20 border border-white/20 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:bg-gray-600/40 md:max-w-xs md:py-2 md:text-lg"
             style={{ textDecoration: "none" }}
           >
             <svg
