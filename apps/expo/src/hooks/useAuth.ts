@@ -1,32 +1,23 @@
+// hooks/useAuth.ts
 import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 
-import { api, queryClient } from "~/utils/api";
+import { queryClient } from "~/utils/api";
 import { auth } from "~/utils/auth";
 
 export function useAuth() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
+  const [, force] = useState({});
 
-  const deleteUserMutation = api.user.deleteUser.useMutation();
-
-  // Subscribe to auth state changes
   useEffect(() => {
-    setIsLoading(false);
-    return auth.subscribe(() => {
-      // Force a re-render when auth state changes
-      setIsLoading(false);
-    });
+    const unsubscribe = auth.subscribe(() => force({}));
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
-  const sendVerificationCode = async (phoneNumber: string) => {
-    await auth.sendVerificationCode(phoneNumber);
-  };
-
-  const verifyPhoneNumber = async (phoneNumber: string, code: string) => {
-    return await auth.verifyPhoneNumber(phoneNumber, code);
-  };
-
+  const sendVerificationCode = auth.sendVerificationCode.bind(auth);
+  const verifyPhoneNumber = auth.verifyPhoneNumber.bind(auth);
   const signOut = () => {
     auth.signOut();
     queryClient.clear();
@@ -34,15 +25,13 @@ export function useAuth() {
   };
 
   const deleteAccount = async () => {
-    await deleteUserMutation.mutateAsync();
-    auth.signOut();
-    queryClient.clear();
-    router.replace("/(onboarding)");
+    // example: call your API then sign out
+    await queryClient.invalidateQueries();
+    signOut();
   };
 
   return {
     user: auth.currentUser,
-    isLoading,
     isSignedIn: auth.isSignedIn,
     sendVerificationCode,
     verifyPhoneNumber,

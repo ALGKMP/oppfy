@@ -1,7 +1,7 @@
+import { AppState } from "react-native";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { jwtDecode } from "jwt-decode";
 import superjson from "superjson";
-import { AppState } from "react-native";
 
 import type { AppRouter } from "@oppfy/api";
 
@@ -17,173 +17,133 @@ interface User {
   uid: string;
 }
 
-const ACCESS_REFRESH_BUFFER_MS = 2 * 60 * 1000; // refresh 2 min before expiry
+const REFRESH_BUFFER_MS = 2 * 60 * 1000; // 2 min
 
-class AuthService {
+export class AuthService {
   private user: User | null = null;
   private tokens: AuthTokens | null = null;
-  private listeners: (() => void)[] = [];
-  private refreshTimer: NodeJS.Timeout | null = null;
-  private appStateSubscription: { remove: () => void } | null = null;
+  private subs = new Set<() => void>();
+  private timer: NodeJS.Timeout | null = null;
 
-  private readonly client = createTRPCClient<AppRouter>({
+  private client = createTRPCClient<AppRouter>({
     links: [
       httpBatchLink({
         transformer: superjson,
         url: `${getBaseUrl()}/api/trpc`,
         headers: () => ({
-          "x-trpc-source": "expo-react",
+          "x-trpc-source": "expo",
+          ...(this.tokens && {
+            Authorization: `Bearer ${this.tokens.accessToken}`,
+          }),
         }),
       }),
     ],
   });
 
   constructor() {
-    void this.initialize();
-    this.setupAppStateListener();
+    void this.bootstrap();
+    AppState.addEventListener("change", (s) => s === "active" && this.onWake());
   }
 
-  private setupAppStateListener() {
-    this.appStateSubscription = AppState.addEventListener("change", (nextAppState) => {
-      if (nextAppState === "active" && this.tokens) {
-        console.log("[Auth] App came to foreground, checking token validity");
-        if (!this.isAccessTokenValid(this.tokens.accessToken)) {
-          console.log("[Auth] Token invalid after app resume, attempting refresh");
-          void this.handleTokenRefresh(this.tokens);
-        } else {
-          console.log("[Auth] Token still valid after app resume");
-          this.scheduleTokenRefresh();
-        }
-      }
-    });
+  /* -------- public API ---------- */
+
+  subscribe(fn: () => void) {
+    this.subs.add(fn);
+    return () => this.subs.delete(fn);
+  }
+  get currentUser() {
+    return this.user;
+  }
+  get isSignedIn() {
+    return !!this.user;
   }
 
-  // ---------------------------------------------------------------------------
-  // Public API
-  // ---------------------------------------------------------------------------
-
-  public subscribe(listener: () => void) {
-    this.listeners.push(listener);
-    return () => {
-      this.listeners = this.listeners.filter((l) => l !== listener);
-    };
-  }
-
-  public async sendVerificationCode(phoneNumber: string) {
+  async sendVerificationCode(phoneNumber: string) {
     await this.client.auth.sendVerificationCode.mutate({ phoneNumber });
   }
 
-  public async verifyPhoneNumber(phoneNumber: string, code: string) {
-    const result = await this.client.auth.verifyCode.mutate({
+  async verifyPhoneNumber(phoneNumber: string, code: string) {
+    const { tokens, isNewUser } = await this.client.auth.verifyCode.mutate({
       phoneNumber,
       code,
     });
-
-    this.setTokens(result.tokens);
-
-    return { isNewUser: result.isNewUser };
+    this.setTokens(tokens);
+    return { isNewUser };
   }
 
-  public signOut() {
-    console.log("[Auth] Signing out user");
-    if (this.appStateSubscription) {
-      this.appStateSubscription.remove();
-      this.appStateSubscription = null;
-    }
-    storage.delete("auth_tokens");
+  signOut() {
     this.clearTimer();
     this.user = null;
     this.tokens = null;
-    this.emitUpdate();
+    storage.delete("auth_tokens");
+    this.emit();
   }
 
-  // ---------------------------------------------------------------------------
-  // Private helpers
-  // ---------------------------------------------------------------------------
+  /* -------- internals ----------- */
 
-  private async initialize() {
-    const persisted = storage.getString("auth_tokens");
-    if (persisted) {
-      const parsed = JSON.parse(persisted) as AuthTokens;
-      // If access token is still fresh, reuse it; otherwise attempt refresh.
-      if (this.isAccessTokenValid(parsed.accessToken)) {
-        this.setTokens(parsed);
-      } else {
-        const refreshed = await this.handleTokenRefresh(parsed);
-        if (!refreshed) this.signOut();
-      }
+  private async bootstrap() {
+    const raw = storage.getString("auth_tokens");
+    if (!raw) return;
+    const persisted = JSON.parse(raw) as AuthTokens;
+    if (this.isAccessFresh(persisted.accessToken)) {
+      this.setTokens(persisted);
+    } else {
+      await this.refreshTokens(persisted);
     }
   }
 
-  private setTokens(tokens: AuthTokens) {
-    this.tokens = tokens;
-    this.user = { uid: jwtDecode<{ uid: string }>(tokens.accessToken).uid };
-    storage.set("auth_tokens", JSON.stringify(tokens));
-    this.scheduleTokenRefresh();
-    this.emitUpdate();
-  }
-
-  private emitUpdate() {
-    this.listeners.forEach((listener) => listener());
-  }
-
-  private clearTimer() {
-    if (this.refreshTimer) clearTimeout(this.refreshTimer);
-    this.refreshTimer = null;
-  }
-
-  private scheduleTokenRefresh() {
-    this.clearTimer();
-    if (!this.tokens) return;
-
-    const { exp } = jwtDecode<{ exp: number }>(this.tokens.accessToken);
-    const msUntilExpiry = exp * 1000 - Date.now();
-    const msUntilRefresh = Math.max(
-      msUntilExpiry - ACCESS_REFRESH_BUFFER_MS,
-      0,
-    );
-
-    console.log(`[Auth] Scheduling token refresh in ${msUntilRefresh}ms`);
-    this.refreshTimer = setTimeout(() => {
-      console.log("[Auth] Token refresh timer triggered");
-      if (this.tokens) void this.handleTokenRefresh(this.tokens);
-    }, msUntilRefresh);
-  }
-
-  private async handleTokenRefresh(tokens: AuthTokens): Promise<boolean> {
+  private async refreshTokens(tok: AuthTokens) {
     try {
-      console.log("[Auth] Attempting to refresh token");
-      const newTokens = await this.client.auth.refreshToken.mutate({
-        refreshToken: tokens.refreshToken,
+      const next = await this.client.auth.refreshToken.mutate({
+        refreshToken: tok.refreshToken,
       });
-      console.log("[Auth] Token refresh successful");
-      this.setTokens(newTokens);
+      this.setTokens(next);
       return true;
-    } catch (err) {
-      console.error("[Auth] Token refresh failed:", err);
+    } catch {
+      this.signOut();
       return false;
     }
   }
 
-  private isAccessTokenValid(token: string): boolean {
+  private setTokens(tok: AuthTokens) {
+    this.tokens = tok;
+    this.user = { uid: jwtDecode<{ uid: string }>(tok.accessToken).uid };
+    storage.set("auth_tokens", JSON.stringify(tok));
+    this.scheduleRefresh();
+    this.emit();
+  }
+
+  private emit() {
+    this.subs.forEach((f) => f());
+  }
+
+  private clearTimer() {
+    if (this.timer) clearTimeout(this.timer);
+  }
+
+  private scheduleRefresh() {
+    this.clearTimer();
+    if (!this.tokens) return;
+    const { exp } = jwtDecode<{ exp: number }>(this.tokens.accessToken);
+    const wait = Math.max(exp * 1000 - Date.now() - REFRESH_BUFFER_MS, 0);
+    this.timer = setTimeout(() => void this.refreshTokens(this.tokens!), wait);
+  }
+
+  private isAccessFresh(token: string) {
     try {
       const { exp } = jwtDecode<{ exp: number }>(token);
-      return exp * 1000 > Date.now() + ACCESS_REFRESH_BUFFER_MS;
+      return exp * 1000 - Date.now() > REFRESH_BUFFER_MS;
     } catch {
       return false;
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Getters
-  // ---------------------------------------------------------------------------
-
-  public get currentUser() {
-    return this.user;
-  }
-
-  public get isSignedIn() {
-    return !!this.user;
+  private onWake() {
+    if (this.tokens && !this.isAccessFresh(this.tokens.accessToken)) {
+      void this.refreshTokens(this.tokens);
+    } else {
+      this.scheduleRefresh();
+    }
   }
 }
 

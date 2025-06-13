@@ -1,3 +1,4 @@
+// services/auth.service.ts
 import { inject, injectable } from "inversify";
 import jwt from "jsonwebtoken";
 import { err, ok, Result } from "neverthrow";
@@ -33,7 +34,7 @@ interface RefreshTokenParams {
   refreshToken: string;
 }
 
-interface AuthTokens {
+export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
 }
@@ -43,20 +44,21 @@ interface VerifyCodeResult {
   tokens: AuthTokens;
 }
 
-// Token lifetimes — tweak as desired
-const ACCESS_TOKEN_TTL = "15m"; // shorter‑lived access tokens
-const REFRESH_TOKEN_TTL = "30d";
+const ACCESS_TOKEN_TTL_SECONDS = 15 * 60; // 15 min
+const REFRESH_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days
+const REFRESH_ROTATE_THRESHOLD = 7 * 24 * 60 * 60; // 7 days
 
 @injectable()
 export class AuthService {
   constructor(
-    @inject(TYPES.Database) private readonly db: Database,
+    @inject(TYPES.Database)
+    private readonly db: Database,
     @inject(TYPES.UserRepository)
     private readonly userRepository: UserRepository,
     @inject(TYPES.Twilio) private readonly twilio: Twilio,
   ) {}
 
-  // ------------------------------ SMS Flow ---------------------------------
+  /* --------------------   SMS  -------------------- */
 
   async sendVerificationCode({
     phoneNumber,
@@ -68,7 +70,7 @@ export class AuthService {
     try {
       await this.twilio.sendVerificationCode({ phoneNumber });
       return ok();
-    } catch (error: unknown) {
+    } catch (error) {
       if (error instanceof RestException) {
         switch (error.code) {
           case 21211:
@@ -76,7 +78,7 @@ export class AuthService {
           case 20429:
             return err(new AuthErrors.RateLimitExceeded());
           case undefined: {
-            throw new Error("Unknown error");
+            throw new Error("Unexpected error");
           }
         }
       }
@@ -95,100 +97,95 @@ export class AuthService {
       | UserErrors.UserStatusNotFound
     >
   > {
-    let isNewUser = false;
-
-    // 1 — Verify code (admin shortcut or Twilio)
+    /* 1 ─ Check the code */
     if (ADMIN_PHONE_NUMBERS.includes(phoneNumber)) {
       if (code !== ADMIN_CODE)
         return err(new AuthErrors.InvalidVerificationCode());
     } else {
       try {
-        const isValid = await this.twilio.verifyCode({ phoneNumber, code });
-        if (!isValid) return err(new AuthErrors.InvalidVerificationCode());
-      } catch (error: unknown) {
-        if (error instanceof RestException && error.code === 60400) {
+        const okCode = await this.twilio.verifyCode({ phoneNumber, code });
+        if (!okCode) return err(new AuthErrors.InvalidVerificationCode());
+      } catch (e) {
+        if (e instanceof RestException && e.code === 60400)
           return err(new AuthErrors.InvalidVerificationCode());
-        }
-        throw error;
+        throw e;
       }
     }
 
-    // 2 — Ensure user exists / on‑app
-    const possibleUser = await this.userRepository.getUserByPhoneNumber({
-      phoneNumber,
-    });
+    /* 2 ─ Ensure user exists / on-app flag */
+    let user = await this.userRepository.getUserByPhoneNumber({ phoneNumber });
 
-    if (!possibleUser) {
+    if (!user) {
       await this.db.transaction(async (tx) => {
-        await this.userRepository.createUser({ phoneNumber }, tx);
+        const { user: newUser } = await this.userRepository.createUser(
+          { phoneNumber },
+          tx,
+        );
+        user = newUser;
       });
-      isNewUser = true;
     } else {
-      const userStatus = await this.userRepository.getUserStatus({
-        userId: possibleUser.id,
+      const status = await this.userRepository.getUserStatus({
+        userId: user.id,
       });
-      if (!userStatus)
-        return err(new UserErrors.UserStatusNotFound(possibleUser.id));
-
-      if (!userStatus.isOnApp) {
+      if (!status) return err(new UserErrors.UserStatusNotFound(user.id));
+      if (!status.isOnApp) {
         await this.userRepository.updateUserOnAppStatus({
-          userId: possibleUser.id,
+          userId: user.id,
           isOnApp: true,
         });
-        isNewUser = true;
       }
     }
 
-    const user = await this.userRepository.getUserByPhoneNumber({
-      phoneNumber,
-    });
     if (!user) return err(new UserErrors.UserNotFound(phoneNumber));
 
-    // 3 — Issue tokens
-    const tokens = this.generateTokens(user.id);
-    return ok({ isNewUser, tokens });
+    /* 3 ─ Tokens */
+    return ok({
+      isNewUser: user.createdAt.getTime() === user.updatedAt.getTime(),
+      tokens: this.issueTokens(user.id),
+    });
   }
 
-  // ------------------------------ JWT Flow ----------------------------------
+  /* --------------------   JWT  -------------------- */
 
   refreshToken({
     refreshToken,
   }: RefreshTokenParams): Result<AuthTokens, AuthErrors.InvalidRefreshToken> {
     try {
-      const { uid, exp } = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET) as {
+      const payload = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET) as {
         uid: string;
         exp: number;
       };
 
-      // Optionally: rotate refresh tokens only if < 7 days remaining
-      const msLeft = exp * 1000 - Date.now();
-      const rotate = msLeft < 7 * 24 * 60 * 60 * 1000;
+      const rotate =
+        payload.exp * 1000 - Date.now() < REFRESH_ROTATE_THRESHOLD * 1000;
 
-      const newAccess = this.createAccessToken(uid);
-      const newRefresh = rotate ? this.createRefreshToken(uid) : refreshToken;
-
-      return ok({ accessToken: newAccess, refreshToken: newRefresh });
+      return ok({
+        accessToken: this.signAccess(payload.uid),
+        refreshToken: rotate ? this.signRefresh(payload.uid) : refreshToken,
+      });
     } catch {
       return err(new AuthErrors.InvalidRefreshToken());
     }
   }
 
-  private generateTokens(uid: string): AuthTokens {
+  /* -------------------- helpers ------------------- */
+
+  private issueTokens(uid: string): AuthTokens {
     return {
-      accessToken: this.createAccessToken(uid),
-      refreshToken: this.createRefreshToken(uid),
+      accessToken: this.signAccess(uid),
+      refreshToken: this.signRefresh(uid),
     };
   }
 
-  private createAccessToken(uid: string): string {
+  private signAccess(uid: string) {
     return jwt.sign({ uid }, env.JWT_ACCESS_SECRET, {
-      expiresIn: ACCESS_TOKEN_TTL,
+      expiresIn: ACCESS_TOKEN_TTL_SECONDS,
     });
   }
 
-  private createRefreshToken(uid: string): string {
+  private signRefresh(uid: string) {
     return jwt.sign({ uid }, env.JWT_REFRESH_SECRET, {
-      expiresIn: REFRESH_TOKEN_TTL,
+      expiresIn: REFRESH_TOKEN_TTL_SECONDS,
     });
   }
 }

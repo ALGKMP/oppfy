@@ -7,14 +7,13 @@ import { ZodError } from "zod";
 import { env } from "@oppfy/env";
 
 import { container } from "./container";
-import type { Services } from "./services/index";
+import type { Services } from "./services";
 import { TYPES } from "./symbols";
 
-interface JWTPayload {
+export interface JWTPayload {
   uid: string;
-  iat: number; // issued at timestamp
-  exp: number; // expiration timestamp
-  jti?: string; // JWT ID (unique identifier)
+  iat: number;
+  exp: number;
 }
 
 /**
@@ -52,42 +51,23 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  * @see https://trpc.io/docs/context
  */
 export const createTRPCContext = (opts: { headers: Headers }) => {
-  const source = opts.headers.get("x-trpc-source") ?? "unknown";
-  const authToken = opts.headers.get("Authorization") ?? null;
-
-  console.log(">>> tRPC Request from", source);
-
-  opts.headers.set("x-request-id", crypto.randomUUID());
+  const hdr = Object.fromEntries(opts.headers);
+  const auth = hdr.authorization || hdr.Authorization || "";
 
   let session: JWTPayload | null = null;
 
-  if (authToken) {
+  if (auth.startsWith("Bearer ")) {
+    const token = auth.slice(7);
     try {
-      const token = authToken.split("Bearer ")[1];
-
-      if (token === undefined) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "No token provided",
-        });
-      }
-
-      // Verify and decode the token
       session = jwt.verify(token, env.JWT_ACCESS_SECRET) as JWTPayload;
-    } catch (err) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message:
-          err instanceof Error
-            ? err.message
-            : "Unknown error during token verification",
-      });
+    } catch {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
     }
   }
 
-  return createInnerTRPCContext({
-    session,
-  });
+  opts.headers.set("x-request-id", crypto.randomUUID());
+
+  return createInnerTRPCContext({ session });
 };
 
 /**
@@ -126,17 +106,9 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
  */
 export const createTRPCRouter = t.router;
 
-const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (ctx.session === null) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
-  }
-
-  return next({
-    ctx: {
-      // infers the `session` as non-nullable
-      session: ctx.session,
-    },
-  });
+const isAuthed = t.middleware(({ ctx, next }) => {
+  if (!ctx.session) throw new TRPCError({ code: "UNAUTHORIZED" });
+  return next({ ctx: { session: ctx.session } });
 });
 
 export const createCallerFactory = t.createCallerFactory;
@@ -159,4 +131,4 @@ export const publicProcedure = t.procedure;
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const protectedProcedure = t.procedure.use(isAuthed);
