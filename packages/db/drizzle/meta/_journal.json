@@ -1,47 +1,19 @@
 {
-  "version": "6",
+  "version": "7",
   "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "6",
-      "when": 1744067429520,
-      "tag": "0000_red_sphinx",
+      "version": "7",
+      "when": 1749776799939,
+      "tag": "0000_high_callisto",
       "breakpoints": true
     },
     {
       "idx": 1,
-      "version": "6",
-      "when": 1744333437642,
-      "tag": "0001_colorful_jasper_sitwell",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1744351445798,
-      "tag": "0002_crazy_lockheed",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1745611289091,
-      "tag": "0003_pale_morbius",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1745612287715,
-      "tag": "0004_yellow_vengeance",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
       "version": "7",
-      "when": 1748546302556,
-      "tag": "0005_giant_cardiac",
+      "when": 1749778203299,
+      "tag": "0001_dizzy_post",
       "breakpoints": true
     }
   ]

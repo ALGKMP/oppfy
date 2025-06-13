@@ -17,6 +17,7 @@
   "dependencies": {
     "@aws-sdk/cloudfront-signer": "^3.609.0",
     "@aws-sdk/s3-request-presigner": "^3.564.0",
+    "@oppfy/auth": "workspace:*",
     "@oppfy/cloudfront": "workspace:*",
     "@oppfy/db": "workspace:*",
     "@oppfy/env": "workspace:*",
@@ -27,6 +28,7 @@
     "@oppfy/validators": "workspace:*",
     "@trpc/client": "catalog:",
     "@trpc/server": "catalog:",
+    "better-auth": "^1.2.9",
     "crypto": "^1.0.1",
     "inversify": "7.0.0-alpha.5",
     "jsonwebtoken": "^9.0.2",

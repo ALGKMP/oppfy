@@ -24,12 +24,14 @@ export class Twilio {
 
   async sendVerificationCode({
     phoneNumber,
+    code,
   }: {
     phoneNumber: string;
+    code: string;
   }): Promise<void> {
     await this.client.verify.v2
       .services(env.TWILIO_SERVICE_SID)
-      .verifications.create({ to: phoneNumber, channel: "sms" });
+      .verifications.create({ to: phoneNumber, channel: "sms", customCode: code });
   }
 
   async verifyCode({

@@ -1,3 +1,5 @@
+export { auth } from "./src/lib/auth";
+
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
 import type { AppRouter } from "./src/root";

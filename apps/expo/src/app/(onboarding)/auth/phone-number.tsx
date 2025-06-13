@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { BackHandler } from "react-native";
 import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
@@ -13,11 +13,10 @@ import {
   OnboardingScreen,
 } from "~/components/ui/Onboarding";
 import type { CountryData } from "~/data/groupedCountries";
-import { useAuth } from "~/hooks/useAuth";
+import { authClient } from "~/lib/auth-client";
 
 const PhoneNumber = () => {
   const router = useRouter();
-  const { sendVerificationCode } = useAuth();
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [countryData, setCountryData] = useState<CountryData>({
@@ -64,26 +63,29 @@ const PhoneNumber = () => {
 
     const e164PhoneNumber = `${countryData.dialingCode}${phoneNumber}`;
 
-    try {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-      await sendVerificationCode(e164PhoneNumber);
+    const response = await authClient.phoneNumber.sendOtp({
+      phoneNumber: e164PhoneNumber,
+    });
 
-      router.push({
-        params: {
-          phoneNumber: e164PhoneNumber,
-        },
-        pathname: "/auth/otp",
-      });
-    } catch (err: unknown) {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-
-      if (err && typeof err === "object" && "message" in err) {
-        setError((err as { message: string }).message);
+    if (response.error) {
+      if (response.error.message) {
+        setError(response.error.message);
       } else {
         setError("An unknown error occurred. Please try again later.");
       }
+
+      setIsLoading(false);
+      return;
     }
+
+    router.push({
+      params: {
+        phoneNumber: e164PhoneNumber,
+      },
+      pathname: "/auth/otp",
+    });
 
     setIsLoading(false);
   };

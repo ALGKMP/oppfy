@@ -9,7 +9,7 @@ import {
   OnboardingOTPInput,
   OnboardingScreen,
 } from "~/components/ui/Onboarding";
-import { useAuth } from "~/hooks/useAuth";
+import { authClient } from "~/lib/auth-client";
 import { api } from "~/utils/api";
 
 const PhoneNumberOTP = () => {
@@ -17,7 +17,6 @@ const PhoneNumberOTP = () => {
 
   const router = useRouter();
 
-  const { verifyPhoneNumber } = useAuth();
   const userStatusMutation = api.user.fetchUserStatus.useMutation();
 
   const [phoneNumberOTP, setPhoneNumberOTP] = useState("");
@@ -40,33 +39,38 @@ const PhoneNumberOTP = () => {
     setIsLoading(true);
     setError(null);
 
-    try {
-      const { isNewUser } = await verifyPhoneNumber(
-        phoneNumber,
-        phoneNumberOTP,
-      );
+    const response = await authClient.phoneNumber.verify({
+      phoneNumber,
+      code: phoneNumberOTP,
+    });
 
-      if (isNewUser) {
-        router.replace("/user-info/name");
-        return;
-      }
-
-      const userStatus = await userStatusMutation.mutateAsync();
-
-      if (!userStatus.hasCompletedOnboarding) {
-        router.replace("/user-info/name");
-        return;
-      }
-
-      router.replace("/(app)/(bottom-tabs)/(home)");
-    } catch (err: unknown) {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      if (err && typeof err === "object" && "message" in err) {
-        setError((err as { message: string }).message);
+    if (response.error) {
+      if (response.error.message) {
+        setError(response.error.message);
       } else {
         setError("An unknown error occurred. Please try again later.");
       }
+
+      setIsLoading(false);
+      return;
     }
+
+    const isNewUser =
+      response.data.user.createdAt === response.data.user.updatedAt;
+
+    if (isNewUser) {
+      router.replace("/user-info/name");
+      return;
+    }
+
+    const userStatus = await userStatusMutation.mutateAsync();
+
+    if (!userStatus.hasCompletedOnboarding) {
+      router.replace("/user-info/name");
+      return;
+    }
+
+    router.replace("/(app)/(bottom-tabs)/(home)");
 
     setIsLoading(false);
   };

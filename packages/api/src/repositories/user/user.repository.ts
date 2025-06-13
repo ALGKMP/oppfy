@@ -100,12 +100,26 @@ export class UserRepository {
     { phoneNumber, isOnApp = true }: CreateUserParams,
     tx: Transaction,
   ): Promise<CreateUserResult> {
-    const [user] = await tx
+    let user: User | undefined;
+
+    const [newUser] = await tx
       .insert(this.schema.user)
       .values({
+        id: crypto.randomUUID(),
+        name: phoneNumber,
+        email: `${phoneNumber}@oppfy.app`,
         phoneNumber,
       })
+      .onConflictDoNothing()
       .returning();
+
+    if (newUser === undefined) {
+      user = await tx.query.user.findFirst({
+        where: eq(this.schema.user.phoneNumber, phoneNumber),
+      });
+    } else {
+      user = newUser;
+    }
 
     invariant(user);
 
@@ -191,7 +205,9 @@ export class UserRepository {
         ),
       );
 
-    return existingNumbers.map((user) => user.phoneNumber);
+    return existingNumbers
+      .map((user) => user.phoneNumber)
+      .filter((phoneNumber) => phoneNumber !== null);
   }
 
   async markUserAsOnApp(

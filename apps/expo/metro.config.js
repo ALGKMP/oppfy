@@ -6,9 +6,13 @@ const path = require("path");
 
 const { getSentryExpoConfig } = require("@sentry/react-native/metro");
 
-module.exports = withTurborepoManagedCache(
-  withMonorepoPaths(getSentryExpoConfig(__dirname)),
-);
+// Get the base config with Sentry
+const baseConfig = getSentryExpoConfig(__dirname);
+
+// // Enable package exports
+// baseConfig.resolver.unstable_enablePackageExports = true;
+
+module.exports = withTurborepoManagedCache(withMonorepoPaths(baseConfig));
 
 /**
  * Add the monorepo paths to the Metro config.
