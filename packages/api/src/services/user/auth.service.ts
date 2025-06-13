@@ -97,6 +97,8 @@ export class AuthService {
       | UserErrors.UserStatusNotFound
     >
   > {
+    let isNewUser = false;
+
     /* 1 ─ Check the code */
     if (ADMIN_PHONE_NUMBERS.includes(phoneNumber)) {
       if (code !== ADMIN_CODE)
@@ -122,6 +124,7 @@ export class AuthService {
           tx,
         );
         user = newUser;
+        isNewUser = true;
       });
     } else {
       const status = await this.userRepository.getUserStatus({
@@ -133,6 +136,7 @@ export class AuthService {
           userId: user.id,
           isOnApp: true,
         });
+        isNewUser = true;
       }
     }
 
@@ -140,7 +144,7 @@ export class AuthService {
 
     /* 3 ─ Tokens */
     return ok({
-      isNewUser: user.createdAt.getTime() === user.updatedAt.getTime(),
+      isNewUser,
       tokens: this.issueTokens(user.id),
     });
   }

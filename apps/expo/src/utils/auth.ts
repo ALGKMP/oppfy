@@ -84,11 +84,25 @@ export class AuthService {
   private async bootstrap() {
     const raw = storage.getString("auth_tokens");
     if (!raw) return;
+
+    // Always hydrate state immediately
     const persisted = JSON.parse(raw) as AuthTokens;
-    if (this.isAccessFresh(persisted.accessToken)) {
-      this.setTokens(persisted);
+    this.tokens = persisted;
+    try {
+      this.user = {
+        uid: jwtDecode<{ uid: string }>(persisted.accessToken).uid,
+      };
+    } catch {
+      /* malformed – treat as unauth later */
+    }
+    this.emit();
+
+    // If token is stale, silently refresh
+    if (!this.isAccessFresh(persisted.accessToken)) {
+      const ok = await this.refreshTokens(persisted);
+      if (!ok) this.signOut(); // blows away state if refresh fails
     } else {
-      await this.refreshTokens(persisted);
+      this.scheduleRefresh();
     }
   }
 
