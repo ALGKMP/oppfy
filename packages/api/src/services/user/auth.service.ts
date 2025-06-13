@@ -75,6 +75,9 @@ export class AuthService {
             return err(new AuthErrors.InvalidPhoneNumber());
           case 20429:
             return err(new AuthErrors.RateLimitExceeded());
+          case undefined: {
+            throw new Error("Unknown error");
+          }
         }
       }
       throw error;
