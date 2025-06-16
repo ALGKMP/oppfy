@@ -43,7 +43,7 @@ interface VerifyCodeResult {
   tokens: AuthTokens;
 }
 
-const ACCESS_TOKEN_TTL_SECONDS = 1 * 60; // 2 min
+const ACCESS_TOKEN_TTL_SECONDS = 30 * 60; // 30 min
 const REFRESH_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days
 const REFRESH_ROTATE_THRESHOLD = 7 * 24 * 60 * 60; // 7 days
 
