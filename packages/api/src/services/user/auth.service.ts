@@ -1,4 +1,3 @@
-// services/auth.service.ts
 import { inject, injectable } from "inversify";
 import jwt from "jsonwebtoken";
 import { err, ok, Result } from "neverthrow";
@@ -44,7 +43,7 @@ interface VerifyCodeResult {
   tokens: AuthTokens;
 }
 
-const ACCESS_TOKEN_TTL_SECONDS = 15 * 60; // 15 min
+const ACCESS_TOKEN_TTL_SECONDS = 1 * 60; // 2 min
 const REFRESH_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days
 const REFRESH_ROTATE_THRESHOLD = 7 * 24 * 60 * 60; // 7 days
 
@@ -58,7 +57,7 @@ export class AuthService {
     @inject(TYPES.Twilio) private readonly twilio: Twilio,
   ) {}
 
-  /* --------------------   SMS  -------------------- */
+  /* -------------------- SMS -------------------- */
 
   async sendVerificationCode({
     phoneNumber,
@@ -149,7 +148,7 @@ export class AuthService {
     });
   }
 
-  /* --------------------   JWT  -------------------- */
+  /* -------------------- JWT -------------------- */
 
   refreshToken({
     refreshToken,

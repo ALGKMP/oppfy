@@ -17,13 +17,13 @@ interface User {
   uid: string;
 }
 
-const REFRESH_BUFFER_MS = 2 * 60 * 1000; // 2 min
+const REFRESH_BUFFER_MS = 30 * 1000; // 30 seconds
 
 export class AuthService {
   private user: User | null = null;
   private tokens: AuthTokens | null = null;
   private subs = new Set<() => void>();
-  private timer: NodeJS.Timeout | null = null;
+  private refreshPromise: Promise<void> | null = null;
 
   private client = createTRPCClient<AppRouter>({
     links: [
@@ -40,8 +40,19 @@ export class AuthService {
     ],
   });
 
+  private unauthenticatedClient = createTRPCClient<AppRouter>({
+    links: [
+      httpBatchLink({
+        transformer: superjson,
+        url: `${getBaseUrl()}/api/trpc`,
+        headers: () => ({
+          "x-trpc-source": "expo",
+        }),
+      }),
+    ],
+  });
+
   constructor() {
-    void this.bootstrap();
     AppState.addEventListener("change", (s) => s === "active" && this.onWake());
   }
 
@@ -51,9 +62,11 @@ export class AuthService {
     this.subs.add(fn);
     return () => this.subs.delete(fn);
   }
+
   get currentUser() {
     return this.user;
   }
+
   get isSignedIn() {
     return !!this.user;
   }
@@ -67,12 +80,48 @@ export class AuthService {
       phoneNumber,
       code,
     });
-    this.setTokens(tokens);
+    await this.setTokens(tokens);
     return { isNewUser };
   }
 
+  async ensureValidToken(): Promise<boolean> {
+    if (!this.tokens) return false;
+
+    try {
+      const decoded = jwtDecode<{ exp: number }>(this.tokens.accessToken);
+      const isExpired = decoded.exp * 1000 - Date.now() < REFRESH_BUFFER_MS;
+
+      if (isExpired) {
+        if (this.refreshPromise) {
+          await this.refreshPromise;
+          return true;
+        }
+
+        this.refreshPromise = this.refreshTokens();
+        await this.refreshPromise;
+        this.refreshPromise = null;
+      }
+
+      return true;
+    } catch {
+      this.signOut();
+      return false;
+    }
+  }
+
+  async bootstrap() {
+    const raw = storage.getString("auth_tokens");
+    if (!raw) return;
+
+    try {
+      const persisted = JSON.parse(raw) as AuthTokens;
+      await this.setTokens(persisted);
+    } catch {
+      this.signOut();
+    }
+  }
+
   signOut() {
-    this.clearTimer();
     this.user = null;
     this.tokens = null;
     storage.delete("auth_tokens");
@@ -81,83 +130,39 @@ export class AuthService {
 
   /* -------- internals ----------- */
 
-  private async bootstrap() {
-    const raw = storage.getString("auth_tokens");
-    if (!raw) return;
-
-    // Always hydrate state immediately
-    const persisted = JSON.parse(raw) as AuthTokens;
-    this.tokens = persisted;
+  private async setTokens(tokens: AuthTokens) {
     try {
-      this.user = {
-        uid: jwtDecode<{ uid: string }>(persisted.accessToken).uid,
-      };
-    } catch {
-      /* malformed – treat as unauth later */
-    }
-    this.emit();
-
-    // If token is stale, silently refresh
-    if (!this.isAccessFresh(persisted.accessToken)) {
-      const ok = await this.refreshTokens(persisted);
-      if (!ok) this.signOut(); // blows away state if refresh fails
-    } else {
-      this.scheduleRefresh();
-    }
-  }
-
-  private async refreshTokens(tok: AuthTokens) {
-    try {
-      const next = await this.client.auth.refreshToken.mutate({
-        refreshToken: tok.refreshToken,
-      });
-      this.setTokens(next);
-      return true;
+      const decoded = jwtDecode<{ uid: string; exp: number }>(
+        tokens.accessToken,
+      );
+      this.user = { uid: decoded.uid };
+      this.tokens = tokens;
+      storage.set("auth_tokens", JSON.stringify(tokens));
+      this.emit();
     } catch {
       this.signOut();
-      return false;
     }
-  }
-
-  private setTokens(tok: AuthTokens) {
-    this.tokens = tok;
-    this.user = { uid: jwtDecode<{ uid: string }>(tok.accessToken).uid };
-    storage.set("auth_tokens", JSON.stringify(tok));
-    this.scheduleRefresh();
-    this.emit();
   }
 
   private emit() {
     this.subs.forEach((f) => f());
   }
 
-  private clearTimer() {
-    if (this.timer) clearTimeout(this.timer);
-  }
-
-  private scheduleRefresh() {
-    this.clearTimer();
+  private async refreshTokens() {
     if (!this.tokens) return;
-    const { exp } = jwtDecode<{ exp: number }>(this.tokens.accessToken);
-    const wait = Math.max(exp * 1000 - Date.now() - REFRESH_BUFFER_MS, 0);
-    this.timer = setTimeout(() => void this.refreshTokens(this.tokens!), wait);
-  }
 
-  private isAccessFresh(token: string) {
     try {
-      const { exp } = jwtDecode<{ exp: number }>(token);
-      return exp * 1000 - Date.now() > REFRESH_BUFFER_MS;
+      const next = await this.unauthenticatedClient.auth.refreshToken.mutate({
+        refreshToken: this.tokens.refreshToken,
+      });
+      await this.setTokens(next);
     } catch {
-      return false;
+      this.signOut();
     }
   }
 
-  private onWake() {
-    if (this.tokens && !this.isAccessFresh(this.tokens.accessToken)) {
-      void this.refreshTokens(this.tokens);
-    } else {
-      this.scheduleRefresh();
-    }
+  private async onWake() {
+    await this.ensureValidToken();
   }
 }
 

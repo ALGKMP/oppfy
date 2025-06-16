@@ -8,7 +8,7 @@ const Index = () => {
   const { isLoading: isLoadingAuth, isSignedIn } = useAuth();
   const { isLoading: isLoadingUserStatus, data: userStatus } =
     api.user.getUserStatus.useQuery(undefined, {
-      enabled: isSignedIn,
+      enabled: isSignedIn && !isLoadingAuth,
     });
 
   const isLoading = isLoadingAuth || isLoadingUserStatus;
