@@ -306,7 +306,7 @@ export default function WaitlistPage() {
           </div>
           {/* Pre-Order on the App Store Button */}
           <a
-            href="#" // Replace with your App Store pre-order link
+            href="https://apps.apple.com/ca/app/oppfy/id6746730960" // Replace with your App Store pre-order link
             className="flex w-full max-w-sm items-center justify-center gap-3 rounded-full bg-white px-6 py-3 text-base font-semibold text-black shadow-md transition hover:bg-gray-100 md:max-w-xs md:py-2 md:text-lg"
             style={{ textDecoration: "none" }}
           >
