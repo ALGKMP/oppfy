@@ -17,7 +17,7 @@ export default function PrivacyPage() {
         </h1>
 
         <div className="w-full max-w-2xl space-y-6 pb-20 text-gray-400">
-          <p>Last updated: {new Date().toLocaleDateString()}</p>
+          <p>Last updated: March 19, 2024</p>
 
           <section className="space-y-4">
             <p>

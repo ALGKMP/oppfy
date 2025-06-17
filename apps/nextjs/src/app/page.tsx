@@ -316,7 +316,6 @@ export default function WaitlistPage() {
               height="20"
               viewBox="0 0 22.773 22.773"
               xmlns="http://www.w3.org/2000/svg"
-              stroke="#000000"
               className="flex-shrink-0"
             >
               <g>
@@ -579,6 +578,10 @@ export default function WaitlistPage() {
           <span className="mx-1">•</span>
           <a href="/terms" className="transition hover:opacity-100">
             Terms of Service
+          </a>
+          <span className="mx-1">•</span>
+          <a href="/contact" className="transition hover:opacity-100">
+            Contact
           </a>
         </div>
       </footer>
