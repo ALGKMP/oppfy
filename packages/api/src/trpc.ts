@@ -52,7 +52,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  */
 export const createTRPCContext = (opts: { headers: Headers }) => {
   const hdr = Object.fromEntries(opts.headers);
-  const auth = hdr.authorization || hdr.Authorization || "";
+  const auth = hdr.authorization ?? hdr.Authorization ?? "";
 
   let session: JWTPayload | null = null;
 

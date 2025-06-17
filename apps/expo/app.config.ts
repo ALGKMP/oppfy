@@ -5,7 +5,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: "Oppfy",
   slug: "oppfy",
   scheme: "oppfy",
-  version: "1.0.1",
+  version: "1.0.2",
   orientation: "portrait",
   icon: "./assets/icons/icon.png",
   userInterfaceStyle: "dark",
