@@ -55,7 +55,7 @@ export default function AnimatedPostPage({ post }: PostPageProps) {
             transition={{ delay: 0.3 }}
           >
             <motion.a
-              href="https://testflight.apple.com/join/EHMR7AxB"
+              href="https://testflight.apple.com/join/3SnDTsgF"
               className="rounded-xl bg-[#F214FF] px-6 py-3 font-bold text-white transition-all hover:opacity-90 hover:shadow-lg hover:shadow-[#F214FF]/20 md:px-8 md:py-4"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

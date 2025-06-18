@@ -101,7 +101,7 @@ const CameraPage = () => {
 
   // Video player setup
   const player = useVideoPlayer(
-    require("@assets/videos/golf.mp4"),
+    require("@assets/videos/pool.mp4"),
     (player) => {
       player.loop = false; // Don't loop, play once
       player.muted = false;
@@ -302,7 +302,7 @@ const CameraPage = () => {
   useEffect(() => {
     const subscription = player.addListener("playToEnd", () => {
       // Video finished playing, prepare the video asset and route
-      const videoAsset = require("@assets/videos/golf.mp4");
+      const videoAsset = require("@assets/videos/pool.mp4");
       const processedUri =
         Platform.OS === "android" ? `file://${videoAsset}` : videoAsset;
 

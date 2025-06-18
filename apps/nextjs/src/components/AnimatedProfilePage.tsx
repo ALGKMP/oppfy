@@ -63,7 +63,7 @@ export default function AnimatedProfilePage({ profile }: ProfilePageProps) {
           </motion.h1>
 
           <motion.a
-            href="https://testflight.apple.com/join/EHMR7AxB"
+            href="https://testflight.apple.com/join/3SnDTsgF"
             className="mt-2 rounded-xl bg-[#F214FF] px-8 py-3 text-base font-bold text-white transition-all hover:opacity-90 hover:shadow-lg hover:shadow-[#F214FF]/20 md:text-lg"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
