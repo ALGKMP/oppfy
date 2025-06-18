@@ -293,7 +293,7 @@ export default function WaitlistPage() {
               alt="Oppfy logo"
               width={56}
               height={56}
-              className="mx-auto mb-3 md:mx-0"
+              className="mx-auto mb-3 rounded-xl md:mx-0 md:rounded-none"
             />
             <h1
               className="mb-4 text-4xl font-extrabold leading-tight text-white md:text-5xl lg:text-6xl"
