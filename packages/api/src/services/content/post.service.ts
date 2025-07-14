@@ -13,12 +13,12 @@ import {
   PostRepository,
   PostResult,
 } from "../../repositories/content/post.repository";
+import { FriendRepository } from "../../repositories/social/friend.repository";
 import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
 import type { PaginatedResponse, PaginationParams } from "../../types";
 import { Hydrate, hydratePost, hydrateProfile } from "../../utils";
-import { FriendRepository } from "../../repositories/social/friend.repository";
 
 interface BasePostParams {
   authorUserId: string;
@@ -99,7 +99,7 @@ export class PostService {
     private readonly cloudfront: CloudFront,
     @inject(TYPES.Mux)
     private readonly mux: Mux,
-  ) { }
+  ) {}
 
   async getPostStats(
     params: GetPostParams,
@@ -206,7 +206,8 @@ export class PostService {
           userId: createdRecipientUser.id,
           update: {
             name: params.recipientNotOnAppName,
-            username: `${Math.random().toString(36).substring(2, 15)}`,
+            // 5 extra random characters to avoid collisions
+            username: `${params.recipientNotOnAppName}-${Math.random().toString(36).substring(2, 7)}`,
           },
         },
         tx,
@@ -255,7 +256,8 @@ export class PostService {
           userId: createdRecipientUser.id,
           update: {
             name: params.recipientNotOnAppName,
-            username: `${params.recipientNotOnAppName}-${Math.random().toString(36).substring(2, 15)}`,
+            // 5 extra random characters to avoid collisions
+            username: `${params.recipientNotOnAppName}-${Math.random().toString(36).substring(2, 7)}`,
           },
         },
         tx,
@@ -468,22 +470,31 @@ export class PostService {
     streakIncremented: boolean;
     currentStreak: number;
     longestStreak: number;
-    resetReason?: 'same_author' | 'too_soon' | 'no_previous_post' | 'friendship_not_found';
+    resetReason?:
+      | "same_author"
+      | "too_soon"
+      | "no_previous_post"
+      | "friendship_not_found";
   }> {
     // Get current friendship data
-    const friend = await this.friendRepository.getFriend({
-      userIdA: params.authorUserId,
-      userIdB: params.recipientUserId,
-    }, tx);
+    const friend = await this.friendRepository.getFriend(
+      {
+        userIdA: params.authorUserId,
+        userIdB: params.recipientUserId,
+      },
+      tx,
+    );
 
     if (!friend) {
       // No friendship exists - this shouldn't happen in normal flow
-      console.warn(`No friendship found between users ${params.authorUserId} and ${params.recipientUserId}`);
+      console.warn(
+        `No friendship found between users ${params.authorUserId} and ${params.recipientUserId}`,
+      );
       return {
         streakIncremented: false,
         currentStreak: 0,
         longestStreak: 0,
-        resetReason: 'friendship_not_found',
+        resetReason: "friendship_not_found",
       };
     }
 
@@ -491,18 +502,25 @@ export class PostService {
     const currentDate = new Date();
     let newCurrentStreak = friend.currentStreak;
     let streakIncremented = false;
-    let resetReason: 'same_author' | 'too_soon' | 'no_previous_post' | undefined;
+    let resetReason:
+      | "same_author"
+      | "too_soon"
+      | "no_previous_post"
+      | undefined;
 
     // Business rule: Check if this is the first post in the friendship
     if (!friend.lastPostDate || !friend.lastPostAuthorId) {
       newCurrentStreak = 1;
-      resetReason = 'no_previous_post';
+      resetReason = "no_previous_post";
     } else {
       // Business rule: Calculate time since last post
-      const hoursSinceLastPost = (currentDate.getTime() - friend.lastPostDate.getTime()) / (1000 * 60 * 60);
+      const hoursSinceLastPost =
+        (currentDate.getTime() - friend.lastPostDate.getTime()) /
+        (1000 * 60 * 60);
 
       // Business rule: Check if last author was different
-      const lastAuthorWasDifferent = friend.lastPostAuthorId !== params.authorUserId;
+      const lastAuthorWasDifferent =
+        friend.lastPostAuthorId !== params.authorUserId;
 
       // Business rule: Check if enough time has passed (24 hours)
       const enoughTimeHasPassed = hoursSinceLastPost >= 24;
@@ -510,11 +528,11 @@ export class PostService {
       if (!lastAuthorWasDifferent) {
         // Business rule: Same author posted consecutively - reset streak
         newCurrentStreak = 1;
-        resetReason = 'same_author';
+        resetReason = "same_author";
       } else if (!enoughTimeHasPassed) {
-        // Business rule: Not enough time has passed - reset streak  
+        // Business rule: Not enough time has passed - reset streak
         newCurrentStreak = 1;
-        resetReason = 'too_soon';
+        resetReason = "too_soon";
       } else {
         // Business rule: Valid conditions met - increment streak
         newCurrentStreak = friend.currentStreak + 1;
@@ -549,17 +567,27 @@ export class PostService {
 
     // Business logic: Logging and analytics
     if (resetReason) {
-      console.log(`Streak reset for users ${params.authorUserId} <-> ${params.recipientUserId}:`, {
-        reason: resetReason,
-        newStreak: newCurrentStreak,
-        longestStreak: newLongestStreak,
-        ...(resetReason === 'too_soon' && { hoursSinceLastPost: (currentDate.getTime() - friend.lastPostDate!.getTime()) / (1000 * 60 * 60) }),
-      });
+      console.log(
+        `Streak reset for users ${params.authorUserId} <-> ${params.recipientUserId}:`,
+        {
+          reason: resetReason,
+          newStreak: newCurrentStreak,
+          longestStreak: newLongestStreak,
+          ...(resetReason === "too_soon" && {
+            hoursSinceLastPost:
+              (currentDate.getTime() - friend.lastPostDate!.getTime()) /
+              (1000 * 60 * 60),
+          }),
+        },
+      );
     } else if (streakIncremented) {
-      console.log(`Streak incremented for users ${params.authorUserId} <-> ${params.recipientUserId}:`, {
-        currentStreak: newCurrentStreak,
-        longestStreak: newLongestStreak,
-      });
+      console.log(
+        `Streak incremented for users ${params.authorUserId} <-> ${params.recipientUserId}:`,
+        {
+          currentStreak: newCurrentStreak,
+          longestStreak: newLongestStreak,
+        },
+      );
     }
 
     return result;
