@@ -61,9 +61,9 @@ const PreviewScreen = () => {
 
   return (
     <ScreenView padding={0} safeAreaEdges={["top", "bottom"]}>
-      <YStack flex={1} justifyContent="space-between" padding="$4">
+      <YStack flex={1} justifyContent="space-between" paddingHorizontal="$4">
         {/* Header Section */}
-        <YStack alignItems="center" paddingTop="$2" gap="$2">
+        <YStack alignItems="center" gap="$2">
           <Text
             fontSize={28}
             fontWeight="900"
@@ -141,7 +141,7 @@ const PreviewScreen = () => {
         </View>
 
         {/* Buttons Section */}
-        <XStack gap="$4" marginTop="$4">
+        <XStack gap="$4">
           <Button
             flex={1}
             disabled={saveState === "saving" || saveState === "saved"}

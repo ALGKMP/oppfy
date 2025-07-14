@@ -330,12 +330,12 @@ const CreativeListItem = ({
             >
               {item.data.name}
             </SizableText>
-            <SizableText size="$3" lineHeight={0} color="white" opacity={0.9}>
+            {/* <SizableText size="$3" lineHeight={0} color="white" opacity={0.9}>
               {formatPhoneNumber(
                 item.data.phoneNumbers?.[0]?.number,
                 item.data.phoneNumbers?.[0]?.countryCode,
               ) ?? item.data.phoneNumbers?.[0]?.number}
-            </SizableText>
+            </SizableText> */}
           </YStack>
 
           {/* Action Button */}
@@ -357,7 +357,6 @@ const CreativeListItem = ({
 };
 
 const PostTo = () => {
-  const theme = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const infoDialog = useDialogController();
@@ -435,29 +434,13 @@ const PostTo = () => {
 
   useEffect(() => {
     return () => debouncedSearchContacts.cancel();
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSearchChange = (text: string) => {
     setSearchQuery(text);
     void debouncedSearchContacts(text);
-  };
-
-  const formatPhoneNumber = (
-    phoneNumber: string | undefined,
-    countryCode: string | undefined,
-  ) => {
-    if (phoneNumber === undefined || countryCode === undefined) return;
-    try {
-      const parsedNumber = parsePhoneNumberWithError(
-        phoneNumber,
-        countryCode.toUpperCase() as CountryCode,
-      );
-      return parsedNumber.isValid()
-        ? parsedNumber.formatNational()
-        : phoneNumber;
-    } catch {
-      return phoneNumber;
-    }
   };
 
   const displayItems = () => {
