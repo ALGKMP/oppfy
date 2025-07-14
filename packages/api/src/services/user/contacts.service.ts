@@ -71,22 +71,46 @@ export class ContactsService {
     // Combine all tiers while preserving original order
     const allRecommendedUserIds = [...tier1, ...tier2, ...tier3];
 
+    let orderedProfiles: Profile<"onboarded">[] = [];
+
     if (allRecommendedUserIds.length === 0) {
-      return ok([]);
+      // Fallback: Get random active users from the app when no recommendations
+      const randomUserIds = await this.userRepository.getRandomActiveUserIds({
+        pageSize: 20, // Get more to filter out the requesting user
+      });
+
+      // Filter out the requesting user and map to just user IDs
+      const filteredUserIds = randomUserIds
+        .map((user) => user.userId)
+        .filter((id) => id !== userId)
+        .slice(0, 10); // Take first 10 after filtering
+
+      if (filteredUserIds.length === 0) {
+        return ok([]);
+      }
+
+      // Get profiles for random users
+      const profiles = await this.profileRepository.getProfilesByIds({
+        userIds: filteredUserIds,
+      });
+
+      orderedProfiles = profiles;
+    } else {
+      // Get profiles and preserve original order from Lambda recommendations
+      const profiles = await this.profileRepository.getProfilesByIds({
+        userIds: allRecommendedUserIds,
+      });
+
+      // Create a map for efficient lookup
+      const profileMap = new Map(
+        profiles.map((profile) => [profile.userId, profile]),
+      );
+
+      // Re-map to original order with fallback for missing profiles
+      orderedProfiles = allRecommendedUserIds
+        .map((id) => profileMap.get(id))
+        .filter((profile): profile is Profile<"onboarded"> => !!profile);
     }
-
-    // Get profiles and preserve original order
-    const profiles = await this.profileRepository.getProfilesByIds({
-      userIds: allRecommendedUserIds,
-    });
-
-    // Create a map for efficient lookup
-    const profileMap = new Map(profiles.map(profile => [profile.userId, profile]));
-
-    // Re-map to original order with fallback for missing profiles
-    const orderedProfiles = allRecommendedUserIds
-      .map(id => profileMap.get(id))
-      .filter((profile): profile is Profile<"onboarded"> => !!profile);
 
     // set all to not following by default
     const profilesWithFollowStatus = orderedProfiles.map((profile) => ({
