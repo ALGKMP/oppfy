@@ -329,6 +329,14 @@ export default function WaitlistPage() {
               Pre-Order on the App Store
             </span>
           </a>
+          {/* Join Beta Button */}
+          <a
+            href="https://testflight.apple.com/join/3SnDTsgF"
+            className="flex w-full max-w-sm items-center justify-center rounded-full border border-white/20 bg-white/10 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:bg-white/20 md:max-w-xs md:py-2 md:text-lg"
+            style={{ textDecoration: "none" }}
+          >
+            <span className="whitespace-nowrap">Join Beta</span>
+          </a>
           {/* Join our Discord Community Button */}
           <a
             href="https://discord.gg/ZEcskPJuDc"
