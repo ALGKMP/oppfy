@@ -313,19 +313,49 @@ export class PostService {
       PostErrors.PostNotFound
     >
   > {
-    const posts = await this.postRepository.paginatePostsOfFollowing({
+    // First, get posts from people the user follows
+    const followingPosts = await this.postRepository.paginatePostsOfFollowing({
       userId,
       cursor,
-      pageSize,
+      pageSize: pageSize + 1, // Get one extra to check if there are more
     });
 
-    const hydratedPosts = await Promise.all(
-      posts.map((post) => this.hydratePost(post)),
+    const hydratedFollowingPosts = await Promise.all(
+      followingPosts.map((post) => this.hydratePost(post)),
     );
 
-    const hasMore = hydratedPosts.length > pageSize;
-    const items = hydratedPosts.slice(0, pageSize);
+    const hasMoreFollowing = hydratedFollowingPosts.length > pageSize;
+    let items = hydratedFollowingPosts.slice(0, pageSize);
+
+    // If we don't have enough posts from following and there are no more following posts,
+    // get posts from users the current user doesn't follow
+    if (!hasMoreFollowing && items.length < pageSize) {
+      const remainingCount = pageSize - items.length;
+
+      const nonFollowingPosts =
+        await this.postRepository.paginatePostsFromNonFollowed({
+          userId,
+          cursor: undefined, // Start from the beginning for non-following posts
+          pageSize: remainingCount + 1, // Get one extra to check if there are more
+        });
+
+      const hydratedNonFollowingPosts = await Promise.all(
+        nonFollowingPosts.map((post) => this.hydratePost(post)),
+      );
+
+      // Add non-following posts to fill up to pageSize
+      const nonFollowingItemsToAdd = hydratedNonFollowingPosts.slice(
+        0,
+        remainingCount,
+      );
+      items = [...items, ...nonFollowingItemsToAdd];
+    }
+
     const lastItem = items[items.length - 1];
+
+    // Determine if there are more posts available
+    const hasMore =
+      hasMoreFollowing || (!hasMoreFollowing && items.length === pageSize);
 
     return ok({
       items,

@@ -1,4 +1,14 @@
-import { aliasedTable, and, desc, eq, lt, or, sql } from "drizzle-orm";
+import {
+  aliasedTable,
+  and,
+  desc,
+  eq,
+  isNull,
+  lt,
+  ne,
+  or,
+  sql,
+} from "drizzle-orm";
 import { inject, injectable } from "inversify";
 
 import type {
@@ -175,6 +185,50 @@ export class PostRepository {
     }));
   }
 
+  async paginatePostsFromNonFollowed(
+    { userId, cursor, pageSize = 10 }: PaginatePostsParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<PostResult<"withIsLiked">[]> {
+    const query = this.baseQuery(userId, tx);
+
+    let whereClause = and(
+      // Exclude posts from the user themselves
+      ne(this.schema.post.authorUserId, userId),
+      // Only include posts where there's no follow relationship (isNull means no follow record exists)
+      isNull(this.schema.follow.id),
+    );
+
+    if (cursor) {
+      const cursorCondition = or(
+        lt(this.schema.post.createdAt, cursor.createdAt),
+        and(
+          eq(this.schema.post.createdAt, cursor.createdAt),
+          lt(this.schema.post.id, cursor.id),
+        ),
+      );
+      whereClause = and(whereClause, cursorCondition);
+    }
+
+    const results = await query
+      .leftJoin(
+        this.schema.follow,
+        and(
+          eq(this.schema.follow.senderUserId, userId),
+          eq(this.schema.follow.recipientUserId, this.schema.post.authorUserId),
+        ),
+      )
+      .where(whereClause)
+      .orderBy(desc(this.schema.post.createdAt), desc(this.schema.post.id))
+      .limit(pageSize);
+
+    return results.map((result) => ({
+      ...result,
+      authorProfile: result.authorProfile as Profile<"onboarded">,
+      recipientProfile: result.recipientProfile as Profile<"notOnApp">,
+      isLiked: result.isLiked ?? false,
+    }));
+  }
+
   async paginatePostsOfUser(
     { userId, cursor, pageSize = 10 }: PaginatePostsParams,
     tx: DatabaseOrTransaction = this.db,
@@ -185,12 +239,12 @@ export class PostRepository {
       eq(this.schema.post.recipientUserId, userId),
       cursor
         ? or(
-          lt(this.schema.post.createdAt, cursor.createdAt),
-          and(
-            eq(this.schema.post.createdAt, cursor.createdAt),
-            lt(this.schema.post.id, cursor.id),
-          ),
-        )
+            lt(this.schema.post.createdAt, cursor.createdAt),
+            and(
+              eq(this.schema.post.createdAt, cursor.createdAt),
+              lt(this.schema.post.id, cursor.id),
+            ),
+          )
         : undefined,
     );
 
