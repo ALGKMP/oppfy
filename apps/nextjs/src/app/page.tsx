@@ -306,8 +306,8 @@ export default function WaitlistPage() {
           </div>
           {/* Pre-Order on the App Store Button */}
           <a
-            href="https://apps.apple.com/ca/app/oppfy/id6746730960" // Replace with your App Store pre-order link
-            className="flex w-full max-w-sm items-center justify-center gap-3 rounded-full bg-white px-6 py-3 text-base font-semibold text-black shadow-md transition hover:bg-gray-100 md:max-w-xs md:py-2 md:text-lg"
+            href="https://apps.apple.com/ca/app/oppfy/id6746730960"
+            className="flex w-full max-w-sm items-center justify-start gap-3 rounded-full bg-white px-6 py-3 text-base font-semibold text-black shadow-md transition hover:bg-gray-100 md:max-w-xs md:py-2 md:text-lg"
             style={{ textDecoration: "none" }}
           >
             <svg
@@ -332,15 +332,27 @@ export default function WaitlistPage() {
           {/* Join Beta Button */}
           <a
             href="https://testflight.apple.com/join/3SnDTsgF"
-            className="flex w-full max-w-sm items-center justify-center rounded-full border border-white/20 bg-white/10 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:bg-white/20 md:max-w-xs md:py-2 md:text-lg"
+            className="flex w-full max-w-sm items-center justify-start gap-3 rounded-full border border-white/20 bg-gray-500/20 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:bg-gray-600/40 md:max-w-xs md:py-2 md:text-lg"
             style={{ textDecoration: "none" }}
           >
-            <span className="whitespace-nowrap">Join Beta</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 512 512"
+              fill="currentColor"
+              className="flex-shrink-0"
+            >
+              <path d="M452.32,365,327.4,167.12A48.07,48.07,0,0,1,320,141.48V64h15.56c8.61,0,16-6.62,16.43-15.23A16,16,0,0,0,336,32H176.45c-8.61,0-16,6.62-16.43,15.23A16,16,0,0,0,176,64h16v77.48a47.92,47.92,0,0,1-7.41,25.63L59.68,365a74,74,0,0,0-2.5,75.84C70.44,465.19,96.36,480,124.13,480H387.87c27.77,0,53.69-14.81,66.95-39.21A74,74,0,0,0,452.32,365ZM211.66,184.2A79.94,79.94,0,0,0,224,141.48V68a4,4,0,0,1,4-4h56a4,4,0,0,1,4,4v73.48a79.94,79.94,0,0,0,12.35,42.72l57.8,91.53A8,8,0,0,1,351.37,288H160.63a8,8,0,0,1-6.77-12.27Z" />
+            </svg>
+            <span className="whitespace-nowrap">
+              Try the iOS Beta on TestFlight
+            </span>
           </a>
           {/* Join our Discord Community Button */}
           <a
             href="https://discord.gg/ZEcskPJuDc"
-            className="flex w-full max-w-sm items-center justify-center gap-3 rounded-full border border-white/20 bg-gray-500/20 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:bg-gray-600/40 md:max-w-xs md:py-2 md:text-lg"
+            className="flex w-full max-w-sm items-center justify-start gap-3 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:bg-white/20 md:max-w-xs md:py-2 md:text-lg"
             style={{ textDecoration: "none" }}
           >
             <svg
