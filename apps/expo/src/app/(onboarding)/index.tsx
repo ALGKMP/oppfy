@@ -51,6 +51,16 @@ export default function Start() {
   const opp7Anim = useSharedValue(0);
   const collageOpacity = useSharedValue(0);
 
+  // Confetti animations
+  const confettiEmojis = ["📷", "🎉", "🎊", "✨", "🎈", "📸", "🎭", "🌟"];
+  const confettiAnimations = confettiEmojis.map(() => ({
+    translateY: useSharedValue(-100),
+    translateX: useSharedValue(0),
+    rotate: useSharedValue(0),
+    opacity: useSharedValue(0),
+    scale: useSharedValue(0),
+  }));
+
   // Helper functions for haptic feedback
   const triggerImpactHaptic = (style: Haptics.ImpactFeedbackStyle) => {
     void Haptics.impactAsync(style);
@@ -105,12 +115,12 @@ export default function Start() {
   // =================== IMAGE COLLAGE ANIMATION ===================
   const animateCollage = async () => {
     // Hide splash screen with a subtle haptic kickoff
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 200));
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     await SplashScreen.hideAsync();
 
     // Fade in collage background with a gentle vibration
-    collageOpacity.value = withTiming(1, { duration: 500 }, () => {
+    collageOpacity.value = withTiming(1, { duration: 300 }, () => {
       runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Soft);
     });
 
@@ -118,7 +128,7 @@ export default function Start() {
     setTimeout(() => {
       // Pop1 animation with a light, quick pulse
       runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Light);
-      pop1Anim.value = withTiming(1, { duration: 400 });
+      pop1Anim.value = withTiming(1, { duration: 350 });
 
       // Pop8 animation with a medium double-tap effect
       setTimeout(() => {
@@ -127,12 +137,12 @@ export default function Start() {
           () => runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Soft),
           100,
         );
-        pop8Anim.value = withTiming(1, { duration: 400 });
+        pop8Anim.value = withTiming(1, { duration: 350 });
 
         // Opp7 animation with a heavy thud
         setTimeout(() => {
           runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Heavy);
-          opp7Anim.value = withTiming(1, { duration: 400 });
+          opp7Anim.value = withTiming(1, { duration: 350 });
 
           // After all images, trigger logo animation with a success vibe
           setTimeout(() => {
@@ -140,14 +150,57 @@ export default function Start() {
               Haptics.NotificationFeedbackType.Success,
             );
             animateLogo();
-          }, 800);
-        }, 400);
-      }, 400);
-    }, 500);
+          }, 400); // Start logo animation right after last image finishes
+        }, 300); // Moderate transition between images
+      }, 300); // Moderate transition between images
+    }, 250); // Start images sooner after collage background fades in
+  };
+
+  // =================== CONFETTI ANIMATION ===================
+  const animateConfetti = () => {
+    confettiAnimations.forEach((anim, index) => {
+      const delay = index * 100; // Stagger the animations
+      const randomX = Math.random() * 300 - 150; // Random horizontal movement
+      const randomRotation = Math.random() * 720 - 360; // Random rotation
+
+      // Set random starting position
+      anim.translateX.value = randomX;
+
+      // Animate opacity and scale in
+      anim.opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
+      anim.scale.value = withDelay(
+        delay,
+        withSpring(1, { damping: 8, stiffness: 100 }),
+      );
+
+      // Animate falling down
+      anim.translateY.value = withDelay(
+        delay,
+        withTiming(800, { duration: 2000, easing: Easing.out(Easing.quad) }),
+      );
+
+      // Animate rotation
+      anim.rotate.value = withDelay(
+        delay,
+        withTiming(randomRotation, {
+          duration: 2000,
+          easing: Easing.out(Easing.ease),
+        }),
+      );
+
+      // Fade out at the end
+      anim.opacity.value = withDelay(
+        delay + 1500,
+        withTiming(0, { duration: 500 }),
+      );
+    });
   };
 
   // =================== LOGO ANIMATION ===================
   const animateLogo = () => {
+    // Start confetti effect
+    animateConfetti();
+
     // Fade in logo with a soft entry haptic
     logoOpacity.value = withTiming(1, { duration: 400 }, () => {
       runOnJS(triggerImpactHaptic)(Haptics.ImpactFeedbackStyle.Soft);
@@ -285,6 +338,19 @@ export default function Start() {
     opacity: opp7Anim.value,
   }));
 
+  // Animated confetti styles
+  const confettiStyles = confettiAnimations.map((anim) =>
+    useAnimatedStyle(() => ({
+      transform: [
+        { translateX: anim.translateX.value },
+        { translateY: anim.translateY.value },
+        { rotate: `${anim.rotate.value}deg` },
+        { scale: anim.scale.value },
+      ],
+      opacity: anim.opacity.value,
+    })),
+  );
+
   // =================== RENDER ===================
   return (
     <ScreenView
@@ -406,6 +472,33 @@ export default function Start() {
         />
       </Animated.View>
 
+      {/* Confetti Effect (behind logo, in front of images) */}
+      <View
+        position="absolute"
+        width="100%"
+        height="100%"
+        style={{ zIndex: 6 }}
+        pointerEvents="none"
+      >
+        {confettiEmojis.map((emoji, index) => (
+          <Animated.Text
+            key={index}
+            style={[
+              {
+                position: "absolute",
+                fontSize: 30,
+                top: 50,
+                left: "50%",
+                marginLeft: -15, // Center the emoji
+              },
+              confettiStyles[index],
+            ]}
+          >
+            {emoji}
+          </Animated.Text>
+        ))}
+      </View>
+
       {/* Main Logo & UI (appears after images) */}
       <View
         position="absolute"
@@ -413,6 +506,7 @@ export default function Start() {
         height="100%"
         justifyContent="center"
         alignItems="center"
+        style={{ zIndex: 7 }}
       >
         {/* Glow behind logo */}
         <Animated.View
