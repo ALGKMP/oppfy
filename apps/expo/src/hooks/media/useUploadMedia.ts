@@ -3,6 +3,12 @@ import { useMutation } from "@tanstack/react-query";
 import { validators } from "@oppfy/validators";
 
 import { api } from "~/utils/api";
+import {
+  calculateCompressionSavings,
+  compressImage,
+  formatFileSize,
+  isCompressionBeneficial,
+} from "~/utils/imageCompression";
 
 interface UploadMediaInputBase {
   uri: string;
@@ -84,7 +90,36 @@ const useUploadMedia = () => {
     mutationFn: async (input: UploadMediaInput) => {
       const { uri, caption, width, height } = input;
 
-      const photoBlob = await getMediaBlob(uri);
+      // Get original file size for comparison
+      const originalBlob = await getMediaBlob(uri);
+      const originalSize = originalBlob.size;
+
+      console.log(
+        `📸 Original image: ${width}x${height}, ${formatFileSize(originalSize)}`,
+      );
+
+      // Compress the image intelligently
+      const compressedImage = await compressImage(uri, "post");
+
+      // Calculate and log compression savings
+      const savings = calculateCompressionSavings(
+        originalSize,
+        compressedImage.size,
+      );
+      const beneficial = isCompressionBeneficial(
+        originalSize,
+        compressedImage.size,
+      );
+
+      console.log(
+        `🗜️  Compressed image: ${compressedImage.width}x${compressedImage.height}, ${formatFileSize(compressedImage.size)}`,
+      );
+      console.log(
+        `💾 Compression saved ${formatFileSize(savings.savedBytes)} (${savings.savedPercentage}%) - ${beneficial ? "✅ Beneficial" : "⚠️ Minimal benefit"}`,
+      );
+
+      // Get the compressed blob
+      const photoBlob = await getMediaBlob(compressedImage.uri);
 
       const parsedMediaType = validators.imageContentType.safeParse(
         photoBlob.type,
@@ -96,8 +131,8 @@ const useUploadMedia = () => {
 
       const baseData = {
         caption: caption ?? "",
-        width: width,
-        height: height,
+        width: compressedImage.width,
+        height: compressedImage.height,
         contentLength: photoBlob.size,
         contentType: parsedMediaType.data,
       };
@@ -122,6 +157,10 @@ const useUploadMedia = () => {
       if (!response.ok) {
         throw new Error("Failed to upload photo");
       }
+
+      console.log(
+        `🚀 Successfully uploaded post image (${formatFileSize(photoBlob.size)})`,
+      );
 
       return postId;
     },

@@ -1,9 +1,14 @@
 import { useState } from "react";
-import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useMutation } from "@tanstack/react-query";
 
 import { api } from "~/utils/api";
+import {
+  calculateCompressionSavings,
+  compressImage,
+  formatFileSize,
+  isCompressionBeneficial,
+} from "~/utils/imageCompression";
 
 interface UseUploadProfilePictureInput {
   optimisticallyUpdate?: boolean;
@@ -34,14 +39,41 @@ const useUploadProfilePicture = ({
         throw new Error("Image selection cancelled");
       }
 
-      // Reduce image resolution
-      const { uri } = await ImageManipulator.manipulateAsync(
-        result.assets[0].uri,
-        undefined,
-        { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG },
+      const selectedAsset = result.assets[0];
+
+      // Get original file size for comparison
+      const originalResponse = await fetch(selectedAsset.uri);
+      const originalBlob = await originalResponse.blob();
+      const originalSize = originalBlob.size;
+
+      console.log(
+        `👤 Original profile picture: ${selectedAsset.width}x${selectedAsset.height}, ${formatFileSize(originalSize)}`,
       );
 
-      return uri;
+      // Compress the image with profile picture specific settings
+      const compressedImage = await compressImage(
+        selectedAsset.uri,
+        "profilePicture",
+      );
+
+      // Calculate and log compression savings
+      const savings = calculateCompressionSavings(
+        originalSize,
+        compressedImage.size,
+      );
+      const beneficial = isCompressionBeneficial(
+        originalSize,
+        compressedImage.size,
+      );
+
+      console.log(
+        `🗜️  Compressed profile picture: ${compressedImage.width}x${compressedImage.height}, ${formatFileSize(compressedImage.size)}`,
+      );
+      console.log(
+        `💾 Profile picture compression saved ${formatFileSize(savings.savedBytes)} (${savings.savedPercentage}%) - ${beneficial ? "✅ Beneficial" : "⚠️ Minimal benefit"}`,
+      );
+
+      return compressedImage.uri;
     },
     onSuccess: (uri) => {
       setSelectedImageUri(uri);
