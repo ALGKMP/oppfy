@@ -1,28 +1,19 @@
 import React, { useMemo, useRef, useState } from "react";
-import { RefreshControl } from "react-native";
+import { RefreshControl, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { FlashList } from "@shopify/flash-list";
 import { CameraOff, Lock, UserX } from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
 
 import FriendCarousel from "~/components/FriendCarousel";
-import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
+import { PostGrid } from "~/components/Profile/PostGrid";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
 import { EmptyPlaceholder, HeaderTitle, Icon } from "~/components/ui";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
 type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
-
-interface ViewToken {
-  item: Post;
-  key: string;
-  index: number | null;
-  isViewable: boolean;
-  timestamp: number;
-}
 
 const OtherProfile = () => {
   const router = useRouter();
@@ -58,9 +49,6 @@ const OtherProfile = () => {
     data: posts,
     refetch: refetchPosts,
     isLoading: isLoadingPostData,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
   } = api.post.paginatePosts.useInfiniteQuery(
     { userId, pageSize: 10 },
     {
@@ -69,7 +57,6 @@ const OtherProfile = () => {
   );
 
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [viewableItems, setViewableItems] = useState<string[]>([]);
 
   const isLoading =
     isLoadingProfile || isLoadingProfileStats || isLoadingRelationshipStates;
@@ -99,79 +86,22 @@ const OtherProfile = () => {
     setIsRefreshing(false);
   };
 
-  const handleOnEndReached = async () => {
-    if (hasNextPage && !isFetchingNextPage) {
-      await fetchNextPage();
-    }
+  const handlePostPress = (post: Post) => {
+    router.push(`/post/${post.post.id}`);
   };
 
-  const onViewableItemsChanged = ({
-    viewableItems,
-  }: {
-    viewableItems: ViewToken[];
-  }) => {
-    const visibleItemIds = viewableItems
-      .filter((token) => token.isViewable)
-      .map((token) => token.item.post.id);
-    setViewableItems(visibleItemIds);
-  };
-
-  const renderPost = ({ item }: { item: Post }) => (
-    <PostCard {...item} isViewable={viewableItems.includes(item.post.id)} />
-  );
-
-  const renderHeader = () => (
-    <YStack gap="$2" position="relative">
-      <Header
-        type="other"
-        profile={headerProfile}
-        stats={profileStats}
-        relationshipState={relationshipState}
-        isLoading={isLoading}
-      />
-
-      {isLoading ? null : (
-        <>
-          {profileStats &&
-          relationshipState &&
-          profileStats.friends > 0 &&
-          !relationshipState.isBlocked ? (
-            <FriendCarousel
-              userId={userId}
-              username={headerProfile.username ?? ""}
-              paddingHorizontal="$2.5"
-            />
-          ) : (
-            <RecommendationCarousel paddingHorizontal="$2.5" />
-          )}
-        </>
-      )}
-
-      {(isLoadingPostData || postItems.length > 0) && (
-        <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
-          Posts
-        </HeaderTitle>
-      )}
-
-      <Icon
-        name="chevron-back"
-        onPress={() => router.back()}
-        blurred
-        style={{
-          position: "absolute",
-          top: 12,
-          left: 12,
-        }}
-      />
-    </YStack>
-  );
-
-  const renderEmptyList = () => {
+  const renderEmptyGrid = () => {
     if (isLoadingPostData) {
       return (
-        <YStack gap="$4">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <PostCard.Skeleton key={index} />
+        <YStack gap="$4" paddingHorizontal="$2.5">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <View
+              key={index}
+              width="48%"
+              aspectRatio={1}
+              backgroundColor="$gray3"
+              borderRadius="$4"
+            />
           ))}
         </YStack>
       );
@@ -212,23 +142,12 @@ const OtherProfile = () => {
   };
 
   return (
-    <FlashList
+    <ScrollView
       ref={scrollRef}
-      data={postItems}
-      renderItem={renderPost}
-      ListHeaderComponent={renderHeader}
-      ListEmptyComponent={renderEmptyList}
-      keyExtractor={(item) => `other-profile-post-${item.post.id}`}
-      estimatedItemSize={664}
       showsVerticalScrollIndicator={false}
-      onEndReached={handleOnEndReached}
-      onViewableItemsChanged={onViewableItemsChanged}
-      viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
-      extraData={viewableItems}
-      ItemSeparatorComponent={() => <Spacer size="$4" />}
-      ListHeaderComponentStyle={{
-        marginTop: insets.top,
-        marginBottom: getToken("$2", "space") as number,
+      contentContainerStyle={{
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
       }}
       refreshControl={
         <RefreshControl
@@ -237,7 +156,65 @@ const OtherProfile = () => {
           progressViewOffset={insets.top}
         />
       }
-    />
+    >
+      {/* Header */}
+      <YStack gap="$2" position="relative">
+        <Header
+          type="other"
+          profile={headerProfile}
+          stats={profileStats}
+          relationshipState={relationshipState}
+          isLoading={isLoading}
+        />
+
+        {isLoading ? null : (
+          <>
+            {profileStats &&
+            relationshipState &&
+            profileStats.friends > 0 &&
+            !relationshipState.isBlocked ? (
+              <FriendCarousel
+                userId={userId}
+                username={headerProfile.username ?? ""}
+                paddingHorizontal="$2.5"
+              />
+            ) : (
+              <RecommendationCarousel paddingHorizontal="$2.5" />
+            )}
+          </>
+        )}
+
+        {(isLoadingPostData || postItems.length > 0) && (
+          <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
+            Posts
+          </HeaderTitle>
+        )}
+
+        <Icon
+          name="chevron-back"
+          onPress={() => router.back()}
+          blurred
+          style={{
+            position: "absolute",
+            top: 12,
+            left: 12,
+          }}
+        />
+      </YStack>
+
+      <Spacer size="$4" />
+
+      {/* Posts Grid */}
+      {postItems.length > 0 ? (
+        <PostGrid
+          posts={postItems}
+          onPostPress={handlePostPress}
+          paddingHorizontal={getToken("$2.5", "space") as number}
+        />
+      ) : (
+        renderEmptyGrid()
+      )}
+    </ScrollView>
   );
 };
 

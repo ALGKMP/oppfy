@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Animated from "react-native-reanimated";
 import { Image } from "expo-image";
 import { getToken } from "tamagui";
 
@@ -24,7 +25,7 @@ export const PostImage = (props: PostImageProps) => {
 
   return (
     <View>
-      <>
+      <Animated.View sharedTransitionTag={`post-image-${props.post.id}`}>
         <Image
           recyclingKey={props.post.id}
           source={{ uri: props.post.assetUrl }}
@@ -54,7 +55,7 @@ export const PostImage = (props: PostImageProps) => {
             <Circle size={48} borderWidth={2} borderColor="$gray11" />
           </View>
         )}
-      </>
+      </Animated.View>
     </View>
   );
 };
