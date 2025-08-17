@@ -1,0 +1,274 @@
+import React from "react";
+import { TouchableOpacity } from "react-native";
+import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
+
+import { Avatar, Skeleton, Text, View, XStack, YStack } from "~/components/ui";
+import useRouteProfile from "~/hooks/useRouteProfile";
+import type { RouterOutputs } from "~/utils/api";
+import { api } from "~/utils/api";
+import MorePostOptionsButton from "./MorePostOptionsButton";
+import PostCaption from "./PostCaption";
+import PostDate from "./PostDate";
+import { PostImage } from "./PostImage";
+import { PostStats } from "./PostStats";
+import { PostVideo } from "./PostVideo";
+
+type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
+
+interface PostCardProps {
+  post: Post["post"];
+  postStats: Post["postStats"];
+  authorProfile: Post["authorProfile"];
+  recipientProfile: Post["recipientProfile"];
+  isLiked: Post["isLiked"];
+  isViewable: boolean;
+}
+
+const PostCard = (props: PostCardProps) => {
+  const { routeProfile } = useRouteProfile();
+
+  // Get the current isLiked status from the cache, falling back to the post's isLiked value
+  const { data: currentIsLiked } = api.post.getIsLiked.useQuery(
+    { postId: props.post.id },
+    {
+      enabled: false, // Disabled by default
+      initialData: props.isLiked,
+    },
+  );
+
+  // Get the current postStats from the cache, falling back to the post's postStats
+  const { data: currentPostStats } = api.post.getPostStats.useQuery(
+    { postId: props.post.id },
+    {
+      enabled: false, // Disabled by default
+      initialData: props.postStats,
+    },
+  );
+
+  return (
+    <View borderRadius="$8" overflow="hidden">
+      {props.post.mediaType === "image" ? (
+        <PostImage
+          post={props.post}
+          stats={currentPostStats}
+          isLiked={currentIsLiked}
+        />
+      ) : (
+        <PostVideo
+          post={props.post}
+          stats={currentPostStats}
+          isLiked={currentIsLiked}
+          isViewable={props.isViewable}
+        />
+      )}
+
+      {/* Top Gradient Overlay */}
+      <LinearGradient
+        colors={["rgba(0,0,0,0.5)", "transparent"]}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 120,
+          zIndex: 1,
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Bottom Gradient Overlay */}
+      <LinearGradient
+        colors={["transparent", "rgba(0,0,0,0.7)"]}
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 160,
+          zIndex: 1,
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Top Header - Overlaid on image */}
+      <XStack
+        position="absolute"
+        top={0}
+        left={0}
+        right={0}
+        paddingVertical="$4"
+        paddingHorizontal="$4"
+        justifyContent="space-between"
+        zIndex={2}
+        pointerEvents="box-none"
+      >
+        <XStack gap="$3" alignItems="center">
+          <TouchableOpacity
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              routeProfile(props.recipientProfile.id, {
+                name: props.recipientProfile.name,
+                username: props.recipientProfile.username,
+                profilePictureUrl: props.recipientProfile.profilePictureUrl,
+              });
+            }}
+          >
+            <Avatar
+              source={props.recipientProfile.profilePictureUrl}
+              size={44}
+              bordered
+            />
+          </TouchableOpacity>
+
+          <YStack>
+            <TouchableOpacity
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                routeProfile(props.recipientProfile.userId, {
+                  name: props.recipientProfile.name,
+                  username: props.recipientProfile.username,
+                  profilePictureUrl: props.recipientProfile.profilePictureUrl,
+                });
+              }}
+            >
+              <Text
+                color="white"
+                fontWeight="600"
+                fontSize="$5"
+                shadowColor="black"
+                shadowOffset={{ width: 1, height: 1 }}
+                shadowOpacity={0.4}
+                shadowRadius={3}
+              >
+                {props.recipientProfile.username}
+              </Text>
+            </TouchableOpacity>
+            <XStack gap="$1" alignItems="center">
+              <TouchableOpacity
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  routeProfile(props.authorProfile.userId, {
+                    name: props.authorProfile.name,
+                    username: props.authorProfile.username,
+                    profilePictureUrl: props.authorProfile.profilePictureUrl,
+                  });
+                }}
+              >
+                <Text
+                  color="white"
+                  fontWeight="500"
+                  fontSize="$4"
+                  shadowColor="black"
+                  shadowOffset={{ width: 1, height: 1 }}
+                  shadowOpacity={0.4}
+                  shadowRadius={3}
+                >
+                  opped by {props.authorProfile.username}
+                </Text>
+              </TouchableOpacity>
+              <Text
+                color="white"
+                fontWeight="500"
+                fontSize="$4"
+                shadowColor="black"
+                shadowOffset={{ width: 1, height: 1 }}
+                shadowOpacity={0.4}
+                shadowRadius={3}
+              >
+                • <PostDate createdAt={props.post.createdAt} />
+              </Text>
+            </XStack>
+          </YStack>
+        </XStack>
+
+        <XStack alignItems="center" justifyContent="flex-end" width="$5">
+          <MorePostOptionsButton
+            postId={props.post.id}
+            recipientUserId={props.recipientProfile.userId}
+            assetUrl={props.post.assetUrl}
+          />
+        </XStack>
+      </XStack>
+
+      {/* Floating Action Buttons - Vertical Stack on Right side */}
+      <PostStats
+        postId={props.post.id}
+        postAuthorUserId={props.authorProfile.userId}
+        postRecipientUserId={props.recipientProfile.userId}
+        postStats={currentPostStats}
+        isLiked={currentIsLiked}
+      />
+
+      {/* Bottom Content Overlay */}
+      <YStack
+        position="absolute"
+        bottom={0}
+        left={0}
+        right={0}
+        paddingHorizontal="$4"
+        paddingVertical="$4"
+        zIndex={2}
+        gap="$2"
+      >
+        <View maxWidth="80%">
+          <PostCaption caption={props.post.caption} />
+        </View>
+      </YStack>
+    </View>
+  );
+};
+
+PostCard.Skeleton = function PostCardLoading() {
+  return (
+    <View borderRadius="$8" overflow="hidden" backgroundColor="$gray3">
+      {/* Header */}
+      <XStack
+        paddingVertical="$4"
+        paddingHorizontal="$4"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <XStack gap="$3" alignItems="center">
+          <Skeleton circular size={44} />
+          <YStack gap="$2">
+            <Skeleton width={120} height={18} />
+            <Skeleton width={80} height={14} />
+          </YStack>
+        </XStack>
+        <Skeleton width={24} height={24} />
+      </XStack>
+
+      {/* Media */}
+      {/* <Skeleton width="100%" height={500} radius={0} /> */}
+      <View width="100%" height={500} backgroundColor="$gray3" />
+
+      {/* Bottom Content */}
+      <YStack paddingHorizontal="$4" paddingVertical="$4" gap="$2">
+        {/* Floating Comments Skeleton */}
+        <Skeleton width={140} height={32} radius="$6" />
+
+        {/* Caption Skeleton */}
+        <YStack gap="$1">
+          <Skeleton width="80%" height={16} />
+          <Skeleton width="80%" height={16} />
+        </YStack>
+      </YStack>
+
+      {/* Stats Buttons */}
+      <YStack
+        position="absolute"
+        right={16}
+        bottom={24}
+        gap="$5"
+        alignItems="flex-end"
+      >
+        <Skeleton size={44} circular />
+        <Skeleton size={44} circular />
+        <Skeleton size={44} circular />
+      </YStack>
+    </View>
+  );
+};
+
+export default PostCard;
