@@ -21,21 +21,11 @@ interface PostCardProps {
   postStats: Post["postStats"];
   authorProfile: Post["authorProfile"];
   recipientProfile: Post["recipientProfile"];
-  isLiked: Post["isLiked"];
   isViewable: boolean;
 }
 
 const PostCard = (props: PostCardProps) => {
   const { routeProfile } = useRouteProfile();
-
-  // Get the current isLiked status from the cache, falling back to the post's isLiked value
-  const { data: currentIsLiked } = api.post.getIsLiked.useQuery(
-    { postId: props.post.id },
-    {
-      enabled: false, // Disabled by default
-      initialData: props.isLiked,
-    },
-  );
 
   // Get the current postStats from the cache, falling back to the post's postStats
   const { data: currentPostStats } = api.post.getPostStats.useQuery(
@@ -49,16 +39,11 @@ const PostCard = (props: PostCardProps) => {
   return (
     <View borderRadius="$8" overflow="hidden">
       {props.post.mediaType === "image" ? (
-        <PostImage
-          post={props.post}
-          stats={currentPostStats}
-          isLiked={currentIsLiked}
-        />
+        <PostImage post={props.post} stats={currentPostStats} />
       ) : (
         <PostVideo
           post={props.post}
           stats={currentPostStats}
-          isLiked={currentIsLiked}
           isViewable={props.isViewable}
         />
       )}
@@ -197,7 +182,6 @@ const PostCard = (props: PostCardProps) => {
         postAuthorUserId={props.authorProfile.userId}
         postRecipientUserId={props.recipientProfile.userId}
         postStats={currentPostStats}
-        isLiked={currentIsLiked}
       />
 
       {/* Bottom Content Overlay */}

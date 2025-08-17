@@ -9,29 +9,21 @@ import { getToken } from "tamagui";
 import { Circle, View } from "~/components/ui";
 import { useAudio } from "~/contexts/AudioContext";
 import type { RouterOutputs } from "~/utils/api";
-import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../Icons/Mute";
-import { useLike } from "./hooks/useLike";
 
 type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
 
 interface PostVideoProps {
   post: Post["post"];
   stats: Post["postStats"];
-  isLiked: boolean;
   isViewable: boolean;
 }
 
 export const PostVideo = (props: PostVideoProps) => {
-  const { likePost } = useLike({
-    postId: props.post.id,
-  });
-
   const videoRef = useRef<Video>(null);
 
   const { isMuted, toggleMute } = useAudio();
   const { muteIcons, addMute } = useMuteAnimations();
-  const { hearts, addHeart } = useHeartAnimations();
 
   const [isPaused, setIsPaused] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -73,14 +65,6 @@ export const PostVideo = (props: PostVideoProps) => {
     void videoRef.current?.setIsMutedAsync(!isMuted);
   }, [toggleMute, addMute, isMuted]);
 
-  const handleDoubleTap = useCallback(
-    (x: number, y: number) => {
-      addHeart(x, y);
-      void likePost();
-    },
-    [addHeart, likePost],
-  );
-
   const handleHold = useCallback(() => {
     if (isPlaying) {
       void videoRef.current?.pauseAsync();
@@ -107,16 +91,7 @@ export const PostVideo = (props: PostVideoProps) => {
     runOnJS(handleMute)();
   });
 
-  const doubleTap = Gesture.Tap()
-    .numberOfTaps(2)
-    .onStart((event) => {
-      runOnJS(handleDoubleTap)(event.x, event.y);
-    });
-
-  const gestures = Gesture.Exclusive(
-    doubleTap,
-    Gesture.Race(longPress, singleTap),
-  );
+  const gestures = Gesture.Race(longPress, singleTap);
 
   return (
     <GestureDetector gesture={gestures}>
@@ -155,13 +130,6 @@ export const PostVideo = (props: PostVideoProps) => {
 
         {muteIcons.map((muteIcon) => (
           <Mute key={muteIcon.id} muted={muteIcon.muted} />
-        ))}
-        {hearts.map((heart) => (
-          <GradientHeart
-            key={heart.id}
-            gradient={heart.gradient}
-            position={heart.position}
-          />
         ))}
       </View>
     </GestureDetector>

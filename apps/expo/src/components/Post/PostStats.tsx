@@ -13,7 +13,6 @@ import { useBottomSheetController } from "~/components/ui/BottomSheet";
 import useShare from "~/hooks/useShare";
 import type { RouterOutputs } from "~/utils/api";
 import { Icon } from "../ui";
-import { useLike } from "./hooks/useLike";
 
 type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
 
@@ -22,7 +21,6 @@ interface PostStatsProps {
   postAuthorUserId: string;
   postRecipientUserId: string;
   postStats: Post["postStats"];
-  isLiked: boolean;
 }
 
 export const PostStats = (props: PostStatsProps) => {
@@ -36,11 +34,6 @@ export const PostStats = (props: PostStatsProps) => {
       zIndex={3}
       alignItems="flex-end"
     >
-      <LikeAction
-        postId={props.postId}
-        postStats={props.postStats}
-        isLiked={props.isLiked}
-      />
       <CommentAction
         postId={props.postId}
         postAuthorUserId={props.postAuthorUserId}
@@ -77,38 +70,6 @@ const useButtonAnimation = () => {
   }, [scale]);
 
   return { buttonScale, animate };
-};
-
-interface LikeActionProps {
-  postId: string;
-  postStats: PostStatsProps["postStats"];
-  isLiked: boolean;
-}
-
-const LikeAction = ({ postId, postStats, isLiked }: LikeActionProps) => {
-  const { buttonScale, animate } = useButtonAnimation();
-
-  const { handleLikeToggle } = useLike({
-    postId,
-  });
-
-  // Animate when isLiked changes from external sources
-  useEffect(() => {
-    animate();
-  }, [isLiked, animate]);
-
-  const handlePress = async () => {
-    animate();
-    void handleLikeToggle();
-  };
-
-  return (
-    <StatButton count={postStats.likes} onPress={handlePress}>
-      <Animated.View style={buttonScale}>
-        <Text fontSize={30}>{isLiked ? "❤️‍🔥" : "❤️"}</Text>
-      </Animated.View>
-    </StatButton>
-  );
 };
 
 interface CommentActionProps {

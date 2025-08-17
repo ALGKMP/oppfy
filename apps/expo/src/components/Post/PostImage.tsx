@@ -1,29 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { runOnJS } from "react-native-reanimated";
 import { Image } from "expo-image";
 import { getToken } from "tamagui";
 
 import { Circle, View } from "~/components/ui";
 import type { RouterOutputs } from "~/utils/api";
-import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
-import { useLike } from "./hooks/useLike";
 
 type Post = RouterOutputs["post"]["paginatePosts"]["items"][number];
 
 interface PostImageProps {
   post: Post["post"];
   stats: Post["postStats"];
-  isLiked: boolean;
 }
 
 export const PostImage = (props: PostImageProps) => {
-  const { likePost } = useLike({
-    postId: props.post.id,
-  });
-
-  const { hearts, addHeart } = useHeartAnimations();
-
   const [isImageLoading, setIsImageLoading] = useState(false);
 
   // Cleanup loading state when component unmounts
@@ -33,60 +22,39 @@ export const PostImage = (props: PostImageProps) => {
     };
   }, []);
 
-  const handleDoubleTap = (x: number, y: number) => {
-    addHeart(x, y);
-    void likePost();
-  };
-
-  const doubleTap = Gesture.Tap()
-    .numberOfTaps(2)
-    .onStart((event) => {
-      runOnJS(handleDoubleTap)(event.x, event.y);
-    });
-
   return (
-    <GestureDetector gesture={doubleTap}>
-      <View>
-        <>
-          <Image
-            recyclingKey={props.post.id}
-            source={{ uri: props.post.assetUrl }}
-            cachePolicy="memory-disk"
-            style={{
-              width: "100%",
-              aspectRatio: props.post.width / props.post.height,
-              borderRadius: getToken("$8", "radius") as number,
-            }}
-            contentFit="cover"
-            transition={0}
-            onLoadStart={() => setIsImageLoading(true)}
-            onLoad={() => setIsImageLoading(false)}
-          />
+    <View>
+      <>
+        <Image
+          recyclingKey={props.post.id}
+          source={{ uri: props.post.assetUrl }}
+          cachePolicy="memory-disk"
+          style={{
+            width: "100%",
+            aspectRatio: props.post.width / props.post.height,
+            borderRadius: getToken("$8", "radius") as number,
+          }}
+          contentFit="cover"
+          transition={0}
+          onLoadStart={() => setIsImageLoading(true)}
+          onLoad={() => setIsImageLoading(false)}
+        />
 
-          {isImageLoading && (
-            <View
-              position="absolute"
-              top={0}
-              left={0}
-              right={0}
-              bottom={0}
-              justifyContent="center"
-              alignItems="center"
-              backgroundColor="rgba(0, 0, 0, 0.1)"
-            >
-              <Circle size={48} borderWidth={2} borderColor="$gray11" />
-            </View>
-          )}
-        </>
-
-        {hearts.map((heart) => (
-          <GradientHeart
-            key={heart.id}
-            gradient={heart.gradient}
-            position={heart.position}
-          />
-        ))}
-      </View>
-    </GestureDetector>
+        {isImageLoading && (
+          <View
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            justifyContent="center"
+            alignItems="center"
+            backgroundColor="rgba(0, 0, 0, 0.1)"
+          >
+            <Circle size={48} borderWidth={2} borderColor="$gray11" />
+          </View>
+        )}
+      </>
+    </View>
   );
 };
