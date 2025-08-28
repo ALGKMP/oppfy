@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import { err, ok, Result } from "neverthrow";
 
 import { CloudFront } from "@oppfy/cloudfront";
-import type { Database, Transaction } from "@oppfy/db";
+import type { Database, DatabaseOrTransaction, Transaction } from "@oppfy/db";
 import { Mux } from "@oppfy/mux";
 import { ImageContentType, S3 } from "@oppfy/s3";
 
@@ -18,7 +18,12 @@ import { ProfileRepository } from "../../repositories/user/profile.repository";
 import { UserRepository } from "../../repositories/user/user.repository";
 import { TYPES } from "../../symbols";
 import type { PaginatedResponse, PaginationParams } from "../../types";
-import { Hydrate, hydratePost, hydrateProfile } from "../../utils";
+import {
+  getRandomEmoji,
+  Hydrate,
+  hydratePost,
+  hydrateProfile,
+} from "../../utils";
 
 interface BasePostParams {
   authorUserId: string;
@@ -206,8 +211,11 @@ export class PostService {
           userId: createdRecipientUser.id,
           update: {
             name: params.recipientNotOnAppName,
-            // 5 extra random characters to avoid collisions
-            username: `${params.recipientNotOnAppName}-${Math.random().toString(36).substring(2, 7)}`,
+            // Random emoji to avoid collisions
+            username: await this.generateUniqueUsername(
+              params.recipientNotOnAppName,
+              tx,
+            ),
           },
         },
         tx,
@@ -256,8 +264,11 @@ export class PostService {
           userId: createdRecipientUser.id,
           update: {
             name: params.recipientNotOnAppName,
-            // 5 extra random characters to avoid collisions
-            username: `${params.recipientNotOnAppName}-${Math.random().toString(36).substring(2, 7)}`,
+            // Random emoji to avoid collisions
+            username: await this.generateUniqueUsername(
+              params.recipientNotOnAppName,
+              tx,
+            ),
           },
         },
         tx,
@@ -621,5 +632,19 @@ export class PostService {
     }
 
     return result;
+  }
+
+  private async generateUniqueUsername(
+    baseName: string,
+    db: DatabaseOrTransaction,
+  ): Promise<string> {
+    let username = `${baseName} ${getRandomEmoji()}`;
+
+    // Check if username exists, if so, keep adding emojis until unique
+    while (await this.profileRepository.usernameTaken({ username }, db)) {
+      username += getRandomEmoji();
+    }
+
+    return username;
   }
 }
