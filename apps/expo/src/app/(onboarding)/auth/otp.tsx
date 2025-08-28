@@ -74,7 +74,7 @@ const PhoneNumberOTP = () => {
   return (
     <OnboardingScreen
       title={`Enter your ${"\n "} verification code`}
-      subtitle="We sent a code to your phone"
+      // subtitle="We sent a code to your phone"
       error={error}
       footer={
         <OnboardingButton
