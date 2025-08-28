@@ -21,7 +21,6 @@ const InviteContacts = () => {
   return (
     <OnboardingScreen
       title="Invite Friends"
-      subtitle="Invite your friends to join you on Oppfy"
       footer={
         <OnboardingButton
           onPress={handleContinue}
