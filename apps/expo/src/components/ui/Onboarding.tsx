@@ -3,10 +3,8 @@ import type { ImageSourcePropType } from "react-native";
 import { Modal, TextInput, TouchableOpacity } from "react-native";
 import Animated, {
   FadeIn,
-  interpolate,
   useAnimatedStyle,
   useSharedValue,
-  withRepeat,
   withSequence,
   withSpring,
   withTiming,
@@ -77,25 +75,6 @@ export function OnboardingScreen({
   successMessage,
   footer,
 }: OnboardingScreenProps) {
-  const welcomeFloat = useSharedValue(0);
-
-  useEffect(() => {
-    welcomeFloat.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 2000 }),
-        withTiming(0, { duration: 2000 }),
-      ),
-      -1,
-      true,
-    );
-  }, []);
-
-  const welcomeStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: interpolate(welcomeFloat.value, [0, 1], [0, -8]) },
-    ],
-  }));
-
   return (
     <ScreenView
       keyboardAvoiding
@@ -104,11 +83,7 @@ export function OnboardingScreen({
       justifyContent="space-between"
     >
       <YStack gap="$6" paddingTop="$8">
-        <AnimatedYStack
-          gap="$2"
-          entering={FadeIn.delay(200)}
-          style={welcomeStyle}
-        >
+        <AnimatedYStack gap="$2" entering={FadeIn.delay(200)}>
           {subtitle && (
             <AnimatedText
               color="rgba(255,255,255,0.7)"
