@@ -14,7 +14,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "typecheck": "tsc --noEmit",
-    "with-env": "dotenv -e ../../.env --"
+    "with-env": "dotenv -e ../../.env --",
+    "deploy": "pnpm with-env cdk deploy"
   },
   "prettier": "@oppfy/prettier-config",
   "dependencies": {

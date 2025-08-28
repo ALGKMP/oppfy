@@ -90,7 +90,7 @@ const PhoneNumber = () => {
 
   return (
     <OnboardingScreen
-      title="What's your phone number?"
+      title="your phone number?"
       error={error}
       footer={
         <OnboardingButton
