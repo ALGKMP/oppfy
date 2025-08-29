@@ -45,7 +45,7 @@ export default function AnimatedPostPage({ post }: PostPageProps) {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            Join the <span className="text-[#F214FF]">Oppfy</span> Beta
+            Join <span className="text-[#F214FF]">Oppfy</span> on the AppStore
           </motion.h1>
 
           <motion.div
@@ -55,7 +55,7 @@ export default function AnimatedPostPage({ post }: PostPageProps) {
             transition={{ delay: 0.3 }}
           >
             <motion.a
-              href="https://testflight.apple.com/join/EHMR7AxB"
+              href="https://apps.apple.com/app/oppfy/id6746730960"
               className="rounded-xl bg-[#F214FF] px-6 py-3 font-bold text-white transition-all hover:opacity-90 hover:shadow-lg hover:shadow-[#F214FF]/20 md:px-8 md:py-4"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -182,7 +182,16 @@ export default function AnimatedPostPage({ post }: PostPageProps) {
             transition={{ delay: 0.6 }}
           >
             Where your friends capture your most authentic moments. Join our
-            exclusive beta and be part of something special.
+            exclusive{" "}
+            <a
+              href="https://apps.apple.com/app/oppfy/id6746730960"
+              className="text-[#F214FF] hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              beta
+            </a>{" "}
+            and be part of something special.
           </motion.p>
 
           <motion.div

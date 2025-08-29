@@ -41,7 +41,7 @@ export default function AnimatedPostErrorPage() {
         transition={{ delay: 0.6 }}
       >
         <motion.a
-          href="https://testflight.apple.com/join/EHMR7AxB"
+          href="https://testflight.apple.com/join/3SnDTsgF"
           className="rounded-xl bg-[#F214FF] px-8 py-4 font-bold text-white transition-opacity hover:opacity-90"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
