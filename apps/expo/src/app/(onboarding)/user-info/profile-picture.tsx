@@ -38,18 +38,8 @@ const ProfilePicture = () => {
   };
 
   const handleSubmit = async () => {
+    // Require profile picture - don't allow skipping
     if (!selectedImageUri) {
-      // Skip flow
-      try {
-        await markOnboardingComplete.mutateAsync();
-        await Haptics.notificationAsync(
-          Haptics.NotificationFeedbackType.Success,
-        );
-        router.replace("/(app)/(bottom-tabs)/(home)");
-      } catch {
-        setError(Error.UNKNOWN);
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      }
       return;
     }
 
@@ -84,10 +74,10 @@ const ProfilePicture = () => {
       footer={
         <OnboardingButton
           onPress={handleSubmit}
-          disabled={isPickerLoading || isUploading}
+          disabled={isPickerLoading || isUploading || !selectedImageUri}
           isLoading={isUploading}
           isValid={selectedImageUri !== null}
-          text={selectedImageUri ? "Continue" : "Skip for now"}
+          text="Continue"
         />
       }
     >
