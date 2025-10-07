@@ -4,7 +4,7 @@ export const Footer = () => {
       <div className="mb-3 flex items-center justify-center gap-6 md:mb-2">
         {/* Instagram Icon */}
         <a
-          href="#"
+          href="https://www.instagram.com/oppfyapp/"
           aria-label="Instagram"
           className="opacity-70 transition hover:opacity-100"
         >
