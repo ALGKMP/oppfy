@@ -343,10 +343,14 @@ export class PostService {
     if (!hasMoreFollowing && items.length < pageSize) {
       const remainingCount = pageSize - items.length;
 
+      // Use the cursor for non-following posts
+      // If cursor exists and we've exhausted following posts, we're now in the non-following phase
+      const nonFollowingCursor = cursor || undefined;
+
       const nonFollowingPosts =
         await this.postRepository.paginatePostsFromNonFollowed({
           userId,
-          cursor: undefined, // Start from the beginning for non-following posts
+          cursor: nonFollowingCursor, // Use cursor to continue pagination
           pageSize: remainingCount + 1, // Get one extra to check if there are more
         });
 
