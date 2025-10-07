@@ -18,7 +18,7 @@ export const PostVisual = ({
 
   return (
     <div className="hidden w-full max-w-md flex-1 items-center justify-center p-4 md:flex md:p-8 lg:p-12">
-      <div className="glow-border relative w-full overflow-hidden rounded-xl border-4 border-[#F214FF]">
+      <div className="relative w-full overflow-hidden rounded-xl border-8 border-white shadow-2xl">
         <div
           className="relative w-full"
           style={{

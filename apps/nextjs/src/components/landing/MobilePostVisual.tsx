@@ -18,7 +18,7 @@ export const MobilePostVisual = ({
 
   return (
     <div className="flex w-full justify-center md:hidden">
-      <div className="glow-border relative w-[70%] overflow-hidden rounded-xl border-4 border-[#F214FF]">
+      <div className="relative w-[70%] overflow-hidden rounded-xl border-8 border-white shadow-2xl">
         <div
           className="relative w-full"
           style={{

@@ -4,13 +4,13 @@ export const CTAButtons = () => {
   return (
     <div className="flex flex-col items-center gap-6 text-center md:items-start md:gap-8 md:text-left">
       <div>
-        {/* Logo */}
+        {/* Logo - hidden on mobile, shown on desktop */}
         <Image
           src="/icon.png"
           alt="Oppfy logo"
           width={56}
           height={56}
-          className="mx-auto mb-3 md:mx-0"
+          className="mx-auto mb-3 hidden md:mx-0 md:block"
         />
         <h1
           className="mb-4 text-4xl font-extrabold leading-tight text-white md:text-5xl lg:text-6xl"

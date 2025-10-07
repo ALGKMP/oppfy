@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 
 import type { RouterOutputs } from "@oppfy/api";
@@ -85,7 +86,16 @@ export default function AnimatedPostPage({ post }: PostPageProps) {
 
             {/* Text and CTA buttons */}
             <div className="flex flex-col items-center gap-6 text-center md:items-start md:gap-8 md:text-left">
-              {/* Mobile post visual - above CTAs on mobile */}
+              {/* Logo - mobile only */}
+              <Image
+                src="/icon.png"
+                alt="Oppfy logo"
+                width={56}
+                height={56}
+                className="md:hidden"
+              />
+
+              {/* Mobile post visual - below logo on mobile */}
               <MobilePostVisual
                 mediaType={post.post.mediaType}
                 assetUrl={post.post.assetUrl}
