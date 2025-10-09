@@ -80,9 +80,9 @@ export const UserCard = ({
 
   // Profile picture size based on card size
   const profileSize = {
-    small: propWidth * 0.6,
-    medium: propWidth * 0.7,
-    large: propWidth * 0.5,
+    small: propWidth * 0.75,
+    medium: propWidth * 0.85,
+    large: propWidth * 0.65,
   }[size];
 
   // Animations
