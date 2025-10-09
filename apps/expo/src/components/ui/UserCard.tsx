@@ -1,17 +1,13 @@
 import type { ComponentProps } from "react";
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import { TouchableOpacity, useWindowDimensions } from "react-native";
 import Animated, {
   FadeIn,
-  interpolate,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  withTiming,
 } from "react-native-reanimated";
-import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
 import DefaultProfilePicture from "@assets/default_profile_picture.jpg";
 import {
   Check,
@@ -27,11 +23,8 @@ import { Button } from "./Buttons";
 import { Circle } from "./Shapes";
 import { XStack, YStack } from "./Stacks";
 import { Text } from "./Texts";
-import { View } from "./Views";
 
 const AnimatedYStack = Animated.createAnimatedComponent(YStack);
-const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
-const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 type CardSize = "small" | "medium" | "large";
 type CardStyle = "minimal" | "gradient" | "glass";
@@ -68,17 +61,16 @@ export const UserCard = ({
   stats,
   width: propWidth = 100,
   size = "medium",
-  style = "gradient",
+  style: _style = "gradient",
   onPress,
   actionButton,
   index = 0,
   isVerified,
 }: UserCardProps) => {
   const { width: windowWidth } = useWindowDimensions();
-  const [isPressed, setIsPressed] = useState(false);
 
   // Dynamic sizing based on card size variant
-  const width =
+  const _width =
     propWidth ??
     {
       small: windowWidth * 0.35,
@@ -86,29 +78,25 @@ export const UserCard = ({
       large: windowWidth * 0.9,
     }[size];
 
-  const aspectRatio = {
-    small: 0.8,
-    medium: 1,
-    large: 1.5,
+  // Profile picture size based on card size
+  const profileSize = {
+    small: propWidth * 0.6,
+    medium: propWidth * 0.7,
+    large: propWidth * 0.5,
   }[size];
 
   // Animations
   const scale = useSharedValue(1);
   const contentY = useSharedValue(0);
-  const blur = useSharedValue(0);
 
   const handlePressIn = () => {
-    setIsPressed(true);
     scale.value = withSpring(0.95, { damping: 15, stiffness: 200 });
     contentY.value = withSpring(-5, { damping: 15, stiffness: 200 });
-    blur.value = withTiming(1, { duration: 200 });
   };
 
   const handlePressOut = () => {
-    setIsPressed(false);
     scale.value = withSpring(1, { damping: 15, stiffness: 200 });
     contentY.value = withSpring(0, { damping: 15, stiffness: 200 });
-    blur.value = withTiming(0, { duration: 200 });
   };
 
   const cardStyle = useAnimatedStyle(() => ({
@@ -119,17 +107,13 @@ export const UserCard = ({
     transform: [{ translateY: contentY.value }],
   }));
 
-  const blurStyle = useAnimatedStyle(() => ({
-    opacity: blur.value,
-  }));
-
   const getActionIcon = useCallback(() => {
     if (!actionButton?.icon) return null;
     const icons = {
-      follow: <UserPlus size={16} color="white" />,
-      add: <Plus size={16} color="white" />,
-      heart: <Heart size={16} color="white" />,
-      check: <Check size={16} color="white" />,
+      follow: <UserPlus size={16} />,
+      add: <Plus size={16} />,
+      heart: <Heart size={16} />,
+      check: <Check size={16} />,
     };
     return icons[actionButton.icon];
   }, [actionButton?.icon]);
@@ -144,15 +128,11 @@ export const UserCard = ({
       }
     : {};
 
-  // Calculate height based on size
-  const height = size === "small" ? propWidth * 1.2 : propWidth;
-
   return (
     <Container {...containerProps}>
       <AnimatedYStack
         entering={FadeIn.delay(index * 100).springify()}
         width={propWidth}
-        height={height}
         overflow="hidden"
         borderRadius="$8"
         backgroundColor="$background"
@@ -164,130 +144,87 @@ export const UserCard = ({
         style={cardStyle}
       >
         <Animated.View style={contentStyle}>
-          {/* Profile Image */}
-          <Image
-            recyclingKey={userId}
-            source={profilePictureUrl ?? DefaultProfilePicture}
-            style={{ width: "100%", aspectRatio }}
-            contentFit="cover"
-            transition={200}
-            cachePolicy="none"
-          />
-
-          {/* Gradient Overlay */}
-          {style === "gradient" && (
-            <AnimatedLinearGradient
-              colors={[
-                "transparent",
-                "rgba(0,0,0,0.4)",
-                isPressed ? "rgba(0,0,0,0.95)" : "rgba(0,0,0,0.8)",
-              ]}
+          <YStack gap="$3" p="$3" alignItems="center">
+            {/* Profile Image */}
+            <Image
+              recyclingKey={userId}
+              source={profilePictureUrl ?? DefaultProfilePicture}
               style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: "70%",
+                width: profileSize,
+                height: profileSize,
+                borderRadius: profileSize / 2,
               }}
+              contentFit="cover"
+              transition={200}
+              cachePolicy="none"
             />
-          )}
 
-          {/* Glass Effect */}
-          {style === "glass" && (
-            <AnimatedBlurView
-              intensity={20}
-              style={[
-                {
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: "40%",
-                  backgroundColor: "rgba(255,255,255,0.1)",
-                },
-                blurStyle,
-              ]}
-            />
-          )}
-
-          {/* Content Overlay */}
-          <YStack
-            position="absolute"
-            bottom={0}
-            left={0}
-            right={0}
-            p="$3"
-            gap="$2"
-          >
-            {/* Username and Verified Badge */}
-            <XStack alignItems="center" gap="$1">
-              <Text
-                numberOfLines={1}
-                fontWeight="700"
-                fontSize={size === "small" ? 14 : 16}
-                color="white"
-                opacity={0.95}
-                textShadowColor="rgba(0, 0, 0, 0.5)"
-                textShadowOffset={{ width: 0, height: 1 }}
-                textShadowRadius={3}
-              >
-                {username}
-              </Text>
-              {isVerified && (
-                <Sparkles
-                  size={size === "small" ? 14 : 16}
-                  color={getTokens().color.primary.val}
-                />
-              )}
-            </XStack>
-
-            {/* Bio - Only for medium and large cards */}
-            {bio && size !== "small" && (
-              <Text
-                numberOfLines={2}
-                fontSize={12}
-                color="white"
-                opacity={0.8}
-                textShadowColor="rgba(0, 0, 0, 0.3)"
-                textShadowOffset={{ width: 0, height: 1 }}
-                textShadowRadius={2}
-              >
-                {bio}
-              </Text>
-            )}
-
-            {/* Stats - Only for large cards */}
-            {stats && size === "large" && (
-              <XStack gap="$4" py="$2">
-                {Object.entries(stats).map(([key, value]) => (
-                  <YStack key={key} alignItems="center">
-                    <Text color="white" fontWeight="700">
-                      {value}
-                    </Text>
-                    <Text color="white" opacity={0.7} fontSize={12}>
-                      {key}
-                    </Text>
-                  </YStack>
-                ))}
-              </XStack>
-            )}
-
-            {/* Action Button */}
-            {actionButton && (
-              <Animated.View entering={FadeIn.delay(index * 100 + 200)}>
-                <Button
-                  size={size === "small" ? "$2" : "$3"}
-                  variant={actionButton.variant ?? "primary"}
-                  onPress={actionButton.onPress}
-                  icon={getActionIcon()}
-                  scaleIcon={0.8}
-                  pressStyle={{ opacity: 0.8 }}
-                  borderRadius={size === "small" ? "$4" : "$6"}
+            {/* Content */}
+            <YStack gap="$2" alignItems="center" width="100%">
+              {/* Username and Verified Badge */}
+              <XStack alignItems="center" gap="$1">
+                <Text
+                  numberOfLines={1}
+                  fontWeight="700"
+                  fontSize={size === "small" ? 14 : 16}
                 >
-                  {size !== "small" && actionButton.label}
-                </Button>
-              </Animated.View>
-            )}
+                  {username}
+                </Text>
+                {isVerified && (
+                  <Sparkles
+                    size={size === "small" ? 14 : 16}
+                    color={getTokens().color.primary.val}
+                  />
+                )}
+              </XStack>
+
+              {/* Bio - Only for medium and large cards */}
+              {bio && size !== "small" && (
+                <Text
+                  numberOfLines={2}
+                  fontSize={12}
+                  opacity={0.7}
+                  textAlign="center"
+                  px="$2"
+                >
+                  {bio}
+                </Text>
+              )}
+
+              {/* Stats - Only for large cards */}
+              {stats && size === "large" && (
+                <XStack gap="$4" py="$2">
+                  {Object.entries(stats).map(([key, value]) => (
+                    <YStack key={key} alignItems="center">
+                      <Text fontWeight="700">{value}</Text>
+                      <Text opacity={0.7} fontSize={12}>
+                        {key}
+                      </Text>
+                    </YStack>
+                  ))}
+                </XStack>
+              )}
+
+              {/* Action Button */}
+              {actionButton && (
+                <Animated.View
+                  entering={FadeIn.delay(index * 100 + 200)}
+                  style={{ width: "100%" }}
+                >
+                  <Button
+                    size={size === "small" ? "$2" : "$3"}
+                    variant={actionButton.variant ?? "primary"}
+                    onPress={actionButton.onPress}
+                    icon={getActionIcon()}
+                    scaleIcon={0.8}
+                    pressStyle={{ opacity: 0.8 }}
+                    borderRadius={size === "small" ? "$4" : "$6"}
+                  >
+                    {size !== "small" && actionButton.label}
+                  </Button>
+                </Animated.View>
+              )}
+            </YStack>
           </YStack>
         </Animated.View>
       </AnimatedYStack>
