@@ -162,7 +162,7 @@ const Inbox = () => {
       case "NOT_FOLLOWING":
         return {
           label: "Follow",
-          icon: UserRoundPlus,
+          // icon: UserRoundPlus,
           variant: "primary",
           onPress: () =>
             void followUser.mutateAsync({
@@ -172,13 +172,13 @@ const Inbox = () => {
       case "FOLLOWING":
         return {
           label: "Followed",
-          icon: UserRoundCheck,
+          // icon: UserRoundCheck,
           disabled: true,
         };
       case "REQUESTED":
         return {
           label: "Sent",
-          icon: UserRoundCheck,
+          // icon: UserRoundCheck,
           disabled: true,
         };
       default:

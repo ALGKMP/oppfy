@@ -37,8 +37,8 @@ export const MediaListItem = ({
   onPress,
 }: MediaListItemProps) => {
   const content = (
-    <XStack alignItems="center" gap="$3">
-      {imageUrl && <Avatar source={imageUrl} size={56} />}
+    <XStack alignItems="center" gap="$4">
+      {imageUrl && <Avatar source={imageUrl} size={46} />}
 
       {verticalText ? (
         <Paragraph flex={1}>
@@ -51,7 +51,7 @@ export const MediaListItem = ({
           )}{" "}
           {subtitle &&
             (typeof subtitle === "string" ? (
-              <SizableText color="$gray12" size="$3" lineHeight={16}>
+              <SizableText color="$gray12" size="$4" lineHeight={16}>
                 {subtitle}
               </SizableText>
             ) : (
@@ -95,13 +95,22 @@ export const MediaListItem = ({
 
       <XStack gap="$2">
         {primaryAction && (
-          <Button size="$3.5" {...primaryAction}>
+          <Button
+            size="$2.5"
+            paddingHorizontal="$4"
+            minWidth={100}
+            {...primaryAction}
+          >
             {primaryAction.label}
           </Button>
         )}
 
         {secondaryAction && (
-          <Button size="$3.5" {...secondaryAction}>
+          <Button 
+            size="$2.5"
+            paddingHorizontal="$4"
+            minWidth={100}
+          >
             {secondaryAction.label}
           </Button>
         )}
