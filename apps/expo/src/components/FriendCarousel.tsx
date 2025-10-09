@@ -65,6 +65,7 @@ const FriendCarousel = ({
             paddingHorizontal as Token,
             "space",
           ) as number,
+          paddingVertical: 4,
         }}
         renderItem={({ item, index }) => {
           if (isLoading) {

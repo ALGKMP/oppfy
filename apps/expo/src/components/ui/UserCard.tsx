@@ -253,15 +253,12 @@ UserCard.SeeAll = ({
         width={width}
         height={height}
         borderRadius="$6"
-        backgroundColor="$gray3"
+        borderWidth={2}
+        borderColor="$borderColor"
+        borderStyle="dashed"
         alignItems="center"
         justifyContent="center"
         gap="$2"
-        elevation={10}
-        shadowColor="#000"
-        shadowOffset={{ width: 0, height: 8 }}
-        shadowOpacity={0.2}
-        shadowRadius={16}
       >
         <YStack alignItems="center" gap="$2">
           <ChevronRight size={24} opacity={0.6} />
