@@ -25,10 +25,10 @@ const BottomTabsLayout = () => {
         options={{
           tabBarIcon: ({ color, size, focused }) => (
             <Icon
-              name="home"
+              name="home-sharp"
               color={color}
               size={size}
-              iconStyle={{ opacity: focused ? 1 : 0.6 }}
+              iconStyle={{ opacity: focused ? 1 : 0.6,  }}
               disabled
             />
           ),
