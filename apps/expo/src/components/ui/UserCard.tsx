@@ -96,14 +96,12 @@ export const UserCard = ({
   const scale = useSharedValue(1);
   const contentY = useSharedValue(0);
   const blur = useSharedValue(0);
-  const sparkleRotation = useSharedValue(0);
 
   const handlePressIn = () => {
     setIsPressed(true);
     scale.value = withSpring(0.95, { damping: 15, stiffness: 200 });
     contentY.value = withSpring(-5, { damping: 15, stiffness: 200 });
     blur.value = withTiming(1, { duration: 200 });
-    sparkleRotation.value = withSpring(1, { damping: 10, stiffness: 100 });
   };
 
   const handlePressOut = () => {
@@ -111,7 +109,6 @@ export const UserCard = ({
     scale.value = withSpring(1, { damping: 15, stiffness: 200 });
     contentY.value = withSpring(0, { damping: 15, stiffness: 200 });
     blur.value = withTiming(0, { duration: 200 });
-    sparkleRotation.value = withSpring(0, { damping: 10, stiffness: 100 });
   };
 
   const cardStyle = useAnimatedStyle(() => ({
@@ -124,13 +121,6 @@ export const UserCard = ({
 
   const blurStyle = useAnimatedStyle(() => ({
     opacity: blur.value,
-  }));
-
-  const sparkleStyle = useAnimatedStyle(() => ({
-    transform: [
-      { rotate: `${interpolate(sparkleRotation.value, [0, 1], [0, 45])}deg` },
-      { scale: interpolate(sparkleRotation.value, [0, 1], [1, 1.2]) },
-    ],
   }));
 
   const getActionIcon = useCallback(() => {
@@ -244,12 +234,10 @@ export const UserCard = ({
                 {username}
               </Text>
               {isVerified && (
-                <Animated.View style={sparkleStyle}>
-                  <Sparkles
-                    size={size === "small" ? 14 : 16}
-                    color={getTokens().color.primary.val}
-                  />
-                </Animated.View>
+                <Sparkles
+                  size={size === "small" ? 14 : 16}
+                  color={getTokens().color.primary.val}
+                />
               )}
             </XStack>
 
