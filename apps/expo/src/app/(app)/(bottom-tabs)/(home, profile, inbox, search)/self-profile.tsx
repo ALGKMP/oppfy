@@ -195,6 +195,7 @@ const SelfProfile = () => {
       headerContainerStyle={{ elevation: 0 }}
       minHeaderHeight={insets.top}
       lazy
+      
     >
       <Tabs.Tab name="Posts">
         <Tabs.FlashList
