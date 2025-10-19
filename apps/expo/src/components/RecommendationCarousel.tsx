@@ -20,16 +20,6 @@ interface RecommendationCarouselProps {
   paddingVertical?: SpaceTokens;
 }
 
-const LoadingCard = ({ width }: { width: number }) => (
-  <YStack
-    width={width}
-    height={width * 1.2}
-    borderRadius="$6"
-    backgroundColor="$gray3"
-    opacity={0.5}
-  />
-);
-
 const RecommendationCarousel = ({
   paddingHorizontal,
   paddingVertical,
@@ -94,7 +84,7 @@ const RecommendationCarousel = ({
         }}
         renderItem={({ item, index }) => {
           if (isLoading) {
-            return <LoadingCard width={CARD_WIDTH} />;
+            return <UserCard.Skeleton width={CARD_WIDTH} />;
           }
 
           if (!item) {
