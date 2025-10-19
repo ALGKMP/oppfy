@@ -121,7 +121,7 @@ const OtherProfile = () => {
   );
 
   const renderHeader = () => (
-    <YStack gap="$2" position="relative">
+    <YStack gap="$2" position="relative" pointerEvents="box-none">
       <Header
         type="other"
         profile={headerProfile}

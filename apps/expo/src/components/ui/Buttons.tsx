@@ -13,6 +13,8 @@ export const Button = styled(TamaguiButton, {
     opacity: 0.7,
   },
   animation: "100ms",
+  // Allow scroll gestures to take priority
+  hitSlop: { top: 0, bottom: 0, left: 0, right: 0 },
 
   variants: {
     variant: {

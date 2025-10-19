@@ -35,7 +35,7 @@ interface HeaderOtherProps {
 type HeaderProps = HeaderSelfProps | HeaderOtherProps;
 
 const Header = (props: HeaderProps) => (
-  <YStack>
+  <YStack pointerEvents="box-none">
     {/* Cover Image Area */}
     <YStack
       height={140}
@@ -43,6 +43,7 @@ const Header = (props: HeaderProps) => (
       borderRadius="$6"
       backgroundColor="$primary"
       position="relative"
+      pointerEvents="box-none"
     >
       <LinearGradient
         colors={["$primary", "$background"]}
@@ -64,14 +65,24 @@ const Header = (props: HeaderProps) => (
         right={12}
         justifyContent="space-between"
         alignItems="center"
+        pointerEvents="box-none"
       >
         <JoinDatePill createdAt={props.profile?.createdAt} />
       </XStack>
     </YStack>
 
     {/* Profile Info Section */}
-    <YStack marginTop={-70} paddingHorizontal="$4" gap="$4">
-      <XStack justifyContent="space-between" alignItems="flex-end">
+    <YStack
+      marginTop={-70}
+      paddingHorizontal="$4"
+      gap="$4"
+      pointerEvents="box-none"
+    >
+      <XStack
+        justifyContent="space-between"
+        alignItems="flex-end"
+        pointerEvents="box-none"
+      >
         <ProfileInfo profile={props.profile} isLoading={props.isLoading} />
 
         {props.type === "self" ? (
@@ -90,34 +101,40 @@ const Header = (props: HeaderProps) => (
         )}
       </XStack>
 
-      <Bio bio={props.profile?.bio} isLoading={props.isLoading} />
+      <YStack pointerEvents="box-none">
+        <Bio bio={props.profile?.bio} isLoading={props.isLoading} />
+      </YStack>
 
-      {props.type === "self" ? (
-        <ProfileActions type="self" userId={props.profile?.userId} />
-      ) : (
-        <ProfileActions
-          type="other"
-          userId={props.profile?.userId}
-          relationshipState={props.relationshipState}
-        />
-      )}
+      <YStack>
+        {props.type === "self" ? (
+          <ProfileActions type="self" userId={props.profile?.userId} />
+        ) : (
+          <ProfileActions
+            type="other"
+            userId={props.profile?.userId}
+            relationshipState={props.relationshipState}
+          />
+        )}
+      </YStack>
 
-      {props.type === "self" ? (
-        <Stats
-          type="self"
-          profile={props.profile}
-          stats={props.stats}
-          isLoading={props.isLoading}
-        />
-      ) : (
-        <Stats
-          type="other"
-          profile={props.profile}
-          stats={props.stats}
-          isLoading={props.isLoading}
-          relationshipState={props.relationshipState}
-        />
-      )}
+      <YStack pointerEvents="box-none">
+        {props.type === "self" ? (
+          <Stats
+            type="self"
+            profile={props.profile}
+            stats={props.stats}
+            isLoading={props.isLoading}
+          />
+        ) : (
+          <Stats
+            type="other"
+            profile={props.profile}
+            stats={props.stats}
+            isLoading={props.isLoading}
+            relationshipState={props.relationshipState}
+          />
+        )}
+      </YStack>
     </YStack>
   </YStack>
 );

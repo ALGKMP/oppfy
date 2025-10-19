@@ -49,8 +49,9 @@ const ActionButton = (props: ActionButtonProps) => {
 
   if (props.type === "self") {
     return (
-      <XStack gap="$3">
+      <XStack gap="$3" pointerEvents="box-none">
         <Button
+          pointerEvents="box-none"
           flex={1}
           size="$4"
           icon={<Edit3 size={18} />}
@@ -64,6 +65,7 @@ const ActionButton = (props: ActionButtonProps) => {
           Edit Profile
         </Button>
         <Button
+          pointerEvents="box-none"
           flex={1}
           size="$4"
           icon={<Share2 size={18} />}
@@ -82,8 +84,9 @@ const ActionButton = (props: ActionButtonProps) => {
 
   if (props.relationshipState?.isBlocked) {
     return (
-      <XStack gap="$3">
+      <XStack gap="$3" pointerEvents="box-none">
         <Button
+          pointerEvents="box-none"
           flex={1}
           size="$4"
           backgroundColor="$gray3"
@@ -158,7 +161,7 @@ const ActionButton = (props: ActionButtonProps) => {
   const buttonKeys = buttonCombinations[key] ?? [];
 
   return (
-    <XStack gap="$3">
+    <XStack gap="$3" pointerEvents="box-none">
       {buttonKeys.map((buttonKey) => {
         const config = buttonConfigs[buttonKey];
         if (!config) return null;
@@ -174,6 +177,7 @@ const ActionButton = (props: ActionButtonProps) => {
         return (
           <Button
             key={buttonKey}
+            pointerEvents="box-none"
             flex={1}
             size="$4"
             icon={!loading ? <Icon size={iconSize} /> : undefined}

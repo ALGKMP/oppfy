@@ -84,7 +84,7 @@ const RecommendationCarousel = ({
         horizontal
         showsHorizontalScrollIndicator={false}
         estimatedItemSize={CARD_WIDTH}
-        ItemSeparatorComponent={() => <Spacer width={CARD_GAP} />}
+        // ItemSeparatorComponent={() => <Spacer width={CARD_GAP} />}
         contentContainerStyle={{
           paddingHorizontal: getToken(
             paddingHorizontal as Token,

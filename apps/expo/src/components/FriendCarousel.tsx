@@ -49,17 +49,22 @@ const FriendCarousel = ({
   }
 
   return (
-    <YStack paddingVertical={paddingVertical} gap="$2">
-      <HeaderTitle icon="people" paddingHorizontal={paddingHorizontal}>
+    <YStack paddingVertical={paddingVertical} gap="$2" pointerEvents="box-none">
+      <HeaderTitle
+        icon="people"
+        paddingHorizontal={paddingHorizontal}
+        pointerEvents="box-none"
+      >
         Friends
       </HeaderTitle>
 
       <FlashList<Friend | null>
         data={isLoading ? Array(4).fill(null) : [...(friends ?? []), null]}
         horizontal
+        pointerEvents="box-none"
         showsHorizontalScrollIndicator={false}
         estimatedItemSize={CARD_WIDTH}
-        ItemSeparatorComponent={() => <Spacer width={CARD_GAP} />}
+        // ItemSeparatorComponent={() => <Spacer width={CARD_GAP} />}
         contentContainerStyle={{
           paddingHorizontal: getToken(
             paddingHorizontal as Token,

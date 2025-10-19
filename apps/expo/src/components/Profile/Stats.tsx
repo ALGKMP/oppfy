@@ -1,4 +1,4 @@
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import type { Href } from "expo-router";
 import { useRouter } from "expo-router";
 import { Text, XStack, YStack } from "tamagui";
@@ -66,8 +66,9 @@ const Stats = (props: StatsProps) => {
       shadowRadius={8}
       elevation={2}
       opacity={props.isLoading ? 0.8 : 1}
+      pointerEvents="box-none"
     >
-      <TouchableOpacity disabled={true}>
+      <TouchableOpacity disabled={true} activeOpacity={0.7}>
         <StatItem
           label="Posts"
           value={props.stats?.posts ?? 0}
@@ -78,6 +79,7 @@ const Stats = (props: StatsProps) => {
       <TouchableOpacity
         onPress={() => navigateToSection("following")}
         disabled={props.isLoading || isDisabled}
+        activeOpacity={0.7}
       >
         <StatItem
           label="Following"
@@ -89,6 +91,7 @@ const Stats = (props: StatsProps) => {
       <TouchableOpacity
         onPress={() => navigateToSection("followers")}
         disabled={props.isLoading || isDisabled}
+        activeOpacity={0.7}
       >
         <StatItem
           label="Followers"
@@ -100,6 +103,7 @@ const Stats = (props: StatsProps) => {
       <TouchableOpacity
         onPress={() => navigateToSection("friends")}
         disabled={props.isLoading || isDisabled}
+        activeOpacity={0.7}
       >
         <StatItem
           label="Friends"

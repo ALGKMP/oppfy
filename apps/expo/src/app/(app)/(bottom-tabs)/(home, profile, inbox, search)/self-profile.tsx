@@ -7,6 +7,7 @@ import { CameraOff } from "@tamagui/lucide-icons";
 import { Spacer, View, YStack } from "tamagui";
 
 import FriendCarousel from "~/components/FriendCarousel";
+import { ProfileTabBar } from "~/components/Layouts/ProfileTabBar";
 import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
@@ -116,7 +117,12 @@ const SelfProfile = () => {
   };
 
   const renderHeader = () => (
-    <YStack gap="$2" paddingTop={insets.top} backgroundColor="$background" pointerEvents="box-none">
+    <YStack
+      gap="$2"
+      paddingTop={insets.top}
+      backgroundColor="$background"
+      pointerEvents="box-none"
+    >
       <Header
         type="self"
         profile={profile}
@@ -124,7 +130,7 @@ const SelfProfile = () => {
         isLoading={isLoading}
       />
 
-      {isLoadingProfile || isLoadingProfileStats ? null : (
+      {/* {isLoadingProfile || isLoadingProfileStats ? null : (
         <>
           {profileStats?.friends && profileStats.friends > 0 ? (
             <FriendCarousel paddingHorizontal="$2.5" />
@@ -132,12 +138,18 @@ const SelfProfile = () => {
             <RecommendationCarousel paddingHorizontal="$2.5" />
           )}
         </>
-      )}
+      )} */}
     </YStack>
   );
 
   return (
-    <Tabs.Container renderHeader={renderHeader} allowHeaderOverscroll={true}>
+    <Tabs.Container
+      renderHeader={renderHeader}
+      allowHeaderOverscroll={true}
+      renderTabBar={(props) => <ProfileTabBar {...props} />}
+      headerContainerStyle={{ elevation: 0 }}
+      minHeaderHeight={0}
+    >
       <Tabs.Tab name="Posts">
         <Tabs.FlashList
           data={postItems}
