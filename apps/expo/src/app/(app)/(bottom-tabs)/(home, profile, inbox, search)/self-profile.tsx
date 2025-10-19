@@ -1,16 +1,16 @@
 import React, { useRef, useState } from "react";
 import { RefreshControl } from "react-native";
+import { Tabs } from "react-native-collapsible-tab-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useScrollToTop } from "@react-navigation/native";
-import { FlashList } from "@shopify/flash-list";
 import { CameraOff } from "@tamagui/lucide-icons";
-import { getToken, Spacer, View, YStack } from "tamagui";
+import { Spacer, View, YStack } from "tamagui";
 
 import FriendCarousel from "~/components/FriendCarousel";
 import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
-import { EmptyPlaceholder, HeaderTitle } from "~/components/ui";
+import { EmptyPlaceholder } from "~/components/ui";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -21,7 +21,7 @@ interface ViewToken {
   key: string;
   index: number | null;
   isViewable: boolean;
-  timestamp: number;
+  timestamp?: number;
 }
 
 const SelfProfile = () => {
@@ -29,7 +29,6 @@ const SelfProfile = () => {
   useScrollToTop(scrollRef);
 
   const insets = useSafeAreaInsets();
-
   const {
     data: profile,
     refetch: refetchProfile,
@@ -117,7 +116,7 @@ const SelfProfile = () => {
   };
 
   const renderHeader = () => (
-    <YStack gap="$2" position="relative">
+    <YStack gap="$2" paddingTop={insets.top} backgroundColor="$background" pointerEvents="box-none">
       <Header
         type="self"
         profile={profile}
@@ -134,42 +133,52 @@ const SelfProfile = () => {
           )}
         </>
       )}
-
-      {(isLoadingPostData || postItems.length > 0) && (
-        <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
-          Posts
-        </HeaderTitle>
-      )}
     </YStack>
   );
 
   return (
-    <FlashList
-      ref={scrollRef}
-      data={postItems}
-      renderItem={renderPost}
-      ListHeaderComponent={renderHeader}
-      ListEmptyComponent={renderEmptyList}
-      keyExtractor={(item) => `self-profile-post-${item.post.id}`}
-      estimatedItemSize={664}
-      showsVerticalScrollIndicator={false}
-      onEndReached={handleOnEndReached}
-      onViewableItemsChanged={onViewableItemsChanged}
-      viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
-      extraData={viewableItems}
-      ItemSeparatorComponent={() => <Spacer size="$4" />}
-      ListHeaderComponentStyle={{
-        paddingTop: insets.top,
-        marginBottom: getToken("$2", "space") as number,
-      }}
-      refreshControl={
-        <RefreshControl
-          refreshing={isRefreshing}
-          onRefresh={handleRefresh}
-          progressViewOffset={insets.top}
+    <Tabs.Container renderHeader={renderHeader} allowHeaderOverscroll={true}>
+      <Tabs.Tab name="Posts">
+        <Tabs.FlashList
+          data={postItems}
+          renderItem={renderPost}
+          ListEmptyComponent={renderEmptyList}
+          keyExtractor={(item) => `self-profile-post-${item.post.id}`}
+          showsVerticalScrollIndicator={false}
+          onEndReached={handleOnEndReached}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
+          extraData={viewableItems}
+          ItemSeparatorComponent={() => <Spacer size="$4" />}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+            />
+          }
         />
-      }
-    />
+      </Tabs.Tab>
+      <Tabs.Tab name="Tagged">
+        <Tabs.FlashList
+          data={postItems}
+          renderItem={renderPost}
+          ListEmptyComponent={renderEmptyList}
+          keyExtractor={(item) => `self-profile-post-tagged-${item.post.id}`}
+          showsVerticalScrollIndicator={false}
+          onEndReached={handleOnEndReached}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
+          extraData={viewableItems}
+          ItemSeparatorComponent={() => <Spacer size="$4" />}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+            />
+          }
+        />
+      </Tabs.Tab>
+    </Tabs.Container>
   );
 };
 
