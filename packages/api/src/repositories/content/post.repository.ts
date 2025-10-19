@@ -49,6 +49,7 @@ export interface DeletePostParams {
 
 export interface PaginatePostsParams extends PaginationParams {
   userId: string;
+  selfUserId?: string;
 }
 
 export interface PostResult<
@@ -144,10 +145,10 @@ export class PostRepository {
   }
 
   async paginatePostsOfFollowing(
-    { userId, cursor, pageSize = 10 }: PaginatePostsParams,
+    { userId, selfUserId, cursor, pageSize = 10 }: PaginatePostsParams,
     tx: DatabaseOrTransaction = this.db,
   ): Promise<PostResult<"withIsLiked">[]> {
-    const query = this.baseQuery(userId, tx);
+    const query = this.baseQuery(selfUserId, tx);
 
     let whereClause = or(
       eq(this.schema.follow.senderUserId, userId),
@@ -230,10 +231,10 @@ export class PostRepository {
   }
 
   async paginatePostsOfUser(
-    { userId, cursor, pageSize = 10 }: PaginatePostsParams,
+    { userId, selfUserId, cursor, pageSize = 10 }: PaginatePostsParams,
     tx: DatabaseOrTransaction = this.db,
   ): Promise<PostResult<"withIsLiked">[]> {
-    const query = this.baseQuery(userId, tx);
+    const query = this.baseQuery(selfUserId, tx);
 
     const whereClause = and(
       eq(this.schema.post.recipientUserId, userId),
@@ -257,6 +258,38 @@ export class PostRepository {
       ...result,
       authorProfile: result.authorProfile as Profile<"onboarded">,
       recipientProfile: result.recipientProfile as Profile<"onboarded">,
+      isLiked: result.isLiked ?? false,
+    }));
+  }
+
+  async paginatePostsByUser(
+    { userId, selfUserId, cursor, pageSize = 10 }: PaginatePostsParams,
+    tx: DatabaseOrTransaction = this.db,
+  ): Promise<PostResult<"withIsLiked">[]> {
+    const query = this.baseQuery(selfUserId, tx);
+
+    const whereClause = and(
+      eq(this.schema.post.authorUserId, userId),
+      cursor
+        ? or(
+            lt(this.schema.post.createdAt, cursor.createdAt),
+            and(
+              eq(this.schema.post.createdAt, cursor.createdAt),
+              lt(this.schema.post.id, cursor.id),
+            ),
+          )
+        : undefined,
+    );
+
+    const results = await query
+      .where(whereClause)
+      .orderBy(desc(this.schema.post.createdAt), desc(this.schema.post.id))
+      .limit(pageSize);
+
+    return results.map((result) => ({
+      ...result,
+      authorProfile: result.authorProfile as Profile<"onboarded">,
+      recipientProfile: result.recipientProfile as Profile<"notOnApp">,
       isLiked: result.isLiked ?? false,
     }));
   }
@@ -290,15 +323,15 @@ export class PostRepository {
     ]);
   }
 
-  private baseQuery(userId?: string, tx: DatabaseOrTransaction = this.db) {
+  private baseQuery(selfUserId?: string, tx: DatabaseOrTransaction = this.db) {
     let query = tx
       .select({
         authorProfile: this.aliasedSchema.authorProfile,
         recipientProfile: this.aliasedSchema.recipientProfile,
         post: this.schema.post,
         postStats: this.schema.postStats,
-        ...(userId
-          ? { isLiked: isLikedSql(userId) }
+        ...(selfUserId
+          ? { isLiked: isLikedSql(selfUserId) }
           : { isLiked: sql<boolean>`false` }),
       })
       .from(this.schema.post)

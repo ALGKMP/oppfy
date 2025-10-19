@@ -258,6 +258,38 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const result = await ctx.services.post.paginatePosts({
         userId: input.userId ?? ctx.session.uid,
+        selfUserId: ctx.session.uid,
+        cursor: input.cursor,
+        pageSize: input.pageSize,
+      });
+
+      return result.match(
+        (res) => res,
+        (_) => {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+          });
+        },
+      );
+    }),
+
+  paginatePostsMadeByUser: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string().optional(),
+        cursor: z
+          .object({
+            id: z.string(),
+            createdAt: z.date(),
+          })
+          .optional(),
+        pageSize: z.number().min(1).max(100).default(10),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.services.post.paginatePostsMadeByUser({
+        userId: input.userId ?? ctx.session.uid,
+        selfUserId: ctx.session.uid,
         cursor: input.cursor,
         pageSize: input.pageSize,
       });

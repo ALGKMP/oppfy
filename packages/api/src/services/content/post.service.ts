@@ -67,6 +67,7 @@ interface DeletePostParams {
 
 interface PaginatePostsParams extends PaginationParams {
   userId: string;
+  selfUserId?: string;
 }
 
 interface PaginateCommentsParams extends PaginationParams {
@@ -288,12 +289,45 @@ export class PostService {
   async paginatePosts({
     userId,
     cursor,
+    selfUserId,
     pageSize = 20,
   }: PaginatePostsParams): Promise<
     Result<PaginatedResponse<HydratedPostResult<"withIsLiked">>, never>
   > {
     const posts = await this.postRepository.paginatePostsOfUser({
       userId,
+      selfUserId,
+      cursor,
+      pageSize,
+    });
+    const hydratedPosts = await Promise.all(
+      posts.map((post) => this.hydratePost(post)),
+    );
+
+    const hasMore = hydratedPosts.length > pageSize;
+    const items = hydratedPosts.slice(0, pageSize);
+    const lastItem = items[items.length - 1];
+
+    return ok({
+      items,
+      nextCursor:
+        hasMore && lastItem
+          ? { id: lastItem.post.id, createdAt: lastItem.post.createdAt }
+          : null,
+    });
+  }
+
+  async paginatePostsMadeByUser({
+    userId,
+    cursor,
+    selfUserId,
+    pageSize = 20,
+  }: PaginatePostsParams): Promise<
+    Result<PaginatedResponse<HydratedPostResult<"withIsLiked">>, never>
+  > {
+    const posts = await this.postRepository.paginatePostsByUser({
+      userId,
+      selfUserId,
       cursor,
       pageSize,
     });
