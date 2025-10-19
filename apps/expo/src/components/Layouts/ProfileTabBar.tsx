@@ -1,5 +1,4 @@
 import React from "react";
-import { Animated } from "react-native";
 import type {
   MaterialTabBarProps,
   MaterialTabItemProps,
@@ -8,6 +7,7 @@ import {
   MaterialTabBar,
   MaterialTabItem,
 } from "react-native-collapsible-tab-view";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Camera, Grid3x3 } from "@tamagui/lucide-icons";
 import { useTheme, XStack } from "tamagui";
 
@@ -20,26 +20,14 @@ const iconMap: Record<
 };
 
 const CustomTabItem = <T extends string>(props: MaterialTabItemProps<T>) => {
-  const theme = useTheme();
   const Icon = iconMap[props.name];
-  const isIconOnly = props.name === "Tagged";
 
   return (
     <MaterialTabItem
       {...props}
       label={() => (
         <XStack gap="$2" alignItems="center">
-          {Icon && <Icon size={20} color={theme.color.val} />}
-          {!isIconOnly && (
-            <Animated.Text
-              style={{
-                color: theme.color.val,
-                fontSize: 14,
-              }}
-            >
-              {props.name}
-            </Animated.Text>
-          )}
+          {Icon && <Icon size={20} color="$color" />}
         </XStack>
       )}
     />
@@ -48,6 +36,7 @@ const CustomTabItem = <T extends string>(props: MaterialTabItemProps<T>) => {
 
 export const ProfileTabBar = (props: MaterialTabBarProps<string>) => {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <MaterialTabBar
@@ -65,6 +54,7 @@ export const ProfileTabBar = (props: MaterialTabBarProps<string>) => {
         shadowOpacity: 0,
         borderBottomWidth: 0.5,
         borderBottomColor: theme.gray4?.val ?? "rgba(255, 255, 255, 0.1)",
+        paddingTop: insets.top,
       }}
       tabStyle={{
         height: 48,

@@ -202,6 +202,7 @@ const SelfProfile = () => {
         <Tabs.FlashList
           data={postItems}
           renderItem={renderPost}
+          estimatedItemSize={664}
           ListEmptyComponent={renderEmptyList}
           keyExtractor={(item) => `self-profile-post-${item.post.id}`}
           showsVerticalScrollIndicator={false}
@@ -222,6 +223,7 @@ const SelfProfile = () => {
         <Tabs.FlashList
           data={postsMadeByUserItems}
           renderItem={renderPostMadeByUser}
+          estimatedItemSize={664}
           ListEmptyComponent={renderEmptyListPostsMadeByUser}
           keyExtractor={(item) => `self-profile-post-tagged-${item.post.id}`}
           showsVerticalScrollIndicator={false}
