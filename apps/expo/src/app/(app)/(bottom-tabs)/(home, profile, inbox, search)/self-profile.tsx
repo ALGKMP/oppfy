@@ -56,12 +56,28 @@ const SelfProfile = () => {
     },
   );
 
+  const {
+    data: postsMadeByUser,
+    refetch: refetchPostsMadeByUser,
+    isLoading: isLoadingPostsMadeByUserData,
+    hasNextPage: hasNextPagePostsMadeByUser,
+    fetchNextPage: fetchNextPagePostsMadeByUser,
+    isFetchingNextPage: isFetchingNextPagePostsMadeByUser,
+  } = api.post.paginatePostsMadeByUser.useInfiniteQuery(
+    { pageSize: 10 },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
+
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
   const isLoading = isLoadingProfile || isLoadingProfileStats;
 
   const postItems = posts?.pages.flatMap((page) => page.items) ?? [];
+  const postsMadeByUserItems =
+    postsMadeByUser?.pages.flatMap((page) => page.items) ?? [];
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -69,6 +85,7 @@ const SelfProfile = () => {
       refetchProfile(),
       refetchProfileStats(),
       refetchPosts(),
+      refetchPostsMadeByUser(),
     ]);
     setIsRefreshing(false);
   };
@@ -76,6 +93,12 @@ const SelfProfile = () => {
   const handleOnEndReached = async () => {
     if (hasNextPage && !isFetchingNextPage) {
       await fetchNextPage();
+    }
+  };
+
+  const handleOnEndReachedPostsMadeByUser = async () => {
+    if (hasNextPagePostsMadeByUser && !isFetchingNextPagePostsMadeByUser) {
+      await fetchNextPagePostsMadeByUser();
     }
   };
 
@@ -95,6 +118,10 @@ const SelfProfile = () => {
     <PostCard {...item} isViewable={viewableItems.includes(item.post.id)} />
   );
 
+  const renderPostMadeByUser = ({ item }: { item: Post }) => (
+    <PostCard {...item} isViewable={viewableItems.includes(item.post.id)} />
+  );
+
   const renderEmptyList = () => {
     if (isLoadingPostData) {
       return (
@@ -111,6 +138,27 @@ const SelfProfile = () => {
         <EmptyPlaceholder
           icon={<CameraOff size="$10" />}
           title="No posts yet"
+        />
+      </View>
+    );
+  };
+
+  const renderEmptyListPostsMadeByUser = () => {
+    if (isLoadingPostsMadeByUserData) {
+      return (
+        <YStack gap="$4">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <PostCard.Skeleton key={index} />
+          ))}
+        </YStack>
+      );
+    }
+
+    return (
+      <View paddingTop="$6">
+        <EmptyPlaceholder
+          icon={<CameraOff size="$10" />}
+          title="No posts made yet"
         />
       </View>
     );
@@ -172,12 +220,12 @@ const SelfProfile = () => {
       </Tabs.Tab>
       <Tabs.Tab name="Tagged">
         <Tabs.FlashList
-          data={postItems}
-          renderItem={renderPost}
-          ListEmptyComponent={renderEmptyList}
+          data={postsMadeByUserItems}
+          renderItem={renderPostMadeByUser}
+          ListEmptyComponent={renderEmptyListPostsMadeByUser}
           keyExtractor={(item) => `self-profile-post-tagged-${item.post.id}`}
           showsVerticalScrollIndicator={false}
-          onEndReached={handleOnEndReached}
+          onEndReached={handleOnEndReachedPostsMadeByUser}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
           extraData={viewableItems}
