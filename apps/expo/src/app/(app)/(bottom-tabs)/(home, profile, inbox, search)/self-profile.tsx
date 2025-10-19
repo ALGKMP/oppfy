@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { RefreshControl } from "react-native";
 import { Tabs } from "react-native-collapsible-tab-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -6,11 +6,9 @@ import { useScrollToTop } from "@react-navigation/native";
 import { CameraOff } from "@tamagui/lucide-icons";
 import { Spacer, View, YStack } from "tamagui";
 
-import FriendCarousel from "~/components/FriendCarousel";
 import { ProfileTabBar } from "~/components/Layouts/ProfileTabBar";
 import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
-import RecommendationCarousel from "~/components/RecommendationCarousel";
 import { EmptyPlaceholder } from "~/components/ui";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -102,17 +100,16 @@ const SelfProfile = () => {
     }
   };
 
-  const onViewableItemsChanged = ({
-    viewableItems,
-  }: {
-    viewableItems: ViewToken[];
-  }) => {
-    const visibleItemIds = viewableItems
-      .filter((token) => token.isViewable)
-      .map((token) => token.item.post.id);
+  const onViewableItemsChanged = useCallback(
+    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      const visibleItemIds = viewableItems
+        .filter((token) => token.isViewable)
+        .map((token) => token.item.post.id);
 
-    setViewableItems(visibleItemIds);
-  };
+      setViewableItems(visibleItemIds);
+    },
+    [],
+  );
 
   const renderPost = ({ item }: { item: Post }) => (
     <PostCard {...item} isViewable={viewableItems.includes(item.post.id)} />
@@ -196,7 +193,8 @@ const SelfProfile = () => {
       allowHeaderOverscroll={true}
       renderTabBar={(props) => <ProfileTabBar {...props} />}
       headerContainerStyle={{ elevation: 0 }}
-      minHeaderHeight={0}
+      minHeaderHeight={insets.top}
+      lazy
     >
       <Tabs.Tab name="Posts">
         <Tabs.FlashList

@@ -7,7 +7,6 @@ import {
   MaterialTabBar,
   MaterialTabItem,
 } from "react-native-collapsible-tab-view";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Camera, Grid3x3 } from "@tamagui/lucide-icons";
 import { useTheme, XStack } from "tamagui";
 
@@ -36,7 +35,6 @@ const CustomTabItem = <T extends string>(props: MaterialTabItemProps<T>) => {
 
 export const ProfileTabBar = (props: MaterialTabBarProps<string>) => {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
 
   return (
     <MaterialTabBar
@@ -54,7 +52,7 @@ export const ProfileTabBar = (props: MaterialTabBarProps<string>) => {
         shadowOpacity: 0,
         borderBottomWidth: 0.5,
         borderBottomColor: theme.gray4?.val ?? "rgba(255, 255, 255, 0.1)",
-        paddingTop: insets.top,
+        pointerEvents: "box-none",
       }}
       tabStyle={{
         height: 48,
