@@ -38,7 +38,7 @@ export const MediaListItem = ({
 }: MediaListItemProps) => {
   const content = (
     <XStack alignItems="center" gap="$4">
-      {imageUrl && <Avatar source={imageUrl} size={46} />}
+      {imageUrl && <Avatar source={imageUrl} size={56} />}
 
       {verticalText ? (
         <Paragraph flex={1}>
@@ -106,11 +106,7 @@ export const MediaListItem = ({
         )}
 
         {secondaryAction && (
-          <Button 
-            size="$2.5"
-            paddingHorizontal="$4"
-            minWidth={100}
-          >
+          <Button size="$2.5" paddingHorizontal="$4" minWidth={100}>
             {secondaryAction.label}
           </Button>
         )}
