@@ -53,7 +53,11 @@ const muxBodySchema = z
       passthrough: z
         .string()
         .transform((str) => muxPassthroughSchema.parse(JSON.parse(str))),
+        new_asset_settings: z.object({
+          
+        }),
     }),
+
   })
   .passthrough();
 
