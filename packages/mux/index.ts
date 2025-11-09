@@ -45,6 +45,10 @@ export class Mux {
     await this.client.video.assets.delete(assetId);
   }
 
+  async getAsset(assetId: string) {
+    return this.client.video.assets.retrieve(assetId);
+  }
+
   verifyWebhookSignature(payload: string, headers: Record<string, string>) {
     return this.client.webhooks.verifySignature(payload, headers);
   }

@@ -1,5 +1,5 @@
 {
-  "name": "@oppfy/mux-lambda",
+  "name": "@oppfy/moderation",
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
@@ -14,12 +14,13 @@
   },
   "prettier": "@oppfy/prettier-config",
   "dependencies": {
+    "@aws-sdk/client-rekognition": "^3.564.0",
+    "@aws-sdk/client-s3": "^3.564.0",
     "@aws-sdk/client-sqs": "^3.598.0",
-    "@mux/mux-node": "^8.5.1",
     "@oppfy/db": "workspace:*",
     "@oppfy/mux": "workspace:*",
-    "@oppfy/validators": "workspace:*",
     "@t3-oss/env-core": "^0.10.1",
+    "p-limit": "^5.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

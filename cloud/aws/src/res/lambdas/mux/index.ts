@@ -1,43 +1,23 @@
 import { parser } from "@aws-lambda-powertools/parser/middleware";
 import { APIGatewayProxyEventV2Schema } from "@aws-lambda-powertools/parser/schemas";
 import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
-// import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
 import middy from "@middy/core";
 import { createEnv } from "@t3-oss/env-core";
-// import { createEnv } from "@t3-oss/env-core";
+import type { APIGatewayProxyEventV2 } from "aws-lambda";
 import { z } from "zod";
 
-import { db, eq, schema, sql } from "@oppfy/db";
 import { Mux } from "@oppfy/mux";
 
-const SQS = new SQSClient({ region: "us-east-1" });
+const REGION = process.env.AWS_REGION ?? "us-east-1";
+const MAX_DURATION_SECONDS = 60;
+const SAMPLE_RATE_SECONDS = 1;
 
-// type SnsNotificationData = z.infer<typeof validators.snsNotificationData>;
-
-// type StoreNotificationData = z.infer<typeof validators.notificationData>;
-
-// type SendNotificationData = z.infer<typeof validators.sendNotificationData>;
-
-type APIGatewayProxyEvent = z.infer<typeof APIGatewayProxyEventV2Schema>;
-
-const MUX_READY_EVENT = "video.asset.ready";
-
+const sqs = new SQSClient({ region: REGION });
 const mux = new Mux();
 
 const muxPassthroughSchema = z.object({
-  postid: z.string(),
+  postid: z.string().uuid(),
 });
-
-const env = createEnv({
-  server: {
-    SQS_NOTIFICATION_QUEUE: z.string().min(1),
-  },
-  runtimeEnv: process.env,
-});
-
-// const sns = new SNSClient({
-//   region: "us-east-1",
-// });
 
 const muxBodySchema = z
   .object({
@@ -45,107 +25,106 @@ const muxBodySchema = z
     object: z.object({
       id: z.string(),
       type: z.string(),
-      error: z.string().optional(),
     }),
     data: z.object({
-      aspect_ratio: z.string(),
+      duration: z.number().optional(),
       playback_ids: z.array(z.object({ id: z.string() })).nonempty(),
       passthrough: z
         .string()
-        .transform((str) => muxPassthroughSchema.parse(JSON.parse(str))),
-        new_asset_settings: z.object({
-          
-        }),
+        .transform((raw) => muxPassthroughSchema.parse(JSON.parse(raw))),
+      id: z.string(),
     }),
-
   })
   .passthrough();
 
-const deleteAsset = async (assetId: string) => {
-  await mux.deleteAsset(assetId);
+const env = createEnv({
+  server: {
+    MODERATION_QUEUE_URL: z.string().min(1),
+  },
+  runtimeEnv: process.env,
+});
+
+const MUX_READY_EVENT = "video.asset.ready";
+
+const buildTimestamps = (durationSeconds: number) => {
+  const capped = Math.max(
+    1,
+    Math.min(MAX_DURATION_SECONDS, Math.ceil(durationSeconds)),
+  );
+
+  return Array.from({ length: capped }, (_, index) => {
+    if (durationSeconds <= 1) {
+      return 0;
+    }
+
+    const raw = index * SAMPLE_RATE_SECONDS;
+    const upperBound = Math.max(durationSeconds - 0.1, 0);
+    return Math.min(raw, upperBound);
+  });
 };
 
-const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
-  const rawBody = event.body;
-  const headers = event.headers;
-
-  if (rawBody === undefined) {
-    throw new Error("Missing raw body or mux-signature header");
+const ensureDuration = async (assetId: string, duration?: number) => {
+  if (typeof duration === "number" && duration > 0) {
+    return duration;
   }
 
-  try {
-    mux.verifyWebhookSignature(rawBody, headers);
-  } catch {
-    throw new Error("Invalid Mux Webhook Signature");
+  const asset = (await mux.getAsset(assetId)) as unknown as {
+    data?: { duration?: number };
+  };
+
+  if (!asset?.data?.duration) {
+    throw new Error(`Mux asset ${assetId} missing duration`);
   }
 
-  const body = muxBodySchema.parse(JSON.parse(rawBody));
+  return asset.data.duration;
+};
 
-  // Early return for non-video.asset.ready events
+const lambdaHandler = async (event: APIGatewayProxyEventV2): Promise<void> => {
+  if (!event.body) {
+    throw new Error("Missing webhook body");
+  }
+
+  mux.verifyWebhookSignature(
+    event.body,
+    event.headers as Record<string, string>,
+  );
+
+  const body = muxBodySchema.parse(JSON.parse(event.body));
+
   if (body.type !== MUX_READY_EVENT) {
-    console.log(`Ignoring Mux event of type: ${body.type}`);
+    console.log(`Ignoring Mux event type ${body.type}`);
     return;
   }
-  const postId = body.data.passthrough.postid;
-  try {
-    // transaction to update post status and user stats
-    await db.transaction(async (tx) => {
-      await tx
-        .update(schema.post)
-        .set({
-          postKey: body.data.playback_ids[0].id,
-          status: "processed",
-        })
-        .where(eq(schema.post.id, postId));
 
-      // Update user stats to increment post count
-      await tx
-        .update(schema.userStats)
-        .set({ posts: sql`${schema.userStats.posts} + 1` })
-        .where(
-          eq(
-            schema.userStats.userId,
-            sql`(SELECT recipient_user_id FROM post WHERE id = ${postId})`,
-          ),
-        );
-    });
-
-    // get the post
-    const post = await db.query.post.findFirst({
-      where: eq(schema.post.id, postId),
-    });
-    if (!post) {
-      throw new Error("Post not found");
-    }
-
-    // get username of poster
-    const authorProfile = await db.query.profile.findFirst({
-      where: eq(schema.profile.userId, post.authorUserId),
-    });
-    if (!authorProfile) {
-      throw new Error("Author profile not found");
-    }
-
-    const notiSqsParams = {
-      senderId: post.authorUserId,
-      recipientId: post.recipientUserId,
-      title: "You've been opped",
-      body: `${authorProfile.username} posted a picture of you`,
-      entityType: "post",
-      entityId: postId,
-      eventType: "post",
-    };
-
-    const command = new SendMessageCommand({
-      QueueUrl: env.SQS_NOTIFICATION_QUEUE,
-      MessageBody: JSON.stringify(notiSqsParams),
-    });
-
-    await SQS.send(command);
-  } catch (error) {
-    console.error("Error processing video:", error);
-    throw error;
+  const playbackId = body.data.playback_ids[0]?.id;
+  if (!playbackId) {
+    throw new Error("Mux playback ID missing in webhook payload");
   }
+
+  const assetId = body.data.id ?? body.object.id;
+  const postId = body.data.passthrough.postid;
+
+  const durationSeconds = await ensureDuration(assetId, body.data.duration);
+  const timestamps = buildTimestamps(durationSeconds);
+
+  console.log(
+    `Enqueueing video moderation for asset ${assetId} with ${timestamps.length} frames`,
+  );
+
+  // Send only metadata - moderation lambda will fetch thumbnails in parallel
+  await sqs.send(
+    new SendMessageCommand({
+      QueueUrl: env.MODERATION_QUEUE_URL,
+      MessageBody: JSON.stringify({
+        type: "video",
+        assetId,
+        playbackId,
+        postId,
+        timestamps,
+        durationSec: durationSeconds,
+      }),
+    }),
+  );
 };
 
 export const handler = middy(lambdaHandler).use(
