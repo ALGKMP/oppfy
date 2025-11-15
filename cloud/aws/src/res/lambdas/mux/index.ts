@@ -6,6 +6,7 @@ import { createEnv } from "@t3-oss/env-core";
 import type { APIGatewayProxyEventV2 } from "aws-lambda";
 import { z } from "zod";
 
+import { db, eq, schema, sql } from "@oppfy/db";
 import { Mux } from "@oppfy/mux";
 
 const REGION = process.env.AWS_REGION ?? "us-east-1";
@@ -40,6 +41,7 @@ const muxBodySchema = z
 const env = createEnv({
   server: {
     MODERATION_QUEUE_URL: z.string().min(1),
+    SQS_NOTIFICATION_QUEUE: z.string().min(1),
   },
   runtimeEnv: process.env,
 });
@@ -108,10 +110,68 @@ const lambdaHandler = async (event: APIGatewayProxyEventV2): Promise<void> => {
   const timestamps = buildTimestamps(durationSeconds);
 
   console.log(
+    `Processing video for asset ${assetId}, marking as processed and enqueueing moderation`,
+  );
+
+  // Update post status and user stats in a transaction
+  const post = await db.transaction(async (tx) => {
+    const post = await tx.query.post.findFirst({
+      where: eq(schema.post.id, postId),
+    });
+
+    if (!post) {
+      throw new Error(`Post ${postId} not found`);
+    }
+
+    // Mark video as processed with the playback ID
+    await tx
+      .update(schema.post)
+      .set({
+        status: "processed",
+        postKey: playbackId,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.post.id, postId));
+
+    // Increment recipient's profile stats post count
+    await tx
+      .update(schema.userStats)
+      .set({ posts: sql`${schema.userStats.posts} + 1` })
+      .where(eq(schema.userStats.userId, post.recipientUserId));
+
+    return post;
+  });
+
+  // Get profile of poster for notification
+  const authorProfile = await db.query.profile.findFirst({
+    where: eq(schema.profile.userId, post.authorUserId),
+  });
+
+  if (authorProfile) {
+    // Send notification
+    const notiSqsParams = {
+      senderId: post.authorUserId,
+      recipientId: post.recipientUserId,
+      title: "You've been opped",
+      body: `${authorProfile.username} posted a video of you`,
+      entityType: "post",
+      entityId: post.id,
+      eventType: "post",
+    };
+
+    await sqs.send(
+      new SendMessageCommand({
+        QueueUrl: env.SQS_NOTIFICATION_QUEUE,
+        MessageBody: JSON.stringify(notiSqsParams),
+      }),
+    );
+  }
+
+  // Queue moderation job
+  console.log(
     `Enqueueing video moderation for asset ${assetId} with ${timestamps.length} frames`,
   );
 
-  // Send only metadata - moderation lambda will fetch thumbnails in parallel
   await sqs.send(
     new SendMessageCommand({
       QueueUrl: env.MODERATION_QUEUE_URL,

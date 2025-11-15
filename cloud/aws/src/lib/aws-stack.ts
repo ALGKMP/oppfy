@@ -185,6 +185,33 @@ export class AwsStack extends cdk.Stack {
       }),
     );
 
+    // Create moderation queue
+    const moderationQueue = new Queue(this, "Moderation", {
+      visibilityTimeout: cdk.Duration.seconds(180), // 3 minutes for video processing
+      receiveMessageWaitTime: cdk.Duration.seconds(20),
+    });
+
+    // Create moderation lambda
+    const moderationLambda = new LambdaFunction(this, "ModerationLambda", {
+      entry: "src/res/lambdas/moderation/index.ts",
+      environment: {
+        ...environment,
+      },
+    });
+
+    // Configure moderation lambda to consume from moderation queue
+    moderationQueue.queue.grantConsumeMessages(moderationLambda.function);
+    moderationLambda.function.addEventSource(
+      new SqsEventSource(moderationQueue.queue, {
+        batchSize: 10,
+        maxBatchingWindow: cdk.Duration.seconds(5),
+        reportBatchItemFailures: true,
+      }),
+    );
+
+    // Grant moderation lambda permissions to delete from S3
+    postBucket.bucket.grantDelete(moderationLambda.function);
+
     const postLambda = new LambdaFunction(this, "PostLambda", {
       entry: "src/res/lambdas/posts/index.ts",
       environment,
@@ -196,12 +223,22 @@ export class AwsStack extends cdk.Stack {
       "AllowPostS3Invocation",
     );
     notificationQueue.queue.grantSendMessages(postLambda.function);
+    // Grant post bucket permission to send to moderation queue
+    moderationQueue.queue.grantSendMessages(postLambda.function);
+    postBucket.bucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED,
+      new s3n.SqsDestination(moderationQueue.queue),
+    );
 
     const muxWebhookLambda = new LambdaFunction(this, "MuxWebhookLambda", {
       entry: "src/res/lambdas/mux/index.ts",
-      environment,
+      environment: {
+        ...environment,
+        MODERATION_QUEUE_URL: moderationQueue.queue.queueUrl,
+      },
     });
     notificationQueue.queue.grantSendMessages(muxWebhookLambda.function);
+    moderationQueue.queue.grantSendMessages(muxWebhookLambda.function);
 
     const muxWebhookUrl = muxWebhookLambda.function.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE,

@@ -13,7 +13,7 @@ import type {
   SQSEvent,
   SQSRecord,
 } from "aws-lambda";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import pLimit from "p-limit";
 import { z } from "zod";
 
@@ -223,7 +223,7 @@ async function getPostIdFromS3Object(
 }
 
 /**
- * Delete S3 object and update database for explicit image
+ * Delete S3 object and delete post from database for explicit image
  */
 async function handleExplicitImage(
   bucket: string,
@@ -244,17 +244,24 @@ async function handleExplicitImage(
       }),
     );
 
-    // Update database - clear postKey to prevent access
-    await db
-      .update(schema.post)
-      .set({
-        postKey: "",
-        updatedAt: new Date(),
-      })
-      .where(eq(schema.post.id, postId));
+    // Get post info before deleting to decrement user's post count
+    const post = await db.query.post.findFirst({
+      where: eq(schema.post.id, postId),
+    });
+
+    if (post && post.status === "processed") {
+      // Decrement recipient's post count since it was already incremented
+      await db
+        .update(schema.userStats)
+        .set({ posts: sql`GREATEST(${schema.userStats.posts} - 1, 0)` })
+        .where(eq(schema.userStats.userId, post.recipientUserId));
+    }
+
+    // Delete the post from the database
+    await db.delete(schema.post).where(eq(schema.post.id, postId));
 
     console.log(
-      `Deleted explicit image ${key} and cleared DB reference for post ${postId}`,
+      `Deleted explicit image ${key} and removed post ${postId} from database due to moderation violation`,
     );
   } catch (error) {
     console.error(`Failed to delete explicit image ${key}:`, error);
@@ -312,18 +319,15 @@ async function processVideoJob(videoJob: VideoJob): Promise<void> {
     `Processing video moderation for asset ${assetId}, ${timestamps.length} frames`,
   );
 
-  // Check if post exists
+  // Check if post exists (if not, it may have been deleted by a previous moderation run)
   const post = await db.query.post.findFirst({
     where: eq(schema.post.id, postId),
   });
 
   if (!post) {
-    console.log(`Post ${postId} not found, skipping video moderation`);
-    return;
-  }
-
-  if (post.status === "processed") {
-    console.log(`Post ${postId} already processed, skipping`);
+    console.log(
+      `Post ${postId} not found (may have been deleted by previous moderation), skipping video moderation`,
+    );
     return;
   }
 
@@ -389,28 +393,24 @@ async function processVideoJob(videoJob: VideoJob): Promise<void> {
       }
     }
 
-    // Update database - clear postKey
-    await db
-      .update(schema.post)
-      .set({
-        postKey: "",
-        updatedAt: new Date(),
-      })
-      .where(eq(schema.post.id, postId));
+    // Decrement recipient's post count since it was already incremented by Mux lambda
+    if (post.status === "processed") {
+      await db
+        .update(schema.userStats)
+        .set({ posts: sql`GREATEST(${schema.userStats.posts} - 1, 0)` })
+        .where(eq(schema.userStats.userId, post.recipientUserId));
+    }
 
-    console.log(`Video ${assetId} rejected for post ${postId}`);
+    // Delete the post from the database
+    await db.delete(schema.post).where(eq(schema.post.id, postId));
+
+    console.log(
+      `Video ${assetId} rejected, deleted, and post ${postId} removed from database due to moderation violation`,
+    );
   } else {
-    console.log(`Video ${assetId} passed moderation for post ${postId}`);
-
-    // Mark post as processed with the playback ID
-    await db
-      .update(schema.post)
-      .set({
-        status: "processed",
-        postKey: playbackId,
-        updatedAt: new Date(),
-      })
-      .where(eq(schema.post.id, postId));
+    console.log(
+      `Video ${assetId} passed moderation for post ${postId} - no action needed (already marked as processed by Mux lambda)`,
+    );
   }
 }
 
