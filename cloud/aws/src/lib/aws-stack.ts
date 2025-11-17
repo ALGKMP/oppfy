@@ -209,12 +209,22 @@ export class AwsStack extends cdk.Stack {
       }),
     );
 
-    // Grant moderation lambda permissions to delete from S3
+    // Grant moderation lambda permissions to read/delete from S3
+    postBucket.bucket.grantRead(moderationLambda.function);
     postBucket.bucket.grantDelete(moderationLambda.function);
+    moderationLambda.function.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["rekognition:DetectModerationLabels"],
+        resources: ["*"],
+      }),
+    );
 
     const postLambda = new LambdaFunction(this, "PostLambda", {
       entry: "src/res/lambdas/posts/index.ts",
-      environment,
+      environment: {
+        ...environment,
+        MODERATION_QUEUE_URL: moderationQueue.queue.queueUrl,
+      },
     });
 
     this.setupBucketLambdaIntegration(
@@ -225,10 +235,6 @@ export class AwsStack extends cdk.Stack {
     notificationQueue.queue.grantSendMessages(postLambda.function);
     // Grant post bucket permission to send to moderation queue
     moderationQueue.queue.grantSendMessages(postLambda.function);
-    postBucket.bucket.addEventNotification(
-      s3.EventType.OBJECT_CREATED,
-      new s3n.SqsDestination(moderationQueue.queue),
-    );
 
     const muxWebhookLambda = new LambdaFunction(this, "MuxWebhookLambda", {
       entry: "src/res/lambdas/mux/index.ts",

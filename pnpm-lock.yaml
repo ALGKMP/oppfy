@@ -830,9 +830,6 @@ importers:
 
   cloud/aws/src/res/lambdas/mux:
     dependencies:
-      '@aws-sdk/client-s3':
-        specifier: ^3.564.0
-        version: 3.722.0
       '@aws-sdk/client-sqs':
         specifier: ^3.598.0
         version: 3.721.0

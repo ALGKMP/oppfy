@@ -24,6 +24,7 @@ const s3 = new S3Client({
 const env = createEnv({
   server: {
     SQS_NOTIFICATION_QUEUE: z.string().min(1),
+    MODERATION_QUEUE_URL: z.string().min(1),
   },
   runtimeEnv: process.env,
 });
@@ -94,6 +95,19 @@ const lambdaHandler = async (
         return post;
       });
 
+      const moderationCommand = new SendMessageCommand({
+        QueueUrl: env.MODERATION_QUEUE_URL,
+        MessageBody: JSON.stringify(event),
+      });
+
+      await SQS.send(moderationCommand);
+      console.log("Queued moderation event", {
+        queueUrl: env.MODERATION_QUEUE_URL,
+        postId: post.id,
+        bucket: objectBucket,
+        key,
+      });
+
       // get profile of poster
       const authorProfile = await db.query.profile.findFirst({
         where: eq(schema.profile.userId, post.authorUserId),
@@ -114,12 +128,17 @@ const lambdaHandler = async (
         eventType: "post",
       };
 
-      const command = new SendMessageCommand({
+      const notificationCommand = new SendMessageCommand({
         QueueUrl: env.SQS_NOTIFICATION_QUEUE,
         MessageBody: JSON.stringify(notiSqsParams),
       });
 
-      await SQS.send(command);
+      await SQS.send(notificationCommand);
+      console.log("Sent notification message", {
+        queueUrl: env.SQS_NOTIFICATION_QUEUE,
+        recipientId: post.recipientUserId,
+        postId: post.id,
+      });
     } catch (error) {
       console.log("error", error);
       // If the transaction fails, delete the S3 object

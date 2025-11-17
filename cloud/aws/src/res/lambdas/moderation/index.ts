@@ -5,6 +5,7 @@ import {
 import {
   DeleteObjectCommand,
   GetObjectCommand,
+  type GetObjectCommandOutput,
   S3Client,
 } from "@aws-sdk/client-s3";
 import type {
@@ -75,30 +76,27 @@ async function checkImageModerationS3(
   bucket: string,
   key: string,
 ): Promise<ModerationResult> {
+  console.log("Running Rekognition on S3 object", { bucket, key });
   try {
-    const response = (await rekognition.send(
-      new DetectModerationLabelsCommand({
-        Image: {
-          S3Object: {
-            Bucket: bucket,
-            Name: key,
-          },
-        },
-        MinConfidence: REKOGNITION_CONFIDENCE_THRESHOLD,
+    const response = await s3.send(
+      new GetObjectCommand({
+        Bucket: bucket,
+        Key: key,
       }),
-    )) as {
-      ModerationLabels?: {
-        Name?: string;
-        ParentName?: string;
-        Confidence?: number;
-      }[];
-    };
+    );
 
-    return processModerationLabels(response.ModerationLabels);
+    const bytes = await streamToUint8Array(response);
+
+    console.log("Fetched S3 object bytes for moderation", {
+      bucket,
+      key,
+      byteLength: bytes.length,
+    });
+
+    return await checkImageModerationBytes(bytes, `${bucket}/${key}`);
   } catch (error) {
-    console.error(`Rekognition error for ${bucket}/${key}:`, error);
-    // On error, fail safe: don't delete content, log and continue
-    return { isExplicit: false };
+    console.error(`Failed to prepare ${bucket}/${key} for moderation:`, error);
+    throw error;
   }
 }
 
@@ -109,6 +107,7 @@ async function checkImageModerationBytes(
   imageBytes: Uint8Array,
   label: string,
 ): Promise<ModerationResult> {
+  console.log("Running Rekognition on image bytes", { label });
   try {
     const response = (await rekognition.send(
       new DetectModerationLabelsCommand({
@@ -125,12 +124,56 @@ async function checkImageModerationBytes(
       }[];
     };
 
-    return processModerationLabels(response.ModerationLabels);
+    const result = processModerationLabels(response.ModerationLabels);
+    console.log("Rekognition result for image bytes", {
+      label,
+      labels: response.ModerationLabels?.map((moderationLabel) => ({
+        name: moderationLabel.Name,
+        parent: moderationLabel.ParentName,
+        confidence: moderationLabel.Confidence,
+      })),
+      isExplicit: result.isExplicit,
+    });
+
+    return result;
   } catch (error) {
     console.error(`Rekognition error for ${label}:`, error);
-    // On error, fail safe: don't delete content, log and continue
-    return { isExplicit: false };
+    throw error;
   }
+}
+
+async function streamToUint8Array(
+  response: GetObjectCommandOutput,
+): Promise<Uint8Array> {
+  const { Body } = response;
+
+  if (Body === undefined) {
+    throw new Error("S3 object response body is undefined");
+  }
+
+  const bodyWithTransform = Body as {
+    transformToByteArray?: () => Promise<Uint8Array>;
+  };
+
+  if (typeof bodyWithTransform.transformToByteArray === "function") {
+    return bodyWithTransform.transformToByteArray();
+  }
+
+  const chunks: Uint8Array[] = [];
+
+  for await (const chunk of Body as AsyncIterable<
+    Uint8Array | Buffer | string
+  >) {
+    if (typeof chunk === "string") {
+      chunks.push(Buffer.from(chunk));
+    } else if (chunk instanceof Buffer) {
+      chunks.push(Uint8Array.from(chunk));
+    } else {
+      chunks.push(chunk);
+    }
+  }
+
+  return Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)));
 }
 
 /**
@@ -275,6 +318,8 @@ async function handleExplicitImage(
 async function processPhotoJob(imageJob: ImageJob): Promise<void> {
   const { bucket, key, postId } = imageJob;
 
+  console.log("Processing photo moderation job", { bucket, key, postId });
+
   // Check if post still exists and is pending
   const post = await db.query.post.findFirst({
     where: eq(schema.post.id, postId),
@@ -285,26 +330,12 @@ async function processPhotoJob(imageJob: ImageJob): Promise<void> {
     return;
   }
 
-  if (post.status === "processed") {
-    console.log(`Post ${postId} already processed, skipping ${key}`);
-    return;
-  }
-
   // Run Rekognition on S3 object
   const result = await checkImageModerationS3(bucket, key);
 
   if (result.isExplicit) {
     await handleExplicitImage(bucket, key, postId, result);
   } else {
-    // Image is safe, mark as processed
-    await db
-      .update(schema.post)
-      .set({
-        status: "processed",
-        updatedAt: new Date(),
-      })
-      .where(eq(schema.post.id, postId));
-
     console.log(`Photo ${key} passed moderation for post ${postId}`);
   }
 }
@@ -426,6 +457,11 @@ async function parseRecord(
     // Check if it's a video job (from Mux lambda)
     const videoResult = videoJobSchema.safeParse(body);
     if (videoResult.success) {
+      console.log("Parsed video moderation job", {
+        assetId: videoResult.data.assetId,
+        postId: videoResult.data.postId,
+        timestamps: videoResult.data.timestamps.length,
+      });
       return videoResult.data;
     }
 
@@ -449,6 +485,7 @@ async function parseRecord(
         return null;
       }
 
+      console.log("Parsed photo moderation job", { bucket, key, postId });
       return {
         type: "image",
         bucket,
