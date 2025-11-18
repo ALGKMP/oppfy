@@ -5,7 +5,6 @@ import {
 import {
   DeleteObjectCommand,
   GetObjectCommand,
-  type GetObjectCommandOutput,
   S3Client,
 } from "@aws-sdk/client-s3";
 import type {
@@ -78,24 +77,39 @@ async function checkImageModerationS3(
 ): Promise<ModerationResult> {
   console.log("Running Rekognition on S3 object", { bucket, key });
   try {
-    const response = await s3.send(
-      new GetObjectCommand({
-        Bucket: bucket,
-        Key: key,
+    const response = (await rekognition.send(
+      new DetectModerationLabelsCommand({
+        Image: {
+          S3Object: {
+            Bucket: bucket,
+            Name: key,
+          },
+        },
+        MinConfidence: REKOGNITION_CONFIDENCE_THRESHOLD,
       }),
-    );
+    )) as {
+      ModerationLabels?: {
+        Name?: string;
+        ParentName?: string;
+        Confidence?: number;
+      }[];
+    };
 
-    const bytes = await streamToUint8Array(response);
-
-    console.log("Fetched S3 object bytes for moderation", {
+    const result = processModerationLabels(response.ModerationLabels);
+    console.log("Rekognition result for S3 object", {
       bucket,
       key,
-      byteLength: bytes.length,
+      labels: response.ModerationLabels?.map((moderationLabel) => ({
+        name: moderationLabel.Name,
+        parent: moderationLabel.ParentName,
+        confidence: moderationLabel.Confidence,
+      })),
+      isExplicit: result.isExplicit,
     });
 
-    return await checkImageModerationBytes(bytes, `${bucket}/${key}`);
+    return result;
   } catch (error) {
-    console.error(`Failed to prepare ${bucket}/${key} for moderation:`, error);
+    console.error(`Failed to run Rekognition on ${bucket}/${key}:`, error);
     throw error;
   }
 }
@@ -140,40 +154,6 @@ async function checkImageModerationBytes(
     console.error(`Rekognition error for ${label}:`, error);
     throw error;
   }
-}
-
-async function streamToUint8Array(
-  response: GetObjectCommandOutput,
-): Promise<Uint8Array> {
-  const { Body } = response;
-
-  if (Body === undefined) {
-    throw new Error("S3 object response body is undefined");
-  }
-
-  const bodyWithTransform = Body as {
-    transformToByteArray?: () => Promise<Uint8Array>;
-  };
-
-  if (typeof bodyWithTransform.transformToByteArray === "function") {
-    return bodyWithTransform.transformToByteArray();
-  }
-
-  const chunks: Uint8Array[] = [];
-
-  for await (const chunk of Body as AsyncIterable<
-    Uint8Array | Buffer | string
-  >) {
-    if (typeof chunk === "string") {
-      chunks.push(Buffer.from(chunk));
-    } else if (chunk instanceof Buffer) {
-      chunks.push(Uint8Array.from(chunk));
-    } else {
-      chunks.push(chunk);
-    }
-  }
-
-  return Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)));
 }
 
 /**
